@@ -24,6 +24,7 @@ import org.assertj.core.api.HamcrestCondition;
 import org.assertj.core.api.ObjectAssert;
 import org.assertj.core.api.SoftAssertions;
 import org.hamcrest.Matcher;
+import org.immutables.builder.Builder;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
@@ -55,7 +56,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -109,33 +113,57 @@ public final class TestSupport {
     }
 
     public static TestGraph fromGdl(String gdl) {
-        return fromGdl(gdl, NATURAL, "graph");
+        return new GdlBuilder().gdl(gdl).build();
+    }
+
+    public static TestGraph fromGdl(String gdl, long idOffset) {
+        return new GdlBuilder().gdl(gdl).idOffset(idOffset).build();
     }
 
     public static TestGraph fromGdl(String gdl, String name) {
-        return fromGdl(gdl, NATURAL, name);
+        return new GdlBuilder().gdl(gdl).name(name).build();
     }
 
     public static TestGraph fromGdl(String gdl, Orientation orientation) {
-        return fromGdl(gdl, orientation, "graph");
+        return new GdlBuilder().gdl(gdl).orientation(orientation).build();
     }
 
     public static TestGraph fromGdl(String gdl, Orientation orientation, String name) {
+        return new GdlBuilder().gdl(gdl).orientation(orientation).name(name).build();
+    }
+
+    @Builder.Factory
+    public static TestGraph gdl(
+        String gdl,
+        Optional<String> name,
+        Optional<Orientation> orientation,
+        Optional<Aggregation> aggregation,
+        Optional<Long> idOffset,
+        Optional<LongSupplier> idSupplier
+    ) {
         Objects.requireNonNull(gdl);
+
+        var graphName = name.orElse("graph");
 
         var config = ImmutableGraphProjectFromGdlConfig.builder()
             .gdlGraph(gdl)
-            .graphName("graph")
-            .orientation(orientation)
+            .graphName(graphName)
+            .orientation(orientation.orElse(NATURAL))
+            .aggregation(aggregation.orElse(Aggregation.NONE))
             .build();
+
+        var nodeIdSupplier = idOffset.isPresent()
+            ? new IncrementingIdSupplier(idOffset.get())
+            : idSupplier.orElse(new IncrementingIdSupplier(0L));
 
         var gdlFactory = GdlFactory
             .builder()
+            .nodeIdFunction(nodeIdSupplier)
             .graphProjectConfig(config)
             .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
             .build();
 
-        return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, name);
+        return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);
     }
 
     public static GraphStore graphStoreFromGDL(String gdl) {
@@ -386,5 +414,18 @@ public final class TestSupport {
         Arrays.stream(originalIds).forEach(builder::addNode);
 
         return builder.build().idMap();
+    }
+
+    public static class IncrementingIdSupplier implements LongSupplier {
+        private final AtomicLong offset;
+
+        public IncrementingIdSupplier(long offset) {
+            this.offset = new AtomicLong(offset);
+        }
+
+        @Override
+        public long getAsLong() {
+            return offset.getAndIncrement();
+        }
     }
 }

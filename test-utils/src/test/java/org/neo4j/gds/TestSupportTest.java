@@ -30,6 +30,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class TestSupportTest {
 
     @Test
@@ -58,15 +60,27 @@ class TestSupportTest {
         Stream<Arguments> expectedStream = Stream.of(
                 Arguments.of(1, "A", true),
                 Arguments.of(1, "A", false),
-                Arguments.of(1, "B", true),
-                Arguments.of(1, "B", false),
-                Arguments.of(2, "A", true),
-                Arguments.of(2, "A", false),
-                Arguments.of(2, "B", true),
-                Arguments.of(2, "B", false)
+            Arguments.of(1, "B", true),
+            Arguments.of(1, "B", false),
+            Arguments.of(2, "A", true),
+            Arguments.of(2, "A", false),
+            Arguments.of(2, "B", true),
+            Arguments.of(2, "B", false)
         );
 
         Assertions.assertEquals(collectArguments(expectedStream), collectArguments(crossStream));
+    }
+
+    @Test
+    void fromGdlTest() {
+        var g = TestSupport.fromGdl("(a)");
+        assertThat(g.toOriginalNodeId("a")).isEqualTo(0L);
+    }
+
+    @Test
+    void fromGdlWithIdOffsetTest() {
+        var g = TestSupport.fromGdl("(a)", 42L);
+        assertThat(g.toOriginalNodeId("a")).isEqualTo(42L);
     }
 
     private Set<List<Object>> collectArguments(Stream<Arguments> arguments) {
