@@ -63,7 +63,7 @@ final class ParameterParser {
         });
         if (!incorrectMaps.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Map parameters must be of the form {range: {min, max}}, " +
+                "Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
                 "where both min and max are Float or Integer. Invalid keys: [%s]",
                 incorrectMaps.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", "))
             ));
