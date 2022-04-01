@@ -216,11 +216,12 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.k1coloring.stream.estimate`
 | `gds.beta.k1coloring.write`
 | `gds.beta.k1coloring.write.estimate`
-.11+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+.12+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
 | `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+| `gds.beta.pipeline.linkPrediction.configureAutoTuning`
 | `gds.beta.pipeline.linkPrediction.configureSplit`
 | `gds.beta.pipeline.linkPrediction.train`
 | `gds.beta.pipeline.linkPrediction.train.estimate`

@@ -24,19 +24,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionAutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
 
-class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
+class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(LinkPredictionPipelineConfigureSplitProc.class, LinkPredictionPipelineCreateProc.class);
+        registerProcedures(LinkPredictionPipelineConfigureAutoTuningProc.class, LinkPredictionPipelineCreateProc.class);
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
     }
@@ -47,13 +46,28 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     }
 
     @Test
+    void shouldApplyDefaultMaxTrials() {
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.create('confetti')",
+            List.of(Map.of(
+                "name", "confetti",
+                "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", Map.of("maxTrials", 100),
+                "nodePropertySteps", List.of(),
+                "featureSteps", List.of(),
+                "parameterSpace", DEFAULT_PARAM_SPACE
+            ))
+        );
+    }
+
+    @Test
     void shouldOverrideSingleSplitField() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})",
+            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
-                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.1, "validationFolds", 42, "trainFraction", 0.1),
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", Map.of("maxTrials", 42),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
@@ -63,14 +77,13 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {validationFolds: 42})");
-
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 1337})");
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5})",
+            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
-                "splitConfig", Map.of("negativeSamplingRatio", 1.0, "testFraction", 0.5, "validationFolds", 3, "trainFraction", 0.1),
-                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", Map.of("maxTrials", 42),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
@@ -79,18 +92,10 @@ class LinkPredictionPipelineConfigureSplitProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldNotThrowOnFractionsAddingToMoreThanOne() {
-        assertThatCode(() ->
-            runQuery(
-                "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {testFraction: 0.5, trainFraction: 0.51})")
-        ).doesNotThrowAnyException();
-    }
-
-    @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureSplit('myPipeline', {invalidKey: 42, traiXFraction: -0.51})",
-            "Unexpected configuration keys: invalidKey, traiXFraction (Did you mean [trainFraction]?"
+            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
+            "Unexpected configuration keys: invalidKey, maxTr1als (Did you mean [maxTrials]?"
         );
     }
 }

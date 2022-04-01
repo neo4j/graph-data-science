@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionAutoTuningConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -52,6 +53,7 @@ class LinkPredictionPipelineCreateProcTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", LinkPredictionAutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );

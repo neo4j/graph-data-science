@@ -37,10 +37,12 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
 
     private LinkPredictionSplitConfig splitConfig;
+    private LinkPredictionAutoTuningConfig autoTuningConfig;
 
     public LinkPredictionTrainingPipeline() {
         super();
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
+        this.autoTuningConfig = LinkPredictionAutoTuningConfig.DEFAULT_CONFIG;
     }
 
 
@@ -70,6 +72,14 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
 
     public void setSplitConfig(LinkPredictionSplitConfig splitConfig) {
         this.splitConfig = splitConfig;
+    }
+
+    public LinkPredictionAutoTuningConfig autoTuningConfig() {
+        return autoTuningConfig;
+    }
+
+    public void setAutoTuningConfig(LinkPredictionAutoTuningConfig autoTuningConfig) {
+        this.autoTuningConfig = autoTuningConfig;
     }
 
     @Override
