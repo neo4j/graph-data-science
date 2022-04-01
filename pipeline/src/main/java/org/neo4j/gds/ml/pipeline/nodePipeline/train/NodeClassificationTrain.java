@@ -54,7 +54,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.ExhaustiveHyperparameterOptimizer;
+import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
@@ -423,7 +423,14 @@ public final class NodeClassificationTrain {
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
-        var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
+        var numberOfConcreteConfigs = (int) pipeline.trainingParameterSpace().values().stream()
+            .flatMap(List::stream)
+            .filter(TunableTrainerConfig::isConcrete).count();
+        var hyperParameterOptimizer = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            Math.max(numberOfConcreteConfigs, 100),
+            config.randomSeed()
+        );
 
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();

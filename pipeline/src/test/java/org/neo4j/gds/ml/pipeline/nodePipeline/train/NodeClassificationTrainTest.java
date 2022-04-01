@@ -36,6 +36,7 @@ import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
@@ -122,6 +123,30 @@ class NodeClassificationTrainTest {
             .build()
         );
 
+        pipeline.setTrainingParameterSpace(
+            TrainingMethod.RandomForest,
+            List.of(
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", 0.1
+                    ),
+                    TrainingMethod.RandomForest
+                ),
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                    ),
+                    TrainingMethod.RandomForest
+                )
+            )
+        );
+
         var config = createConfig("model", metricSpecification, 1L);
 
         var ncTrain = NodeClassificationTrain.create(
@@ -137,14 +162,13 @@ class NodeClassificationTrainTest {
         var customInfo = model.customInfo();
         List<ModelStats> validationScores = result.modelSelectionStatistics().validationStats().get(metric);
 
-        assertThat(validationScores).hasSize(3);
+        assertThat(validationScores).hasSize(100);
 
         double model1Score = validationScores.get(0).avg();
-        double model2Score = validationScores.get(1).avg();
-        double model3Score = validationScores.get(2).avg();
-        assertThat(model1Score)
-            .isNotCloseTo(model2Score, Percentage.withPercentage(0.2))
-            .isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
+        for (int i = 1; i < 100; i++) {
+            assertThat(model1Score)
+                .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
+        }
 
         var actualWinnerParams = customInfo.bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
