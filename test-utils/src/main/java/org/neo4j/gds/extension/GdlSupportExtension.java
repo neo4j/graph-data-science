@@ -25,6 +25,7 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
@@ -106,14 +107,16 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             : stream(field.getAnnotation(GdlGraphs.class).value());
 
         return annotations
-            .map(annotation -> ImmutableGdlGraphSetup.of(
-                annotation.graphNamePrefix(),
-                gdl,
-                annotation.username(),
-                annotation.orientation(),
-                annotation.aggregation(),
-                annotation.addToCatalog()
-            ));
+            .map(annotation -> ImmutableGdlGraphSetup.builder()
+                .graphNamePrefix(annotation.graphNamePrefix())
+                .gdlGraph(gdl)
+                .username(annotation.username())
+                .orientation(annotation.orientation())
+                .aggregation(annotation.aggregation())
+                .idOffset(annotation.idOffset())
+                .addToCatalog(annotation.addToCatalog())
+                .build()
+            );
     }
 
     private static void injectGraphStore(GdlGraphSetup gdlGraphSetup, ExtensionContext context) {
@@ -128,8 +131,11 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .aggregation(gdlGraphSetup.aggregation())
             .build();
 
+        var nodeIdFunction = new TestSupport.IncrementingIdSupplier(gdlGraphSetup.idOffset());
+
         GdlFactory gdlFactory = GdlFactory
             .builder()
+            .nodeIdFunction(nodeIdFunction)
             .graphProjectConfig(graphProjectConfig)
             .namedDatabaseId(DATABASE_ID)
             .build();
@@ -176,6 +182,9 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
 
         @Value.Auxiliary
         Aggregation aggregation();
+
+        @Value.Auxiliary
+        long idOffset();
 
         @Value.Auxiliary
         @Value.Default

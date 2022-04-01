@@ -43,6 +43,12 @@ public @interface GdlGraph {
     String username() default "";
 
     /**
+     * Offset for assigning ids to nodes in the GDL graph.
+     * Node ids will always be consecutive incrementing by 1.
+     */
+    long idOffset() default 0;
+
+    /**
      * If set, the graph store is added to the GraphStore catalog.
      * The name is the {@code graphNamePrefix() + 'Graph'} or just
      * {@code 'graph'} if no prefix is set.
