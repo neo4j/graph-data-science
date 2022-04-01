@@ -54,6 +54,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", Map.of("maxTrials", 100),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
@@ -80,6 +81,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", Map.of("maxTrials", 100),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
@@ -107,6 +109,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", Map.of("maxTrials", 100),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(

@@ -229,11 +229,12 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.13+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+.14+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`
 | `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+| `gds.beta.pipeline.nodeClassification.configureAutoTuning`
 | `gds.beta.pipeline.nodeClassification.configureSplit`
 | `gds.beta.pipeline.nodeClassification.train`
 | `gds.beta.pipeline.nodeClassification.train.estimate`

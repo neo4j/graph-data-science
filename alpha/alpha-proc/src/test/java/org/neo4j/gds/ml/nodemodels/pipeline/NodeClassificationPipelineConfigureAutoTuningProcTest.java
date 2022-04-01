@@ -24,18 +24,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
-class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
+class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(NodeClassificationPipelineConfigureSplitProc.class, NodeClassificationPipelineCreateProc.class);
+        registerProcedures(NodeClassificationPipelineConfigureAutoTuningProc.class, NodeClassificationPipelineCreateProc.class);
 
         runQuery("CALL gds.beta.pipeline.nodeClassification.create('myPipeline')");
     }
@@ -46,15 +46,12 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldOverrideSingleSplitField() {
-        var expectedSplitConfig = new HashMap<>(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG) {{
-            put("validationFolds", 42);
-        }};
+    void shouldApplyDefaultMaxTrials() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})",
+            "CALL gds.beta.pipeline.nodeClassification.create('confetti')",
             List.of(Map.of(
-                "name", "myPipeline",
-                "splitConfig", expectedSplitConfig,
+                "name", "confetti",
+                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
                 "autoTuningConfig", Map.of("maxTrials", 100),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
@@ -64,18 +61,29 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     }
 
     @Test
-    void shouldOnlyKeepLastOverride() {
-        var expectedSplitConfig = new HashMap<>(NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG) {{
-            put("testFraction", 0.5);
-        }};
-        runQuery("CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {validationFolds: 42})");
-
+    void shouldOverrideSingleSplitField() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {testFraction: 0.5})",
+            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
-                "splitConfig", expectedSplitConfig,
-                "autoTuningConfig", Map.of("maxTrials", 100),
+                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", Map.of("maxTrials", 42),
+                "nodePropertySteps", List.of(),
+                "featureProperties", List.of(),
+                "parameterSpace", DEFAULT_PARAM_CONFIG
+            ))
+        );
+    }
+
+    @Test
+    void shouldOnlyKeepLastOverride() {
+        runQuery("CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 1337})");
+        assertCypherResult(
+            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            List.of(Map.of(
+                "name", "myPipeline",
+                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                "autoTuningConfig", Map.of("maxTrials", 42),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
@@ -86,8 +94,8 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.nodeClassification.configureSplit('myPipeline', {invalidKey: 42, testMyFraction: -0.51})",
-            "Unexpected configuration keys: invalidKey, testMyFraction (Did you mean [testFraction]?)"
+            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
+            "Unexpected configuration keys: invalidKey, maxTr1als (Did you mean [maxTrials]?"
         );
     }
 }
