@@ -10,7 +10,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all production-quality algorithms in the GDS library. Functions are written in _italic_.
 [[table-product]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
 .8+<.^|<<algorithms-label-propagation-syntax, Label Propagation>>
@@ -190,7 +190,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all beta algorithms in the GDS library. Functions are written in _italic_.
 [[table-beta]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
 .4+<.^|<<algorithms-closeness-centrality, Closeness Centrality>>
@@ -216,6 +216,32 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.k1coloring.stream.estimate`
 | `gds.beta.k1coloring.write`
 | `gds.beta.k1coloring.write.estimate`
+.11+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+| `gds.beta.pipeline.linkPrediction.create`
+| `gds.beta.pipeline.linkPrediction.addNodeProperty`
+| `gds.beta.pipeline.linkPrediction.addFeature`
+| `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+| `gds.beta.pipeline.linkPrediction.configureSplit`
+| `gds.beta.pipeline.linkPrediction.train`
+| `gds.beta.pipeline.linkPrediction.train.estimate`
+| `gds.beta.pipeline.linkPrediction.predict.mutate`
+| `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
+| `gds.beta.pipeline.linkPrediction.predict.stream`
+| `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
+.13+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+| `gds.beta.pipeline.nodeClassification.create`
+| `gds.beta.pipeline.nodeClassification.addNodeProperty`
+| `gds.beta.pipeline.nodeClassification.selectFeatures`
+| `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+| `gds.beta.pipeline.nodeClassification.configureSplit`
+| `gds.beta.pipeline.nodeClassification.train`
+| `gds.beta.pipeline.nodeClassification.train.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.mutate`
+| `gds.beta.pipeline.nodeClassification.predict.mutate.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.stream`
+| `gds.beta.pipeline.nodeClassification.predict.stream.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.write`
+| `gds.beta.pipeline.nodeClassification.predict.write.estimate`
 .6+<.^| <<algorithms-modularity-optimization, Modularity Optimization>>
 | `gds.beta.modularityOptimization.mutate`
 | `gds.beta.modularityOptimization.mutate.estimate`
@@ -241,7 +267,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 .List of all alpha algorithms in the GDS library. Functions are written in _italic_.
 [[table-alpha]]
 [role=procedure-listing]
-[opts=header,cols="1, 1"]
+[opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation .1+<.^|<<alpha-algorithm-all-pairs-shortest-path, All Shortest Paths>>
 | `gds.alpha.allShortestPaths.stream`
@@ -285,34 +311,10 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.spanningTree.kmin.write`
 | `gds.alpha.spanningTree.maximum.write`
 | `gds.alpha.spanningTree.minimum.write`
-.12+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
-| `gds.beta.pipeline.linkPrediction.create`
-| `gds.beta.pipeline.linkPrediction.addNodeProperty`
-| `gds.beta.pipeline.linkPrediction.addFeature`
-| `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+.1+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.alpha.pipeline.linkPrediction.addRandomForest`
-| `gds.beta.pipeline.linkPrediction.configureSplit`
-| `gds.beta.pipeline.linkPrediction.train`
-| `gds.beta.pipeline.linkPrediction.train.estimate`
-| `gds.beta.pipeline.linkPrediction.predict.mutate`
-| `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
-| `gds.beta.pipeline.linkPrediction.predict.stream`
-| `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.14+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
-| `gds.beta.pipeline.nodeClassification.create`
-| `gds.beta.pipeline.nodeClassification.addNodeProperty`
-| `gds.beta.pipeline.nodeClassification.selectFeatures`
-| `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+.1+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.alpha.pipeline.nodeClassification.addRandomForest`
-| `gds.beta.pipeline.nodeClassification.configureSplit`
-| `gds.beta.pipeline.nodeClassification.train`
-| `gds.beta.pipeline.nodeClassification.train.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.mutate`
-| `gds.beta.pipeline.nodeClassification.predict.mutate.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.stream`
-| `gds.beta.pipeline.nodeClassification.predict.stream.estimate`
-| `gds.beta.pipeline.nodeClassification.predict.write`
-| `gds.beta.pipeline.nodeClassification.predict.write.estimate`
 | <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
 | <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
 | <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`
@@ -327,6 +329,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| <<algorithms-celf, Influence Maximization - CELF>>
 | `gds.alpha.influenceMaximization.celf.stream`
-.1+<.^| Conductance
+.1+<.^| <<alpha-algorithms-conductance, Conductance>>
 | `gds.alpha.conductance.stream`
 |===
