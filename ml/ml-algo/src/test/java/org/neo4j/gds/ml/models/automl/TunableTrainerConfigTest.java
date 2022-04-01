@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
@@ -138,6 +139,17 @@ class TunableTrainerConfigTest {
                 .maxFeaturesRatio(0.1337)
                 .numberOfDecisionTrees(55)
                 .build());
+    }
+
+    @Test
+    void shouldMaterializeCubeWhenConcrete() {
+        var userInput = Map.<String, Object>of();
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var trainerConfigs = config.materializeConcreteCube();
+        assertThat(trainerConfigs.size()).isEqualTo(1);
+        assertThat(trainerConfigs.get(0))
+            .usingRecursiveComparison()
+            .isEqualTo(RandomForestTrainConfig.of(Map.of()));
     }
 
     @Test
