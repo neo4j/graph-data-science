@@ -87,13 +87,12 @@ final class ParameterParser {
     }
 
     static Map<String, ConcreteParameter<?>> parseConcreteParameters(Map<String, Object> input) {
-        var result = new HashMap<String, ConcreteParameter<?>>();
-        input.forEach((key, value) -> {
-                if (value instanceof Map) return;
-                result.put(key, parseConcreteParameter(key, value));
-            }
-        );
-        return Collections.unmodifiableMap(result);
+        return input.entrySet().stream()
+            .filter(entry -> !(entry.getValue() instanceof Map))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> parseConcreteParameter(entry.getKey(), entry.getValue())
+            ));
     }
 
     private static ConcreteParameter<?> parseConcreteParameter(String key, Object value) {
