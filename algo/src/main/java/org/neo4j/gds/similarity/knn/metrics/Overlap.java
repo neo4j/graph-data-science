@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.Intersections;
 public class Overlap {
     public static double metric(long[] left, long[] right) {
         long intersection = Intersections.intersection3(left, right);
-        double denominator = Math.min(left.length, right.length);
-        return denominator == 0 ? 0 : intersection / denominator;
+        long denominator = Math.min(left.length, right.length);
+        return denominator == 0 ? 0 : intersection / (double) denominator;
     }
 }

@@ -26,7 +26,7 @@ public final class Jaccard {
 
     public static double metric(long[] left, long[] right) {
         long intersection = Intersections.intersection3(left, right);
-        double union = left.length + right.length - intersection;
-        return union == 0 ? 0 : intersection / union;
+        long union = left.length + right.length - intersection;
+        return union == 0 ? 0 : intersection / (double) union;
     }
 }
