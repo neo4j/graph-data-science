@@ -19,30 +19,27 @@
  */
 package org.neo4j.gds.clustering;
 
-
 import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.config.NodeWeightConfig;
-import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.concurrent.ExecutorService;
 
 @ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig, NodeWeightConfig {
+public interface KmeansContext {
 
-    @Configuration.IntegerRange(min = 1)
-    @Override
     @Value.Default
-    default int maxIterations() {
-        return 10;
+    default ExecutorService executor() {
+        return Pools.DEFAULT;
     }
 
     @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int K() {
-        return 10;
+    default ProgressTracker progressTracker() {
+        return ProgressTracker.NULL_TRACKER;
+    }
+
+    static KmeansContext empty() {
+        return ImmutableKmeansContext.builder().build();
     }
 }
