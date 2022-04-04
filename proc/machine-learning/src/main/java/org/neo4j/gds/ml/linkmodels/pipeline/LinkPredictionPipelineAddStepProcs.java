@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -34,7 +35,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
-import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
@@ -50,7 +50,7 @@ public class LinkPredictionPipelineAddStepProcs extends BaseProc {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
         validateRelationshipProperty(pipeline, procedureConfig);
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
+        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(taskName, procedureConfig));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

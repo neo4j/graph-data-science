@@ -91,6 +91,9 @@ project(':graph-schema-api').projectDir = file('graph-schema-api')
 include('licensing')
 project(':licensing').projectDir = file('licensing')
 
+include('proc-machine-learning')
+project(':proc-machine-learning').projectDir = file('proc/machine-learning')
+
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
 
