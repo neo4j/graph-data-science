@@ -91,6 +91,9 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
         var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class);
 
+        var maxTrials = pipeline.autoTuningConfig().maxTrials();
+        var numberOfCandidates = pipeline.isConcrete() ? pipeline.numberOfModelCandidates() : maxTrials;
+
         return Tasks.task(
             taskName(),
             Tasks.iterativeFixed(
@@ -100,7 +103,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             ),
             NodeClassificationTrain.progressTask(
                 pipeline.splitConfig().validationFolds(),
-                pipeline.numberOfModelCandidates()
+                numberOfCandidates
             )
         );
     }

@@ -163,7 +163,7 @@ public final class NodeClassificationTrain {
         return "NCTrain";
     }
 
-    public static Task progressTask(int validationFolds, int paramsSize) {
+    public static Task progressTask(int validationFolds, int numberOfTrials) {
         return Tasks.task(
             taskName(),
             Tasks.leaf("ShuffleAndSplit"),
@@ -177,7 +177,7 @@ public final class NodeClassificationTrain {
                         )
                     ), validationFolds)
                 ),
-                paramsSize
+                numberOfTrials
             ),
             Trainer.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
@@ -423,12 +423,9 @@ public final class NodeClassificationTrain {
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
-        var numberOfConcreteConfigs = (int) pipeline.trainingParameterSpace().values().stream()
-            .flatMap(List::stream)
-            .filter(TunableTrainerConfig::isConcrete).count();
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            Math.max(numberOfConcreteConfigs, 100),
+            pipeline.autoTuningConfig().maxTrials(),
             config.randomSeed()
         );
 

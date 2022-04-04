@@ -189,14 +189,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        progressTracker.setVolume(pipeline.numberOfModelCandidates());
+        var numberOfCandidates = pipeline.isConcrete()
+            ? pipeline.numberOfModelCandidates()
+            : pipeline.autoTuningConfig().maxTrials();
+        progressTracker.setVolume(numberOfCandidates);
 
-        var numberOfConcreteConfigs = (int) pipeline.trainingParameterSpace().values().stream()
-            .flatMap(List::stream)
-            .filter(TunableTrainerConfig::isConcrete).count();
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            Math.max(numberOfConcreteConfigs, 100),
+            pipeline.autoTuningConfig().maxTrials(),
             config.randomSeed()
         );
 

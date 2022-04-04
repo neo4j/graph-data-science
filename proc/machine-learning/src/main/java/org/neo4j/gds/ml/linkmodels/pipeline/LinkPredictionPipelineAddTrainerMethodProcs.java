@@ -51,7 +51,6 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
         var tunableTrainerConfig = TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression);
         pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
             tunableTrainerConfig
         );
 
@@ -71,7 +70,6 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
 
         var tunableTrainerConfig = TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest);
         pipeline.addTrainerConfig(
-            TrainingMethod.RandomForest,
             tunableTrainerConfig
         );
 

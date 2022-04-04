@@ -46,6 +46,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.ImmutableAutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -456,6 +457,59 @@ class LinkPredictionTrainTest {
                 "LinkPredictionTrain :: train best model :: Epoch 4 with loss 0.673952840083",
                 "LinkPredictionTrain :: train best model :: Epoch 5 with loss 0.669576960529",
                 "LinkPredictionTrain :: train best model :: Finished"
+            );
+    }
+
+    @Test
+    void logProgressLRWithRange() {
+        int MAX_TRIALS = 4;
+        var pipeline = new LinkPredictionTrainingPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(
+            Map.of("maxEpochs", 5, "penalty", Map.of("range", List.of(1e-4, 1e4))),
+            TrainingMethod.LogisticRegression
+        ));
+        pipeline.setAutoTuningConfig(ImmutableAutoTuningConfig.builder().maxTrials(MAX_TRIALS).build());
+
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            LinkPredictionTrain.progressTask(),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfig
+                .builder()
+                .randomSeed(42L)
+                .modelName("DUMMY")
+                .graphName("DUMMY")
+                .pipeline("DUMMY")
+                .concurrency(4)
+                .build(),
+            progressTracker
+        ).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
+            .contains(
+                "LinkPredictionTrain :: select model 25%",
+                "LinkPredictionTrain :: select model 50%",
+                "LinkPredictionTrain :: select model 75%",
+                "LinkPredictionTrain :: select model 100%"
             );
     }
 

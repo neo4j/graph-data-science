@@ -114,6 +114,10 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         return trainingParameterSpace;
     }
 
+    public boolean isConcrete() {
+        return trainingParameterSpace().values().stream().flatMap(List::stream).allMatch(TunableTrainerConfig::isConcrete);
+    }
+
     public void setTrainingParameterSpace(TrainingMethod method, List<TunableTrainerConfig> trainingConfigs) {
         this.trainingParameterSpace.put(method, trainingConfigs);
     }
@@ -127,8 +131,8 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.trainingParameterSpace.put(method, tunableTrainerConfigs);
     }
 
-    public void addTrainerConfig(TrainingMethod method, TunableTrainerConfig trainingConfig) {
-        this.trainingParameterSpace.get(method).add(trainingConfig);
+    public void addTrainerConfig(TunableTrainerConfig trainingConfig) {
+        this.trainingParameterSpace.get(trainingConfig.trainingMethod()).add(trainingConfig);
     }
 
     public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfig) {

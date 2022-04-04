@@ -42,7 +42,7 @@ public class RandomSearch implements HyperParameterOptimizer {
         this(parameterSpace, maxTrials, Optional.of(randomSeed));
     }
 
-    private RandomSearch(
+    public RandomSearch(
         Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
         int maxTrials,
         Optional<Long> randomSeed
