@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +80,8 @@ final class ParameterParser {
             ));
         }
         return ImmutableRangeParameters.of(
-            Collections.unmodifiableMap(doubleRanges),
-            Collections.unmodifiableMap(integerRanges)
+            Map.copyOf(doubleRanges),
+            Map.copyOf(integerRanges)
         );
     }
 
