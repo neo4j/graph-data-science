@@ -69,7 +69,7 @@ public class RandomSearch implements HyperParameterOptimizer {
     @Override
     public TrainerConfig next() {
         if (!hasNext()) {
-            throw new IllegalStateException("RandomSearch has already produced `maxTrials` samples.");
+            throw new IllegalStateException("RandomSearch has already exhausted the maximum trials or the parameter space.");
         }
         if (producedTrials < concreteConfigs.size()) {
             return concreteConfigs.get(producedTrials++).materialize(Map.of());
