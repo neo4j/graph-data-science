@@ -100,17 +100,17 @@ public final class TunableTrainerConfig {
         rangeParameters.putAll(doubleRanges);
         rangeParameters.putAll(integerRanges);
         var numberOfHyperParameters = rangeParameters.size();
-        if (numberOfHyperParameters > 32)
-            throw new IllegalArgumentException("Currently at most 32 hyperparameters are supported");
+        if (numberOfHyperParameters > 20)
+            throw new IllegalArgumentException("Currently at most 20 hyperparameters are supported");
+        // the position i in the bitset represents whether to take min or max value for the i:th parameter
         for (int bitset = 0; bitset < Math.pow(2, numberOfHyperParameters); bitset++) {
             var hyperParameterValues = new HashMap<String, Object>();
             var parameterIdx = 0;
             for (var entry : rangeParameters.entrySet()) {
                 boolean useMin = (bitset >> parameterIdx & 1) == 0;
-                var key = entry.getKey();
                 var range = entry.getValue();
                 var materializedValue = useMin ? range.min() : range.max();
-                hyperParameterValues.put(key, materializedValue);
+                hyperParameterValues.put(entry.getKey(), materializedValue);
                 parameterIdx++;
             }
             result.add(materialize(hyperParameterValues));
