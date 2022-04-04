@@ -26,11 +26,9 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-public interface IntegerRangeParameter extends NumericalRangeParameter<Integer> {
-
-    static IntegerRangeParameter of(int min, int max) {
-        return ImmutableIntegerRangeParameter.of(min, max);
-    }
+public interface NumericalRangeParameter<T> {
+    T min();
+    T max();
 
     @Value.Derived
     default Map<String, Object> toMap() {

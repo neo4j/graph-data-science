@@ -26,10 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-public interface DoubleRangeParameter {
-    double min();
-    double max();
-
+public interface DoubleRangeParameter extends NumericalRangeParameter<Double> {
     static DoubleRangeParameter of(double min, double max) {
         return ImmutableDoubleRangeParameter.of(min, max);
     }

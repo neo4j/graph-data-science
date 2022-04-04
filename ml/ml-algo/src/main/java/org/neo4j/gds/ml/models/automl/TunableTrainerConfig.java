@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.models.automl.ParameterParser.RangeParameters;
 import org.neo4j.gds.ml.models.automl.hyperparameter.ConcreteParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.NumericalRangeParameter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -95,26 +96,22 @@ public final class TunableTrainerConfig {
 
     public List<TrainerConfig> materializeConcreteCube() {
         var result = new ArrayList<TrainerConfig>();
-        var numberOfHyperParameters = doubleRanges.size() + integerRanges.size();
-        var doubleRangeKeys = new ArrayList<>(doubleRanges.keySet());
-        var integerRangeKeys = new ArrayList<>(integerRanges.keySet());
+        var rangeParameters = new HashMap<String, NumericalRangeParameter<?>>();
+        rangeParameters.putAll(doubleRanges);
+        rangeParameters.putAll(integerRanges);
+        var numberOfHyperParameters = rangeParameters.size();
         if (numberOfHyperParameters > 32)
             throw new IllegalArgumentException("Currently at most 32 hyperparameters are supported");
         for (int bitset = 0; bitset < Math.pow(2, numberOfHyperParameters); bitset++) {
             var hyperParameterValues = new HashMap<String, Object>();
-            for (int parameterIdx = 0; parameterIdx < numberOfHyperParameters; parameterIdx++) {
+            var parameterIdx = 0;
+            for (var entry : rangeParameters.entrySet()) {
                 boolean useMin = (bitset >> parameterIdx & 1) == 0;
-                if (parameterIdx < doubleRanges.size()) {
-                    var key = doubleRangeKeys.get(parameterIdx);
-                    var doubleRange = doubleRanges.get(key);
-                    var materializedValue = useMin ? doubleRange.min() : doubleRange.max();
-                    hyperParameterValues.put(key, materializedValue);
-                } else {
-                    var key = integerRangeKeys.get(parameterIdx - doubleRanges.size());
-                    var intRange = integerRanges.get(key);
-                    var materializedValue = useMin ? intRange.min() : intRange.max();
-                    hyperParameterValues.put(key, materializedValue);
-                }
+                var key = entry.getKey();
+                var range = entry.getValue();
+                var materializedValue = useMin ? range.min() : range.max();
+                hyperParameterValues.put(key, materializedValue);
+                parameterIdx++;
             }
             result.add(materialize(hyperParameterValues));
         }
