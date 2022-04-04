@@ -55,7 +55,6 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
@@ -198,10 +197,10 @@ public final class NodeClassificationTrain {
             .values()
             .stream()
             .flatMap(List::stream)
-            .map(tunableTrainerConfig -> {
-                var config = tunableTrainerConfig.materialize(Map.of());
+            .flatMap(tunableConfig -> tunableConfig.materializeConcreteCube().stream())
+            .map(config -> {
                 var training = TrainerFactory.memoryEstimation(
-                    tunableTrainerConfig,
+                    config,
                     trainSetSize,
                     fudgedClassCount,
                     MemoryRange.of(fudgedFeatureCount),
@@ -212,7 +211,7 @@ public final class NodeClassificationTrain {
                     ? ((LogisticRegressionTrainConfig) config).batchSize()
                     : 0; // Not used
                 var evaluation = estimateEvaluation(
-                    tunableTrainerConfig,
+                    config,
                     batchSize,
                     trainSetSize,
                     testSetSize,
@@ -231,7 +230,7 @@ public final class NodeClassificationTrain {
     }
 
     public static MemoryEstimation estimateEvaluation(
-        TunableTrainerConfig config,
+        TrainerConfig config,
         int batchSize,
         LongUnaryOperator trainSetSize,
         LongUnaryOperator testSetSize,
@@ -261,7 +260,7 @@ public final class NodeClassificationTrain {
             .rangePerNode(
                 "classifier runtime",
                 nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    config.trainingMethod(),
+                    TrainingMethod.valueOf(config.methodName()),
                     batchSize,
                     fudgedClassCount,
                     fudgedFeatureCount,

@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.ImmutableAutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -142,35 +143,54 @@ class LinkPredictionTrainTest {
                 Map.<String, Object>of("batchSize", 100L)
             )
             .map(LogisticRegressionTrainConfig::of)
+            .map(TrainerConfig::toTunableConfig)
             .collect(Collectors.toList());
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                TrainingMethod.LogisticRegression, List.of(llrConfigs.get(0)), MemoryRange.of(36_160, 1_122_000)
+                List.of(llrConfigs.get(0)), MemoryRange.of(36_160, 1_122_000)
             ),
             Arguments.of(
                 "LLR batchSize 100",
-                TrainingMethod.LogisticRegression,
                 List.of(llrConfigs.get(1)),
                 MemoryRange.of(82_240, 2_579_280)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
-                TrainingMethod.LogisticRegression,
                 llrConfigs,
                 MemoryRange.of(82_336, 2_579_376)
             ),
             Arguments.of(
                 "RF",
-                TrainingMethod.RandomForest,
                 List.of(RandomForestTrainConfigImpl
                     .builder()
                     .maxDepth(3)
                     .minSplitSize(2)
                     .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
-                    .build()),
+                    .build()
+                    .toTunableConfig()
+                ),
                 MemoryRange.of(59_712, 899_472)
+            ),
+            Arguments.of(
+                "Default RF and default LR",
+                List.of(
+                    LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(82_336, 2_579_376)
+            ),
+            Arguments.of(
+                "Default RF and default LR with range",
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(82_336, 2_579_376)
             )
         );
     }
@@ -294,7 +314,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, TrainingMethod trainerMethod, List<TrainerConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, List<TunableTrainerConfig> tunableConfigs, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -303,7 +323,9 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(trainerMethod, parameterSpace);
+        for (var config: tunableConfigs) {
+            pipeline.addTrainerConfig(config);
+        }
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)

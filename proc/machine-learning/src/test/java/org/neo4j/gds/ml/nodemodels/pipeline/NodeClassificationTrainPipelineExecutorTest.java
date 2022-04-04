@@ -42,10 +42,10 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
-import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -268,18 +268,25 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     public static Stream<Arguments> trainerMethodConfigs() {
         return Stream.of(
             Arguments.of(
-                List.of(TrainingMethod.LogisticRegression),
-                List.of(LogisticRegressionTrainConfig.DEFAULT),
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
                 MemoryRange.of(31_742_464L, 31_774_424L)
             ),
             Arguments.of(
-                List.of(TrainingMethod.RandomForest),
-                List.of(RandomForestTrainConfigImpl.builder().build()),
+                List.of(RandomForestTrainConfig.DEFAULT.toTunableConfig()),
                 MemoryRange.of(123_808L, 231_048L)
             ),
             Arguments.of(
-                List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest),
-                List.of(LogisticRegressionTrainConfig.DEFAULT, RandomForestTrainConfigImpl.builder().build()),
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainConfig.DEFAULT.toTunableConfig()),
+                MemoryRange.of(31_839_432L, 31_906_672L)
+            ),
+            Arguments.of(
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
                 MemoryRange.of(31_839_432L, 31_906_672L)
             )
         );
@@ -287,7 +294,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("trainerMethodConfigs")
-    void shouldEstimateMemory(List<TrainingMethod> trainingMethods, List<TrainerConfig> trainerConfigs, MemoryRange memoryRange) {
+    void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "pageRank",
@@ -299,8 +306,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
-        for (int i = 0; i < trainerConfigs.size(); i++) {
-            pipeline.addTrainerConfig(trainingMethods.get(i), trainerConfigs.get(i));
+        for (int i = 0; i < tunableConfigs.size(); i++) {
+            pipeline.addTrainerConfig(tunableConfigs.get(i));
         }
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
