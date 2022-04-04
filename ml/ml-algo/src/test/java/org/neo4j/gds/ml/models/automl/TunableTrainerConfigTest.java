@@ -32,6 +32,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.ml.models.automl.TunableTrainerConfig.EPSILON;
 
 class TunableTrainerConfigTest {
     @Test
@@ -156,7 +157,8 @@ class TunableTrainerConfigTest {
     void shouldMaterializeRFCube() {
         var userInput = Map.of(
             "maxDepth", 5L,
-            "maxFeaturesRatio", Map.of("range", List.of(0.1, 0.2)),
+            // Easier to account for EPSILON here than in all expectations below
+            "maxFeaturesRatio", Map.of("range", List.of(0.1 - EPSILON, 0.2 + EPSILON)),
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);

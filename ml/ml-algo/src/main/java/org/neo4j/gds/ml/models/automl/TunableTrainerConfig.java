@@ -39,6 +39,7 @@ import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParame
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseRangeParameters;
 
 public final class TunableTrainerConfig {
+    static final double EPSILON = 1e-8;
     static final List<String> LOG_SCALE_PARAMETERS = List.of("penalty", "learningRate", "tolerance");
     private final Map<String, ConcreteParameter<?>> concreteParameters;
     public final Map<String, DoubleRangeParameter> doubleRanges;
@@ -110,13 +111,24 @@ public final class TunableTrainerConfig {
             for (var entry : rangeParameters.entrySet()) {
                 boolean useMin = (bitset >> parameterIdx & 1) == 0;
                 var range = entry.getValue();
-                var materializedValue = useMin ? range.min() : range.max();
-                hyperParameterValues.put(entry.getKey(), materializedValue);
+                var key = entry.getKey();
+                var materializedValue = endPoint(useMin, doubleRanges.containsKey(key), range);
+                hyperParameterValues.put(key, materializedValue);
                 parameterIdx++;
             }
             result.add(materialize(hyperParameterValues));
         }
         return result;
+    }
+
+    private static Number endPoint(boolean useMin, boolean isDouble, NumericalRangeParameter<?> range) {
+        // some parameters have exclusive endpoints, for example RandomForestTrainConfig.maxFeaturesRatio.
+        // this prevents us from materializing at the endpoint
+        if (isDouble) {
+            return useMin ? (Double) range.min() + EPSILON : (Double) range.max() - EPSILON;
+        } else {
+            return useMin ? range.min() : range.max();
+        }
     }
 
     public Map<String, Object> toMap() {

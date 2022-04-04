@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @ValueClass
-public interface NumericalRangeParameter<T> {
+public interface NumericalRangeParameter<T extends Number> {
     T min();
     T max();
 
