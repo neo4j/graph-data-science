@@ -108,7 +108,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                 partition,
                 progressTracker
             ),
-            Optional.of(config.minBatchSize())
+            Optional.of((int) nodeCount / concurrency)
         );
         int numberOfTasks = kmeansThreads.size();
         //Initialization do initial centre computation and assignment
@@ -120,7 +120,6 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         for (int iteration = 0; iteration < maxIterations; ++iteration) {
             long swaps = 0;
             //assign each node to a centre
-
             ParallelUtil.runWithConcurrency(concurrency, kmeansThreads, context.executor());
 
             for (int threadId = 0; threadId < numberOfTasks; ++threadId) {
