@@ -23,7 +23,7 @@ import org.neo4j.gds.compat.VirtualRelationship;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 
-public class VirtualRelationshipImpl extends VirtualRelationship {
+final class VirtualRelationshipImpl extends VirtualRelationship {
 
     VirtualRelationshipImpl(
         long id,

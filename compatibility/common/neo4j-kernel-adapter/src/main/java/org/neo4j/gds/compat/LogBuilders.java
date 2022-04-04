@@ -36,7 +36,7 @@ import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Optional;
 
-public final class LogBuilders {
+final class LogBuilders {
 
     @Builder.Factory
     public static Log outputStreamLog(

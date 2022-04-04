@@ -24,11 +24,11 @@ import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
+final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
     private final Scan<C> scan;
     private final int batchSize;
 
-    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
+    ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
         this.scan = scan;
         this.batchSize = batchSize;
     }
