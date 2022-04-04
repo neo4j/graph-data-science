@@ -41,10 +41,10 @@ class TestSupportTest {
         Stream<Arguments> crossStream = TestSupport.crossArguments(leftFn, rightFn);
 
         Stream<Arguments> expectedStream = Stream.of(
-                Arguments.of(1, 2, "A", "B"),
-                Arguments.of(1, 2, "C", "D"),
-                Arguments.of(3, 4, "A", "B"),
-                Arguments.of(3, 4, "C", "D")
+            Arguments.of(1, 2, "A", "B"),
+            Arguments.of(1, 2, "C", "D"),
+            Arguments.of(3, 4, "A", "B"),
+            Arguments.of(3, 4, "C", "D")
         );
 
         Assertions.assertEquals(collectArguments(expectedStream), collectArguments(crossStream));
@@ -58,8 +58,8 @@ class TestSupportTest {
         Stream<Arguments> crossStream = TestSupport.crossArguments(fn1, fn2, fn3);
 
         Stream<Arguments> expectedStream = Stream.of(
-                Arguments.of(1, "A", true),
-                Arguments.of(1, "A", false),
+            Arguments.of(1, "A", true),
+            Arguments.of(1, "A", false),
             Arguments.of(1, "B", true),
             Arguments.of(1, "B", false),
             Arguments.of(2, "A", true),

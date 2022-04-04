@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GdlSupportExtensionTest {
 
     @GdlGraph(idOffset = 42, graphNamePrefix = "idOffset")
-    public static final String ID_OFFSET_GRAPH = "CREATE (a)-[:REL]->(b)";
+    public static final String ID_OFFSET_GRAPH = "(a)-[:REL]->(b)";
     @Inject
     private TestGraph idOffsetGraph;
     @Inject

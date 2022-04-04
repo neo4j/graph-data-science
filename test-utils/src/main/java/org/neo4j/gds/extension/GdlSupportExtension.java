@@ -131,7 +131,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
             .aggregation(gdlGraphSetup.aggregation())
             .build();
 
-        var nodeIdFunction = new TestSupport.IncrementingIdSupplier(gdlGraphSetup.idOffset());
+        var nodeIdFunction = new TestSupport.OffsetIdSupplier(gdlGraphSetup.idOffset());
 
         GdlFactory gdlFactory = GdlFactory
             .builder()

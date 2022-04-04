@@ -117,7 +117,7 @@ public final class TestSupport {
     }
 
     public static TestGraph fromGdl(String gdl, long idOffset) {
-        return new GdlBuilder().gdl(gdl).idOffset(idOffset).build();
+        return new GdlBuilder().gdl(gdl).idSupplier(new OffsetIdSupplier(idOffset)).build();
     }
 
     public static TestGraph fromGdl(String gdl, String name) {
@@ -138,7 +138,6 @@ public final class TestSupport {
         Optional<String> name,
         Optional<Orientation> orientation,
         Optional<Aggregation> aggregation,
-        Optional<Long> idOffset,
         Optional<LongSupplier> idSupplier
     ) {
         Objects.requireNonNull(gdl);
@@ -152,13 +151,9 @@ public final class TestSupport {
             .aggregation(aggregation.orElse(Aggregation.NONE))
             .build();
 
-        var nodeIdSupplier = idOffset.isPresent()
-            ? new IncrementingIdSupplier(idOffset.get())
-            : idSupplier.orElse(new IncrementingIdSupplier(0L));
-
         var gdlFactory = GdlFactory
             .builder()
-            .nodeIdFunction(nodeIdSupplier)
+            .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
             .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
             .build();
@@ -416,10 +411,10 @@ public final class TestSupport {
         return builder.build().idMap();
     }
 
-    public static class IncrementingIdSupplier implements LongSupplier {
+    public static class OffsetIdSupplier implements LongSupplier {
         private final AtomicLong offset;
 
-        public IncrementingIdSupplier(long offset) {
+        public OffsetIdSupplier(long offset) {
             this.offset = new AtomicLong(offset);
         }
 
