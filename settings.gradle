@@ -22,9 +22,6 @@ project(':algo-test').projectDir = file('algo-test')
 include('alpha-algo')
 project(':alpha-algo').projectDir = file('alpha/alpha-algo')
 
-include('alpha-core')
-project(':alpha-core').projectDir = file('alpha/alpha-core')
-
 include('alpha-proc')
 project(':alpha-proc').projectDir = file('alpha/alpha-proc')
 
