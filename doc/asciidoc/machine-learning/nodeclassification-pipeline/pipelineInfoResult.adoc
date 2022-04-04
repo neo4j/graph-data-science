@@ -1,10 +1,11 @@
 .Results
-[opts="header",cols="1,1,6"]
+[opts="header",cols="1,1,7"]
 |===
 | Name              | Type          | Description
 | name              | String        | Name of the pipeline.
 | nodePropertySteps | List of Map   | List of configurations for node property steps.
 | featureProperties | List of String| List of node properties to be used as features.
 | splitConfig       | Map           | Configuration to define the split before the model training.
+| autoTuningConfig  | Map           | Configuration to define the behavior of auto-tuning. Currently contains only `maxTrials`.
 | parameterSpace    | List of Map   | List of parameter configurations for models which the train mode uses for model selection.
 |===
