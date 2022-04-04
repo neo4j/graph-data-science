@@ -110,7 +110,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             ),
             Optional.of(config.minBatchSize())
         );
-
+        int numberOfTasks = kmeansThreads.size();
         //Initialization do initial centre computation and assignment
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
@@ -123,7 +123,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
 
             ParallelUtil.runWithConcurrency(concurrency, kmeansThreads, context.executor());
 
-            for (int threadId = 0; threadId < concurrency; ++threadId) {
+            for (int threadId = 0; threadId < numberOfTasks; ++threadId) {
                 swaps += kmeansThreads.get(threadId).getSwaps();
             }
             if (swaps == 0) {
