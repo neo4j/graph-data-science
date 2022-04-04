@@ -92,7 +92,7 @@ include('licensing')
 project(':licensing').projectDir = file('licensing')
 
 include('proc-machine-learning')
-project(':proc-machine-learning').projectDir = file('public/proc/machine-learning')
+project(':proc-machine-learning').projectDir = file('proc/machine-learning')
 
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
