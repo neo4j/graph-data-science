@@ -55,7 +55,7 @@ public class RandomSearch implements HyperParameterOptimizer {
             .flatMap(List::stream)
             .filter(tunableTrainerConfig -> !tunableTrainerConfig.isConcrete())
             .collect(Collectors.toList());
-        this.maxTrials = tunableConfigs.isEmpty() ? Math.min(maxTrials, concreteConfigs.size()) : maxTrials;
+        this.maxTrials = maxTrials;
         this.random = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         this.producedTrials = 0;
     }
@@ -63,7 +63,11 @@ public class RandomSearch implements HyperParameterOptimizer {
 
     @Override
     public boolean hasNext() {
-        return producedTrials < maxTrials;
+        if (tunableConfigs.isEmpty()) {
+            return producedTrials < concreteConfigs.size();
+        } else {
+            return producedTrials < maxTrials;
+        }
     }
 
     @Override
