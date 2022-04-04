@@ -111,6 +111,9 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             Optional.of((int) nodeCount / concurrency)
         );
         int numberOfTasks = kmeansThreads.size();
+        
+        assert numberOfTasks <= concurrency;
+
         //Initialization do initial centre computation and assignment
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
