@@ -31,7 +31,7 @@ import com.carrotsearch.hppc.IntDoubleMap;
 public abstract class SharedIntPriorityQueue extends IntPriorityQueue {
 
     protected final IntDoubleMap costs;
-    protected final double defaultCost;
+    private final double defaultCost;
 
     /**
      * Creates a new queue with the given capacity.
@@ -41,10 +41,11 @@ public abstract class SharedIntPriorityQueue extends IntPriorityQueue {
      * costs are up-to-date.
      * The defaultCost is used in case a value has no entry in the costs map.
      */
-    public SharedIntPriorityQueue(
-            int initialCapacity,
-            IntDoubleMap costs,
-            double defaultCost) {
+    private SharedIntPriorityQueue(
+        int initialCapacity,
+        IntDoubleMap costs,
+        double defaultCost
+    ) {
         super(initialCapacity);
         this.costs = costs;
         this.defaultCost = defaultCost;
