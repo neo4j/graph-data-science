@@ -45,6 +45,7 @@ dependencies {
     testImplementation project(':proc-common')
 
     testImplementation group: 'net.jqwik', name: 'jqwik', version: ver.'jqwik'
+    testImplementation group: 'io.qala.datagen', name: 'qala-datagen-junit5', version: ver.'qala-datagen'
 }
 
 test {
