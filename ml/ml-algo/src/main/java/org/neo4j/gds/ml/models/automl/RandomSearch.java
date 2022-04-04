@@ -28,21 +28,25 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class RandomSearch implements HyperParameterOptimizer {
     private final List<TunableTrainerConfig> concreteConfigs;
     private final List<TunableTrainerConfig> tunableConfigs;
     private final int maxTrials;
-    private final Random random;
+    private final SplittableRandom random;
     private int producedTrials;
 
     public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int maxTrials, long randomSeed) {
         this(parameterSpace, maxTrials, Optional.of(randomSeed));
     }
 
-    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int maxTrials, Optional<Long> randomSeed) {
+    private RandomSearch(
+        Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
+        int maxTrials,
+        Optional<Long> randomSeed
+    ) {
         this.concreteConfigs = parameterSpace.values().stream()
             .flatMap(List::stream)
             .filter(TunableTrainerConfig::isConcrete)
@@ -52,8 +56,7 @@ public class RandomSearch implements HyperParameterOptimizer {
             .filter(tunableTrainerConfig -> !tunableTrainerConfig.isConcrete())
             .collect(Collectors.toList());
         this.maxTrials = tunableConfigs.isEmpty() ? Math.min(maxTrials, concreteConfigs.size()) : maxTrials;
-        this.random = new Random();
-        randomSeed.ifPresent(this.random::setSeed);
+        this.random = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         this.producedTrials = 0;
     }
 
@@ -86,16 +89,16 @@ public class RandomSearch implements HyperParameterOptimizer {
     }
 
     private int sampleInteger(IntegerRangeParameter range) {
-        return random.nextInt(range.max() - range.min()) + range.min();
+        return random.nextInt(range.min(), range.max());
     }
 
     private double sampleDouble(DoubleRangeParameter range) {
         if (range.logScale()) {
             var min = Math.log(range.min());
             var max = Math.log(range.max());
-            return Math.exp(random.nextDouble() * (max - min) + min);
+            return Math.exp(random.nextDouble(min, max));
         } else {
-            return random.nextDouble() * (range.max() - range.min()) + range.min();
+            return random.nextDouble(range.min(), range.max());
         }
     }
 }
