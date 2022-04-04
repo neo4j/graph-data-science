@@ -24,21 +24,21 @@ import org.neo4j.storageengine.api.Reference;
 
 import java.util.Objects;
 
-public final class ReferencePropertyReference implements PropertyReference {
+final class ReferencePropertyReference implements PropertyReference {
 
     private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
 
-    public final Reference reference;
+    final Reference reference;
 
     private ReferencePropertyReference(Reference reference) {
         this.reference = reference;
     }
 
-    public static PropertyReference of(Reference reference) {
+    static PropertyReference of(Reference reference) {
         return new ReferencePropertyReference(Objects.requireNonNull(reference));
     }
 
-    public static PropertyReference empty() {
+    static PropertyReference empty() {
         return EMPTY;
     }
 

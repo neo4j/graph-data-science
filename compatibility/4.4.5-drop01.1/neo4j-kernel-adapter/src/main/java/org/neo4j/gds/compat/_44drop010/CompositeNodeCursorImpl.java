@@ -17,16 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat._44drop010;
 
-import java.util.concurrent.TimeUnit;
+import org.neo4j.gds.compat.CompositeNodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-public interface JobRunner {
+import java.util.List;
 
-    JobPromise scheduleAtInterval(
-        Runnable runnable,
-        long initialDelay,
-        long rate,
-        TimeUnit timeUnit
-    );
+final class CompositeNodeCursorImpl extends CompositeNodeCursor {
+
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
+    }
 }

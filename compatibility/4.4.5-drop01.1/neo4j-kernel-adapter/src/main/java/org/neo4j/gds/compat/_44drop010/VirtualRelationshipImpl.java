@@ -19,14 +19,18 @@
  */
 package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.gds.compat.CompositeNodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.gds.compat.VirtualRelationship;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 
-import java.util.List;
+final class VirtualRelationshipImpl extends VirtualRelationship {
 
-public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
-
-    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        super(cursors, labelIds);
+    VirtualRelationshipImpl(
+        long id,
+        Node startNode,
+        Node endNode,
+        RelationshipType type
+    ) {
+        super(id, startNode, endNode, type);
     }
 }

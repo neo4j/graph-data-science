@@ -31,7 +31,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Consumer;
 
-public class TestLogImpl implements TestLog {
+final class TestLogImpl implements TestLog {
 
     private final ConcurrentMap<String, ConcurrentLinkedQueue<String>> messages;
 
@@ -39,6 +39,7 @@ public class TestLogImpl implements TestLog {
         messages = new ConcurrentHashMap<>(3);
     }
 
+    @Override
     public void assertContainsMessage(String level, String fragment) {
         if (!containsMessage(level, fragment)) {
             throw new RuntimeException(
@@ -174,5 +175,3 @@ public class TestLogImpl implements TestLog {
         ).add(message);
     }
 }
-
-

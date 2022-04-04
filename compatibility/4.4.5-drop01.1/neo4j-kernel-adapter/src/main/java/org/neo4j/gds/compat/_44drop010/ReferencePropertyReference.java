@@ -19,22 +19,31 @@
  */
 package org.neo4j.gds.compat._44drop010;
 
-import org.neo4j.gds.compat.StoreScan;
-import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.storageengine.api.Reference;
 
-public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
-    private final Scan<C> scan;
-    private final int batchSize;
+import java.util.Objects;
 
-    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
-        this.scan = scan;
-        this.batchSize = batchSize;
+final class ReferencePropertyReference implements PropertyReference {
+
+    private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
+
+    final Reference reference;
+
+    private ReferencePropertyReference(Reference reference) {
+        this.reference = reference;
+    }
+
+    static PropertyReference of(Reference reference) {
+        return new ReferencePropertyReference(Objects.requireNonNull(reference));
+    }
+
+    static PropertyReference empty() {
+        return EMPTY;
     }
 
     @Override
-    public boolean scanBatch(C cursor, KernelTransaction ktx) {
-        return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
+    public boolean isEmpty() {
+        return reference == null;
     }
 }
