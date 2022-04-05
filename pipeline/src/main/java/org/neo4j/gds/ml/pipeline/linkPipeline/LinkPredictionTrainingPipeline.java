@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
@@ -38,12 +37,10 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
 
     private LinkPredictionSplitConfig splitConfig;
-    private AutoTuningConfig autoTuningConfig;
 
     public LinkPredictionTrainingPipeline() {
         super();
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
-        this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;
     }
 
 
@@ -73,14 +70,6 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
 
     public void setSplitConfig(LinkPredictionSplitConfig splitConfig) {
         this.splitConfig = splitConfig;
-    }
-
-    public AutoTuningConfig autoTuningConfig() {
-        return autoTuningConfig;
-    }
-
-    public void setAutoTuningConfig(AutoTuningConfig autoTuningConfig) {
-        this.autoTuningConfig = autoTuningConfig;
     }
 
     @Override

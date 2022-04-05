@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 
 import java.util.ArrayList;
@@ -35,12 +34,10 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
     public static final String MODEL_TYPE = "NodeClassification";
 
     private NodeClassificationSplitConfig splitConfig;
-    private AutoTuningConfig autoTuningConfig;
 
     public NodeClassificationTrainingPipeline() {
         super();
         this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
-        this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;
     }
 
     public NodeClassificationTrainingPipeline copy() {
@@ -83,14 +80,6 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
 
     public NodeClassificationSplitConfig splitConfig() {
         return splitConfig;
-    }
-
-    public AutoTuningConfig autoTuningConfig() {
-        return autoTuningConfig;
-    }
-
-    public void setAutoTuningConfig(AutoTuningConfig autoTuningConfig) {
-        this.autoTuningConfig = autoTuningConfig;
     }
 
     public List<String> featureProperties() {

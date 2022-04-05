@@ -20,8 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.procedure.Description;
@@ -38,15 +37,12 @@ public class LinkPredictionPipelineConfigureAutoTuningProc extends BaseProc {
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.configureAutoTuning", mode = READ)
     @Description("Configures the auto-tuning of the link prediction pipeline.")
     public Stream<PipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
-        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
-
-        var cypherConfig = CypherMapWrapper.create(configMap);
-        var config = AutoTuningConfig.of(cypherConfig);
-
-        cypherConfig.requireOnlyKeysFrom(config.configKeys());
-
-        pipeline.setAutoTuningConfig(config);
-
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
+        return PipelineCompanion.configureAutoTuning(
+            username(),
+            pipelineName,
+            configMap,
+            pipeline -> new PipelineInfoResult(pipelineName, (LinkPredictionTrainingPipeline) pipeline)
+        );
     }
 }

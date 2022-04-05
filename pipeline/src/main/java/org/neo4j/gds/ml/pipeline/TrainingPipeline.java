@@ -43,6 +43,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     private final ZonedDateTime creationTime;
 
     protected Map<TrainingMethod, List<TunableTrainerConfig>> trainingParameterSpace;
+    protected AutoTuningConfig autoTuningConfig;
 
     public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
@@ -58,6 +59,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.creationTime = TimeUtil.now();
 
         this.trainingParameterSpace = new EnumMap<>(TrainingMethod.class);
+        this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;
 
         Arrays.stream(TrainingMethod.values()).forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
     }
@@ -131,6 +133,14 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
 
     public void addTrainerConfig(TrainingMethod method, TrainerConfig trainingConfig) {
         this.trainingParameterSpace.get(method).add(trainingConfig.toTunableConfig());
+    }
+
+    public AutoTuningConfig autoTuningConfig() {
+        return autoTuningConfig;
+    }
+
+    public void setAutoTuningConfig(AutoTuningConfig autoTuningConfig) {
+        this.autoTuningConfig = autoTuningConfig;
     }
 
     private void validateUniqueMutateProperty(NodePropertyStep step) {
