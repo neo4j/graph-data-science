@@ -163,7 +163,7 @@ public final class NodeClassificationTrain {
         return "NCTrain";
     }
 
-    public static Task progressTask(int validationFolds, int numberOfTrials) {
+    public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
         return Tasks.task(
             taskName(),
             Tasks.leaf("ShuffleAndSplit"),
@@ -177,7 +177,7 @@ public final class NodeClassificationTrain {
                         )
                     ), validationFolds)
                 ),
-                numberOfTrials
+                numberOfModelSelectionTrials
             ),
             Trainer.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
