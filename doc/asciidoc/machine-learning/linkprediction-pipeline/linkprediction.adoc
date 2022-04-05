@@ -2,6 +2,7 @@
 = Link prediction pipelines
 :entity: relationship
 :result: relationships
+:max-trials: 10
 
 
 [abstract]
@@ -76,6 +77,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -101,12 +103,13 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1"]
+[opts="header",cols="1,1,1,1,1,1"]
 |===
-| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
-           | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-           | {RandomForest=[], LogisticRegression=[]}
+| {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {maxTrials={max-trials}}
+| {RandomForest=[], LogisticRegression=[]}
 |===
 --
 
@@ -143,6 +146,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -173,12 +177,13 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1"]
+[opts="header",cols="1,1,1,1,1,1"]
 |===
-| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {maxTrials={max-trials}}
 | {RandomForest=[], LogisticRegression=[]}
 |===
 
@@ -215,6 +220,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -333,6 +339,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -426,6 +433,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: Map
 ----
 
@@ -459,6 +467,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureSteps: List of Map,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: Map
 ----
 

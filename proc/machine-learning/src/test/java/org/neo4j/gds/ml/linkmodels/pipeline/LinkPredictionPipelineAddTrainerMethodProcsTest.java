@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
@@ -53,6 +54,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
@@ -80,6 +82,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
@@ -117,6 +120,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(

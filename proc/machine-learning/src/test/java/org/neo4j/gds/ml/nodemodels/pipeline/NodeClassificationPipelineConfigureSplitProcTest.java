@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
 
@@ -55,6 +56,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
@@ -74,6 +76,7 @@ class NodeClassificationPipelineConfigureSplitProcTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", expectedSplitConfig,
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG

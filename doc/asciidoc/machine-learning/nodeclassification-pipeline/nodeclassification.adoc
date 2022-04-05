@@ -2,6 +2,7 @@
 = Node classification pipelines
 :entity: node
 :result: predicted property
+:max-trials: 10
 
 
 [abstract]
@@ -73,6 +74,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -97,12 +99,13 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 ----
 
 .Results
-[opts="header",cols="1,1,1,1,1"]
+[opts="header",cols="1,1,1,1,1,1"]
 |===
-| name     | nodePropertySteps | featureProperties | splitConfig | parameterSpace
+| name     | nodePropertySteps | featureProperties | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
-           | {testFraction=0.3, validationFolds=3}
-           | {RandomForest=[], LogisticRegression=[]}
+| {testFraction=0.3, validationFolds=3}
+| {maxTrials={max-trials}}
+| {RandomForest=[], LogisticRegression=[]}
 |===
 --
 
@@ -137,6 +140,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -200,6 +204,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -280,6 +285,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of Strings,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
 
@@ -368,6 +374,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: Map
 ----
 
@@ -402,6 +409,7 @@ YIELD
   nodePropertySteps: List of Map,
   featureProperties: List of String,
   splitConfig: Map,
+  autoTuningConfig: Map,
   parameterSpace: Map
 ----
 

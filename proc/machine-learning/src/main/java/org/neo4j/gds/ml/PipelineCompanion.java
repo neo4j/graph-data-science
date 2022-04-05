@@ -19,7 +19,14 @@
  */
 package org.neo4j.gds.ml;
 
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class PipelineCompanion {
 
@@ -36,5 +43,23 @@ public final class PipelineCompanion {
         } else {
             algoConfiguration.put("graphName", "__ANONYMOUS_GRAPH__");
         }
+    }
+
+    public static <PIPELINE extends TrainingPipeline<?>, INFO_RESULT> Stream<INFO_RESULT> configureAutoTuning(
+        String userName,
+        String pipelineName,
+        Map<String, Object> configMap,
+        Function<PIPELINE, INFO_RESULT> factory
+    ) {
+        PIPELINE pipeline = (PIPELINE) PipelineCatalog.get(userName, pipelineName);
+
+        var cypherConfig = CypherMapWrapper.create(configMap);
+        var config = AutoTuningConfig.of(cypherConfig);
+
+        cypherConfig.requireOnlyKeysFrom(config.configKeys());
+
+        pipeline.setAutoTuningConfig(config);
+
+        return Stream.of(factory.apply(pipeline));
     }
 }

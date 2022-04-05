@@ -33,7 +33,6 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
 
-
     private NodeClassificationSplitConfig splitConfig;
 
     public NodeClassificationTrainingPipeline() {
