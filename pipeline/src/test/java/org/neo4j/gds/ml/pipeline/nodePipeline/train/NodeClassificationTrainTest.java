@@ -57,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -163,10 +164,10 @@ class NodeClassificationTrainTest {
         var customInfo = model.customInfo();
         List<ModelStats> validationScores = result.modelSelectionStatistics().validationStats().get(metric);
 
-        assertThat(validationScores).hasSize(100);
+        assertThat(validationScores).hasSize(MAX_TRIALS);
 
         double model1Score = validationScores.get(0).avg();
-        for (int i = 1; i < 100; i++) {
+        for (int i = 1; i < MAX_TRIALS; i++) {
             assertThat(model1Score)
                 .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
         }
