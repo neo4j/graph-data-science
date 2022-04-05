@@ -188,10 +188,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        var numberOfCandidates = pipeline.hasOnlyConcreteTrainerConfigs()
-            ? pipeline.numberOfModelCandidates()
-            : pipeline.autoTuningConfig().maxTrials();
-        progressTracker.setVolume(numberOfCandidates);
+        progressTracker.setVolume(pipeline.numberOfCandidates());
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),

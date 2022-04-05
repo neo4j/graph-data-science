@@ -114,8 +114,14 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         return trainingParameterSpace;
     }
 
-    public boolean hasOnlyConcreteTrainerConfigs() {
+    private boolean hasOnlyConcreteTrainerConfigs() {
         return trainingParameterSpace().values().stream().flatMap(List::stream).allMatch(TunableTrainerConfig::isConcrete);
+    }
+
+    public int numberOfCandidates() {
+        return hasOnlyConcreteTrainerConfigs()
+            ? numberOfModelCandidates()
+            : autoTuningConfig().maxTrials();
     }
 
     public void setTrainingParameterSpace(TrainingMethod method, List<TunableTrainerConfig> trainingConfigs) {
