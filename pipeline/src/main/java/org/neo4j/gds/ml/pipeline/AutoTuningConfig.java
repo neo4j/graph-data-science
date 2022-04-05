@@ -30,12 +30,13 @@ import java.util.Map;
 
 @Configuration
 public interface AutoTuningConfig extends ToMapConvertible {
+    int MAX_TRIALS = 10;
 
     AutoTuningConfig DEFAULT_CONFIG = AutoTuningConfig.of(CypherMapWrapper.empty());
 
     @Configuration.IntegerRange(min = 1)
     default int maxTrials() {
-        return 100;
+        return MAX_TRIALS;
     }
 
     @Override

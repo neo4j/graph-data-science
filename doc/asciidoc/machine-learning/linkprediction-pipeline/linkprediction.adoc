@@ -2,6 +2,7 @@
 = Link prediction pipelines
 :entity: relationship
 :result: relationships
+:max-trials: 10
 
 
 [abstract]
@@ -107,7 +108,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-| {maxTrials=100}
+| {maxTrials={max-trials}}
 | {RandomForest=[], LogisticRegression=[]}
 |===
 --
@@ -182,7 +183,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
-| {maxTrials=100}
+| {maxTrials={max-trials}}
 | {RandomForest=[], LogisticRegression=[]}
 |===
 

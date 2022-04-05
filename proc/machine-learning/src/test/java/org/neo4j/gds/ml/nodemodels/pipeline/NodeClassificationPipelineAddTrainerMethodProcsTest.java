@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 
 class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
@@ -54,7 +55,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", Map.of("maxTrials", 100),
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
@@ -81,7 +82,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", Map.of("maxTrials", 100),
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
@@ -109,7 +110,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
-                "autoTuningConfig", Map.of("maxTrials", 100),
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(

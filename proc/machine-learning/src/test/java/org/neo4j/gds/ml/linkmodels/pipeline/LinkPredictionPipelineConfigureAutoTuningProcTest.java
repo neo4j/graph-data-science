@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
@@ -52,7 +53,7 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
             List.of(Map.of(
                 "name", "confetti",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
-                "autoTuningConfig", Map.of("maxTrials", 100),
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
