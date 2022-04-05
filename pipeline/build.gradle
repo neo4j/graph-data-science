@@ -62,3 +62,11 @@ dependencies {
     testImplementation project(':test-utils')
     testImplementation project(':proc-test')
 }
+
+forbiddenApisMain {
+    signaturesFiles = files("$publicDir/etc/forbidden-apis-main", "forbidden-apis-main")
+    bundledSignatures += 'jdk-unsafe'
+    bundledSignatures += 'jdk-system-out'
+    exclude '**/*Immutable*.class'
+    exclude '**/RelationshipsBuilderBuilder.class'
+}
