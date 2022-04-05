@@ -63,7 +63,7 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
     @Test
     void shouldOverrideSingleSplitField() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -77,9 +77,9 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 1337})");
+        runQuery("CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 1337})");
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -94,7 +94,7 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
             "Unexpected configuration keys: invalidKey, maxTr1als (Did you mean [maxTrials]?"
         );
     }

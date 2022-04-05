@@ -216,12 +216,11 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.k1coloring.stream.estimate`
 | `gds.beta.k1coloring.write`
 | `gds.beta.k1coloring.write.estimate`
-.12+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+.11+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
 | `gds.beta.pipeline.linkPrediction.addLogisticRegression`
-| `gds.beta.pipeline.linkPrediction.configureAutoTuning`
 | `gds.beta.pipeline.linkPrediction.configureSplit`
 | `gds.beta.pipeline.linkPrediction.train`
 | `gds.beta.pipeline.linkPrediction.train.estimate`
@@ -229,12 +228,11 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.14+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+.13+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`
 | `gds.beta.pipeline.nodeClassification.addLogisticRegression`
-| `gds.beta.pipeline.nodeClassification.configureAutoTuning`
 | `gds.beta.pipeline.nodeClassification.configureSplit`
 | `gds.beta.pipeline.nodeClassification.train`
 | `gds.beta.pipeline.nodeClassification.train.estimate`
@@ -313,10 +311,12 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.spanningTree.kmin.write`
 | `gds.alpha.spanningTree.maximum.write`
 | `gds.alpha.spanningTree.minimum.write`
-.1+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+.2+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.alpha.pipeline.linkPrediction.addRandomForest`
-.1+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+| `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
+.2+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.alpha.pipeline.nodeClassification.addRandomForest`
+| `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
 | <<alpha-algorithms-linkprediction-adamic-adar>> | `_gds.alpha.linkprediction.adamicAdar_`
 | <<alpha-algorithms-linkprediction-common-neighbors>> | `_gds.alpha.linkprediction.commonNeighbors_`
 | <<alpha-algorithms-linkprediction-preferential-attachment>> | `_gds.alpha.linkprediction.preferentialAttachment_`

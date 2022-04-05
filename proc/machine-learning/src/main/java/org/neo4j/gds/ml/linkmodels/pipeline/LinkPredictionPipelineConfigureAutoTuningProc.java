@@ -35,9 +35,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LinkPredictionPipelineConfigureAutoTuningProc extends BaseProc {
 
-    @Procedure(name = "gds.beta.pipeline.linkPrediction.configureAutoTuning", mode = READ)
+    @Procedure(name = "gds.alpha.pipeline.linkPrediction.configureAutoTuning", mode = READ)
     @Description("Configures the auto-tuning of the link prediction pipeline.")
-    public Stream<PipelineInfoResult> configureSplit(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
+    public Stream<PipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
         var cypherConfig = CypherMapWrapper.create(configMap);

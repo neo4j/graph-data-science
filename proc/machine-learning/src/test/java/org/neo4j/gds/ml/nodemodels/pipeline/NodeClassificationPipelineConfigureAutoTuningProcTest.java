@@ -63,7 +63,7 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
     @Test
     void shouldOverrideSingleSplitField() {
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -77,9 +77,9 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 1337})");
+        runQuery("CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 1337})");
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -94,7 +94,7 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
     @Test
     void failOnInvalidKeys() {
         assertError(
-            "CALL gds.beta.pipeline.nodeClassification.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {invalidKey: 42, maxTr1als: -0.51})",
             "Unexpected configuration keys: invalidKey, maxTr1als (Did you mean [maxTrials]?"
         );
     }
