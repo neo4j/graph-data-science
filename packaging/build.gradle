@@ -27,8 +27,8 @@ task shadowCopy(type: Copy) {
 
 task versionsJson {
     ext.outFile = file("$distributionDir/versions.json")
-    def bucketUrl = "https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science"
-    def versionsJsonUrl = new URL("https://s3-eu-west-1.amazonaws.com/com.neo4j.graphalgorithms.dist/graph-data-science/versions.json")
+    def bucketUrl = "https://graphdatascience.ninja"
+    def versionsJsonUrl = new URL("https://graphdatascience.ninja/versions.json")
     outputs.file(outFile)
     doLast {
         def versionsJson = new groovy.json.JsonSlurper().parse(versionsJsonUrl)
