@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -438,7 +439,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 .values()
                 .stream()
                 .flatMap(List::stream)
-                .flatMap(tunableConfig -> tunableConfig.materializeConcreteCube().stream())
+                .flatMap(TunableTrainerConfig::materializeConcreteCube)
                 .map(trainerConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))

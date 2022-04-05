@@ -55,6 +55,7 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
@@ -197,7 +198,7 @@ public final class NodeClassificationTrain {
             .values()
             .stream()
             .flatMap(List::stream)
-            .flatMap(tunableConfig -> tunableConfig.materializeConcreteCube().stream())
+            .flatMap(TunableTrainerConfig::materializeConcreteCube)
             .map(config -> {
                 var training = TrainerFactory.memoryEstimation(
                     config,

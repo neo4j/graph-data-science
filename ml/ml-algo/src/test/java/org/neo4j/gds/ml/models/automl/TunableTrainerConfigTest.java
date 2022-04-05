@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -146,7 +147,7 @@ class TunableTrainerConfigTest {
     void shouldMaterializeCubeWhenConcrete() {
         var userInput = Map.<String, Object>of();
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube();
+        var trainerConfigs = config.materializeConcreteCube().collect(Collectors.toList());
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
@@ -162,7 +163,7 @@ class TunableTrainerConfigTest {
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube();
+        var trainerConfigs = config.materializeConcreteCube().collect(Collectors.toList());
         assertThat(trainerConfigs)
             .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(

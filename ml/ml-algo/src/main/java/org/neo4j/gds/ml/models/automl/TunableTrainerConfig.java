@@ -27,12 +27,12 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.NumericalRangeParameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.models.automl.ParameterParser.parseConcreteParameters;
@@ -70,7 +70,7 @@ public final class TunableTrainerConfig {
             method
         );
         // triggers validation for combinations of end endpoints of each range.
-        tunableTrainerConfig.materializeConcreteCube();
+        tunableTrainerConfig.materializeConcreteCube().forEach(unused -> {});
         return tunableTrainerConfig;
     }
 
@@ -96,16 +96,18 @@ public final class TunableTrainerConfig {
         return trainingMethod().createConfig(materializedMap);
     }
 
-    public List<TrainerConfig> materializeConcreteCube() {
-        var result = new ArrayList<TrainerConfig>();
+    public Stream<TrainerConfig> materializeConcreteCube() {
         var rangeParameters = new HashMap<String, NumericalRangeParameter<?>>();
+
         rangeParameters.putAll(doubleRanges);
         rangeParameters.putAll(integerRanges);
+
         var numberOfHyperParameters = rangeParameters.size();
         if (numberOfHyperParameters > 20)
             throw new IllegalArgumentException("Currently at most 20 hyperparameters are supported");
+
         // the position i in the bitset represents whether to take min or max value for the i:th parameter
-        for (int bitset = 0; bitset < Math.pow(2, numberOfHyperParameters); bitset++) {
+        return IntStream.range(0, (int) Math.pow(2, numberOfHyperParameters)).mapToObj(bitset -> {
             var hyperParameterValues = new HashMap<String, Object>();
             var parameterIdx = 0;
             for (var entry : rangeParameters.entrySet()) {
@@ -116,9 +118,8 @@ public final class TunableTrainerConfig {
                 hyperParameterValues.put(key, materializedValue);
                 parameterIdx++;
             }
-            result.add(materialize(hyperParameterValues));
-        }
-        return result;
+            return materialize(hyperParameterValues);
+        });
     }
 
     private static Number endPoint(boolean useMin, boolean isDouble, NumericalRangeParameter<?> range) {
