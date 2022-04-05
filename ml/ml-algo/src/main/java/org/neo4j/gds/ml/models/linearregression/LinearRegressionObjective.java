@@ -19,34 +19,63 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.gradientdescent.Objective;
+import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
 
 public class LinearRegressionObjective implements Objective<LinearRegressionObjective.LinearRegressionData> {
 
+    private final Features features;
+    private final HugeDoubleArray actualValues;
+    private final LinearRegressionData modelData;
+
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return null;
+        return List.of(modelData.weights(), modelData.bias());
+    }
+
+    LinearRegressionObjective(
+        Features features,
+        HugeDoubleArray actualValues
+    ) {
+        this.features = features;
+        this.actualValues = actualValues;
+        this.modelData = LinearRegressionData.of(features.featureDimension());
     }
 
     @Override
     public Variable<Scalar> loss(
         Batch batch, long trainSize
     ) {
+        // FIXME implement actual implementation
         return Constant.scalar(0D);
     }
 
     @Override
     public LinearRegressionData modelData() {
-        return new LinearRegressionData();
+        return modelData;
     }
 
-    static class LinearRegressionData {}
+    @ValueClass
+    interface LinearRegressionData {
+        Weights<Vector> weights();
+        Weights<Scalar> bias();
+
+        static LinearRegressionData of(int featureDimension) {
+            return ImmutableLinearRegressionData.builder()
+                .weights(new Weights<>(Vector.create(0D, featureDimension)))
+                .bias(Weights.ofScalar(0D))
+                .build();
+        }
+    }
 }
