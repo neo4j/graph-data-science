@@ -39,6 +39,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -102,7 +103,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            NodeClassificationPipelineTrainConfig.builder()
+            NodeClassificationPipelineTrainConfigImpl.builder()
                 .modelName("model")
                 .graphName(graphName)
                 .pipeline("DUMMY")

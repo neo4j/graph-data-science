@@ -57,6 +57,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 import org.neo4j.gds.test.TestProc;
 
@@ -314,7 +315,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 NodeClassificationTrainingPipeline.MODEL_TYPE,
                 GraphSchema.empty(),
                 modelData,
-                NodeClassificationPipelineTrainConfig.builder()
+                NodeClassificationPipelineTrainConfigImpl.builder()
                     .modelName("model")
                     .pipeline("DUMMY")
                     .graphName(GRAPH_NAME)
@@ -438,7 +439,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
-            NodeClassificationPipelineTrainConfig.builder()
+            NodeClassificationPipelineTrainConfigImpl.builder()
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .pipeline("DUMMY")

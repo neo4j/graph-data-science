@@ -49,7 +49,4 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
         return new NodeClassificationPipelineTrainConfigImpl(username, config);
     }
 
-    static ImmutableNodeClassificationPipelineTrainConfig.Builder builder() {
-        return ImmutableNodeClassificationPipelineTrainConfig.builder();
-    }
 }
