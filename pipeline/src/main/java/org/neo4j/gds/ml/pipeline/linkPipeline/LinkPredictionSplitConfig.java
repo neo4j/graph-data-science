@@ -23,7 +23,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -44,7 +43,6 @@ import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateRelSetSize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
 public interface LinkPredictionSplitConfig extends ToMapConvertible {
 

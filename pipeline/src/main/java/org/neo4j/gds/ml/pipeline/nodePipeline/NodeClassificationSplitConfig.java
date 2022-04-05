@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -34,7 +33,6 @@ import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNodeSetSize;
 
-@ValueClass
 @Configuration
 public interface NodeClassificationSplitConfig extends ToMapConvertible {
     NodeClassificationSplitConfig DEFAULT_CONFIG = NodeClassificationSplitConfig.of(CypherMapWrapper.empty());

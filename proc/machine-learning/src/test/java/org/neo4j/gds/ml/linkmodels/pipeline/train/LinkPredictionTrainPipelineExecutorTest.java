@@ -57,7 +57,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
@@ -207,7 +206,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
-                ImmutableLinkPredictionTrainConfig.builder().graphName(GRAPH_NAME).modelName("foo").pipeline("bar").build(),
+                LinkPredictionTrainConfigImpl.builder().graphName(GRAPH_NAME).modelName("foo").pipeline("bar").build(),
                 caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
@@ -241,11 +240,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(splitConfig);
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
-        var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
+        var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
             .modelName("foo")
             .graphName(GRAPH_NAME)
             .pipeline("bar")
-            .addNodeLabel(NODE_LABEL.name)
+            .nodeLabels(List.of(NODE_LABEL.name))
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
@@ -284,7 +283,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().build());
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
-        var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
+        var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
             .modelName("foo")
             .graphName(graphName)
             .pipeline("bar")
