@@ -47,7 +47,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
-import org.neo4j.gds.ml.pipeline.ImmutableAutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -61,6 +61,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
 class LinkPredictionTrainTest {
@@ -191,6 +192,17 @@ class LinkPredictionTrainTest {
                     RandomForestTrainConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(82_336, 2_579_376)
+            ),
+            Arguments.of(
+                "Default RF and default LR with batch size range",
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(51_231_136, 1_620_160_176)
             )
         );
     }
@@ -203,7 +215,7 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(100);
+        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
 
         var actualModel = result.model();
 
@@ -326,6 +338,10 @@ class LinkPredictionTrainTest {
         for (var config: tunableConfigs) {
             pipeline.addTrainerConfig(config);
         }
+
+        // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
+
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
@@ -497,7 +513,7 @@ class LinkPredictionTrainTest {
             Map.of("maxEpochs", 5, "penalty", Map.of("range", List.of(1e-4, 1e4))),
             TrainingMethod.LogisticRegression
         ));
-        pipeline.setAutoTuningConfig(ImmutableAutoTuningConfig.builder().maxTrials(MAX_TRIALS).build());
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 

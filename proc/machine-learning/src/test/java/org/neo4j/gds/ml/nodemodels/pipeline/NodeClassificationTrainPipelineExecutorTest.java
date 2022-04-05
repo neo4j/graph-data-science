@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.ImmutableNodeClassificationSplitConfig;
@@ -288,6 +289,16 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     RandomForestTrainConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(31_839_432L, 31_906_672L)
+            ),
+            Arguments.of(
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(3_629_038_632L, 3_629_105_872L)
             )
         );
     }
@@ -309,6 +320,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         for (int i = 0; i < tunableConfigs.size(); i++) {
             pipeline.addTrainerConfig(tunableConfigs.get(i));
         }
+
+        // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
 
         var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
             .pipeline(PIPELINE_NAME)

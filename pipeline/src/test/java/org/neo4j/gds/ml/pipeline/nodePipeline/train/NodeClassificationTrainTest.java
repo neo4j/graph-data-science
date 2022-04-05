@@ -41,7 +41,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
-import org.neo4j.gds.ml.pipeline.ImmutableAutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
@@ -402,7 +402,7 @@ class NodeClassificationTrainTest {
                 TrainingMethod.LogisticRegression
             )
         );
-        pipeline.setAutoTuningConfig(ImmutableAutoTuningConfig.builder().maxTrials(MAX_TRIALS).build());
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
         var config = createConfig("bananasModel", metricSpecification, 42L);
 
