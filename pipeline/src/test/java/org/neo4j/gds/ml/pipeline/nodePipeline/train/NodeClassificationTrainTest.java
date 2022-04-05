@@ -279,7 +279,7 @@ class NodeClassificationTrainTest {
 
         var progressTask = NodeClassificationTrain.progressTask(
             pipeline.splitConfig().validationFolds(),
-            pipeline.numberOfModelCandidates()
+            pipeline.numberOfModelSelectionTrials()
         );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);

@@ -87,7 +87,7 @@ public abstract class PipelineExecutor<
     }
 
     public static void validateTrainingParameterSpace(TrainingPipeline pipeline) {
-        if (pipeline.numberOfModelCandidates() == 0) {
+        if (pipeline.numberOfModelSelectionTrials() == 0) {
             throw new IllegalArgumentException("Need at least one model candidate for training.");
         }
     }

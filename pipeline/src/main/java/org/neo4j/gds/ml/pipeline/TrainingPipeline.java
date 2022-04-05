@@ -83,7 +83,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
 
     protected abstract Map<String, Object> additionalEntries();
 
-    public int numberOfModelCandidates() {
+    private int numberOfTrainerConfigs() {
         return this.trainingParameterSpace()
             .values()
             .stream()
@@ -118,9 +118,9 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         return trainingParameterSpace().values().stream().flatMap(List::stream).allMatch(TunableTrainerConfig::isConcrete);
     }
 
-    public int numberOfCandidates() {
+    public int numberOfModelSelectionTrials() {
         return hasOnlyConcreteTrainerConfigs()
-            ? numberOfModelCandidates()
+            ? numberOfTrainerConfigs()
             : autoTuningConfig().maxTrials();
     }
 

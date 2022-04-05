@@ -188,11 +188,11 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        progressTracker.setVolume(pipeline.numberOfCandidates());
+        progressTracker.setVolume(pipeline.numberOfModelSelectionTrials());
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.autoTuningConfig().maxTrials(),
+            pipeline.numberOfModelSelectionTrials(),
             config.randomSeed()
         );
 
@@ -461,11 +461,11 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .add(maxEstimationOverModelCandidates)
             .add(
                 "Inner train stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .add(
                 "Validation stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .build();
     }

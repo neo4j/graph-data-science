@@ -34,17 +34,17 @@ import java.util.stream.Collectors;
 public class RandomSearch implements HyperParameterOptimizer {
     private final List<TunableTrainerConfig> concreteConfigs;
     private final List<TunableTrainerConfig> tunableConfigs;
-    private final int maxTrials;
+    private final int totalNumberOfTrials;
     private final SplittableRandom random;
-    private int producedTrials;
+    private int numberOfFinishedTrials;
 
-    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int maxTrials, long randomSeed) {
-        this(parameterSpace, maxTrials, Optional.of(randomSeed));
+    public RandomSearch(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace, int totalNumberOfTrials, long randomSeed) {
+        this(parameterSpace, totalNumberOfTrials, Optional.of(randomSeed));
     }
 
     public RandomSearch(
         Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
-        int maxTrials,
+        int totalNumberOfTrials,
         Optional<Long> randomSeed
     ) {
         this.concreteConfigs = parameterSpace.values().stream()
@@ -55,19 +55,15 @@ public class RandomSearch implements HyperParameterOptimizer {
             .flatMap(List::stream)
             .filter(tunableTrainerConfig -> !tunableTrainerConfig.isConcrete())
             .collect(Collectors.toList());
-        this.maxTrials = maxTrials;
+        this.totalNumberOfTrials = totalNumberOfTrials;
         this.random = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
-        this.producedTrials = 0;
+        this.numberOfFinishedTrials = 0;
     }
 
 
     @Override
     public boolean hasNext() {
-        if (tunableConfigs.isEmpty()) {
-            return producedTrials < concreteConfigs.size();
-        } else {
-            return producedTrials < maxTrials;
-        }
+        return numberOfFinishedTrials < totalNumberOfTrials;
     }
 
     @Override
@@ -75,10 +71,10 @@ public class RandomSearch implements HyperParameterOptimizer {
         if (!hasNext()) {
             throw new IllegalStateException("RandomSearch has already exhausted the maximum trials or the parameter space.");
         }
-        if (producedTrials < concreteConfigs.size()) {
-            return concreteConfigs.get(producedTrials++).materialize(Map.of());
+        if (numberOfFinishedTrials < concreteConfigs.size()) {
+            return concreteConfigs.get(numberOfFinishedTrials++).materialize(Map.of());
         }
-        producedTrials++;
+        numberOfFinishedTrials++;
         var tunableConfig = tunableConfigs.get(random.nextInt(tunableConfigs.size()));
         return sample(tunableConfig);
     }

@@ -139,11 +139,11 @@ public final class NodeClassificationTrain {
             )
             .add(
                 "stats map train",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add(
                 "stats map validation",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
@@ -424,7 +424,7 @@ public final class NodeClassificationTrain {
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
-            pipeline.autoTuningConfig().maxTrials(),
+            pipeline.numberOfModelSelectionTrials(),
             config.randomSeed()
         );
 

@@ -102,7 +102,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             ),
             NodeClassificationTrain.progressTask(
                 pipeline.splitConfig().validationFolds(),
-                pipeline.numberOfCandidates()
+                pipeline.numberOfModelSelectionTrials()
             )
         );
     }
