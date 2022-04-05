@@ -102,9 +102,9 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 |===
 | name     | nodePropertySteps | featureProperties | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
-           | {testFraction=0.3, validationFolds=3}
-           | {maxTrials=100}
-           | {RandomForest=[], LogisticRegression=[]}
+| {testFraction=0.3, validationFolds=3}
+| {maxTrials=100}
+| {RandomForest=[], LogisticRegression=[]}
 |===
 --
 

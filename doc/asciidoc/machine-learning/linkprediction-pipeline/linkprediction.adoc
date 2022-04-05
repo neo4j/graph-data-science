@@ -106,7 +106,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
-           | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials=100}
 | {RandomForest=[], LogisticRegression=[]}
 |===
