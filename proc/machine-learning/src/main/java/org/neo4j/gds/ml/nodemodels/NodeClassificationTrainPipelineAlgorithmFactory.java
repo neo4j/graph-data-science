@@ -92,7 +92,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class);
 
         var maxTrials = pipeline.autoTuningConfig().maxTrials();
-        var numberOfCandidates = pipeline.isConcrete() ? pipeline.numberOfModelCandidates() : maxTrials;
+        var numberOfCandidates = pipeline.hasOnlyConcreteTrainerConfigs() ? pipeline.numberOfModelCandidates() : maxTrials;
 
         return Tasks.task(
             taskName(),
