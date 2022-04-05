@@ -57,7 +57,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -295,7 +295,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 MODEL_TYPE,
                 GraphSchema.empty(),
                 modelData,
-                LinkPredictionTrainConfig.builder()
+                LinkPredictionTrainConfigImpl.builder()
                     .modelName("model")
                     .pipeline("DUMMY")
                     .graphName(GRAPH_NAME)

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -54,10 +53,5 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
         return new LinkPredictionTrainConfigImpl(username, config);
-    }
-
-    @TestOnly
-    static ImmutableLinkPredictionTrainConfig.Builder builder() {
-        return ImmutableLinkPredictionTrainConfig.builder();
     }
 }

@@ -59,7 +59,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.ImmutableLinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -156,8 +156,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
-        var config = LinkPredictionTrainConfig
-            .builder()
+        var config = LinkPredictionTrainConfigImpl.builder()
             .modelName("model")
             .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
@@ -330,8 +329,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         ));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "degree")));
 
-        var config = LinkPredictionTrainConfig
-            .builder()
+        var config = LinkPredictionTrainConfigImpl.builder()
             .modelName("model")
             .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
@@ -429,8 +427,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("estimationsForDiffNodeSteps")
     void estimateWithDifferentNodePropertySteps(String desc, List<NodePropertyStep> nodePropertySteps, MemoryRange expectedRange) {
-        var config = LinkPredictionTrainConfig
-            .builder()
+        var config = LinkPredictionTrainConfigImpl.builder()
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -457,8 +454,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void failEstimateOnEmptyParameterSpace() {
-        var config = LinkPredictionTrainConfig
-            .builder()
+        var config = LinkPredictionTrainConfigImpl.builder()
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")

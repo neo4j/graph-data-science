@@ -266,8 +266,8 @@ class LinkPredictionTrainTest {
         "1000, 1000, 82_240, 2_579_280"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
-        var trainConfig = LinkPredictionTrainConfig
-            .builder()
+        var trainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -296,8 +296,8 @@ class LinkPredictionTrainTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithSplitConfigs")
     void estimateWithDifferentSplits(String desc, LinkPredictionSplitConfig splitConfig, MemoryRange expectedRange) {
-        var trainConfig = LinkPredictionTrainConfig
-            .builder()
+        var trainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -327,8 +327,8 @@ class LinkPredictionTrainTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
     void estimateWithParameterSpace(String desc, List<TunableTrainerConfig> tunableConfigs, MemoryRange expectedRange) {
-        var trainConfig = LinkPredictionTrainConfig
-            .builder()
+        var trainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -366,8 +366,8 @@ class LinkPredictionTrainTest {
         "  4,  82_240, 2_579_280",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
-        var trainConfig = LinkPredictionTrainConfig
-            .builder()
+        var trainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -423,8 +423,8 @@ class LinkPredictionTrainTest {
             trainGraph,
             trainGraph,
             pipeline,
-            LinkPredictionTrainConfig
-                .builder()
+            LinkPredictionTrainConfigImpl.builder()
+                .username("DUMMY")
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
@@ -474,8 +474,8 @@ class LinkPredictionTrainTest {
             trainGraph,
             trainGraph,
             pipeline,
-            LinkPredictionTrainConfig
-                .builder()
+            LinkPredictionTrainConfigImpl.builder()
+                .username("DUMMY")
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
@@ -502,7 +502,7 @@ class LinkPredictionTrainTest {
     void logProgressLRWithRange() {
         int MAX_TRIALS = 4;
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
             .trainFraction(0.5)
@@ -529,8 +529,9 @@ class LinkPredictionTrainTest {
             trainGraph,
             trainGraph,
             pipeline,
-            LinkPredictionTrainConfig
+            LinkPredictionTrainConfigImpl
                 .builder()
+                .username("DUMMY")
                 .randomSeed(42L)
                 .modelName("DUMMY")
                 .graphName("DUMMY")
@@ -594,8 +595,8 @@ class LinkPredictionTrainTest {
     }
 
     private LinkPredictionTrainConfig trainingConfig(String modelName) {
-        return LinkPredictionTrainConfig
-            .builder()
+        return LinkPredictionTrainConfigImpl.builder()
+            .username("DUMMY")
             .modelName(modelName)
             .graphName("g")
             .pipeline("DUMMY")
