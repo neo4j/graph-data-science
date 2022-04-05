@@ -142,7 +142,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     void testProcedureAndLinkFeatures() {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
             .trainFraction(0.5)
@@ -225,11 +225,11 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     static Stream<Arguments> invalidSplits() {
         return Stream.of(
             Arguments.of(
-                LinkPredictionSplitConfig.builder().testFraction(0.01).build(),
+                LinkPredictionSplitConfigImpl.builder().testFraction(0.01).build(),
                 "The specified `testFraction` is too low for the current graph. The test set would have 0 relationship(s) but it must have at least 1."
             ),
             Arguments.of(
-                LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build(),
+                LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build(),
                 "The specified `trainFraction` is too low for the current graph. The train set would have 0 relationship(s) but it must have at least 2."
             )
         );
@@ -282,7 +282,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder().build());
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().build());
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
         var linkPredictionTrainConfig = ImmutableLinkPredictionTrainConfig.builder()
@@ -312,7 +312,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     void shouldLogProgress() {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(0.01)
             .trainFraction(0.7)

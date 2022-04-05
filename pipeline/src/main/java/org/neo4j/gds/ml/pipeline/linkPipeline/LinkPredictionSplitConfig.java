@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
@@ -136,11 +135,6 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     static LinkPredictionSplitConfig of(CypherMapWrapper config) {
         return new LinkPredictionSplitConfigImpl(config);
-    }
-
-    @TestOnly
-    static ImmutableLinkPredictionSplitConfig.Builder builder() {
-        return ImmutableLinkPredictionSplitConfig.builder();
     }
 
     @Configuration.Ignore

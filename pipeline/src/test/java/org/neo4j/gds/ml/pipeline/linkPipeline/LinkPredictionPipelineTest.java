@@ -135,7 +135,7 @@ class LinkPredictionPipelineTest {
     @Test
     void canSetSplitConfig() {
         var pipeline = new LinkPredictionTrainingPipeline();
-        var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
+        var splitConfig = LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
@@ -145,10 +145,10 @@ class LinkPredictionPipelineTest {
     @Test
     void overridesTheSplitConfig() {
         var pipeline = new LinkPredictionTrainingPipeline();
-        var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
+        var splitConfig = LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
-        var splitConfigOverride = LinkPredictionSplitConfig.builder().trainFraction(0.1).testFraction(0.7).build();
+        var splitConfigOverride = LinkPredictionSplitConfigImpl.builder().trainFraction(0.1).testFraction(0.7).build();
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
@@ -211,7 +211,7 @@ class LinkPredictionPipelineTest {
                     .build()
             ));
 
-            var splitConfig = LinkPredictionSplitConfig.builder().trainFraction(0.01).testFraction(0.5).build();
+            var splitConfig = LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())

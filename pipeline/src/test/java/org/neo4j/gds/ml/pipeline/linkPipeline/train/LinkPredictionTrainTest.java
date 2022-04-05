@@ -397,7 +397,7 @@ class LinkPredictionTrainTest {
     @Test
     void logProgressRF() {
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
             .trainFraction(0.5)
@@ -449,7 +449,7 @@ class LinkPredictionTrainTest {
     @Test
     void logProgressLR() {
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
             .trainFraction(0.5)
@@ -554,7 +554,7 @@ class LinkPredictionTrainTest {
     private LinkPredictionTrainingPipeline linkPredictionPipeline() {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
-        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
             .validationFolds(2)
             .negativeSamplingRatio(1)
             .trainFraction(0.5)
