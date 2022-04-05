@@ -20,9 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -30,13 +28,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-@ValueClass
 @Configuration
 public interface AutoTuningConfig extends ToMapConvertible {
 
     AutoTuningConfig DEFAULT_CONFIG = AutoTuningConfig.of(CypherMapWrapper.empty());
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int maxTrials() {
         return 100;
