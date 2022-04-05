@@ -25,20 +25,30 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
+    private static final String PIPELINE_NAME = "myPipeline";
+
     @BeforeEach
     void setUp() throws Exception {
-        registerProcedures(NodeClassificationPipelineConfigureAutoTuningProc.class, NodeClassificationPipelineCreateProc.class);
+        registerProcedures(
+            NodeClassificationPipelineConfigureAutoTuningProc.class,
+            NodeClassificationPipelineCreateProc.class
+        );
 
-        runQuery("CALL gds.beta.pipeline.nodeClassification.create('myPipeline')");
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipelineName)",
+            Map.of("pipelineName", PIPELINE_NAME)
+        );
     }
 
     @AfterEach
@@ -48,8 +58,10 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
 
     @Test
     void shouldApplyDefaultMaxTrials() {
+        String pipelineName = "confetti";
         assertCypherResult(
-            "CALL gds.beta.pipeline.nodeClassification.create('confetti')",
+            "CALL gds.beta.pipeline.nodeClassification.create($pipelineName)",
+            Map.of("pipelineName", pipelineName),
             List.of(Map.of(
                 "name", "confetti",
                 "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -59,28 +71,39 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
+        var pipeline = (NodeClassificationTrainingPipeline) PipelineCatalog.get(getUsername(), pipelineName);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(MAX_TRIALS);
     }
 
     @Test
     void shouldOverrideSingleSplitField() {
+        int maxTrials = 42;
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: $maxTrials})",
+            Map.of("pipelineName", PIPELINE_NAME, "maxTrials", maxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
-                "autoTuningConfig", Map.of("maxTrials", 42),
+                "autoTuningConfig", Map.of("maxTrials", maxTrials),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
+        var pipeline = (NodeClassificationTrainingPipeline) PipelineCatalog.get(getUsername(), PIPELINE_NAME);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(maxTrials);
     }
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 1337})");
+        int lastMaxTrials = 42;
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning($pipelineName, {maxTrials: 1337})",
+            Map.of("pipelineName", PIPELINE_NAME)
+        );
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning($pipelineName, {maxTrials: $maxTrials})",
+            Map.of("pipelineName", PIPELINE_NAME, "maxTrials", lastMaxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -90,6 +113,8 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
                 "parameterSpace", DEFAULT_PARAM_CONFIG
             ))
         );
+        var pipeline = (NodeClassificationTrainingPipeline) PipelineCatalog.get(getUsername(), PIPELINE_NAME);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(lastMaxTrials);
     }
 
     @Test

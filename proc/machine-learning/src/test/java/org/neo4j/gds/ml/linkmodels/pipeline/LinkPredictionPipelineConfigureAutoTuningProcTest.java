@@ -25,20 +25,24 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.DEFAULT_PARAM_SPACE;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
+    private static final String PIPELINE_NAME = "myPipeline";
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(LinkPredictionPipelineConfigureAutoTuningProc.class, LinkPredictionPipelineCreateProc.class);
 
-        runQuery("CALL gds.beta.pipeline.linkPrediction.create('myPipeline')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create($pipelineName)", Map.of("pipelineName", PIPELINE_NAME));
     }
 
     @AfterEach
@@ -48,8 +52,10 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
 
     @Test
     void shouldApplyDefaultMaxTrials() {
+        String pipelineName = "confetti";
         assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.create('confetti')",
+            "CALL gds.beta.pipeline.linkPrediction.create($pipelineName)",
+            Map.of("pipelineName", pipelineName),
             List.of(Map.of(
                 "name", "confetti",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -59,28 +65,39 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
                 "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
+        var pipeline = (LinkPredictionTrainingPipeline) PipelineCatalog.get(getUsername(), pipelineName);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(MAX_TRIALS);
     }
 
     @Test
     void shouldOverrideSingleSplitField() {
+        int maxTrials = 42;
         assertCypherResult(
-            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: $maxTrials})",
+            Map.of("pipelineName", PIPELINE_NAME, "maxTrials", maxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
-                "autoTuningConfig", Map.of("maxTrials", 42),
+                "autoTuningConfig", Map.of("maxTrials", maxTrials),
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
+        var pipeline = (LinkPredictionTrainingPipeline) PipelineCatalog.get(getUsername(), PIPELINE_NAME);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(maxTrials);
     }
 
     @Test
     void shouldOnlyKeepLastOverride() {
-        runQuery("CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 1337})");
+        int lastMaxTrials = 42;
+        runQuery(
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning($pipelineName, {maxTrials: 1337})",
+            Map.of("pipelineName", PIPELINE_NAME)
+        );
         assertCypherResult(
-            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('myPipeline', {maxTrials: 42})",
+            "CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning($pipelineName, {maxTrials: $maxTrials})",
+            Map.of("pipelineName", PIPELINE_NAME, "maxTrials", lastMaxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", LinkPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
@@ -90,6 +107,8 @@ class LinkPredictionPipelineConfigureAutoTuningProcTest extends BaseProcTest {
                 "parameterSpace", DEFAULT_PARAM_SPACE
             ))
         );
+        var pipeline = (LinkPredictionTrainingPipeline) PipelineCatalog.get(getUsername(), PIPELINE_NAME);
+        assertThat(pipeline.autoTuningConfig().maxTrials()).isEqualTo(lastMaxTrials);
     }
 
     @Test
