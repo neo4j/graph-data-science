@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -27,13 +26,12 @@ import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
 
-public class LinearRegressionObjective implements Objective<LinearRegressionObjective.LinearRegressionData> {
+public class LinearRegressionObjective implements Objective<LinearRegressionData> {
 
     private final Features features;
     private final HugeDoubleArray actualValues;
@@ -66,16 +64,4 @@ public class LinearRegressionObjective implements Objective<LinearRegressionObje
         return modelData;
     }
 
-    @ValueClass
-    interface LinearRegressionData {
-        Weights<Vector> weights();
-        Weights<Scalar> bias();
-
-        static LinearRegressionData of(int featureDimension) {
-            return ImmutableLinearRegressionData.builder()
-                .weights(new Weights<>(Vector.create(0D, featureDimension)))
-                .bias(Weights.ofScalar(0D))
-                .build();
-        }
-    }
 }
