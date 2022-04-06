@@ -70,7 +70,6 @@ import org.openjdk.jol.util.Multiset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -281,7 +280,7 @@ public final class NodeClassificationTrain {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount());
         var targets = targetsAndClasses.getOne();
-        var classIdMap = makeClassIdMap(targets);
+        var classIdMap = LocalIdMap.ofSorted(targets);
         var classCounts = targetsAndClasses.getTwo();
         var metrics = createMetrics(config, classCounts);
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
@@ -311,16 +310,6 @@ public final class NodeClassificationTrain {
             validationStats,
             progressTracker
         );
-    }
-
-    public static LocalIdMap makeClassIdMap(HugeLongArray targets) {
-        var classSet = new TreeSet<Long>();
-        var classIdMap = new LocalIdMap();
-        for (long i = 0; i < targets.size(); i++) {
-            classSet.add(targets.get(i));
-        }
-        classSet.forEach(classIdMap::toMapped);
-        return classIdMap;
     }
 
     private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(

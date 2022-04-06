@@ -44,6 +44,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
@@ -433,7 +434,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .builder()
             .addDecisionTree(new DecisionTreePredict<>(root))
             .featureDimension(3)
-            .classIdMap(NodeClassificationTrain.makeClassIdMap(HugeLongArray.newArray(10)))
+            .classIdMap(LocalIdMap.ofSorted(HugeLongArray.newArray(10)))
             .build();
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
