@@ -24,13 +24,11 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
@@ -74,26 +72,26 @@ public class TrainerFactory {
     }
 
     public static MemoryEstimation memoryEstimation(
-        TunableTrainerConfig config,
+        TrainerConfig config,
         LongUnaryOperator numberOfTrainingExamples,
         int numberOfClasses,
         MemoryRange featureDimension,
         boolean isReduced
     ) {
-        switch (config.trainingMethod()) {
+        switch (TrainingMethod.valueOf(config.methodName())) {
             case LogisticRegression:
                 return LogisticRegressionTrainer.memoryEstimation(
                     isReduced,
                     numberOfClasses,
                     featureDimension,
-                    ((LogisticRegressionTrainConfig) config.materialize(Map.of())).batchSize()
+                    ((LogisticRegressionTrainConfig) config).batchSize()
                 );
             case RandomForest: {
                 return ClassificationRandomForestTrainer.memoryEstimation(
                     numberOfTrainingExamples,
                     numberOfClasses,
                     featureDimension,
-                    ((RandomForestTrainConfig) config.materialize(Map.of()))
+                   (RandomForestTrainConfig) config
                 );
             }
             default:

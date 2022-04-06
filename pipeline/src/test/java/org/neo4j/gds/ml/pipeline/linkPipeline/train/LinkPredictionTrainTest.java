@@ -41,10 +41,13 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -58,6 +61,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
 class LinkPredictionTrainTest {
@@ -140,35 +144,65 @@ class LinkPredictionTrainTest {
                 Map.<String, Object>of("batchSize", 100L)
             )
             .map(LogisticRegressionTrainConfig::of)
+            .map(TrainerConfig::toTunableConfig)
             .collect(Collectors.toList());
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                TrainingMethod.LogisticRegression, List.of(llrConfigs.get(0)), MemoryRange.of(36_160, 1_122_000)
+                List.of(llrConfigs.get(0)), MemoryRange.of(36_160, 1_122_000)
             ),
             Arguments.of(
                 "LLR batchSize 100",
-                TrainingMethod.LogisticRegression,
                 List.of(llrConfigs.get(1)),
                 MemoryRange.of(82_240, 2_579_280)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
-                TrainingMethod.LogisticRegression,
                 llrConfigs,
                 MemoryRange.of(82_336, 2_579_376)
             ),
             Arguments.of(
                 "RF",
-                TrainingMethod.RandomForest,
                 List.of(RandomForestTrainConfigImpl
                     .builder()
                     .maxDepth(3)
                     .minSplitSize(2)
                     .maxFeaturesRatio(1.0D)
                     .numberOfDecisionTrees(1)
-                    .build()),
+                    .build()
+                    .toTunableConfig()
+                ),
                 MemoryRange.of(59_712, 899_472)
+            ),
+            Arguments.of(
+                "Default RF and default LR",
+                List.of(
+                    LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(82_336, 2_579_376)
+            ),
+            Arguments.of(
+                "Default RF and default LR with range",
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(82_336, 2_579_376)
+            ),
+            Arguments.of(
+                "Default RF and default LR with batch size range",
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(51_231_136, 1_620_160_176)
             )
         );
     }
@@ -181,9 +215,7 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(
-            linkPredictionPipeline().numberOfModelCandidates()
-        );
+        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
 
         var actualModel = result.model();
 
@@ -294,7 +326,7 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("paramsForEstimationsWithParamSpace")
-    void estimateWithParameterSpace(String desc, TrainingMethod trainerMethod, List<TrainerConfig> parameterSpace, MemoryRange expectedRange) {
+    void estimateWithParameterSpace(String desc, List<TunableTrainerConfig> tunableConfigs, MemoryRange expectedRange) {
         var trainConfig = LinkPredictionTrainConfig
             .builder()
             .modelName("DUMMY")
@@ -303,7 +335,13 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(trainerMethod, parameterSpace);
+        for (var config: tunableConfigs) {
+            pipeline.addTrainerConfig(config);
+        }
+
+        // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
+
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
@@ -460,6 +498,59 @@ class LinkPredictionTrainTest {
             );
     }
 
+    @Test
+    void logProgressLRWithRange() {
+        int MAX_TRIALS = 4;
+        var pipeline = new LinkPredictionTrainingPipeline();
+        pipeline.setSplitConfig(LinkPredictionSplitConfig.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(
+            Map.of("maxEpochs", 5, "penalty", Map.of("range", List.of(1e-4, 1e4))),
+            TrainingMethod.LogisticRegression
+        ));
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
+
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            LinkPredictionTrain.progressTask(),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            LinkPredictionTrainConfig
+                .builder()
+                .randomSeed(42L)
+                .modelName("DUMMY")
+                .graphName("DUMMY")
+                .pipeline("DUMMY")
+                .concurrency(4)
+                .build(),
+            progressTracker
+        ).compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
+            .contains(
+                "LinkPredictionTrain :: select model 25%",
+                "LinkPredictionTrain :: select model 50%",
+                "LinkPredictionTrain :: select model 75%",
+                "LinkPredictionTrain :: select model 100%"
+            );
+    }
+
     private LinkPredictionTrainingPipeline linkPredictionPipeline() {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
 
@@ -475,15 +566,28 @@ class LinkPredictionTrainTest {
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
         ));
         // Should NOT be the winning model, so give it bad hyperparams.
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
-            RandomForestTrainConfigImpl
-                .builder()
-                .minSplitSize(2)
-                .maxDepth(1)
-                .numberOfDecisionTrees(1)
-                .maxFeaturesRatio(0.1)
-                .build()
-        ));
+        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest,
+            List.of(
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", 0.1
+                    ),
+                    TrainingMethod.RandomForest
+                ),
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                    ),
+                    TrainingMethod.RandomForest
+                )
+            )
+        );
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
         return pipeline;

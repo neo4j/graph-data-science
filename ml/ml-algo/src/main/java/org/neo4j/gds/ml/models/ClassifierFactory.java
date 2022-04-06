@@ -21,14 +21,12 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
-import java.util.Map;
 import java.util.function.LongUnaryOperator;
 
 public final class ClassifierFactory {
@@ -71,19 +69,19 @@ public final class ClassifierFactory {
     }
 
     public static MemoryEstimation dataMemoryEstimation(
-        TunableTrainerConfig trainerConfig,
+        TrainerConfig trainerConfig,
         LongUnaryOperator numberOfTrainingSamples,
         int numberOfClasses,
         int featureDimension,
         boolean isReduced
     ) {
-        switch (trainerConfig.trainingMethod()) {
+        switch (TrainingMethod.valueOf(trainerConfig.methodName())) {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
             case RandomForest:
                 return RandomForestData.memoryEstimation(
                     numberOfTrainingSamples,
-                    (RandomForestTrainConfig) trainerConfig.materialize(Map.of())
+                    (RandomForestTrainConfig) trainerConfig
                 );
             default:
                 throw new IllegalStateException("No such classifier.");

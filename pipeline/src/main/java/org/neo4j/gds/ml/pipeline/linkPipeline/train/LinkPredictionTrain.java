@@ -46,7 +46,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
-import org.neo4j.gds.ml.models.automl.ExhaustiveHyperparameterOptimizer;
+import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -189,9 +189,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var trainStats = initStatsMap();
         var validationStats = initStatsMap();
 
-        progressTracker.setVolume(pipeline.numberOfModelCandidates());
+        progressTracker.setVolume(pipeline.numberOfModelSelectionTrials());
 
-        var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
+        var hyperParameterOptimizer = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            config.randomSeed()
+        );
+
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();
             var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
@@ -434,6 +439,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 .values()
                 .stream()
                 .flatMap(List::stream)
+                .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
                 .map(trainerConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
@@ -456,18 +462,18 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             .add(maxEstimationOverModelCandidates)
             .add(
                 "Inner train stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .add(
                 "Validation stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelCandidates(), 1)
+                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .build();
     }
 
     private static MemoryEstimation estimateTraining(
         LinkPredictionSplitConfig splitConfig,
-        TunableTrainerConfig trainerConfig,
+        TrainerConfig trainerConfig,
         MemoryRange linkFeatureDimension
     ) {
         return MemoryEstimations.setup(

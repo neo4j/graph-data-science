@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -143,10 +144,10 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void shouldMaterializeCubeWhenConcrete() {
+    void shouldMaterializeCornerCasesWhenConcrete() {
         var userInput = Map.<String, Object>of();
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube();
+        var trainerConfigs = config.streamCornerCaseConfigs().collect(Collectors.toList());
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
@@ -154,7 +155,7 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void shouldMaterializeRFCube() {
+    void shouldMaterializeRFCornerCases() {
         var userInput = Map.of(
             "maxDepth", 5L,
             // Easier to account for EPSILON here than in all expectations below
@@ -162,8 +163,7 @@ class TunableTrainerConfigTest {
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube();
-        assertThat(trainerConfigs)
+        assertThat(config.streamCornerCaseConfigs())
             .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
                 RandomForestTrainConfigImpl

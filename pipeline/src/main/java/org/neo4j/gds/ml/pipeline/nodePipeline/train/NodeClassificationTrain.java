@@ -54,7 +54,7 @@ import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.ExhaustiveHyperparameterOptimizer;
+import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
@@ -140,11 +140,11 @@ public final class NodeClassificationTrain {
             )
             .add(
                 "stats map train",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add(
                 "stats map validation",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelCandidates())
+                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
@@ -163,7 +163,7 @@ public final class NodeClassificationTrain {
         return "NCTrain";
     }
 
-    public static Task progressTask(int validationFolds, int paramsSize) {
+    public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
         return Tasks.task(
             taskName(),
             Tasks.leaf("ShuffleAndSplit"),
@@ -177,7 +177,7 @@ public final class NodeClassificationTrain {
                         )
                     ), validationFolds)
                 ),
-                paramsSize
+                numberOfModelSelectionTrials
             ),
             Trainer.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
@@ -198,10 +198,10 @@ public final class NodeClassificationTrain {
             .values()
             .stream()
             .flatMap(List::stream)
-            .map(tunableTrainerConfig -> {
-                var config = tunableTrainerConfig.materialize(Map.of());
+            .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
+            .map(config -> {
                 var training = TrainerFactory.memoryEstimation(
-                    tunableTrainerConfig,
+                    config,
                     trainSetSize,
                     fudgedClassCount,
                     MemoryRange.of(fudgedFeatureCount),
@@ -212,7 +212,7 @@ public final class NodeClassificationTrain {
                     ? ((LogisticRegressionTrainConfig) config).batchSize()
                     : 0; // Not used
                 var evaluation = estimateEvaluation(
-                    tunableTrainerConfig,
+                    config,
                     batchSize,
                     trainSetSize,
                     testSetSize,
@@ -231,7 +231,7 @@ public final class NodeClassificationTrain {
     }
 
     public static MemoryEstimation estimateEvaluation(
-        TunableTrainerConfig config,
+        TrainerConfig config,
         int batchSize,
         LongUnaryOperator trainSetSize,
         LongUnaryOperator testSetSize,
@@ -261,7 +261,7 @@ public final class NodeClassificationTrain {
             .rangePerNode(
                 "classifier runtime",
                 nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    config.trainingMethod(),
+                    TrainingMethod.valueOf(config.methodName()),
                     batchSize,
                     fudgedClassCount,
                     fudgedFeatureCount,
@@ -423,7 +423,11 @@ public final class NodeClassificationTrain {
     private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
-        var hyperParameterOptimizer = new ExhaustiveHyperparameterOptimizer(pipeline.trainingParameterSpace());
+        var hyperParameterOptimizer = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            config.randomSeed()
+        );
 
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();

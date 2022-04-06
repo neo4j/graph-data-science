@@ -36,10 +36,12 @@ import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
@@ -55,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
 class NodeClassificationTrainTest {
@@ -122,6 +125,30 @@ class NodeClassificationTrainTest {
             .build()
         );
 
+        pipeline.setTrainingParameterSpace(
+            TrainingMethod.RandomForest,
+            List.of(
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", 0.1
+                    ),
+                    TrainingMethod.RandomForest
+                ),
+                TunableTrainerConfig.of(
+                    Map.of(
+                        "minSplitSize", 2,
+                        "maxDepth", 1,
+                        "numberOfDecisionTrees", 1,
+                        "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                    ),
+                    TrainingMethod.RandomForest
+                )
+            )
+        );
+
         var config = createConfig("model", metricSpecification, 1L);
 
         var ncTrain = NodeClassificationTrain.create(
@@ -137,14 +164,13 @@ class NodeClassificationTrainTest {
         var customInfo = model.customInfo();
         List<ModelStats> validationScores = result.modelSelectionStatistics().validationStats().get(metric);
 
-        assertThat(validationScores).hasSize(3);
+        assertThat(validationScores).hasSize(MAX_TRIALS);
 
         double model1Score = validationScores.get(0).avg();
-        double model2Score = validationScores.get(1).avg();
-        double model3Score = validationScores.get(2).avg();
-        assertThat(model1Score)
-            .isNotCloseTo(model2Score, Percentage.withPercentage(0.2))
-            .isNotCloseTo(model3Score, Percentage.withPercentage(0.2));
+        for (int i = 1; i < MAX_TRIALS; i++) {
+            assertThat(model1Score)
+                .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
+        }
 
         var actualWinnerParams = customInfo.bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
@@ -252,7 +278,10 @@ class NodeClassificationTrainTest {
 
         var config = createConfig("bananasModel", metricSpecification, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(pipeline.splitConfig().validationFolds(), pipeline.numberOfModelCandidates());
+        var progressTask = NodeClassificationTrain.progressTask(
+            pipeline.splitConfig().validationFolds(),
+            pipeline.numberOfModelSelectionTrials()
+        );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
         NodeClassificationTrain.create(graph, pipeline, config, progressTracker).compute();
@@ -361,6 +390,132 @@ class NodeClassificationTrainTest {
     }
 
     @ParameterizedTest
+    @MethodSource("metricArguments")
+    void shouldLogProgressWithRange(MetricSpecification metricSpecification) {
+        int MAX_TRIALS = 2;
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of("penalty", Map.of("range", List.of(1e-4, 1e4)), "maxEpochs", 100),
+                TrainingMethod.LogisticRegression
+            )
+        );
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
+
+        var config = createConfig("bananasModel", metricSpecification, 42L);
+
+        var progressTask = NodeClassificationTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        NodeClassificationTrain.create(graph, pipeline, config, progressTracker).compute();
+
+        assertThat(testLog.getMessages(INFO))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
+            .containsExactly(
+                "NCTrain :: Start",
+                "NCTrain :: ShuffleAndSplit :: Start",
+                "NCTrain :: ShuffleAndSplit :: Train set size is 10",
+                "NCTrain :: ShuffleAndSplit :: Test set size is 5",
+                "NCTrain :: ShuffleAndSplit 100%",
+                "NCTrain :: ShuffleAndSplit :: Finished",
+                "NCTrain :: SelectBestModel :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639036297",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215514172",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556576919136",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530247134770",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512607645569",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502938148049",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500434701592",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503165614594",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503165614594.",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 50%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039036210",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012004300",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675865724407",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675865724407.",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 50%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639145877",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215952493",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556577905360",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530248888057",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512610385079",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502942092943",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500440012161",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503171967802",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503171967802.",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 50%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039145791",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012442592",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675866418844",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675866418844.",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Start",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 50%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 100%",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Finished",
+                "NCTrain :: SelectBestModel :: Finished",
+                "NCTrain :: TrainSelectedOnRemainder :: Start",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 with loss 0.657839036255",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 with loss 0.632615478262",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 with loss 0.617173961195",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 with loss 0.611030782023",
+                "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 with loss 0.612865911556",
+                "NCTrain :: TrainSelectedOnRemainder :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612865911556.",
+                "NCTrain :: TrainSelectedOnRemainder 100%",
+                "NCTrain :: TrainSelectedOnRemainder :: Finished",
+                "NCTrain :: EvaluateSelectedModel :: Start",
+                "NCTrain :: EvaluateSelectedModel 33%",
+                "NCTrain :: EvaluateSelectedModel 100%",
+                "NCTrain :: EvaluateSelectedModel :: Finished",
+                "NCTrain :: RetrainSelectedModel :: Start",
+                "NCTrain :: RetrainSelectedModel :: Epoch 1 with loss 0.664572369574",
+                "NCTrain :: RetrainSelectedModel :: Epoch 2 with loss 0.646081901344",
+                "NCTrain :: RetrainSelectedModel :: Epoch 3 with loss 0.637370299241",
+                "NCTrain :: RetrainSelectedModel :: Epoch 4 with loss 0.637607698441",
+                "NCTrain :: RetrainSelectedModel :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637607698441.",
+                "NCTrain :: RetrainSelectedModel 100%",
+                "NCTrain :: RetrainSelectedModel :: Finished",
+                "NCTrain :: Finished"
+            );
+    }
+
+    @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void seededNodeClassification(int concurrency) {
         var pipeline = new NodeClassificationTrainingPipeline();
@@ -393,8 +548,11 @@ class NodeClassificationTrainTest {
         var firstResult = algoSupplier.get().compute();
         var secondResult = algoSupplier.get().compute();
 
-        assertThat(((LogisticRegressionData)firstResult.model().data()).weights().data())
-            .matches(matrix -> matrix.equals(((LogisticRegressionData)secondResult.model().data()).weights().data(), 1e-10));
+        assertThat(((LogisticRegressionData) firstResult.model().data()).weights().data())
+            .matches(matrix -> matrix.equals(
+                ((LogisticRegressionData) secondResult.model().data()).weights().data(),
+                1e-10
+            ));
     }
 
     private NodeClassificationPipelineTrainConfig createConfig(
