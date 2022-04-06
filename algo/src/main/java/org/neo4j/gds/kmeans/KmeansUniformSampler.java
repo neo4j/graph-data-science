@@ -17,18 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.clustering;
+package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public interface KmeansSampler {
+
+public class KmeansUniformSampler implements KmeansSampler {
+
+    @Override
     public List<Long> sampleClusters(
         SplittableRandom splittableRandom,
-        HugeObjectArray<double[]> nodeProperties,
-        long nodeCount,
-        int Κ
-    );
+        HugeObjectArray<double[]> nodeProperties, long nodeCount, int K
+    ) {
+        HashSet<Long> sampled = new HashSet<>();
+        while (sampled.size() < K) {
+            long nodeId = splittableRandom.nextLong(nodeCount);
+            if (!sampled.contains(nodeId)) {
+                sampled.add(nodeId);
+            }
+        }
+        return new ArrayList<>(sampled);
+    }
 }

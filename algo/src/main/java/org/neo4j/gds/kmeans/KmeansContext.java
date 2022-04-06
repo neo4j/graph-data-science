@@ -17,30 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.clustering;
+package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.SplittableRandom;
+import java.util.concurrent.ExecutorService;
 
+@ValueClass
+public interface KmeansContext {
 
-public class KmeansUniformSampler implements KmeansSampler {
+    @Value.Default
+    default ExecutorService executor() {
+        return Pools.DEFAULT;
+    }
 
-    @Override
-    public List<Long> sampleClusters(
-        SplittableRandom splittableRandom,
-        HugeObjectArray<double[]> nodeProperties, long nodeCount, int K
-    ) {
-        HashSet<Long> sampled = new HashSet<>();
-        while (sampled.size() < K) {
-            long nodeId = splittableRandom.nextLong(nodeCount);
-            if (!sampled.contains(nodeId)) {
-                sampled.add(nodeId);
-            }
-        }
-        return new ArrayList<>(sampled);
+    @Value.Default
+    default ProgressTracker progressTracker() {
+        return ProgressTracker.NULL_TRACKER;
+    }
+
+    static KmeansContext empty() {
+        return ImmutableKmeansContext.builder().build();
     }
 }

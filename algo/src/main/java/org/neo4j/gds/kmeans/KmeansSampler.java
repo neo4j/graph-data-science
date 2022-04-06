@@ -17,29 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.clustering;
+package org.neo4j.gds.kmeans;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
-import java.util.concurrent.ExecutorService;
+import java.util.List;
+import java.util.SplittableRandom;
 
-@ValueClass
-public interface KmeansContext {
-
-    @Value.Default
-    default ExecutorService executor() {
-        return Pools.DEFAULT;
-    }
-
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    static KmeansContext empty() {
-        return ImmutableKmeansContext.builder().build();
-    }
+public interface KmeansSampler {
+    public List<Long> sampleClusters(
+        SplittableRandom splittableRandom,
+        HugeObjectArray<double[]> nodeProperties,
+        long nodeCount,
+        int Κ
+    );
 }
