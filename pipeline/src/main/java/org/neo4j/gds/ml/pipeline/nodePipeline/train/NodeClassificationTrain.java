@@ -35,16 +35,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
@@ -62,7 +61,6 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -524,34 +522,4 @@ public final class NodeClassificationTrain {
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
     }
 
-    private static class ModelStatsBuilder {
-        private final Map<Metric, Double> min;
-        private final Map<Metric, Double> max;
-        private final Map<Metric, Double> sum;
-        private final TrainerConfig modelParams;
-        private final int numberOfSplits;
-
-        ModelStatsBuilder(TrainerConfig modelParams, int numberOfSplits) {
-            this.modelParams = modelParams;
-            this.numberOfSplits = numberOfSplits;
-            this.min = new HashMap<>();
-            this.max = new HashMap<>();
-            this.sum = new HashMap<>();
-        }
-
-        void update(Metric metric, double value) {
-            min.merge(metric, value, Math::min);
-            max.merge(metric, value, Math::max);
-            sum.merge(metric, value, Double::sum);
-        }
-
-        ModelStats build(Metric metric) {
-            return ImmutableModelStats.of(
-                modelParams,
-                sum.get(metric) / numberOfSplits,
-                min.get(metric),
-                max.get(metric)
-            );
-        }
-    }
 }
