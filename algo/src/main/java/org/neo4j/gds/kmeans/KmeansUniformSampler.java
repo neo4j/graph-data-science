@@ -32,10 +32,10 @@ public class KmeansUniformSampler implements KmeansSampler {
     @Override
     public List<Long> sampleClusters(
         SplittableRandom splittableRandom,
-        HugeObjectArray<double[]> nodeProperties, long nodeCount, int K
+        HugeObjectArray<double[]> nodeProperties, long nodeCount, int k
     ) {
         HashSet<Long> sampled = new HashSet<>();
-        while (sampled.size() < K) {
+        while (sampled.size() < k) {
             long nodeId = splittableRandom.nextLong(nodeCount);
             if (!sampled.contains(nodeId)) {
                 sampled.add(nodeId);

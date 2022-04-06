@@ -62,7 +62,7 @@ class KmeansTest {
             .nodeWeightProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
-            .K(2)
+            .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
@@ -81,7 +81,7 @@ class KmeansTest {
             .nodeWeightProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
-            .K(2)
+            .k(2)
             .maxIterations(1)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
@@ -99,7 +99,7 @@ class KmeansTest {
             .nodeWeightProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L) //init clusters 0.2 and 3.8
-            .K(2)
+            .k(2)
             .maxIterations(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();

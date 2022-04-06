@@ -29,6 +29,6 @@ public interface KmeansSampler {
         SplittableRandom splittableRandom,
         HugeObjectArray<double[]> nodeProperties,
         long nodeCount,
-        int Κ
+        int k
     );
 }

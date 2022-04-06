@@ -42,7 +42,7 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Sing
 
     @Value.Default
     @Configuration.IntegerRange(min = 1)
-    default int K() {
+    default int k() {
         return 10;
     }
 }

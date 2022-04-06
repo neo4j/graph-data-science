@@ -39,7 +39,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
 
     private final HugeLongArray inCluster;
     private final Graph graph;
-    private final int K;
+    private final int k;
     private final int concurrency;
     private final int maxIterations;
     private final KmeansContext context;
@@ -59,7 +59,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         return new Kmeans(
             context.progressTracker(),
             graph,
-            config.K(),
+            config.k(),
             config.concurrency(),
             config.maxIterations(),
             context,
@@ -71,7 +71,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     Kmeans(
         ProgressTracker progressTracker,
         Graph graph,
-        int K,
+        int k,
         int concurrency,
         int maxIterations,
         KmeansContext context,
@@ -80,7 +80,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.K = K;
+        this.k = k;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
         this.context = context;
@@ -92,17 +92,16 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     @Override
     public HugeLongArray compute() {
         int numberOfDimensions = nodeProperties.get(0).length;
-        if (K > graph.nodeCount()) {
-            // Every node in it's own community. Warn and return early.
+        if (k > graph.nodeCount()) {
+            // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             inCluster.setAll(v -> v);
             return inCluster;
         }
         long nodeCount = graph.nodeCount();
-        double[][] clusterCentre = new double[K][numberOfDimensions];
+        double[][] clusterCentre = new double[k][numberOfDimensions];
         inCluster.setAll(v -> UNASSIGNED);
 
-        int finalK = K;
         var kmeansThreads = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -110,7 +109,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                 clusterCentre,
                 nodeProperties,
                 inCluster,
-                finalK,
+                k,
                 numberOfDimensions,
                 partition,
                 progressTracker
@@ -124,7 +123,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         //Initialization do initial centre computation and assignment
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
-        List<Long> initialCentreIds = sampler.sampleClusters(splittableRandom, nodeProperties, nodeCount, K);
+        List<Long> initialCentreIds = sampler.sampleClusters(splittableRandom, nodeProperties, nodeCount, k);
         assignCentres(clusterCentre, initialCentreIds, numberOfDimensions);
         //
         for (int iteration = 0; iteration < maxIterations; ++iteration) {
@@ -144,16 +143,16 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     }
 
     private void recomputeCenters(double[][] clusterCentre, List<KmeansThread> kmeansThreads) {
-        int K = clusterCentre.length;
+        int k = clusterCentre.length;
         int numberOfDimensions = clusterCentre[0].length;
-        long[] nodesInCluster = new long[K];
-        for (int centreId = 0; centreId < K; ++centreId) {
+        long[] nodesInCluster = new long[k];
+        for (int centreId = 0; centreId < k; ++centreId) {
             for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
                 clusterCentre[centreId][dimension] = 0.0;
             }
         }
         for (KmeansThread thread : kmeansThreads) {
-            for (int centreId = 0; centreId < K; ++centreId) {
+            for (int centreId = 0; centreId < k; ++centreId) {
                 var centreContribution = thread.getCentreContribution(centreId);
                 nodesInCluster[centreId] += thread.getNumAssignedAtCentre(centreId);
                 for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
@@ -161,7 +160,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                 }
             }
         }
-        for (int centreId = 0; centreId < K; ++centreId) {
+        for (int centreId = 0; centreId < k; ++centreId) {
             for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
                 clusterCentre[centreId][dimension] /= (double) nodesInCluster[centreId];
             }
@@ -200,14 +199,14 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         private long[] numAssignedAtCentre;
         private double[][] clusterCentre;
         private long swaps;
-        private int K;
+        private int k;
         private int numberOfDimensions;
 
         public KmeansThread(
             double[][] clusterCentre,
             HugeObjectArray<double[]> nodeProperties,
             HugeLongArray inCluster,
-            int K,
+            int k,
             int numberOfDimensions,
             Partition partition,
             ProgressTracker progressTracker
@@ -215,9 +214,9 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.clusterCentre = clusterCentre;
-            this.centreSumAtDimension = new double[K][numberOfDimensions];
-            this.numAssignedAtCentre = new long[K];
-            this.K = K;
+            this.centreSumAtDimension = new double[k][numberOfDimensions];
+            this.numAssignedAtCentre = new long[k];
+            this.k = k;
             this.numberOfDimensions = numberOfDimensions;
             this.nodeProperties = nodeProperties;
             this.inCluster = inCluster;
@@ -244,7 +243,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             var startNode = partition.startNode();
             long endNode = startNode + partition.nodeCount();
             swaps = 0;
-            for (int centreId = 0; centreId < K; ++centreId) {
+            for (int centreId = 0; centreId < k; ++centreId) {
                 numAssignedAtCentre[centreId] = 0;
                 for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
                     centreSumAtDimension[centreId][dimension] = 0.0;
@@ -254,7 +253,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                 int bestPosition = 0;
                 var nodePropertyArray = nodeProperties.get(nodeId);
                 double smallestDistance = euclidean(nodePropertyArray, clusterCentre[0]);
-                for (int centreId = 1; centreId < K; ++centreId) {
+                for (int centreId = 1; centreId < k; ++centreId) {
                     double tempDistance = euclidean(nodePropertyArray, clusterCentre[centreId]);
                     if (tempDistance < smallestDistance) {
                         smallestDistance = tempDistance;
