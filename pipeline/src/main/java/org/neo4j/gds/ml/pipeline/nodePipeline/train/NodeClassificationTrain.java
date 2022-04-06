@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -524,39 +522,6 @@ public final class NodeClassificationTrain {
         );
 
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
-    }
-
-    @ValueClass
-    public interface ModelSelectResult {
-        TrainerConfig bestParameters();
-
-        Map<Metric, List<ModelStats>> trainStats();
-
-        Map<Metric, List<ModelStats>> validationStats();
-
-        static ModelSelectResult of(
-            TrainerConfig bestConfig,
-            StatsMap trainStats,
-            StatsMap validationStats
-        ) {
-            return ImmutableModelSelectResult.of(bestConfig, trainStats.getMap(), validationStats.getMap());
-        }
-
-        @Value.Derived
-        default Map<String, Object> toMap() {
-            Function<Map<Metric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
-                stats.entrySet().stream().collect(Collectors.toMap(
-                    entry -> entry.getKey().name(),
-                    value -> value.getValue().stream().map(ModelStats::toMap)
-                ));
-
-            return Map.of(
-                "bestParameters", bestParameters().toMap(),
-                "trainStats", statsConverter.apply(trainStats()),
-                "validationStats", statsConverter.apply(validationStats())
-            );
-        }
-
     }
 
     private static class ModelStatsBuilder {

@@ -26,5 +26,5 @@ import org.neo4j.gds.ml.models.Classifier;
 @ValueClass
 public interface NodeClassificationTrainResult {
     Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
-    NodeClassificationTrain.ModelSelectResult modelSelectionStatistics();
+    ModelSelectResult modelSelectionStatistics();
 }
