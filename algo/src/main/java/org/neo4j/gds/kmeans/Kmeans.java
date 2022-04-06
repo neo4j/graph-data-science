@@ -36,13 +36,17 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 
 public class Kmeans extends Algorithm<HugeLongArray> {
+
     private final HugeLongArray inCluster;
     private final Graph graph;
-    private final KmeansBaseConfig config;
+    private final int K;
+    private final int concurrency;
+    private final int maxIterations;
     private final KmeansContext context;
     private final SplittableRandom splittableRandom;
     private final HugeObjectArray<double[]> nodeProperties;
-    public static final long UNASSIGNED = -1;
+
+    private static final long UNASSIGNED = -1;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeWeightProperty();
@@ -55,7 +59,9 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         return new Kmeans(
             context.progressTracker(),
             graph,
-            config,
+            config.K(),
+            config.concurrency(),
+            config.maxIterations(),
             context,
             nodeProperties,
             getSplittableRandom(config.randomSeed())
@@ -65,14 +71,18 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     Kmeans(
         ProgressTracker progressTracker,
         Graph graph,
-        KmeansBaseConfig config,
+        int K,
+        int concurrency,
+        int maxIterations,
         KmeansContext context,
         HugeObjectArray<double[]> nodeProperties,
         SplittableRandom splittableRandom
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.K = K;
+        this.concurrency = concurrency;
+        this.maxIterations = maxIterations;
         this.context = context;
         this.splittableRandom = splittableRandom;
         this.inCluster = HugeLongArray.newArray(graph.nodeCount());
@@ -82,16 +92,13 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     @Override
     public HugeLongArray compute() {
         int numberOfDimensions = nodeProperties.get(0).length;
-        int maxIterations = config.maxIterations();
-        int K = config.K();
         if (K > graph.nodeCount()) {
-            K = (int) graph.nodeCount();
+            // Every node in it's own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             inCluster.setAll(v -> v);
             return inCluster;
         }
         long nodeCount = graph.nodeCount();
-        int concurrency = config.concurrency();
         double[][] clusterCentre = new double[K][numberOfDimensions];
         inCluster.setAll(v -> UNASSIGNED);
 
