@@ -193,16 +193,17 @@ public class Kmeans extends Algorithm<HugeLongArray> {
 
         private final ProgressTracker progressTracker;
         private final Partition partition;
-        private double[][] centreSumAtDimension;
-        private HugeObjectArray<double[]> nodeProperties;
-        private HugeLongArray inCluster;
-        private long[] numAssignedAtCentre;
-        private double[][] clusterCentre;
-        private long swaps;
-        private int k;
-        private int numberOfDimensions;
+        private final double[][] centreSumAtDimension;
+        private final HugeObjectArray<double[]> nodeProperties;
+        private final HugeLongArray inCluster;
+        private final long[] numAssignedAtCentre;
+        private final double[][] clusterCentre;
+        private final int k;
+        private final int numberOfDimensions;
 
-        public KmeansThread(
+        private long swaps;
+
+        KmeansThread(
             double[][] clusterCentre,
             HugeObjectArray<double[]> nodeProperties,
             HugeLongArray inCluster,
@@ -222,15 +223,15 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             this.inCluster = inCluster;
         }
 
-        public double[] getCentreContribution(int ith) {
+        double[] getCentreContribution(int ith) {
             return centreSumAtDimension[ith];
         }
 
-        public long getNumAssignedAtCentre(int ith) {
+        long getNumAssignedAtCentre(int ith) {
             return numAssignedAtCentre[ith];
         }
 
-        public long getSwaps() {
+        long getSwaps() {
             return swaps;
         }
 
