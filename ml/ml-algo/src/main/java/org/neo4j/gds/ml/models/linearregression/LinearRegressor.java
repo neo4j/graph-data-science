@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.models.linearregression;
 
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.Regressor;
 
 class LinearRegressor implements Regressor {
@@ -29,9 +28,8 @@ class LinearRegressor implements Regressor {
     LinearRegressor(LinearRegressionData data) {this.data = data;}
 
     @Override
-    public double predict(long id, Features allFeatures) {
+    public double predict(double[] features) {
         Vector weights = this.data.weights().data();
-        double[] features = allFeatures.get(id);
 
         double prediction = 0;
 

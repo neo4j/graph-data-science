@@ -45,7 +45,7 @@ class LinearRegressorTest {
 
         assertThat(regressor.data()).isSameAs(modelData);
 
-        assertThat(regressor.predict(0, features)).isEqualTo(12 + 2.5);
-        assertThat(regressor.predict(1, features)).isEqualTo(30 + 2.5);
+        assertThat(regressor.predict(features.get(0))).isEqualTo(12 + 2.5);
+        assertThat(regressor.predict(features.get(1))).isEqualTo(30 + 2.5);
     }
 }

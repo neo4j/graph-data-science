@@ -20,7 +20,8 @@
 package org.neo4j.gds.ml.models;
 
 public interface Regressor {
-    double predict(long id, Features features);
+    // FIXME directly take double[]
+    double predict(double[] features);
 
     RegressorData data();
 
