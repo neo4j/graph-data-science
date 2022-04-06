@@ -1,0 +1,28 @@
+[[ml-auto-tuning]]
+= Auto-tuning
+
+[abstract]
+--
+This section describes auto-tuning for hyper-parameters in training pipelines in the Neo4j Graph Data Science library.
+--
+
+<<nodeclassification-pipelines, Node Classification Pipelines>> and <<linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods which have multiple configurable parameters that affect training outcomes.
+To obtain models with high quality, setting good values for the hyper-parameters can have a large impact.
+Auto-tuning is generally preferable over manual search for such values, as that is a time-consuming and hard thing to do.
+
+It is possible to combine manual and automatic tuning when <<nodeclassification-pipelines-adding-model-candidates, adding a model to Node Classification>> or <<linkprediction-adding-model-candidates, to Link Prediction>>.
+For the manual part, configurations with fixed values for all hyper-parameters are added to the pipeline.
+To fully leverage automatic search, hyper-parameters can be specified to lie in ranges instead of having fixed values.
+
+When training a pipeline auto-tuning is always applied.
+The configurations with only fixed values are evaluated first, and subsequently the remaining configurations are repeatedly selected and evaluated.
+For configurations that have at least one range, fixed values from the ranges are selected before the evaluation.
+Each such evaluation is called a trial.
+In the case at least one range is present, the number of trials is the value of the `maxTrials` configuration parameter of <<nodeclassification-pipelines-configure-auto-tuning,`gds.alpha.pipeline.nodeClassification.configureAutoTuning`>>, and <<linkprediction-configure-auto-tuning,`gds.alpha.pipeline.linkPrediction.configureAutoTuning`>> respectively.
+If no range is present in any model configuration, all of the configurations are tried, regardless of `maxTrials`.
+Once the all the trials have been completed, the best model candidate configuration is selected as the winner.
+
+For details on specific hyper-parameters, please see the supported <<ml-training-methods, training methods>>.
+
+
+

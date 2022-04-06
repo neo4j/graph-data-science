@@ -2,11 +2,12 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                | Type    | Default         | Optional | Description
-| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
-| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
-| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
-| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
-| learningRate        | Float   | 0.001           | yes      | The learning rate determines the step size at each epoch while moving in the direction dictated by the Adam optimizer for minimizing the loss.
-| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
-| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
+| penalty             | Float  footnote:range[A numerical type can be replaced with a map of the form `{range: [minValue, maxValue]}` which is used by auto-tuning.]
+                                | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
+| batchSize           | Integer footnote:range[]  | 100             | yes      | Number of nodes per batch.
+| minEpochs           | Integer footnote:range[]  | 1               | yes      | Minimum number of training epochs.
+| maxEpochs           | Integer footnote:range[]  | 100             | yes      | Maximum number of training epochs.
+| learningRate        | Float   footnote:range[]  | 0.001           | yes      | The learning rate determines the step size at each epoch while moving in the direction dictated by the Adam optimizer for minimizing the loss.
+| patience            | Integer footnote:range[]  | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance           | Float   footnote:range[]  | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
 |===

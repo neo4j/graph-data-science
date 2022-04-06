@@ -329,6 +329,8 @@
 
         <d:tocentry linkend="ml-training-methods"><?dbhtml filename="machine-learning/training-methods/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="ml-auto-tuning"><?dbhtml filename="machine-learning/auto-tuning/index.html"?>
+        </d:tocentry>
     </d:tocentry>
 
     <d:tocentry linkend="end-to-end-examples">
