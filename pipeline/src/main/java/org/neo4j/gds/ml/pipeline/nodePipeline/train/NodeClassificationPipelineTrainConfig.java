@@ -25,10 +25,13 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @ValueClass
 @Configuration
@@ -44,6 +47,14 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
     List<MetricSpecification> metrics();
 
     String pipeline();
+
+    @Configuration.Ignore
+    default List<Metric> metrics(Collection<Long> classes) {
+        return metrics()
+            .stream()
+            .flatMap(spec -> spec.createMetrics(classes))
+            .collect(Collectors.toList());
+    }
 
     static NodeClassificationPipelineTrainConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPipelineTrainConfigImpl(username, config);

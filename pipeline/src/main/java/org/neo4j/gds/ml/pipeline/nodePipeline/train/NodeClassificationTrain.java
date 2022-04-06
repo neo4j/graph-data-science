@@ -282,7 +282,7 @@ public final class NodeClassificationTrain {
         var targets = targetsAndClasses.getOne();
         var classIdMap = LocalIdMap.ofSorted(targets);
         var classCounts = targetsAndClasses.getTwo();
-        var metrics = createMetrics(config, classCounts);
+        var metrics = config.metrics(classCounts.keys());
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
@@ -323,16 +323,6 @@ public final class NodeClassificationTrain {
             classCounts.add(targetNodeProperty.longValue(nodeId));
         }
         return Tuples.pair(targets, classCounts);
-    }
-
-    private static List<Metric> createMetrics(
-        NodeClassificationPipelineTrainConfig config,
-        Multiset<Long> globalClassCounts
-    ) {
-        return config.metrics()
-            .stream()
-            .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
-            .collect(Collectors.toList());
     }
 
     private NodeClassificationTrain(
