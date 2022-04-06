@@ -60,7 +60,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
 
         // The actual depth of the produced tree is capped by the number of samples to populate the leaves.
-        long normalizedMaxDepth = Math.min(maxDepth, numberOfTrainingSamples - minSplitSize + 2);
+        long normalizedMaxDepth = Math.min(maxDepth, Math.max(1, numberOfTrainingSamples - minSplitSize + 2));
         // Stack implies DFS, so will at most have 2 * normalizedMaxDepth entries for a binary tree.
         long maxItemsOnStack = 2L * normalizedMaxDepth;
         var maxStackSize = MemoryRange.of(sizeOfInstance(ArrayDeque.class))
