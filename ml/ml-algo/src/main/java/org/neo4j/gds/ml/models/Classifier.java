@@ -30,7 +30,7 @@ public interface Classifier {
 
     LocalIdMap classIdMap();
 
-    double[] predictProbabilities(long id, Features features);
+    double[] predictProbabilities(double[] features);
 
     Matrix predictProbabilities(Batch batch, Features features);
 

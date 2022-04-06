@@ -29,7 +29,7 @@ public abstract class TestClassifier implements Classifier {
         var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
         var offset = 0;
         for (long id : batch.nodeIds()) {
-            double[] predictionsForNode = predictProbabilities(id, features);
+            double[] predictionsForNode = predictProbabilities(features.get(id));
             predictedProbabilities.setRow(offset++, predictionsForNode);
         }
         return predictedProbabilities;

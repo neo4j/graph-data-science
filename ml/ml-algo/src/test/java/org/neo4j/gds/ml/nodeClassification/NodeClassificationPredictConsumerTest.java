@@ -21,16 +21,15 @@ package org.neo4j.gds.ml.nodeClassification;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestClassifier;
-import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
-import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -52,8 +51,8 @@ class NodeClassificationPredictConsumerTest {
             }
 
             @Override
-            public double[] predictProbabilities(long id, Features features) {
-                if (id == 0) {
+            public double[] predictProbabilities(double[] features) {
+                if (Double.compare(features[0], 0) == 0) {
                     return new double[]{0.2, 0.8};
                 } else {
                     return new double[]{0.7, 0.3};
@@ -68,7 +67,7 @@ class NodeClassificationPredictConsumerTest {
         var probabilities = HugeObjectArray.newArray(double[].class, 2);
         var predictedClasses = HugeLongArray.newArray(2);
         var predictConsumer = new NodeClassificationPredictConsumer(
-            new TestFeatures(new double[0][0]),
+            FeaturesFactory.wrap(List.of(new double[] {0.0}, new double[] {1.0})),
             BatchTransformer.IDENTITY,
             classifier,
             probabilities,
@@ -101,8 +100,8 @@ class NodeClassificationPredictConsumerTest {
 
         Features features = FeaturesFactory.wrap(List.of(new double[]{42.0}, new double[]{1337.0}));
 
-        assertThat(classifier.predictProbabilities(0, features)).containsExactly(0, 1);
-        assertThat(classifier.predictProbabilities(1, features)).containsExactly(0, 1);
+        assertThat(classifier.predictProbabilities(features.get(0))).containsExactly(0, 1);
+        assertThat(classifier.predictProbabilities(features.get(1))).containsExactly(0, 1);
 
         var predictedClasses = HugeLongArray.newArray(features.size());
 

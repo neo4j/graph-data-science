@@ -25,15 +25,16 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
-import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -60,10 +61,15 @@ class ClassificationMetricComputerTest {
         var idMap = identityMapOf(1, 0, 3);
         var targets = HugeLongArray.of(firstTarget, 0, 3, 0);
 
+        Features features = FeaturesFactory.wrap(Stream
+            .of(0, 1, 2, 3)
+            .map(i -> new double[]{i})
+            .collect(Collectors.toList()));
+
         var classificationMetricComputer = new ClassificationMetricComputer(
             List.of(F1_WEIGHTED),
             multiSet,
-            TestFeatures.singleConstant(1),
+            features,
             targets,
             1,
             ProgressTracker.NULL_TRACKER,
@@ -77,8 +83,8 @@ class ClassificationMetricComputerTest {
             }
 
             @Override
-            public double[] predictProbabilities(long id, Features features) {
-                switch ((int) id) {
+            public double[] predictProbabilities(double[] features) {
+                switch ((int) features[0]) {
                     case 0:
                         return new double[]{0.8, 0.1, 0.1};
                     case 1:

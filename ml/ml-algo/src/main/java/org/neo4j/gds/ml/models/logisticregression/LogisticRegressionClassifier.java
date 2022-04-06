@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
@@ -53,15 +52,14 @@ public final class LogisticRegressionClassifier implements Classifier {
     }
 
     interface LogisticRegressionPredictionStrategy {
-        double[] predictProbabilities(long id, Features features, LogisticRegressionClassifier classifier);
+        double[] predictProbabilities(double[] features, LogisticRegressionClassifier classifier);
 
         static LogisticRegressionPredictionStrategy binary() {
-            return (id, features, classifier) -> {
+            return (features, classifier) -> {
                 var affinity = 0D;
-                double[] featuresForNode = features.get(id);
                 var weights = classifier.data().weights().data();
-                for (int i = 0; i < features.featureDimension(); i++) {
-                    affinity += weights.dataAt(i) * featuresForNode[i];
+                for (int i = 0; i < features.length; i++) {
+                    affinity += weights.dataAt(i) * features[i];
                 }
                 var sigmoid = Sigmoid.sigmoid(affinity + classifier.data().bias().data().dataAt(0));
 
@@ -70,10 +68,11 @@ public final class LogisticRegressionClassifier implements Classifier {
         }
 
         static LogisticRegressionPredictionStrategy multiClass() {
-            return (id, features, classifier) -> {
-                var batch = new SingletonBatch(id);
+            return (features, classifier) -> {
                 ComputationContext ctx = new ComputationContext();
-                return ctx.forward(classifier.predictionsVariable(batchFeatureMatrix(batch, features))).data();
+                Constant<Matrix> featuresVariable = Constant.matrix(features, 1, features.length);
+                Variable<Matrix> predictionsVariable = classifier.predictionsVariable(featuresVariable);
+                return ctx.forward(predictionsVariable).data();
             };
         }
     }
@@ -139,8 +138,8 @@ public final class LogisticRegressionClassifier implements Classifier {
     }
 
     @Override
-    public double[] predictProbabilities(long id, Features features) {
-        return predictionStrategy.predictProbabilities(id, features, this);
+    public double[] predictProbabilities(double[] features) {
+        return predictionStrategy.predictProbabilities(features, this);
     }
 
     @Override

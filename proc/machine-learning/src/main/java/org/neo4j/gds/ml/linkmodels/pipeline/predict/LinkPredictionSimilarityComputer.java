@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
@@ -46,7 +45,7 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
     @Override
     public double similarity(long sourceId, long targetId) {
         var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-        return classifier.predictProbabilities(0L, FeaturesFactory.wrap(features))[positiveClassLocalId];
+        return classifier.predictProbabilities(features)[positiveClassLocalId];
     }
 
     static final class LinkFilter implements NeighborFilter {
