@@ -434,7 +434,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .builder()
             .addDecisionTree(new DecisionTreePredict<>(root))
             .featureDimension(3)
-            .classIdMap(LocalIdMap.ofSorted(HugeLongArray.newArray(10)))
+            .classIdMap(LocalIdMap.ofSorted(List.of(0L)))
             .build();
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(

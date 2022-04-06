@@ -24,14 +24,13 @@ import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class LocalIdMap {
@@ -57,14 +56,9 @@ public class LocalIdMap {
         return idMap;
     }
 
-    public static LocalIdMap ofSorted(HugeLongArray targets) {
-        var classSet = new TreeSet<Long>();
-        for (long i = 0; i < targets.size(); i++) {
-            classSet.add(targets.get(i));
-        }
-
+    public static LocalIdMap ofSorted(Collection<Long> classes) {
         var classIdMap = new LocalIdMap();
-        classSet.forEach(classIdMap::toMapped);
+        classes.stream().sorted().forEach(classIdMap::toMapped);
 
         return classIdMap;
     }

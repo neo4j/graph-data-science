@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -77,6 +74,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.train.LabelsAndClassCountsExtractor.*;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
@@ -278,10 +276,10 @@ public final class NodeClassificationTrain {
         ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount());
-        var targets = targetsAndClasses.getOne();
-        var classIdMap = LocalIdMap.ofSorted(targets);
-        var classCounts = targetsAndClasses.getTwo();
+        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
+        Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
+        HugeLongArray labels = labelsAndClassCounts.labels();
+        var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
@@ -296,33 +294,32 @@ public final class NodeClassificationTrain {
             features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
         }
 
+        var terminationFlag = TerminationFlag.RUNNING_TRUE;
+        var metricComputer = new ClassificationMetricComputer(
+            metrics,
+            classCounts,
+            features,
+            labels,
+            config.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+
         return new NodeClassificationTrain(
             graph,
             pipeline,
             config,
             features,
-            targets,
+            labels,
             classIdMap,
-            classCounts,
             metrics,
             nodeIds,
+            metricComputer,
             trainStats,
             validationStats,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
-    }
-
-    private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(
-        NodeProperties targetNodeProperty,
-        long nodeCount
-    ) {
-        var classCounts = new Multiset<Long>();
-        var targets = HugeLongArray.newArray(nodeCount);
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            targets.set(nodeId, targetNodeProperty.longValue(nodeId));
-            classCounts.add(targetNodeProperty.longValue(nodeId));
-        }
-        return Tuples.pair(targets, classCounts);
     }
 
     private NodeClassificationTrain(
@@ -330,36 +327,29 @@ public final class NodeClassificationTrain {
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         Features features,
-        HugeLongArray targets,
+        HugeLongArray labels,
         LocalIdMap classIdMap,
-        Multiset<Long> classCounts,
         List<Metric> metrics,
         HugeLongArray nodeIds,
+        ClassificationMetricComputer metricComputer,
         StatsMap trainStats,
         StatsMap validationStats,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.progressTracker = progressTracker;
-        this.terminationFlag = TerminationFlag.RUNNING_TRUE;
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.pipeline = pipeline;
         this.config = config;
         this.features = features;
-        this.targets = targets;
+        this.targets = labels;
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
         this.validationStats = validationStats;
-        this.metricComputer = new ClassificationMetricComputer(
-            metrics,
-            classCounts,
-            features,
-            targets,
-            config.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
+        this.metricComputer = metricComputer;
     }
 
     public NodeClassificationTrainResult compute() {
