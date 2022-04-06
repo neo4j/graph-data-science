@@ -70,7 +70,7 @@ public final class TunableTrainerConfig {
             method
         );
         // triggers validation for combinations of end endpoints of each range.
-        tunableTrainerConfig.materializeConcreteCube().forEach(unused -> {});
+        tunableTrainerConfig.streamCornerCaseConfigs().forEach(unused -> {});
         return tunableTrainerConfig;
     }
 
@@ -96,7 +96,7 @@ public final class TunableTrainerConfig {
         return trainingMethod().createConfig(materializedMap);
     }
 
-    public Stream<TrainerConfig> materializeConcreteCube() {
+    public Stream<TrainerConfig> streamCornerCaseConfigs() {
         var rangeParameters = new HashMap<String, NumericalRangeParameter<?>>();
 
         rangeParameters.putAll(doubleRanges);

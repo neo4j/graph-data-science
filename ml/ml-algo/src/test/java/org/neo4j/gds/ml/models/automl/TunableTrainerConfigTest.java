@@ -144,10 +144,10 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void shouldMaterializeCubeWhenConcrete() {
+    void shouldMaterializeCornerCasesWhenConcrete() {
         var userInput = Map.<String, Object>of();
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube().collect(Collectors.toList());
+        var trainerConfigs = config.streamCornerCaseConfigs().collect(Collectors.toList());
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
@@ -155,7 +155,7 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void shouldMaterializeRFCube() {
+    void shouldMaterializeRFCornerCases() {
         var userInput = Map.of(
             "maxDepth", 5L,
             // Easier to account for EPSILON here than in all expectations below
@@ -163,8 +163,7 @@ class TunableTrainerConfigTest {
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
         var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
-        var trainerConfigs = config.materializeConcreteCube().collect(Collectors.toList());
-        assertThat(trainerConfigs)
+        assertThat(config.streamCornerCaseConfigs())
             .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
                 RandomForestTrainConfigImpl

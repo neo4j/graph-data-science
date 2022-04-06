@@ -198,7 +198,7 @@ public final class NodeClassificationTrain {
             .values()
             .stream()
             .flatMap(List::stream)
-            .flatMap(TunableTrainerConfig::materializeConcreteCube)
+            .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
             .map(config -> {
                 var training = TrainerFactory.memoryEstimation(
                     config,

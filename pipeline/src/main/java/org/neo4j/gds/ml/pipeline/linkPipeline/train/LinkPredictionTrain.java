@@ -439,7 +439,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 .values()
                 .stream()
                 .flatMap(List::stream)
-                .flatMap(TunableTrainerConfig::materializeConcreteCube)
+                .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
                 .map(trainerConfig -> MemoryEstimations.builder("Train and evaluate model")
                     .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
