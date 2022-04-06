@@ -98,7 +98,7 @@ public class RandomSearch implements HyperParameterOptimizer {
 
     private double sampleDouble(DoubleRangeParameter range) {
         if (range.logScale()) {
-            var min = Math.log(range.min());
+            var min = range.min() < 1e-20 ? Math.log(1e-20) : Math.log(range.min());
             var max = Math.log(range.max());
             return Math.exp(random.nextDouble(min, max));
         } else {

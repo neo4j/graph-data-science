@@ -61,17 +61,20 @@ final class ParameterParser {
                     incorrectMaps.add(key);
                     return;
                 }
-                if (range.get(0) instanceof Double && range.get(1) instanceof Double) {
+                var minObject = range.get(0);
+                var maxObject = range.get(1);
+                if (!typeIsSupported(minObject) || !typeIsSupported(maxObject)) {
+                    incorrectMaps.add(key);
+                    return;
+                }
+                var min = (Number) minObject;
+                var max = (Number) maxObject;
+                if (isFloatOrDouble(min) || isFloatOrDouble(max)) {
                     var logScale = LOG_SCALE_PARAMETERS.contains(key);
-                    doubleRanges.put(key, DoubleRangeParameter.of((Double) range.get(0), (Double) range.get(1), logScale));
+                    doubleRanges.put(key, DoubleRangeParameter.of(min.doubleValue(), max.doubleValue(), logScale));
                     return;
                 }
-                if ((range.get(0) instanceof Integer && range.get(1) instanceof Integer) ||
-                    (range.get(0) instanceof Long && range.get(1) instanceof Long)) {
-                    integerRanges.put(key, IntegerRangeParameter.of(toInt(range.get(0)), toInt(range.get(1))));
-                    return;
-                }
-                incorrectMaps.add(key);
+                integerRanges.put(key, IntegerRangeParameter.of(min.intValue(), max.intValue()));
             }
         });
         if (!incorrectMaps.isEmpty()) {
@@ -85,6 +88,14 @@ final class ParameterParser {
             Map.copyOf(doubleRanges),
             Map.copyOf(integerRanges)
         );
+    }
+
+    private static boolean typeIsSupported(Object value) {
+        return value instanceof Double || value instanceof Float || value instanceof Integer || value instanceof Long;
+    }
+
+    private static boolean isFloatOrDouble(Object value) {
+        return value instanceof Double || value instanceof Float;
     }
 
     static Map<String, ConcreteParameter<?>> parseConcreteParameters(Map<String, Object> input) {
@@ -107,11 +118,6 @@ final class ParameterParser {
             return DoubleParameter.of((Double) value);
         }
         throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric or of the form {range: {min, max}}.", key));
-    }
-
-    private static int toInt(Object wholeNumber) {
-        if (wholeNumber instanceof Integer) return (int) wholeNumber;
-        return Math.toIntExact((Long) wholeNumber);
     }
 
     @ValueClass
