@@ -12,7 +12,7 @@ ext {
         'dev'           : properties.getOrDefault('neo4jVersionDev', '5.0.0-dev'),
     ]
 
-    neo4jDefault = neos.'4.3'
+    neo4jDefault = neos.'4.4'
 
     neo4j_minor = properties.getOrDefault('neo4jVersion', neos.'4.3').toString().split('\\.')[0..1].join('.')
 
