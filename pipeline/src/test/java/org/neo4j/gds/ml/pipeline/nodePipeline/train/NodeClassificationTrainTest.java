@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
@@ -117,14 +116,6 @@ class NodeClassificationTrainTest {
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, expectedWinner);
 
         // Should NOT be the winning model, so give it bad hyperparams.
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, RandomForestTrainConfigImpl.builder()
-            .minSplitSize(2)
-            .maxDepth(1)
-            .numberOfDecisionTrees(1)
-            .maxFeaturesRatio(0.1)
-            .build()
-        );
-
         pipeline.setTrainingParameterSpace(
             TrainingMethod.RandomForest,
             List.of(
