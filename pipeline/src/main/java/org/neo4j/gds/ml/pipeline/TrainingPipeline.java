@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -45,6 +44,8 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     protected Map<TrainingMethod, List<TunableTrainerConfig>> trainingParameterSpace;
     protected AutoTuningConfig autoTuningConfig;
 
+    private static final List<TrainingMethod> CLASSIFICATION_METHODS = List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest);
+
     public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
             .collect(Collectors.toMap(
@@ -61,7 +62,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.trainingParameterSpace = new EnumMap<>(TrainingMethod.class);
         this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;
 
-        Arrays.stream(TrainingMethod.values()).forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
+        CLASSIFICATION_METHODS.forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
     }
 
     @Override
