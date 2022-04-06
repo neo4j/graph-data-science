@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.models.linearregression;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
@@ -56,7 +56,10 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
         Batch batch, long trainSize
     ) {
         // FIXME implement actual implementation
-        return Constant.scalar(0D);
+        return new ElementSum(List.of(
+            modelData().weights(),
+            modelData().bias())
+        );
     }
 
     @Override

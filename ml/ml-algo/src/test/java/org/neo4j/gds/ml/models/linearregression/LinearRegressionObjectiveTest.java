@@ -53,7 +53,8 @@ class LinearRegressionObjectiveTest {
         );
 
         Variable<Scalar> loss = objective.loss(new SingletonBatch(1), 10);
-        double lossValue = loss.apply(new ComputationContext()).value();
+        ComputationContext ctx = new ComputationContext();
+        double lossValue = ctx.forward(loss).value();
 
         assertThat(lossValue).isCloseTo(0.0, Offset.offset(1e-10));
 
