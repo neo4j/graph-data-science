@@ -23,13 +23,14 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,18 +45,13 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     private final int maxIterations;
     private final KmeansContext context;
     private final SplittableRandom splittableRandom;
-    private final HugeObjectArray<double[]> nodeProperties;
+    private final NodeProperties nodeProperties;
 
     private static final long UNASSIGNED = -1;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeWeightProperty();
-        NodeProperties nodePropertiesAll = graph.nodeProperties(nodeWeightProperty);
-        HugeObjectArray<double[]> nodeProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount());
-        graph.forEachNode(nodeId -> {
-            nodeProperties.set(nodeId, nodePropertiesAll.doubleArrayValue(nodeId));
-            return true;
-        });
+        NodeProperties nodeProperties = graph.nodeProperties(nodeWeightProperty);
         return new Kmeans(
             context.progressTracker(),
             graph,
@@ -68,6 +64,21 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         );
     }
 
+    private static void validateNodeProperties(NodeProperties nodeProperties) {
+        var valueType = nodeProperties.valueType();
+        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY) {
+            return;
+        }
+        throw new IllegalArgumentException(
+            StringFormatting.formatWithLocale(
+                "Unsupported node property value type [%s]. Value type required: [%s] or [%s].",
+                valueType,
+                ValueType.DOUBLE_ARRAY,
+                ValueType.FLOAT_ARRAY
+            )
+        );
+    }
+
     Kmeans(
         ProgressTracker progressTracker,
         Graph graph,
@@ -75,7 +86,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         int concurrency,
         int maxIterations,
         KmeansContext context,
-        HugeObjectArray<double[]> nodeProperties,
+        NodeProperties nodeProperties,
         SplittableRandom splittableRandom
     ) {
         super(progressTracker);
@@ -86,12 +97,13 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         this.context = context;
         this.splittableRandom = splittableRandom;
         this.inCluster = HugeLongArray.newArray(graph.nodeCount());
+        validateNodeProperties(nodeProperties);
         this.nodeProperties = nodeProperties;
     }
 
     @Override
     public HugeLongArray compute() {
-        int numberOfDimensions = nodeProperties.get(0).length;
+        int numberOfDimensions = nodeProperties.doubleArrayValue(0).length;
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
@@ -181,7 +193,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     private void assignCentres(double[][] clusterCentre, List<Long> initialCentreIds, int numberOfDimensions) {
         int clusterUpdateId = 0;
         for (long centreId : initialCentreIds) {
-            var property = nodeProperties.get(centreId);
+            var property = nodeProperties.doubleArrayValue(centreId);
             for (int j = 0; j < numberOfDimensions; ++j) {
                 clusterCentre[clusterUpdateId][j] = property[j];
             }
@@ -194,7 +206,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         private final ProgressTracker progressTracker;
         private final Partition partition;
         private final double[][] centreSumAtDimension;
-        private final HugeObjectArray<double[]> nodeProperties;
+        private final NodeProperties nodeProperties;
         private final HugeLongArray inCluster;
         private final long[] numAssignedAtCentre;
         private final double[][] clusterCentre;
@@ -205,7 +217,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
 
         KmeansThread(
             double[][] clusterCentre,
-            HugeObjectArray<double[]> nodeProperties,
+            NodeProperties nodeProperties,
             HugeLongArray inCluster,
             int k,
             int numberOfDimensions,
@@ -252,7 +264,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             }
             for (long nodeId = startNode; nodeId < endNode; nodeId++) {
                 int bestPosition = 0;
-                var nodePropertyArray = nodeProperties.get(nodeId);
+                var nodePropertyArray = nodeProperties.doubleArrayValue(nodeId);
                 double smallestDistance = euclidean(nodePropertyArray, clusterCentre[0]);
                 for (int centreId = 1; centreId < k; ++centreId) {
                     double tempDistance = euclidean(nodePropertyArray, clusterCentre[centreId]);

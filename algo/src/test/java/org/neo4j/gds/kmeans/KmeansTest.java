@@ -20,14 +20,27 @@
 package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
+import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.gds.nodeproperties.LongTestProperties;
+
+import java.util.SplittableRandom;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
 class KmeansTest {
@@ -71,8 +84,6 @@ class KmeansTest {
         assertThat(result.get(0)).isEqualTo(result.get(1));
         assertThat(result.get(2)).isEqualTo(result.get(3));
         assertThat(result.get(0)).isNotEqualTo(result.get(2));
-
-
     }
 
     @Test
@@ -109,7 +120,48 @@ class KmeansTest {
 
         assertThat(result.get(1)).isEqualTo(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
         assertThat(result.get(0)).isNotEqualTo(result.get(1));
+    }
 
+    @Test
+    void shouldFailOnInvalidPropertyValueTypes() {
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var longProperties = new LongTestProperties(n -> n);
+        assertThatThrownBy(() -> new Kmeans(
+                ProgressTracker.NULL_TRACKER,
+                graph,
+                5,
+                4,
+                10,
+                kmeansContext,
+                longProperties,
+                new SplittableRandom()
+            ).compute()
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Unsupported node property value type [LONG]. Value type required: [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
+    }
 
+    @ParameterizedTest
+    @MethodSource("org.neo4j.gds.kmeans.KmeansTest#validNodeProperties")
+    void shouldAcceptValidPropertyValueTypes(NodeProperties nodeProperties) {
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        assertThatNoException()
+            .isThrownBy(() -> new Kmeans(
+                ProgressTracker.NULL_TRACKER,
+                graph,
+                5,
+                4,
+                10,
+                kmeansContext,
+                nodeProperties,
+                new SplittableRandom()
+            ).compute()
+        );
+    }
+
+    static Stream<Arguments> validNodeProperties() {
+        return Stream.of(
+            Arguments.of(new DoubleArrayTestProperties(__ -> new double[]{1.0D})),
+            Arguments.of(new FloatArrayTestProperties(__ -> new float[]{1.0F}))
+        );
     }
 }

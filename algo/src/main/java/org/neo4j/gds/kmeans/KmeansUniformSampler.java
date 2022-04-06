@@ -19,20 +19,21 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.NodeProperties;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.SplittableRandom;
 
-
 public class KmeansUniformSampler implements KmeansSampler {
 
     @Override
     public List<Long> sampleClusters(
         SplittableRandom splittableRandom,
-        HugeObjectArray<double[]> nodeProperties, long nodeCount, int k
+        NodeProperties nodeProperties,
+        long nodeCount,
+        int k
     ) {
         HashSet<Long> sampled = new HashSet<>();
         while (sampled.size() < k) {

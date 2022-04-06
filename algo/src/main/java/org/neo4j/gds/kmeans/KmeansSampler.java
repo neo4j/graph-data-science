@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.api.NodeProperties;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -27,7 +27,7 @@ import java.util.SplittableRandom;
 public interface KmeansSampler {
     public List<Long> sampleClusters(
         SplittableRandom splittableRandom,
-        HugeObjectArray<double[]> nodeProperties,
+        NodeProperties nodeProperties,
         long nodeCount,
         int k
     );
