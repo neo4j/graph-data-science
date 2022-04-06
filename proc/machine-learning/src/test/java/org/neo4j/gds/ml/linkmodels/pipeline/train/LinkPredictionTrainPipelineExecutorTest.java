@@ -58,6 +58,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
@@ -156,6 +157,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
         var config = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("model")
             .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
@@ -203,10 +205,18 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "no-property", "no-prop-2")));
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("other-no-property")));
 
+        LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfigImpl
+            .builder()
+            .username(getUsername())
+            .graphName(GRAPH_NAME)
+            .modelName("foo")
+            .pipeline("bar")
+            .build();
+
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var executor = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
-                LinkPredictionTrainConfigImpl.builder().graphName(GRAPH_NAME).modelName("foo").pipeline("bar").build(),
+                trainConfig,
                 caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
@@ -241,6 +251,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
         var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("foo")
             .graphName(GRAPH_NAME)
             .pipeline("bar")
@@ -284,6 +295,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
         var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("foo")
             .graphName(graphName)
             .pipeline("bar")
@@ -329,6 +341,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "degree")));
 
         var config = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("model")
             .graphName(GRAPH_NAME)
             .pipeline("DUMMY")
@@ -427,6 +440,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @MethodSource("estimationsForDiffNodeSteps")
     void estimateWithDifferentNodePropertySteps(String desc, List<NodePropertyStep> nodePropertySteps, MemoryRange expectedRange) {
         var config = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
@@ -454,6 +468,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     @Test
     void failEstimateOnEmptyParameterSpace() {
         var config = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")

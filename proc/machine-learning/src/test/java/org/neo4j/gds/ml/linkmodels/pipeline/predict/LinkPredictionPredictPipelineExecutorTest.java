@@ -296,6 +296,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 GraphSchema.empty(),
                 modelData,
                 LinkPredictionTrainConfigImpl.builder()
+                    .username(getUsername())
                     .modelName("model")
                     .pipeline("DUMMY")
                     .graphName(GRAPH_NAME)
