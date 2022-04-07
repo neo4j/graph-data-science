@@ -206,7 +206,7 @@ class TunableTrainerConfigTest {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo", "bar", "bat"));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+                        "where both min and max are numerical. Invalid parameters: [`maxDepth={bar=bat, range=foo}`]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -215,7 +215,7 @@ class TunableTrainerConfigTest {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo"));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+                        "where both min and max are numerical. Invalid parameters: [`maxDepth={range=foo}`]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -224,7 +224,7 @@ class TunableTrainerConfigTest {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of(1,2,3)));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+                        "where both min and max are numerical. Invalid parameters: [`maxDepth={range=[1, 2, 3]}`]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -233,7 +233,7 @@ class TunableTrainerConfigTest {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of("foo", "bar")));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                        "where both min and max are Float or Integer. Invalid keys: [`maxDepth`]")
+                        "where both min and max are numerical. Invalid parameters: [`maxDepth={range=[foo, bar]}`]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
