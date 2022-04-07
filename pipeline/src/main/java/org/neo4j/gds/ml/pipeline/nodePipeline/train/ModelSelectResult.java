@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.List;
@@ -41,10 +40,10 @@ public interface ModelSelectResult {
 
     static ModelSelectResult of(
         TrainerConfig bestConfig,
-        StatsMap trainStats,
-        StatsMap validationStats
+        Map<? extends Metric, List<ModelStats>> trainStats,
+        Map<? extends Metric, List<ModelStats>> validationStats
     ) {
-        return ImmutableModelSelectResult.of(bestConfig, trainStats.getMap(), validationStats.getMap());
+        return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
     }
 
     @Value.Derived

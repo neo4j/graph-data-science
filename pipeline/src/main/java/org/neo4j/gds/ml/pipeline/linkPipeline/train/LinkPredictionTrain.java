@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -40,6 +38,7 @@ import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
@@ -53,6 +52,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.ModelSelectResult;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -60,10 +60,8 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -182,14 +180,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
-    private LinkPredictionTrain.ModelSelectResult modelSelect(
+    private ModelSelectResult modelSelect(
         FeaturesAndLabels trainData,
         ReadOnlyHugeLongArray trainRelationshipIds
     ) {
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.labels());
 
-        var trainStats = initStatsMap();
-        var validationStats = initStatsMap();
+        Map<LinkMetric, List<ModelStats>> trainStats = initStatsMap();
+        Map<LinkMetric, List<ModelStats>> validationStats = initStatsMap();
 
         progressTracker.setVolume(pipeline.numberOfModelSelectionTrials());
 
@@ -278,12 +276,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return result;
     }
 
-    private static Map<LinkMetric, BestMetricData> combineBestParameterMetrics(
-        LinkPredictionTrain.ModelSelectResult modelSelectResult,
-        Map<LinkMetric, Double> outerTrainMetrics,
-        Map<LinkMetric, Double> testMetrics
+    // FIXME share between NC and LP
+    private static Map<Metric, BestMetricData> combineBestParameterMetrics(
+        ModelSelectResult modelSelectResult,
+        Map<? extends Metric, Double> outerTrainMetrics,
+        Map<? extends Metric, Double> testMetrics
     ) {
-        Set<LinkMetric> metrics = modelSelectResult.validationStats().keySet();
+        var metrics = modelSelectResult.validationStats().keySet();
 
         return metrics.stream().collect(Collectors.toMap(
             Function.identity(),
@@ -315,40 +314,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return statsMap;
     }
 
-    @ValueClass
-    public interface ModelSelectResult {
-
-        TrainerConfig bestParameters();
-
-        Map<LinkMetric, List<ModelStats>> trainStats();
-
-        Map<LinkMetric, List<ModelStats>> validationStats();
-
-        static LinkPredictionTrain.ModelSelectResult of(
-            TrainerConfig bestConfig,
-            Map<LinkMetric, List<ModelStats>> trainStats,
-            Map<LinkMetric, List<ModelStats>> validationStats
-        ) {
-            return ImmutableModelSelectResult.of(bestConfig, trainStats, validationStats);
-        }
-
-        @Value.Derived
-        default Map<String, Object> toMap() {
-            Function<Map<LinkMetric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
-                stats.entrySet().stream().collect(Collectors.toMap(
-                    entry -> entry.getKey().name(),
-                    value -> value.getValue().stream().map(ModelStats::toMap)
-                ));
-
-            return Map.of(
-                "bestParameters", bestParameters().toMap(),
-                "trainStats", statsConverter.apply(trainStats()),
-                "validationStats", statsConverter.apply(validationStats())
-            );
-        }
-
-    }
-
     private Map<LinkMetric, Double> computeTrainMetric(
         FeaturesAndLabels trainData,
         Classifier classifier,
@@ -368,7 +333,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
         TrainerConfig bestParameters,
         Classifier.ClassifierData classifierData,
-        Map<LinkMetric, BestMetricData> winnerMetrics
+        Map<Metric, BestMetricData> winnerMetrics
     ) {
         return Model.of(
             config.username(),

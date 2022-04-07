@@ -23,16 +23,17 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.nodePipeline.train.ModelSelectResult;
 
 @ValueClass
 public interface LinkPredictionTrainResult {
     Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
 
-    LinkPredictionTrain.ModelSelectResult modelSelectionStatistics();
+    ModelSelectResult modelSelectionStatistics();
 
     static LinkPredictionTrainResult of(
         Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
-        LinkPredictionTrain.ModelSelectResult modelSelectResult
+        ModelSelectResult modelSelectResult
     ) {
         return ImmutableLinkPredictionTrainResult.of(model, modelSelectResult);
     }
