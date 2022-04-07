@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
@@ -58,6 +59,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -199,8 +201,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();
-            var trainStatsBuilder = new LinkModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-            var validationStatsBuilder = new LinkModelStatsBuilder(
+            var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,
                 pipeline.splitConfig().validationFolds()
             );
@@ -235,8 +237,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
             // insert the candidates' metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.modelStats(metric));
-                trainStats.get(metric).add(trainStatsBuilder.modelStats(metric));
+                validationStats.get(metric).add(validationStatsBuilder.build(metric));
+                trainStats.get(metric).add(trainStatsBuilder.build(metric));
             });
 
             progressTracker.logProgress();
@@ -308,7 +310,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     }
 
     private static Map<LinkMetric, List<ModelStats>> initStatsMap() {
-        var statsMap = new HashMap<LinkMetric, List<ModelStats>>();
+        var statsMap = new EnumMap<LinkMetric, List<ModelStats>>(LinkMetric.class);
         statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
         return statsMap;
     }
@@ -441,8 +443,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 .flatMap(List::stream)
                 .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
                 .map(trainerConfig -> MemoryEstimations.builder("Train and evaluate model")
-                    .fixed("Stats map builder train", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
-                    .fixed("Stats map builder validation", LinkModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .fixed("Stats map builder train", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
+                    .fixed("Stats map builder validation", ModelStatsBuilder.sizeInBytes(numberOfMetrics))
                     .max("Train model and compute train metrics", List.of(
                             estimateTraining(pipeline.splitConfig(), trainerConfig, linkFeatureDimension),
                             estimateComputeTrainMetrics(pipeline.splitConfig())

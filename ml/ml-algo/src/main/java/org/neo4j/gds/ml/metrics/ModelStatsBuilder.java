@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public class ModelStatsBuilder {
     private final Map<Metric, Double> min;
@@ -52,5 +55,11 @@ public class ModelStatsBuilder {
             min.get(metric),
             max.get(metric)
         );
+    }
+
+    public static long sizeInBytes(long numberOfMetrics) {
+        int numberOfStats = 3;
+        long statsMapEntries = numberOfStats * (sizeOfInstance(HashMap.class) + numberOfMetrics * Double.BYTES);
+        return MemoryUsage.sizeOfInstance(ModelStatsBuilder.class) + statsMapEntries;
     }
 }

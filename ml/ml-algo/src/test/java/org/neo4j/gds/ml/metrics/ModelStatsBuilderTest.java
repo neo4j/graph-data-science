@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.linkPipeline.train;
+package org.neo4j.gds.ml.metrics;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class LinkModelStatsBuilderTest {
+class ModelStatsBuilderTest {
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -34,7 +34,7 @@ class LinkModelStatsBuilderTest {
         "10, 416"
     })
     void estimate(int numberOfMetrics, long expected) {
-        assertThat(LinkModelStatsBuilder.sizeInBytes(numberOfMetrics)).isEqualTo(expected);
+        assertThat(ModelStatsBuilder.sizeInBytes(numberOfMetrics)).isEqualTo(expected);
     }
 
 }
