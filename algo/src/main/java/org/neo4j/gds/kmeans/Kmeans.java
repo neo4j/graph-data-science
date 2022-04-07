@@ -26,7 +26,7 @@ import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,9 +37,9 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public class Kmeans extends Algorithm<HugeLongArray> {
+public class Kmeans extends Algorithm<HugeIntArray> {
 
-    private final HugeLongArray communities;
+    private final HugeIntArray communities;
     private final Graph graph;
     private final int k;
     private final int concurrency;
@@ -48,7 +48,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     private final SplittableRandom random;
     private final NodeProperties nodeProperties;
 
-    private static final long UNASSIGNED = -1;
+    private static final int UNASSIGNED = -1;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeWeightProperty();
@@ -97,18 +97,18 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
         this.random = random;
-        this.communities = HugeLongArray.newArray(graph.nodeCount());
+        this.communities = HugeIntArray.newArray(graph.nodeCount());
         validateNodeProperties(nodeProperties);
         this.nodeProperties = nodeProperties;
     }
 
     @Override
-    public HugeLongArray compute() {
+    public HugeIntArray compute() {
         int propertyDimensions = nodeProperties.doubleArrayValue(0).length;
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
-            communities.setAll(v -> v);
+            communities.setAll(v -> (int) v);
             return communities;
         }
         long nodeCount = graph.nodeCount();
@@ -207,7 +207,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         private final Partition partition;
         private final double[][] centerSumAtDimension;
         private final NodeProperties nodeProperties;
-        private final HugeLongArray communities;
+        private final HugeIntArray communities;
         private final long[] numAssignedAtCenter;
         private final double[][] clusterCenters;
         private final int k;
@@ -218,7 +218,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         KmeansTask(
             double[][] clusterCenters,
             NodeProperties nodeProperties,
-            HugeLongArray communities,
+            HugeIntArray communities,
             int k,
             int propertyDimensions,
             Partition partition,
@@ -274,7 +274,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                     }
                 }
                 numAssignedAtCenter[bestPosition]++;
-                int previousCluster = (int) communities.get(nodeId);
+                int previousCluster = communities.get(nodeId);
                 if (bestPosition != previousCluster) {
                     swaps++;
                 }
