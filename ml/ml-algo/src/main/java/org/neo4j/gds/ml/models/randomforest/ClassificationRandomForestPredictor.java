@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.models.randomforest;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 
@@ -66,24 +66,6 @@ public class ClassificationRandomForestPredictor implements Classifier {
     }
 
     @Override
-    public double[] predictProbabilities(long id, Features features) {
-        return predictProbabilities(features.get(id));
-    }
-
-    @Override
-    public Matrix predictProbabilities(
-        Batch batch, Features features
-    ) {
-        var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
-        var offset = 0;
-
-        for (long id : batch.nodeIds()) {
-            predictedProbabilities.setRow(offset++, predictProbabilities(id, features));
-        }
-
-        return predictedProbabilities;
-    }
-
     public double[] predictProbabilities(double[] features) {
         int[] votesPerClass = gatherTreePredictions(features);
         int numberOfTrees = data.decisionTrees().size();
@@ -96,6 +78,20 @@ public class ClassificationRandomForestPredictor implements Classifier {
         }
 
         return probabilities;
+    }
+
+    @Override
+    public Matrix predictProbabilities(
+        Batch batch, Features features
+    ) {
+        var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
+        var offset = 0;
+
+        for (long id : batch.nodeIds()) {
+            predictedProbabilities.setRow(offset++, predictProbabilities(features.get(id)));
+        }
+
+        return predictedProbabilities;
     }
 
     int[] gatherTreePredictions(double[] features) {
