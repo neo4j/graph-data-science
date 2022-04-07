@@ -83,8 +83,6 @@ public final class NodeClassificationTrain {
     private final LocalIdMap classIdMap;
     private final HugeLongArray nodeIds;
     private final List<Metric> metrics;
-    private final StatsMap trainStats;
-    private final StatsMap validationStats;
     private final MetricComputer metricComputer;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -278,8 +276,6 @@ public final class NodeClassificationTrain {
         var metrics = config.metrics(classCounts.keys());
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
-        var trainStats = StatsMap.create(metrics);
-        var validationStats = StatsMap.create(metrics);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
@@ -310,8 +306,6 @@ public final class NodeClassificationTrain {
             metrics,
             nodeIds,
             metricComputer,
-            trainStats,
-            validationStats,
             progressTracker,
             terminationFlag
         );
@@ -327,8 +321,6 @@ public final class NodeClassificationTrain {
         List<Metric> metrics,
         HugeLongArray nodeIds,
         ClassificationMetricComputer metricComputer,
-        StatsMap trainStats,
-        StatsMap validationStats,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -342,8 +334,6 @@ public final class NodeClassificationTrain {
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
-        this.trainStats = trainStats;
-        this.validationStats = validationStats;
         this.metricComputer = metricComputer;
     }
 
@@ -386,6 +376,9 @@ public final class NodeClassificationTrain {
 
     private TrainingStatistics selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
+
+        var trainStats = StatsMap.create(metrics);
+        var validationStats = StatsMap.create(metrics);
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
