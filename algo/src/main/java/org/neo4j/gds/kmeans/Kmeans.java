@@ -265,7 +265,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             for (long nodeId = startNode; nodeId < endNode; nodeId++) {
                 int bestPosition = 0;
                 var nodePropertyArray = nodeProperties.doubleArrayValue(nodeId);
-                double smallestDistance = euclidean(nodePropertyArray, clusterCenters[0]);
+                double smallestDistance = Double.MAX_VALUE;
                 for (int centerId = 1; centerId < k; ++centerId) {
                     double distance = euclidean(nodePropertyArray, clusterCenters[centerId]);
                     if (Double.compare(distance, smallestDistance) < 0) {
