@@ -48,17 +48,24 @@ public interface ModelSelectResult {
 
     @Value.Derived
     default Map<String, Object> toMap() {
-        Function<Map<Metric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
-            stats.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().name(),
-                value -> value.getValue().stream().map(ModelStats::toMap)
-            ));
-
         return Map.of(
             "bestParameters", bestParameters().toMap(),
-            "trainStats", statsConverter.apply(trainStats()),
-            "validationStats", statsConverter.apply(validationStats())
+            "trainStats", MetricStatsToCypher.convertToCypher(trainStats()),
+            "validationStats", MetricStatsToCypher.convertToCypher(validationStats())
         );
+    }
+
+    final class MetricStatsToCypher {
+
+        private MetricStatsToCypher() {}
+
+        static Map<String,List<Map<String, Object>>> convertToCypher(Map<Metric, List<ModelStats>> metricStats) {
+            return metricStats.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().name(),
+                value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
+            ));
+        }
+
     }
 
 }
