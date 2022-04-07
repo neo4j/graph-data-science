@@ -377,8 +377,7 @@ public final class NodeClassificationTrain {
     private TrainingStatistics selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
-        var trainStats = StatsMap.create(metrics);
-        var validationStats = StatsMap.create(metrics);
+        var trainingStats = new TrainingStatistics(metrics);
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -413,16 +412,13 @@ public final class NodeClassificationTrain {
             progressTracker.endSubTask();
 
             metrics.forEach(metric -> {
-                validationStats.add(metric, validationStatsBuilder.build(metric));
-                trainStats.add(metric, trainStatsBuilder.build(metric));
+                trainingStats.addValidationStats(metric, validationStatsBuilder.build(metric));
+                trainingStats.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
         }
         progressTracker.endSubTask();
 
-        var mainMetric = metrics.get(0);
-        var bestModelStats = validationStats.pickBestModelStats(mainMetric);
-
-        return new TrainingStatistics(bestModelStats.params(), trainStats.getMap(), validationStats.getMap());
+        return trainingStats;
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(

@@ -186,7 +186,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
 
             var customInfo = actualModel.customInfo();
-            assertThat(result.trainingStatistics().validationStats().get(LinkMetric.AUCPR))
+            assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
                 .hasSize(2)
                 .satisfies(scores ->
                     assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))

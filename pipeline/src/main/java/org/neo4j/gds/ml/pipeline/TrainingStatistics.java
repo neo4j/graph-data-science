@@ -24,8 +24,10 @@ import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -33,41 +35,38 @@ import java.util.stream.Collectors;
 
 public final class TrainingStatistics {
 
-    private final TrainerConfig bestParameters;
+    private final StatsMap trainStats;
 
-    private final Map<? extends Metric, List<ModelStats>> trainStats;
+    private final StatsMap validationStats;
 
-    private final Map<? extends Metric, List<ModelStats>> validationStats;
+    private final List<Metric> metrics;
 
-    public TrainingStatistics(
-        TrainerConfig bestParameters,
-        Map<? extends Metric, List<ModelStats>> trainStats,
-        Map<? extends Metric, List<ModelStats>> validationStats
-    ) {
-        this.bestParameters = bestParameters;
-        this.trainStats = trainStats;
-        this.validationStats = validationStats;
+    public TrainingStatistics(List<Metric> metrics) {
+        this.trainStats = StatsMap.create(metrics);
+        this.validationStats = StatsMap.create(metrics);
+        this.metrics = metrics;
     }
 
     public TrainerConfig bestParameters() {
-        return bestParameters;
+        var modelStats = validationStats.getMetricStats(metrics.get(0));
+        return Collections.max(modelStats, ModelStats.COMPARE_AVERAGE).params();
     }
 
     @TestOnly
     public List<ModelStats> getTrainStats(Metric metric) {
-        return trainStats.get(metric);
+        return trainStats.getMetricStats(metric);
     }
 
     @TestOnly
     public List<ModelStats> getValidationStats(Metric metric) {
-        return validationStats.get(metric);
+        return validationStats.getMetricStats(metric);
     }
 
     public Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMap(),
-            "trainStats", convertToCypher(trainStats),
-            "validationStats", convertToCypher(validationStats)
+            "trainStats", trainStats.toMap(),
+            "validationStats", validationStats.toMap()
         );
     }
 
@@ -75,20 +74,20 @@ public final class TrainingStatistics {
         Map<? extends Metric, Double> outerTrainMetrics,
         Map<? extends Metric, Double> testMetrics
     ) {
-        var metrics = validationStats.keySet();
+        TrainerConfig bestParameters = bestParameters();
 
         return metrics.stream().collect(Collectors.toMap(
             Function.identity(),
             metric -> BestMetricData.of(
-                findBestModelStats(trainStats.get(metric)),
-                findBestModelStats(validationStats.get(metric)),
+                findBestModelStats(trainStats.getMetricStats(metric), bestParameters),
+                findBestModelStats(validationStats.getMetricStats(metric), bestParameters),
                 outerTrainMetrics.get(metric),
                 testMetrics.get(metric)
             )
         ));
     }
 
-    private BestModelStats findBestModelStats(List<ModelStats> metricStatsForModels) {
+    private static BestModelStats findBestModelStats(List<ModelStats> metricStatsForModels, TrainerConfig bestParameters) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParameters)
             .findFirst()
@@ -96,10 +95,11 @@ public final class TrainingStatistics {
             .orElseThrow();
     }
 
-    private static Map<String, List<Map<String, Object>>> convertToCypher(Map<? extends Metric, List<ModelStats>> metricStats) {
-        return metricStats.entrySet().stream().collect(Collectors.toMap(
-            entry -> entry.getKey().name(),
-            value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
-        ));
+    public void addValidationStats(Metric metric, ModelStats stats) {
+        validationStats.add(metric, stats);
+    }
+
+    public void addTrainStats(Metric metric, ModelStats stats) {
+        trainStats.add(metric, stats);
     }
 }

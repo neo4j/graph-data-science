@@ -58,14 +58,12 @@ import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.ml.metrics.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 
@@ -184,8 +182,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     ) {
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.labels());
 
-        Map<LinkMetric, List<ModelStats>> trainStats = initStatsMap();
-        Map<LinkMetric, List<ModelStats>> validationStats = initStatsMap();
+        var trainingStats = new TrainingStatistics(new ArrayList<>(config.metrics()));
 
         progressTracker.setVolume(pipeline.numberOfModelSelectionTrials());
 
@@ -233,21 +230,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
             // insert the candidates' metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
-                validationStats.get(metric).add(validationStatsBuilder.build(metric));
-                trainStats.get(metric).add(trainStatsBuilder.build(metric));
+                trainingStats.addValidationStats(metric, validationStatsBuilder.build(metric));
+                trainingStats.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
 
             progressTracker.logProgress();
         }
 
-        // 5. pick the best-scoring model candidate, according to the main metric
-        var mainMetric = config.metrics().get(0);
-        var modelStats = validationStats.get(mainMetric);
-        ModelStats winner = Collections.max(modelStats, COMPARE_AVERAGE);
-
-        var bestConfig = winner.params();
-
-        return new TrainingStatistics(bestConfig, trainStats, validationStats);
+        return trainingStats;
     }
 
     private Map<LinkMetric, Double> computeTestMetric(Classifier classifier) {

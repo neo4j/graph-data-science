@@ -22,8 +22,6 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
-import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
@@ -39,23 +37,26 @@ class TrainingStatisticsTest {
         RandomForestTrainConfig firstCandidate = RandomForestTrainConfig.DEFAULT;
         LogisticRegressionTrainConfig secondCandidate = LogisticRegressionTrainConfig.DEFAULT;
 
-        var trainStats = Map.<Metric, List<ModelStats>>of(
+        var selectResult = new TrainingStatistics(List.of(AllClassMetric.ACCURACY));
+
+        selectResult.addTrainStats(
             AllClassMetric.ACCURACY,
-            List.of(
-                ImmutableModelStats.of(firstCandidate, 0.33, 0.1, 0.6),
-                ImmutableModelStats.of(secondCandidate, 0.2, 0.01, 0.7)
-            )
+            ImmutableModelStats.of(firstCandidate, 0.33, 0.1, 0.6)
+        );
+        selectResult.addTrainStats(
+            AllClassMetric.ACCURACY,
+            ImmutableModelStats.of(secondCandidate, 0.2, 0.01, 0.7)
         );
 
-        var validationStats = Map.<Metric, List<ModelStats>>of(
+        selectResult.addValidationStats(
             AllClassMetric.ACCURACY,
-            List.of(
-                ImmutableModelStats.of(firstCandidate, 0.4, 0.3, 0.5),
-                ImmutableModelStats.of(secondCandidate, 0.8, 0.7, 0.9)
-            )
+            ImmutableModelStats.of(firstCandidate, 0.4, 0.3, 0.5)
+        );
+        selectResult.addValidationStats(
+            AllClassMetric.ACCURACY,
+            ImmutableModelStats.of(secondCandidate, 0.8, 0.7, 0.9)
         );
 
-        var selectResult = new TrainingStatistics(firstCandidate, trainStats, validationStats);
 
         List<Map<String, Object>> expectedTrainAccuracyStats = List.of(
             Map.of("params", firstCandidate.toMap(), "avg", 0.33, "min", 0.1, "max", 0.6),
@@ -68,7 +69,7 @@ class TrainingStatisticsTest {
         );
 
         assertThat(selectResult.toMap())
-            .containsEntry("bestParameters", firstCandidate.toMap())
+            .containsEntry("bestParameters", secondCandidate.toMap())
             .containsEntry("trainStats", Map.of("ACCURACY", expectedTrainAccuracyStats))
             .containsEntry("validationStats", Map.of("ACCURACY", expectedValidationAccuracyStats));
     }
