@@ -39,6 +39,8 @@ import java.util.concurrent.ExecutorService;
 
 public class Kmeans extends Algorithm<HugeIntArray> {
 
+    private static final int UNASSIGNED = -1;
+
     private final HugeIntArray communities;
     private final Graph graph;
     private final int k;
@@ -47,8 +49,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
     private final ExecutorService executorService;
     private final SplittableRandom random;
     private final NodeProperties nodeProperties;
-
-    private static final int UNASSIGNED = -1;
+    private final int dimensions;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeWeightProperty();
@@ -100,11 +101,11 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         this.communities = HugeIntArray.newArray(graph.nodeCount());
         validateNodeProperties(nodeProperties);
         this.nodeProperties = nodeProperties;
+        this.dimensions = nodeProperties.doubleArrayValue(0).length;
     }
 
     @Override
     public HugeIntArray compute() {
-        int propertyDimensions = nodeProperties.doubleArrayValue(0).length;
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
@@ -112,7 +113,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             return communities;
         }
         long nodeCount = graph.nodeCount();
-        double[][] clusterCenters = new double[k][propertyDimensions];
+        double[][] clusterCenters = new double[k][dimensions];
         communities.setAll(v -> UNASSIGNED);
 
         var tasks = PartitionUtils.rangePartition(
@@ -123,7 +124,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
                 nodeProperties,
                 communities,
                 k,
-                propertyDimensions,
+                dimensions,
                 partition,
                 progressTracker
             ),
@@ -137,7 +138,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
         List<Long> initialCenterIds = sampler.sampleClusters(random, nodeProperties, nodeCount, k);
-        assignCenters(clusterCenters, initialCenterIds, propertyDimensions);
+        assignCenters(clusterCenters, initialCenterIds, dimensions);
         //
         for (int iteration = 0; iteration < maxIterations; ++iteration) {
             long swaps = 0;
@@ -156,10 +157,9 @@ public class Kmeans extends Algorithm<HugeIntArray> {
     }
 
     private void recomputeCenters(double[][] clusterCenters, List<KmeansTask> tasks) {
-        int propertyDimensions = clusterCenters[0].length;
         long[] nodesInCluster = new long[k];
         for (int centerId = 0; centerId < k; ++centerId) {
-            for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
                 clusterCenters[centerId][dimension] = 0.0;
             }
         }
@@ -167,13 +167,13 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             for (int centerId = 0; centerId < k; ++centerId) {
                 var centerContribution = task.getCenterContribution(centerId);
                 nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
-                for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
                     clusterCenters[centerId][dimension] += centerContribution[dimension];
                 }
             }
         }
         for (int centerId = 0; centerId < k; ++centerId) {
-            for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
                 clusterCenters[centerId][dimension] /= (double) nodesInCluster[centerId];
             }
         }
@@ -190,11 +190,11 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    private void assignCenters(double[][] clusterCenters, List<Long> initialCenterIds, int dimentions) {
+    private void assignCenters(double[][] clusterCenters, List<Long> initialCenterIds, int dimensions) {
         int clusterUpdateId = 0;
         for (long centerId : initialCenterIds) {
             var property = nodeProperties.doubleArrayValue(centerId);
-            for (int j = 0; j < dimentions; ++j) {
+            for (int j = 0; j < dimensions; ++j) {
                 clusterCenters[clusterUpdateId][j] = property[j];
             }
             clusterUpdateId++;
@@ -211,7 +211,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         private final long[] numAssignedAtCenter;
         private final double[][] clusterCenters;
         private final int k;
-        private final int numberOfDimensions;
+        private final int dimensions;
 
         private long swaps;
 
@@ -220,17 +220,17 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             NodeProperties nodeProperties,
             HugeIntArray communities,
             int k,
-            int propertyDimensions,
+            int dimensions,
             Partition partition,
             ProgressTracker progressTracker
         ) {
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.clusterCenters = clusterCenters;
-            this.centerSumAtDimension = new double[k][propertyDimensions];
+            this.centerSumAtDimension = new double[k][dimensions];
             this.numAssignedAtCenter = new long[k];
             this.k = k;
-            this.numberOfDimensions = propertyDimensions;
+            this.dimensions = dimensions;
             this.nodeProperties = nodeProperties;
             this.communities = communities;
         }
@@ -258,7 +258,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             swaps = 0;
             for (int centerId = 0; centerId < k; ++centerId) {
                 numAssignedAtCenter[centerId] = 0;
-                for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
                     centerSumAtDimension[centerId][dimension] = 0.0;
                 }
             }
@@ -284,7 +284,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
                 //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
                 // or avoid calculating their distance from other nodes etc...
                 communities.set(nodeId, bestPosition);
-                for (int j = 0; j < numberOfDimensions; ++j) {
+                for (int j = 0; j < dimensions; ++j) {
                     centerSumAtDimension[bestPosition][j] += nodePropertyArray[j];
                 }
             }
