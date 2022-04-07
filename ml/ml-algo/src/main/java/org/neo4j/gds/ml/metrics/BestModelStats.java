@@ -21,9 +21,7 @@ package org.neo4j.gds.ml.metrics;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.models.TrainerConfig;
 
-import java.util.List;
 import java.util.Map;
 
 @ValueClass
@@ -56,16 +54,5 @@ public interface BestModelStats {
 
     static BestModelStats of(ModelStats modelStats) {
         return ImmutableBestModelStats.of(modelStats.avg(), modelStats.min(), modelStats.max());
-    }
-
-    static BestModelStats findBestModelStats(
-        List<ModelStats> metricStatsForModels,
-        TrainerConfig bestParams
-    ) {
-        return metricStatsForModels.stream()
-            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
-            .findFirst()
-            .map(BestModelStats::of)
-            .orElseThrow();
     }
 }

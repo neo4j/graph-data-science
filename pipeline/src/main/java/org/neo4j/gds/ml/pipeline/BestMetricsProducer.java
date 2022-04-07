@@ -20,15 +20,19 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.models.TrainerConfig;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.metrics.BestModelStats.findBestModelStats;
+public final class BestMetricsProducer {
 
-public class BestMetricsProducer {
+    private BestMetricsProducer() {}
 
     public static Map<Metric, BestMetricData> computeBestMetrics(
         ModelSelectResult modelSelectResult,
@@ -46,5 +50,16 @@ public class BestMetricsProducer {
                 testMetrics.get(metric)
             )
         ));
+    }
+
+    private static BestModelStats findBestModelStats(
+        List<ModelStats> metricStatsForModels,
+        TrainerConfig bestParams
+    ) {
+        return metricStatsForModels.stream()
+            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
+            .findFirst()
+            .map(BestModelStats::of)
+            .orElseThrow();
     }
 }
