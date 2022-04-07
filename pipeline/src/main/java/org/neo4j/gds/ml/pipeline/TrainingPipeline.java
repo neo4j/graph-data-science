@@ -74,6 +74,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
             "trainingParameterSpace",
             toMapParameterSpace(trainingParameterSpace)
         );
+        map.put("autoTuningConfig", autoTuningConfig().toMap());
         map.putAll(additionalEntries());
         return map;
     }

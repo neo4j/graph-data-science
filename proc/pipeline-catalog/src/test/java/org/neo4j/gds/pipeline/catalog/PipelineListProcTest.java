@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.compat.MapUtil.map;
+import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PipelineListProcTest extends BaseProcTest {
@@ -70,7 +71,7 @@ class PipelineListProcTest extends BaseProcTest {
         assertCypherResult(
             formatWithLocale(
                 "CALL %s YIELD pipelineInfo, pipelineName, pipelineType, creationTime " +
-                "RETURN pipelineInfo.splitConfig, pipelineName, pipelineType, creationTime " +
+                "RETURN pipelineInfo.splitConfig, pipelineInfo.autoTuningConfig, pipelineName, pipelineType, creationTime " +
                 "ORDER BY pipelineName",
                 query
             ),
@@ -82,6 +83,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "validationFolds", 3,
                         "trainFraction", 0.1
                     ),
+                    "pipelineInfo.autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "lpPipe",
                     "pipelineType", LinkPredictionTrainingPipeline.PIPELINE_TYPE
@@ -91,6 +93,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "testFraction", 0.8,
                         "validationFolds", 3
                     ),
+                    "pipelineInfo.autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe1",
                     "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
@@ -100,6 +103,7 @@ class PipelineListProcTest extends BaseProcTest {
                         "testFraction", 0.3,
                         "validationFolds", 3
                     ),
+                    "pipelineInfo.autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                     "creationTime", isA(ZonedDateTime.class),
                     "pipelineName", "ncPipe2",
                     "pipelineType", NodeClassificationTrainingPipeline.PIPELINE_TYPE
