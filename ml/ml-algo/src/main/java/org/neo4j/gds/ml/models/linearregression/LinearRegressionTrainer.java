@@ -40,8 +40,8 @@ public final class LinearRegressionTrainer {
         this.trainConfig = LinearRegressionTrainConfig.DEFAULT;
     }
 
-    public LinearRegressor train(Features features, HugeDoubleArray actualValues, ReadOnlyHugeLongArray trainSet) {
-        var objective = new LinearRegressionObjective(features, actualValues);
+    public LinearRegressor train(Features features, HugeDoubleArray targets, ReadOnlyHugeLongArray trainSet) {
+        var objective = new LinearRegressionObjective(features, targets);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
 
         var training = new Training(trainConfig, ProgressTracker.NULL_TRACKER, trainSet.size(), TerminationFlag.RUNNING_TRUE);

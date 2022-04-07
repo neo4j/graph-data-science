@@ -34,7 +34,7 @@ import java.util.List;
 public class LinearRegressionObjective implements Objective<LinearRegressionData> {
 
     private final Features features;
-    private final HugeDoubleArray actualValues;
+    private final HugeDoubleArray targets;
     private final LinearRegressionData modelData;
 
     @Override
@@ -44,10 +44,10 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
 
     LinearRegressionObjective(
         Features features,
-        HugeDoubleArray actualValues
+        HugeDoubleArray targets
     ) {
         this.features = features;
-        this.actualValues = actualValues;
+        this.targets = targets;
         this.modelData = LinearRegressionData.of(features.featureDimension());
     }
 

@@ -47,11 +47,10 @@ class LinearRegressionTrainerTest {
             new double[] {1, 2, 3}
         ));
 
-        var actualValues = HugeDoubleArray.of(12, 9, 6);
+        var targets = HugeDoubleArray.of(12, 9, 6);
         var trainSet = ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 2));
 
-        var regressor = trainer.train(features, actualValues, trainSet);
-
+        var regressor = trainer.train(features, targets, trainSet);
 
         // TODO update when the objective has an actual loss function
         Vector expectedWeights = new Vector(-0.09999, -0.09999, -0.09999);
