@@ -396,6 +396,8 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
+Each model candidate configuration contains either fixed values or ranges for training parameters.
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see <<ml-auto-tuning>>.
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.linkPrediction.addLogisticRegression`
@@ -508,7 +510,7 @@ YIELD parameterSpace
 
 [role=query-example,group=lp]
 --
-.The following will add another logistic regression model:
+.The following will add a logistic regression model with a range parameter:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e4]}})
@@ -602,7 +604,7 @@ YIELD autoTuningConfig
 | {maxTrials=100}
 |===
 
-We now reconfigured the auto-tuning to use 100 trials during <<linkprediction-pipelines-train, training>>.
+We now reconfigured the auto-tuning to try out at most 100 model candidates during <<linkprediction-pipelines-train, training>>.
 --
 
 include::training.adoc[]
