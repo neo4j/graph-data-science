@@ -52,7 +52,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.ModelSelectResult;
+import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;

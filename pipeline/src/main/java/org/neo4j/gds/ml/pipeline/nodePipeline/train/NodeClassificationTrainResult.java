@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 
 @ValueClass
 public interface NodeClassificationTrainResult {

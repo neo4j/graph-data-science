@@ -23,7 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.ModelSelectResult;
+import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 
 @ValueClass
 public interface LinkPredictionTrainResult {

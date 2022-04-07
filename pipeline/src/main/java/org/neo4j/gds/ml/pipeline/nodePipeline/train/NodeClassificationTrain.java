@@ -52,6 +52,7 @@ import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
