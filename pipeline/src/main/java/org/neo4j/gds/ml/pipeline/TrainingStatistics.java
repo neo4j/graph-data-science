@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -32,68 +31,75 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@ValueClass
-public interface TrainingStatistics {
+public final class TrainingStatistics {
 
-    TrainerConfig bestParameters();
+    private final TrainerConfig bestParameters;
 
-    Map<Metric, List<ModelStats>> trainStats();
+    private final Map<? extends Metric, List<ModelStats>> trainStats;
 
-    Map<Metric, List<ModelStats>> validationStats();
+    private final Map<? extends Metric, List<ModelStats>> validationStats;
 
-    static TrainingStatistics of(
-        TrainerConfig bestConfig,
+    public TrainingStatistics(
+        TrainerConfig bestParameters,
         Map<? extends Metric, List<ModelStats>> trainStats,
         Map<? extends Metric, List<ModelStats>> validationStats
     ) {
-        return ImmutableTrainingStatistics.of(bestConfig, trainStats, validationStats);
+        this.bestParameters = bestParameters;
+        this.trainStats = trainStats;
+        this.validationStats = validationStats;
     }
 
-    @Value.Derived
-    default Map<String, Object> toMap() {
+    public TrainerConfig bestParameters() {
+        return bestParameters;
+    }
+
+    @TestOnly
+    public List<ModelStats> getTrainStats(Metric metric) {
+        return trainStats.get(metric);
+    }
+
+    @TestOnly
+    public List<ModelStats> getValidationStats(Metric metric) {
+        return validationStats.get(metric);
+    }
+
+    public Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMap(),
-            "trainStats", MetricStatsToCypher.convertToCypher(trainStats()),
-            "validationStats", MetricStatsToCypher.convertToCypher(validationStats())
+            "trainStats", convertToCypher(trainStats),
+            "validationStats", convertToCypher(validationStats)
         );
     }
 
-    default Map<Metric, BestMetricData> finalizeMetrics(Map<? extends Metric, Double> outerTrainMetrics, Map<? extends Metric, Double> testMetrics) {
-        var metrics = validationStats().keySet();
+    public Map<Metric, BestMetricData> finalizeMetrics(
+        Map<? extends Metric, Double> outerTrainMetrics,
+        Map<? extends Metric, Double> testMetrics
+    ) {
+        var metrics = validationStats.keySet();
 
         return metrics.stream().collect(Collectors.toMap(
             Function.identity(),
             metric -> BestMetricData.of(
-                findBestModelStats(trainStats().get(metric), bestParameters()),
-                findBestModelStats(validationStats().get(metric), bestParameters()),
+                findBestModelStats(trainStats.get(metric)),
+                findBestModelStats(validationStats.get(metric)),
                 outerTrainMetrics.get(metric),
                 testMetrics.get(metric)
             )
         ));
     }
 
-    private static BestModelStats findBestModelStats(
-        List<ModelStats> metricStatsForModels,
-        TrainerConfig bestParams
-    ) {
+    private BestModelStats findBestModelStats(List<ModelStats> metricStatsForModels) {
         return metricStatsForModels.stream()
-            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParams)
+            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParameters)
             .findFirst()
             .map(BestModelStats::of)
             .orElseThrow();
     }
 
-    final class MetricStatsToCypher {
-
-        private MetricStatsToCypher() {}
-
-        static Map<String,List<Map<String, Object>>> convertToCypher(Map<Metric, List<ModelStats>> metricStats) {
-            return metricStats.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().name(),
-                value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
-            ));
-        }
-
+    private static Map<String, List<Map<String, Object>>> convertToCypher(Map<? extends Metric, List<ModelStats>> metricStats) {
+        return metricStats.entrySet().stream().collect(Collectors.toMap(
+            entry -> entry.getKey().name(),
+            value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
+        ));
     }
-
 }

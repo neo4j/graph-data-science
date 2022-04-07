@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.metrics.AllClassMetric;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
@@ -37,7 +39,7 @@ class TrainingStatisticsTest {
         RandomForestTrainConfig firstCandidate = RandomForestTrainConfig.DEFAULT;
         LogisticRegressionTrainConfig secondCandidate = LogisticRegressionTrainConfig.DEFAULT;
 
-        var trainStats = Map.of(
+        var trainStats = Map.<Metric, List<ModelStats>>of(
             AllClassMetric.ACCURACY,
             List.of(
                 ImmutableModelStats.of(firstCandidate, 0.33, 0.1, 0.6),
@@ -45,7 +47,7 @@ class TrainingStatisticsTest {
             )
         );
 
-        var validationStats = Map.of(
+        var validationStats = Map.<Metric, List<ModelStats>>of(
             AllClassMetric.ACCURACY,
             List.of(
                 ImmutableModelStats.of(firstCandidate, 0.4, 0.3, 0.5),
@@ -53,8 +55,7 @@ class TrainingStatisticsTest {
             )
         );
 
-
-        var selectResult = TrainingStatistics.of(firstCandidate, trainStats, validationStats);
+        var selectResult = new TrainingStatistics(firstCandidate, trainStats, validationStats);
 
         List<Map<String, Object>> expectedTrainAccuracyStats = List.of(
             Map.of("params", firstCandidate.toMap(), "avg", 0.33, "min", 0.1, "max", 0.6),

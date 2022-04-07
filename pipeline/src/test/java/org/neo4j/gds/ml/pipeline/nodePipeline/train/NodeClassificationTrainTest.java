@@ -150,7 +150,7 @@ class NodeClassificationTrainTest {
         var model = result.model();
 
         var customInfo = model.customInfo();
-        List<ModelStats> validationScores = result.trainingStatistics().validationStats().get(metric);
+        List<ModelStats> validationScores = result.trainingStatistics().getValidationStats(metric);
 
         assertThat(validationScores).hasSize(MAX_TRIALS);
 

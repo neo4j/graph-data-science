@@ -422,7 +422,7 @@ public final class NodeClassificationTrain {
         var mainMetric = metrics.get(0);
         var bestModelStats = validationStats.pickBestModelStats(mainMetric);
 
-        return TrainingStatistics.of(bestModelStats.params(), trainStats.getMap(), validationStats.getMap());
+        return new TrainingStatistics(bestModelStats.params(), trainStats.getMap(), validationStats.getMap());
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(

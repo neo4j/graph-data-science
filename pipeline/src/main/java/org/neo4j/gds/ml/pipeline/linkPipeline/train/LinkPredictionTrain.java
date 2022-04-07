@@ -247,7 +247,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         var bestConfig = winner.params();
 
-        return TrainingStatistics.of(bestConfig, trainStats, validationStats);
+        return new TrainingStatistics(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(Classifier classifier) {
