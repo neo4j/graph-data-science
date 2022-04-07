@@ -26,7 +26,7 @@ import java.util.SplittableRandom;
 
 public interface KmeansSampler {
     public List<Long> sampleClusters(
-        SplittableRandom splittableRandom,
+        SplittableRandom random,
         NodeProperties nodeProperties,
         long nodeCount,
         int k

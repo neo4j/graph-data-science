@@ -39,13 +39,13 @@ import java.util.concurrent.ExecutorService;
 
 public class Kmeans extends Algorithm<HugeLongArray> {
 
-    private final HugeLongArray inCluster;
+    private final HugeLongArray communities;
     private final Graph graph;
     private final int k;
     private final int concurrency;
     private final int maxIterations;
     private final ExecutorService executorService;
-    private final SplittableRandom splittableRandom;
+    private final SplittableRandom random;
     private final NodeProperties nodeProperties;
 
     private static final long UNASSIGNED = -1;
@@ -88,7 +88,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         int concurrency,
         int maxIterations,
         NodeProperties nodeProperties,
-        SplittableRandom splittableRandom
+        SplittableRandom random
     ) {
         super(progressTracker);
         this.executorService = executorService;
@@ -96,86 +96,85 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         this.k = k;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
-        this.splittableRandom = splittableRandom;
-        this.inCluster = HugeLongArray.newArray(graph.nodeCount());
+        this.random = random;
+        this.communities = HugeLongArray.newArray(graph.nodeCount());
         validateNodeProperties(nodeProperties);
         this.nodeProperties = nodeProperties;
     }
 
     @Override
     public HugeLongArray compute() {
-        int numberOfDimensions = nodeProperties.doubleArrayValue(0).length;
+        int propertyDimensions = nodeProperties.doubleArrayValue(0).length;
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
-            inCluster.setAll(v -> v);
-            return inCluster;
+            communities.setAll(v -> v);
+            return communities;
         }
         long nodeCount = graph.nodeCount();
-        double[][] clusterCentre = new double[k][numberOfDimensions];
-        inCluster.setAll(v -> UNASSIGNED);
+        double[][] clusterCenters = new double[k][propertyDimensions];
+        communities.setAll(v -> UNASSIGNED);
 
-        var kmeansThreads = PartitionUtils.rangePartition(
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new KmeansThread(
-                clusterCentre,
+            partition -> new KmeansTask(
+                clusterCenters,
                 nodeProperties,
-                inCluster,
+                communities,
                 k,
-                numberOfDimensions,
+                propertyDimensions,
                 partition,
                 progressTracker
             ),
             Optional.of((int) nodeCount / concurrency)
         );
-        int numberOfTasks = kmeansThreads.size();
+        int numberOfTasks = tasks.size();
         
         assert numberOfTasks <= concurrency;
 
-        //Initialization do initial centre computation and assignment
+        //Initialization do initial center computation and assignment
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
-        List<Long> initialCentreIds = sampler.sampleClusters(splittableRandom, nodeProperties, nodeCount, k);
-        assignCentres(clusterCentre, initialCentreIds, numberOfDimensions);
+        List<Long> initialCenterIds = sampler.sampleClusters(random, nodeProperties, nodeCount, k);
+        assignCenters(clusterCenters, initialCenterIds, propertyDimensions);
         //
         for (int iteration = 0; iteration < maxIterations; ++iteration) {
             long swaps = 0;
-            //assign each node to a centre
-            ParallelUtil.runWithConcurrency(concurrency, kmeansThreads, executorService);
+            //assign each node to a center
+            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
 
             for (int threadId = 0; threadId < numberOfTasks; ++threadId) {
-                swaps += kmeansThreads.get(threadId).getSwaps();
+                swaps += tasks.get(threadId).getSwaps();
             }
             if (swaps == 0) {
                 break;
             }
-            recomputeCenters(clusterCentre, kmeansThreads);
+            recomputeCenters(clusterCenters, tasks);
         }
-        return inCluster;
+        return communities;
     }
 
-    private void recomputeCenters(double[][] clusterCentre, List<KmeansThread> kmeansThreads) {
-        int k = clusterCentre.length;
-        int numberOfDimensions = clusterCentre[0].length;
+    private void recomputeCenters(double[][] clusterCenters, List<KmeansTask> tasks) {
+        int propertyDimensions = clusterCenters[0].length;
         long[] nodesInCluster = new long[k];
-        for (int centreId = 0; centreId < k; ++centreId) {
-            for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
-                clusterCentre[centreId][dimension] = 0.0;
+        for (int centerId = 0; centerId < k; ++centerId) {
+            for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+                clusterCenters[centerId][dimension] = 0.0;
             }
         }
-        for (KmeansThread thread : kmeansThreads) {
-            for (int centreId = 0; centreId < k; ++centreId) {
-                var centreContribution = thread.getCentreContribution(centreId);
-                nodesInCluster[centreId] += thread.getNumAssignedAtCentre(centreId);
-                for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
-                    clusterCentre[centreId][dimension] += centreContribution[dimension];
+        for (KmeansTask task : tasks) {
+            for (int centerId = 0; centerId < k; ++centerId) {
+                var centerContribution = task.getCenterContribution(centerId);
+                nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
+                for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+                    clusterCenters[centerId][dimension] += centerContribution[dimension];
                 }
             }
         }
-        for (int centreId = 0; centreId < k; ++centreId) {
-            for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
-                clusterCentre[centreId][dimension] /= (double) nodesInCluster[centreId];
+        for (int centerId = 0; centerId < k; ++centerId) {
+            for (int dimension = 0; dimension < propertyDimensions; ++dimension) {
+                clusterCenters[centerId][dimension] /= (double) nodesInCluster[centerId];
             }
         }
 
@@ -191,57 +190,57 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    private void assignCentres(double[][] clusterCentre, List<Long> initialCentreIds, int numberOfDimensions) {
+    private void assignCenters(double[][] clusterCenters, List<Long> initialCenterIds, int dimentions) {
         int clusterUpdateId = 0;
-        for (long centreId : initialCentreIds) {
-            var property = nodeProperties.doubleArrayValue(centreId);
-            for (int j = 0; j < numberOfDimensions; ++j) {
-                clusterCentre[clusterUpdateId][j] = property[j];
+        for (long centerId : initialCenterIds) {
+            var property = nodeProperties.doubleArrayValue(centerId);
+            for (int j = 0; j < dimentions; ++j) {
+                clusterCenters[clusterUpdateId][j] = property[j];
             }
             clusterUpdateId++;
         }
     }
 
-    private static final class KmeansThread implements Runnable {
+    private static final class KmeansTask implements Runnable {
 
         private final ProgressTracker progressTracker;
         private final Partition partition;
-        private final double[][] centreSumAtDimension;
+        private final double[][] centerSumAtDimension;
         private final NodeProperties nodeProperties;
-        private final HugeLongArray inCluster;
-        private final long[] numAssignedAtCentre;
-        private final double[][] clusterCentre;
+        private final HugeLongArray communities;
+        private final long[] numAssignedAtCenter;
+        private final double[][] clusterCenters;
         private final int k;
         private final int numberOfDimensions;
 
         private long swaps;
 
-        KmeansThread(
-            double[][] clusterCentre,
+        KmeansTask(
+            double[][] clusterCenters,
             NodeProperties nodeProperties,
-            HugeLongArray inCluster,
+            HugeLongArray communities,
             int k,
-            int numberOfDimensions,
+            int propertyDimensions,
             Partition partition,
             ProgressTracker progressTracker
         ) {
             this.progressTracker = progressTracker;
             this.partition = partition;
-            this.clusterCentre = clusterCentre;
-            this.centreSumAtDimension = new double[k][numberOfDimensions];
-            this.numAssignedAtCentre = new long[k];
+            this.clusterCenters = clusterCenters;
+            this.centerSumAtDimension = new double[k][propertyDimensions];
+            this.numAssignedAtCenter = new long[k];
             this.k = k;
-            this.numberOfDimensions = numberOfDimensions;
+            this.numberOfDimensions = propertyDimensions;
             this.nodeProperties = nodeProperties;
-            this.inCluster = inCluster;
+            this.communities = communities;
         }
 
-        double[] getCentreContribution(int ith) {
-            return centreSumAtDimension[ith];
+        double[] getCenterContribution(int ith) {
+            return centerSumAtDimension[ith];
         }
 
-        long getNumAssignedAtCentre(int ith) {
-            return numAssignedAtCentre[ith];
+        long getNumAssignedAtCenter(int ith) {
+            return numAssignedAtCenter[ith];
         }
 
         long getSwaps() {
@@ -257,25 +256,25 @@ public class Kmeans extends Algorithm<HugeLongArray> {
             var startNode = partition.startNode();
             long endNode = startNode + partition.nodeCount();
             swaps = 0;
-            for (int centreId = 0; centreId < k; ++centreId) {
-                numAssignedAtCentre[centreId] = 0;
+            for (int centerId = 0; centerId < k; ++centerId) {
+                numAssignedAtCenter[centerId] = 0;
                 for (int dimension = 0; dimension < numberOfDimensions; ++dimension) {
-                    centreSumAtDimension[centreId][dimension] = 0.0;
+                    centerSumAtDimension[centerId][dimension] = 0.0;
                 }
             }
             for (long nodeId = startNode; nodeId < endNode; nodeId++) {
                 int bestPosition = 0;
                 var nodePropertyArray = nodeProperties.doubleArrayValue(nodeId);
-                double smallestDistance = euclidean(nodePropertyArray, clusterCentre[0]);
-                for (int centreId = 1; centreId < k; ++centreId) {
-                    double tempDistance = euclidean(nodePropertyArray, clusterCentre[centreId]);
+                double smallestDistance = euclidean(nodePropertyArray, clusterCenters[0]);
+                for (int centerId = 1; centerId < k; ++centerId) {
+                    double tempDistance = euclidean(nodePropertyArray, clusterCenters[centerId]);
                     if (tempDistance < smallestDistance) {
                         smallestDistance = tempDistance;
-                        bestPosition = centreId;
+                        bestPosition = centerId;
                     }
                 }
-                numAssignedAtCentre[bestPosition]++;
-                int previousCluster = (int) inCluster.get(nodeId);
+                numAssignedAtCenter[bestPosition]++;
+                int previousCluster = (int) communities.get(nodeId);
                 if (bestPosition != previousCluster) {
                     swaps++;
                 }
@@ -284,9 +283,9 @@ public class Kmeans extends Algorithm<HugeLongArray> {
                 //we keep as is and do a subtraction when a node changes its cluster.
                 //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
                 // or avoid calculating their distance from other nodes etc...
-                inCluster.set(nodeId, bestPosition);
+                communities.set(nodeId, bestPosition);
                 for (int j = 0; j < numberOfDimensions; ++j) {
-                    centreSumAtDimension[bestPosition][j] += nodePropertyArray[j];
+                    centerSumAtDimension[bestPosition][j] += nodePropertyArray[j];
                 }
             }
         }
