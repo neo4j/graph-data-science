@@ -28,12 +28,10 @@ import org.neo4j.values.storable.Value;
 public class UpdatableDoubleArrayNodeProperty implements UpdatableNodeProperty, DoubleArrayNodeProperties {
 
     private final long nodeCount;
-    private final double[] defaultValue;
     private final HugeSparseDoubleArrayList doubleArrayList;
 
     public UpdatableDoubleArrayNodeProperty(long nodeCount, double[] defaultValue) {
         this.nodeCount = nodeCount;
-        this.defaultValue = defaultValue;
         this.doubleArrayList = HugeSparseDoubleArrayList.of(defaultValue);
     }
 

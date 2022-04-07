@@ -28,12 +28,10 @@ import org.neo4j.values.storable.Value;
 public class UpdatableLongNodeProperty implements UpdatableNodeProperty, LongNodeProperties {
 
     private final long nodeCount;
-    private final long defaultValue;
     private final HugeSparseLongList longList;
 
     public UpdatableLongNodeProperty(long nodeCount, long defaultValue) {
         this.nodeCount = nodeCount;
-        this.defaultValue = defaultValue;
         this.longList = HugeSparseLongList.of(defaultValue);
     }
 
