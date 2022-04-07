@@ -109,6 +109,7 @@ def neo_deps = [
     'neo4j-lock',
     'neo4j-diagnostics',
     'neo4j-concurrent',
+    'neo4j-ssl',
     'neo4j',
 ]
 
