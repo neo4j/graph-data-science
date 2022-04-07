@@ -1,3 +1,5 @@
+import java.nio.file.Files
+
 def shouldForbiddenApis = !project.hasProperty('no-forbidden-apis')
 
 if (shouldForbiddenApis) {
@@ -14,7 +16,14 @@ if (shouldForbiddenApis) {
                 tasks.check.dependsOn it
             }
             proj.forbiddenApisMain {
-                signaturesFiles = files("$publicDir/etc/forbidden-apis-main")
+                ConfigurableFileCollection collection
+                def projectSpecificForbiddenAPIsConfig = proj.projectDir.toPath().resolve("forbidden-apis-main")
+                if(Files.exists(projectSpecificForbiddenAPIsConfig)) {
+                    collection = files("$publicDir/etc/forbidden-apis-main", projectSpecificForbiddenAPIsConfig)
+                } else {
+                    collection = files("$publicDir/etc/forbidden-apis-main")
+                }
+                signaturesFiles = collection
                 bundledSignatures += 'jdk-unsafe'
                 bundledSignatures += 'jdk-system-out'
                 exclude '**/*Immutable*.class'
