@@ -102,7 +102,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
         public NCTrainResult(NodeClassificationTrainResult algoResult, long trainMillis) {
             super(algoResult.model(), trainMillis);
-            this.modelSelectionStats = algoResult.modelSelectionStatistics().toMap();
+            this.modelSelectionStats = algoResult.trainingStatistics().toMap();
         }
     }
 }

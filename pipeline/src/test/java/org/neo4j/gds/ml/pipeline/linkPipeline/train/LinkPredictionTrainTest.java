@@ -215,7 +215,7 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.modelSelectionStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
+        assertThat(result.trainingStatistics().trainStats().get(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
 
         var actualModel = result.model();
 
@@ -229,7 +229,7 @@ class LinkPredictionTrainTest {
             .isEqualTo(6);
 
         var customInfo = actualModel.customInfo();
-        assertThat(result.modelSelectionStatistics().validationStats().get(LinkMetric.AUCPR))
+        assertThat(result.trainingStatistics().validationStats().get(LinkMetric.AUCPR))
             .satisfies(scores ->
                 assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))
             );

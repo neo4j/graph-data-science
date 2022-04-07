@@ -30,7 +30,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ModelSelectResultTest {
+class TrainingStatisticsTest {
 
     @Test
     void toMap() {
@@ -54,7 +54,7 @@ class ModelSelectResultTest {
         );
 
 
-        var selectResult = ModelSelectResult.of(firstCandidate, trainStats, validationStats);
+        var selectResult = TrainingStatistics.of(firstCandidate, trainStats, validationStats);
 
         List<Map<String, Object>> expectedTrainAccuracyStats = List.of(
             Map.of("params", firstCandidate.toMap(), "avg", 0.33, "min", 0.1, "max", 0.6),
@@ -69,8 +69,7 @@ class ModelSelectResultTest {
         assertThat(selectResult.toMap())
             .containsEntry("bestParameters", firstCandidate.toMap())
             .containsEntry("trainStats", Map.of("ACCURACY", expectedTrainAccuracyStats))
-            .containsEntry("validationStats", Map.of("ACCURACY", expectedValidationAccuracyStats))
-        ;
+            .containsEntry("validationStats", Map.of("ACCURACY", expectedValidationAccuracyStats));
     }
 
 }

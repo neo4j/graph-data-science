@@ -51,8 +51,7 @@ import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
-import org.neo4j.gds.ml.pipeline.BestMetricsProducer;
-import org.neo4j.gds.ml.pipeline.ModelSelectResult;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
@@ -385,7 +384,7 @@ public final class NodeClassificationTrain {
         );
     }
 
-    private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
+    private TrainingStatistics selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
         progressTracker.beginSubTask();
 
         var hyperParameterOptimizer = new RandomSearch(
@@ -430,12 +429,12 @@ public final class NodeClassificationTrain {
         var mainMetric = metrics.get(0);
         var bestModelStats = validationStats.pickBestModelStats(mainMetric);
 
-        return ModelSelectResult.of(bestModelStats.params(), trainStats.getMap(), validationStats.getMap());
+        return TrainingStatistics.of(bestModelStats.params(), trainStats.getMap(), validationStats.getMap());
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
-        ModelSelectResult modelSelectResult,
+        TrainingStatistics trainingStatistics,
         TrainerConfig bestParameters
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
@@ -447,7 +446,7 @@ public final class NodeClassificationTrain {
         var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
         progressTracker.endSubTask();
 
-        return BestMetricsProducer.computeBestMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
+        return trainingStatistics.finalizeMetrics(outerTrainMetrics, testMetrics);
     }
 
     private Classifier retrainBestModel(TrainerConfig bestParameters) {
@@ -460,13 +459,13 @@ public final class NodeClassificationTrain {
 
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         Classifier classifier,
-        ModelSelectResult modelSelectResult,
+        TrainingStatistics trainingStatistics,
         Map<Metric, BestMetricData> metricResults
     ) {
 
         var modelInfo = NodeClassificationPipelineModelInfo.builder()
             .classes(classIdMap.originalIdsList())
-            .bestParameters(modelSelectResult.bestParameters())
+            .bestParameters(trainingStatistics.bestParameters())
             .metrics(metricResults)
             .pipeline(NodeClassificationPredictPipeline.from(pipeline))
             .build();

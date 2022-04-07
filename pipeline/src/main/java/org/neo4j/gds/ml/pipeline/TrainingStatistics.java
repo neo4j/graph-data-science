@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -30,22 +32,40 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class BestMetricsProducer {
+@ValueClass
+public interface TrainingStatistics {
 
-    private BestMetricsProducer() {}
+    TrainerConfig bestParameters();
 
-    public static Map<Metric, BestMetricData> computeBestMetrics(
-        ModelSelectResult modelSelectResult,
-        Map<? extends Metric, Double> outerTrainMetrics,
-        Map<? extends Metric, Double> testMetrics
+    Map<Metric, List<ModelStats>> trainStats();
+
+    Map<Metric, List<ModelStats>> validationStats();
+
+    static TrainingStatistics of(
+        TrainerConfig bestConfig,
+        Map<? extends Metric, List<ModelStats>> trainStats,
+        Map<? extends Metric, List<ModelStats>> validationStats
     ) {
-        var metrics = modelSelectResult.validationStats().keySet();
+        return ImmutableTrainingStatistics.of(bestConfig, trainStats, validationStats);
+    }
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(
+            "bestParameters", bestParameters().toMap(),
+            "trainStats", MetricStatsToCypher.convertToCypher(trainStats()),
+            "validationStats", MetricStatsToCypher.convertToCypher(validationStats())
+        );
+    }
+
+    default Map<Metric, BestMetricData> finalizeMetrics(Map<? extends Metric, Double> outerTrainMetrics, Map<? extends Metric, Double> testMetrics) {
+        var metrics = validationStats().keySet();
 
         return metrics.stream().collect(Collectors.toMap(
             Function.identity(),
             metric -> BestMetricData.of(
-                findBestModelStats(modelSelectResult.trainStats().get(metric), modelSelectResult.bestParameters()),
-                findBestModelStats(modelSelectResult.validationStats().get(metric), modelSelectResult.bestParameters()),
+                findBestModelStats(trainStats().get(metric), bestParameters()),
+                findBestModelStats(validationStats().get(metric), bestParameters()),
                 outerTrainMetrics.get(metric),
                 testMetrics.get(metric)
             )
@@ -62,4 +82,18 @@ public final class BestMetricsProducer {
             .map(BestModelStats::of)
             .orElseThrow();
     }
+
+    final class MetricStatsToCypher {
+
+        private MetricStatsToCypher() {}
+
+        static Map<String,List<Map<String, Object>>> convertToCypher(Map<Metric, List<ModelStats>> metricStats) {
+            return metricStats.entrySet().stream().collect(Collectors.toMap(
+                entry -> entry.getKey().name(),
+                value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
+            ));
+        }
+
+    }
+
 }

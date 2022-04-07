@@ -48,8 +48,7 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.pipeline.BestMetricsProducer;
-import org.neo4j.gds.ml.pipeline.ModelSelectResult;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -132,8 +131,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask("extract train features");
 
         progressTracker.beginSubTask("select model");
-        var modelSelectResult = modelSelect(trainData, trainRelationshipIds);
-        var bestParameters = modelSelectResult.bestParameters();
+        var trainingStatistics = modelSelect(trainData, trainRelationshipIds);
+        var bestParameters = trainingStatistics.bestParameters();
         progressTracker.endSubTask("select model");
 
         // train best model on the entire training graph
@@ -153,12 +152,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var model = createModel(
             bestParameters,
             classifier.data(),
-            BestMetricsProducer.computeBestMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
+            trainingStatistics.finalizeMetrics(outerTrainMetrics, testMetrics)
         );
 
         progressTracker.endSubTask();
 
-        return LinkPredictionTrainResult.of(model, modelSelectResult);
+        return LinkPredictionTrainResult.of(model, trainingStatistics);
     }
 
     @NotNull
@@ -179,7 +178,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
-    private ModelSelectResult modelSelect(
+    private TrainingStatistics modelSelect(
         FeaturesAndLabels trainData,
         ReadOnlyHugeLongArray trainRelationshipIds
     ) {
@@ -244,11 +243,11 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         // 5. pick the best-scoring model candidate, according to the main metric
         var mainMetric = config.metrics().get(0);
         var modelStats = validationStats.get(mainMetric);
-        var winner = Collections.max(modelStats, COMPARE_AVERAGE);
+        ModelStats winner = Collections.max(modelStats, COMPARE_AVERAGE);
 
         var bestConfig = winner.params();
 
-        return ModelSelectResult.of(bestConfig, trainStats, validationStats);
+        return TrainingStatistics.of(bestConfig, trainStats, validationStats);
     }
 
     private Map<LinkMetric, Double> computeTestMetric(Classifier classifier) {
