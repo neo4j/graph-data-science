@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -124,34 +125,33 @@ class KmeansTest {
 
     @Test
     void shouldFailOnInvalidPropertyValueTypes() {
-        var kmeansContext = ImmutableKmeansContext.builder().build();
         var longProperties = new LongTestProperties(n -> n);
         assertThatThrownBy(() -> new Kmeans(
                 ProgressTracker.NULL_TRACKER,
+                Pools.DEFAULT,
                 graph,
                 5,
                 4,
                 10,
-                kmeansContext,
                 longProperties,
                 new SplittableRandom()
             ).compute()
         ).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Unsupported node property value type [LONG]. Value type required: [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
+            .hasMessageContaining(
+                "Unsupported node property value type [LONG]. Value type required: [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
     }
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.kmeans.KmeansTest#validNodeProperties")
     void shouldAcceptValidPropertyValueTypes(NodeProperties nodeProperties) {
-        var kmeansContext = ImmutableKmeansContext.builder().build();
         assertThatNoException()
             .isThrownBy(() -> new Kmeans(
                 ProgressTracker.NULL_TRACKER,
+                Pools.DEFAULT,
                 graph,
                 5,
                 4,
                 10,
-                kmeansContext,
                 nodeProperties,
                 new SplittableRandom()
             ).compute()

@@ -35,6 +35,7 @@ import org.neo4j.gds.utils.StringFormatting;
 import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutorService;
 
 public class Kmeans extends Algorithm<HugeLongArray> {
 
@@ -43,7 +44,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
     private final int k;
     private final int concurrency;
     private final int maxIterations;
-    private final KmeansContext context;
+    private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
     private final NodeProperties nodeProperties;
 
@@ -54,11 +55,11 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         NodeProperties nodeProperties = graph.nodeProperties(nodeWeightProperty);
         return new Kmeans(
             context.progressTracker(),
+            context.executor(),
             graph,
             config.k(),
             config.concurrency(),
             config.maxIterations(),
-            context,
             nodeProperties,
             getSplittableRandom(config.randomSeed())
         );
@@ -81,20 +82,20 @@ public class Kmeans extends Algorithm<HugeLongArray> {
 
     Kmeans(
         ProgressTracker progressTracker,
+        ExecutorService executorService,
         Graph graph,
         int k,
         int concurrency,
         int maxIterations,
-        KmeansContext context,
         NodeProperties nodeProperties,
         SplittableRandom splittableRandom
     ) {
         super(progressTracker);
+        this.executorService = executorService;
         this.graph = graph;
         this.k = k;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
-        this.context = context;
         this.splittableRandom = splittableRandom;
         this.inCluster = HugeLongArray.newArray(graph.nodeCount());
         validateNodeProperties(nodeProperties);
@@ -141,7 +142,7 @@ public class Kmeans extends Algorithm<HugeLongArray> {
         for (int iteration = 0; iteration < maxIterations; ++iteration) {
             long swaps = 0;
             //assign each node to a centre
-            ParallelUtil.runWithConcurrency(concurrency, kmeansThreads, context.executor());
+            ParallelUtil.runWithConcurrency(concurrency, kmeansThreads, executorService);
 
             for (int threadId = 0; threadId < numberOfTasks; ++threadId) {
                 swaps += kmeansThreads.get(threadId).getSwaps();
