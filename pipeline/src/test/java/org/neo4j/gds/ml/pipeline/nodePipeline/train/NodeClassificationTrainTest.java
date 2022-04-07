@@ -62,9 +62,6 @@ import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 @GdlExtension
 class NodeClassificationTrainTest {
 
-    // TODO validation
-    // at least one config
-
     @GdlGraph
     private static final String DB_QUERY =
         "CREATE " +

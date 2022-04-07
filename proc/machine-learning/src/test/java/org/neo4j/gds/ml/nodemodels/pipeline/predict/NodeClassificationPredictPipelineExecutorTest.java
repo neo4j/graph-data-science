@@ -38,12 +38,12 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
@@ -59,7 +59,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationPipelineTrainConfigImpl;
-import org.neo4j.gds.ml.pipeline.nodePipeline.train.NodeClassificationTrain;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.ArrayList;
@@ -433,7 +432,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .builder()
             .addDecisionTree(new DecisionTreePredict<>(root))
             .featureDimension(3)
-            .classIdMap(NodeClassificationTrain.makeClassIdMap(HugeLongArray.newArray(10)))
+            .classIdMap(LocalIdMap.ofSorted(List.of(0L)))
             .build();
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(

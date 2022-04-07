@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
-import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -40,11 +35,10 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
-import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -67,10 +61,8 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -78,6 +70,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
@@ -279,11 +272,11 @@ public final class NodeClassificationTrain {
         ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        var targetsAndClasses = computeGlobalTargetsAndClasses(targetNodeProperty, graph.nodeCount());
-        var targets = targetsAndClasses.getOne();
-        var classIdMap = makeClassIdMap(targets);
-        var classCounts = targetsAndClasses.getTwo();
-        var metrics = createMetrics(config, classCounts);
+        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
+        Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
+        HugeLongArray labels = labelsAndClassCounts.labels();
+        var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
+        var metrics = config.metrics(classCounts.keys());
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
         var trainStats = StatsMap.create(metrics);
@@ -297,53 +290,32 @@ public final class NodeClassificationTrain {
             features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
         }
 
+        var terminationFlag = TerminationFlag.RUNNING_TRUE;
+        var metricComputer = new ClassificationMetricComputer(
+            metrics,
+            classCounts,
+            features,
+            labels,
+            config.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+
         return new NodeClassificationTrain(
             graph,
             pipeline,
             config,
             features,
-            targets,
+            labels,
             classIdMap,
-            classCounts,
             metrics,
             nodeIds,
+            metricComputer,
             trainStats,
             validationStats,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
-    }
-
-    public static LocalIdMap makeClassIdMap(HugeLongArray targets) {
-        var classSet = new TreeSet<Long>();
-        var classIdMap = new LocalIdMap();
-        for (long i = 0; i < targets.size(); i++) {
-            classSet.add(targets.get(i));
-        }
-        classSet.forEach(classIdMap::toMapped);
-        return classIdMap;
-    }
-
-    private static Pair<HugeLongArray, Multiset<Long>> computeGlobalTargetsAndClasses(
-        NodeProperties targetNodeProperty,
-        long nodeCount
-    ) {
-        var classCounts = new Multiset<Long>();
-        var targets = HugeLongArray.newArray(nodeCount);
-        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            targets.set(nodeId, targetNodeProperty.longValue(nodeId));
-            classCounts.add(targetNodeProperty.longValue(nodeId));
-        }
-        return Tuples.pair(targets, classCounts);
-    }
-
-    private static List<Metric> createMetrics(
-        NodeClassificationPipelineTrainConfig config,
-        Multiset<Long> globalClassCounts
-    ) {
-        return config.metrics()
-            .stream()
-            .flatMap(spec -> spec.createMetrics(globalClassCounts.keys()))
-            .collect(Collectors.toList());
     }
 
     private NodeClassificationTrain(
@@ -351,36 +323,29 @@ public final class NodeClassificationTrain {
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         Features features,
-        HugeLongArray targets,
+        HugeLongArray labels,
         LocalIdMap classIdMap,
-        Multiset<Long> classCounts,
         List<Metric> metrics,
         HugeLongArray nodeIds,
+        ClassificationMetricComputer metricComputer,
         StatsMap trainStats,
         StatsMap validationStats,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.progressTracker = progressTracker;
-        this.terminationFlag = TerminationFlag.RUNNING_TRUE;
+        this.terminationFlag = terminationFlag;
         this.graph = graph;
         this.pipeline = pipeline;
         this.config = config;
         this.features = features;
-        this.targets = targets;
+        this.targets = labels;
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
         this.trainStats = trainStats;
         this.validationStats = validationStats;
-        this.metricComputer = new ClassificationMetricComputer(
-            metrics,
-            classCounts,
-            features,
-            targets,
-            config.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
+        this.metricComputer = metricComputer;
     }
 
     public NodeClassificationTrainResult compute() {
@@ -557,67 +522,4 @@ public final class NodeClassificationTrain {
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
     }
 
-    @ValueClass
-    public interface ModelSelectResult {
-        TrainerConfig bestParameters();
-
-        Map<Metric, List<ModelStats>> trainStats();
-
-        Map<Metric, List<ModelStats>> validationStats();
-
-        static ModelSelectResult of(
-            TrainerConfig bestConfig,
-            StatsMap trainStats,
-            StatsMap validationStats
-        ) {
-            return ImmutableModelSelectResult.of(bestConfig, trainStats.getMap(), validationStats.getMap());
-        }
-
-        @Value.Derived
-        default Map<String, Object> toMap() {
-            Function<Map<Metric, List<ModelStats>>, Map<String, Object>> statsConverter = stats ->
-                stats.entrySet().stream().collect(Collectors.toMap(
-                    entry -> entry.getKey().name(),
-                    value -> value.getValue().stream().map(ModelStats::toMap)
-                ));
-
-            return Map.of(
-                "bestParameters", bestParameters().toMap(),
-                "trainStats", statsConverter.apply(trainStats()),
-                "validationStats", statsConverter.apply(validationStats())
-            );
-        }
-
-    }
-
-    private static class ModelStatsBuilder {
-        private final Map<Metric, Double> min;
-        private final Map<Metric, Double> max;
-        private final Map<Metric, Double> sum;
-        private final TrainerConfig modelParams;
-        private final int numberOfSplits;
-
-        ModelStatsBuilder(TrainerConfig modelParams, int numberOfSplits) {
-            this.modelParams = modelParams;
-            this.numberOfSplits = numberOfSplits;
-            this.min = new HashMap<>();
-            this.max = new HashMap<>();
-            this.sum = new HashMap<>();
-        }
-
-        void update(Metric metric, double value) {
-            min.merge(metric, value, Math::min);
-            max.merge(metric, value, Math::max);
-            sum.merge(metric, value, Double::sum);
-        }
-
-        ModelStats build(Metric metric) {
-            return ImmutableModelStats.of(
-                modelParams,
-                sum.get(metric) / numberOfSplits,
-                min.get(metric),
-                max.get(metric)
-            );
-        }
-    }
 }
