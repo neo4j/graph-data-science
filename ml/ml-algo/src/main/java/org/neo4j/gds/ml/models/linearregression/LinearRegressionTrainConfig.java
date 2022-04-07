@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
+import org.neo4j.gds.ml.models.PenaltyConfig;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
@@ -32,14 +32,8 @@ import java.util.Map;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinearRegressionTrainConfig extends GradientDescentConfig, TrainerConfig {
+public interface LinearRegressionTrainConfig extends GradientDescentConfig, PenaltyConfig, TrainerConfig {
     LinearRegressionTrainConfig DEFAULT = of(Map.of());
-
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double penalty() {
-        return 0.0;
-    }
 
     @Configuration.ToMap
     Map<String, Object> toMap();
