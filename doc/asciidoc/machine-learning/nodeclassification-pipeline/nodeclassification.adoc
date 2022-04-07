@@ -47,7 +47,8 @@ The rest of this page is divided as follows:
 * <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>
 * <<nodeclassification-pipelines-adding-features, Adding features>>
 * <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>
-* <<nodeclassification-pipelines-configure-model-parameters, Configuring the model parameter space>>
+* <<nodeclassification-pipelines-adding-model-candidates, Adding model candidates>>
+* <<nodeclassification-pipelines-configure-auto-tuning, Configuring the auto-tuning>>
 * <<nodeclassification-pipelines-train, Training the pipeline>>
 * <<nodeclassification-pipelines-predict, Applying a classification model to make predictions>>
 
@@ -241,7 +242,7 @@ YIELD name, featureProperties
 [[nodeclassification-pipelines-configure-splits]]
 == Configuring the node splits
 
-Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<nodeclassification-pipelines-configure-model-parameters,parameter space>>.
+Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<nodeclassification-pipelines-adding-model-candidates,parameter space>>.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
 The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
 
@@ -332,11 +333,13 @@ YIELD splitConfig
 We now reconfigured the splitting of the pipeline, which will be applied during <<nodeclassification-pipelines-train, training>>.
 --
 
-[[nodeclassification-pipelines-configure-model-parameters]]
+[[nodeclassification-pipelines-adding-model-candidates]]
 == Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
+Each model candidate configuration contains either fixed values or ranges for training parameters.
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see <<ml-auto-tuning>>.
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.nodeClassification.addLogisticRegression`
@@ -434,9 +437,9 @@ include::pipelineInfoResult.adoc[]
 We can add multiple model candidates to our pipeline.
 
 [source, cypher, role=noplay query-example, no-result=true, group=nc]
-.The following will add a logistic regression model:
+.The following will add a logistic regression model with default configuration:
 --
-CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {penalty: 0.0625})
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe')
 YIELD parameterSpace
 --
 
@@ -449,10 +452,10 @@ YIELD parameterSpace
 
 [role=query-example,group=nc]
 --
-.The following will add another logistic regression model:
+.The following will add a logistic regression model with a range parameter:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500})
+CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
 YIELD parameterSpace
 RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
@@ -461,7 +464,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace
-| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 
@@ -474,6 +477,77 @@ These are somewhat naive examples of how to add and configure model candidates.
 Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
 ====
 
+
+[[nodeclassification-pipelines-configure-auto-tuning]]
+== Configuring Auto-tuning
+
+In order to find good models, the pipeline supports automatically tuning the parameters of the training algorithm.
+Optionally, the procedure described below can be used to configure the auto-tuning behavior.
+Otherwise, default auto-tuning configuration is used.
+Currently, it is only possible to configure the maximum number trials of hyper-parameter settings which are evaluated.
+
+
+=== Syntax
+
+[.pipeline-configure-auto-tuning-syntax]
+--
+.Configuring auto-tuning syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the created pipeline.
+| configuration   | Map     | The configuration for auto-tuning.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name            | Type    | Default      | Description
+| maxTrials       | Integer | {max-trials} | The value of `maxTrials` determines the maximum allowed model candidates that should be evaluated and compared when training the pipeline. If no ranges are present in the parameter space, `maxTrials` is ignored and the each model candidate in the parameter space is evaluated.
+|===
+
+
+include::pipelineInfoResult.adoc[]
+--
+
+=== Example
+
+[role=query-example,group=nc]
+--
+.The following will configure the maximum trials for the auto-tuning:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('pipe', {
+  maxTrials: 100
+})
+YIELD autoTuningConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| autoTuningConfig
+| {maxTrials=100}
+|===
+
+We now reconfigured the auto-tuning to try out at most 100 model candidates during <<nodeclassification-pipelines-train, training>>.
+--
 
 include::training.adoc[]
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddStepProcs;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineAddTrainerMethodProcs;
+import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureAutoTuningProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.ml.nodemodels.pipeline.predict.NodeClassificationPipelineMutateProc;
@@ -58,6 +59,7 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
             NodeClassificationPipelineTrainProc.class,
             NodeClassificationPipelineAddStepProcs.class,
             NodeClassificationPipelineConfigureSplitProc.class,
+            NodeClassificationPipelineConfigureAutoTuningProc.class,
             NodeClassificationPipelineAddTrainerMethodProcs.class,
             GraphStreamNodePropertiesProc.class,
             GraphProjectProc.class,

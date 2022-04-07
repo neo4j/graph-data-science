@@ -48,7 +48,8 @@ The rest of this page is divided as follows:
 * <<linkprediction-adding-node-properties, Adding node properties>>
 * <<linkprediction-adding-features, Adding link features>>
 * <<linkprediction-configure-splits, Configuring the relationship splits>>
-* <<linkprediction-configure-model-parameters, Configuring the model parameter space>>
+* <<linkprediction-adding-model-candidates, Adding model candidates>>
+* <<linkprediction-configure-auto-tuning, Configuring the auto-tuning>>
 * <<linkprediction-pipelines-train, Training the pipeline>>
 * <<algorithms-link-prediction-pipelines-predict, Applying a trained model for prediction>>
 
@@ -390,11 +391,13 @@ YIELD splitConfig
 We now reconfigured the splitting of the pipeline, which will be applied during <<linkprediction-pipelines-train, training>>.
 --
 
-[[linkprediction-configure-model-parameters]]
+[[linkprediction-adding-model-candidates]]
 == Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
+Each model candidate configuration contains either fixed values or ranges for training parameters.
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see <<ml-auto-tuning>>.
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.linkPrediction.addLogisticRegression`
@@ -492,9 +495,9 @@ include::pipelineInfoResult.adoc[]
 We can add multiple model candidates to our pipeline.
 
 [source, cypher, role=noplay query-example, no-result=true, group=lp]
-.The following will add a logistic regression model:
+.The following will add a logistic regression model with default configuration:
 --
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 0.0625})
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
 YIELD parameterSpace
 --
 
@@ -507,10 +510,10 @@ YIELD parameterSpace
 
 [role=query-example,group=lp]
 --
-.The following will add another logistic regression model:
+.The following will add a logistic regression model with a range parameter:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500})
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
 YIELD parameterSpace
 RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
@@ -519,7 +522,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace
-| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 
@@ -531,6 +534,78 @@ Each specified model candidate will be tried out during the model selection in <
 These are somewhat naive examples of how to add and configure model candidates.
 Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
 ====
+
+
+[[linkprediction-configure-auto-tuning]]
+== Configuring Auto-tuning
+
+In order to find good models, the pipeline supports automatically tuning the parameters of the training algorithm.
+Optionally, the procedure described below can be used to configure the auto-tuning behavior.
+Otherwise, default auto-tuning configuration is used.
+Currently, it is only possible to configure the maximum number trials of hyper-parameter settings which are evaluated.
+
+
+=== Syntax
+
+[.pipeline-configure-auto-tuning-syntax]
+--
+.Configuring auto-tuning syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the created pipeline.
+| configuration   | Map     | The configuration for auto-tuning.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name            | Type    | Default      | Description
+| maxTrials       | Integer | {max-trials} | The value of `maxTrials` determines the maximum allowed model candidates that should be evaluated and compared when training the pipeline. If no ranges are present in the parameter space, `maxTrials` is ignored and the each model candidate in the parameter space is evaluated.
+|===
+
+include::pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will configure the maximum trials for the auto-tuning:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('pipe', {
+  maxTrials: 100
+})
+YIELD autoTuningConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| autoTuningConfig
+| {maxTrials=100}
+|===
+
+We now reconfigured the auto-tuning to try out at most 100 model candidates during <<linkprediction-pipelines-train, training>>.
+--
 
 include::training.adoc[]
 

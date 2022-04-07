@@ -42,9 +42,9 @@ Below is a description of the methods on such objects:
                             Union[str, list[str]]  | Series                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
 | configureSplit        | config: **kwargs         | Series                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
 | addRandomForest       | parameter_space: +
-                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>.
 | train                 | G: Graph, +
                             config: **kwargs       | NCPredictionPipeline, +
                                                              Series          | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
@@ -187,9 +187,9 @@ Below is a description of the methods on such objects:
                         config: **kwargs         | Series              | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
 | configureSplit        | config: **kwargs       | Series              | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                          dict[str, any]         | Series              | <<linkprediction-configure-model-parameters, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
+                          dict[str, any]         | Series              | <<linkprediction-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>.
 | addRandomForest       | parameter_space: +
-                          dict[str, any]         | Series              | <<linkprediction-configure-model-parameters, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+                          dict[str, any]         | Series              | <<linkprediction-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>.
 | train                 | G: Graph, +
 config: **kwargs        | LPPredictionPipeline, +
                                                   Series               | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.

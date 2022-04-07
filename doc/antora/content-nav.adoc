@@ -110,6 +110,7 @@
 *** xref:model-catalog/store/index.adoc[]
 *** xref:model-catalog/publish/index.adoc[]
 ** xref:machine-learning/training-methods/index.adoc[]
+** xref:machine-learning/auto-tuning/index.adoc[]
 * xref:end-to-end-examples/end-to-end-examples/index.adoc[]
 ** xref:end-to-end-examples/fastrp-knn-example/index.adoc[]
 * xref:production-deployment/index.adoc[]
