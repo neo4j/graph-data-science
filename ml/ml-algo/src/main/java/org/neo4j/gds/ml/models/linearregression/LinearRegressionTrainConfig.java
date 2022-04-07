@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.models.logisticregression;
+package org.neo4j.gds.ml.models.linearregression;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -32,8 +32,8 @@ import java.util.Map;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LogisticRegressionTrainConfig extends GradientDescentConfig, PenaltyConfig, TrainerConfig {
-    LogisticRegressionTrainConfig DEFAULT = of(Map.of());
+public interface LinearRegressionTrainConfig extends GradientDescentConfig, PenaltyConfig, TrainerConfig {
+    LinearRegressionTrainConfig DEFAULT = of(Map.of());
 
     @Configuration.ToMap
     Map<String, Object> toMap();
@@ -41,10 +41,10 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Pe
     @Configuration.CollectKeys
     Collection<String> configKeys();
 
-    static LogisticRegressionTrainConfig of(Map<String, Object> params) {
+    static LinearRegressionTrainConfig of(Map<String, Object> params) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
 
-        var config = new LogisticRegressionTrainConfigImpl(cypherMapWrapper);
+        var config = new LinearRegressionTrainConfigImpl(cypherMapWrapper);
 
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;
@@ -52,6 +52,6 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Pe
 
     @Override
     default String methodName() {
-        return TrainingMethod.LogisticRegression.name();
+        return TrainingMethod.LinearRegression.name();
     }
 }
