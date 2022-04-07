@@ -102,6 +102,7 @@ public final class GraphFactory {
             : Optional.<Long>empty();
 
         var idMapBuilder = idMapBehavior.create(
+            threadCount,
             maybeMaxOriginalId,
             nodeCount
         );

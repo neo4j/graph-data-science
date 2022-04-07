@@ -70,6 +70,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
         var idMapBuilder = IdMapBehaviorServiceProvider
             .idMapBehavior()
             .create(
+                concurrency,
                 Optional.of(dimensions.highestPossibleNodeCount()),
                 Optional.of(dimensions.nodeCount())
             );

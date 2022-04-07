@@ -26,6 +26,7 @@ import java.util.Optional;
 
 public interface IdMapBehavior {
     IdMapBuilder create(
+        int concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount
     );

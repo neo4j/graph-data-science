@@ -31,12 +31,13 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public IdMapBuilder create(
+        int concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount
     ) {
         return nodeCount.or(() -> maxOriginalId.map(maxId -> maxId + 1))
             .map(capacity -> (IdMapBuilder) HugeIdMapBuilder.of(capacity))
-            .orElseGet(() -> GrowingHugeIdMapBuilder.of());
+            .orElseGet(GrowingHugeIdMapBuilder::of);
     }
 
     @Override
