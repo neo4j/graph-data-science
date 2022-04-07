@@ -39,7 +39,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
@@ -58,7 +57,6 @@ import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -275,12 +273,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             config.randomSeed()
         );
         return splitter.splits();
-    }
-
-    private static Map<LinkMetric, List<ModelStats>> initStatsMap() {
-        var statsMap = new EnumMap<LinkMetric, List<ModelStats>>(LinkMetric.class);
-        statsMap.put(LinkMetric.AUCPR, new ArrayList<>());
-        return statsMap;
     }
 
     private Map<LinkMetric, Double> computeTrainMetric(
