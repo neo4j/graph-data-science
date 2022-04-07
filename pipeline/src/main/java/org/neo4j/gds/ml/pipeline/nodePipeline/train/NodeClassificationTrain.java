@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
@@ -52,6 +51,7 @@ import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.pipeline.BestMetricsProducer;
 import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
@@ -64,7 +64,6 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -448,7 +447,7 @@ public final class NodeClassificationTrain {
         var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
         progressTracker.endSubTask();
 
-        return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
+        return BestMetricsProducer.computeBestMetrics(modelSelectResult, outerTrainMetrics, testMetrics);
     }
 
     private Classifier retrainBestModel(TrainerConfig bestParameters) {
@@ -481,29 +480,6 @@ public final class NodeClassificationTrain {
             config,
             modelInfo
         );
-    }
-
-    private static Map<Metric, BestMetricData> mergeMetricResults(
-        ModelSelectResult modelSelectResult,
-        Map<Metric, Double> outerTrainMetrics,
-        Map<Metric, Double> testMetrics
-    ) {
-        return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric ->
-                BestMetricData.of(
-                    BestModelStats.findBestModelStats(
-                        modelSelectResult.trainStats().get(metric),
-                        modelSelectResult.bestParameters()
-                    ),
-                    BestModelStats.findBestModelStats(
-                        modelSelectResult.validationStats().get(metric),
-                        modelSelectResult.bestParameters()
-                    ),
-                    outerTrainMetrics.get(metric),
-                    testMetrics.get(metric)
-                )
-        ));
     }
 
     private Classifier trainModel(

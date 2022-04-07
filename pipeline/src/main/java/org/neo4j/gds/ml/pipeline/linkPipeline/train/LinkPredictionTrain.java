@@ -48,11 +48,12 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.pipeline.BestMetricsProducer;
+import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.ModelSelectResult;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
@@ -62,11 +63,9 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.ml.metrics.BestModelStats.findBestModelStats;
 import static org.neo4j.gds.ml.metrics.ModelStats.COMPARE_AVERAGE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
@@ -154,7 +153,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var model = createModel(
             bestParameters,
             classifier.data(),
-            combineBestParameterMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
+            BestMetricsProducer.computeBestMetrics(modelSelectResult, outerTrainMetrics, testMetrics)
         );
 
         progressTracker.endSubTask();
@@ -274,25 +273,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask("compute test metrics");
 
         return result;
-    }
-
-    // FIXME share between NC and LP
-    private static Map<Metric, BestMetricData> combineBestParameterMetrics(
-        ModelSelectResult modelSelectResult,
-        Map<? extends Metric, Double> outerTrainMetrics,
-        Map<? extends Metric, Double> testMetrics
-    ) {
-        var metrics = modelSelectResult.validationStats().keySet();
-
-        return metrics.stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric -> BestMetricData.of(
-                findBestModelStats(modelSelectResult.trainStats().get(metric), modelSelectResult.bestParameters()),
-                findBestModelStats(modelSelectResult.validationStats().get(metric), modelSelectResult.bestParameters()),
-                outerTrainMetrics.get(metric),
-                testMetrics.get(metric)
-            )
-        ));
     }
 
     private List<TrainingExamplesSplit> trainValidationSplits(
