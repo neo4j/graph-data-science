@@ -144,8 +144,8 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             //assign each node to a center
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
 
-            for (int threadId = 0; threadId < numberOfTasks; ++threadId) {
-                swaps += tasks.get(threadId).getSwaps();
+            for (KmeansTask task : tasks) {
+                swaps += task.getSwaps();
             }
             if (swaps == 0) {
                 break;
@@ -267,9 +267,9 @@ public class Kmeans extends Algorithm<HugeIntArray> {
                 var nodePropertyArray = nodeProperties.doubleArrayValue(nodeId);
                 double smallestDistance = euclidean(nodePropertyArray, clusterCenters[0]);
                 for (int centerId = 1; centerId < k; ++centerId) {
-                    double tempDistance = euclidean(nodePropertyArray, clusterCenters[centerId]);
-                    if (tempDistance < smallestDistance) {
-                        smallestDistance = tempDistance;
+                    double distance = euclidean(nodePropertyArray, clusterCenters[centerId]);
+                    if (distance < smallestDistance) {
+                        smallestDistance = distance;
                         bestPosition = centerId;
                     }
                 }
