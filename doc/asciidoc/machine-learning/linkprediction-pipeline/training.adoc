@@ -205,7 +205,7 @@ YIELD requiredMemory
 [opts="header",cols="1"]
 |===
 | requiredMemory
-| "[67 KiB \... 1817 KiB]"
+| "[28 KiB \... 571 KiB]"
 |===
 --
 

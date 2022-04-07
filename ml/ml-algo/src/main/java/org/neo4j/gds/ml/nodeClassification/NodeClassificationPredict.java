@@ -125,7 +125,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             (dim, threads) ->
                 ClassifierFactory.runtimeOverheadMemoryEstimation(
                     method,
-                    BatchQueue.computeBatchSize(dim.nodeCount(), minBatchSize, threads),
+                    (int) Math.min(dim.nodeCount(), BatchQueue.computeBatchSize(dim.nodeCount(), minBatchSize, threads)),
                     classCount,
                     featureCount,
                     isReduced

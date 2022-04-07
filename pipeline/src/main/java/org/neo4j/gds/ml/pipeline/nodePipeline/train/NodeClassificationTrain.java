@@ -47,6 +47,7 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
@@ -181,26 +182,34 @@ public final class NodeClassificationTrain {
             .stream()
             .flatMap(List::stream)
             .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
-            .map(config -> {
-                var training = ClassifierTrainerFactory.memoryEstimation(
-                    config,
-                    trainSetSize,
-                    fudgedClassCount,
-                    MemoryRange.of(fudgedFeatureCount),
-                    false
-                );
+            .map(
+                config ->
+                    MemoryEstimations.setup("max of training and evaluation", dim ->
+                        {
+                            var training = ClassifierTrainerFactory.memoryEstimation(
+                                config,
+                                trainSetSize,
+                                (int) Math.min(fudgedClassCount, dim.nodeCount()),
+                                MemoryRange.of(fudgedFeatureCount),
+                                false
+                            );
 
-                var evaluation = ClassificationMetricComputer.estimateEvaluation(
-                    config,
-                    trainSetSize,
-                    testSetSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    false
-                );
+                            int batchSize = config instanceof LogisticRegressionTrainConfig
+                                ? ((LogisticRegressionTrainConfig) config).batchSize()
+                                : 0; // Not used
+                            var evaluation = ClassificationMetricComputer.estimateEvaluation(
+                                config,
+                                (int) Math.min(batchSize, dim.nodeCount()),
+                                trainSetSize,
+                                testSetSize,
+                                (int) Math.min(fudgedClassCount, dim.nodeCount()),
+                                fudgedFeatureCount,
+                                false
+                            );
 
-                return MemoryEstimations.maxEstimation(List.of(training, evaluation));
-            })
+                            return MemoryEstimations.maxEstimation(List.of(training, evaluation));
+                        }
+                    ))
             .collect(Collectors.toList());
 
         return MemoryEstimations.builder("model selection")

@@ -84,7 +84,8 @@ public class ClassifierTrainerFactory {
                     isReduced,
                     numberOfClasses,
                     featureDimension,
-                    ((LogisticRegressionTrainConfig) config).batchSize()
+                    ((LogisticRegressionTrainConfig) config).batchSize(),
+                    numberOfTrainingExamples
                 );
             case RandomForest: {
                 return RandomForestClassifierTrainer.memoryEstimation(

@@ -149,13 +149,13 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
     }
 
     static Stream<Arguments> graphNameOrConfigurations() {
-        MemoryRange pipelineExecutorEstimation = MemoryRange.of(6160L);
+        MemoryRange pipelineExecutorEstimation = MemoryRange.of(840L);
 
         return Stream.of(
             Arguments.of("g", pipelineExecutorEstimation),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(301472)
+                MemoryRange.of(296152)
             )
         );
     }

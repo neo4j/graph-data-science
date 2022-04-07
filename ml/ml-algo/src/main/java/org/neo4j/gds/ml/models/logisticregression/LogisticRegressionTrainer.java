@@ -33,6 +33,7 @@ import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
+import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.standard;
@@ -51,21 +52,26 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         boolean isReduced,
         int numberOfClasses,
         MemoryRange featureDimension,
-        int batchSize
+        int batchSize,
+        LongUnaryOperator numberOfTrainingExamples
     ) {
         return MemoryEstimations.builder("train logistic regression", LogisticRegressionTrainer.class)
             .add("model data", LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, featureDimension))
             .add("update weights", Training.memoryEstimation(featureDimension, numberOfClasses))
-            .perThread(
+            .perGraphDimension(
                 "computation graph",
-                featureDimension.apply(dim ->
-                    sizeInBytesOfComputationGraph(
-                        isReduced,
-                        batchSize,
-                        (int) dim,
-                        numberOfClasses
-                    )
-                )
+                (graphDimensions, concurrency) -> {
+                    long actualTrainSetSize = numberOfTrainingExamples.applyAsLong(graphDimensions.nodeCount());
+                    int numberOfConcurrentComputationGraphs = (int) Math.min(concurrency, Math.ceil((double) actualTrainSetSize / batchSize));
+                    return featureDimension.apply(dim ->
+                        sizeInBytesOfComputationGraph(
+                            isReduced,
+                            batchSize,
+                            (int) dim,
+                            numberOfClasses
+                        )
+                    ).times(numberOfConcurrentComputationGraphs);
+                }
             )
             .build();
     }
