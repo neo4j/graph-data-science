@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,9 +43,6 @@ import static org.neo4j.gds.utils.StringJoining.join;
 public class NodePropertyFunc {
     @Context
     public GraphDatabaseAPI api;
-
-    @Context
-    public KernelTransaction transaction;
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
