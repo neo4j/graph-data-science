@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
@@ -162,7 +163,7 @@ class LinkPredictionPipelineTest {
         void returnsCorrectDefaultsMap() {
             var pipeline = new LinkPredictionTrainingPipeline();
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
                 .satisfies(pipelineMap -> {
                     assertThat(pipelineMap.get("featurePipeline"))
                         .isInstanceOf(Map.class)
@@ -181,6 +182,9 @@ class LinkPredictionPipelineTest {
                         TrainingMethod.RandomForest.name(), List.of()
                     ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
+                ).returns(
+                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                    pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
         }
 
@@ -215,7 +219,7 @@ class LinkPredictionPipelineTest {
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
                 .satisfies(pipelineMap -> {
                     assertThat(pipelineMap.get("featurePipeline"))
                         .isInstanceOf(Map.class)
@@ -249,6 +253,9 @@ class LinkPredictionPipelineTest {
                             .collect(Collectors.toList())
                     ),
                       pipelineMap -> pipelineMap.get("trainingParameterSpace")
+                ).returns(
+                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                    pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
         }
     }

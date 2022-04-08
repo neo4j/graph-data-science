@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 
@@ -148,7 +149,7 @@ class NodeClassificationPipelineTest {
         void returnsCorrectDefaultsMap() {
             var pipeline = new NodeClassificationTrainingPipeline();
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
                 .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
@@ -162,6 +163,10 @@ class NodeClassificationPipelineTest {
                 .returns(
                     Map.of(TrainingMethod.LogisticRegression.name(), List.of(), TrainingMethod.RandomForest.name(), List.of()),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
+                )
+                .returns(
+                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                    pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
         }
 
@@ -186,7 +191,7 @@ class NodeClassificationPipelineTest {
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace")
+                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
                 .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(InstanceOfAssertFactories.MAP)
@@ -209,6 +214,9 @@ class NodeClassificationPipelineTest {
                         .map(TunableTrainerConfig::toMap)
                         .collect(Collectors.toList()),
                     pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LogisticRegression.name())
+                ).returns(
+                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                    pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
         }
     }
