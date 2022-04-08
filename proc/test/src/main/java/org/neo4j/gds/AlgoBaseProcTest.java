@@ -65,7 +65,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.QueryRunner.runQuery;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROPERTIES_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROPERTIES_KEY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -237,10 +236,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return false;
     }
 
-    default String relationshipQuery() {
-        return ALL_RELATIONSHIPS_QUERY;
-    }
-
     default boolean releaseAlgorithm() {
         return true;
     }
@@ -382,15 +377,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             .filter(method -> {
                 String procedureMethodName = getProcedureMethodName(method);
                 return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write");
-            });
-    }
-
-    default Stream<Method> getWriteStreamStatsProcedures(AlgoBaseProc<?, RESULT, CONFIG, ?> proc) {
-        return getProcedureMethods(proc)
-            .filter(method -> {
-                var procedureMethodName = getProcedureMethodName(method);
-                return procedureMethodName.endsWith("stream") || procedureMethodName.endsWith("write") || procedureMethodName.endsWith(
-                    "stats");
             });
     }
 

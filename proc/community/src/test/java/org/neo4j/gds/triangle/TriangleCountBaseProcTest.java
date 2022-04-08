@@ -37,7 +37,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig> extends BaseProcTest
@@ -87,11 +86,6 @@ abstract class TriangleCountBaseProcTest<CONFIG extends TriangleCountBaseConfig>
     @Override
     public boolean requiresUndirected() {
         return true;
-    }
-
-    @Override
-    public String relationshipQuery() {
-        return ALL_RELATIONSHIPS_UNDIRECTED_QUERY;
     }
 
     @Test
