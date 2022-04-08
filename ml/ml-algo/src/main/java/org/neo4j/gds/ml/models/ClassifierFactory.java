@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
+import org.neo4j.gds.ml.models.randomforest.RandomForestData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.function.LongUnaryOperator;
@@ -79,7 +80,7 @@ public final class ClassifierFactory {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
             case RandomForest:
-                return RandomForestClassifierData.memoryEstimation(
+                return RandomForestData.memoryEstimation(
                     numberOfTrainingSamples,
                     (RandomForestTrainerConfig) trainerConfig
                 );

@@ -91,7 +91,7 @@ public class RandomForestClassifierTrainer implements Trainer {
 
         return MemoryEstimations.builder("Training", RandomForestClassifierTrainer.class)
             // estimating the final forest produced
-            .add(RandomForestClassifierData.memoryEstimation(numberOfTrainingSamples, config))
+            .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
                 "GiniIndex Loss",
                 nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))

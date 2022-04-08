@@ -22,15 +22,15 @@ package org.neo4j.gds.ml.models.randomforest;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
-import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.List;
 
 @ValueClass
-public interface RandomForestClassifierData extends Classifier.ClassifierData {
+public interface RandomForestRegressorData extends Regressor.RegressorData {
 
-    List<DecisionTreePredictor<Integer>> decisionTrees();
+    List<DecisionTreePredictor<Double>> decisionTrees();
 
     @Value.Derived
     default TrainingMethod trainerMethod() {
