@@ -70,6 +70,7 @@ public class ClosenessCentralityStatsProc extends StatsProc<ClosenessCentrality,
         );
     }
 
+    @SuppressWarnings("unused")
     public static class StatsResult extends StandardStatsResult {
 
         public final Map<String, Object> centralityDistribution;

@@ -84,6 +84,7 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
     }
 
     // TODO: remove this and use `org.neo4j.gds.common.CentralityStreamResult` when productizing.
+    @SuppressWarnings("unused")
     public static final class StreamResult {
 
         public final long nodeId;

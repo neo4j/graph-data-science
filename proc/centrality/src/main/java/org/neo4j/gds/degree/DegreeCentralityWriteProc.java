@@ -91,6 +91,7 @@ public class DegreeCentralityWriteProc extends WriteProc<DegreeCentrality, Degre
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends StandardWriteResult {
 
         public final long nodePropertiesWritten;

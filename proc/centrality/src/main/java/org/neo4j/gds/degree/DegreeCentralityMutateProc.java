@@ -89,6 +89,7 @@ public class DegreeCentralityMutateProc extends MutatePropertyProc<DegreeCentral
         return DegreeCentralityProc.nodeProperties(computationResult);
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends StandardMutateResult {
 
         public final long nodePropertiesWritten;

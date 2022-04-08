@@ -93,6 +93,7 @@ public class ClosenessCentralityMutateProc extends MutatePropertyProc<ClosenessC
             .resultBuilder(procResultBuilder, computeResult);
     }
 
+    @SuppressWarnings("unused")
     public static final class MutateResult extends StandardMutateResult {
 
         public final long nodePropertiesWritten;

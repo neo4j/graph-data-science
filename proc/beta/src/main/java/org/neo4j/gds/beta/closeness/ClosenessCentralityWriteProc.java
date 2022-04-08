@@ -93,6 +93,7 @@ public class ClosenessCentralityWriteProc extends WriteProc<ClosenessCentrality,
         );
     }
 
+    @SuppressWarnings("unused")
     public static final class WriteResult extends StandardWriteResult {
 
         public final long nodePropertiesWritten;
