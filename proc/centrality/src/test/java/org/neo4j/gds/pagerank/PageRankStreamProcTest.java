@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.MapUtil;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -106,13 +105,10 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             "cacheWeights", true
         )));
 
-        var log = Neo4jProxy.testLog();
-
-        assertThatThrownBy(() -> {
-            applyOnProcedure(proc -> {
-                ((PageRankStreamProc) proc).stream(DEFAULT_GRAPH_NAME, config.toMap());
-            });
-        })
+        assertThatThrownBy(() -> applyOnProcedure(proc -> ((PageRankStreamProc) proc).stream(
+            DEFAULT_GRAPH_NAME,
+            config.toMap()
+        )))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration key: cacheWeights");
     }
