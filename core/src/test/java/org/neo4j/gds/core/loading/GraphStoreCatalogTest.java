@@ -419,7 +419,6 @@ class GraphStoreCatalogTest {
     @Test
     void shouldThrowOnMissingGraph() {
         var dummyDatabaseId = DatabaseIdFactory.from("mydatabase", UUID.fromString("0-0-0-0-0"));
-        var dummyGraphStore = GdlFactory.of("()").build();
 
         // test the get code path
         assertThatExceptionOfType(NoSuchElementException.class)

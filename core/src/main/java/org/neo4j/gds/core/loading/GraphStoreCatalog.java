@@ -302,11 +302,6 @@ public final class GraphStoreCatalog {
             degreeDistributionByName.remove(userCatalogKey);
         }
 
-        private GraphStoreWithConfig get(UserCatalogKey userCatalogKey) {
-            //noinspection ConstantConditions
-            return get(userCatalogKey, true);
-        }
-
         private @Nullable GraphStoreWithConfig get(UserCatalogKey userCatalogKey, boolean failOnMissing) {
             var graphStoreWithConfig = graphsByName.get(userCatalogKey);
 
