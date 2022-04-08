@@ -33,7 +33,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -110,7 +109,6 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            BatchTransformer.IDENTITY,
             1,
             true,
             ProgressTracker.NULL_TRACKER,
@@ -167,7 +165,6 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            BatchTransformer.IDENTITY,
             1,
             true,
             ProgressTracker.NULL_TRACKER,
@@ -235,7 +232,6 @@ class NodeClassificationPredictTest {
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
-            BatchTransformer.IDENTITY,
             1,
             false,
             progressTracker,

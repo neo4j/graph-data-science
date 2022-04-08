@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -117,7 +116,6 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties()),
             MIN_BATCH_SIZE,
-            BatchTransformer.IDENTITY,
             config.concurrency(),
             config.includePredictedProbabilities(),
             progressTracker,

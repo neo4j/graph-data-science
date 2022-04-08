@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
@@ -47,16 +46,13 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
 
     private final Classifier classifier;
     private final Features features;
-    private final int batchSize;
-    private final int concurrency;
     private final boolean produceProbabilities;
-    private final BatchTransformer batchTransformer;
+    private final ParallelNodeClassifier predictor;
 
     public NodeClassificationPredict(
         Classifier classifier,
         Features features,
         int batchSize,
-        BatchTransformer batchTransformer,
         int concurrency,
         boolean produceProbabilities,
         ProgressTracker progressTracker,
@@ -65,11 +61,17 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         super(progressTracker);
         this.classifier = classifier;
         this.features = features;
-        this.batchTransformer = batchTransformer;
-        this.concurrency = concurrency;
-        this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
         this.terminationFlag = terminationFlag;
+
+        this.predictor = new ParallelNodeClassifier(
+            classifier,
+            features,
+            batchSize,
+            concurrency,
+            progressTracker,
+            terminationFlag
+        );
     }
 
     public static Task progressTask(Graph graph) {
@@ -132,51 +134,14 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         return builder.build();
     }
 
-    // FIXME: turn this into a class
-    static HugeLongArray predict(
-        Classifier classifier,
-        Features features,
-        long evalutationSetSize,
-        int batchSize,
-        BatchTransformer batchTransformer,
-        int concurrency,
-        @Nullable HugeObjectArray<double[]> predictedProbabilities,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
-        var predictedClasses = HugeLongArray.newArray(evalutationSetSize);
-        var consumer = new NodeClassificationPredictConsumer(
-            features,
-            batchTransformer,
-            classifier,
-            predictedProbabilities,
-            predictedClasses,
-            progressTracker
-        );
-        var batchQueue = new BatchQueue(evalutationSetSize, batchSize, concurrency);
-        batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
-
-        return predictedClasses;
-    }
 
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
-
-        var predictedClasses = predict(
-            classifier,
-            features,
-            features.size(),
-            batchSize,
-            batchTransformer,
-            concurrency,
-            predictedProbabilities,
-            progressTracker,
-            terminationFlag
-        );
-
+        var predictedClasses = predictor.predict(predictedProbabilities);
         progressTracker.endSubTask();
+
         return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
     }
 

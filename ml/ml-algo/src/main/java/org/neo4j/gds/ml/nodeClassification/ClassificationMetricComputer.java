@@ -59,20 +59,17 @@ public final class ClassificationMetricComputer {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        HugeLongArray predictedClasses = NodeClassificationPredict.predict(
+        var predictor = new ParallelNodeClassifier(
             classifier,
             features,
-            evaluationSet.size(),
             DEFAULT_BATCH_SIZE,
-            evaluationSet::get,
             concurrency,
-            null,
             progressTracker,
             terminationFlag
         );
 
         return new ClassificationMetricComputer(
-            predictedClasses,
+            predictor.predict(evaluationSet),
             makeLocalTargets(evaluationSet, labels),
             classCounts
         );
