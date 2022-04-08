@@ -20,25 +20,21 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
+public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends DecisionTreeTrainer<LOSS, Double> {
 
-    private final HugeLongArray allLabels;
-    private final LocalIdMap classIdMap;
+    private final HugeDoubleArray targets;
 
-    public ClassificationDecisionTreeTrain(
+    public DecisionTreeRegressorTrainer(
         LOSS lossFunction,
         Features features,
-        HugeLongArray labels,
-        LocalIdMap classIdMap,
-        DecisionTreeTrainConfig config,
+        HugeDoubleArray targets,
+        DecisionTreeTrainerConfig config,
         FeatureBagger featureBagger
     ) {
         super(
@@ -47,50 +43,36 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
             lossFunction,
             featureBagger
         );
-        this.classIdMap = classIdMap;
 
-        assert labels.size() == features.size();
-        this.allLabels = labels;
+        assert targets.size() == features.size();
+        this.targets = targets;
     }
 
     public static MemoryRange memoryEstimation(
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures,
-        int numberOfClasses
+        long numberOfBaggedFeatures
     ) {
-        return MemoryRange.of(sizeOfInstance(ClassificationDecisionTreeTrain.class))
-            .add(DecisionTreeTrain.estimateTree(
+        return MemoryRange.of(sizeOfInstance(DecisionTreeRegressorTrainer.class))
+            .add(DecisionTreeTrainer.estimateTree(
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
                 numberOfBaggedFeatures
-            ))
-            .add(sizeOfLongArray(numberOfClasses));
+            ));
     }
 
     @Override
-    protected Integer toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
+    protected Double toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
         assert groupSize > 0;
         assert group.size() >= groupSize;
 
-        final var classesInGroup = new long[classIdMap.size()];
-
+        double sum = 0;
         for (long i = 0; i < groupSize; i++) {
-            long label = allLabels.get(group.get(i));
-            classesInGroup[classIdMap.toMapped(label)]++;
+            sum += targets.get(group.get(i));
         }
 
-        long maxClassCountInGroup = -1;
-        int maxMappedClass = 0;
-        for (int i = 0; i < classesInGroup.length; i++) {
-            if (classesInGroup[i] <= maxClassCountInGroup) continue;
-
-            maxClassCountInGroup = classesInGroup[i];
-            maxMappedClass = i;
-        }
-
-        return maxMappedClass;
+        return sum / groupSize;
     }
 }

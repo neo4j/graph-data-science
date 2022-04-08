@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
@@ -91,7 +91,7 @@ class NodeClassificationPredictConsumerTest {
         var root = new TreeNode<>(classMapping.toMapped(10));
         var modelData = ImmutableRandomForestData
             .builder()
-            .addDecisionTree(new DecisionTreePredict<>(root))
+            .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(1)
             .classIdMap(classMapping)
             .build();

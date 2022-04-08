@@ -45,13 +45,13 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestPredictor;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -184,14 +184,14 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
                 .builder()
-                .addDecisionTree(new DecisionTreePredict<>(root))
+                .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
                 .classIdMap(LinkPredictionTrain.makeClassIdMap())
                 .build();
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
-                new ClassificationRandomForestPredictor(modelData),
+                new RandomForestClassifier(modelData),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -387,7 +387,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         var root = new TreeNode<>(0);
         var modelData = ImmutableRandomForestData
             .builder()
-            .addDecisionTree(new DecisionTreePredict<>(root))
+            .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(2)
             .classIdMap(LinkPredictionTrain.makeClassIdMap())
             .build();

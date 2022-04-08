@@ -31,16 +31,16 @@ import java.util.Deque;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
-public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTION> {
+public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICTION> {
 
     private final LOSS lossFunction;
     private final Features features;
-    private final DecisionTreeTrainConfig config;
+    private final DecisionTreeTrainerConfig config;
     private final FeatureBagger featureBagger;
 
-    DecisionTreeTrain(
+    DecisionTreeTrainer(
         Features features,
-        DecisionTreeTrainConfig config,
+        DecisionTreeTrainerConfig config,
         LOSS lossFunction,
         FeatureBagger featureBagger
     ) {
@@ -88,12 +88,12 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             )
         );
         long maxNumNodes = 2 * maxNumLeafNodes - 1;
-        return MemoryRange.of(sizeOfInstance(DecisionTreePredict.class))
+        return MemoryRange.of(sizeOfInstance(DecisionTreePredictor.class))
             // Minimum size of tree depends on class distribution.
             .add(MemoryRange.of(1, maxNumNodes).times(TreeNode.memoryEstimation()));
     }
 
-    public DecisionTreePredict<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
+    public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
@@ -133,7 +133,7 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
             }
         }
 
-        return new DecisionTreePredict<>(root);
+        return new DecisionTreePredictor<>(root);
     }
 
     protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
@@ -265,4 +265,10 @@ public abstract class DecisionTreeTrain<LOSS extends DecisionTreeLoss, PREDICTIO
         int depth();
     }
 
+    @ValueClass
+    interface ReadOnlyGroups {
+        ReadOnlyHugeLongArray left();
+
+        ReadOnlyHugeLongArray right();
+    }
 }

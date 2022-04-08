@@ -27,8 +27,8 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.models.Features;
 
 import java.util.Optional;
@@ -39,7 +39,7 @@ public final class OutOfBagErrorMetric {
     private OutOfBagErrorMetric() {}
 
     static void addPredictionsForTree(
-        DecisionTreePredict<Integer> decisionTree,
+        DecisionTreePredictor<Integer> decisionTree,
         LocalIdMap classMapping,
         final Features allFeatureVectors,
         ReadOnlyHugeLongArray trainSet,

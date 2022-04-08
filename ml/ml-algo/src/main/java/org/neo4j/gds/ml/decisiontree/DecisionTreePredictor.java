@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-public class DecisionTreePredict<PREDICTION> {
+public class DecisionTreePredictor<PREDICTION> {
 
     private final TreeNode<PREDICTION> root;
 
-    public DecisionTreePredict(TreeNode<PREDICTION> root) {
+    public DecisionTreePredictor(TreeNode<PREDICTION> root) {
         this.root = root;
     }
 

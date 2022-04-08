@@ -19,12 +19,18 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.annotation.Configuration;
 
-@ValueClass
-interface ReadOnlyGroups {
-    ReadOnlyHugeLongArray left();
+@Configuration
+public interface DecisionTreeTrainerConfig {
 
-    ReadOnlyHugeLongArray right();
+    @Configuration.IntegerRange(min = 1)
+    default int maxDepth() {
+        return Integer.MAX_VALUE;
+    }
+
+    @Configuration.IntegerRange(min = 2)
+    default int minSplitSize() {
+        return 2;
+    }
 }
