@@ -26,7 +26,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration

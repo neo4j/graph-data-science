@@ -212,13 +212,6 @@ class PregelTest {
             .containsExactlyInAnyOrder("TestPregelComputation");
     }
 
-    static Stream<Arguments> forkJoinAndPartitioning() {
-        return crossArguments(
-            TestSupport::trueFalseArguments,
-            () -> Arrays.stream(Partitioning.values()).map(Arguments::of)
-        );
-    }
-
     @ParameterizedTest
     @EnumSource(Partitioning.class)
     void testCorrectnessForLargeGraph(Partitioning partitioning) {
