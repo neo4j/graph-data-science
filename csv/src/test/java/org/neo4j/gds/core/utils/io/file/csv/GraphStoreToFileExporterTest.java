@@ -96,9 +96,6 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     public GraphStore concurrentGraphStore;
 
-    @Inject
-    private IdFunction concurrentIdFunction;
-
     @GdlGraph(graphNamePrefix = "noProperties")
     private static final String GDL_WITHOUT_PROPERTIES =
         "CREATE" +
@@ -116,8 +113,8 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     @Inject
     public GraphStore noPropertiesGraphStore;
 
-    public static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
-    public static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
+    private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
+    private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
     @Test
     void exportTopology() {
