@@ -63,9 +63,6 @@ public abstract class BaseTest {
     @Inject
     public IdFunction idFunction;
 
-    @Inject
-    public String createQuery;
-
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder.impermanent();
