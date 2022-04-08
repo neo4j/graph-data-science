@@ -21,13 +21,12 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
 @GdlExtension
-public abstract class FeatureStepBaseTest {
+abstract class FeatureStepBaseTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GRAPH = "(a:N {noise: 42, z: 13, array: [3.0,2.0], zeros: [.0, .0], invalidValue: NaN}), " +
                           "(b:N {noise: 1337, z: 0, array: [1.0,1.0], zeros: [.0, .0], invalidValue: 1.0}), " +
@@ -37,9 +36,6 @@ public abstract class FeatureStepBaseTest {
                           "(a)-[:REL]->(b), " +
                           "(a)-[:REL]->(c), " +
                           "(a)-[:REL]->(d)";
-
-    @Inject
-    GraphStore graphStore;
 
     @Inject
     Graph graph;
