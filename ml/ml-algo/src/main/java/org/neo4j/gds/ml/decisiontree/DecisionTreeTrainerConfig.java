@@ -19,30 +19,23 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-public class DecisionTreePredict<PREDICTION> {
+import org.neo4j.gds.annotation.Configuration;
 
-    private final TreeNode<PREDICTION> root;
+@Configuration
+public interface DecisionTreeTrainerConfig {
 
-    public DecisionTreePredict(TreeNode<PREDICTION> root) {
-        this.root = root;
+    @Configuration.IntegerRange(min = 1)
+    default int maxDepth() {
+        return Integer.MAX_VALUE;
     }
 
-    public PREDICTION predict(double[] features) {
-        assert features.length > 0;
+    @Configuration.IntegerRange(min = 2)
+    default int minSplitSize() {
+        return 2;
+    }
 
-        TreeNode<PREDICTION> node = root;
-
-        while (node.leftChild() != null) {
-            assert features.length > node.featureIndex();
-            assert node.rightChild() != null;
-
-            if (features[node.featureIndex()] < node.thresholdValue()) {
-                node = node.leftChild();
-            } else {
-                node = node.rightChild();
-            }
-        }
-
-        return node.prediction();
+    @Configuration.Ignore
+    default String lossFunction() {
+        return "GiniIndex";
     }
 }

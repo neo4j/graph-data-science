@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainConfig;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, TrainerConfig {
+public interface RandomForestTrainConfig extends DecisionTreeTrainerConfig, TrainerConfig {
     RandomForestTrainConfig DEFAULT = of(Map.of());
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)

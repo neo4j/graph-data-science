@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
-import org.neo4j.gds.ml.models.randomforest.ClassificationRandomForestTrainer;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
 import java.util.Optional;
@@ -57,7 +57,7 @@ public class TrainerFactory {
                 );
             }
             case RandomForest: {
-                return new ClassificationRandomForestTrainer(
+                return new RandomForestClassifierTrainer(
                     concurrency,
                     classIdMap,
                     (RandomForestTrainConfig) config,
@@ -87,7 +87,7 @@ public class TrainerFactory {
                     ((LogisticRegressionTrainConfig) config).batchSize()
                 );
             case RandomForest: {
-                return ClassificationRandomForestTrainer.memoryEstimation(
+                return RandomForestClassifierTrainer.memoryEstimation(
                     numberOfTrainingExamples,
                     numberOfClasses,
                     featureDimension,

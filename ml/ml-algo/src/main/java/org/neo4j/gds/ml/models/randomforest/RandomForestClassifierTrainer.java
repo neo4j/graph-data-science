@@ -32,11 +32,11 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.decisiontree.ClassificationDecisionTreeTrain;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeLoss;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainConfig;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainConfigImpl;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.models.Features;
@@ -52,7 +52,7 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class ClassificationRandomForestTrainer implements Trainer {
+public class RandomForestClassifierTrainer implements Trainer {
 
     private final LocalIdMap classIdMap;
     private final RandomForestTrainConfig config;
@@ -62,7 +62,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
     private final ProgressTracker progressTracker;
     private Optional<Double> outOfBagError = Optional.empty();
 
-    public ClassificationRandomForestTrainer(
+    public RandomForestClassifierTrainer(
         int concurrency,
         LocalIdMap classIdMap,
         RandomForestTrainConfig config,
@@ -89,7 +89,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
         int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
-        return MemoryEstimations.builder("Training", ClassificationRandomForestTrainer.class)
+        return MemoryEstimations.builder("Training", RandomForestClassifierTrainer.class)
             // estimating the final forest produced
             .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
@@ -119,7 +119,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
             .build();
     }
 
-    public ClassificationRandomForestPredictor train(
+    public RandomForestClassifier train(
         Features allFeatureVectors,
         HugeLongArray allLabels,
         ReadOnlyHugeLongArray trainSet
@@ -128,7 +128,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
             : Optional.empty();
 
-        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
+        var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(config.maxDepth())
             .minSplitSize(config.minSplitSize())
             .build();
@@ -166,7 +166,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
-        return new ClassificationRandomForestPredictor(decisionTrees, classIdMap, allFeatureVectors.featureDimension());
+        return new RandomForestClassifier(decisionTrees, classIdMap, allFeatureVectors.featureDimension());
     }
 
     double outOfBagError() {
@@ -175,9 +175,9 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
     static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
 
-        private DecisionTreePredict<Integer> trainedTree;
+        private DecisionTreePredictor<Integer> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
-        private final DecisionTreeTrainConfig decisionTreeTrainConfig;
+        private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
         private final RandomForestTrainConfig randomForestTrainConfig;
         private final SplittableRandom random;
         private final Features allFeatureVectors;
@@ -190,7 +190,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
         TrainDecisionTreeTask(
             Optional<HugeAtomicLongArray> maybePredictions,
-            DecisionTreeTrainConfig decisionTreeTrainConfig,
+            DecisionTreeTrainerConfig decisionTreeTrainConfig,
             RandomForestTrainConfig randomForestTrainConfig,
             SplittableRandom random,
             Features allFeatureVectors,
@@ -230,7 +230,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
-                .add(ClassificationDecisionTreeTrain.memoryEstimation(
+                .add(DecisionTreeClassifierTrainer.memoryEstimation(
                     maxDepth,
                     minSplitSize,
                     usedNumberOfTrainingSamples,
@@ -240,7 +240,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 .add(bootstrappedDatasetEstimation);
         }
 
-        public DecisionTreePredict<Integer> trainedTree() {
+        public DecisionTreePredictor<Integer> trainedTree() {
             return trainedTree;
         }
 
@@ -252,7 +252,7 @@ public class ClassificationRandomForestTrainer implements Trainer {
                 randomForestTrainConfig.maxFeaturesRatio(allFeatureVectors.featureDimension())
             );
 
-            var decisionTree = new ClassificationDecisionTreeTrain<>(
+            var decisionTree = new DecisionTreeClassifierTrainer<>(
                 lossFunction,
                 allFeatureVectors,
                 allLabels,

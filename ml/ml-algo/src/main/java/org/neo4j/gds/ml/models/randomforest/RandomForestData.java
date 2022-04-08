@@ -25,8 +25,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeTrain;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
@@ -38,7 +38,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 @ValueClass
 public interface RandomForestData extends Classifier.ClassifierData {
 
-    List<DecisionTreePredict<Integer>> decisionTrees();
+    List<DecisionTreePredictor<Integer>> decisionTrees();
 
     @Value.Derived
     default TrainingMethod trainerMethod() {
@@ -54,7 +54,7 @@ public interface RandomForestData extends Classifier.ClassifierData {
                 "Decision trees",
                 nodeCount ->
                     MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
-                        .add(DecisionTreeTrain
+                        .add(DecisionTreeTrainer
                                 .estimateTree(
                                     config.maxDepth(),
                                     numberOfTrainingExamples.applyAsLong(nodeCount),

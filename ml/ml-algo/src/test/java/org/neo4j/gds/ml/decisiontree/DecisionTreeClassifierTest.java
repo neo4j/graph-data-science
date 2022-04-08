@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ClassificationDecisionTreeTest {
+class DecisionTreeClassifierTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
@@ -97,12 +97,12 @@ class ClassificationDecisionTreeTest {
         int maxDepth,
         int minSplitSize
     ) {
-        var decisionTree = new ClassificationDecisionTreeTrain<>(
+        var decisionTree = new DecisionTreeClassifierTrainer<>(
             giniIndexLoss,
             features,
             allLabels,
             CLASS_MAPPING,
-            DecisionTreeTrainConfigImpl.builder()
+            DecisionTreeTrainerConfigImpl.builder()
                 .maxDepth(maxDepth)
                 .minSplitSize(minSplitSize)
                 .build(),
@@ -121,7 +121,7 @@ class ClassificationDecisionTreeTest {
 
     @Test
     void indexSamplingShouldWork() {
-        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
+        var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(1)
             .minSplitSize(2)
             .build();
@@ -130,7 +130,7 @@ class ClassificationDecisionTreeTest {
         mutableFeatureVectors.setAll(idx -> idx);
         var featureVectors = ReadOnlyHugeLongArray.of(mutableFeatureVectors);
 
-        var decisionTree = new ClassificationDecisionTreeTrain<>(
+        var decisionTree = new DecisionTreeClassifierTrainer<>(
             giniIndexLoss,
             features,
             allLabels,
@@ -144,7 +144,7 @@ class ClassificationDecisionTreeTest {
         var decisionTreePredict = decisionTree.train(featureVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42));
 
-        decisionTree = new ClassificationDecisionTreeTrain<>(
+        decisionTree = new DecisionTreeClassifierTrainer<>(
             giniIndexLoss,
             features,
             allLabels,
@@ -161,7 +161,7 @@ class ClassificationDecisionTreeTest {
     void considersSampledVectors() {
         var featureVector = new double[]{8.0, 0.0};
 
-        var decisionTreeTrainConfig = DecisionTreeTrainConfigImpl.builder()
+        var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(1)
             .minSplitSize(2)
             .build();
@@ -170,7 +170,7 @@ class ClassificationDecisionTreeTest {
         mutableSampledVectors.set(0, 1);
         var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
 
-        var decisionTree = new ClassificationDecisionTreeTrain<>(
+        var decisionTree = new DecisionTreeClassifierTrainer<>(
             giniIndexLoss,
             features,
             allLabels,
@@ -186,7 +186,7 @@ class ClassificationDecisionTreeTest {
         mutableOtherSampledVectors.set(0, features.size() - 1);
         var otherSampledVectors = ReadOnlyHugeLongArray.of(mutableOtherSampledVectors);
 
-        decisionTree = new ClassificationDecisionTreeTrain<>(
+        decisionTree = new DecisionTreeClassifierTrainer<>(
             giniIndexLoss,
             features,
             allLabels,
@@ -213,8 +213,14 @@ class ClassificationDecisionTreeTest {
         " 8_000, 100_000,  2, 56, 79_99_976",
         " 8_000, 100_000, 20, 56,   799_976"
     })
-    void estimateDecisionTree(int maxDepth, long numberOfTrainingSamples, int minSplitSize, long expectedMin, long expectedMax) {
-        var range = DecisionTreeTrain.estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
+    void estimateDecisionTree(
+        int maxDepth,
+        long numberOfTrainingSamples,
+        int minSplitSize,
+        long expectedMin,
+        long expectedMax
+    ) {
+        var range = DecisionTreeTrainer.estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);
@@ -229,7 +235,7 @@ class ClassificationDecisionTreeTest {
         " 20, 10_000, 320_456, 1_202_912",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = ClassificationDecisionTreeTrain.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10, 10);
+        var range = DecisionTreeClassifierTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10, 10);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);

@@ -39,7 +39,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ClassificationRandomForestTest {
+class RandomForestClassifierTest {
     private static final long NUM_SAMPLES = 10;
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
@@ -76,7 +76,7 @@ class ClassificationRandomForestTest {
 
     long predictLabel(
         final double[] features,
-        ClassificationRandomForestPredictor randomForestPredictor
+        RandomForestClassifier randomForestPredictor
     ) {
         final int[] predictionsPerClass = randomForestPredictor.gatherTreePredictions(features);
 
@@ -92,13 +92,13 @@ class ClassificationRandomForestTest {
             maxClassIdx = i;
         }
 
-        return ClassificationRandomForestTest.CLASS_MAPPING.toOriginal(maxClassIdx);
+        return RandomForestClassifierTest.CLASS_MAPPING.toOriginal(maxClassIdx);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer(
+        var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -128,7 +128,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer(
+        var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -159,7 +159,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldMakeSaneErrorEstimation(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer(
+        var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -182,7 +182,7 @@ class ClassificationRandomForestTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
-        var randomForestTrainer = new ClassificationRandomForestTrainer(
+        var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
             RandomForestTrainConfigImpl
@@ -224,7 +224,7 @@ class ClassificationRandomForestTest {
         long expectedMin,
         long expectedMax
     ) {
-        var estimation = ClassificationRandomForestPredictor.runtimeOverheadMemoryEstimation(numberOfClasses);
+        var estimation = RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
 
         assertThat(estimation.min).isEqualTo(expectedMin);
         assertThat(estimation.max).isEqualTo(expectedMax);
@@ -264,7 +264,7 @@ class ClassificationRandomForestTest {
             .maxFeaturesRatio(maxFeaturesRatio)
             .numberOfSamplesRatio(numberOfSamplesRatio)
             .build();
-        var estimator = ClassificationRandomForestTrainer.memoryEstimation(
+        var estimator = RandomForestClassifierTrainer.memoryEstimation(
             unused -> numberOfTrainingSamples,
             numberOfClasses,
             MemoryRange.of(featureDimension),

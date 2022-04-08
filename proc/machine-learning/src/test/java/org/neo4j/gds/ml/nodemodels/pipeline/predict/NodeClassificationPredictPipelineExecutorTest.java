@@ -44,7 +44,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
@@ -195,7 +195,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var root = new TreeNode<>(0);
             var modelData = ImmutableRandomForestData
                 .builder()
-                .addDecisionTree(new DecisionTreePredict<>(root))
+                .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
                 .classIdMap(LinkPredictionTrain.makeClassIdMap())
                 .build();
@@ -430,7 +430,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var root = new TreeNode<>(0);
         var modelData = ImmutableRandomForestData
             .builder()
-            .addDecisionTree(new DecisionTreePredict<>(root))
+            .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(3)
             .classIdMap(LocalIdMap.ofSorted(List.of(0L)))
             .build();

@@ -28,17 +28,17 @@ import org.neo4j.gds.ml.models.Features;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> extends DecisionTreeTrain<LOSS, Integer> {
+public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extends DecisionTreeTrainer<LOSS, Integer> {
 
     private final HugeLongArray allLabels;
     private final LocalIdMap classIdMap;
 
-    public ClassificationDecisionTreeTrain(
+    public DecisionTreeClassifierTrainer(
         LOSS lossFunction,
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
-        DecisionTreeTrainConfig config,
+        DecisionTreeTrainerConfig config,
         FeatureBagger featureBagger
     ) {
         super(
@@ -60,8 +60,8 @@ public class ClassificationDecisionTreeTrain<LOSS extends DecisionTreeLoss> exte
         long numberOfBaggedFeatures,
         int numberOfClasses
     ) {
-        return MemoryRange.of(sizeOfInstance(ClassificationDecisionTreeTrain.class))
-            .add(DecisionTreeTrain.estimateTree(
+        return MemoryRange.of(sizeOfInstance(DecisionTreeClassifierTrainer.class))
+            .add(DecisionTreeTrainer.estimateTree(
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,

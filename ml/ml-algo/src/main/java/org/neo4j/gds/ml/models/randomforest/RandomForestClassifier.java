@@ -23,7 +23,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.decisiontree.DecisionTreePredict;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 
@@ -33,24 +33,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
-public class ClassificationRandomForestPredictor implements Classifier {
+public class RandomForestClassifier implements Classifier {
 
     private final RandomForestData data;
 
-    public ClassificationRandomForestPredictor(
-        List<DecisionTreePredict<Integer>> decisionTrees,
+    public RandomForestClassifier(
+        List<DecisionTreePredictor<Integer>> decisionTrees,
         LocalIdMap classMapping,
         int featureDimension
     ) {
         this(ImmutableRandomForestData.of(classMapping, featureDimension, decisionTrees));
     }
 
-    public ClassificationRandomForestPredictor(RandomForestData data) {
+    public RandomForestClassifier(RandomForestData data) {
         this.data = data;
     }
 
     public static MemoryRange runtimeOverheadMemoryEstimation(int numberOfClasses) {
-        return MemoryRange.of(sizeOfInstance(ClassificationRandomForestPredictor.class))
+        return MemoryRange.of(sizeOfInstance(RandomForestClassifier.class))
             .add(sizeOfDoubleArray(numberOfClasses))
             .add(sizeOfIntArray(numberOfClasses));
     }
@@ -98,7 +98,7 @@ public class ClassificationRandomForestPredictor implements Classifier {
         var classMapping = data.classIdMap();
         final var predictionsPerClass = new int[classMapping.size()];
 
-        for (DecisionTreePredict<Integer> decisionTree : data.decisionTrees()) {
+        for (DecisionTreePredictor<Integer> decisionTree : data.decisionTrees()) {
             int predictedClass = decisionTree.predict(features);
             predictionsPerClass[predictedClass]++;
         }
