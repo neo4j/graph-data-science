@@ -96,7 +96,7 @@ steps = pipe.feature_properties()
 assert len(steps) == 1
 assert steps[0]["feature"] == "rank"
 
-# Configure the model training do to cross-validation over logistic regression
+# Configure the model training to do cross-validation over logistic regression
 pipe.addLogisticRegression(tolerance=(0.01, 0.001))
 pipe.addLogisticRegression(penalty=1.0)
 
