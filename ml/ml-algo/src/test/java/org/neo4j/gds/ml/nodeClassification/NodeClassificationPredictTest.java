@@ -36,6 +36,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -105,11 +106,10 @@ class NodeClassificationPredictTest {
 
         var result = new NodeClassificationPredict(
             LogisticRegressionClassifier.from(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
             1,
             true,
-            featureProperties,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -161,11 +161,10 @@ class NodeClassificationPredictTest {
 
         var result = new NodeClassificationPredict(
             LogisticRegressionClassifier.from(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
             1,
             true,
-            featureProperties,
             ProgressTracker.NULL_TRACKER
         ).compute();
 
@@ -228,11 +227,10 @@ class NodeClassificationPredictTest {
 
         var mcnlrPredict = new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
             1,
             false,
-            featureProperties,
             progressTracker
         );
 

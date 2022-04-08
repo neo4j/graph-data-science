@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
@@ -113,11 +114,10 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         );
         var innerAlgo = new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties()),
             MIN_BATCH_SIZE,
             config.concurrency(),
             config.includePredictedProbabilities(),
-            pipeline.featureProperties(),
             progressTracker
         );
         return innerAlgo.compute();
