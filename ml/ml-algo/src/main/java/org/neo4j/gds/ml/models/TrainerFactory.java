@@ -36,7 +36,7 @@ public class TrainerFactory {
 
     private TrainerFactory() {}
 
-    public static Trainer create(
+    public static ClassifierTrainer create(
         TrainerConfig config,
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,

@@ -42,7 +42,7 @@ public class RandomForestRegressor implements Regressor {
         this.data = data;
     }
 
-    public static MemoryRange runtimeOverheadMemoryEstimation(int numberOfClasses) {
+    public static MemoryRange runtimeOverheadMemoryEstimation() {
         return MemoryRange.of(sizeOfInstance(RandomForestRegressor.class));
     }
 

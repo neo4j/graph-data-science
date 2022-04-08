@@ -30,15 +30,15 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.gradientdescent.Training;
+import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
-import org.neo4j.gds.ml.models.Trainer;
 
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.standard;
 import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.withReducedClassCount;
 
-public final class LogisticRegressionTrainer implements Trainer {
+public final class LogisticRegressionTrainer implements ClassifierTrainer {
 
     private final LogisticRegressionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;

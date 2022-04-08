@@ -20,27 +20,25 @@
 package org.neo4j.gds.ml.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
-import org.neo4j.gds.ml.decisiontree.GiniIndex;
-import org.neo4j.gds.ml.models.ClassifierTrainer;
+import org.neo4j.gds.ml.decisiontree.MeanSquaredError;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.RegressorTrainer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -52,49 +50,39 @@ import java.util.stream.IntStream;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class RandomForestClassifierTrainer implements ClassifierTrainer {
+public class RandomForestRegressorTrainer implements RegressorTrainer {
 
-    private final LocalIdMap classIdMap;
     private final RandomForestTrainerConfig config;
     private final int concurrency;
-    private final boolean computeOutOfBagError;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
-    private Optional<Double> outOfBagError = Optional.empty();
 
-    public RandomForestClassifierTrainer(
+    public RandomForestRegressorTrainer(
         int concurrency,
-        LocalIdMap classIdMap,
         RandomForestTrainerConfig config,
-        boolean computeOutOfBagError,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker
     ) {
-        this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
-        this.computeOutOfBagError = computeOutOfBagError;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
     }
 
     public static MemoryEstimation memoryEstimation(
         LongUnaryOperator numberOfTrainingSamples,
-        int numberOfClasses,
         MemoryRange featureDimension,
         RandomForestTrainerConfig config
     ) {
-        // Since we don't expose Out-of-bag-error (yet) we do not take it into account here either.
-
         int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
-        return MemoryEstimations.builder("Training", RandomForestClassifierTrainer.class)
+        return MemoryEstimations.builder("Training", RandomForestRegressorTrainer.class)
             // estimating the final forest produced
             .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
-                "GiniIndex Loss",
-                nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
+                "Mean Squared Error Loss",
+                nodeCount -> MeanSquaredError.memoryEstimation()
             ).perGraphDimension(
                 "Decision tree training",
                 (dim, concurrency) ->
@@ -102,7 +90,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                         config.maxDepth(),
                         config.minSplitSize(),
                         numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
-                        numberOfClasses,
                         minNumberOfBaggedFeatures,
                         config.numberOfSamplesRatio()
                     ).union(
@@ -110,7 +97,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                             config.maxDepth(),
                             config.minSplitSize(),
                             numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
-                            numberOfClasses,
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
                         )
@@ -119,35 +105,29 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             .build();
     }
 
-    public RandomForestClassifier train(
+    public RandomForestRegressor train(
         Features allFeatureVectors,
-        HugeLongArray allLabels,
+        HugeDoubleArray targets,
         ReadOnlyHugeLongArray trainSet
     ) {
-        Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
-            ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
-            : Optional.empty();
-
         var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(config.maxDepth())
             .minSplitSize(config.minSplitSize())
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var lossFunction = GiniIndex.fromOriginalLabels(allLabels, classIdMap);
+        var lossFunction = new MeanSquaredError(targets);
 
         progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
             new TrainDecisionTreeTask<>(
-                maybePredictions,
                 decisionTreeTrainConfig,
                 config,
                 random.split(),
                 allFeatureVectors,
-                allLabels,
-                classIdMap,
+                targets,
                 lossFunction,
                 trainSet,
                 progressTracker,
@@ -156,58 +136,40 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
-            trainSet,
-            classIdMap,
-            allLabels,
-            concurrency,
-            predictions
-        ));
-
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
-        return new RandomForestClassifier(decisionTrees, classIdMap, allFeatureVectors.featureDimension());
-    }
-
-    double outOfBagError() {
-        return outOfBagError.orElseThrow(() -> new IllegalAccessError("Out of bag error has not been computed."));
+        return new RandomForestRegressor(decisionTrees, allFeatureVectors.featureDimension());
     }
 
     static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
 
-        private DecisionTreePredictor<Integer> trainedTree;
-        private final Optional<HugeAtomicLongArray> maybePredictions;
+        private DecisionTreePredictor<Double> trainedTree;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
         private final RandomForestTrainerConfig randomForestTrainConfig;
         private final SplittableRandom random;
         private final Features allFeatureVectors;
-        private final HugeLongArray allLabels;
-        private final LocalIdMap classIdMap;
+        private final HugeDoubleArray targets;
         private final LOSS lossFunction;
         private final ReadOnlyHugeLongArray trainSet;
         private final ProgressTracker progressTracker;
         private final AtomicInteger numberOfTreesTrained;
 
         TrainDecisionTreeTask(
-            Optional<HugeAtomicLongArray> maybePredictions,
             DecisionTreeTrainerConfig decisionTreeTrainConfig,
             RandomForestTrainerConfig randomForestTrainConfig,
             SplittableRandom random,
             Features allFeatureVectors,
-            HugeLongArray allLabels,
-            LocalIdMap classIdMap,
+            HugeDoubleArray targets,
             LOSS lossFunction,
             ReadOnlyHugeLongArray trainSet,
             ProgressTracker progressTracker,
             AtomicInteger numberOfTreesTrained
         ) {
-            this.maybePredictions = maybePredictions;
             this.decisionTreeTrainConfig = decisionTreeTrainConfig;
             this.randomForestTrainConfig = randomForestTrainConfig;
             this.random = random;
             this.allFeatureVectors = allFeatureVectors;
-            this.allLabels = allLabels;
-            this.classIdMap = classIdMap;
+            this.targets = targets;
             this.lossFunction = lossFunction;
             this.trainSet = trainSet;
             this.progressTracker = progressTracker;
@@ -218,7 +180,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             int maxDepth,
             int minSplitSize,
             long numberOfTrainingSamples,
-            int numberOfClasses,
             int numberOfBaggedFeatures,
             double numberOfSamplesRatio
         ) {
@@ -230,17 +191,16 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
-                .add(DecisionTreeClassifierTrainer.memoryEstimation(
+                .add(DecisionTreeRegressorTrainer.memoryEstimation(
                     maxDepth,
                     minSplitSize,
                     usedNumberOfTrainingSamples,
-                    numberOfBaggedFeatures,
-                    numberOfClasses
+                    numberOfBaggedFeatures
                 ))
                 .add(bootstrappedDatasetEstimation);
         }
 
-        public DecisionTreePredictor<Integer> trainedTree() {
+        public DecisionTreePredictor<Double> trainedTree() {
             return trainedTree;
         }
 
@@ -252,27 +212,15 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 randomForestTrainConfig.maxFeaturesRatio(allFeatureVectors.featureDimension())
             );
 
-            var decisionTree = new DecisionTreeClassifierTrainer<>(
+            var decisionTree = new DecisionTreeRegressorTrainer<>(
                 lossFunction,
                 allFeatureVectors,
-                allLabels,
-                classIdMap,
+                targets,
                 decisionTreeTrainConfig,
                 featureBagger
             );
 
-            var bootstrappedDataset = bootstrappedDataset();
-
-            trainedTree = decisionTree.train(bootstrappedDataset.allVectorsIndices());
-
-            maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
-                trainedTree,
-                classIdMap,
-                allFeatureVectors,
-                trainSet,
-                bootstrappedDataset.trainSetIndices(),
-                predictionsCache
-            ));
+            trainedTree = decisionTree.train(bootstrappedDataset());
 
             progressTracker.logProgress(
                 1,
@@ -284,7 +232,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             );
         }
 
-        private BootstrappedDataset bootstrappedDataset() {
+        private ReadOnlyHugeLongArray bootstrappedDataset() {
             BitSet trainSetIndices = new BitSet(trainSet.size());
             ReadOnlyHugeLongArray allVectorsIndices;
 
@@ -301,17 +249,8 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 );
             }
 
-            return ImmutableBootstrappedDataset.of(
-                trainSetIndices,
-                allVectorsIndices
-            );
-        }
-
-        @ValueClass
-        interface BootstrappedDataset {
-            BitSet trainSetIndices();
-
-            ReadOnlyHugeLongArray allVectorsIndices();
+            // trainSetIndices unused until we add out-out-bag-error
+            return allVectorsIndices;
         }
     }
 }

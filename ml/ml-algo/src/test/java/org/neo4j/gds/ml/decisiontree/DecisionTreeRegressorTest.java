@@ -49,8 +49,6 @@ class DecisionTreeRegressorTest {
 
     @BeforeEach
     void setup() {
-        targets.setAll(idx -> idx >= 5 ? 42 : 1337);
-
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(
             double[].class,
             NUM_SAMPLES
