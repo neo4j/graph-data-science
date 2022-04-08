@@ -27,8 +27,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -45,9 +43,6 @@ class GraphSageTrainProcGraphWithoutRelationshipsTest extends BaseProcTest {
         ", (b:King{ name: 'B', age: 12 })";
 
     private static final String GRAPH_NAME = "embeddingsGraph";
-
-    @Inject
-    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {

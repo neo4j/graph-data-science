@@ -19,17 +19,12 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -162,47 +157,5 @@ class GraphSageTrainConfigTest {
             ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Value for `sampleSizes` was `0`, but must be within the range [1,");
-    }
-
-    @Nested
-    @GdlExtension
-    class MultiLabelGraphSageConfigTest {
-
-        @GdlGraph
-        private static final String GRAPH =
-            "CREATE" +
-            "  (dan:Person {age: 20, height: 185, weight: 75})," +
-            "  (annie:Person {age: 12, height: 124, weight: 42})," +
-            "  (matt:Person {age: 67, height: 170, weight: 80})," +
-            "  (jeff:Person {age: 45, height: 192, weight: 85})," +
-            "  (brie:Person {age: 27, height: 176, weight: 57})," +
-            "  (elsa:Person {age: 32, height: 158, weight: 55})," +
-            "  (john:Person {age: 35, height: 172, weight: 76})," +
-            "  (dan)-[:KNOWS]->(annie)," +
-            "  (dan)-[:KNOWS]->(matt)," +
-            "  (annie)-[:KNOWS]->(matt)," +
-            "  (annie)-[:KNOWS]->(jeff)," +
-            "  (annie)-[:KNOWS]->(brie)," +
-            "  (matt)-[:KNOWS]->(brie)," +
-            "  (brie)-[:KNOWS]->(elsa)," +
-            "  (brie)-[:KNOWS]->(jeff)," +
-            "  (john)-[:KNOWS]->(jeff)," +
-            "  (guitar:Instrument {cost: 1337.0})," +
-            "  (synth:Instrument {cost: 1337.0})," +
-            "  (bongos:Instrument {cost: 42.0})," +
-            "  (trumpet:Instrument {cost: 1337.0})," +
-            "  (dan)-[:LIKES]->(guitar)," +
-            "  (dan)-[:LIKES]->(synth)," +
-            "  (dan)-[:LIKES]->(bongos)," +
-            "  (annie)-[:LIKES]->(guitar)," +
-            "  (annie)-[:LIKES]->(synth)," +
-            "  (matt)-[:LIKES]->(bongos)," +
-            "  (brie)-[:LIKES]->(guitar)," +
-            "  (brie)-[:LIKES]->(synth)," +
-            "  (brie)-[:LIKES]->(bongos)," +
-            "  (john)-[:LIKES]->(trumpet)";
-
-        @Inject
-        private GraphStore graphStore;
     }
 }

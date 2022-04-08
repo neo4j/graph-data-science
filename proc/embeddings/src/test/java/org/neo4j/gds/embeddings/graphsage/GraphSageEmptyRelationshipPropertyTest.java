@@ -187,12 +187,6 @@ class GraphSageEmptyRelationshipPropertyTest extends BaseProcTest {
 
         runQuery(graphCreateForStream);
 
-        String streamQuery = GdsCypher.call("inductiveGraph")
-            .algo("gds.beta.graphSage")
-            .streamMode()
-            .addParameter("modelName", modelName)
-            .yields();
-
         assertError(embeddingQuery, "Found an invalid relationship weight between nodes `10` and `11` with the property value of `NaN`. Consider using `defaultValue` when loading the graph.");
     }
 
