@@ -25,8 +25,6 @@ import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public class PagedDataStructure<T> {
 
     final int pageSize;
@@ -55,28 +53,6 @@ public class PagedDataStructure<T> {
         this.allocator = allocator;
         pages = allocator.emptyPages();
         setPages(numPages(size));
-    }
-
-    PagedDataStructure(long size, T[] pages, PageAllocator<T> allocator) {
-        pageSize = allocator.pageSize();
-        pageShift = Integer.numberOfTrailingZeros(pageSize);
-        pageMask = pageSize - 1;
-
-        if (numPages(size) != pages.length) {
-            throw new IllegalArgumentException(formatWithLocale(
-                    "The capacity of [%d] would require [%d] pages, but [%d] were provided",
-                    size,
-                    numPages(size),
-                    pages.length));
-        }
-
-        final int maxIndexShift = Integer.SIZE - 1 + pageShift;
-        maxSupportedSize = 1L << maxIndexShift;
-
-        this.allocator = allocator;
-        this.pages = pages;
-        this.capacity.set(capacityFor(pages.length));
-        this.size.set(size);
     }
 
     /**
