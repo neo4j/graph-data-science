@@ -360,24 +360,23 @@ public final class NodeClassificationTrain {
 
         progressTracker.endSubTask();
 
-        var modelSelectResult = selectBestModel(innerSplits);
-        var bestParameters = modelSelectResult.bestParameters();
-        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
+        var trainingStatistics = new TrainingStatistics(metrics);
 
-        Classifier retrainedModelData = retrainBestModel(bestParameters);
+        selectBestModel(innerSplits, trainingStatistics);
+        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
+
+        Classifier retrainedModelData = retrainBestModel(trainingStatistics.bestParameters());
 
         progressTracker.endSubTask();
 
         return ImmutableNodeClassificationTrainResult.of(
-            createModel(retrainedModelData, modelSelectResult, metricResults),
-            modelSelectResult
+            createModel(retrainedModelData, trainingStatistics, metricResults),
+            trainingStatistics
         );
     }
 
-    private TrainingStatistics selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
+    private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask();
-
-        var trainingStats = new TrainingStatistics(metrics);
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -412,30 +411,27 @@ public final class NodeClassificationTrain {
             progressTracker.endSubTask();
 
             metrics.forEach(metric -> {
-                trainingStats.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStats.addTrainStats(metric, trainStatsBuilder.build(metric));
+                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
+                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
         }
         progressTracker.endSubTask();
-
-        return trainingStats;
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
-        TrainingStatistics trainingStatistics,
-        TrainerConfig bestParameters
+        TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        var bestClassifier = trainModel(outerSplit.trainSet(), bestParameters);
+        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier);
+        metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier).forEach(trainingStatistics::addTestScore);
         var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
         progressTracker.endSubTask();
 
-        return trainingStatistics.finalizeMetrics(outerTrainMetrics, testMetrics);
+        return trainingStatistics.metricsForWinningModel(outerTrainMetrics);
     }
 
     private Classifier retrainBestModel(TrainerConfig bestParameters) {

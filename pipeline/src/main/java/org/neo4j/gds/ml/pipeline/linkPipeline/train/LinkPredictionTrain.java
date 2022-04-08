@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
+import org.neo4j.gds.ml.metrics.SignedProbabilities;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Trainer;
@@ -59,11 +60,11 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionEvaluationMetricComputer.computeMetric;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
@@ -127,13 +128,20 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask("extract train features");
 
         progressTracker.beginSubTask("select model");
-        var trainingStatistics = modelSelect(trainData, trainRelationshipIds);
-        var bestParameters = trainingStatistics.bestParameters();
+
+        var trainingStatistics = new TrainingStatistics(new ArrayList<>(config.metrics()));
+
+        modelSelect(trainData, trainRelationshipIds, trainingStatistics);
         progressTracker.endSubTask("select model");
 
         // train best model on the entire training graph
         progressTracker.beginSubTask("train best model");
-        var classifier = trainModel(trainData, trainRelationshipIds, bestParameters, progressTracker);
+        var classifier = trainModel(
+            trainData,
+            trainRelationshipIds,
+            trainingStatistics.bestParameters(),
+            progressTracker
+        );
         progressTracker.endSubTask("train best model");
 
         // evaluate the best model on the training and test graphs
@@ -142,13 +150,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask("compute train metrics");
 
         progressTracker.beginSubTask("evaluate on test data");
-        var testMetrics = computeTestMetric(classifier);
+        computeTestMetric(classifier, trainingStatistics);
         progressTracker.endSubTask("evaluate on test data");
 
         var model = createModel(
-            bestParameters,
+            trainingStatistics.bestParameters(),
             classifier.data(),
-            trainingStatistics.finalizeMetrics(outerTrainMetrics, testMetrics)
+            trainingStatistics.metricsForWinningModel(outerTrainMetrics)
         );
 
         progressTracker.endSubTask();
@@ -174,13 +182,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
-    private TrainingStatistics modelSelect(
+    private void modelSelect(
         FeaturesAndLabels trainData,
-        ReadOnlyHugeLongArray trainRelationshipIds
+        ReadOnlyHugeLongArray trainRelationshipIds,
+        TrainingStatistics trainingStatistics
     ) {
         var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.labels());
-
-        var trainingStats = new TrainingStatistics(new ArrayList<>(config.metrics()));
 
         progressTracker.setVolume(pipeline.numberOfModelSelectionTrials());
 
@@ -228,17 +235,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
             // insert the candidates' metrics into trainStats and validationStats
             config.metrics().forEach(metric -> {
-                trainingStats.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStats.addTrainStats(metric, trainStatsBuilder.build(metric));
+                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
+                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
 
             progressTracker.logProgress();
         }
-
-        return trainingStats;
     }
 
-    private Map<LinkMetric, Double> computeTestMetric(Classifier classifier) {
+    private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask("extract test features");
         var testData = extractFeaturesAndLabels(
             validationGraph,
@@ -249,17 +254,21 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         progressTracker.endSubTask("extract test features");
 
         progressTracker.beginSubTask("compute test metrics");
-        var result = computeMetric(
-            testData,
+        var signedProbabilities = SignedProbabilities.computeFromLabeledData(
+            testData.features(),
+            testData.labels(),
             classifier,
             new BatchQueue(testData.size()),
-            config,
+            config.concurrency(),
             progressTracker,
             terminationFlag
         );
-        progressTracker.endSubTask("compute test metrics");
 
-        return result;
+        config.metrics().forEach(metric -> {
+            double score = metric.compute(signedProbabilities, config.negativeClassWeight());
+            trainingStatistics.addTestScore(metric, score);
+        });
+        progressTracker.endSubTask("compute test metrics");
     }
 
     private List<TrainingExamplesSplit> trainValidationSplits(
@@ -281,14 +290,20 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         ReadOnlyHugeLongArray evaluationSet,
         ProgressTracker progressTracker
     ) {
-        return computeMetric(
-            trainData,
+        var signedProbabilities = SignedProbabilities.computeFromLabeledData(
+            trainData.features(),
+            trainData.labels(),
             classifier,
             new HugeBatchQueue(evaluationSet),
-            config,
+            config.concurrency(),
             progressTracker,
             terminationFlag
         );
+
+        return config.metrics().stream().collect(Collectors.toMap(
+            Function.identity(),
+            metric -> metric.compute(signedProbabilities, config.negativeClassWeight())
+        ));
     }
 
     private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
@@ -425,7 +440,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     long trainSetSize = dim
                         .relationshipCounts()
                         .get(RelationshipType.of(splitConfig.trainRelationshipType()));
-                    return LinkPredictionEvaluationMetricComputer.estimate(trainSetSize);
+                    return MemoryRange.of(SignedProbabilities.estimateMemory(trainSetSize));
                 }
             ).build();
     }

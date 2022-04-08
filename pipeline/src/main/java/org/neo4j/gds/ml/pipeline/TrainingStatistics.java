@@ -28,6 +28,7 @@ import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -36,15 +37,15 @@ import java.util.stream.Collectors;
 public final class TrainingStatistics {
 
     private final StatsMap trainStats;
-
     private final StatsMap validationStats;
-
     private final List<Metric> metrics;
+    private final Map<Metric, Double> testScores;
 
     public TrainingStatistics(List<Metric> metrics) {
         this.trainStats = StatsMap.create(metrics);
         this.validationStats = StatsMap.create(metrics);
         this.metrics = metrics;
+        this.testScores = new HashMap<>();
     }
 
     public TrainerConfig bestParameters() {
@@ -62,6 +63,11 @@ public final class TrainingStatistics {
         return validationStats.getMetricStats(metric);
     }
 
+    /**
+     * Turns this class into a Cypher map, to be returned in a procedure YIELD field.
+     * This is intentionally omitting the test scores.
+     * These can be added to extend the return surface later.
+     */
     public Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMap(),
@@ -70,9 +76,8 @@ public final class TrainingStatistics {
         );
     }
 
-    public Map<Metric, BestMetricData> finalizeMetrics(
-        Map<? extends Metric, Double> outerTrainMetrics,
-        Map<? extends Metric, Double> testMetrics
+    public Map<Metric, BestMetricData> metricsForWinningModel(
+        Map<? extends Metric, Double> outerTrainMetrics
     ) {
         TrainerConfig bestParameters = bestParameters();
 
@@ -82,7 +87,7 @@ public final class TrainingStatistics {
                 findBestModelStats(trainStats.getMetricStats(metric), bestParameters),
                 findBestModelStats(validationStats.getMetricStats(metric), bestParameters),
                 outerTrainMetrics.get(metric),
-                testMetrics.get(metric)
+                testScores.get(metric)
             )
         ));
     }
@@ -101,5 +106,9 @@ public final class TrainingStatistics {
 
     public void addTrainStats(Metric metric, ModelStats stats) {
         trainStats.add(metric, stats);
+    }
+
+    public void addTestScore(Metric metric, double score) {
+        testScores.put(metric, score);
     }
 }

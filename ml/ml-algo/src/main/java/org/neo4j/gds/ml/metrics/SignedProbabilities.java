@@ -21,7 +21,14 @@ package org.neo4j.gds.ml.metrics;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,6 +77,41 @@ public final class SignedProbabilities {
         Optional<List<Double>> list = !isTree ? Optional.of(new ArrayList<>((int) capacity)) : Optional.empty();
         return new SignedProbabilities(tree, list, isTree);
     }
+
+    public static SignedProbabilities computeFromLabeledData(
+        Features features,
+        HugeLongArray labels,
+        Classifier classifier,
+        BatchQueue evaluationQueue,
+        int concurrency,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        progressTracker.setVolume(features.size());
+
+        var signedProbabilities = SignedProbabilities.create(features.size());
+
+        int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
+        evaluationQueue.parallelConsume(concurrency, thread -> (batch) -> {
+                var probabilityMatrix = classifier.predictProbabilities(batch, features);
+                var offset = 0;
+                for (Long relationshipIdx : batch.nodeIds()) {
+                    double probabilityOfPositiveEdge = probabilityMatrix.dataAt(offset, positiveClassId);
+                    offset += 1;
+                    boolean isEdge = labels.get(relationshipIdx) == EdgeSplitter.POSITIVE;
+
+                    var signedProbability = isEdge ? probabilityOfPositiveEdge : -1 * probabilityOfPositiveEdge;
+                    signedProbabilities.add(signedProbability);
+                }
+
+                progressTracker.logProgress(batch.size());
+            },
+            terminationFlag
+        );
+
+        return signedProbabilities;
+    }
+
 
     public synchronized void add(double value) {
         if (value > 0) positiveCount++;

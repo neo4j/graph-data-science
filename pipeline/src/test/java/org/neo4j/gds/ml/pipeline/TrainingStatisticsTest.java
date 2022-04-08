@@ -21,7 +21,11 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.metrics.AllClassMetric;
+import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
 
@@ -29,8 +33,80 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 
 class TrainingStatisticsTest {
+
+    @Test
+    void selectsBestParametersAccordingToMainMetric() {
+        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
+
+        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+            new TestTrainerConfig("bad"),
+            0.1,
+            1000,
+            1000
+        ));
+        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+            new TestTrainerConfig("better"),
+            0.2,
+            0.2,
+            0.2
+        ));
+        trainingStatistics.addValidationStats(F1_WEIGHTED, ModelStats.of(
+            new TestTrainerConfig("notprimarymetric"),
+            5000,
+            5000,
+            5000
+        ));
+
+        assertThat(trainingStatistics.bestParameters().methodName()).isEqualTo("better");
+    }
+
+    @Test
+    void getsMetricsForWinningModel() {
+        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
+
+        var candidate = new TestTrainerConfig("train");
+        ModelStats trainStats = ModelStats.of(
+            candidate,
+            0.1,
+            0.1,
+            0.1
+        );
+        ModelStats validationStats = ModelStats.of(
+            candidate,
+            0.4,
+            0.3,
+            0.5
+        );
+        trainingStatistics.addTrainStats(AUCPR, trainStats);
+        trainingStatistics.addTrainStats(F1_WEIGHTED, trainStats);
+        trainingStatistics.addValidationStats(AUCPR, validationStats);
+        trainingStatistics.addValidationStats(F1_WEIGHTED, validationStats);
+        trainingStatistics.addTestScore(AUCPR, 1);
+        trainingStatistics.addTestScore(F1_WEIGHTED, 2);
+
+        var winningModelMetrics = trainingStatistics.metricsForWinningModel(Map.of(
+            AUCPR,
+            3D,
+            F1_WEIGHTED,
+            4D
+        ));
+
+        assertThat(winningModelMetrics)
+            .hasSize(2)
+            .containsEntry(
+                AUCPR,
+                BestMetricData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 3, 1)
+            )
+            .containsEntry(
+                F1_WEIGHTED,
+                BestMetricData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 4, 2)
+            );
+
+    }
 
     @Test
     void toMap() {
@@ -72,6 +148,23 @@ class TrainingStatisticsTest {
             .containsEntry("bestParameters", secondCandidate.toMap())
             .containsEntry("trainStats", Map.of("ACCURACY", expectedTrainAccuracyStats))
             .containsEntry("validationStats", Map.of("ACCURACY", expectedValidationAccuracyStats));
+    }
+
+    private static final class TestTrainerConfig implements TrainerConfig {
+
+        private final String method;
+
+        private TestTrainerConfig(String method) {this.method = method;}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+
+        @Override
+        public String methodName() {
+            return method;
+        }
     }
 
 }
