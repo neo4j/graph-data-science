@@ -70,10 +70,6 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
             .build();
     }
 
-    static LogisticRegressionData create(Weights<Matrix> weights, Weights<Vector> bias, LocalIdMap classIdMap) {
-        return ImmutableLogisticRegressionData.builder().bias(bias).weights(weights).classIdMap(classIdMap).build();
-    }
-
     static MemoryEstimation memoryEstimation(boolean isReduced, int numberOfClasses, MemoryRange featureDimension) {
         int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
         return MemoryEstimations.builder("Logistic regression model data", LogisticRegressionData.class)
