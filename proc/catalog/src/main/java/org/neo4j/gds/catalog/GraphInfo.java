@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static org.neo4j.gds.catalog.GraphInfoHelper.density;
 
+@SuppressWarnings("unused")
 public class GraphInfo {
 
     public final String graphName;

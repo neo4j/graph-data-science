@@ -50,6 +50,7 @@ public class GraphMemoryUsageProc extends CatalogProc {
         return Stream.of(memoryUsage);
     }
 
+    @SuppressWarnings("unused")
     public static class GraphMemoryUsage {
 
         public final String graphName;

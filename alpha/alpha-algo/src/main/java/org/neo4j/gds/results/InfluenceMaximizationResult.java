@@ -35,6 +35,7 @@ public class InfluenceMaximizationResult {
         return "InfluenceMaximizationResult{nodeId=" + nodeId + ", spread=" + spread + "}";
     }
 
+    @SuppressWarnings("unused")
     public static final class Stats {
         public final long nodes;
         public final long computeMillis;

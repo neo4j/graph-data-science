@@ -65,6 +65,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
         return Stream.of(result);
     }
 
+    @SuppressWarnings("unused")
     public static class CreateCypherDbResult {
         public final String dbName;
         public final String graphName;
