@@ -19,23 +19,18 @@
  */
 package org.neo4j.gds.core.utils.paged.dss;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongLongMap;
 import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public abstract class DisjointSetStructTest {
+abstract class DisjointSetStructTest {
 
     private DisjointSetStruct struct;
 
@@ -123,23 +118,6 @@ public abstract class DisjointSetStructTest {
         }
     }
 
-    private static int[] set(int... elements) {
-        return elements;
-    }
-
-    void assertMemoryEstimation(MemoryEstimation memoryEstimation, long nodeCount, MemoryRange memoryRange) {
-        assertMemoryEstimation(memoryEstimation, nodeCount, 1, memoryRange);
-    }
-
-    void assertMemoryEstimation(
-            final MemoryEstimation memoryEstimation,
-            long nodeCount,
-            int concurrency,
-            MemoryRange memoryRange) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        assertEquals(memoryRange.min, memoryEstimation.estimate(dimensions, concurrency).memoryUsage().min);
-    }
-
     /**
      * Check if p and q belong to the same set.
      *
@@ -149,19 +127,6 @@ public abstract class DisjointSetStructTest {
      */
     private boolean connected(DisjointSetStruct struct, long p, long q) {
         return struct.sameSet(p, q);
-    }
-
-    /**
-     * Compute number of sets present.
-     */
-    long getSetCount(DisjointSetStruct struct) {
-        long capacity = struct.size();
-        BitSet sets = new BitSet(capacity);
-        for (long i = 0L; i < capacity; i++) {
-            long setId = struct.setIdOf(i);
-            sets.set(setId);
-        }
-        return sets.cardinality();
     }
 
     /**
@@ -175,18 +140,5 @@ public abstract class DisjointSetStructTest {
             map.addTo(struct.setIdOf(i), 1);
         }
         return map;
-    }
-
-    private DisjointSetStruct create(int size, int[]... sets) {
-        DisjointSetStruct dss = newSet(size);
-        for (int[] set : sets) {
-            if (set.length < 1) {
-                throw new IllegalArgumentException("Sets must contain at least one element");
-            }
-            for (int i = 1; i < set.length; i++) {
-                dss.union(set[i], set[0]);
-            }
-        }
-        return dss;
     }
 }
