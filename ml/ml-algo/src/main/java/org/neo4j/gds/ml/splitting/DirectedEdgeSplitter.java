@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
@@ -33,11 +34,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, negativeSamplingRatio);
     }
 
-    @Override
-    public SplitResult split(
-        Graph graph,
-        double holdoutFraction
-    ) {
+    @TestOnly
+    public SplitResult split(Graph graph, double holdoutFraction) {
         return split(graph, graph, holdoutFraction);
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -50,12 +49,6 @@ public abstract class EdgeSplitter {
         this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
         this.negativeSamplingRatio = negativeSamplingRatio;
     }
-
-    @TestOnly
-    public abstract SplitResult split(
-        Graph graph,
-        double holdoutFraction
-    );
 
     public abstract SplitResult split(
         Graph graph,
