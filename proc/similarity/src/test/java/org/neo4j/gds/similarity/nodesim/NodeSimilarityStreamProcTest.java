@@ -29,10 +29,8 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphDropProc;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Collection;
@@ -257,9 +255,6 @@ class NodeSimilarityStreamProcTest extends NodeSimilarityProcTest<NodeSimilarity
             registerProcedures(GraphDropProc.class);
             runQuery("CALL gds.graph.drop('myGraphNATURAL')");
             runQuery(graphCreate);
-            GraphStore myGraphNATURAL = GraphStoreCatalog
-                .get(getUsername(), db.databaseId(), "myGraphNATURAL")
-                .graphStore();
 
             Set<String> expected = Set.of(
                 resultString(idOffset + deletedNodes + 0, idOffset + deletedNodes + 1, 2 / 3.0),

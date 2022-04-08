@@ -34,7 +34,6 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -69,7 +68,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.executorService = executorService;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
-        var metricUsed = config.similarityMetric().toUpperCase(Locale.ROOT);
 
         var metric = MetricSimilarityComputer.valueOf(config.similarityMetric());
         this.similarityComputer = MetricSimilarityComputer.create(metric, config.similarityCutoff());

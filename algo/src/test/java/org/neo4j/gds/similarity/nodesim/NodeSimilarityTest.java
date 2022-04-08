@@ -821,14 +821,12 @@ final class NodeSimilarityTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var nodeSimilarity = new NodeSimilarity(
+        new NodeSimilarity(
             graph,
             config,
             Pools.DEFAULT,
             progressTracker
-        );
-
-        long comparisons = nodeSimilarity.compute().streamResult().count();
+        ).compute().streamResult().count();
 
         List<AtomicLong> progresses = progressTracker.getProgresses();
 
@@ -849,14 +847,12 @@ final class NodeSimilarityTest {
     @Test
     void shouldThrowOnWrongMetric() {
 
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            new NodeSimilarity(
-                naturalGraph,
-                configBuilder().concurrency(1).similarityMetric("ovErLaPPPPP").build(),
-                Pools.DEFAULT,
-                ProgressTracker.NULL_TRACKER
-            );
-        });
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new NodeSimilarity(
+            naturalGraph,
+            configBuilder().concurrency(1).similarityMetric("ovErLaPPPPP").build(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ));
 
         assertTrue(exception.getMessage().contains("ovErLaPPPPP is not a valid metric"));
 
