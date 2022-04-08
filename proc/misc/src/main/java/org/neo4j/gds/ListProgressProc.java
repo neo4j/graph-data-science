@@ -73,6 +73,7 @@ public class ListProgressProc extends BaseProc {
         return jobProgressVisitor.progressRowsStream();
     }
 
+    @SuppressWarnings("unused")
     public static class ProgressResult {
         public String jobId;
         public String taskName;

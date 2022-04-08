@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class ModelCatalogResult {
     public final Map<String, Object> modelInfo;
     public final Map<String, Object> trainConfig;
