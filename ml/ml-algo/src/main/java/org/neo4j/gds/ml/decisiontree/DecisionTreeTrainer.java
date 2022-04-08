@@ -265,4 +265,10 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         int depth();
     }
 
+    @ValueClass
+    interface ReadOnlyGroups {
+        ReadOnlyHugeLongArray left();
+
+        ReadOnlyHugeLongArray right();
+    }
 }
