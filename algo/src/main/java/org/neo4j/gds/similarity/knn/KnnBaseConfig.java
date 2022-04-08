@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -28,10 +27,6 @@ import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
 @ValueClass
 @Configuration
@@ -110,14 +105,5 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {
         return KnnSampler.SamplerType.UNIFORM;
-    }
-
-    static @Nullable List<String> validatePropertyNames(List<String> input) {
-        if (input.isEmpty()) {
-            throw new IllegalArgumentException("The 'nodeProperties' list must not be empty.");
-        }
-        return input.stream()
-            .map(str -> validateNoWhiteCharacter(emptyToNull(str), "nodeProperties"))
-            .collect(Collectors.toList());
     }
 }
