@@ -22,7 +22,6 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.provider.Arguments;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
@@ -35,7 +34,6 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -52,14 +50,6 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
         ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
         ", (f:B {nodeProp1: 5, nodeProp2: 47})";
-
-    private static Stream<Arguments> nodeProperties() {
-        return Stream.of(
-            Arguments.of(List.of("nodeProp1"), 3L),
-            Arguments.of(List.of("nodeProp2"), 3L),
-            Arguments.of(List.of("nodeProp1", "nodeProp2"), 6L)
-        );
-    }
 
     @BeforeEach
     void setup() throws Exception {
