@@ -25,11 +25,8 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-
-import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
 
 abstract class AllShortestPathsProcTest extends BaseTest
 {
@@ -102,12 +99,4 @@ abstract class AllShortestPathsProcTest extends BaseTest
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    protected CypherMapWrapper createMinimalConfig(CypherMapWrapper mapWrapper) {
-        long sourceId = idFunction.of("a");
-
-        if (!mapWrapper.containsKey(SOURCE_NODE_KEY)) {
-            mapWrapper = mapWrapper.withNumber(SOURCE_NODE_KEY, sourceId);
-        }
-        return mapWrapper;
-    }
 }
