@@ -40,23 +40,17 @@ import java.util.Random;
  */
 public class GridBuilder extends GraphBuilder<GridBuilder> {
 
-    private final List<List<Node>> lines = new ArrayList<>();
-
     GridBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
         super(api, tx, label, relationship, random);
     }
 
     public GridBuilder createGrid(int width, int height) {
-        return createGrid(width, height, 1.0);
-    }
-
-    public GridBuilder createGrid(int width, int height, double connectivity) {
         List<Node> temp = null;
         for (int i = 0; i < height; i++) {
             List<Node> line = createLine(width);
             if (null != temp) {
                 for (int j = 0; j < width; j++) {
-                    if (randomDouble() < connectivity) {
+                    if (randomDouble() < 1.0) {
                         createRelationship(temp.get(j), line.get(j));
                     }
                 }
@@ -76,12 +70,7 @@ public class GridBuilder extends GraphBuilder<GridBuilder> {
             temp = node;
         }
         nodes.add(temp);
-        lines.add(nodes);
         return nodes;
-    }
-
-    public List<List<Node>> getLineNodes() {
-        return lines;
     }
 
     @Override
