@@ -80,25 +80,6 @@ public final class Intersections {
         return intersection;
     }
 
-
-    public static double sumSquareDeltaSkip(double[] vector1, double[] vector2, int len, double skipValue) {
-        double result = 0;
-        double comparisons = 0;
-        for (int i = 0; i < len; i++) {
-            double weight1 = vector1[i];
-            if (shouldSkip(weight1, skipValue)) continue;
-
-            double weight2 = vector2[i];
-            if (shouldSkip(weight2, skipValue)) continue;
-
-            double delta = weight1 - weight2;
-            result += delta * delta;
-            comparisons++;
-        }
-
-        return comparisons == 0 ? Double.NaN : result;
-    }
-
     public static double sumSquareDelta(double[] vector1, double[] vector2, int len) {
         double result = 0;
         for (int i = 0; i < len; i++) {
@@ -118,25 +99,6 @@ public final class Intersections {
             }
         }
         return result;
-    }
-
-    public static double cosineSkip(double[] vector1, double[] vector2, int len, double skipValue) {
-        double dotProduct = 0D;
-        double xLength = 0D;
-        double yLength = 0D;
-        for (int i = 0; i < len; i++) {
-            double weight1 = vector1[i];
-            if (shouldSkip(weight1, skipValue)) continue;
-            double weight2 = vector2[i];
-            if (shouldSkip(weight2, skipValue)) continue;
-
-            dotProduct += weight1 * weight2;
-            xLength += weight1 * weight1;
-            yLength += weight2 * weight2;
-        }
-
-        if (xLength == 0D || yLength == 0D) return 0D;
-        return dotProduct / Math.sqrt(xLength * yLength);
     }
 
     public static double pearson(double[] vector1, double[] vector2, int len) {
@@ -164,55 +126,6 @@ public final class Intersections {
 
         double result = dotProductMinusMean / Math.sqrt(xLength * yLength);
         return Double.isNaN(result) ? 0 : result;
-    }
-
-    public static double pearsonSkip(double[] vector1, double[] vector2, int len, double skipValue) {
-        double vector1Sum = 0.0;
-        int vector1Count = 0;
-        double vector2Sum = 0.0;
-        int vector2Count = 0;
-        for (int i = 0; i < len; i++) {
-            double weight1 = vector1[i];
-            double weight2 = vector2[i];
-
-            if(!shouldSkip(weight1, skipValue)) {
-                vector1Sum += weight1;
-                vector1Count++;
-            }
-
-            if (!shouldSkip(weight2, skipValue)) {
-                vector2Sum += weight2;
-                vector2Count++;
-            }
-        }
-
-        double vector1Mean = vector1Sum / vector1Count;
-        double vector2Mean = vector2Sum / vector2Count;
-
-        double dotProductMinusMean = 0D;
-        double xLength = 0D;
-        double yLength = 0D;
-        for (int i = 0; i < len; i++) {
-            double weight1 = vector1[i];
-            if (shouldSkip(weight1, skipValue)) continue;
-
-            double weight2 = vector2[i];
-            if (shouldSkip(weight2, skipValue)) continue;
-
-            double vector1Delta = weight1 - vector1Mean;
-            double vector2Delta = weight2 - vector2Mean;
-
-            dotProductMinusMean += (vector1Delta * vector2Delta);
-            xLength += vector1Delta * vector1Delta;
-            yLength += vector2Delta * vector2Delta;
-        }
-
-        double result = dotProductMinusMean / Math.sqrt(xLength * yLength);
-        return Double.isNaN(result) ? 0 : result;
-    }
-
-    public static boolean shouldSkip(double propertyValue, double skipValue) {
-        return Double.isNaN(propertyValue) || Double.compare(propertyValue, skipValue) == 0;
     }
 
     public static double cosine(double[] vector1, double[] vector2, int len) {
