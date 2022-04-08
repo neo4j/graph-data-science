@@ -33,9 +33,4 @@ public interface DecisionTreeTrainerConfig {
     default int minSplitSize() {
         return 2;
     }
-
-    @Configuration.Ignore
-    default String lossFunction() {
-        return "GiniIndex";
-    }
 }
