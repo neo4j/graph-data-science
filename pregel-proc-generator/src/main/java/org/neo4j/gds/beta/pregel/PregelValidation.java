@@ -168,10 +168,7 @@ final class PregelValidation {
     private boolean configHasFactoryMethod(Element pregelElement) {
         var config = config(pregelElement);
 
-        var stringType = elementUtils.getTypeElement(String.class.getName()).asType();
         var cypherMapWrapperType = elementUtils.getTypeElement(CypherMapWrapper.class.getName()).asType();
-        var optionalType = elementUtils.getTypeElement(Optional.class.getTypeName());
-        var graphNameType = typeUtils.getDeclaredType(optionalType, stringType);
 
         var configElement = typeUtils.asElement(config);
         var maybeHasFactoryMethod = ElementFilter.methodsIn(configElement.getEnclosedElements()).stream()
