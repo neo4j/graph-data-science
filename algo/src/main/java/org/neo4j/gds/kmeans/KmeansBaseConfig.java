@@ -45,4 +45,12 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Sing
     default int k() {
         return 10;
     }
+
+    @Value.Default
+    @Configuration.DoubleRange(min = 0.0)
+    default double deltaSwaps() {
+        return 0.1;
+    }
 }
+
+
