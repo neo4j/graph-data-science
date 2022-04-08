@@ -310,10 +310,6 @@ final class DeltaSteppingTest {
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
         void singleSource(double delta, int concurrency, long idOffset) {
-            var graph = TestSupport.fromGdl(DB_CYPHER, idOffset);
-
-            IdFunction idFunction = (String variable) -> graph.toMappedNodeId(graph.toOriginalNodeId(variable));
-
             var expected = Set.of(
                 expected(idFunction, 0, new double[]{0.0}, "a"),
                 expected(idFunction, 1, new double[]{0.0, 1.0}, "a", "b"),
@@ -323,7 +319,7 @@ final class DeltaSteppingTest {
                 expected(idFunction, 5, new double[]{0.0, 1.0, 2.0, 3.0}, "a", "b", "d", "f")
             );
 
-            var sourceNode = graph.toOriginalNodeId("a");
+            var sourceNode = graph.toOriginalNodeId(idFunction.of("a"));
 
             var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
                 .concurrency(concurrency)
