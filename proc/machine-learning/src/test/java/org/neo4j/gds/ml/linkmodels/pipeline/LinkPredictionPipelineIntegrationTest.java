@@ -30,8 +30,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc;
@@ -97,9 +95,6 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(m)-[:IGNORED]->(c) ";
 
     private GraphStore graphStore;
-
-    @Inject
-    ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
