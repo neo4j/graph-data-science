@@ -34,7 +34,6 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.function.LongUnaryOperator;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
 
 public final class ClassificationMetricComputer {
@@ -128,7 +127,6 @@ public final class ClassificationMetricComputer {
                     isReduced
                 )
             )
-            .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
             .build();
     }
 
