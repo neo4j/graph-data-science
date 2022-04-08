@@ -54,6 +54,9 @@
         <d:tocentry linkend="monitoring-system">
             <?dbhtml filename="common-usage/monitoring-system/index.html"?>
         </d:tocentry>
+        <d:tocentry linkend="debug-sysinfo">
+            <?dbhtml filename="common-usage/debug-sysinfo/index.html"?>
+        </d:tocentry>
     </d:tocentry>
 
         <d:tocentry linkend="management-ops"><?dbhtml filename="management-ops/index.html"?>

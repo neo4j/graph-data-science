@@ -15,6 +15,7 @@
 ** xref:common-usage/running-algos/index.adoc[]
 ** xref:common-usage/logging/index.adoc[]
 ** xref:common-usage/monitoring-system/index.adoc[]
+** xref:common-usage/debug-sysinfo/index.adoc[]
 * xref:management-ops/index.adoc[]
 ** xref:management-ops/graph-catalog-ops/index.adoc[]
 *** xref:graph-project/index.adoc[]

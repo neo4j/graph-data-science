@@ -24,10 +24,10 @@ dependencies {
     implementation     group: 'org.reflections', name: 'reflections',  version: ver.doc.'reflections'
 
     testImplementation project(':cypher-aggregation')
-    testImplementation project(':pipeline')
     testImplementation project(':proc')
     testImplementation project(':pregel-example')
     testImplementation project(':pipeline')
+    testImplementation project(':proc-sysinfo')
 
     testImplementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 }

@@ -47,6 +47,7 @@ This chapter is divided into the following sections:
 * <<running-algos>>
 * <<logging>>
 * <<monitoring-system>>
+* <<debug-sysinfo>>
 
 
 include::memory-estimation.adoc[leveloffset=+1]
@@ -56,3 +57,5 @@ include::projecting-graphs.adoc[leveloffset=+1]
 include::running-algorihms.adoc[leveloffset=+1]
 
 include::logging.adoc[leveroffset=+1]
+
+include::debug-sysinfo.adoc[leveroffset=+1]
