@@ -117,7 +117,4 @@ public final class LinkFeatureExtractor {
         return featuresForLink;
     }
 
-    public int featureDimension() {
-        return featureDimension;
-    }
 }
