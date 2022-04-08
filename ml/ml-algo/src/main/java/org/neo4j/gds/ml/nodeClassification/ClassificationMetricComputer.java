@@ -20,13 +20,21 @@
 package org.neo4j.gds.ml.nodeClassification;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.ClassificationMetric;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.function.LongUnaryOperator;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
 
 public final class ClassificationMetricComputer {
@@ -80,6 +88,48 @@ public final class ClassificationMetricComputer {
 
         localTargets.setAll(i -> targets.get(nodeIds.get(i)));
         return localTargets;
+    }
+
+    public static MemoryEstimation estimateEvaluation(
+        TrainerConfig config,
+        int batchSize,
+        LongUnaryOperator trainSetSize,
+        LongUnaryOperator testSetSize,
+        int fudgedClassCount,
+        int fudgedFeatureCount,
+        boolean isReduced
+    ) {
+        return MemoryEstimations.builder("computing metrics")
+            .perNode("local targets", nodeCount -> {
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .perNode("predicted classes", nodeCount -> {
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .add(
+                "classifier model",
+                ClassifierFactory.dataMemoryEstimation(
+                    config,
+                    trainSetSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
+            .rangePerNode(
+                "classifier runtime",
+                nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
+                    TrainingMethod.valueOf(config.methodName()),
+                    batchSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
+            .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
+            .build();
     }
 
 }

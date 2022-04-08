@@ -40,7 +40,6 @@ import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Trainer;
@@ -150,13 +149,9 @@ public final class NodeClassificationTrain {
         return builder.build();
     }
 
-    public static String taskName() {
-        return "NCTrain";
-    }
-
     public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
         return Tasks.task(
-            taskName(),
+            "NCTrain",
             Tasks.leaf("ShuffleAndSplit"),
             Tasks.iterativeFixed(
                 "SelectBestModel",
@@ -202,7 +197,8 @@ public final class NodeClassificationTrain {
                 int batchSize = config instanceof LogisticRegressionTrainConfig
                     ? ((LogisticRegressionTrainConfig) config).batchSize()
                     : 0; // Not used
-                var evaluation = estimateEvaluation(
+
+                var evaluation = ClassificationMetricComputer.estimateEvaluation(
                     config,
                     batchSize,
                     trainSetSize,
@@ -218,48 +214,6 @@ public final class NodeClassificationTrain {
 
         return MemoryEstimations.builder("model selection")
             .max(foldEstimations)
-            .build();
-    }
-
-    public static MemoryEstimation estimateEvaluation(
-        TrainerConfig config,
-        int batchSize,
-        LongUnaryOperator trainSetSize,
-        LongUnaryOperator testSetSize,
-        int fudgedClassCount,
-        int fudgedFeatureCount,
-        boolean isReduced
-    ) {
-        return MemoryEstimations.builder("computing metrics")
-            .perNode("local targets", nodeCount -> {
-                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
-                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
-            })
-            .perNode("predicted classes", nodeCount -> {
-                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
-                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
-            })
-            .add(
-                "classifier model",
-                ClassifierFactory.dataMemoryEstimation(
-                    config,
-                    trainSetSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    isReduced
-                )
-            )
-            .rangePerNode(
-                "classifier runtime",
-                nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    TrainingMethod.valueOf(config.methodName()),
-                    batchSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    isReduced
-                )
-            )
-            .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
             .build();
     }
 
