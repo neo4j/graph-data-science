@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Status;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
 
@@ -46,12 +45,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.nullValue;
 
 @FakeClockExtension
-public class ListProgressDetailProcTest extends BaseProgressTest {
+class ListProgressDetailProcTest extends BaseProgressTest {
 
-    @Inject
-    public FakeClock fakeClock;
-
-    String jobId;
+    private String jobId;
 
     @BeforeEach
     void setUp() throws Exception {
