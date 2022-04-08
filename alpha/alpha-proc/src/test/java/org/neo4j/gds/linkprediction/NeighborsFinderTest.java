@@ -20,7 +20,7 @@
 package org.neo4j.gds.linkprediction;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.graphdb.Direction;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
@@ -35,7 +35,7 @@ import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 
-class NeighborsFinderTest extends AlgoTestBase {
+class NeighborsFinderTest extends BaseTest {
 
     private static final RelationshipType FRIEND = RelationshipType.withName("FRIEND");
     private static final RelationshipType COLLEAGUE = RelationshipType.withName("COLLEAGUE");
@@ -236,4 +236,3 @@ class NeighborsFinderTest extends AlgoTestBase {
         });
     }
 }
-

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
@@ -44,7 +44,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
  * B:     1      1      2
  * C:     0      2      2
  */
-class DegreesTest extends AlgoTestBase {
+class DegreesTest extends BaseTest {
 
     private static final String UNI_DIRECTIONAL =
         "CREATE" +

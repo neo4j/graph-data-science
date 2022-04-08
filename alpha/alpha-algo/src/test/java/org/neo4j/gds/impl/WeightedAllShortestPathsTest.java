@@ -21,7 +21,7 @@ package org.neo4j.gds.impl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
@@ -55,7 +55,7 @@ import static org.mockito.Mockito.verify;
  *   v    v
  *  (8)->(9)
  */
-class WeightedAllShortestPathsTest extends AlgoTestBase {
+class WeightedAllShortestPathsTest extends BaseTest {
 
     private static final int width = 2, height = 5;
 

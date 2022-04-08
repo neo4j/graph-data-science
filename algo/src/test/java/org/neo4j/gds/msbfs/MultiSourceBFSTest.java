@@ -22,7 +22,7 @@ package org.neo4j.gds.msbfs;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class MultiSourceBFSTest extends AlgoTestBase {
+final class MultiSourceBFSTest extends BaseTest {
 
     private static final String DB_CYPHER =
             "CREATE" +

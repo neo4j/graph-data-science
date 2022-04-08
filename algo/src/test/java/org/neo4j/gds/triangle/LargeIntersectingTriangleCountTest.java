@@ -21,7 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class LargeIntersectingTriangleCountTest extends AlgoTestBase {
+class LargeIntersectingTriangleCountTest extends BaseTest {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";

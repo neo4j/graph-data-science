@@ -21,8 +21,8 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
-import org.neo4j.gds.AlgoTestBase;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class NodeSimilarityTerminationTest extends AlgoTestBase {
+class NodeSimilarityTerminationTest extends BaseTest {
 
     @Timeout(value = 10)
     @Test

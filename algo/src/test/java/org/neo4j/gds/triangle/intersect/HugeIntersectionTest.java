@@ -21,7 +21,7 @@ package org.neo4j.gds.triangle.intersect;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.RelationshipIntersect;
@@ -35,7 +35,7 @@ import java.util.Random;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
 
-final class HugeIntersectionTest extends AlgoTestBase {
+final class HugeIntersectionTest extends BaseTest {
 
     private static final int DEGREE = 25;
     public static final RelationshipType TYPE = RelationshipType.withName("TYPE");

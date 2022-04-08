@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
@@ -57,7 +57,7 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class FastRPTest extends AlgoTestBase {
+class FastRPTest extends BaseTest {
 
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()

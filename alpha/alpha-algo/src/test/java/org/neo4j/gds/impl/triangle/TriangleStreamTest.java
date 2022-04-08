@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.triangle;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.AlgoTestBase;
+import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
@@ -37,7 +37,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-class TriangleStreamTest extends AlgoTestBase {
+class TriangleStreamTest extends BaseTest {
 
     private static final String LABEL = "Node";
     private static final String RELATIONSHIP = "REL";
