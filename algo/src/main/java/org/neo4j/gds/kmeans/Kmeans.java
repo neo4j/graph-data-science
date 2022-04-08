@@ -61,7 +61,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             config.k(),
             config.concurrency(),
             config.maxIterations(),
-            config.deltaSwaps(),
+            config.deltaThreshold(),
             nodeProperties,
             getSplittableRandom(config.randomSeed())
         );
@@ -89,7 +89,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         int k,
         int concurrency,
         int maxIterations,
-        double deltaSwaps,
+        double deltaThreshold,
         NodeProperties nodeProperties,
         SplittableRandom random
     ) {
@@ -104,7 +104,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         this.nodeProperties = nodeProperties;
         this.dimensions = nodeProperties.doubleArrayValue(0).length;
         this.kmeansIterationStopper = new KmeansIterationStopper(
-            deltaSwaps,
+            deltaThreshold,
             maxIterations,
             graph.nodeCount()
         );

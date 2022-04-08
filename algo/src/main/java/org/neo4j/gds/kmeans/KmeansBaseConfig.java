@@ -47,9 +47,9 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Sing
     }
 
     @Value.Default
-    @Configuration.DoubleRange(min = 0.0)
-    default double deltaSwaps() {
-        return 0.1;
+    @Configuration.DoubleRange(min = 0, max = 1)
+    default double deltaThreshold() {
+        return 0.05;
     }
 }
 
