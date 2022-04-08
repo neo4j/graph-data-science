@@ -48,10 +48,6 @@ public final class MultiLabelInformation implements LabelInformation {
     private static final List<NodeLabel> ALL_NODES_LABELS = List.of(NodeLabel.ALL_NODES);
     private static final Set<NodeLabel> ALL_NODES_LABEL_SET = Set.of(NodeLabel.ALL_NODES);
 
-    public static MultiLabelInformation from(Map<NodeLabel, BitSet> labelInformation) {
-        return new MultiLabelInformation(labelInformation);
-    }
-
     private final Map<NodeLabel, BitSet> labelInformation;
 
     private MultiLabelInformation(Map<NodeLabel, BitSet> labelInformation) {
