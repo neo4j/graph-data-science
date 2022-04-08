@@ -164,6 +164,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
         return resultRelationships;
     }
 
+    @SuppressWarnings("unused")
     public static class Result extends SimilarityMutateResult {
         public final long ranIterations;
         public final long nodePairsConsidered;

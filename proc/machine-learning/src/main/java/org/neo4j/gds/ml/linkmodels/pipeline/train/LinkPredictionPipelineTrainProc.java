@@ -97,6 +97,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         return new LPTrainResult(computationResult.result(), computationResult.computeMillis());
     }
 
+    @SuppressWarnings("unused")
     public static class LPTrainResult extends MLTrainResult {
 
         public final Map<String, Object> modelSelectionStats;

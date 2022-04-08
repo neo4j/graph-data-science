@@ -146,6 +146,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
         });
     }
 
+    @SuppressWarnings("unused")
     public static class Result extends SimilarityStatsResult {
         public final long ranIterations;
         public final boolean didConverge;

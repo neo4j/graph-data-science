@@ -119,6 +119,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
 
+    @SuppressWarnings("unused")
     public static class Result extends SimilarityWriteResult {
         public final long ranIterations;
         public final boolean didConverge;
