@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -49,14 +48,10 @@ final class L2LinkFeatureStepTest {
                           "(a)-[:REL]->(d)";
 
     @Inject
-    GraphStore graphStore;
-
-    @Inject
     Graph graph;
 
     @Test
-    public void runL2LinkFeatureStep() {
-
+    void runL2LinkFeatureStep() {
         var step = LinkFeatureStepFactory.create(
             "L2",
             ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("noise", "z", "array")).build()
@@ -72,7 +67,7 @@ final class L2LinkFeatureStepTest {
     }
 
     @Test
-    public void handlesZeroVectors() {
+    void handlesZeroVectors() {
         var step = LinkFeatureStepFactory.create(
             "L2",
             ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("zeros")).build()
