@@ -22,30 +22,77 @@ package org.neo4j.gds.ml.metrics;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public enum AllClassMetric implements ClassificationMetric {
-    F1_WEIGHTED(new F1Weighted()),
-    F1_MACRO(new F1Macro()),
-    ACCURACY(new AccuracyMetric());
-
-    private final MetricStrategy strategy;
-
-    AllClassMetric(MetricStrategy strategy) {
-        this.strategy = strategy;
-    }
-
-    public double compute(
-        HugeLongArray targets,
-        HugeLongArray predictions,
-        Multiset<Long> globalClassCounts
-    ) {
-        return strategy.compute(targets, predictions, globalClassCounts);
-    }
-
-    interface MetricStrategy {
-        double compute(
+    F1_WEIGHTED {
+        @Override
+        public double compute(
             HugeLongArray targets,
             HugeLongArray predictions,
             Multiset<Long> globalClassCounts
-        );
+        ) {
+            if (globalClassCounts.size() == 0) {
+                return 0.0;
+            }
+
+            var weightedScores = globalClassCounts.keys().stream()
+                .mapToDouble(target -> {
+                    var weight = globalClassCounts.count(target);
+                    return weight * new F1Score(target).compute(targets, predictions);
+                });
+            return weightedScores.sum() / globalClassCounts.size();
+        }
+    },
+    F1_MACRO {
+        @Override
+        public double compute(
+            HugeLongArray targets,
+            HugeLongArray predictions,
+            Multiset<Long> globalClassCounts
+        ) {
+            var metrics = globalClassCounts.keys().stream()
+                .map(F1Score::new)
+                .collect(Collectors.toList());
+
+            return metrics
+                .stream()
+                .mapToDouble(metric -> metric.compute(targets, predictions))
+                .average()
+                .orElse(-1);
+        }
+    },
+    ACCURACY {
+        @Override
+        public double compute(
+            HugeLongArray targets,
+            HugeLongArray predictions,
+            Multiset<Long> globalClassCounts
+        ) {
+            long accuratePredictions = 0;
+            assert targets.size() == predictions.size() : formatWithLocale(
+                "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
+                targets.size(),
+                predictions.size());
+
+            for (long row = 0; row < targets.size(); row++) {
+                long targetClass = targets.get(row);
+                long predictedClass = predictions.get(row);
+                if (predictedClass == targetClass) {
+                    accuratePredictions++;
+                }
+            }
+
+            if (targets.size() == 0) {
+                return 0.0;
+            }
+            return BigDecimal.valueOf(accuratePredictions)
+                .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
+                .doubleValue();
+        }
     }
 }
