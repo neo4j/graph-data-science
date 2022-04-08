@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
@@ -125,7 +125,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForest.name(),
-                    List.of(RandomForestTrainConfigImpl
+                    List.of(RandomForestTrainerConfigImpl
                         .builder()
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)

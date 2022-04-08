@@ -50,7 +50,7 @@ import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
+import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -182,7 +182,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var root = new TreeNode<>(0);
-            var modelData = ImmutableRandomForestData
+            var modelData = ImmutableRandomForestClassifierData
                 .builder()
                 .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
@@ -385,7 +385,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     void shouldEstimateMemoryWithRandomForest() {
         var pipeline = LinkPredictionPredictPipeline.EMPTY;
         var root = new TreeNode<>(0);
-        var modelData = ImmutableRandomForestData
+        var modelData = ImmutableRandomForestClassifierData
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(2)
