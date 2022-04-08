@@ -110,7 +110,7 @@ class KmeansTest {
         var kmeansConfig = ImmutableKmeansBaseConfig.builder()
             .nodeWeightProperty("kmeans")
             .concurrency(1)
-            .randomSeed(19L) //init clusters 0.2 and 3.8
+            .randomSeed(19L) //init clusters 0.21 and 3.8
             .k(2)
             .maxIterations(2)
             .build();
@@ -133,6 +133,7 @@ class KmeansTest {
                 5,
                 4,
                 10,
+                0.1,
                 longProperties,
                 new SplittableRandom()
             ).compute()
@@ -152,6 +153,7 @@ class KmeansTest {
                 5,
                 4,
                 10,
+                0.1,
                 nodeProperties,
                 new SplittableRandom()
             ).compute()

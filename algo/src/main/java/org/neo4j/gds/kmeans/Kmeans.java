@@ -45,11 +45,11 @@ public class Kmeans extends Algorithm<HugeIntArray> {
     private final Graph graph;
     private final int k;
     private final int concurrency;
-    private final int maxIterations;
     private final ExecutorService executorService;
     private final SplittableRandom random;
     private final NodeProperties nodeProperties;
     private final int dimensions;
+    private final KmeansIterationStopper kmeansIterationStopper;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeWeightProperty();
@@ -61,6 +61,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             config.k(),
             config.concurrency(),
             config.maxIterations(),
+            config.deltaSwaps(),
             nodeProperties,
             getSplittableRandom(config.randomSeed())
         );
@@ -88,6 +89,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         int k,
         int concurrency,
         int maxIterations,
+        double deltaSwaps,
         NodeProperties nodeProperties,
         SplittableRandom random
     ) {
@@ -96,12 +98,17 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         this.graph = graph;
         this.k = k;
         this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
         this.random = random;
         this.communities = HugeIntArray.newArray(graph.nodeCount());
         validateNodeProperties(nodeProperties);
         this.nodeProperties = nodeProperties;
         this.dimensions = nodeProperties.doubleArrayValue(0).length;
+        this.kmeansIterationStopper = new KmeansIterationStopper(
+            deltaSwaps,
+            maxIterations,
+            graph.nodeCount()
+        );
+
     }
 
     @Override
@@ -131,7 +138,7 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             Optional.of((int) nodeCount / concurrency)
         );
         int numberOfTasks = tasks.size();
-        
+
         assert numberOfTasks <= concurrency;
 
         //Initialization do initial center computation and assignment
@@ -140,7 +147,8 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         List<Long> initialCenterIds = sampler.sampleClusters(random, nodeProperties, nodeCount, k);
         assignCenters(clusterCenters, initialCenterIds, dimensions);
         //
-        for (int iteration = 0; iteration < maxIterations; ++iteration) {
+        int iteration = 0;
+        while (true) {
             long swaps = 0;
             //assign each node to a center
             ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
@@ -148,10 +156,11 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             for (KmeansTask task : tasks) {
                 swaps += task.getSwaps();
             }
-            if (swaps == 0) {
+            if (kmeansIterationStopper.shouldQuit(swaps, ++iteration)) {
                 break;
             }
             recomputeCenters(clusterCenters, tasks);
+
         }
         return communities;
     }
