@@ -157,8 +157,6 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         return copy;
     }
 
-    public abstract int pages();
-
     /**
      * {@inheritDoc}
      */
@@ -384,11 +382,6 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         }
 
         @Override
-        public int pages() {
-            return 1;
-        }
-
-        @Override
         public String toString() {
             return Arrays.toString(page);
         }
@@ -574,9 +567,5 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
             return new HugeCursor.PagedCursor<>(size, pages);
         }
 
-        @Override
-        public int pages() {
-            return pages.length;
-        }
     }
 }

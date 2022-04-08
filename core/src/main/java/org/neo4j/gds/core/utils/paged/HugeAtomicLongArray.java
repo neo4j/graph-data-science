@@ -286,10 +286,6 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
             this.page = page;
         }
 
-        long[] page() {
-            return page;
-        }
-
         @Override
         public HugeCursor<long[]> newCursor() {
             return new HugeCursor.SinglePageCursor<>(page);

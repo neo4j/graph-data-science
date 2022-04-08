@@ -239,10 +239,6 @@ public abstract class HugeAtomicByteArray implements HugeCursorSupport<byte[]> {
             this.page = page;
         }
 
-        byte[] page() {
-            return page;
-        }
-
         @Override
         public HugeCursor<byte[]> newCursor() {
             return new HugeCursor.SinglePageCursor<>(page);
