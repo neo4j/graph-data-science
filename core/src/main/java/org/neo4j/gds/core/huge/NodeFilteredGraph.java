@@ -77,10 +77,6 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
         return degreeCache;
     }
 
-    public IdMap idMap() {
-        return filteredIdMap;
-    }
-
     @Override
     public GraphSchema schema() {
         return csrGraph.schema().filterNodeLabels(filteredIdMap.availableNodeLabels());
