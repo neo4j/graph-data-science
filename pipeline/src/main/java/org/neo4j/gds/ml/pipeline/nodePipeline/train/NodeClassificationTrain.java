@@ -365,7 +365,7 @@ public final class NodeClassificationTrain {
     }
 
     private void registerMetricScores(
-        HugeLongArray evalutationSet,
+        HugeLongArray evaluationSet,
         Classifier classifier,
         BiConsumer<Metric, Double> scoreConsumer
     ) {
@@ -373,7 +373,7 @@ public final class NodeClassificationTrain {
             features,
             targets,
             classCounts,
-            evalutationSet,
+            evaluationSet,
             classifier,
             config.concurrency(),
             progressTracker,
