@@ -22,7 +22,6 @@ package org.neo4j.gds.core.huge;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CSRGraph;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.huge.FilteredNodeProperties.FilteredToOriginalNodeProperties;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -41,9 +40,6 @@ class FilteredToOriginalNodePropertiesTest {
 
     @Inject
     private CSRGraph graph;
-
-    @Inject
-    private GraphStore graphStore;
 
     @Inject
     private IdFunction idFunction;
