@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -118,7 +118,7 @@ class TunableTrainerConfigTest {
         var trainerConfig = config.materialize(Map.of());
         assertThat(trainerConfig)
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainConfigImpl.builder().maxDepth(5).build());
+            .isEqualTo(RandomForestTrainerConfigImpl.builder().maxDepth(5).build());
     }
 
     @Test
@@ -135,7 +135,7 @@ class TunableTrainerConfigTest {
         ));
         assertThat(trainerConfig)
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainConfigImpl
+            .isEqualTo(RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(5)
                 .maxFeaturesRatio(0.1337)
@@ -151,7 +151,7 @@ class TunableTrainerConfigTest {
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainConfig.DEFAULT);
+            .isEqualTo(RandomForestTrainerConfig.DEFAULT);
     }
 
     @Test
@@ -166,25 +166,25 @@ class TunableTrainerConfigTest {
         assertThat(config.streamCornerCaseConfigs())
             .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
-                RandomForestTrainConfigImpl
+                RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.1)
                     .numberOfDecisionTrees(10)
                     .build(),
-                RandomForestTrainConfigImpl
+                RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.1)
                     .numberOfDecisionTrees(100)
                     .build(),
-                RandomForestTrainConfigImpl
+                RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.2)
                     .numberOfDecisionTrees(10)
                     .build(),
-                RandomForestTrainConfigImpl
+                RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.2)

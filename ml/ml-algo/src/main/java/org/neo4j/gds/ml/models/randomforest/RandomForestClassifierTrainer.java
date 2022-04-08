@@ -55,7 +55,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class RandomForestClassifierTrainer implements Trainer {
 
     private final LocalIdMap classIdMap;
-    private final RandomForestTrainConfig config;
+    private final RandomForestTrainerConfig config;
     private final int concurrency;
     private final boolean computeOutOfBagError;
     private final SplittableRandom random;
@@ -65,7 +65,7 @@ public class RandomForestClassifierTrainer implements Trainer {
     public RandomForestClassifierTrainer(
         int concurrency,
         LocalIdMap classIdMap,
-        RandomForestTrainConfig config,
+        RandomForestTrainerConfig config,
         boolean computeOutOfBagError,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker
@@ -82,7 +82,7 @@ public class RandomForestClassifierTrainer implements Trainer {
         LongUnaryOperator numberOfTrainingSamples,
         int numberOfClasses,
         MemoryRange featureDimension,
-        RandomForestTrainConfig config
+        RandomForestTrainerConfig config
     ) {
         // Since we don't expose Out-of-bag-error (yet) we do not take it into account here either.
 
@@ -91,7 +91,7 @@ public class RandomForestClassifierTrainer implements Trainer {
 
         return MemoryEstimations.builder("Training", RandomForestClassifierTrainer.class)
             // estimating the final forest produced
-            .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
+            .add(RandomForestClassifierData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
                 "GiniIndex Loss",
                 nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
@@ -178,7 +178,7 @@ public class RandomForestClassifierTrainer implements Trainer {
         private DecisionTreePredictor<Integer> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
-        private final RandomForestTrainConfig randomForestTrainConfig;
+        private final RandomForestTrainerConfig randomForestTrainConfig;
         private final SplittableRandom random;
         private final Features allFeatureVectors;
         private final HugeLongArray allLabels;
@@ -191,7 +191,7 @@ public class RandomForestClassifierTrainer implements Trainer {
         TrainDecisionTreeTask(
             Optional<HugeAtomicLongArray> maybePredictions,
             DecisionTreeTrainerConfig decisionTreeTrainConfig,
-            RandomForestTrainConfig randomForestTrainConfig,
+            RandomForestTrainerConfig randomForestTrainConfig,
             SplittableRandom random,
             Features allFeatureVectors,
             HugeLongArray allLabels,

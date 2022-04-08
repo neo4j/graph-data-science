@@ -101,7 +101,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainConfigImpl
+            RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(2)
@@ -131,7 +131,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainConfigImpl
+            RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
@@ -162,7 +162,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainConfigImpl
+            RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
@@ -185,7 +185,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainConfigImpl
+            RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
@@ -258,7 +258,7 @@ class RandomForestClassifierTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainConfigImpl.builder()
+        var config = RandomForestTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
             .maxFeaturesRatio(maxFeaturesRatio)

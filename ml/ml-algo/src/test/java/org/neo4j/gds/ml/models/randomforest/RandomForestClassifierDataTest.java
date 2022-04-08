@@ -25,7 +25,7 @@ import org.neo4j.gds.core.GraphDimensions;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RandomForestDataTest {
+class RandomForestClassifierDataTest {
 
     @ParameterizedTest
     @CsvSource(value = {
@@ -46,12 +46,12 @@ class RandomForestDataTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainConfigImpl.builder()
+        var config = RandomForestTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
             .minSplitSize(minSplitSize)
             .build();
-        var estimator = RandomForestData.memoryEstimation(
+        var estimator = RandomForestClassifierData.memoryEstimation(
             unused -> numberOfTrainingSamples,
             config
         );

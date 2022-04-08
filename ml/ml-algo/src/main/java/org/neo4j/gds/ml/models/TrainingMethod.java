@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public enum TrainingMethod {
     RandomForest{
         @Override
         public TrainerConfig createConfig(Map<String, Object> configMap) {
-            return RandomForestTrainConfig.of(configMap);
+            return RandomForestTrainerConfig.of(configMap);
         }
     };
 

@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @Configuration
-public interface RandomForestTrainConfig extends DecisionTreeTrainerConfig, TrainerConfig {
-    RandomForestTrainConfig DEFAULT = of(Map.of());
+public interface RandomForestTrainerConfig extends DecisionTreeTrainerConfig, TrainerConfig {
+    RandomForestTrainerConfig DEFAULT = of(Map.of());
 
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     // Defaults to 1.0/sqrt(featureDimension) if not set explicitly.
@@ -58,10 +58,10 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainerConfig, Trai
         return TrainingMethod.RandomForest.name();
     }
 
-    static RandomForestTrainConfig of(Map<String, Object> params) {
+    static RandomForestTrainerConfig of(Map<String, Object> params) {
         var cypherMapWrapper = CypherMapWrapper.create(params);
 
-        var config = new RandomForestTrainConfigImpl(cypherMapWrapper);
+        var config = new RandomForestTrainerConfigImpl(cypherMapWrapper);
 
         cypherMapWrapper.requireOnlyKeysFrom(config.configKeys());
         return config;

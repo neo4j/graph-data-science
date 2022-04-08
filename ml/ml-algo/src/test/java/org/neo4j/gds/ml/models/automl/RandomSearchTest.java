@@ -23,7 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -64,7 +64,7 @@ class RandomSearchTest {
         var randomForestSamples = 0;
         while (randomSearch.hasNext()) {
             var trainerConfig = randomSearch.next();
-            if (trainerConfig instanceof RandomForestTrainConfig) randomForestSamples++;
+            if (trainerConfig instanceof RandomForestTrainerConfig) randomForestSamples++;
         }
         assertThat(randomForestSamples).isCloseTo((int) (0.5 * maxTrials), Offset.offset((int) (0.05 * maxTrials)));
     }
@@ -122,8 +122,8 @@ class RandomSearchTest {
         var penaltiesHigherThanAHalf = 0;
         while (randomSearch.hasNext()) {
             var trainerConfig = randomSearch.next();
-            assertThat(trainerConfig).isInstanceOf(RandomForestTrainConfig.class);
-            var lrConfig = (RandomForestTrainConfig) trainerConfig;
+            assertThat(trainerConfig).isInstanceOf(RandomForestTrainerConfig.class);
+            var lrConfig = (RandomForestTrainerConfig) trainerConfig;
             assertThat(lrConfig.maxFeaturesRatio().get()).isBetween(0.0, 1.0);
             if (lrConfig.maxFeaturesRatio().get() > 0.5) penaltiesHigherThanAHalf++;
         }
@@ -153,7 +153,7 @@ class RandomSearchTest {
             System.currentTimeMillis()
         );
         assertThat(randomSearch.hasNext());
-        assertThat(randomSearch.next()).isInstanceOf(RandomForestTrainConfig.class);
+        assertThat(randomSearch.next()).isInstanceOf(RandomForestTrainerConfig.class);
         assertThat(!randomSearch.hasNext());
     }
 }

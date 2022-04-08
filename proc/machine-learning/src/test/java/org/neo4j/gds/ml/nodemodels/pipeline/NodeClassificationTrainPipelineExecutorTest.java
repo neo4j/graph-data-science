@@ -45,7 +45,7 @@ import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -273,11 +273,11 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 MemoryRange.of(31_742_464L, 31_774_424L)
             ),
             Arguments.of(
-                List.of(RandomForestTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(115_792L, 223_032L)
+                List.of(RandomForestTrainerConfig.DEFAULT.toTunableConfig()),
+                MemoryRange.of(123_808L, 231_048L)
             ),
             Arguments.of(
-                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainConfig.DEFAULT.toTunableConfig()),
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainerConfig.DEFAULT.toTunableConfig()),
                 MemoryRange.of(31_839_432L, 31_906_672L)
             ),
             Arguments.of(
@@ -286,7 +286,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                         Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(31_839_432L, 31_906_672L)
             ),
@@ -296,7 +296,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                         Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainConfig.DEFAULT.toTunableConfig()
+                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(3_629_038_632L, 3_629_105_872L)
             )

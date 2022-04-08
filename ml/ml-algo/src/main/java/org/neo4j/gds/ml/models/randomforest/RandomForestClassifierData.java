@@ -36,7 +36,7 @@ import java.util.function.LongUnaryOperator;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 @ValueClass
-public interface RandomForestData extends Classifier.ClassifierData {
+public interface RandomForestClassifierData extends Classifier.ClassifierData {
 
     List<DecisionTreePredictor<Integer>> decisionTrees();
 
@@ -47,9 +47,9 @@ public interface RandomForestData extends Classifier.ClassifierData {
 
     static MemoryEstimation memoryEstimation(
         LongUnaryOperator numberOfTrainingExamples,
-        RandomForestTrainConfig config
+        RandomForestTrainerConfig config
     ) {
-        return MemoryEstimations.builder("Random forest model data", RandomForestData.class)
+        return MemoryEstimations.builder("Random forest model data", RandomForestClassifierData.class)
             .rangePerNode(
                 "Decision trees",
                 nodeCount ->
