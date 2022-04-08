@@ -52,14 +52,6 @@ final class LocalClusteringCoefficientCompanion {
         return computeResult.result().asNodeProperties();
     }
 
-    static void warnOnGraphWithParallelRelationships(
-        GraphProjectConfig graphProjectConfig,
-        LocalClusteringCoefficientBaseConfig config,
-        Log log
-    ) {
-
-    }
-
     static <PROC_RESULT, CONFIG extends LocalClusteringCoefficientBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
