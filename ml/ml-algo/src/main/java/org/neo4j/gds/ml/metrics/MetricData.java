@@ -63,8 +63,4 @@ public interface MetricData {
             "train", train().stream().map(ModelStats::toMap).collect(Collectors.toList())
         );
     }
-
-    static MetricData of(List<ModelStats> train, List<ModelStats> validation, double outerTrain, double test) {
-        return ImmutableMetricData.of(train, validation, outerTrain, test);
-    }
 }
