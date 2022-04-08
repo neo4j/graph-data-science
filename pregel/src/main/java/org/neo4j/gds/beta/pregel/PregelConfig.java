@@ -54,8 +54,4 @@ public interface PregelConfig extends
     default boolean useForkJoin() {
         return partitioning() == Partitioning.AUTO;
     }
-
-    static PregelConfig of(CypherMapWrapper userInput) {
-        return new PregelConfigImpl(userInput);
-    }
 }
