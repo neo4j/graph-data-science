@@ -97,7 +97,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @param q the target node
      * @return the relationship object
      */
-    public Relationship createRelationship(Node p, Node q) {
+    Relationship createRelationship(Node p, Node q) {
         final Relationship relationshipTo = p.createRelationshipTo(q, relationship);
         relationships.add(relationshipTo);
         return relationshipTo;
@@ -192,17 +192,6 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      */
     public static DefaultBuilder create(GraphDatabaseAPI api) {
         return new DefaultBuilder(api, api.beginTx(), null, null, RNGHolder.rng);
-    }
-
-    /**
-     * create a new default builder with a defined RNG
-     *
-     * @param api    the neo4j api
-     * @param random the random number generator
-     * @return a new default builder
-     */
-    public static DefaultBuilder create(GraphDatabaseAPI api, Random random) {
-        return new DefaultBuilder(api, api.beginTx(), null, null, random);
     }
 
     @Override
