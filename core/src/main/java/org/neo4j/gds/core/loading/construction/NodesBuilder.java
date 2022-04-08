@@ -178,10 +178,6 @@ public final class NodesBuilder {
         this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabels(nodeLabels));
     }
 
-    public void flush() {
-        this.threadLocalBuilder.get().flush();
-    }
-
     public long importedNodes() {
         return this.importedNodes.sum();
     }
