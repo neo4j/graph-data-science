@@ -207,7 +207,6 @@ class NodeClassificationPredictTest {
         var classIdMap = new LocalIdMap();
         classIdMap.toMapped(0);
         var featureProperties = List.of("a", "b");
-        var modelName = "model";
         LogisticRegressionData modelData = ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386
