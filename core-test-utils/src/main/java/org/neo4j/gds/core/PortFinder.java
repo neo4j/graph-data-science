@@ -130,10 +130,6 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
         );
     }
 
-    public static int freePort() {
-        return freePort(PREFERRED_PORT);
-    }
-
     private static int freePort(int preferred) {
         var random = new Random();
         return IntStream.concat(
