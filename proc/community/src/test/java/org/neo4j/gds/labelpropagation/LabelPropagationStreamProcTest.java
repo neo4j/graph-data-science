@@ -86,7 +86,6 @@ class LabelPropagationStreamProcTest extends LabelPropagationProcTest<LabelPropa
 
         @Test
         void testStreamWithFilteredNodes() {
-            long ignoredNodes = 1;
 
             String graphCreateQuery = GdsCypher
                 .call("nodeFilteredGraph")
