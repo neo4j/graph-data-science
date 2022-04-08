@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -31,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
@@ -40,7 +42,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import java.util.Optional;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict.NodeClassificationResult> {
 
@@ -49,21 +50,26 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     private final int batchSize;
     private final int concurrency;
     private final boolean produceProbabilities;
+    private final BatchTransformer batchTransformer;
 
     public NodeClassificationPredict(
         Classifier classifier,
         Features features,
         int batchSize,
+        BatchTransformer batchTransformer,
         int concurrency,
         boolean produceProbabilities,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.classifier = classifier;
         this.features = features;
+        this.batchTransformer = batchTransformer;
         this.concurrency = concurrency;
         this.batchSize = batchSize;
         this.produceProbabilities = produceProbabilities;
+        this.terminationFlag = terminationFlag;
     }
 
     public static Task progressTask(Graph graph) {
@@ -126,22 +132,50 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         return builder.build();
     }
 
-    @Override
-    public NodeClassificationResult compute() {
-        progressTracker.beginSubTask();
-        var predictedProbabilities = initProbabilities();
-
-        var predictedClasses = HugeLongArray.newArray(features.size());
+    // FIXME: turn this into a class
+    static HugeLongArray predict(
+        Classifier classifier,
+        Features features,
+        long evalutationSetSize,
+        int batchSize,
+        BatchTransformer batchTransformer,
+        int concurrency,
+        @Nullable HugeObjectArray<double[]> predictedProbabilities,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        var predictedClasses = HugeLongArray.newArray(evalutationSetSize);
         var consumer = new NodeClassificationPredictConsumer(
             features,
-            IDENTITY,
+            batchTransformer,
             classifier,
             predictedProbabilities,
             predictedClasses,
             progressTracker
         );
-        var batchQueue = new BatchQueue(features.size(), batchSize, concurrency);
+        var batchQueue = new BatchQueue(evalutationSetSize, batchSize, concurrency);
         batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
+
+        return predictedClasses;
+    }
+
+    @Override
+    public NodeClassificationResult compute() {
+        progressTracker.beginSubTask();
+        var predictedProbabilities = initProbabilities();
+
+        var predictedClasses = predict(
+            classifier,
+            features,
+            features.size(),
+            batchSize,
+            batchTransformer,
+            concurrency,
+            predictedProbabilities,
+            progressTracker,
+            terminationFlag
+        );
+
         progressTracker.endSubTask();
         return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
     }

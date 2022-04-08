@@ -34,8 +34,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
@@ -63,6 +63,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -83,7 +84,7 @@ public final class NodeClassificationTrain {
     private final LocalIdMap classIdMap;
     private final HugeLongArray nodeIds;
     private final List<Metric> metrics;
-    private final MetricComputer metricComputer;
+    private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
@@ -286,15 +287,6 @@ public final class NodeClassificationTrain {
         }
 
         var terminationFlag = TerminationFlag.RUNNING_TRUE;
-        var metricComputer = new ClassificationMetricComputer(
-            metrics,
-            classCounts,
-            features,
-            labels,
-            config.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
 
         return new NodeClassificationTrain(
             graph,
@@ -305,7 +297,7 @@ public final class NodeClassificationTrain {
             classIdMap,
             metrics,
             nodeIds,
-            metricComputer,
+            classCounts,
             progressTracker,
             terminationFlag
         );
@@ -320,7 +312,7 @@ public final class NodeClassificationTrain {
         LocalIdMap classIdMap,
         List<Metric> metrics,
         HugeLongArray nodeIds,
-        ClassificationMetricComputer metricComputer,
+        Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -334,7 +326,7 @@ public final class NodeClassificationTrain {
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
-        this.metricComputer = metricComputer;
+        this.classCounts = classCounts;
     }
 
     public NodeClassificationTrainResult compute() {
@@ -402,8 +394,8 @@ public final class NodeClassificationTrain {
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
-                metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
+                registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
+                registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
                 progressTracker.endSubTask();
 
                 progressTracker.endSubTask();
@@ -418,6 +410,27 @@ public final class NodeClassificationTrain {
         progressTracker.endSubTask();
     }
 
+    private void registerMetricScores(
+        HugeLongArray evalutationSet,
+        Classifier classifier,
+        BiConsumer<Metric, Double> scoreConsumer
+    ) {
+        var trainMetricComputer = ClassificationMetricComputer.forEvaluationSet(
+            features,
+            targets,
+            classCounts,
+            evalutationSet,
+            classifier,
+            config.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+        metrics.forEach(metric -> scoreConsumer.accept(
+            metric,
+            trainMetricComputer.score((ClassificationMetric) metric)
+        ));
+    }
+
     private Map<Metric, BestMetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         TrainingStatistics trainingStatistics
@@ -427,11 +440,11 @@ public final class NodeClassificationTrain {
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier).forEach(trainingStatistics::addTestScore);
-        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
+        registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
+        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
         progressTracker.endSubTask();
 
-        return trainingStatistics.metricsForWinningModel(outerTrainMetrics);
+        return trainingStatistics.metricsForWinningModel();
     }
 
     private Classifier retrainBestModel(TrainerConfig bestParameters) {

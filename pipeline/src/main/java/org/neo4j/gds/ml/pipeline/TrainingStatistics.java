@@ -40,12 +40,14 @@ public final class TrainingStatistics {
     private final StatsMap validationStats;
     private final List<Metric> metrics;
     private final Map<Metric, Double> testScores;
+    private final Map<Metric, Double> outerTrainScores;
 
     public TrainingStatistics(List<Metric> metrics) {
         this.trainStats = StatsMap.create(metrics);
         this.validationStats = StatsMap.create(metrics);
         this.metrics = metrics;
         this.testScores = new HashMap<>();
+        this.outerTrainScores = new HashMap<>();
     }
 
     public TrainerConfig bestParameters() {
@@ -76,9 +78,7 @@ public final class TrainingStatistics {
         );
     }
 
-    public Map<Metric, BestMetricData> metricsForWinningModel(
-        Map<? extends Metric, Double> outerTrainMetrics
-    ) {
+    public Map<Metric, BestMetricData> metricsForWinningModel() {
         TrainerConfig bestParameters = bestParameters();
 
         return metrics.stream().collect(Collectors.toMap(
@@ -86,7 +86,7 @@ public final class TrainingStatistics {
             metric -> BestMetricData.of(
                 findBestModelStats(trainStats.getMetricStats(metric), bestParameters),
                 findBestModelStats(validationStats.getMetricStats(metric), bestParameters),
-                outerTrainMetrics.get(metric),
+                outerTrainScores.get(metric),
                 testScores.get(metric)
             )
         ));
@@ -110,5 +110,8 @@ public final class TrainingStatistics {
 
     public void addTestScore(Metric metric, double score) {
         testScores.put(metric, score);
+    }
+    public void addOuterTrainScore(Metric metric, double score) {
+        outerTrainScores.put(metric, score);
     }
 }

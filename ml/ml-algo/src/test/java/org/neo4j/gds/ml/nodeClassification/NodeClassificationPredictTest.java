@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -32,6 +33,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -108,9 +110,11 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
+            BatchTransformer.IDENTITY,
             1,
             true,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -163,9 +167,11 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
+            BatchTransformer.IDENTITY,
             1,
             true,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -229,9 +235,11 @@ class NodeClassificationPredictTest {
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
+            BatchTransformer.IDENTITY,
             1,
             false,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         mcnlrPredict.compute();

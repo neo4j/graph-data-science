@@ -37,7 +37,6 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -60,7 +59,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
@@ -146,7 +145,13 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         // evaluate the best model on the training and test graphs
         progressTracker.beginSubTask("compute train metrics");
-        var outerTrainMetrics = computeTrainMetric(trainData, classifier, trainRelationshipIds, progressTracker);
+        computeTrainMetric(
+            trainData,
+            classifier,
+            trainRelationshipIds,
+            trainingStatistics::addOuterTrainScore,
+            progressTracker
+        );
         progressTracker.endSubTask("compute train metrics");
 
         progressTracker.beginSubTask("evaluate on test data");
@@ -156,7 +161,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var model = createModel(
             trainingStatistics.bestParameters(),
             classifier.data(),
-            trainingStatistics.metricsForWinningModel(outerTrainMetrics)
+            trainingStatistics.metricsForWinningModel()
         );
 
         progressTracker.endSubTask();
@@ -221,16 +226,16 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(trainSet),
+                    trainStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
-                )
-                    .forEach(trainStatsBuilder::update);
+                );
                 computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(validationSet),
+                    validationStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
-                )
-                    .forEach(validationStatsBuilder::update);
+                );
             }
 
             // insert the candidates' metrics into trainStats and validationStats
@@ -284,10 +289,11 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         return splitter.splits();
     }
 
-    private Map<LinkMetric, Double> computeTrainMetric(
+    private void computeTrainMetric(
         FeaturesAndLabels trainData,
         Classifier classifier,
         ReadOnlyHugeLongArray evaluationSet,
+        BiConsumer<Metric, Double> scoreConsumer,
         ProgressTracker progressTracker
     ) {
         var signedProbabilities = SignedProbabilities.computeFromLabeledData(
@@ -300,10 +306,12 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             terminationFlag
         );
 
-        return config.metrics().stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric -> metric.compute(signedProbabilities, config.negativeClassWeight())
-        ));
+        config.metrics().forEach(metric ->
+            scoreConsumer.accept(
+                metric,
+                metric.compute(signedProbabilities, config.negativeClassWeight())
+            )
+        );
     }
 
     private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(

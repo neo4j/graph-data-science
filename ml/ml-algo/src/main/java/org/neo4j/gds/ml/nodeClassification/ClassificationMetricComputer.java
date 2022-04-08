@@ -22,73 +22,63 @@ package org.neo4j.gds.ml.nodeClassification;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.metrics.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
 
-public class ClassificationMetricComputer implements MetricComputer {
-    private final List<Metric> metrics;
+public final class ClassificationMetricComputer {
+
+    private final HugeLongArray predictedClasses;
+    private final HugeLongArray labels;
     private final Multiset<Long> classCounts;
-    private final Features features;
-    private final HugeLongArray targets;
-    private final int concurrency;
-    private final ProgressTracker progressTracker;
-    private final TerminationFlag terminationFlag;
 
-    public ClassificationMetricComputer(
-        List<Metric> metrics,
-        Multiset<Long> classCounts,
+    private ClassificationMetricComputer(
+        HugeLongArray predictedClasses,
+        HugeLongArray labels,
+        Multiset<Long> classCounts
+    ) {
+        this.labels = labels;
+        this.classCounts = classCounts;
+        this.predictedClasses = predictedClasses;
+    }
+
+    public double score(ClassificationMetric metric) {
+        return metric.compute(labels, predictedClasses, classCounts);
+    }
+
+    public static ClassificationMetricComputer forEvaluationSet(
         Features features,
-        HugeLongArray targets,
+        HugeLongArray labels,
+        Multiset<Long> classCounts,
+        HugeLongArray evaluationSet,
+        Classifier classifier,
         int concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        this.metrics = metrics;
-        this.classCounts = classCounts;
-        this.features = features;
-        this.targets = targets;
-        this.concurrency = concurrency;
-        this.progressTracker = progressTracker;
-        this.terminationFlag = terminationFlag;
-    }
-
-    @Override
-    public Map<Metric, Double> computeMetrics(
-        HugeLongArray evaluationSet, Classifier classifier
-    ) {
-        var predictedClasses = HugeLongArray.newArray(evaluationSet.size());
-
-        // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
-        // the consumer internally remaps to original nodeIds before prediction
-        var consumer = new NodeClassificationPredictConsumer(
-            features,
-            evaluationSet::get,
+        HugeLongArray predictedClasses = NodeClassificationPredict.predict(
             classifier,
+            features,
+            evaluationSet.size(),
+            DEFAULT_BATCH_SIZE,
+            evaluationSet::get,
+            concurrency,
             null,
-            predictedClasses,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
 
-        var queue = new BatchQueue(evaluationSet.size());
-        queue.parallelConsume(consumer, concurrency, terminationFlag);
-
-        var localLabels = makeLocalTargets(evaluationSet, targets);
-        return metrics.stream().collect(Collectors.toMap(
-            metric -> metric,
-            metric -> ((ClassificationMetric) metric).compute(localLabels, predictedClasses, classCounts)
-        ));
+        return new ClassificationMetricComputer(
+            predictedClasses,
+            makeLocalTargets(evaluationSet, labels),
+            classCounts
+        );
     }
 
-    private HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
+    private static HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
         var localTargets = HugeLongArray.newArray(nodeIds.size());
 
         localTargets.setAll(i -> targets.get(nodeIds.get(i)));

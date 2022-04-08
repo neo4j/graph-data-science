@@ -33,7 +33,6 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -66,16 +65,6 @@ class ClassificationMetricComputerTest {
             .map(i -> new double[]{i})
             .collect(Collectors.toList()));
 
-        var classificationMetricComputer = new ClassificationMetricComputer(
-            List.of(F1_WEIGHTED),
-            multiSet,
-            features,
-            targets,
-            1,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
-
         var classifier = new TestClassifier() {
             @Override
             public LocalIdMap classIdMap() {
@@ -104,11 +93,17 @@ class ClassificationMetricComputerTest {
             }
         };
 
-        var metrics = classificationMetricComputer.computeMetrics(
+        var classificationMetricComputer = ClassificationMetricComputer.forEvaluationSet(
+            features,
+            targets,
+            multiSet,
             HugeLongArray.of(0, 1, 2, 3),
-            classifier
+            classifier,
+            1,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
-        assertThat(metrics.get(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));
+        assertThat(classificationMetricComputer.score(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));
     }
 }

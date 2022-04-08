@@ -87,13 +87,10 @@ class TrainingStatisticsTest {
         trainingStatistics.addValidationStats(F1_WEIGHTED, validationStats);
         trainingStatistics.addTestScore(AUCPR, 1);
         trainingStatistics.addTestScore(F1_WEIGHTED, 2);
+        trainingStatistics.addOuterTrainScore(AUCPR, 3);
+        trainingStatistics.addOuterTrainScore(F1_WEIGHTED, 4);
 
-        var winningModelMetrics = trainingStatistics.metricsForWinningModel(Map.of(
-            AUCPR,
-            3D,
-            F1_WEIGHTED,
-            4D
-        ));
+        var winningModelMetrics = trainingStatistics.metricsForWinningModel();
 
         assertThat(winningModelMetrics)
             .hasSize(2)
