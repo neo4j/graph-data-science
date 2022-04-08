@@ -264,7 +264,7 @@ class NodeClassificationPredictTest {
         var concurrency = 1;
 
         // instance overhead
-        var instance = 48L;
+        var instance = 40L;
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
         // The predictions variable is tested elsewhere
