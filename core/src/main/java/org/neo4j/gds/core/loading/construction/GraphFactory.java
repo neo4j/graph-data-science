@@ -299,31 +299,6 @@ public final class GraphFactory {
 
     public static HugeGraph create(
         IdMap idMap,
-        Map<String, NodeProperties> nodeProperties,
-        RelationshipType relationshipType,
-        Relationships relationships
-    ) {
-        var nodeSchemaBuilder = NodeSchema.builder();
-        idMap.availableNodeLabels().forEach(label -> {
-            nodeProperties.forEach((propertyKey, propertyValues) -> nodeSchemaBuilder.addProperty(
-                label,
-                propertyKey,
-                propertyValues.valueType()
-            ));
-            nodeSchemaBuilder.addLabel(label);
-        });
-
-        return create(
-            idMap,
-            nodeSchemaBuilder.build(),
-            nodeProperties,
-            relationshipType,
-            relationships
-        );
-    }
-
-    public static HugeGraph create(
-        IdMap idMap,
         NodeSchema nodeSchema,
         Map<String, NodeProperties> nodeProperties,
         RelationshipType relationshipType,
