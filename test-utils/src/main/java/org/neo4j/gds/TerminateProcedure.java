@@ -42,8 +42,8 @@ public class TerminateProcedure {
 
     @Procedure("test.testProc")
     public void allShortestPathsStream(
-            @Name(value = "config", defaultValue = "{}")
-                    Map<String, Object> config) {
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+    ) {
 
         final TerminationFlag flag = TerminationFlag.wrap(transaction);
         while (flag.running()) {
@@ -51,6 +51,7 @@ public class TerminateProcedure {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ignore) {
+                Thread.currentThread().interrupt();
             }
         }
         log.info("algorithm termination successful");

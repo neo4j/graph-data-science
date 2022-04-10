@@ -143,6 +143,7 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
                     try {
                         resultQueue.put(result);
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     }
                 }
