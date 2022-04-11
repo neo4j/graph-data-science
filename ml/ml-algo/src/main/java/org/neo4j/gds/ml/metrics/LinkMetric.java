@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics;
 
-public enum LinkMetric {
+public enum LinkMetric implements Metric {
     AUCPR;
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {

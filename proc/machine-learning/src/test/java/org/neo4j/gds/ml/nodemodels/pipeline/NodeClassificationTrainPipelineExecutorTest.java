@@ -41,7 +41,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -125,7 +125,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("pr"));
 
-        var metricSpecification = MetricSpecification.parse("F1(class=1)");
+        var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.of(
@@ -182,7 +182,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
 
-        var metricSpecification = MetricSpecification.parse("F1(class=1)");
+        var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
 
         pipeline.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
             .testFraction(0.3)
@@ -247,7 +247,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .graphName(GRAPH_NAME)
             .modelName("myModel")
             .targetProperty("INVALID_PROPERTY")
-            .addMetric(MetricSpecification.parse("F1(class=1)"))
+            .addMetric(ClassificationMetricSpecification.parse("F1(class=1)"))
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -274,7 +274,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             ),
             Arguments.of(
                 List.of(RandomForestTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(123_808L, 231_048L)
+                MemoryRange.of(115_792L, 223_032L)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainConfig.DEFAULT.toTunableConfig()),
@@ -317,8 +317,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         ));
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
-        for (int i = 0; i < tunableConfigs.size(); i++) {
-            pipeline.addTrainerConfig(tunableConfigs.get(i));
+        for (TunableTrainerConfig tunableConfig : tunableConfigs) {
+            pipeline.addTrainerConfig(tunableConfig);
         }
 
         // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
@@ -335,7 +335,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .addRelationshipType("SOME_REL")
             .addNodeLabel("SOME_LABEL")
             .minBatchSize(1)
-            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
         var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog());
@@ -365,7 +365,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .addRelationshipType("SOME_REL")
             .addNodeLabel("SOME_LABEL")
             .minBatchSize(1)
-            .metrics(List.of(MetricSpecification.parse("F1_WEIGHTED")))
+            .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
         assertThatThrownBy(() -> NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog()))
@@ -380,7 +380,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     private NodeClassificationPipelineTrainConfig createConfig(
         String modelName,
-        MetricSpecification metricSpecification,
+        ClassificationMetricSpecification metricSpecification,
         long randomSeed
     ) {
         return ImmutableNodeClassificationPipelineTrainConfig.builder()

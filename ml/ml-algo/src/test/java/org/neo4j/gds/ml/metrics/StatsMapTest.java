@@ -21,8 +21,14 @@ package org.neo4j.gds.ml.metrics;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.ml.models.TrainerConfig;
+
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.metrics.AllClassMetric.ACCURACY;
+import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
 
 class StatsMapTest {
 
@@ -49,6 +55,43 @@ class StatsMapTest {
         assertThat(_4_10.max).isEqualTo(4 * _1_10.max - 3 * overheadForOneStatsMap);
         assertThat(_1_10.max).isEqualTo(2 * _1_05.max - overheadForOneStatsMap);
         assertThat(_4_10.max).isEqualTo(2 * _4_05.max - overheadForOneStatsMap);
+    }
+
+    @Test
+    void toMap() {
+        ModelStats goodF1Stats = ModelStats.of(new TestTrainerConfig("good"), 0.2, 0.1, 0.5);
+        ModelStats badF1Stats = ModelStats.of(new TestTrainerConfig("bad"), 42, 12, 50);
+        ModelStats goodAccuracyStats = ModelStats.of(new TestTrainerConfig("good"), 2, 1, 5);
+        ModelStats badAccuracyStats = ModelStats.of(new TestTrainerConfig("bad"), 3, 2, 6);
+
+        StatsMap statsMap = StatsMap.create(List.of(F1_WEIGHTED, ACCURACY));
+
+        statsMap.add(F1_WEIGHTED, goodF1Stats);
+        statsMap.add(F1_WEIGHTED, badF1Stats);
+        statsMap.add(ACCURACY, goodAccuracyStats);
+        statsMap.add(ACCURACY, badAccuracyStats);
+
+        assertThat(statsMap.toMap())
+            .hasSize(2)
+            .containsEntry(F1_WEIGHTED.name(), List.of(goodF1Stats.toMap(), badF1Stats.toMap()))
+            .containsEntry(ACCURACY.name(), List.of(goodAccuracyStats.toMap(), badAccuracyStats.toMap()));
+    }
+
+    private static final class TestTrainerConfig implements TrainerConfig {
+
+        private final String method;
+
+        private TestTrainerConfig(String method) {this.method = method;}
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of("method", method);
+        }
+
+        @Override
+        public String methodName() {
+            return method;
+        }
     }
 
 }

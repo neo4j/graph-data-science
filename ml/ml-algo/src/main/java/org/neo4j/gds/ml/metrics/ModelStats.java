@@ -52,6 +52,10 @@ public interface ModelStats {
      */
     double max();
 
+    static ModelStats of(TrainerConfig params, double avg, double min, double max) {
+        return ImmutableModelStats.of(params, avg, min, max);
+    }
+
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(

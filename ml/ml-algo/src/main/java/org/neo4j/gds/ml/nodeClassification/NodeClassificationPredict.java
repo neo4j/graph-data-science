@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -33,41 +34,44 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
-import org.neo4j.gds.ml.models.FeaturesFactory;
+import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.ml.core.batch.BatchTransformer.IDENTITY;
 
 public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict.NodeClassificationResult> {
 
     private final Classifier classifier;
-    private final Graph graph;
-    private final int batchSize;
-    private final int concurrency;
+    private final Features features;
     private final boolean produceProbabilities;
-    private final List<String> featureProperties;
+    private final ParallelNodeClassifier predictor;
 
     public NodeClassificationPredict(
         Classifier classifier,
-        Graph graph,
+        Features features,
         int batchSize,
         int concurrency,
         boolean produceProbabilities,
-        List<String> featureProperties,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         super(progressTracker);
         this.classifier = classifier;
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.batchSize = batchSize;
+        this.features = features;
         this.produceProbabilities = produceProbabilities;
-        this.featureProperties = featureProperties;
+        this.terminationFlag = terminationFlag;
+
+        this.predictor = new ParallelNodeClassifier(
+            classifier,
+            features,
+            batchSize,
+            concurrency,
+            progressTracker,
+            terminationFlag
+        );
     }
 
     public static Task progressTask(Graph graph) {
@@ -130,23 +134,14 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         return builder.build();
     }
 
+
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
-        var features = FeaturesFactory.extractLazyFeatures(graph, featureProperties);
         var predictedProbabilities = initProbabilities();
-        var predictedClasses = HugeLongArray.newArray(graph.nodeCount());
-        var consumer = new NodeClassificationPredictConsumer(
-            features,
-            IDENTITY,
-            classifier,
-            predictedProbabilities,
-            predictedClasses,
-            progressTracker
-        );
-        var batchQueue = new BatchQueue(graph.nodeCount(), batchSize, concurrency);
-        batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
+        var predictedClasses = predictor.predict(predictedProbabilities);
         progressTracker.endSubTask();
+
         return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
     }
 
@@ -160,7 +155,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             var numberOfClasses = classifier.numberOfClasses();
             var predictions = HugeObjectArray.newArray(
                 double[].class,
-                graph.nodeCount()
+                features.size()
             );
             predictions.setAll(i -> new double[numberOfClasses]);
             return predictions;

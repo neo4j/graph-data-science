@@ -105,7 +105,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         public LPTrainResult(LinkPredictionTrainResult algoResult, long trainMillis) {
             super(algoResult.model(), trainMillis);
 
-            this.modelSelectionStats = algoResult.modelSelectionStatistics().toMap();
+            this.modelSelectionStats = algoResult.trainingStatistics().toMap();
         }
     }
 }

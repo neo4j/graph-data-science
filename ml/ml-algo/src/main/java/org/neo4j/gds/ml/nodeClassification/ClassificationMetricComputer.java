@@ -20,79 +20,113 @@
 package org.neo4j.gds.ml.nodeClassification;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.metrics.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.MetricComputer;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.function.LongUnaryOperator;
 
-public class ClassificationMetricComputer implements MetricComputer {
-    private final List<Metric> metrics;
+import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
+
+public final class ClassificationMetricComputer {
+
+    private final HugeLongArray predictedClasses;
+    private final HugeLongArray labels;
     private final Multiset<Long> classCounts;
-    private final Features features;
-    private final HugeLongArray targets;
-    private final int concurrency;
-    private final ProgressTracker progressTracker;
-    private final TerminationFlag terminationFlag;
 
-    public ClassificationMetricComputer(
-        List<Metric> metrics,
-        Multiset<Long> classCounts,
+    private ClassificationMetricComputer(
+        HugeLongArray predictedClasses,
+        HugeLongArray labels,
+        Multiset<Long> classCounts
+    ) {
+        this.labels = labels;
+        this.classCounts = classCounts;
+        this.predictedClasses = predictedClasses;
+    }
+
+    public double score(ClassificationMetric metric) {
+        return metric.compute(labels, predictedClasses, classCounts);
+    }
+
+    public static ClassificationMetricComputer forEvaluationSet(
         Features features,
-        HugeLongArray targets,
+        HugeLongArray labels,
+        Multiset<Long> classCounts,
+        HugeLongArray evaluationSet,
+        Classifier classifier,
         int concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        this.metrics = metrics;
-        this.classCounts = classCounts;
-        this.features = features;
-        this.targets = targets;
-        this.concurrency = concurrency;
-        this.progressTracker = progressTracker;
-        this.terminationFlag = terminationFlag;
-    }
-
-    @Override
-    public Map<Metric, Double> computeMetrics(
-        HugeLongArray evaluationSet, Classifier classifier
-    ) {
-        var predictedClasses = HugeLongArray.newArray(evaluationSet.size());
-
-        // consume from queue which contains local nodeIds, i.e. indices into evaluationSet
-        // the consumer internally remaps to original nodeIds before prediction
-        var consumer = new NodeClassificationPredictConsumer(
-            features,
-            evaluationSet::get,
+        var predictor = new ParallelNodeClassifier(
             classifier,
-            null,
-            predictedClasses,
-            progressTracker
+            features,
+            DEFAULT_BATCH_SIZE,
+            concurrency,
+            progressTracker,
+            terminationFlag
         );
 
-        var queue = new BatchQueue(evaluationSet.size());
-        queue.parallelConsume(consumer, concurrency, terminationFlag);
-
-        var localLabels = makeLocalTargets(evaluationSet, targets);
-        return metrics.stream().collect(Collectors.toMap(
-            metric -> metric,
-            metric -> ((ClassificationMetric) metric).compute(localLabels, predictedClasses, classCounts)
-        ));
+        return new ClassificationMetricComputer(
+            predictor.predict(evaluationSet),
+            makeLocalTargets(evaluationSet, labels),
+            classCounts
+        );
     }
 
-    private HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
+    private static HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
         var localTargets = HugeLongArray.newArray(nodeIds.size());
 
         localTargets.setAll(i -> targets.get(nodeIds.get(i)));
         return localTargets;
+    }
+
+    public static MemoryEstimation estimateEvaluation(
+        TrainerConfig config,
+        LongUnaryOperator trainSetSize,
+        LongUnaryOperator testSetSize,
+        int fudgedClassCount,
+        int fudgedFeatureCount,
+        boolean isReduced
+    ) {
+        return MemoryEstimations.builder("computing metrics")
+            .perNode("local targets", nodeCount -> {
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .perNode("predicted classes", nodeCount -> {
+                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
+                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
+            })
+            .add(
+                "classifier model",
+                ClassifierFactory.dataMemoryEstimation(
+                    config,
+                    trainSetSize,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
+            .rangePerNode(
+                "classifier runtime",
+                nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
+                    TrainingMethod.valueOf(config.methodName()),
+                    DEFAULT_BATCH_SIZE,
+                    fudgedClassCount,
+                    fudgedFeatureCount,
+                    isReduced
+                )
+            )
+            .build();
     }
 
 }

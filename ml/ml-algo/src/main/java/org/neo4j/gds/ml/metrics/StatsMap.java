@@ -23,10 +23,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
@@ -64,12 +64,14 @@ public final class StatsMap {
         map.get(metric).add(modelStats);
     }
 
-    public ModelStats pickBestModelStats(Metric metric) {
-        var modelStats = map.get(metric);
-        return Collections.max(modelStats, ModelStats.COMPARE_AVERAGE);
+    public List<ModelStats> getMetricStats(Metric metric) {
+        return map.get(metric);
     }
 
-    public Map<Metric, List<ModelStats>> getMap() {
-        return map;
+    public Map<String, List<Map<String, Object>>> toMap() {
+        return map.entrySet().stream().collect(Collectors.toMap(
+            entry -> entry.getKey().name(),
+            value -> value.getValue().stream().map(ModelStats::toMap).collect(Collectors.toList())
+        ));
     }
 }

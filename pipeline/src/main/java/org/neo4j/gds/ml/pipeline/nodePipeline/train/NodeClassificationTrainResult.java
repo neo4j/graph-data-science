@@ -22,9 +22,10 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.train;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 
 @ValueClass
 public interface NodeClassificationTrainResult {
     Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
-    ModelSelectResult modelSelectionStatistics();
+    TrainingStatistics trainingStatistics();
 }

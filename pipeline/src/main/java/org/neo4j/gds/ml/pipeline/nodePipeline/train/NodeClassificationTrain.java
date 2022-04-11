@@ -34,14 +34,12 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.BestModelStats;
+import org.neo4j.gds.ml.metrics.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.MetricComputer;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Trainer;
@@ -50,8 +48,8 @@ import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
@@ -63,7 +61,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -83,10 +81,8 @@ public final class NodeClassificationTrain {
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
     private final HugeLongArray nodeIds;
-    private final List<Metric> metrics;
-    private final StatsMap trainStats;
-    private final StatsMap validationStats;
-    private final MetricComputer metricComputer;
+    private final List<ClassificationMetric> metrics;
+    private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
@@ -124,7 +120,7 @@ public final class NodeClassificationTrain {
         var builder = MemoryEstimations.builder()
             .perNode("global targets", HugeLongArray::memoryEstimation)
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
-            .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
+            .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - testFraction))
             .add(
@@ -152,13 +148,9 @@ public final class NodeClassificationTrain {
         return builder.build();
     }
 
-    public static String taskName() {
-        return "NCTrain";
-    }
-
     public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
         return Tasks.task(
-            taskName(),
+            "NCTrain",
             Tasks.leaf("ShuffleAndSplit"),
             Tasks.iterativeFixed(
                 "SelectBestModel",
@@ -201,12 +193,8 @@ public final class NodeClassificationTrain {
                     false
                 );
 
-                int batchSize = config instanceof LogisticRegressionTrainConfig
-                    ? ((LogisticRegressionTrainConfig) config).batchSize()
-                    : 0; // Not used
-                var evaluation = estimateEvaluation(
+                var evaluation = ClassificationMetricComputer.estimateEvaluation(
                     config,
-                    batchSize,
                     trainSetSize,
                     testSetSize,
                     fudgedClassCount,
@@ -220,48 +208,6 @@ public final class NodeClassificationTrain {
 
         return MemoryEstimations.builder("model selection")
             .max(foldEstimations)
-            .build();
-    }
-
-    public static MemoryEstimation estimateEvaluation(
-        TrainerConfig config,
-        int batchSize,
-        LongUnaryOperator trainSetSize,
-        LongUnaryOperator testSetSize,
-        int fudgedClassCount,
-        int fudgedFeatureCount,
-        boolean isReduced
-    ) {
-        return MemoryEstimations.builder("computing metrics")
-            .perNode("local targets", nodeCount -> {
-                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
-                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
-            })
-            .perNode("predicted classes", nodeCount -> {
-                var sizeOfLargePartOfAFold = testSetSize.applyAsLong(nodeCount);
-                return HugeLongArray.memoryEstimation(sizeOfLargePartOfAFold);
-            })
-            .add(
-                "classifier model",
-                ClassifierFactory.dataMemoryEstimation(
-                    config,
-                    trainSetSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    isReduced
-                )
-            )
-            .rangePerNode(
-                "classifier runtime",
-                nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    TrainingMethod.valueOf(config.methodName()),
-                    batchSize,
-                    fudgedClassCount,
-                    fudgedFeatureCount,
-                    isReduced
-                )
-            )
-            .fixed("probabilities", sizeOfDoubleArray(fudgedClassCount))
             .build();
     }
 
@@ -279,8 +225,6 @@ public final class NodeClassificationTrain {
         var metrics = config.metrics(classCounts.keys());
         var nodeIds = HugeLongArray.newArray(graph.nodeCount());
         nodeIds.setAll(i -> i);
-        var trainStats = StatsMap.create(metrics);
-        var validationStats = StatsMap.create(metrics);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
@@ -291,15 +235,6 @@ public final class NodeClassificationTrain {
         }
 
         var terminationFlag = TerminationFlag.RUNNING_TRUE;
-        var metricComputer = new ClassificationMetricComputer(
-            metrics,
-            classCounts,
-            features,
-            labels,
-            config.concurrency(),
-            progressTracker,
-            terminationFlag
-        );
 
         return new NodeClassificationTrain(
             graph,
@@ -310,9 +245,7 @@ public final class NodeClassificationTrain {
             classIdMap,
             metrics,
             nodeIds,
-            metricComputer,
-            trainStats,
-            validationStats,
+            classCounts,
             progressTracker,
             terminationFlag
         );
@@ -325,11 +258,9 @@ public final class NodeClassificationTrain {
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
-        List<Metric> metrics,
+        List<ClassificationMetric> metrics,
         HugeLongArray nodeIds,
-        ClassificationMetricComputer metricComputer,
-        StatsMap trainStats,
-        StatsMap validationStats,
+        Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -343,9 +274,7 @@ public final class NodeClassificationTrain {
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.nodeIds = nodeIds;
-        this.trainStats = trainStats;
-        this.validationStats = validationStats;
-        this.metricComputer = metricComputer;
+        this.classCounts = classCounts;
     }
 
     public NodeClassificationTrainResult compute() {
@@ -371,21 +300,22 @@ public final class NodeClassificationTrain {
 
         progressTracker.endSubTask();
 
-        var modelSelectResult = selectBestModel(innerSplits);
-        var bestParameters = modelSelectResult.bestParameters();
-        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, modelSelectResult, bestParameters);
+        var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
-        Classifier retrainedModelData = retrainBestModel(bestParameters);
+        selectBestModel(innerSplits, trainingStatistics);
+        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
+
+        Classifier retrainedModelData = retrainBestModel(trainingStatistics.bestParameters());
 
         progressTracker.endSubTask();
 
         return ImmutableNodeClassificationTrainResult.of(
-            createModel(retrainedModelData, modelSelectResult, metricResults),
-            modelSelectResult
+            createModel(retrainedModelData, trainingStatistics, metricResults),
+            trainingStatistics
         );
     }
 
-    private ModelSelectResult selectBestModel(List<TrainingExamplesSplit> nodeSplits) {
+    private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask();
 
         var hyperParameterOptimizer = new RandomSearch(
@@ -412,8 +342,8 @@ public final class NodeClassificationTrain {
                 progressTracker.endSubTask("Training");
 
                 progressTracker.beginSubTask(validationSet.size() + trainSet.size());
-                metricComputer.computeMetrics(validationSet, classifier).forEach(validationStatsBuilder::update);
-                metricComputer.computeMetrics(trainSet, classifier).forEach(trainStatsBuilder::update);
+                registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
+                registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
                 progressTracker.endSubTask();
 
                 progressTracker.endSubTask();
@@ -421,33 +351,45 @@ public final class NodeClassificationTrain {
             progressTracker.endSubTask();
 
             metrics.forEach(metric -> {
-                validationStats.add(metric, validationStatsBuilder.build(metric));
-                trainStats.add(metric, trainStatsBuilder.build(metric));
+                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
+                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
         }
         progressTracker.endSubTask();
+    }
 
-        var mainMetric = metrics.get(0);
-        var bestModelStats = validationStats.pickBestModelStats(mainMetric);
-
-        return ModelSelectResult.of(bestModelStats.params(), trainStats, validationStats);
+    private void registerMetricScores(
+        HugeLongArray evaluationSet,
+        Classifier classifier,
+        BiConsumer<Metric, Double> scoreConsumer
+    ) {
+        var trainMetricComputer = ClassificationMetricComputer.forEvaluationSet(
+            features,
+            targets,
+            classCounts,
+            evaluationSet,
+            classifier,
+            config.concurrency(),
+            progressTracker,
+            terminationFlag
+        );
+        metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(
         TrainingExamplesSplit outerSplit,
-        ModelSelectResult modelSelectResult,
-        TrainerConfig bestParameters
+        TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        var bestClassifier = trainModel(outerSplit.trainSet(), bestParameters);
+        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
         progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
-        var testMetrics = metricComputer.computeMetrics(outerSplit.testSet(), bestClassifier);
-        var outerTrainMetrics = metricComputer.computeMetrics(outerSplit.trainSet(), bestClassifier);
+        registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
+        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
         progressTracker.endSubTask();
 
-        return mergeMetricResults(modelSelectResult, outerTrainMetrics, testMetrics);
+        return trainingStatistics.metricsForWinningModel();
     }
 
     private Classifier retrainBestModel(TrainerConfig bestParameters) {
@@ -460,13 +402,13 @@ public final class NodeClassificationTrain {
 
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         Classifier classifier,
-        ModelSelectResult modelSelectResult,
+        TrainingStatistics trainingStatistics,
         Map<Metric, BestMetricData> metricResults
     ) {
 
         var modelInfo = NodeClassificationPipelineModelInfo.builder()
             .classes(classIdMap.originalIdsList())
-            .bestParameters(modelSelectResult.bestParameters())
+            .bestParameters(trainingStatistics.bestParameters())
             .metrics(metricResults)
             .pipeline(NodeClassificationPredictPipeline.from(pipeline))
             .build();
@@ -480,29 +422,6 @@ public final class NodeClassificationTrain {
             config,
             modelInfo
         );
-    }
-
-    private static Map<Metric, BestMetricData> mergeMetricResults(
-        ModelSelectResult modelSelectResult,
-        Map<Metric, Double> outerTrainMetrics,
-        Map<Metric, Double> testMetrics
-    ) {
-        return modelSelectResult.validationStats().keySet().stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric ->
-                BestMetricData.of(
-                    BestModelStats.findBestModelStats(
-                        modelSelectResult.trainStats().get(metric),
-                        modelSelectResult.bestParameters()
-                    ),
-                    BestModelStats.findBestModelStats(
-                        modelSelectResult.validationStats().get(metric),
-                        modelSelectResult.bestParameters()
-                    ),
-                    outerTrainMetrics.get(metric),
-                    testMetrics.get(metric)
-                )
-        ));
     }
 
     private Classifier trainModel(

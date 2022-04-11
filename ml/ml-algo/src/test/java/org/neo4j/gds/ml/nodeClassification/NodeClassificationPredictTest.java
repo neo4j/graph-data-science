@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,6 +37,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -105,12 +107,12 @@ class NodeClassificationPredictTest {
 
         var result = new NodeClassificationPredict(
             LogisticRegressionClassifier.from(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
             1,
             true,
-            featureProperties,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -161,12 +163,12 @@ class NodeClassificationPredictTest {
 
         var result = new NodeClassificationPredict(
             LogisticRegressionClassifier.from(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
             1,
             true,
-            featureProperties,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
 
         assertThat(result.predictedProbabilities())
@@ -228,12 +230,12 @@ class NodeClassificationPredictTest {
 
         var mcnlrPredict = new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
-            graph,
+            FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
             1,
             false,
-            featureProperties,
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
 
         mcnlrPredict.compute();
@@ -262,7 +264,7 @@ class NodeClassificationPredictTest {
         var concurrency = 1;
 
         // instance overhead
-        var instance = 48L;
+        var instance = 40L;
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
         // The predictions variable is tested elsewhere

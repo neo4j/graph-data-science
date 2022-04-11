@@ -152,14 +152,14 @@ CALL gds.beta.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
   includePredictedProbabilities: true,
   nodeLabels: ['UnknownHouse']
 })
-YIELD bytesMin, bytesMax, requiredMemory
+YIELD requiredMemory
 ----
 
 .Results
 [opts="header"]
 |===
-| bytesMin | bytesMax  | requiredMemory
-| 10200    | 10200     | +"10200 Bytes"+
+| requiredMemory
+| +"10192 Bytes"+
 |===
 --
 
