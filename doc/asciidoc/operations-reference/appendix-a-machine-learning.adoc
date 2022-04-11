@@ -3,6 +3,8 @@
 
 include::pipeline-operation-references.adoc[]
 
+include::model-operation-references.adoc[]
+
 include::../algorithms/algorithm-tiers.adoc[]
 
 [[production-quality-tier]]

@@ -1,7 +1,7 @@
 [[appendix-a-model-ops]]
-= Model Catalog
+== Model Catalog
 
-== Beta Tier
+=== Beta Tier
 
 .List of all beta model catalog operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
@@ -13,7 +13,7 @@
 | <<catalog-model-list, List models>>                | `gds.beta.model.list`
 |===
 
-== Alpha Tier
+=== Alpha Tier
 
 .List of all alpha model catalog operations in the GDS library. Functions are written in _italic_.
 [role=procedure-listing]
