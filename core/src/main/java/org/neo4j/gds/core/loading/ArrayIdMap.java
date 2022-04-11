@@ -43,10 +43,10 @@ import java.util.function.LongPredicate;
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class HugeIdMap implements IdMap {
+public class ArrayIdMap implements IdMap {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-        .builder(HugeIdMap.class)
+        .builder(ArrayIdMap.class)
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
@@ -77,7 +77,7 @@ public class HugeIdMap implements IdMap {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public HugeIdMap(
+    public ArrayIdMap(
         HugeLongArray graphIds,
         HugeSparseLongArray nodeToGraphIds,
         LabelInformation labelInformation,
@@ -181,7 +181,7 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public HugeIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public ArrayIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {
@@ -200,7 +200,7 @@ public class HugeIdMap implements IdMap {
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseIdMap(
+        HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
@@ -219,7 +219,7 @@ public class HugeIdMap implements IdMap {
         );
     }
 
-    private static class FilteredIdMap extends HugeIdMap {
+    private static class FilteredIdMap extends ArrayIdMap {
 
         private final IdMap rootIdMap;
 

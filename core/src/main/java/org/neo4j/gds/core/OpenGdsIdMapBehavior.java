@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core;
 
-import org.neo4j.gds.core.loading.GrowingHugeIdMapBuilder;
-import org.neo4j.gds.core.loading.HugeIdMap;
-import org.neo4j.gds.core.loading.HugeIdMapBuilder;
+import org.neo4j.gds.core.loading.ArrayIdMap;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
@@ -36,12 +36,12 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
         Optional<Long> nodeCount
     ) {
         return nodeCount.or(() -> maxOriginalId.map(maxId -> maxId + 1))
-            .map(capacity -> (IdMapBuilder) HugeIdMapBuilder.of(capacity))
-            .orElseGet(GrowingHugeIdMapBuilder::of);
+            .map(capacity -> (IdMapBuilder) ArrayIdMapBuilder.of(capacity))
+            .orElseGet(GrowingArrayIdMapBuilder::of);
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return HugeIdMap.memoryEstimation();
+        return ArrayIdMap.memoryEstimation();
     }
 }
