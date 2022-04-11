@@ -151,6 +151,11 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         exportRelationships(graphStoreInput);
     }
 
+    @Override
+    protected GraphStoreExporter.IdMappingType idMappingType() {
+        return IdMappingType.ORIGINAL;
+    }
+
     private void exportNodes(GraphStoreInput graphStoreInput) {
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
