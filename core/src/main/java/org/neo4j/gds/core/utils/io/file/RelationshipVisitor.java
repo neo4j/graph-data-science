@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.internal.batchimport.input.Group;
 
 import java.util.List;
 
@@ -59,9 +60,21 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
     }
 
     @Override
+    public boolean startId(Object id, Group group) {
+        return startId((long) id);
+    }
+
+
+
+    @Override
     public boolean endId(long id) {
         currentEndNode = id;
         return true;
+    }
+
+    @Override
+    public boolean endId(Object id, Group group) {
+        return endId((long) id);
     }
 
     @Override
