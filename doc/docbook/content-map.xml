@@ -392,9 +392,6 @@
             <d:tocentry linkend="appendix-a-graph-ops">
                 <?dbhtml filename="operations-reference/graph-operation-references/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="appendix-a-pipeline-ops">
-                <?dbhtml filename="operations-reference/pipeline-operation-references/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="appendix-a-model-ops">
                 <?dbhtml filename="operations-reference/model-operation-references/index.html"?>
             </d:tocentry>

@@ -1,7 +1,7 @@
 [[appendix-a-pipeline-ops]]
-= Pipeline Catalog
+== Pipeline Catalog
 
-== Beta Tier
+=== Beta Tier
 
 .List of all beta pipeline catalog operations in the GDS library.
 [role=procedure-listing]

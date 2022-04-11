@@ -130,7 +130,6 @@
 * Appendix
 ** xref:operations-reference/appendix-a/index.adoc[]
 *** xref:operations-reference/graph-operation-references/index.adoc[]
-*** xref:operations-reference/pipeline-operation-references/index.adoc[]
 *** xref:operations-reference/model-operation-references/index.adoc[]
 *** xref:operations-reference/algorithm-references/index.adoc[]
 *** xref:operations-reference/machine-learning-references/index.adoc[]
