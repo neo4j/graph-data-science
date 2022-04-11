@@ -292,7 +292,9 @@
             </d:tocentry>
         </d:tocentry>
 
-        <d:tocentry linkend="nodeclassification-pipelines"><?dbhtml filename="machine-learning/nodeclassification-pipelines/index.html"?>
+        <d:tocentry linkend="node-property-prediction"><?dbhtml filename="machine-learning/node-property-prediction/index.html"?>
+            <d:tocentry linkend="nodeclassification-pipelines"><?dbhtml filename="machine-learning/node-property-prediction/nodeclassification-pipelines/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="linkprediction-pipelines"><?dbhtml filename="machine-learning/linkprediction-pipelines/index.html"?>
