@@ -133,6 +133,7 @@
 *** xref:operations-reference/pipeline-operation-references/index.adoc[]
 *** xref:operations-reference/model-operation-references/index.adoc[]
 *** xref:operations-reference/algorithm-references/index.adoc[]
+*** xref:operations-reference/machine-learning-references/index.adoc[]
 *** xref:operations-reference/additional-operation-references/index.adoc[]
 ** xref:appendix-b/index.adoc[]
 *** xref:appendix-b/migration-algos-common/index.adoc[]

@@ -13,4 +13,5 @@ The operations in the Graph Data Science library can be divided into the followi
 * <<appendix-a-pipeline-ops>>
 * <<appendix-a-model-ops>>
 * <<appendix-a-graph-algos>>
+* <<appendix-a-machine-learning>>
 * <<appendix-a-additional-ops>>
