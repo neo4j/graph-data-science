@@ -1,5 +1,5 @@
 [[nodeclassification-pipelines-train]]
-== Training the pipeline
+= Training the pipeline
 
 The train mode, `gds.beta.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a classification model of type `NodeClassification`, which is then stored in the <<model-catalog-ops, model catalog>>.
@@ -27,7 +27,7 @@ The actual steps as well as their ordering in the implementation may differ.
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
 [[nodeclassification-pipeline-metrics]]
-=== Metrics
+== Metrics
 
 The Node Classification model in the Neo4j GDS library supports the following evaluation metrics:
 
@@ -48,7 +48,7 @@ When using a per-class metric, the reported metrics contain keys like for exampl
 More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
 The primary metric may not be a `*` expansion due to the ambiguity of which of the expanded metrics should be the `primary` one.
 
-=== Syntax
+== Syntax
 
 [.include-with-train]
 --
@@ -65,7 +65,7 @@ CALL gds.beta.pipeline.nodeClassification.train(
   configuration: Map
 ----
 
-include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
@@ -151,7 +151,7 @@ The structure of `modelInfo` is:
 --
 
 [[nodeclassification-pipelines-examples-train]]
-=== Example
+== Example
 
 In this section we will show examples of running a Node Classification training pipeline on a concrete graph.
 The intention is to illustrate what the results look like and to provide a guide in how to make use of the model in a real setting.
@@ -185,7 +185,7 @@ With the graph in Neo4j we can now project it into the graph catalog to prepare 
 We do this using a native projection targeting the `House` and `UnknownHouse` labels.
 We will also project the `sizeOfStory` property to use as a model feature, and the `class` property to use as a target feature.
 
-include::../../algorithms/shared/examples-named-native-note.adoc[]
+include::../../../algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
 [source, cypher, role=noplay graph-project-query, group=nc]
@@ -199,10 +199,10 @@ CALL gds.graph.project('myGraph', {
 ----
 
 [[nodeclassification-pipelines-examples-train-memory-estimation]]
-==== Memory Estimation
+=== Memory Estimation
 :mode: train
 
-include::../../algorithms/shared/examples-estimate-intro.adoc[]
+include::../../../algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example, group=nc]
 --
@@ -231,7 +231,7 @@ YIELD bytesMin, bytesMax, requiredMemory
 NOTE: If a node property step does not have an estimation implemented, the step will be ignored in the estimation.
 
 
-==== Train
+=== Train
 
 In the following examples we will demonstrate running the Node Classification training pipeline on this graph.
 We will train a model to predict the class in which a house belongs, based on its `sizePerStory` property.

@@ -1,10 +1,11 @@
 [[nodeclassification-pipelines-config]]
-== Configuring the pipeline
+= Configuring the pipeline
 :modelType: NodeClassification
 :entity: node
+:max-trials: 10
 
-This section goes into how to create and configure a node classification pipeline.
-It consists of the following subsections:
+This page goes into how to create and configure a node classification pipeline.
+It consists of the following sections:
 
 * <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>
 * <<nodeclassification-pipelines-adding-features, Adding features>>
@@ -14,7 +15,7 @@ It consists of the following subsections:
 
 
 [[nodeclassification-creating-a-pipeline]]
-=== Creating a pipeline
+== Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.beta.pipeline.nodeClassification.create`.
 This stores a trainable pipeline object in the pipeline catalog of type `Node classification training pipeline`.
@@ -22,7 +23,7 @@ This represents a configurable pipeline that can later be invoked for training, 
 The latter is also a model which is stored in the catalog with type `NodeClassification`.
 
 
-==== Syntax
+=== Syntax
 
 [.pipeline-create-syntax]
 --
@@ -52,7 +53,7 @@ include::pipelineInfoResult.adoc[]
 --
 
 
-==== Example
+=== Example
 
 [role=query-example,group=nc]
 --
@@ -77,7 +78,7 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 
 
 [[nodeclassification-pipelines-adding-node-properties]]
-=== Adding node properties
+== Adding node properties
 
 A node classification pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
 Such steps producing node properties can be chained one after another and created properties can later be used as <<nodeclassification-pipelines-adding-features, features>>.
@@ -89,7 +90,7 @@ The ending `.mutate` may be omitted and one may also use shorthand forms such as
 For example, <<ml-preprocessing, pre-processing algorithms>> can be used as node property steps.
 
 
-==== Syntax
+=== Syntax
 
 [.pipeline-add-node-property-syntax]
 --
@@ -123,7 +124,7 @@ include::pipelineInfoResult.adoc[]
 --
 
 
-==== Example
+=== Example
 
 [role=query-example,group=nc]
 --
@@ -150,14 +151,14 @@ The `scaledSizes` property can be later used as a feature.
 
 
 [[nodeclassification-pipelines-adding-features]]
-=== Adding features
+== Adding features
 
 A Node Classification Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
 When executing the pipeline, the selected `nodeProperties` must be either present in the input graph, or created by a previous node property step.
 For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
 
 
-==== Syntax
+=== Syntax
 
 [.pipeline-add-feature-syntax]
 --
@@ -189,7 +190,7 @@ include::pipelineInfoResult.adoc[]
 --
 
 
-==== Example
+=== Example
 
 [role=query-example,group=nc]
 --
@@ -210,7 +211,7 @@ YIELD name, featureProperties
 
 
 [[nodeclassification-pipelines-configure-splits]]
-=== Configuring the node splits
+== Configuring the node splits
 
 Node Classification Pipelines manage splitting the nodes into several sets for training, testing and validating the models defined in the <<nodeclassification-pipelines-adding-model-candidates,parameter space>>.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
@@ -241,7 +242,7 @@ image::train-test-splitting/validation-folds-node-classification.gif[validation-
 // The GIF was created in https://ezgif.com/maker/ezgif-3-23bccde0-gif with 150 cs between images and crossfade on
 
 
-==== Syntax
+=== Syntax
 
 [.pipeline-configure-split-syntax]
 --
@@ -281,7 +282,7 @@ include::pipelineInfoResult.adoc[]
 --
 
 
-==== Example
+=== Example
 
 [role=query-example,group=nc]
 --
@@ -307,7 +308,7 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 
 
 [[nodeclassification-pipelines-adding-model-candidates]]
-=== Adding model candidates
+== Adding model candidates
 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
@@ -330,7 +331,7 @@ At least one model candidate must be added to the pipeline before training it.
 ====
 
 
-==== Syntax
+=== Syntax
 
 [.tabbed-example, caption = ]
 ====
@@ -362,7 +363,7 @@ YIELD
 | config          | Map         | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::../training-methods/logisticRegressionConfig.adoc[]
+include::../../training-methods/logisticRegressionConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -397,7 +398,7 @@ YIELD
 | config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::../training-methods//randomForestConfig.adoc[]
+include::../../training-methods//randomForestConfig.adoc[]
 
 include::pipelineInfoResult.adoc[]
 --
@@ -405,7 +406,7 @@ include::pipelineInfoResult.adoc[]
 ====
 
 
-==== Example
+=== Example
 
 We can add multiple model candidates to our pipeline.
 
@@ -452,7 +453,7 @@ Please see <<ml-training-methods>> for more information on how to tune the confi
 
 
 [[nodeclassification-pipelines-configure-auto-tuning]]
-=== Configuring Auto-tuning
+== Configuring Auto-tuning
 
 In order to find good models, the pipeline supports automatically tuning the parameters of the training algorithm.
 Optionally, the procedure described below can be used to configure the auto-tuning behavior.
@@ -460,7 +461,7 @@ Otherwise, default auto-tuning configuration is used.
 Currently, it is only possible to configure the maximum number trials of hyper-parameter settings which are evaluated.
 
 
-==== Syntax
+=== Syntax
 
 [.pipeline-configure-auto-tuning-syntax]
 --
@@ -500,7 +501,7 @@ include::pipelineInfoResult.adoc[]
 --
 
 
-==== Example
+=== Example
 
 [role=query-example,group=nc]
 --

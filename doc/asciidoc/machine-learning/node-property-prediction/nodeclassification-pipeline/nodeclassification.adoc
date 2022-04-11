@@ -1,8 +1,6 @@
 [[nodeclassification-pipelines]]
 = Node classification pipelines
 :entity: node
-:result: predicted property
-:max-trials: 10
 
 
 [abstract]
@@ -10,9 +8,6 @@
 This section describes Node classification pipelines in the Neo4j Graph Data Science library.
 --
 
-
-[[nodeclassification-pipelines-intro]]
-== Introduction
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
 Concretely, Node Classification models are used to predict the classes of unlabeled nodes as a node properties based on other node properties.
@@ -41,15 +36,15 @@ The order of the probabilities matches the order of the classes registered in th
 
 NOTE: <<nodeclassification-pipelines-predict, Classification>> can only be done with a classification model (not with a training pipeline).
 
-The rest of this page is divided as follows:
+This segment is divided into the following pages:
 
 * <<nodeclassification-pipelines-config, Configuring the pipeline>>
 * <<nodeclassification-pipelines-train, Training the pipeline>>
 * <<nodeclassification-pipelines-predict, Applying a classification model to make predictions>>
 
 
-include::config.adoc[]
+include::config.adoc[leveloffset=+1]
 
-include::training.adoc[]
+include::training.adoc[leveloffset=+1]
 
-include::predict.adoc[]
+include::predict.adoc[leveloffset=+1]
