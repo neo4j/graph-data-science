@@ -148,7 +148,7 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
     private static boolean portAvailable(int port) {
         try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.setReuseAddress(false);
-            serverSocket.bind(new InetSocketAddress(InetAddress.getLocalHost(), port), 1);
+            serverSocket.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1);
             return true;
         } catch (Exception ex) {
             return false;
