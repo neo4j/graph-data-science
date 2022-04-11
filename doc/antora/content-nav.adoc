@@ -119,6 +119,8 @@
 *** xref:model-catalog/store/index.adoc[]
 *** xref:model-catalog/publish/index.adoc[]
 ** xref:machine-learning/training-methods/index.adoc[]
+*** xref:machine-learning/training-methods/logistic-regression/index.adoc[]
+*** xref:machine-learning/training-methods/random-forest/index.adoc[]
 ** xref:machine-learning/auto-tuning/index.adoc[]
 * xref:end-to-end-examples/end-to-end-examples/index.adoc[]
 ** xref:end-to-end-examples/fastrp-knn-example/index.adoc[]
