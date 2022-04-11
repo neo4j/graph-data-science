@@ -91,7 +91,6 @@ public final class ClassificationMetricComputer {
 
     public static MemoryEstimation estimateEvaluation(
         TrainerConfig config,
-        int batchSize,
         LongUnaryOperator trainSetSize,
         LongUnaryOperator testSetSize,
         int fudgedClassCount,
@@ -121,7 +120,7 @@ public final class ClassificationMetricComputer {
                 "classifier runtime",
                 nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
                     TrainingMethod.valueOf(config.methodName()),
-                    batchSize,
+                    DEFAULT_BATCH_SIZE,
                     fudgedClassCount,
                     fudgedFeatureCount,
                     isReduced

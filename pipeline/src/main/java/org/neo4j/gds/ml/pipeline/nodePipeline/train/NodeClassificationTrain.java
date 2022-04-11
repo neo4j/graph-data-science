@@ -48,7 +48,6 @@ import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
@@ -194,13 +193,8 @@ public final class NodeClassificationTrain {
                     false
                 );
 
-                int batchSize = config instanceof LogisticRegressionTrainConfig
-                    ? ((LogisticRegressionTrainConfig) config).batchSize()
-                    : 0; // Not used
-
                 var evaluation = ClassificationMetricComputer.estimateEvaluation(
                     config,
-                    batchSize,
                     trainSetSize,
                     testSetSize,
                     fudgedClassCount,
