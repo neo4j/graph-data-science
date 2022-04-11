@@ -1,50 +1,24 @@
 [[appendix-a-machine-learning]]
 = Machine Learning
 
+Please see <<algorithms>> for an introduction to the maturity tiers: production-quality, beta and alpha.
+
 include::pipeline-operation-references.adoc[]
 
 include::model-operation-references.adoc[]
 
-include::../algorithms/algorithm-tiers.adoc[]
 
-[[production-quality-tier]]
-== Production-quality tier
+== Pipelines
 
-.List of all production-quality machine learning algorithms in the GDS library. Functions are written in _italic_.
-[[table-product]]
-[role=procedure-listing]
-[opts=header,cols="1, 2"]
-|===
-| Algorithm name | Operation
-.8+<.^| <<fastrp, Fast Random Projection>>
-| `gds.fastRP.mutate`
-| `gds.fastRP.mutate.estimate`
-| `gds.fastRP.stats`
-| `gds.fastRP.stats.estimate`
-| `gds.fastRP.stream`
-| `gds.fastRP.stream.estimate`
-| `gds.fastRP.write`
-| `gds.fastRP.write.estimate`
-|===
+[[pipelines-beta-tier]]
+=== Beta tier
 
-[[beta-tier]]
-== Beta tier
-
-.List of all beta machine learning algorithms in the GDS library. Functions are written in _italic_.
-[[table-beta]]
+.List of all beta machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+[[pipelines-table-beta]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.8+<.^|<<graph-sage, GraphSAGE>>
-| `gds.beta.graphSage.stream`
-| `gds.beta.graphSage.stream.estimate`
-| `gds.beta.graphSage.mutate`
-| `gds.beta.graphSage.mutate.estimate`
-| `gds.beta.graphSage.write`
-| `gds.beta.graphSage.write.estimate`
-| `gds.beta.graphSage.train`
-| `gds.beta.graphSage.train.estimate`
 .11+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
@@ -71,20 +45,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.beta.pipeline.nodeClassification.predict.stream.estimate`
 | `gds.beta.pipeline.nodeClassification.predict.write`
 | `gds.beta.pipeline.nodeClassification.predict.write.estimate`
-.6+<.^|<<node2vec, Node2Vec>>
-| `gds.beta.node2vec.mutate`
-| `gds.beta.node2vec.mutate.estimate`
-| `gds.beta.node2vec.stream`
-| `gds.beta.node2vec.stream.estimate`
-| `gds.beta.node2vec.write`
-| `gds.beta.node2vec.write`.estimate
 |===
 
-[[alpha-tier]]
-== Alpha tier
+[[pipelines-alpha-tier]]
+=== Alpha tier
 
-.List of all alpha machine learning algorithms in the GDS library. Functions are written in _italic_.
-[[table-alpha]]
+.List of all alpha machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+[[pipelines-table-alpha]]
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
@@ -95,4 +62,54 @@ include::../algorithms/algorithm-tiers.adoc[]
 .2+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.alpha.pipeline.nodeClassification.addRandomForest`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
+|===
+
+
+== Node embeddings
+
+[[embeddings-production-quality-tier]]
+=== Production-quality tier
+
+.List of all production-quality node embedding algorithms in the GDS library. Functions are written in _italic_.
+[[embeddings-table-product]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+| Algorithm name | Operation
+.8+<.^| <<fastrp, Fast Random Projection>>
+| `gds.fastRP.mutate`
+| `gds.fastRP.mutate.estimate`
+| `gds.fastRP.stats`
+| `gds.fastRP.stats.estimate`
+| `gds.fastRP.stream`
+| `gds.fastRP.stream.estimate`
+| `gds.fastRP.write`
+| `gds.fastRP.write.estimate`
+|===
+
+[[embeddings-beta-tier]]
+=== Beta tier
+
+.List of all beta node embedding algorithms in the GDS library. Functions are written in _italic_.
+[[embeddings-table-beta]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.8+<.^|<<graph-sage, GraphSAGE>>
+| `gds.beta.graphSage.stream`
+| `gds.beta.graphSage.stream.estimate`
+| `gds.beta.graphSage.mutate`
+| `gds.beta.graphSage.mutate.estimate`
+| `gds.beta.graphSage.write`
+| `gds.beta.graphSage.write.estimate`
+| `gds.beta.graphSage.train`
+| `gds.beta.graphSage.train.estimate`
+.6+<.^|<<node2vec, Node2Vec>>
+| `gds.beta.node2vec.mutate`
+| `gds.beta.node2vec.mutate.estimate`
+| `gds.beta.node2vec.stream`
+| `gds.beta.node2vec.stream.estimate`
+| `gds.beta.node2vec.write`
+| `gds.beta.node2vec.write`.estimate
 |===
