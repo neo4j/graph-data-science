@@ -304,6 +304,14 @@
         </d:tocentry>
 
         <d:tocentry linkend="linkprediction-pipelines"><?dbhtml filename="machine-learning/linkprediction-pipelines/index.html"?>
+            <d:tocentry linkend="linkprediction-configure"><?dbhtml filename="machine-learning/linkprediction-pipelines/config/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="linkprediction-pipelines-train"><?dbhtml filename="machine-learning/linkprediction-pipelines/training/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="algorithms-link-prediction-pipelines-predict"><?dbhtml filename="machine-learning/linkprediction-pipelines/predict/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="linkprediction-appendix"><?dbhtml filename="machine-learning/linkprediction-pipelines/appendix/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="pipeline-catalog-ops">

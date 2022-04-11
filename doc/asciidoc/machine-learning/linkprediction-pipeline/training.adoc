@@ -1,5 +1,5 @@
 [[linkprediction-pipelines-train]]
-== Training the pipeline
+= Training the pipeline
 
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a prediction model of type `LinkPrediction` being stored in the <<model-catalog-ops,model catalog>> along with metrics collected during training.
@@ -27,7 +27,7 @@ The actual steps as well as their ordering in the implementation may differ.
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
 
-=== Syntax
+== Syntax
 
 [.include-with-train]
 --
@@ -117,7 +117,7 @@ The structure of `modelInfo` is:
 <7> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
-=== Example
+== Example
 
 In this example we will create a small graph and use the training pipeline we have built up thus far.
 The graph consists of a handful nodes connected in a particular pattern.
@@ -180,7 +180,7 @@ WARNING: The Link Prediction model requires the graph to be created using the `U
 
 
 [[linkprediction-pipeline-examples-train-estimate]]
-==== Memory Estimation
+=== Memory Estimation
 
 First off, we will estimate the cost of training the pipeline by using the `estimate` procedure.
 Estimation is useful to understand the memory impact that training the pipeline on your graph will have.
@@ -210,7 +210,7 @@ YIELD requiredMemory
 --
 
 
-==== Training
+=== Training
 
 [[linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]

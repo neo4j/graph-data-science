@@ -1,5 +1,5 @@
 [[algorithms-link-prediction-pipelines-predict]]
-== Applying a trained model for prediction
+= Applying a trained model for prediction
 :modelType: LinkPrediction
 :entity: relationship
 
@@ -23,7 +23,7 @@ It is necessary that the predict graph contains the properties that the pipeline
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
 
 
-=== Syntax
+== Syntax
 
 .Link Prediction syntax per mode
 [.tabbed-example, caption = ]
@@ -115,7 +115,7 @@ include::specific-predict-configuration.adoc[]
 
 
 [[algorithms-link-prediction-pipelines-predict-examples]]
-=== Example
+== Example
 
 In this example we will show how to use a trained model to predict new relationships in your projected graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
@@ -136,7 +136,7 @@ The stream procedure will yield a node pair only once.
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-estimate]]
-==== Memory Estimation
+=== Memory Estimation
 
 :mode: stream
 include::../../algorithms/shared/examples-estimate-intro.adoc[]
@@ -164,7 +164,7 @@ YIELD requiredMemory
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
-==== Stream
+=== Stream
 
 [role=query-example, group=lp]
 --
@@ -198,14 +198,14 @@ We can see, that our model predicts the most likely link is between Alice and Ch
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
-==== Mutate
+=== Mutate
 
 In these examples we will show how to write the predictions to your projected graph.
 We will use the model `lp-pipeline-model`, that we trained in the <<linkprediction-pipelines-train, train example>>.
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]
-===== Exhaustive search
+==== Exhaustive search
 
 The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
 For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
@@ -245,7 +245,7 @@ It may therefore be a more viable option to use a search strategy that only look
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-approximate]]
-===== Approximate search
+==== Approximate search
 
 To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
 
