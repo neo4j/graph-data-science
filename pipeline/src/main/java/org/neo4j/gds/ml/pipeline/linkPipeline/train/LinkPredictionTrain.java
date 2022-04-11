@@ -56,7 +56,6 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -128,7 +127,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
         progressTracker.beginSubTask("select model");
 
-        var trainingStatistics = new TrainingStatistics(new ArrayList<>(config.metrics()));
+        var trainingStatistics = new TrainingStatistics(List.copyOf(config.metrics()));
 
         modelSelect(trainData, trainRelationshipIds, trainingStatistics);
         progressTracker.endSubTask("select model");

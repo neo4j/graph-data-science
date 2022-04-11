@@ -41,7 +41,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
-public interface MetricSpecification {
+public interface ClassificationMetricSpecification {
     SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
         F1Score.NAME, F1Score::new,
         Precision.NAME, Precision::new,
@@ -71,13 +71,13 @@ public interface MetricSpecification {
 
     String asString();
 
-    static List<MetricSpecification> parse(List<?> userSpecifications) {
+    static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
         if (userSpecifications.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
         }
 
-        if (userSpecifications.get(0) instanceof MetricSpecification) {
-            return (List<MetricSpecification>) userSpecifications;
+        if (userSpecifications.get(0) instanceof ClassificationMetricSpecification) {
+            return (List<ClassificationMetricSpecification>) userSpecifications;
         }
 
         List<String> stringInput = (List<String>) userSpecifications;
@@ -92,7 +92,7 @@ public interface MetricSpecification {
         }
         List<String> badSpecifications = stringInput
             .stream()
-            .filter(MetricSpecification::invalidSpecification)
+            .filter(ClassificationMetricSpecification::invalidSpecification)
             .collect(Collectors.toList());
         if (!badSpecifications.isEmpty()) {
             errors.add(errorMessage(badSpecifications));
@@ -101,14 +101,14 @@ public interface MetricSpecification {
             throw new IllegalArgumentException(String.join(" ", errors));
         }
         return userSpecifications.stream()
-            .map(MetricSpecification::parse)
+            .map(ClassificationMetricSpecification::parse)
             .distinct()
             .collect(Collectors.toList());
     }
 
-    static MetricSpecification parse(Object userSpecification) {
-        if (userSpecification instanceof MetricSpecification) {
-            return (MetricSpecification) userSpecification;
+    static ClassificationMetricSpecification parse(Object userSpecification) {
+        if (userSpecification instanceof ClassificationMetricSpecification) {
+            return (ClassificationMetricSpecification) userSpecification;
         }
 
         if (userSpecification instanceof String) {
@@ -156,11 +156,11 @@ public interface MetricSpecification {
         ));
     }
 
-    static MetricSpecification createSpecification(
+    static ClassificationMetricSpecification createSpecification(
         Function<Collection<Long>, Stream<ClassificationMetric>> metricFactory,
         String stringRepresentation
     ) {
-        return new MetricSpecification() {
+        return new ClassificationMetricSpecification() {
             @Override
             public Stream<ClassificationMetric> createMetrics(Collection<Long> classes) {
                 return metricFactory.apply(classes);
@@ -179,10 +179,10 @@ public interface MetricSpecification {
 
             @Override
             public boolean equals(Object obj) {
-                if (!(obj instanceof MetricSpecification)) {
+                if (!(obj instanceof ClassificationMetricSpecification)) {
                     return false;
                 }
-                return asString().equals(((MetricSpecification) obj).asString());
+                return asString().equals(((ClassificationMetricSpecification) obj).asString());
             }
 
             @Override
@@ -215,9 +215,9 @@ public interface MetricSpecification {
         return validExpressions;
     }
 
-    static List<String> specificationsToString(List<MetricSpecification> specifications) {
+    static List<String> specificationsToString(List<ClassificationMetricSpecification> specifications) {
         return specifications.stream()
-            .map(MetricSpecification::asString)
+            .map(ClassificationMetricSpecification::asString)
             .collect(Collectors.toList());
     }
 

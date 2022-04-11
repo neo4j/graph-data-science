@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -109,7 +109,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .modelName("model")
                 .graphName(graphName)
                 .pipeline("DUMMY")
-                .metrics(MetricSpecification.parse(List.of("F1_MACRO")))
+                .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
                 .targetProperty("foo")
                 .build(),
             NodeClassificationPipelineModelInfo.builder()

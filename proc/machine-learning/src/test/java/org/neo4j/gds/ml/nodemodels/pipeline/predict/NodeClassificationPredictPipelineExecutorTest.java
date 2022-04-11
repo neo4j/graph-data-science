@@ -46,7 +46,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
@@ -320,7 +320,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .modelName("model")
                     .pipeline("DUMMY")
                     .graphName(GRAPH_NAME)
-                    .metrics(MetricSpecification.parse(List.of("F1_MACRO")))
+                    .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
                     .targetProperty("foo")
                     .build(),
                 NodeClassificationPipelineModelInfo.builder()
@@ -444,7 +444,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             NodeClassificationPipelineTrainConfigImpl.builder()
                 .username(getUsername())
                 .modelName("model")
-                .metrics(MetricSpecification.parse(List.of("F1_MACRO")))
+                .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
                 .graphName(GRAPH_NAME)
                 .pipeline("DUMMY")
                 .targetProperty("foo")

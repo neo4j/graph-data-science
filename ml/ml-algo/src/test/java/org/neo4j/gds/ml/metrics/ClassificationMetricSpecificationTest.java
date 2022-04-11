@@ -31,10 +31,10 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class MetricSpecificationTest {
+public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
-        var metricSpecification = MetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
@@ -44,7 +44,7 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldCreateAccuracyMetric() {
-        var metricSpecification = MetricSpecification.parse(List.of("Accuracy")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy")).get(0);
         ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.asString()).isEqualTo("ACCURACY");
@@ -53,7 +53,7 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldCreateF1WeightedMetric() {
-        var metricSpecification = MetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
         ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
         assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
@@ -61,7 +61,7 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldCreateF1MacroMetric() {
-        var metricSpecification = MetricSpecification.parse(List.of("F1_maCRo")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_maCRo")).get(0);
         ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
@@ -69,7 +69,7 @@ public class MetricSpecificationTest {
 
     @Test
     void shouldParseSyntacticSugar() {
-        var metricSpecification = MetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
         List<ClassificationMetric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
@@ -83,7 +83,7 @@ public class MetricSpecificationTest {
     @MethodSource("invalidSingleClassSpecifications")
     void shouldFailOnInvalidSingleClassSpecifications(String metric) {
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> MetricSpecification.parse(metric))
+            .isThrownBy(() -> ClassificationMetricSpecification.parse(metric))
             .withMessageContaining(
                 "Invalid metric expression"
             );
@@ -92,7 +92,7 @@ public class MetricSpecificationTest {
     @Test
     void shouldFailOnMultipleInvalidSingleClassSpecifications() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> MetricSpecification.parse(invalidSingleClassSpecifications()))
+            .isThrownBy(() -> ClassificationMetricSpecification.parse(invalidSingleClassSpecifications()))
             .withMessageContaining(
                 "Invalid metric expressions"
             );
@@ -102,7 +102,8 @@ public class MetricSpecificationTest {
     void shouldEstimateMemoryUsage() {
         var nodeCount = 1_000_000_000;
         var numberOfClasses = 1000;
-        var actual = MetricSpecification.memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
+        var actual = ClassificationMetricSpecification
+            .memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
         var expected = MemoryRange.of(24 * 1, 24 * numberOfClasses);
         assertThat(actual).isEqualTo(expected);
     }

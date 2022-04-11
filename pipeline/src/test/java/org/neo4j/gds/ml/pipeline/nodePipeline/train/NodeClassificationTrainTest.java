@@ -33,7 +33,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.AllClassMetric;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -91,7 +91,7 @@ class NodeClassificationTrainTest {
 
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void selectsTheBestModel(MetricSpecification metricSpecification) {
+    void selectsTheBestModel(ClassificationMetricSpecification metricSpecification) {
 
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
@@ -166,7 +166,7 @@ class NodeClassificationTrainTest {
 
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void shouldProduceDifferentMetricsForDifferentTrainings(MetricSpecification metricSpecification) {
+    void shouldProduceDifferentMetricsForDifferentTrainings(ClassificationMetricSpecification metricSpecification) {
         var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
 
         var bananasPipeline = new NodeClassificationTrainingPipeline();
@@ -250,7 +250,7 @@ class NodeClassificationTrainTest {
 
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void shouldLogProgress(MetricSpecification metricSpecification) {
+    void shouldLogProgress(ClassificationMetricSpecification metricSpecification) {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
@@ -379,7 +379,7 @@ class NodeClassificationTrainTest {
 
     @ParameterizedTest
     @MethodSource("metricArguments")
-    void shouldLogProgressWithRange(MetricSpecification metricSpecification) {
+    void shouldLogProgressWithRange(ClassificationMetricSpecification metricSpecification) {
         int MAX_TRIALS = 2;
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
@@ -522,7 +522,7 @@ class NodeClassificationTrainTest {
             .modelName("model")
             .randomSeed(42L)
             .targetProperty("t")
-            .metrics(List.of(MetricSpecification.parse("Accuracy")))
+            .metrics(List.of(ClassificationMetricSpecification.parse("Accuracy")))
             .concurrency(concurrency)
             .build();
 
@@ -545,7 +545,7 @@ class NodeClassificationTrainTest {
 
     private NodeClassificationPipelineTrainConfig createConfig(
         String modelName,
-        MetricSpecification metricSpecification,
+        ClassificationMetricSpecification metricSpecification,
         long randomSeed
     ) {
         return NodeClassificationPipelineTrainConfigImpl.builder()
@@ -561,11 +561,11 @@ class NodeClassificationTrainTest {
     }
 
     static Stream<Arguments> metricArguments() {
-        var singleClassMetrics = Stream.of(Arguments.arguments(MetricSpecification.parse("F1(class=1)")));
+        var singleClassMetrics = Stream.of(Arguments.arguments(ClassificationMetricSpecification.parse("F1(class=1)")));
         var allClassMetrics = Arrays
             .stream(AllClassMetric.values())
             .map(AllClassMetric::name)
-            .map(MetricSpecification::parse)
+            .map(ClassificationMetricSpecification::parse)
             .map(Arguments::of);
         return Stream.concat(singleClassMetrics, allClassMetrics);
     }

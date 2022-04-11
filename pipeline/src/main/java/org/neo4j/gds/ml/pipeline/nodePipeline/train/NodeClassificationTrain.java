@@ -35,8 +35,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.MetricSpecification;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
@@ -81,7 +81,7 @@ public final class NodeClassificationTrain {
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
     private final HugeLongArray nodeIds;
-    private final List<Metric> metrics;
+    private final List<ClassificationMetric> metrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -120,7 +120,7 @@ public final class NodeClassificationTrain {
         var builder = MemoryEstimations.builder()
             .perNode("global targets", HugeLongArray::memoryEstimation)
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
-            .add("metrics", MetricSpecification.memoryEstimation(fudgedClassCount))
+            .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
             .add("outer split", FractionSplitter.estimate(1 - testFraction))
             .add(
@@ -258,7 +258,7 @@ public final class NodeClassificationTrain {
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
-        List<Metric> metrics,
+        List<ClassificationMetric> metrics,
         HugeLongArray nodeIds,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
@@ -300,7 +300,7 @@ public final class NodeClassificationTrain {
 
         progressTracker.endSubTask();
 
-        var trainingStatistics = new TrainingStatistics(metrics);
+        var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
         selectBestModel(innerSplits, trainingStatistics);
         Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
@@ -373,10 +373,7 @@ public final class NodeClassificationTrain {
             progressTracker,
             terminationFlag
         );
-        metrics.forEach(metric -> scoreConsumer.accept(
-            metric,
-            trainMetricComputer.score((ClassificationMetric) metric)
-        ));
+        metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
     private Map<Metric, BestMetricData> evaluateBestModel(
