@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.AllClassMetric.ACCURACY;
-import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class StatsMapTest {
 

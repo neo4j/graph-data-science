@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
-import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
 

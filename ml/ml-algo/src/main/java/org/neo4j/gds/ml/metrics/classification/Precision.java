@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.metrics;
+package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
@@ -26,48 +26,46 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Accuracy implements ClassificationMetric {
+public class Precision implements ClassificationMetric {
 
-    // TODO: Accuracy per class clashes with the global Accuracy metric.
-    // Let's solve that later, and call this APC for now.
-    public static final String NAME = "ACCURACY";
+    public static final String NAME = "PRECISION";
 
     private final long positiveTarget;
 
-    public Accuracy(long positiveTarget) {
+    public Precision(long positiveTarget) {
         this.positiveTarget = positiveTarget;
     }
 
     @Override
-    public double compute(
-        HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore
-    ) {
+    public double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
-            "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
-            targets.size(),
-            predictions.size()
-        );
+                    "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
+                    targets.size(),
+                    predictions.size()
+                );
 
-        if (targets.size() == 0) {
-            return 0;
-        }
-
-        long accurates = 0L;
+        long truePositives = 0L;
+        long falsePositives = 0L;
         for (long row = 0; row < targets.size(); row++) {
 
             long targetClass = targets.get(row);
             long predictedClass = predictions.get(row);
 
             var predictedIsPositive = predictedClass == positiveTarget;
+            if (!predictedIsPositive) continue;
+
             var targetIsPositive = targetClass == positiveTarget;
 
-            if (predictedIsPositive == targetIsPositive) {
-                accurates++;
+            if (targetIsPositive) {
+                truePositives++;
             }
-
+            else {
+                falsePositives++;
+            }
         }
 
-        var result = ((double) accurates) / targets.size();
+        var result = truePositives / (truePositives + falsePositives + EPSILON);
+        assert result <= 1.0;
         return result;
     }
 
@@ -75,8 +73,8 @@ public class Accuracy implements ClassificationMetric {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Accuracy accuracyScore = (Accuracy) o;
-        return positiveTarget == accuracyScore.positiveTarget;
+        Precision precisionScore = (Precision) o;
+        return positiveTarget == precisionScore.positiveTarget;
     }
 
     @Override
