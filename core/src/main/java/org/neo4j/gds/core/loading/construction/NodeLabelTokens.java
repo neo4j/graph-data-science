@@ -76,6 +76,10 @@ public final class NodeLabelTokens {
         return new Array<>(nodeLabels, Function.identity());
     }
 
+    public static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
+        return new Singleton<>(nodeLabel, Function.identity());
+    }
+
     private static @Nullable NodeLabelToken ofList(List<?> nodeLabels) {
         if (nodeLabels.isEmpty()) {
             return empty();
