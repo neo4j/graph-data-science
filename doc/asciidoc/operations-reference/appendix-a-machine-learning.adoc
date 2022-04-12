@@ -1,0 +1,115 @@
+[[appendix-a-machine-learning]]
+= Machine Learning
+
+Please see <<algorithms>> for an introduction to the maturity tiers: production-quality, beta and alpha.
+
+include::pipeline-operation-references.adoc[]
+
+include::model-operation-references.adoc[]
+
+
+== Pipelines
+
+[[pipelines-beta-tier]]
+=== Beta tier
+
+.List of all beta machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+[[pipelines-table-beta]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.11+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+| `gds.beta.pipeline.linkPrediction.create`
+| `gds.beta.pipeline.linkPrediction.addNodeProperty`
+| `gds.beta.pipeline.linkPrediction.addFeature`
+| `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+| `gds.beta.pipeline.linkPrediction.configureSplit`
+| `gds.beta.pipeline.linkPrediction.train`
+| `gds.beta.pipeline.linkPrediction.train.estimate`
+| `gds.beta.pipeline.linkPrediction.predict.mutate`
+| `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
+| `gds.beta.pipeline.linkPrediction.predict.stream`
+| `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
+.13+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+| `gds.beta.pipeline.nodeClassification.create`
+| `gds.beta.pipeline.nodeClassification.addNodeProperty`
+| `gds.beta.pipeline.nodeClassification.selectFeatures`
+| `gds.beta.pipeline.nodeClassification.addLogisticRegression`
+| `gds.beta.pipeline.nodeClassification.configureSplit`
+| `gds.beta.pipeline.nodeClassification.train`
+| `gds.beta.pipeline.nodeClassification.train.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.mutate`
+| `gds.beta.pipeline.nodeClassification.predict.mutate.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.stream`
+| `gds.beta.pipeline.nodeClassification.predict.stream.estimate`
+| `gds.beta.pipeline.nodeClassification.predict.write`
+| `gds.beta.pipeline.nodeClassification.predict.write.estimate`
+|===
+
+[[pipelines-alpha-tier]]
+=== Alpha tier
+
+.List of all alpha machine learning pipelines operations in the GDS library. Functions are written in _italic_.
+[[pipelines-table-alpha]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.2+<.^| <<linkprediction-pipelines, Link Prediction Pipeline>>
+| `gds.alpha.pipeline.linkPrediction.addRandomForest`
+| `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
+.2+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
+| `gds.alpha.pipeline.nodeClassification.addRandomForest`
+| `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
+|===
+
+
+== Node embeddings
+
+[[embeddings-production-quality-tier]]
+=== Production-quality tier
+
+.List of all production-quality node embedding algorithms in the GDS library. Functions are written in _italic_.
+[[embeddings-table-product]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+| Algorithm name | Operation
+.8+<.^| <<fastrp, Fast Random Projection>>
+| `gds.fastRP.mutate`
+| `gds.fastRP.mutate.estimate`
+| `gds.fastRP.stats`
+| `gds.fastRP.stats.estimate`
+| `gds.fastRP.stream`
+| `gds.fastRP.stream.estimate`
+| `gds.fastRP.write`
+| `gds.fastRP.write.estimate`
+|===
+
+[[embeddings-beta-tier]]
+=== Beta tier
+
+.List of all beta node embedding algorithms in the GDS library. Functions are written in _italic_.
+[[embeddings-table-beta]]
+[role=procedure-listing]
+[opts=header,cols="1, 2"]
+|===
+|Algorithm name | Operation
+.8+<.^|<<graph-sage, GraphSAGE>>
+| `gds.beta.graphSage.stream`
+| `gds.beta.graphSage.stream.estimate`
+| `gds.beta.graphSage.mutate`
+| `gds.beta.graphSage.mutate.estimate`
+| `gds.beta.graphSage.write`
+| `gds.beta.graphSage.write.estimate`
+| `gds.beta.graphSage.train`
+| `gds.beta.graphSage.train.estimate`
+.6+<.^|<<node2vec, Node2Vec>>
+| `gds.beta.node2vec.mutate`
+| `gds.beta.node2vec.mutate.estimate`
+| `gds.beta.node2vec.stream`
+| `gds.beta.node2vec.stream.estimate`
+| `gds.beta.node2vec.write`
+| `gds.beta.node2vec.write`.estimate
+|===

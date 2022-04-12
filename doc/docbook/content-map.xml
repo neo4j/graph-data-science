@@ -392,14 +392,11 @@
             <d:tocentry linkend="appendix-a-graph-ops">
                 <?dbhtml filename="operations-reference/graph-operation-references/index.html"?>
             </d:tocentry>
-            <d:tocentry linkend="appendix-a-pipeline-ops">
-                <?dbhtml filename="operations-reference/pipeline-operation-references/index.html"?>
-            </d:tocentry>
-            <d:tocentry linkend="appendix-a-model-ops">
-                <?dbhtml filename="operations-reference/model-operation-references/index.html"?>
-            </d:tocentry>
             <d:tocentry linkend="appendix-a-graph-algos">
                 <?dbhtml filename="operations-reference/algorithm-references/index.html"?>
+            </d:tocentry>
+            <d:tocentry linkend="appendix-a-machine-learning">
+                <?dbhtml filename="operations-reference/machine-learning-references/index.html"?>
             </d:tocentry>
             <d:tocentry linkend="appendix-a-additional-ops">
                 <?dbhtml filename="operations-reference/additional-operation-references/index.html"?>
