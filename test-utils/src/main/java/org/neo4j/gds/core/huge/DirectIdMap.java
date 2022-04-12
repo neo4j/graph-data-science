@@ -56,7 +56,7 @@ public class DirectIdMap implements IdMap {
 
     @Override
     public long highestNeoId() {
-        throw new UnsupportedOperationException();
+        return nodeCount;
     }
 
     @Override

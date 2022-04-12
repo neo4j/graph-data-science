@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading.construction;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.ObjectIntMap;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -160,9 +159,12 @@ public final class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, nodeLabels);
     }
 
-    @TestOnly
     public void addNode(long originalId, NodeLabel... nodeLabels) {
         this.addNode(originalId, NodeLabelTokens.ofNodeLabels(nodeLabels));
+    }
+
+    public void addNode(long originalId, NodeLabel nodeLabel) {
+        this.addNode(originalId, NodeLabelTokens.ofNodeLabel(nodeLabel));
     }
 
     public void addNode(long originalId, Map<String, Value> properties) {
@@ -173,9 +175,12 @@ public final class NodesBuilder {
         this.threadLocalBuilder.get().addNode(originalId, properties, nodeLabels);
     }
 
-    @TestOnly
     public void addNode(long originalId, Map<String, Value> properties, NodeLabel... nodeLabels) {
         this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabels(nodeLabels));
+    }
+
+    public void addNode(long originalId, Map<String, Value> properties, NodeLabel nodeLabel) {
+        this.addNode(originalId, properties, NodeLabelTokens.ofNodeLabel(nodeLabel));
     }
 
     public long importedNodes() {
