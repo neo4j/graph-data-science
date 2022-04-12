@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.models.linearregression;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Regressor;
 
-class LinearRegressor implements Regressor {
+public class LinearRegressor implements Regressor {
     private final LinearRegressionData data;
 
     LinearRegressor(LinearRegressionData data) {this.data = data;}
