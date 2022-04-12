@@ -4,7 +4,7 @@
 :entity: node
 :max-trials: 10
 
-This page goes into how to create and configure a node classification pipeline.
+This page explains how to create and configure a node classification pipeline.
 It consists of the following sections:
 
 * <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>
