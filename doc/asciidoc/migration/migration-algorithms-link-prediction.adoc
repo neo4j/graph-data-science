@@ -36,6 +36,14 @@ There is also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to 
 | This parameter is now only configured in `gds.beta.pipeline.linkPrediction.train`.
 |===
 
+.Changes in configuration for the pipeline
+[options=header, cols=2]
+|===
+| 1.x | 2.x
+| `gds.beta.pipeline.linkPrediction.configureParams`
+| This procedure, which is no longer present, added logistic regression model candidates. Adding logistic regression candidates, can instead be done by calling `gds.beta.pipeline.linkPrediction.addLogisticRegression` one or multiple times.
+|===
+
 
 == Predict
 
