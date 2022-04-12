@@ -1,6 +1,7 @@
 [[nodeclassification-pipelines]]
 = Node classification pipelines
 :entity: node
+:max-trials: 10
 
 
 [abstract]
