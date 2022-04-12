@@ -200,7 +200,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
     }
 
     private boolean runMasterComputeStep(int iteration) {
-        var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor);
+        var context = new MasterComputeContext<>(config, graph, iteration, nodeValues, executor, progressTracker);
         var didConverge = computation.masterCompute(context);
         return didConverge;
     }
