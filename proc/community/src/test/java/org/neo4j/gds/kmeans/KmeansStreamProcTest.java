@@ -81,6 +81,8 @@ class KmeansStreamProcTest extends BaseProcTest {
             .streamMode()
             .addParameter("k", 2)
             .addParameter("nodeWeightProperty", "kmeans")
+            .addParameter("randomSeed", 19)
+            .addParameter("concurrency", 1)
             .yields("nodeId", "communityId");
         assertCypherResult(algoQuery, List.of(
             Map.of("nodeId", 0L, "communityId", 0L),
