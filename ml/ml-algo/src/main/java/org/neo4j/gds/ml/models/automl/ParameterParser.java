@@ -26,8 +26,8 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,27 +44,27 @@ final class ParameterParser {
     ) {
         var doubleRanges = new HashMap<String, DoubleRangeParameter>();
         var integerRanges = new HashMap<String, IntegerRangeParameter>();
-        var incorrectMaps = new ArrayList<String>();
+        var incorrectMaps = new LinkedHashMap<String, Object>();
 
         input.forEach((key, value) -> {
             if (value instanceof Map) {
                 if (!((Map<?, ?>) value).keySet().equals(Set.of("range"))) {
-                    incorrectMaps.add(key);
+                    incorrectMaps.put(key, value);
                     return;
                 }
                 if (!(((Map<?, ?>) value).get("range") instanceof List)) {
-                    incorrectMaps.add(key);
+                    incorrectMaps.put(key, value);
                     return;
                 }
                 var range = (List<?>) ((Map<?, ?>) value).get("range");
                 if (range.size() != 2) {
-                    incorrectMaps.add(key);
+                    incorrectMaps.put(key, value);
                     return;
                 }
                 var minObject = range.get(0);
                 var maxObject = range.get(1);
                 if (!typeIsSupported(minObject) || !typeIsSupported(maxObject)) {
-                    incorrectMaps.add(key);
+                    incorrectMaps.put(key, value);
                     return;
                 }
                 var min = (Number) minObject;
@@ -80,8 +80,8 @@ final class ParameterParser {
         if (!incorrectMaps.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                "where both min and max are Float or Integer. Invalid keys: [%s]",
-                incorrectMaps.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", "))
+                "where both min and max are numerical. Invalid parameters: [%s]",
+                incorrectMaps.entrySet().stream().map(s -> "`" + s + "`").collect(Collectors.joining(", "))
             ));
         }
         return ImmutableRangeParameters.of(
