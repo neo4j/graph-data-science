@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public interface Trainer {
+public interface ClassifierTrainer {
 
     Classifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet);
 

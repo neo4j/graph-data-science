@@ -49,8 +49,8 @@ import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestData;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
@@ -193,7 +193,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var root = new TreeNode<>(0);
-            var modelData = ImmutableRandomForestData
+            var modelData = ImmutableRandomForestClassifierData
                 .builder()
                 .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
@@ -428,7 +428,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     @Test
     void shouldEstimateMemoryWithRandomForest() {
         var root = new TreeNode<>(0);
-        var modelData = ImmutableRandomForestData
+        var modelData = ImmutableRandomForestClassifierData
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(3)
@@ -451,7 +451,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(RandomForestTrainConfigImpl.builder().build())
+                .bestParameters(RandomForestTrainerConfigImpl.builder().build())
                 .metrics(Map.of())
                 .pipeline(NodeClassificationPredictPipeline.EMPTY)
                 .build()

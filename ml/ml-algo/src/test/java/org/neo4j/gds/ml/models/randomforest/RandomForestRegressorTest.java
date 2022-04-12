@@ -21,235 +21,165 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class RandomForestClassifierTest {
+class RandomForestRegressorTest {
     private static final long NUM_SAMPLES = 10;
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private final HugeDoubleArray targets = HugeDoubleArray.newArray(NUM_SAMPLES);
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
-
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES);
         mutableTrainSet.setAll(idx -> idx);
         trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
 
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(double[].class, NUM_SAMPLES);
 
-        // Class 1337 feature vectors.
         featureVectorArray.set(0, new double[]{2.771244718, 1.784783929});
+        targets.set(0, 0.1);
         featureVectorArray.set(1, new double[]{1.728571309, 1.169761413});
+        targets.set(1, 0.2);
         featureVectorArray.set(2, new double[]{3.678319846, 3.31281357});
+        targets.set(2, 0.1);
         featureVectorArray.set(3, new double[]{6.961043357, 2.61995032});
+        targets.set(3, 0.3);
         featureVectorArray.set(4, new double[]{6.999208922, 2.209014212});
+        targets.set(4, 0.15);
 
-        // Class 42 feature vectors.
         featureVectorArray.set(5, new double[]{7.497545867, 3.162953546});
+        targets.set(5, 4.1);
         featureVectorArray.set(6, new double[]{9.00220326, 3.339047188});
+        targets.set(6, 4.0);
         featureVectorArray.set(7, new double[]{7.444542326, 0.476683375});
+        targets.set(7, 4.7);
         featureVectorArray.set(8, new double[]{10.12493903, 3.234550982});
+        targets.set(8, 3.9);
         featureVectorArray.set(9, new double[]{6.642287351, 3.319983761});
+        targets.set(9, 4.5);
 
         allFeatureVectors = FeaturesFactory.wrap(featureVectorArray);
-    }
-
-    long predictLabel(
-        final double[] features,
-        RandomForestClassifier randomForestPredictor
-    ) {
-        final int[] predictionsPerClass = randomForestPredictor.gatherTreePredictions(features);
-
-        int max = -1;
-        int maxClassIdx = 0;
-
-        for (int i = 0; i < predictionsPerClass.length; i++) {
-            var numPredictions = predictionsPerClass[i];
-
-            if (numPredictions <= max) continue;
-
-            max = numPredictions;
-            maxClassIdx = i;
-        }
-
-        return RandomForestClassifierTest.CLASS_MAPPING.toOriginal(maxClassIdx);
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
-        var randomForestTrainer = new RandomForestClassifierTrainer(
+        var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            CLASS_MAPPING,
             RandomForestTrainerConfigImpl
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(2)
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(1)
+                .numberOfSamplesRatio(0.0)
                 .build(),
-            false,
             Optional.of(42L),
             ProgressTracker.NULL_TRACKER
         );
 
-        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
+        var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
 
         var featureVector = new double[]{8.0, 0.0};
 
-        assertThrows(
-            IllegalAccessError.class,
-            randomForestTrainer::outOfBagError
-        );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
-        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(4.175, Offset.offset(0.01D));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
-        var randomForestTrainer = new RandomForestClassifierTrainer(
+        var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            CLASS_MAPPING,
             RandomForestTrainerConfigImpl
                 .builder()
-                .maxDepth(2)
+                .maxDepth(3)
                 .minSplitSize(2)
                 .numberOfSamplesRatio(0.5D)
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            false,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER
         );
 
-        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
+        var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
 
-        var featureVector = new double[]{8.0, 3.2};
+        var featureVector = new double[]{10.0, 3.2};
 
-        assertThrows(
-            IllegalAccessError.class,
-            randomForestTrainer::outOfBagError
-        );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
-        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.4, 0.6);
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {1, 4})
-    void shouldMakeSaneErrorEstimation(int concurrency) {
-        var randomForestTrainer = new RandomForestClassifierTrainer(
-            concurrency,
-            CLASS_MAPPING,
-            RandomForestTrainerConfigImpl
-                .builder()
-                .maxDepth(2)
-                .minSplitSize(2)
-                .maxFeaturesRatio(1.0D)
-                .numberOfDecisionTrees(20)
-                .build(),
-            true,
-            Optional.of(1337L),
-            ProgressTracker.NULL_TRACKER
-        );
-
-        randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
-
-        assertThat(randomForestTrainer.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(3.273, Offset.offset(0.01D));
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
-        var randomForestTrainer = new RandomForestClassifierTrainer(
+        var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            CLASS_MAPPING,
             RandomForestTrainerConfigImpl
                 .builder()
-                .maxDepth(2)
+                .maxDepth(3)
                 .minSplitSize(2)
-                .numberOfSamplesRatio(0.5D)
+                .numberOfSamplesRatio(1.0D)
                 .maxFeaturesRatio(1.0D)
-                .numberOfDecisionTrees(5)
+                .numberOfDecisionTrees(10)
                 .build(),
-            false,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);
-        // Use only class 1337 vectors => all predictions should be 1337
+        // Use only target ~0.2 vectors => all predictions should be around there
         mutableTrainSet.setAll(idx -> idx);
         trainSet = ReadOnlyHugeLongArray.of(mutableTrainSet);
-        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
+        var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
 
-        // 42 example (see setup above)
-        var featureVector = new double[]{7.444542326, 0.476683375};
+        // target 3.9 example (see setup above)
+        var featureVector = new double[]{10.12493903, 3.234550982};
 
-        assertThrows(
-            IllegalAccessError.class,
-            randomForestTrainer::outOfBagError
-        );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1337);
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(0.235, Offset.offset(0.01D));
+    }
+
+    @Test
+    void predictOverheadMemoryEstimation() {
+        var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
+
+        assertThat(estimation).isEqualTo(MemoryRange.of(16));
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   168,   168",
-        " 100, 1_248, 1_248"
-    })
-    void predictOverheadMemoryEstimation(
-        int numberOfClasses,
-        long expectedMin,
-        long expectedMax
-    ) {
-        var estimation = RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
-
-        assertThat(estimation.min).isEqualTo(expectedMin);
-        assertThat(estimation.max).isEqualTo(expectedMax);
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4413562,   5224370",
+        "     6, 100_000, 10, 1,   1, 0.1, 1.0,  4013394, 4824202",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4414066,   6115578",
+        "    10, 100_000, 10, 1,  10, 0.1, 1.0,  4013898, 5715410",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23122,    166954",
-        // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4414786,   6116298",
+        " 8_000,     500, 10, 1,   1, 0.1, 1.0,    20954,  164786",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4414858,   6116462",
+        "    10, 100_000, 10, 1,  10, 0.9, 1.0,  4013970, 5715574",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1204786,   2266298",
+        "    10, 100_000, 10, 1,  10, 0.1, 0.2,   803898, 1865410",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16457032,  20807880",
+        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 16053648, 20404496",
     })
     void trainMemoryEstimation(
         int maxDepth,
         long numberOfTrainingSamples,
-        int numberOfClasses,
         int featureDimension,
         int concurrency,
         int numTrees,
@@ -264,9 +194,8 @@ class RandomForestClassifierTest {
             .maxFeaturesRatio(maxFeaturesRatio)
             .numberOfSamplesRatio(numberOfSamplesRatio)
             .build();
-        var estimator = RandomForestClassifierTrainer.memoryEstimation(
+        var estimator = RandomForestRegressorTrainer.memoryEstimation(
             unused -> numberOfTrainingSamples,
-            numberOfClasses,
             MemoryRange.of(featureDimension),
             config
         );
@@ -302,7 +231,7 @@ class RandomForestClassifierTest {
             .numberOfDecisionTrees(numTrees)
             .minSplitSize(minSplitSize)
             .build();
-        var estimator = RandomForestClassifierData.memoryEstimation(
+        var estimator = RandomForestRegressorData.memoryEstimation(
             unused -> numberOfTrainingSamples,
             config
         );

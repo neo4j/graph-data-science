@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
@@ -92,7 +92,7 @@ class LinkPredictionPipelineTest {
     @Test
     void canSetParameterSpace() {
         var lrConfig = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
-        var rfConfg = RandomForestTrainConfigImpl.builder()
+        var rfConfg = RandomForestTrainerConfigImpl.builder()
             .maxFeaturesRatio(0.5)
             .numberOfDecisionTrees(1)
             .minSplitSize(2)
@@ -206,7 +206,7 @@ class LinkPredictionPipelineTest {
             ));
 
             pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
-                RandomForestTrainConfigImpl
+                RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(2)
                     .maxFeaturesRatio(0.5)

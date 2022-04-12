@@ -24,8 +24,8 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
-import org.neo4j.gds.ml.models.randomforest.RandomForestData;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.function.LongUnaryOperator;
 
@@ -40,7 +40,7 @@ public final class ClassifierFactory {
             case LogisticRegression:
                 return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
             case RandomForest:
-                return new RandomForestClassifier((RandomForestData) classifierData);
+                return new RandomForestClassifier((RandomForestClassifierData) classifierData);
             default:
                 throw new IllegalStateException("No such classifier.");
         }
@@ -79,9 +79,9 @@ public final class ClassifierFactory {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
             case RandomForest:
-                return RandomForestData.memoryEstimation(
+                return RandomForestClassifierData.memoryEstimation(
                     numberOfTrainingSamples,
-                    (RandomForestTrainConfig) trainerConfig
+                    (RandomForestTrainerConfig) trainerConfig
                 );
             default:
                 throw new IllegalStateException("No such classifier.");

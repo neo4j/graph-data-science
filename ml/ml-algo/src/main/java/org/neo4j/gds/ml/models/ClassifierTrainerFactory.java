@@ -27,16 +27,16 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-public class TrainerFactory {
+public class ClassifierTrainerFactory {
 
-    private TrainerFactory() {}
+    private ClassifierTrainerFactory() {}
 
-    public static Trainer create(
+    public static ClassifierTrainer create(
         TrainerConfig config,
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
@@ -60,7 +60,7 @@ public class TrainerFactory {
                 return new RandomForestClassifierTrainer(
                     concurrency,
                     classIdMap,
-                    (RandomForestTrainConfig) config,
+                    (RandomForestTrainerConfig) config,
                     false,
                     randomSeed,
                     progressTracker
@@ -91,7 +91,7 @@ public class TrainerFactory {
                     numberOfTrainingExamples,
                     numberOfClasses,
                     featureDimension,
-                   (RandomForestTrainConfig) config
+                   (RandomForestTrainerConfig) config
                 );
             }
             default:

@@ -24,7 +24,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
@@ -65,7 +65,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
 
-        var allowedKeys = RandomForestTrainConfig.DEFAULT.configKeys();
+        var allowedKeys = RandomForestTrainerConfig.DEFAULT.configKeys();
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
 
         var tunableTrainerConfig = TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest);

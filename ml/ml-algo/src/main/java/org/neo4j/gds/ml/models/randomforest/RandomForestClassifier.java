@@ -35,17 +35,17 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public class RandomForestClassifier implements Classifier {
 
-    private final RandomForestData data;
+    private final RandomForestClassifierData data;
 
     public RandomForestClassifier(
         List<DecisionTreePredictor<Integer>> decisionTrees,
         LocalIdMap classMapping,
         int featureDimension
     ) {
-        this(ImmutableRandomForestData.of(classMapping, featureDimension, decisionTrees));
+        this(ImmutableRandomForestClassifierData.of(classMapping, featureDimension, decisionTrees));
     }
 
-    public RandomForestClassifier(RandomForestData data) {
+    public RandomForestClassifier(RandomForestClassifierData data) {
         this.data = data;
     }
 

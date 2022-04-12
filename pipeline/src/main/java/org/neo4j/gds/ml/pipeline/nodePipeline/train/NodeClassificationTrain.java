@@ -40,11 +40,11 @@ import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.models.ClassifierTrainer;
+import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
-import org.neo4j.gds.ml.models.Trainer;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -157,16 +157,16 @@ public final class NodeClassificationTrain {
                 () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
                         Tasks.task(
                             "Split",
-                            Trainer.progressTask("Training"),
+                            ClassifierTrainer.progressTask("Training"),
                             Tasks.leaf("Evaluate")
                         )
                     ), validationFolds)
                 ),
                 numberOfModelSelectionTrials
             ),
-            Trainer.progressTask("TrainSelectedOnRemainder"),
+            ClassifierTrainer.progressTask("TrainSelectedOnRemainder"),
             Tasks.leaf("EvaluateSelectedModel"),
-            Trainer.progressTask("RetrainSelectedModel")
+            ClassifierTrainer.progressTask("RetrainSelectedModel")
         );
     }
 
@@ -185,7 +185,7 @@ public final class NodeClassificationTrain {
             .flatMap(List::stream)
             .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
             .map(config -> {
-                var training = TrainerFactory.memoryEstimation(
+                var training = ClassifierTrainerFactory.memoryEstimation(
                     config,
                     trainSetSize,
                     fudgedClassCount,
@@ -428,7 +428,7 @@ public final class NodeClassificationTrain {
         HugeLongArray trainSet,
         TrainerConfig trainerConfig
     ) {
-        Trainer trainer = TrainerFactory.create(
+        ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
             terminationFlag,
