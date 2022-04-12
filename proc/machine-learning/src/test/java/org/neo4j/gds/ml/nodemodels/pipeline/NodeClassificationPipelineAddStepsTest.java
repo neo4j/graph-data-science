@@ -33,7 +33,7 @@ import java.util.NoSuchElementException;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
-import static org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig.DEFAULT_CONFIG;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
 
 class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 

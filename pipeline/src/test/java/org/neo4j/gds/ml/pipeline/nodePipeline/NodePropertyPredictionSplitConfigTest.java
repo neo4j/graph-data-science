@@ -28,7 +28,7 @@ import org.neo4j.gds.extension.Inject;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
-class NodeClassificationSplitConfigTest {
+class NodePropertyPredictionSplitConfigTest {
 
     @GdlGraph
     static String GDL = "  (a:Node)" +
@@ -46,7 +46,7 @@ class NodeClassificationSplitConfigTest {
 
     @Test
     void shouldThrowOnEmptyTestSet() {
-        var splitConfig = NodeClassificationSplitConfigImpl.builder()
+        var splitConfig = NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.1)
             .validationFolds(2)
             .build();
@@ -58,7 +58,7 @@ class NodeClassificationSplitConfigTest {
 
     @Test
     void shouldThrowOnTooSmallTrainSet() {
-        var splitConfig = NodeClassificationSplitConfigImpl.builder()
+        var splitConfig = NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.9)
             .validationFolds(2)
             .build();
@@ -70,7 +70,7 @@ class NodeClassificationSplitConfigTest {
 
     @Test
     void shouldThrowOnEmptyValidationSet() {
-        var splitConfig = NodeClassificationSplitConfigImpl.builder()
+        var splitConfig = NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.5)
             .validationFolds(6)
             .build();

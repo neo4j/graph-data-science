@@ -24,7 +24,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +35,11 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
 
-    private NodeClassificationSplitConfig splitConfig;
+    private NodePropertyPredictionSplitConfig splitConfig;
 
     public NodeClassificationTrainingPipeline() {
         super();
-        this.splitConfig = NodeClassificationSplitConfig.DEFAULT_CONFIG;
+        this.splitConfig = NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
     }
 
     public NodeClassificationTrainingPipeline copy() {
@@ -76,11 +76,11 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
         );
     }
 
-    public void setSplitConfig(NodeClassificationSplitConfig splitConfig) {
+    public void setSplitConfig(NodePropertyPredictionSplitConfig splitConfig) {
         this.splitConfig = splitConfig;
     }
 
-    public NodeClassificationSplitConfig splitConfig() {
+    public NodePropertyPredictionSplitConfig splitConfig() {
         return splitConfig;
     }
 

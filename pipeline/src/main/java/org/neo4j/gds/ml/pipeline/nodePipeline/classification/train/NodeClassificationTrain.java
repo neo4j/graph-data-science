@@ -51,7 +51,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
@@ -90,7 +90,7 @@ public final class NodeClassificationTrain {
     ) {
         var fudgedClassCount = 1000;
         var fudgedFeatureCount = 500;
-        NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
+        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
         var testFraction = splitConfig.testFraction();
 
         var modelSelection = modelTrainAndEvaluateMemoryUsage(
@@ -285,7 +285,7 @@ public final class NodeClassificationTrain {
         allTrainingExamples.setAll(i -> i);
 
         ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(config.randomSeed()));
-        NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
+        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
         var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
         var innerSplits = new StratifiedKFoldSplitter(
             splitConfig.validationFolds(),

@@ -29,8 +29,8 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,7 @@ class NodeClassificationPipelineTest {
         assertThat(pipeline)
             .returns(List.of(), NodeClassificationTrainingPipeline::featureSteps)
             .returns(List.of(), NodeClassificationTrainingPipeline::nodePropertySteps)
-            .returns(NodeClassificationSplitConfig.DEFAULT_CONFIG, NodeClassificationTrainingPipeline::splitConfig);
+            .returns(NodePropertyPredictionSplitConfig.DEFAULT_CONFIG, NodeClassificationTrainingPipeline::splitConfig);
 
         assertThat(pipeline.trainingParameterSpace())
             .isEqualTo(Map.of(TrainingMethod.LogisticRegression, List.of(), TrainingMethod.RandomForest, List.of()));
@@ -125,7 +125,7 @@ class NodeClassificationPipelineTest {
     @Test
     void canSetSplitConfig() {
         var pipeline = new NodeClassificationTrainingPipeline();
-        var splitConfig = NodeClassificationSplitConfigImpl.builder().testFraction(0.555).build();
+        var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.555).build();
         pipeline.setSplitConfig(splitConfig);
 
         assertThat(pipeline)
@@ -135,10 +135,10 @@ class NodeClassificationPipelineTest {
     @Test
     void overridesTheSplitConfig() {
         var pipeline = new NodeClassificationTrainingPipeline();
-        var splitConfig = NodeClassificationSplitConfigImpl.builder().testFraction(0.5).build();
+        var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
         pipeline.setSplitConfig(splitConfig);
 
-        var splitConfigOverride = NodeClassificationSplitConfigImpl.builder().testFraction(0.7).build();
+        var splitConfigOverride = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.7).build();
         pipeline.setSplitConfig(splitConfigOverride);
 
         assertThat(pipeline)
@@ -160,7 +160,7 @@ class NodeClassificationPipelineTest {
                     .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
                     .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureProperties")))
                 .returns(
-                    NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                    NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
@@ -190,7 +190,7 @@ class NodeClassificationPipelineTest {
                 LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
             ));
 
-            var splitConfig = NodeClassificationSplitConfigImpl.builder().testFraction(0.5).build();
+            var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             assertThat(pipeline.toMap())
@@ -296,7 +296,7 @@ class NodeClassificationPipelineTest {
         @Test
         void doesntDeepCopySplitConfig() {
             var pipeline = new NodeClassificationTrainingPipeline();
-            var splitConfig = NodeClassificationSplitConfigImpl.builder().testFraction(0.5).build();
+            var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
             var copy = pipeline.copy();

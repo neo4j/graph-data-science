@@ -51,7 +51,7 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.ImmutableNodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
@@ -132,7 +132,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             Map.of("penalty", 1, "maxEpochs", 1)
         )));
 
-        pipeline.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
             .validationFolds(2)
             .build()
@@ -184,7 +184,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
 
-        pipeline.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
             .validationFolds(2)
             .build()

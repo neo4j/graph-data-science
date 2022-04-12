@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
@@ -64,7 +64,7 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
             Map.of("pipelineName", pipelineName),
             List.of(Map.of(
                 "name", "confetti",
-                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                 "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
@@ -83,7 +83,7 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
             Map.of("pipelineName", PIPELINE_NAME, "maxTrials", maxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
-                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                 "autoTuningConfig", Map.of("maxTrials", maxTrials),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
@@ -106,7 +106,7 @@ class NodeClassificationPipelineConfigureAutoTuningProcTest extends BaseProcTest
             Map.of("pipelineName", PIPELINE_NAME, "maxTrials", lastMaxTrials),
             List.of(Map.of(
                 "name", "myPipeline",
-                "splitConfig", NodeClassificationSplitConfig.DEFAULT_CONFIG.toMap(),
+                "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                 "autoTuningConfig", Map.of("maxTrials", 42),
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),

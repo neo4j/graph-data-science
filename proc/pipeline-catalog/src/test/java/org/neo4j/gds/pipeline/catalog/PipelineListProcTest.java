@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationSplitConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.time.ZonedDateTime;
@@ -57,7 +57,7 @@ class PipelineListProcTest extends BaseProcTest {
     @ValueSource(strings = {"gds.beta.pipeline.list()", "gds.beta.pipeline.list(null)"})
     void listsPipelines(String query) {
         var ncPipe1 = new NodeClassificationTrainingPipeline();
-        ncPipe1.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
+        ncPipe1.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.8)
             .build()
         );
@@ -127,7 +127,7 @@ class PipelineListProcTest extends BaseProcTest {
     @Test
     void returnSpecificPipeline() {
         var ncPipe1 = new NodeClassificationTrainingPipeline();
-        ncPipe1.setSplitConfig(NodeClassificationSplitConfigImpl.builder()
+        ncPipe1.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.8)
             .build()
         );

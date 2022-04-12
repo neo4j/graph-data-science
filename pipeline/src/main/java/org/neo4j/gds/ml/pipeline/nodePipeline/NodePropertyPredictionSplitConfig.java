@@ -34,8 +34,8 @@ import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateNodeSetSize;
 
 @Configuration
-public interface NodeClassificationSplitConfig extends ToMapConvertible {
-    NodeClassificationSplitConfig DEFAULT_CONFIG = NodeClassificationSplitConfig.of(CypherMapWrapper.empty());
+public interface NodePropertyPredictionSplitConfig extends ToMapConvertible {
+    NodePropertyPredictionSplitConfig DEFAULT_CONFIG = NodePropertyPredictionSplitConfig.of(CypherMapWrapper.empty());
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
@@ -49,8 +49,8 @@ public interface NodeClassificationSplitConfig extends ToMapConvertible {
         return 3;
     }
 
-    static NodeClassificationSplitConfig of(CypherMapWrapper config) {
-        return new NodeClassificationSplitConfigImpl(config);
+    static NodePropertyPredictionSplitConfig of(CypherMapWrapper config) {
+        return new NodePropertyPredictionSplitConfigImpl(config);
     }
 
     @Override
