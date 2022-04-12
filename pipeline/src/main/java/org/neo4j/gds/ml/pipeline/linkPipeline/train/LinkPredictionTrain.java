@@ -43,8 +43,8 @@ import org.neo4j.gds.ml.metrics.SignedProbabilities;
 import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
+import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainerFactory;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
@@ -175,7 +175,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         TrainerConfig trainerConfig,
         ProgressTracker customProgressTracker
     ) {
-        return TrainerFactory.create(
+        return ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
             terminationFlag,
@@ -428,7 +428,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     ) {
         return MemoryEstimations.setup(
             "Training", dim ->
-                TrainerFactory.memoryEstimation(
+                ClassifierTrainerFactory.memoryEstimation(
                     trainerConfig,
                     unused -> dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType())),
                     2,

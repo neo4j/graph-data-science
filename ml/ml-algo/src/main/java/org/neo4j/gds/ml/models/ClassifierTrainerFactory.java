@@ -32,9 +32,9 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-public class TrainerFactory {
+public class ClassifierTrainerFactory {
 
-    private TrainerFactory() {}
+    private ClassifierTrainerFactory() {}
 
     public static ClassifierTrainer create(
         TrainerConfig config,
