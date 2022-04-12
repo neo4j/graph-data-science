@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -201,12 +202,12 @@ class TunableTrainerConfigTest {
             .isInstanceOf(IllegalArgumentException.class);
     }
 
-    @Test
+    @RepeatedTest(100)
     void failsOnIllegalMapKeys() {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo", "bar", "bat"));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
-            .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
-                        "where both min and max are numerical. Invalid parameters: [`maxDepth={bar=bat, range=foo}`]")
+            .hasMessageMatching("Ranges for training hyper-parameters must be of the form \\{range: \\{min, max\\}}, " +
+                                "where both min and max are numerical. Invalid parameters: \\[`maxDepth=\\{(bar=bat, range=foo|range=foo, bar=bat)\\}`\\]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
