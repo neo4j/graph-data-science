@@ -42,6 +42,7 @@ This segment is divided into the following pages:
 * <<linkprediction-configure, Configuring the pipeline>>
 * <<linkprediction-pipelines-train, Training the pipeline>>
 * <<algorithms-link-prediction-pipelines-predict, Applying a trained model for prediction>>
+* <<linkprediction-appendix, Appendix>>
 
 
 include::config.adoc[leveloffset=+1]
