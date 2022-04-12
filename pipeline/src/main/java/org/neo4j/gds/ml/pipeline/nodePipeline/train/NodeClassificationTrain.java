@@ -33,12 +33,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
@@ -60,7 +59,6 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -300,14 +298,14 @@ public final class NodeClassificationTrain {
         var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
         selectBestModel(innerSplits, trainingStatistics);
-        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
+        evaluateBestModel(outerSplit, trainingStatistics);
 
         Classifier retrainedModelData = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
 
         progressTracker.endSubTask("NCTrain");
 
         return ImmutableNodeClassificationTrainResult.of(
-            createModel(retrainedModelData, trainingStatistics, metricResults),
+            createModel(retrainedModelData, trainingStatistics),
             trainingStatistics
         );
     }
@@ -373,7 +371,7 @@ public final class NodeClassificationTrain {
         metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
-    private Map<Metric, BestMetricData> evaluateBestModel(
+    private void evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         TrainingStatistics trainingStatistics
     ) {
@@ -385,8 +383,6 @@ public final class NodeClassificationTrain {
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
         progressTracker.endSubTask("EvaluateSelectedModel");
-
-        return trainingStatistics.metricsForWinningModel();
     }
 
     private Classifier retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
@@ -399,14 +395,13 @@ public final class NodeClassificationTrain {
 
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         Classifier classifier,
-        TrainingStatistics trainingStatistics,
-        Map<Metric, BestMetricData> metricResults
+        TrainingStatistics trainingStatistics
     ) {
 
         var modelInfo = NodeClassificationPipelineModelInfo.builder()
             .classes(classIdMap.originalIdsList())
             .bestParameters(trainingStatistics.bestParameters())
-            .metrics(metricResults)
+            .metrics(trainingStatistics.metricsForWinningModel())
             .pipeline(NodeClassificationPredictPipeline.from(pipeline))
             .build();
 
