@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.metrics.AllClassMetric;
+import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 
 class TrainingStatisticsTest {

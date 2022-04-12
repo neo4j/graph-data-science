@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.metrics;
+package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
@@ -26,13 +26,13 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class F1Score implements ClassificationMetric {
+public class Recall implements ClassificationMetric {
 
-    public static final String NAME = "F1";
+    public static final String NAME = "RECALL";
 
     private final long positiveTarget;
 
-    public F1Score(long positiveTarget) {
+    public Recall(long positiveTarget) {
         this.positiveTarget = positiveTarget;
     }
 
@@ -45,7 +45,6 @@ public class F1Score implements ClassificationMetric {
                 );
 
         long truePositives = 0L;
-        long falsePositives = 0L;
         long falseNegatives = 0L;
         for (long row = 0; row < targets.size(); row++) {
 
@@ -55,7 +54,6 @@ public class F1Score implements ClassificationMetric {
             var predictedIsPositive = predictedClass == positiveTarget;
             var targetIsPositive = targetClass == positiveTarget;
             var predictedIsNegative = !predictedIsPositive;
-            var targetIsNegative = !targetIsPositive;
 
             if (predictedIsPositive && targetIsPositive) {
                 truePositives++;
@@ -64,29 +62,17 @@ public class F1Score implements ClassificationMetric {
             if (predictedIsNegative && targetIsPositive) {
                 falseNegatives++;
             }
-
-            if (predictedIsPositive && targetIsNegative) {
-                falsePositives++;
-            }
         }
 
-        var precision = truePositives / (truePositives + falsePositives + EPSILON);
-        var recall = truePositives / (truePositives + falseNegatives + EPSILON);
-        var result = 2 * (precision * recall) / (precision + recall + EPSILON);
-        assert result <= 1.0;
-        return result;
-    }
-
-    public double compute(HugeLongArray targets, HugeLongArray predictions) {
-        return compute(targets, predictions, null);
+        return truePositives / (truePositives + falseNegatives + EPSILON);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        F1Score f1Score = (F1Score) o;
-        return positiveTarget == f1Score.positiveTarget;
+        Recall recallScore = (Recall) o;
+        return positiveTarget == recallScore.positiveTarget;
     }
 
     @Override

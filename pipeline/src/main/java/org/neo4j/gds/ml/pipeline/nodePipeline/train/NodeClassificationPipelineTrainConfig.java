@@ -25,8 +25,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.metrics.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.ClassificationMetricSpecification;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.Collection;
@@ -42,8 +42,8 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
 
     String graphName();
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.ClassificationMetricSpecification#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.ClassificationMetricSpecification#specificationsToString")
+    @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")
     List<ClassificationMetricSpecification> metrics();
 
     String pipeline();

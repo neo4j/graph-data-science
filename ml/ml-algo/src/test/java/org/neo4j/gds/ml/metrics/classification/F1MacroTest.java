@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.metrics;
+package org.neo4j.gds.ml.metrics.classification;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.AllClassMetric.F1_MACRO;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_MACRO;
 
 class F1MacroTest {
 
