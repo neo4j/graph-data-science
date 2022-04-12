@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.nodes;
 
 import java.util.Set;
 
@@ -33,7 +33,7 @@ public interface NodePropertyContainer {
      * @param propertyKey the node property key
      * @return the values associated with that key
      */
-    NodeProperties nodeProperties(String propertyKey);
+    NodePropertyValues nodeProperties(String propertyKey);
 
     Set<String> availableNodeProperties();
 

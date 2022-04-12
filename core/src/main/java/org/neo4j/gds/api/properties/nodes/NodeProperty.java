@@ -17,45 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.ImmutableNodeProperty;
+import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 @ValueClass
 public
-interface NodeProperty {
-
-    NodeProperties values();
-
-    PropertySchema propertySchema();
-
-    @Configuration.Ignore
-    default String key() {
-        return propertySchema().key();
-    }
-
-    @Configuration.Ignore
-    default ValueType valueType() {
-        return propertySchema().valueType();
-    }
-
-    @Configuration.Ignore
-    default DefaultValue defaultValue() {
-        return propertySchema().defaultValue();
-    }
-
-    @Configuration.Ignore
-    default PropertyState propertyState() {
-        return propertySchema().state();
-    }
+interface NodeProperty extends Property<NodePropertyValues> {
 
     static NodeProperty of(
         String key,
         PropertyState origin,
-        NodeProperties values
+        NodePropertyValues values
     ) {
         return ImmutableNodeProperty.of(
             values,
@@ -66,7 +44,7 @@ interface NodeProperty {
     static NodeProperty of(
         String key,
         PropertyState origin,
-        NodeProperties values,
+        NodePropertyValues values,
         DefaultValue defaultValue
     ) {
         return ImmutableNodeProperty.of(

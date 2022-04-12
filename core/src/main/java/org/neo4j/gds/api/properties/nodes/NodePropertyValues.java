@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.nodes;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -28,7 +28,7 @@ import java.util.OptionalLong;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface NodeProperties {
+public interface NodePropertyValues {
 
     default double doubleValue(long nodeId) {
         throw unsupportedTypeException(ValueType.DOUBLE);
