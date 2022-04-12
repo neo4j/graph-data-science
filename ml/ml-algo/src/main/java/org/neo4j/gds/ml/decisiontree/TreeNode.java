@@ -36,8 +36,12 @@ public class TreeNode<PREDICTION> {
         this.thresholdValue = value;
     }
 
-    public static long memoryEstimation() {
+    public static long splitMemoryEstimation() {
         return sizeOfInstance(TreeNode.class);
+    }
+
+    public static <T extends Number> long leafMemoryEstimation(Class<T> leafType) {
+        return sizeOfInstance(TreeNode.class) + sizeOfInstance(leafType);
     }
 
     public TreeNode(PREDICTION prediction) {

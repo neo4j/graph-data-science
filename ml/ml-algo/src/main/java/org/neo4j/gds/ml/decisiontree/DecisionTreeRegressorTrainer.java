@@ -59,7 +59,8 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
-                numberOfBaggedFeatures
+                numberOfBaggedFeatures,
+                TreeNode.leafMemoryEstimation(Double.class)
             ));
     }
 

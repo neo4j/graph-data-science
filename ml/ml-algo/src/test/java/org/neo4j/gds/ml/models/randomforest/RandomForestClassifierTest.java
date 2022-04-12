@@ -232,19 +232,19 @@ class RandomForestClassifierTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4413562,   5224370",
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4413594,  5226418",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4414066,   6115578",
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4414242,  6295802",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23122,    166954",
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23154,   182954",
         // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4414786,   6116298",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4414962,  6296522",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4414858,   6116462",
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4415034,  6296686",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1204786,   2266298",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1204962,  2446522",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16457032,  20807880",
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16457256, 21037256",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -281,13 +281,13 @@ class RandomForestClassifierTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Max should almost scale linearly with numberOfDecisionTrees.
-        "     6, 100_000,   1,  2,    96,     5_136",
-        "     6, 100_000, 100,  2, 5_640,   509_640",
+        "     6, 100_000,   1,  2,    112,     6_160",
+        "     6, 100_000, 100,  2,  7_240,   612_040",
         // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
-        "    10, 100_000,   1,  2,    96,    81_936",
+        "    10, 100_000,   1,  2,    112,    98_320",
         // Max should scale almost inverse linearly with minSplitSize.
-        "   800, 100_000,   1,  2,    96, 8_000_016",
-        "   800, 100_000,   1, 10,    96, 1_600_016",
+        "   800, 100_000,   1,  2,    112, 9_600_016",
+        "   800, 100_000,   1, 10,    112, 1_920_016",
     })
     void memoryEstimation(
         int maxDepth,
