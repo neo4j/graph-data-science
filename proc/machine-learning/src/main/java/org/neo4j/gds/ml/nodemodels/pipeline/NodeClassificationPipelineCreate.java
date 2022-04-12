@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
-public class NodeClassificationPipelineCreate {
+public final class NodeClassificationPipelineCreate {
 
     private NodeClassificationPipelineCreate() {}
 

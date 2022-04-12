@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
