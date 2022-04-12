@@ -20,6 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
@@ -42,5 +43,10 @@ final class KmeansProc {
             .result()
             .communities()::get : null);
     }
-    
+
+    static <CONFIG extends KmeansBaseConfig> NodeProperties nodeProperties(
+        ComputationResult<Kmeans, KmeansResult, CONFIG> computeResult
+    ) {
+        return computeResult.result().communities().asNodeProperties();
+    }
 }
