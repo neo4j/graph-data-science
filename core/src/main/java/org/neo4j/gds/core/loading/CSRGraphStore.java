@@ -37,6 +37,9 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
+import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -93,6 +96,8 @@ public class CSRGraphStore implements GraphStore {
 
     private GraphSchema schema;
 
+    private GraphPropertyStore graphProperties;
+
     private NodePropertyStore nodeProperties;
 
     private ZonedDateTime modificationTime;
@@ -136,6 +141,8 @@ public class CSRGraphStore implements GraphStore {
 
         this.schema = schema;
 
+        this.graphProperties = GraphPropertyStore.empty();
+
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;
 
@@ -160,6 +167,57 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public ZonedDateTime modificationTime() {
         return modificationTime;
+    }
+
+    // Graph properties
+
+    @Override
+    public Set<String> graphPropertyKeys() {
+        return graphProperties.keySet();
+    }
+
+    @Override
+    public boolean hasGraphProperty(String propertyKey) {
+        return graphPropertyKeys().contains(propertyKey);
+    }
+
+    @Override
+    public GraphProperty graphProperty(String propertyKey) {
+        return graphProperties.get(propertyKey);
+    }
+
+    @Override
+    public ValueType graphPropertyType(String propertyKey) {
+        return graphProperty(propertyKey).valueType();
+    }
+
+    @Override
+    public GraphPropertyValues graphPropertyValues(String propertyKey) {
+        return graphProperty(propertyKey).values();
+    }
+
+    @Override
+    public void addGraphProperty(String propertyKey, GraphPropertyValues propertyValues) {
+        updateGraphStore((graphStore) -> {
+            if (graphStore.hasGraphProperty(propertyKey)) {
+                throw new UnsupportedOperationException(formatWithLocale("Graph property %s already exists", propertyKey));
+            }
+
+            graphStore.graphProperties = GraphPropertyStore.builder()
+                .from(graphStore.graphProperties)
+                .putIfAbsent(propertyKey, GraphProperty.of(propertyKey, propertyValues))
+                .build();
+        });
+    }
+
+    @Override
+    public void removeGraphProperty(String propertyKey) {
+        updateGraphStore(graphStore -> {
+            graphStore.graphProperties = GraphPropertyStore.builder()
+                .from(graphStore.graphProperties)
+                .removeProperty(propertyKey)
+                .build();
+        });
     }
 
     @Override

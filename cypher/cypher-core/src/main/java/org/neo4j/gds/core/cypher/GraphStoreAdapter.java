@@ -29,6 +29,8 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -68,6 +70,42 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     @Override
     public ZonedDateTime modificationTime() {
         return graphStore.modificationTime();
+    }
+
+
+    @Override
+    public Set<String> graphPropertyKeys() {
+        return graphStore.graphPropertyKeys();
+    }
+
+    @Override
+    public boolean hasGraphProperty(String propertyKey) {
+        return graphStore.hasGraphProperty(propertyKey);
+    }
+
+    @Override
+    public GraphProperty graphProperty(String propertyKey) {
+        return graphStore.graphProperty(propertyKey);
+    }
+
+    @Override
+    public ValueType graphPropertyType(String propertyKey) {
+        return graphStore.graphPropertyType(propertyKey);
+    }
+
+    @Override
+    public GraphPropertyValues graphPropertyValues(String propertyKey) {
+        return graphStore.graphPropertyValues(propertyKey);
+    }
+
+    @Override
+    public void addGraphProperty(String propertyKey, GraphPropertyValues propertyValues) {
+        graphStore.addGraphProperty(propertyKey, propertyValues);
+    }
+
+    @Override
+    public void removeGraphProperty(String propertyKey) {
+        graphStore.removeGraphProperty(propertyKey);
     }
 
     @Override

@@ -30,24 +30,22 @@ public interface GraphProperty extends Property<GraphPropertyValues> {
 
     static GraphProperty of(
         String key,
-        PropertyState origin,
         GraphPropertyValues values
     ) {
         return ImmutableGraphProperty.of(
             values,
-            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), origin)
+            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), PropertyState.TRANSIENT)
         );
     }
 
     static GraphProperty of(
         String key,
-        PropertyState origin,
         GraphPropertyValues values,
         DefaultValue defaultValue
     ) {
         return ImmutableGraphProperty.of(
             values,
-            PropertySchema.of(key, values.valueType(), defaultValue, origin)
+            PropertySchema.of(key, values.valueType(), defaultValue, PropertyState.TRANSIENT)
         );
     }
 }

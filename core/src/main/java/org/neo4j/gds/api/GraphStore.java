@@ -22,6 +22,8 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -49,11 +51,35 @@ public interface GraphStore {
 
     ZonedDateTime modificationTime();
 
+    // Graph Properties
+
+    Set<String> graphPropertyKeys();
+
+    boolean hasGraphProperty(String propertyKey);
+
+    GraphProperty graphProperty(String propertyKey);
+
+    ValueType graphPropertyType(String propertyKey);
+
+    GraphPropertyValues graphPropertyValues(String propertyKey);
+
+    void addGraphProperty(
+        String propertyKey,
+        GraphPropertyValues propertyValues
+    );
+
+    void removeGraphProperty(String propertyKey);
+
+
+    // Nodes
+
     long nodeCount();
 
     IdMap nodes();
 
     Set<NodeLabel> nodeLabels();
+
+    // Node Properties
 
     Set<String> nodePropertyKeys(NodeLabel label);
 
@@ -95,6 +121,9 @@ public interface GraphStore {
 
     void removeNodeProperty(String propertyKey);
 
+
+    // Relationships
+
     long relationshipCount();
 
     long relationshipCount(RelationshipType relationshipType);
@@ -102,6 +131,9 @@ public interface GraphStore {
     Set<RelationshipType> relationshipTypes();
 
     boolean hasRelationshipType(RelationshipType relationshipType);
+
+
+    // Relationship Properties
 
     boolean hasRelationshipProperty(RelationshipType relType, String propertyKey);
 
