@@ -27,6 +27,7 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +44,7 @@ final class ParameterParser {
     ) {
         var doubleRanges = new HashMap<String, DoubleRangeParameter>();
         var integerRanges = new HashMap<String, IntegerRangeParameter>();
-        var incorrectMaps = new HashMap<String, Object>();
+        var incorrectMaps = new LinkedHashMap<String, Object>();
 
         input.forEach((key, value) -> {
             if (value instanceof Map) {
