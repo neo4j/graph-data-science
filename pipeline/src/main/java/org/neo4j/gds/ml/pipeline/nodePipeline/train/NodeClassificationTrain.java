@@ -272,9 +272,9 @@ public final class NodeClassificationTrain {
     }
 
     public NodeClassificationTrainResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("NCTrain");
 
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("ShuffleAndSplit");
         var allTrainingExamples = HugeLongArray.newArray(features.size());
         allTrainingExamples.setAll(i -> i);
 
@@ -295,7 +295,7 @@ public final class NodeClassificationTrain {
             progressTracker
         );
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("ShuffleAndSplit");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
@@ -304,7 +304,7 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("NCTrain");
 
         return ImmutableNodeClassificationTrainResult.of(
             createModel(retrainedModelData, trainingStatistics, metricResults),
@@ -313,7 +313,7 @@ public final class NodeClassificationTrain {
     }
 
     private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("SelectBestModel");
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -323,12 +323,12 @@ public final class NodeClassificationTrain {
 
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("Model Candidate");
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                progressTracker.beginSubTask();
+                progressTracker.beginSubTask("Split");
 
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
@@ -338,21 +338,21 @@ public final class NodeClassificationTrain {
 
                 progressTracker.endSubTask("Training");
 
-                progressTracker.beginSubTask(validationSet.size() + trainSet.size());
+                progressTracker.beginSubTask("Evaluate",validationSet.size() + trainSet.size());
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
-                progressTracker.endSubTask();
+                progressTracker.endSubTask("Evaluate");
 
-                progressTracker.endSubTask();
+                progressTracker.endSubTask("Split");
             }
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("Model Candidate");
 
             metrics.forEach(metric -> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
         }
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("SelectBestModel");
     }
 
     private void registerMetricScores(
@@ -381,10 +381,10 @@ public final class NodeClassificationTrain {
         var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
-        progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("EvaluateSelectedModel", outerSplit.testSet().size() + outerSplit.trainSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("EvaluateSelectedModel");
 
         return trainingStatistics.metricsForWinningModel();
     }
