@@ -113,10 +113,12 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     @Override
     public KmeansResult compute() {
+        progressTracker.beginSubTask();
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             communities.setAll(v -> (int) v);
+            progressTracker.endSubTask();
             return ImmutableKmeansResult.of(communities);
         }
         long nodeCount = graph.nodeCount();
@@ -162,6 +164,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             recomputeCenters(clusterCenters, tasks);
 
         }
+        progressTracker.endSubTask();
         return ImmutableKmeansResult.of(communities);
     }
 
