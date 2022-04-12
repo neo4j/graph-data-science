@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.metrics.regression;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RegressionMetricsTest {
@@ -48,6 +50,12 @@ class RegressionMetricsTest {
         var predictions = HugeDoubleArray.of(2.5, 0, 2, 8);
 
         assertThat(RegressionMetrics.MEAN_ABSOLUTE_ERROR.compute(targets, predictions)).isEqualTo(0.5);
+    }
+
+    @Test
+    void parseEvaluationMetrics() {
+        var expectedMetrics = List.of(RegressionMetrics.MEAN_SQUARED_ERROR, RegressionMetrics.ROOT_MEAN_SQUARED_ERROR);
+        assertThat(RegressionMetrics.parseList(List.of("MEAN_SQUARED_ERROR", "ROOT_MEAN_SQUARED_ERROR"))).isEqualTo(expectedMetrics);
     }
 
 }

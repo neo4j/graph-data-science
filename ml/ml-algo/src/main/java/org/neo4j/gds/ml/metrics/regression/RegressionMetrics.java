@@ -22,6 +22,14 @@ package org.neo4j.gds.ml.metrics.regression;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.metrics.Metric;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
+
 public enum RegressionMetrics implements Metric {
     MEAN_SQUARED_ERROR {
         @Override
@@ -60,4 +68,40 @@ public enum RegressionMetrics implements Metric {
     };
 
     public abstract double compute(HugeDoubleArray targets, HugeDoubleArray predictions);
+
+    private static final List<String> VALUES = Arrays
+        .stream(RegressionMetrics.values())
+        .map(RegressionMetrics::name)
+        .collect(Collectors.toList());
+
+    public static List<RegressionMetrics> parseList(List<?> input) {
+        return input.stream().map(RegressionMetrics::parse).collect(Collectors.toList());
+    }
+
+    public static RegressionMetrics parse(Object input) {
+        if (input instanceof String) {
+            var inputString = toUpperCaseWithLocale((String) input);
+
+            if (VALUES.contains(inputString)) {
+                return RegressionMetrics.valueOf(inputString.toUpperCase(Locale.ENGLISH));
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "RegressionMetric `%s` is not supported. Must be one of: %s.",
+                inputString,
+                VALUES
+            ));
+        } else if (input instanceof RegressionMetrics) {
+            return (RegressionMetrics) input;
+        }
+
+        throw new IllegalArgumentException(formatWithLocale(
+            "Expected RegressionMetric or String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
+    }
+
+    public static List<String> toString(List<RegressionMetrics> metrics) {
+        return metrics.stream().map(RegressionMetrics::name).collect(Collectors.toList());
+    }
 }
