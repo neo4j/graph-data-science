@@ -2,6 +2,7 @@
 = Link prediction pipelines
 :entity: relationship
 :result: relationships
+:max-trials: 10
 
 
 [abstract]
