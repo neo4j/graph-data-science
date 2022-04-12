@@ -20,9 +20,9 @@
 package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
 @ValueClass
 public interface ClosenessCentralityResult {
-    HugeAtomicDoubleArray centralities();
+    HugeDoubleArray centralities();
 }

@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.closeness;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -117,10 +117,10 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         progressTracker.endSubTask();
     }
 
-    private HugeAtomicDoubleArray computeCloseness() {
+    private HugeDoubleArray computeCloseness() {
         progressTracker.beginSubTask();
 
-        var closeness = HugeAtomicDoubleArray.newArray(nodeCount);
+        var closeness = HugeDoubleArray.newArray(nodeCount);
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
