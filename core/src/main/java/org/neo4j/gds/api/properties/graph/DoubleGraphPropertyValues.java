@@ -17,36 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.properties;
+package org.neo4j.gds.api.properties.graph;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.values.storable.Value;
+import org.neo4j.values.storable.Values;
 
-public interface Property<VALUE extends PropertyValues> {
-    VALUE values();
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
-    PropertySchema propertySchema();
+public interface DoubleGraphPropertyValues extends GraphPropertyValues {
 
-    @Configuration.Ignore
-    default String key() {
-        return propertySchema().key();
+    @Override
+    DoubleStream doubleValues();
+
+    @Override
+    default Stream<Object> objects() {
+        return doubleValues().boxed().map(l -> l);
     }
 
-    @Configuration.Ignore
+    @Override
+    default Stream<Value> values() {
+        return doubleValues().boxed().map(value -> Double.isNaN(value) ? null : Values.doubleValue(value));
+    }
+
+    @Override
     default ValueType valueType() {
-        return propertySchema().valueType();
-    }
-
-    @Configuration.Ignore
-    default DefaultValue defaultValue() {
-        return propertySchema().defaultValue();
-    }
-
-    @Configuration.Ignore
-    default PropertyState propertyState() {
-        return propertySchema().state();
+        return ValueType.DOUBLE;
     }
 }

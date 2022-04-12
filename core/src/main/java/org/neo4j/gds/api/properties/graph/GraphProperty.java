@@ -17,36 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.properties;
+package org.neo4j.gds.api.properties.graph;
 
-import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.Property;
 import org.neo4j.gds.api.schema.PropertySchema;
 
-public interface Property<VALUE extends PropertyValues> {
-    VALUE values();
+@ValueClass
+public interface GraphProperty extends Property<GraphPropertyValues> {
 
-    PropertySchema propertySchema();
-
-    @Configuration.Ignore
-    default String key() {
-        return propertySchema().key();
+    static GraphProperty of(
+        String key,
+        PropertyState origin,
+        GraphPropertyValues values
+    ) {
+        return ImmutableGraphProperty.of(
+            values,
+            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), origin)
+        );
     }
 
-    @Configuration.Ignore
-    default ValueType valueType() {
-        return propertySchema().valueType();
-    }
-
-    @Configuration.Ignore
-    default DefaultValue defaultValue() {
-        return propertySchema().defaultValue();
-    }
-
-    @Configuration.Ignore
-    default PropertyState propertyState() {
-        return propertySchema().state();
+    static GraphProperty of(
+        String key,
+        PropertyState origin,
+        GraphPropertyValues values,
+        DefaultValue defaultValue
+    ) {
+        return ImmutableGraphProperty.of(
+            values,
+            PropertySchema.of(key, values.valueType(), defaultValue, origin)
+        );
     }
 }

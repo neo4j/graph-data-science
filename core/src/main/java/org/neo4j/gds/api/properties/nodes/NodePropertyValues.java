@@ -21,6 +21,7 @@ package org.neo4j.gds.api.properties.nodes;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.PropertyValues;
 import org.neo4j.values.storable.Value;
 
 import java.util.OptionalDouble;
@@ -28,7 +29,7 @@ import java.util.OptionalLong;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public interface NodePropertyValues {
+public interface NodePropertyValues extends PropertyValues {
 
     default double doubleValue(long nodeId) {
         throw unsupportedTypeException(ValueType.DOUBLE);
@@ -56,23 +57,7 @@ public interface NodePropertyValues {
     @Nullable
     Object getObject(long nodeId);
 
-    ValueType valueType();
-
     Value value(long nodeId);
-
-    /**
-     * Release internal data structures and return an estimate how many bytes were freed.
-     *
-     * Note that the mapping is not usable afterwards.
-     */
-    default long release() {
-        return 0;
-    }
-
-    /**
-     * @return the number of values stored.
-     */
-    long size();
 
     /**
      * @return the maximum long value contained in the mapping or an empty {@link OptionalLong} if the mapping is
@@ -98,9 +83,5 @@ public interface NodePropertyValues {
         } else {
             throw unsupportedTypeException(ValueType.DOUBLE);
         }
-    }
-
-    private UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
-        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));
     }
 }
