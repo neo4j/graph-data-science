@@ -27,24 +27,35 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.Features;
+import org.neo4j.gds.ml.models.RegressorTrainer;
 
 import java.util.function.Supplier;
 
-public final class LinearRegressionTrainer {
+public final class LinearRegressionTrainer implements RegressorTrainer {
 
     private final int concurrency;
+    private final TerminationFlag terminationFlag;
+    private final ProgressTracker progressTracker;
     private final LinearRegressionTrainConfig trainConfig;
 
-    public LinearRegressionTrainer(int concurrency) {
+    public LinearRegressionTrainer(
+        int concurrency,
+        LinearRegressionTrainConfig config,
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
+    ) {
         this.concurrency = concurrency;
-        this.trainConfig = LinearRegressionTrainConfig.DEFAULT;
+        this.trainConfig = config;
+        this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
     }
 
+    @Override
     public LinearRegressor train(Features features, HugeDoubleArray targets, ReadOnlyHugeLongArray trainSet) {
         var objective = new LinearRegressionObjective(features, targets);
         Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
 
-        var training = new Training(trainConfig, ProgressTracker.NULL_TRACKER, trainSet.size(), TerminationFlag.RUNNING_TRUE);
+        var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
         training.train(objective, queueSupplier, concurrency);
 
         return new LinearRegressor(objective.modelData());
