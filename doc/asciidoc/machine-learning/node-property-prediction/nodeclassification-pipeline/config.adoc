@@ -7,6 +7,7 @@
 This page explains how to create and configure a node classification pipeline.
 It consists of the following sections:
 
+* <<nodeclassification-creating-a-pipeline, Creating the pipeline>>
 * <<nodeclassification-pipelines-adding-node-properties, Adding node properties>>
 * <<nodeclassification-pipelines-adding-features, Adding features>>
 * <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>
