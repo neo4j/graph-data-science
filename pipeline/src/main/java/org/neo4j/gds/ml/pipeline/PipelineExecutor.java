@@ -104,10 +104,10 @@ public abstract class PipelineExecutor<
 
         var dataSplits = splitDataset();
         try {
-            progressTracker.beginSubTask("execute node property steps");
+            progressTracker.beginSubTask("Execute node property steps");
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
             executeNodePropertySteps(dataSplits.get(DatasetSplits.FEATURE_INPUT));
-            progressTracker.endSubTask("execute node property steps");
+            progressTracker.endSubTask("Execute node property steps");
 
             validate(graphStore, config);
 

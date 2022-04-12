@@ -96,8 +96,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         return Tasks.task(
             taskName(),
             Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
                 pipeline.nodePropertySteps().size()
             ),
             NodeClassificationTrain.progressTask(

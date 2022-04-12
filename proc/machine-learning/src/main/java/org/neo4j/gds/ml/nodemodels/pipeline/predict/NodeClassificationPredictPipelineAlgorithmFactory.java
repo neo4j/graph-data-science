@@ -59,8 +59,8 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         return Tasks.task(
             taskName(),
             Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
             Tasks.leaf("Node classification predict", graphStore.getUnion().nodeCount())

@@ -106,7 +106,7 @@ public class Training {
             stopper.registerLoss(lastLoss);
             epoch++;
 
-            progressTracker.logProgress(1, StringFormatting.formatWithLocale(":: Epoch %d with loss %s", epoch, lastLoss));
+            progressTracker.logMessage(StringFormatting.formatWithLocale("Epoch %d with loss %s", epoch, lastLoss));
         }
         progressTracker.logMessage(StringFormatting.formatWithLocale(
             "%s after %d epochs. Initial loss: %s, Last loss: %s.%s",

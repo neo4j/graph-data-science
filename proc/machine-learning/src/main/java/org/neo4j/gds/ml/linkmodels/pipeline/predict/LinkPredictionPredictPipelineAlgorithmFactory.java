@@ -53,13 +53,13 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         return Tasks.task(
             taskName(),
             Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
                 trainingPipeline.nodePropertySteps().size()
             ),
         config.isApproximateStrategy()
-            ? Tasks.task("approximate link prediction", KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig()))
-            : Tasks.leaf("exhaustive link prediction", graphStore.nodeCount())
+            ? Tasks.task("Approximate link prediction", KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig()))
+            : Tasks.leaf("Exhaustive link prediction", graphStore.nodeCount())
         );
     }
 

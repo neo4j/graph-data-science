@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
@@ -71,17 +72,20 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
     @Override
     public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
         var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class);
-
-        return Tasks.task(
-            taskName(),
-            Tasks.leaf("split relationships"),
-            Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
+        var tasks = new ArrayList<Task>() {{
+            add(Tasks.leaf("Split relationships"));
+            add(Tasks.iterativeFixed(
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
                 pipeline.nodePropertySteps().size()
-            ),
-            LinkPredictionTrain.progressTask()
-        );
+            ));
+            addAll(LinkPredictionTrain.progressTasks(
+                pipeline.splitConfig().validationFolds(),
+                pipeline.numberOfModelSelectionTrials()
+            ));
+        }};
+
+        return Tasks.task(taskName(), tasks);
     }
 
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {

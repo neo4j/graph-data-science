@@ -34,6 +34,8 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -414,12 +416,16 @@ class LinkPredictionTrainTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
-            LinkPredictionTrain.progressTask(),
+            progressTask(
+                pipeline.splitConfig().validationFolds(),
+                pipeline.numberOfModelSelectionTrials()
+            ),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
+        progressTracker.beginSubTask();
         new LinkPredictionTrain(
             trainGraph,
             trainGraph,
@@ -433,17 +439,18 @@ class LinkPredictionTrainTest {
                 .build(),
             progressTracker
         ).compute();
+        progressTracker.endSubTask();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "LinkPredictionTrain :: train best model :: Start",
-                "LinkPredictionTrain :: train best model :: trained decision tree 1 out of 5",
-                "LinkPredictionTrain :: train best model :: trained decision tree 2 out of 5",
-                "LinkPredictionTrain :: train best model :: trained decision tree 3 out of 5",
-                "LinkPredictionTrain :: train best model :: trained decision tree 4 out of 5",
-                "LinkPredictionTrain :: train best model :: trained decision tree 5 out of 5",
-                "LinkPredictionTrain :: train best model :: Finished"
+                "Link prediction train :: Train best model :: Start",
+                "Link prediction train :: Train best model :: Trained decision tree 1 out of 5",
+                "Link prediction train :: Train best model :: Trained decision tree 2 out of 5",
+                "Link prediction train :: Train best model :: Trained decision tree 3 out of 5",
+                "Link prediction train :: Train best model :: Trained decision tree 4 out of 5",
+                "Link prediction train :: Train best model :: Trained decision tree 5 out of 5",
+                "Link prediction train :: Train best model :: Finished"
             );
     }
 
@@ -465,12 +472,16 @@ class LinkPredictionTrainTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
-            LinkPredictionTrain.progressTask(),
+            progressTask(
+                pipeline.splitConfig().validationFolds(),
+                pipeline.numberOfModelSelectionTrials()
+            ),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
+        progressTracker.beginSubTask();
         new LinkPredictionTrain(
             trainGraph,
             trainGraph,
@@ -484,18 +495,19 @@ class LinkPredictionTrainTest {
                 .build(),
             progressTracker
         ).compute();
+        progressTracker.endSubTask();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
             .contains(
-                "LinkPredictionTrain :: train best model :: Start",
-                "LinkPredictionTrain :: train best model :: Epoch 1 with loss 0.688097317504",
-                "LinkPredictionTrain :: train best model :: Epoch 2 with loss 0.683213654690",
-                "LinkPredictionTrain :: train best model :: Epoch 3 with loss 0.678498422872",
-                "LinkPredictionTrain :: train best model :: Epoch 4 with loss 0.673952840083",
-                "LinkPredictionTrain :: train best model :: Epoch 5 with loss 0.669576960529",
-                "LinkPredictionTrain :: train best model :: Finished"
+                "Link prediction train :: Train best model :: Start",
+                "Link prediction train :: Train best model :: Epoch 1 with loss 0.688097317504",
+                "Link prediction train :: Train best model :: Epoch 2 with loss 0.683213654690",
+                "Link prediction train :: Train best model :: Epoch 3 with loss 0.678498422872",
+                "Link prediction train :: Train best model :: Epoch 4 with loss 0.673952840083",
+                "Link prediction train :: Train best model :: Epoch 5 with loss 0.669576960529",
+                "Link prediction train :: Train best model :: Finished"
             );
     }
 
@@ -520,12 +532,16 @@ class LinkPredictionTrainTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
-            LinkPredictionTrain.progressTask(),
+            progressTask(
+                pipeline.splitConfig().validationFolds(),
+                pipeline.numberOfModelSelectionTrials()
+            ),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
+        progressTracker.beginSubTask();
         new LinkPredictionTrain(
             trainGraph,
             trainGraph,
@@ -541,16 +557,80 @@ class LinkPredictionTrainTest {
                 .build(),
             progressTracker
         ).compute();
+        progressTracker.endSubTask();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
             .contains(
-                "LinkPredictionTrain :: select model 25%",
-                "LinkPredictionTrain :: select model 50%",
-                "LinkPredictionTrain :: select model 75%",
-                "LinkPredictionTrain :: select model 100%"
+                "Link prediction train :: Start",
+                "Link prediction train :: Extract train features :: Start",
+                "Link prediction train :: Extract train features 50%",
+                "Link prediction train :: Extract train features 63%",
+                "Link prediction train :: Extract train features 73%",
+                "Link prediction train :: Extract train features 80%",
+                "Link prediction train :: Extract train features 84%",
+                "Link prediction train :: Extract train features 89%",
+                "Link prediction train :: Extract train features 91%",
+                "Link prediction train :: Extract train features 93%",
+                "Link prediction train :: Extract train features 95%",
+                "Link prediction train :: Extract train features 97%",
+                "Link prediction train :: Extract train features 100%",
+                "Link prediction train :: Extract train features :: Finished",
+                "Link prediction train :: Select best model :: Start",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 1 of 4 50%",
+                "Link prediction train :: Select best model :: Trial 1 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Finished",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 2 of 4 50%",
+                "Link prediction train :: Select best model :: Trial 2 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Finished",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 3 of 4 50%",
+                "Link prediction train :: Select best model :: Trial 3 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Finished",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 4 of 4 50%",
+                "Link prediction train :: Select best model :: Trial 4 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Finished",
+                "Link prediction train :: Select best model :: Finished",
+                "Link prediction train :: Train best model :: Start",
+                "Link prediction train :: Train best model :: Epoch 1 with loss 0.688097328918",
+                "Link prediction train :: Train best model :: Epoch 2 with loss 0.683213701008",
+                "Link prediction train :: Train best model :: Epoch 3 with loss 0.678498527915",
+                "Link prediction train :: Train best model :: Epoch 4 with loss 0.673953027899",
+                "Link prediction train :: Train best model 100%",
+                "Link prediction train :: Train best model :: Epoch 5 with loss 0.669577255253",
+                "Link prediction train :: Train best model :: terminated after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.669577255253. Did not converge",
+                "Link prediction train :: Train best model :: Finished",
+                "Link prediction train :: Compute train metrics :: Start",
+                "Link prediction train :: Compute train metrics 100%",
+                "Link prediction train :: Compute train metrics :: Finished",
+                "Link prediction train :: Evaluate on test data :: Start",
+                "Link prediction train :: Evaluate on test data :: Extract test features :: Start",
+                "Link prediction train :: Evaluate on test data :: Extract test features 50%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 63%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 73%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 80%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 84%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 89%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 91%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 93%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 95%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 97%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 100%",
+                "Link prediction train :: Evaluate on test data :: Extract test features :: Finished",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics :: Start",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics 100%",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics :: Finished",
+                "Link prediction train :: Evaluate on test data :: Finished",
+                "Link prediction train :: Finished"
             );
+    }
+
+    static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
+        return Tasks.task("Link prediction train", LinkPredictionTrain.progressTasks(validationFolds, numberOfModelSelectionTrials));
     }
 
     private LinkPredictionTrainingPipeline linkPredictionPipeline() {

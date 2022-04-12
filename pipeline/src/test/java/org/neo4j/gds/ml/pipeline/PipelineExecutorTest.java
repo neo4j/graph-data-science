@@ -107,11 +107,11 @@ class PipelineExecutorTest {
             .extracting(removingThreadId())
             .containsExactly(
                 "FailingPipelineExecutor :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
-                "FailingPipelineExecutor :: execute node property steps :: Finished",
+                "FailingPipelineExecutor :: Execute node property steps :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 100%",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: Execute node property steps :: Finished",
                 "FailingPipelineExecutor :: Finished"
             );
     }
@@ -145,11 +145,11 @@ class PipelineExecutorTest {
             .extracting(removingThreadId())
             .containsExactly(
                 "FailingPipelineExecutor :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Start",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 100%",
-                "FailingPipelineExecutor :: execute node property steps :: step 1 of 1 :: Finished",
-                "FailingPipelineExecutor :: execute node property steps :: Finished"
+                "FailingPipelineExecutor :: Execute node property steps :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 100%",
+                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: Execute node property steps :: Finished"
             );
     }
 
@@ -177,8 +177,8 @@ class PipelineExecutorTest {
         return Tasks.task(
             "FailingPipelineExecutor",
             Tasks.iterativeFixed(
-                "execute node property steps",
-                () -> List.of(Tasks.leaf("step")),
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
                 1
             )
         );

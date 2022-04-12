@@ -136,7 +136,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
         var lossFunction = GiniIndex.fromOriginalLabels(allLabels, classIdMap);
 
-        progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
@@ -274,10 +273,9 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 predictionsCache
             ));
 
-            progressTracker.logProgress(
-                1,
+            progressTracker.logMessage(
                 formatWithLocale(
-                    ":: trained decision tree %d out of %d",
+                    "Trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),
                     randomForestTrainConfig.numberOfDecisionTrees()
                 )
