@@ -212,7 +212,8 @@ public final class NodeClassificationTrain {
         Graph graph,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
@@ -228,8 +229,6 @@ public final class NodeClassificationTrain {
             // Random forest uses feature vectors many times each.
             features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
         }
-
-        var terminationFlag = TerminationFlag.RUNNING_TRUE;
 
         return new NodeClassificationTrain(
             graph,

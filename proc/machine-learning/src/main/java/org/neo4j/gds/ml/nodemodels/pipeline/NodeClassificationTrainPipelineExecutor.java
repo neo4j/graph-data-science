@@ -102,7 +102,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
 
         return NodeClassificationTrain
-            .create(graph, pipeline, config, progressTracker)
+            .create(graph, pipeline, config, progressTracker, terminationFlag)
             .compute();
     }
 }
