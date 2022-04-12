@@ -160,8 +160,7 @@ class RandomForestRegressorTest {
     void predictOverheadMemoryEstimation() {
         var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
 
-        assertThat(estimation.min).isEqualTo(16);
-        assertThat(estimation.max).isEqualTo(16);
+        assertThat(estimation).isEqualTo(MemoryRange.of(16));
     }
 
     @ParameterizedTest
