@@ -80,7 +80,6 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
-    private final HugeLongArray nodeIds;
     private final List<ClassificationMetric> metrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
@@ -223,8 +222,6 @@ public final class NodeClassificationTrain {
         HugeLongArray labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
-        nodeIds.setAll(i -> i);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
@@ -244,7 +241,6 @@ public final class NodeClassificationTrain {
             labels,
             classIdMap,
             metrics,
-            nodeIds,
             classCounts,
             progressTracker,
             terminationFlag
@@ -259,7 +255,6 @@ public final class NodeClassificationTrain {
         HugeLongArray labels,
         LocalIdMap classIdMap,
         List<ClassificationMetric> metrics,
-        HugeLongArray nodeIds,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -273,7 +268,6 @@ public final class NodeClassificationTrain {
         this.targets = labels;
         this.classIdMap = classIdMap;
         this.metrics = metrics;
-        this.nodeIds = nodeIds;
         this.classCounts = classCounts;
     }
 
@@ -281,9 +275,12 @@ public final class NodeClassificationTrain {
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
-        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
+        var allTrainingExamples = HugeLongArray.newArray(features.size());
+        allTrainingExamples.setAll(i -> i);
+
+        ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(config.randomSeed()));
         NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
-        var outerSplit = new FractionSplitter().split(nodeIds, 1 - splitConfig.testFraction());
+        var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
         var innerSplits = new StratifiedKFoldSplitter(
             splitConfig.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
@@ -305,7 +302,7 @@ public final class NodeClassificationTrain {
         selectBestModel(innerSplits, trainingStatistics);
         Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
 
-        Classifier retrainedModelData = retrainBestModel(trainingStatistics.bestParameters());
+        Classifier retrainedModelData = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
 
         progressTracker.endSubTask();
 
@@ -392,9 +389,9 @@ public final class NodeClassificationTrain {
         return trainingStatistics.metricsForWinningModel();
     }
 
-    private Classifier retrainBestModel(TrainerConfig bestParameters) {
+    private Classifier retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("RetrainSelectedModel");
-        var retrainedClassifier = trainModel(nodeIds, bestParameters);
+        var retrainedClassifier = trainModel(trainSet, bestParameters);
         progressTracker.endSubTask("RetrainSelectedModel");
 
         return retrainedClassifier;
