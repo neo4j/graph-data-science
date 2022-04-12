@@ -79,7 +79,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
         return MemoryEstimations.builder("Training", RandomForestRegressorTrainer.class)
             // estimating the final forest produced
-            .add(RandomForestData.memoryEstimation(numberOfTrainingSamples, config))
+            .add(RandomForestRegressorData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
                 "Mean Squared Error Loss",
                 nodeCount -> MeanSquaredError.memoryEstimation()

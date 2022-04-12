@@ -207,4 +207,39 @@ class RandomForestRegressorTest {
             .withFailMessage("Got (%s, %s)", estimation.min, estimation.max)
             .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        // Max should almost scale linearly with numberOfDecisionTrees.
+        "     6, 100_000,   1,  2,    96,     5_136",
+        "     6, 100_000, 100,  2, 5_640,   509_640",
+        // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
+        "    10, 100_000,   1,  2,    96,    81_936",
+        // Max should scale almost inverse linearly with minSplitSize.
+        "   800, 100_000,   1,  2,    96, 8_000_016",
+        "   800, 100_000,   1, 10,    96, 1_600_016",
+    })
+    void memoryEstimation(
+        int maxDepth,
+        long numberOfTrainingSamples,
+        int numTrees,
+        int minSplitSize,
+        long expectedMin,
+        long expectedMax
+    ) {
+        var config = RandomForestTrainerConfigImpl.builder()
+            .maxDepth(maxDepth)
+            .numberOfDecisionTrees(numTrees)
+            .minSplitSize(minSplitSize)
+            .build();
+        var estimator = RandomForestRegressorData.memoryEstimation(
+            unused -> numberOfTrainingSamples,
+            config
+        );
+        // Does not depend on node count, only indirectly so with the size of the training set.
+        var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
+
+        assertThat(estimation.min).isEqualTo(expectedMin);
+        assertThat(estimation.max).isEqualTo(expectedMax);
+    }
 }
