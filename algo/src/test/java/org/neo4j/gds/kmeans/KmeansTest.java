@@ -81,7 +81,7 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute();
+        var result = kmeans.compute().communities();
         assertThat(result.get(0)).isEqualTo(result.get(1));
         assertThat(result.get(2)).isEqualTo(result.get(3));
         assertThat(result.get(0)).isNotEqualTo(result.get(2));
@@ -99,7 +99,7 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute();
+        var result = kmeans.compute().communities();
         assertThat(result.get(0)).isEqualTo(result.get(1));
         assertThat(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
         assertThat(result.get(0)).isNotEqualTo(result.get(2));
@@ -117,7 +117,7 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute();
+        var result = kmeans.compute().communities();
 
         assertThat(result.get(1)).isEqualTo(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
         assertThat(result.get(0)).isNotEqualTo(result.get(1));
