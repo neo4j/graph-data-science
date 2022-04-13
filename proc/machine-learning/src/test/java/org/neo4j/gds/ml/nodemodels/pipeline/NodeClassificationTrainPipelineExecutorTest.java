@@ -180,7 +180,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
 

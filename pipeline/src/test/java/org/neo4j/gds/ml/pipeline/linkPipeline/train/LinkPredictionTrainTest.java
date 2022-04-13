@@ -275,7 +275,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
         MemoryTree actualEstimation = LinkPredictionTrain
@@ -305,7 +305,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
         pipeline.setSplitConfig(splitConfig);
 
         var graphDim = GraphDimensions.of(100, 1_000);
@@ -376,7 +376,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
@@ -406,7 +406,6 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.addTrainerConfig(
-            TrainingMethod.RandomForest,
             RandomForestTrainerConfigImpl.builder().numberOfDecisionTrees(5).build()
         );
 
@@ -457,7 +456,7 @@ class LinkPredictionTrainTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression,
+        pipeline.addTrainerConfig(
             LogisticRegressionTrainConfigImpl.builder().maxEpochs(5).minEpochs(5).build()
         );
 
