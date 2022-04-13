@@ -28,6 +28,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,12 +70,12 @@ class StratifiedKFoldSplitterTest {
         });
         var totalClassCounts = classCounts(targets);
 
-
         var kFoldSplitter = new StratifiedKFoldSplitter(
             k,
             ReadOnlyHugeLongArray.of(nodeIds),
-            ReadOnlyHugeLongArray.of(targets),
-            Optional.of(42L)
+            targets::get,
+            Optional.of(42L),
+            Arrays.stream(distinctTargets).boxed().collect(Collectors.toSet())
         );
         var splits = kFoldSplitter.splits();
         assertThat(splits.size()).isEqualTo(k);

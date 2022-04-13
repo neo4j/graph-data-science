@@ -54,8 +54,8 @@ class RegressionMetricsTest {
 
     @Test
     void parseEvaluationMetrics() {
-        var expectedMetrics = List.of(RegressionMetrics.MEAN_SQUARED_ERROR, RegressionMetrics.ROOT_MEAN_SQUARED_ERROR);
-        assertThat(RegressionMetrics.parseList(List.of("MEAN_SQUARED_ERROR", "ROOT_MEAN_SQUARED_ERROR"))).isEqualTo(expectedMetrics);
+        var expectedMetrics = List.of(RegressionMetrics.MEAN_SQUARED_ERROR, RegressionMetrics.ROOT_MEAN_SQUARED_ERROR, RegressionMetrics.ROOT_MEAN_SQUARED_ERROR);
+        assertThat(RegressionMetrics.parseList(List.of("MEAN_SQUARED_ERROR", "ROOT_MEAN_SQUARED_ERROR", "root_mean_squared_error"))).isEqualTo(expectedMetrics);
     }
 
 }

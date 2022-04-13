@@ -60,6 +60,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -290,8 +291,9 @@ public final class NodeClassificationTrain {
         var innerSplits = new StratifiedKFoldSplitter(
             splitConfig.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
-            ReadOnlyHugeLongArray.of(targets),
-            config.randomSeed()
+            targets::get,
+            config.randomSeed(),
+            Set.copyOf(classCounts.keys())
         ).splits();
 
         warnForSmallNodeSets(

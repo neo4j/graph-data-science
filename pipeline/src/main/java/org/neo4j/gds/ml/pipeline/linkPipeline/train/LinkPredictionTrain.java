@@ -58,6 +58,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -282,8 +283,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         var splitter = new StratifiedKFoldSplitter(
             pipeline.splitConfig().validationFolds(),
             trainRelationshipIds,
-            ReadOnlyHugeLongArray.of(actualLabels),
-            config.randomSeed()
+            actualLabels::get,
+            config.randomSeed(),
+            Set.copyOf(classIdMap.originalIdsList())
         );
         return splitter.splits();
     }

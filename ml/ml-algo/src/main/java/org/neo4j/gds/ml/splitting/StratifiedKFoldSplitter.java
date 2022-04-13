@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.math3.random.RandomDataGenerator;
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -31,6 +32,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -46,8 +48,9 @@ import java.util.stream.IntStream;
 public class StratifiedKFoldSplitter {
     private final int k;
     private final ReadOnlyHugeLongArray ids;
-    private final ReadOnlyHugeLongArray targets;
+    private final LongToLongFunction targets;
     private final RandomDataGenerator random;
+    private final Set<Long> distinctTargets;
 
     public static MemoryEstimation memoryEstimationForNodeSet(int k, double trainFraction) {
         return memoryEstimation(k, dim -> (long) (dim.nodeCount() * trainFraction));
@@ -80,16 +83,15 @@ public class StratifiedKFoldSplitter {
         );
     }
 
-    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, ReadOnlyHugeLongArray targets, Optional<Long> randomSeed) {
+    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, LongToLongFunction targets, Optional<Long> randomSeed, Set<Long> distinctTargets) {
         this.k = k;
         this.ids = ids;
         this.targets = targets;
         this.random = ShuffleUtil.createRandomDataGenerator(randomSeed);
+        this.distinctTargets = distinctTargets;
     }
 
     public List<TrainingExamplesSplit> splits() {
-        var distinctClasses = distinctClasses();
-
         var nodeCount = ids.size();
         var trainSets = new HugeLongArray[k];
         var testSets = new HugeLongArray[k];
@@ -99,10 +101,10 @@ public class StratifiedKFoldSplitter {
         allocateArrays(nodeCount, trainSets, testSets);
 
         var roundRobinPointer = new MutableInt();
-        distinctClasses.forEach(currentClass -> {
+        distinctTargets.forEach(currentClass -> {
             for (long offset = 0; offset < ids.size(); offset++) {
                 var id = ids.get(offset);
-                if (targets.get(id) == currentClass) {
+                if (targets.applyAsLong(id) == currentClass) {
                     var bucketToAddTo = roundRobinPointer.getValue();
                     for (int fold = 0; fold < k; fold++) {
                         if (fold == bucketToAddTo) {
@@ -134,13 +136,5 @@ public class StratifiedKFoldSplitter {
             testSets[fold] = HugeLongArray.newArray(testSize);
             trainSets[fold] = HugeLongArray.newArray(nodeCount - testSize);
         }
-    }
-
-    private HashSet<Long> distinctClasses() {
-        var distinctClasses = new HashSet<Long>();
-        for (long offset = 0; offset < targets.size(); offset++) {
-            distinctClasses.add(targets.get(offset));
-        }
-        return distinctClasses;
     }
 }
