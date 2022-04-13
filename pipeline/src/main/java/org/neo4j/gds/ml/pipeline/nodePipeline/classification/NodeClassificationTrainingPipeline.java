@@ -38,7 +38,7 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
     private NodePropertyPredictionSplitConfig splitConfig;
 
     public NodeClassificationTrainingPipeline() {
-        super();
+        super(TrainingType.CLASSIFICATION);
         this.splitConfig = NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
     }
 

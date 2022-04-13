@@ -39,7 +39,7 @@ public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeature
     private LinkPredictionSplitConfig splitConfig;
 
     public LinkPredictionTrainingPipeline() {
-        super();
+        super(TrainingType.CLASSIFICATION);
         this.splitConfig = LinkPredictionSplitConfig.DEFAULT_CONFIG;
     }
 

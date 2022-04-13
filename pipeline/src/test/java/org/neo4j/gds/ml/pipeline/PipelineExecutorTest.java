@@ -94,7 +94,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
-        var log = Neo4jProxy.testLog();;
+        var log = Neo4jProxy.testLog();
         var pipelineExecutor = new SucceedingPipelineExecutor(
             new BogusNodePropertyPipeline(),
             graphStore,
@@ -132,7 +132,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
-        var log = Neo4jProxy.testLog();;
+        var log = Neo4jProxy.testLog();
         var pipelineExecutor = new FailingPipelineExecutor(
             new BogusNodePropertyPipeline(),
             graphStore,
@@ -318,7 +318,7 @@ class PipelineExecutorTest {
 
     private class BogusNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
-        BogusNodePropertyPipeline() {super();}
+        BogusNodePropertyPipeline() {super(TrainingType.REGRESSION);}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
@@ -352,7 +352,7 @@ class PipelineExecutorTest {
 
     private class FailingNodePropertyPipeline extends TrainingPipeline<FeatureStep> {
 
-        FailingNodePropertyPipeline() {super();}
+        FailingNodePropertyPipeline() {super(TrainingType.CLASSIFICATION);}
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {

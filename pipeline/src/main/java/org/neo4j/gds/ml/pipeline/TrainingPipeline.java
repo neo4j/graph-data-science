@@ -44,8 +44,6 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     protected Map<TrainingMethod, List<TunableTrainerConfig>> trainingParameterSpace;
     protected AutoTuningConfig autoTuningConfig;
 
-    private static final List<TrainingMethod> CLASSIFICATION_METHODS = List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest);
-
     public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
             .collect(Collectors.toMap(
@@ -54,7 +52,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
             ));
     }
 
-    protected TrainingPipeline() {
+    protected TrainingPipeline(TrainingType trainingType) {
         this.nodePropertySteps = new ArrayList<>();
         this.featureSteps = new ArrayList<>();
         this.creationTime = TimeUtil.now();
@@ -62,7 +60,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.trainingParameterSpace = new EnumMap<>(TrainingMethod.class);
         this.autoTuningConfig = AutoTuningConfig.DEFAULT_CONFIG;
 
-        CLASSIFICATION_METHODS.forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
+        trainingType.supportedMethods().forEach(method -> trainingParameterSpace.put(method, new ArrayList<>()));
     }
 
     @Override
@@ -172,5 +170,22 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
 
     public ZonedDateTime creationTime() {
         return creationTime;
+    }
+
+    protected enum TrainingType {
+        CLASSIFICATION {
+            @Override
+            List<TrainingMethod> supportedMethods() {
+                return List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForest);
+            }
+        },
+        REGRESSION {
+            @Override
+            List<TrainingMethod> supportedMethods() {
+                return List.of(TrainingMethod.LinearRegression, TrainingMethod.RandomForest);
+            }
+        };
+
+        abstract List<TrainingMethod> supportedMethods();
     }
 }
