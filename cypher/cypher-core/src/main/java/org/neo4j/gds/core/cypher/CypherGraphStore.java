@@ -21,6 +21,7 @@ package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.token.TokenHolders;
 

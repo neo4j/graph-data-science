@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.cypher;
 
+import org.neo4j.gds.api.GraphStoreWrapper;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;

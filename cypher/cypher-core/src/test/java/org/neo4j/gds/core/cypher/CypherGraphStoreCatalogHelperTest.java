@@ -22,6 +22,7 @@ package org.neo4j.gds.core.cypher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.GdlExtension;

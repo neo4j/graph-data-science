@@ -17,17 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.cypher;
+package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
