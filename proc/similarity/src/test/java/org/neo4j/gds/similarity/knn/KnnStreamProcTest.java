@@ -51,7 +51,7 @@ class KnnStreamProcTest extends KnnProcTest<KnnStreamConfig> {
 
     @Test
     void shouldStreamResults() {
-        String query = "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1})" +
+        String query = "CALL gds.knn.stream($graph, {nodeProperties: ['knn'], topK: 1, randomSeed: 19, concurrency: 1})" +
                        " YIELD node1, node2, similarity" +
                        " RETURN node1, node2, similarity" +
                        " ORDER BY node1";
