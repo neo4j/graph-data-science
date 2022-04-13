@@ -33,12 +33,11 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
@@ -60,7 +59,6 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -80,7 +78,6 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
-    private final HugeLongArray nodeIds;
     private final List<ClassificationMetric> metrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
@@ -215,7 +212,8 @@ public final class NodeClassificationTrain {
         Graph graph,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
@@ -223,8 +221,6 @@ public final class NodeClassificationTrain {
         HugeLongArray labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
-        var nodeIds = HugeLongArray.newArray(graph.nodeCount());
-        nodeIds.setAll(i -> i);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
@@ -234,8 +230,6 @@ public final class NodeClassificationTrain {
             features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
         }
 
-        var terminationFlag = TerminationFlag.RUNNING_TRUE;
-
         return new NodeClassificationTrain(
             graph,
             pipeline,
@@ -244,7 +238,6 @@ public final class NodeClassificationTrain {
             labels,
             classIdMap,
             metrics,
-            nodeIds,
             classCounts,
             progressTracker,
             terminationFlag
@@ -259,7 +252,6 @@ public final class NodeClassificationTrain {
         HugeLongArray labels,
         LocalIdMap classIdMap,
         List<ClassificationMetric> metrics,
-        HugeLongArray nodeIds,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -273,17 +265,19 @@ public final class NodeClassificationTrain {
         this.targets = labels;
         this.classIdMap = classIdMap;
         this.metrics = metrics;
-        this.nodeIds = nodeIds;
         this.classCounts = classCounts;
     }
 
     public NodeClassificationTrainResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("NCTrain");
 
-        progressTracker.beginSubTask();
-        ShuffleUtil.shuffleHugeLongArray(nodeIds, createRandomDataGenerator(config.randomSeed()));
+        progressTracker.beginSubTask("ShuffleAndSplit");
+        var allTrainingExamples = HugeLongArray.newArray(features.size());
+        allTrainingExamples.setAll(i -> i);
+
+        ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(config.randomSeed()));
         NodeClassificationSplitConfig splitConfig = pipeline.splitConfig();
-        var outerSplit = new FractionSplitter().split(nodeIds, 1 - splitConfig.testFraction());
+        var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
         var innerSplits = new StratifiedKFoldSplitter(
             splitConfig.validationFolds(),
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
@@ -298,25 +292,25 @@ public final class NodeClassificationTrain {
             progressTracker
         );
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("ShuffleAndSplit");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
         selectBestModel(innerSplits, trainingStatistics);
-        Map<Metric, BestMetricData> metricResults = evaluateBestModel(outerSplit, trainingStatistics);
+        evaluateBestModel(outerSplit, trainingStatistics);
 
-        Classifier retrainedModelData = retrainBestModel(trainingStatistics.bestParameters());
+        Classifier retrainedModelData = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("NCTrain");
 
         return ImmutableNodeClassificationTrainResult.of(
-            createModel(retrainedModelData, trainingStatistics, metricResults),
+            createModel(retrainedModelData, trainingStatistics),
             trainingStatistics
         );
     }
 
     private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("SelectBestModel");
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -326,12 +320,12 @@ public final class NodeClassificationTrain {
 
         while (hyperParameterOptimizer.hasNext()) {
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("Model Candidate");
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                progressTracker.beginSubTask();
+                progressTracker.beginSubTask("Split");
 
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
@@ -341,21 +335,21 @@ public final class NodeClassificationTrain {
 
                 progressTracker.endSubTask("Training");
 
-                progressTracker.beginSubTask(validationSet.size() + trainSet.size());
+                progressTracker.beginSubTask("Evaluate",validationSet.size() + trainSet.size());
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
-                progressTracker.endSubTask();
+                progressTracker.endSubTask("Evaluate");
 
-                progressTracker.endSubTask();
+                progressTracker.endSubTask("Split");
             }
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("Model Candidate");
 
             metrics.forEach(metric -> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
         }
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("SelectBestModel");
     }
 
     private void registerMetricScores(
@@ -376,7 +370,7 @@ public final class NodeClassificationTrain {
         metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
-    private Map<Metric, BestMetricData> evaluateBestModel(
+    private void evaluateBestModel(
         TrainingExamplesSplit outerSplit,
         TrainingStatistics trainingStatistics
     ) {
@@ -384,17 +378,15 @@ public final class NodeClassificationTrain {
         var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
         progressTracker.endSubTask("TrainSelectedOnRemainder");
 
-        progressTracker.beginSubTask(outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("EvaluateSelectedModel", outerSplit.testSet().size() + outerSplit.trainSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
-        progressTracker.endSubTask();
-
-        return trainingStatistics.metricsForWinningModel();
+        progressTracker.endSubTask("EvaluateSelectedModel");
     }
 
-    private Classifier retrainBestModel(TrainerConfig bestParameters) {
+    private Classifier retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("RetrainSelectedModel");
-        var retrainedClassifier = trainModel(nodeIds, bestParameters);
+        var retrainedClassifier = trainModel(trainSet, bestParameters);
         progressTracker.endSubTask("RetrainSelectedModel");
 
         return retrainedClassifier;
@@ -402,14 +394,13 @@ public final class NodeClassificationTrain {
 
     private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
         Classifier classifier,
-        TrainingStatistics trainingStatistics,
-        Map<Metric, BestMetricData> metricResults
+        TrainingStatistics trainingStatistics
     ) {
 
         var modelInfo = NodeClassificationPipelineModelInfo.builder()
             .classes(classIdMap.originalIdsList())
             .bestParameters(trainingStatistics.bestParameters())
-            .metrics(metricResults)
+            .metrics(trainingStatistics.metricsForWinningModel())
             .pipeline(NodeClassificationPredictPipeline.from(pipeline))
             .build();
 

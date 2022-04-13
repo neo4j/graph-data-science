@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -143,7 +144,8 @@ class NodeClassificationTrainTest {
             graph,
             pipeline,
             config,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var result = ncTrain.compute();
@@ -195,7 +197,8 @@ class NodeClassificationTrainTest {
             graph,
             bananasPipeline,
             bananasConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var arrayPipeline = new NodeClassificationTrainingPipeline();
@@ -218,7 +221,8 @@ class NodeClassificationTrainTest {
             graph,
             arrayPipeline,
             arrayPropertyConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var bananasModelTrainResult = bananasTrain.compute();
@@ -272,7 +276,7 @@ class NodeClassificationTrainTest {
         );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-        NodeClassificationTrain.create(graph, pipeline, config, progressTracker).compute();
+        NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
@@ -398,7 +402,7 @@ class NodeClassificationTrainTest {
         var progressTask = NodeClassificationTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-        NodeClassificationTrain.create(graph, pipeline, config, progressTracker).compute();
+        NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
@@ -530,7 +534,8 @@ class NodeClassificationTrainTest {
             graph,
             pipeline,
             config,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var firstResult = algoSupplier.get().compute();
