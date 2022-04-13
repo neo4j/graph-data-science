@@ -21,25 +21,16 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeClassificationFeatureStep> {
+public class NodeClassificationTrainingPipeline extends NodePropertyTrainingPipeline {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
 
-    private NodePropertyPredictionSplitConfig splitConfig;
-
     public NodeClassificationTrainingPipeline() {
         super(TrainingType.CLASSIFICATION);
-        this.splitConfig = NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
     }
 
     public NodeClassificationTrainingPipeline copy() {
@@ -59,36 +50,6 @@ public class NodeClassificationTrainingPipeline extends TrainingPipeline<NodeCla
     @Override
     public String type() {
         return PIPELINE_TYPE;
-    }
-
-    @Override
-    protected Map<String, List<Map<String, Object>>> featurePipelineDescription() {
-        return Map.of(
-            "nodePropertySteps", ToMapConvertible.toMap(nodePropertySteps),
-            "featureProperties", ToMapConvertible.toMap(featureSteps)
-        );
-    }
-
-    @Override
-    protected Map<String, Object> additionalEntries() {
-        return Map.of(
-            "splitConfig", splitConfig.toMap()
-        );
-    }
-
-    public void setSplitConfig(NodePropertyPredictionSplitConfig splitConfig) {
-        this.splitConfig = splitConfig;
-    }
-
-    public NodePropertyPredictionSplitConfig splitConfig() {
-        return splitConfig;
-    }
-
-    public List<String> featureProperties() {
-        return featureSteps()
-            .stream()
-            .flatMap(step -> step.inputNodeProperties().stream())
-            .collect(Collectors.toList());
     }
 
     @Override
