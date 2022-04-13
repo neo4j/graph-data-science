@@ -40,6 +40,7 @@ class ModelProcBaseTest extends BaseProcTest {
             "REL", Map.of(
                 "r", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.NONE)"
             )
-        )
+        ),
+        "graphProperties", Map.of()
     );
 }
