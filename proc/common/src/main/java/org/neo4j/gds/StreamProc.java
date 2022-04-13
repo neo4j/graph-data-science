@@ -48,7 +48,6 @@ public abstract class StreamProc<
 
                 Graph graph = computationResult.graph();
                 NodeProperties nodeProperties = nodeProperties(computationResult);
-
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
                     .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));

@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.AlgoBaseProc;
+import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,15 +31,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.kmeans.KmeansProc.Kmeans_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.kmeans.stream", description = Kmeans_DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class KmeansStreamProc extends StreamProc<
+public class KmeansStreamProc extends AlgoBaseProc<
     Kmeans,
     KmeansResult,
-    KmeansStreamProc.StreamResult,
-    KmeansStreamConfig> {
+    KmeansStreamConfig,
+    KmeansStreamProc.StreamResult
+    > {
+
+    static final String Kmeans_DESCRIPTION =
+        "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
 
     @Procedure(value = "gds.alpha.kmeans.stream", mode = READ)
     @Description(Kmeans_DESCRIPTION)
@@ -49,33 +49,27 @@ public class KmeansStreamProc extends StreamProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Kmeans, KmeansResult, KmeansStreamConfig> computationResult = compute(
-            graphName,
-            configuration
-        );
-        return stream(computationResult);
+
+        var streamSpec = new KmeansStreamSpec();
+        return new ProcedureExecutor<>(
+            streamSpec,
+            executionContext()
+        ).compute(graphName, configuration, true, true);
+    }
+
+    @Override
+    public AlgorithmFactory<?, Kmeans, KmeansStreamConfig> algorithmFactory() {
+        return new KmeansStreamSpec().algorithmFactory();
+    }
+
+    @Override
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+        return new KmeansStreamSpec().computationResultConsumer();
     }
 
     @Override
     protected KmeansStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return KmeansStreamConfig.of(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<Kmeans, KmeansStreamConfig> algorithmFactory() {
-        return KmeansProc.algorithmFactory();
-    }
-
-    @Override
-    protected NodeProperties nodeProperties(ComputationResult<Kmeans, KmeansResult, KmeansStreamConfig> computationResult) {
-        return KmeansProc.nodeProperties(computationResult);
-    }
-
-    @Override
-    protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
-    ) {
-        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new KmeansStreamSpec().newConfigFunction().apply(username, config);
     }
 
 
