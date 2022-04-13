@@ -24,6 +24,7 @@ import java.io.UncheckedIOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +35,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public final class ResourceUtil {
 
     public static List<String> lines(String resourceName) {
+        var resourcePath = path(resourceName);
+        try {
+            return Files.readAllLines(resourcePath, UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public static Path path(String resourceName) {
         var classLoader = Objects.requireNonNullElse(
             Thread.currentThread().getContextClassLoader(),
             ResourceUtil.class.getClassLoader()
@@ -49,12 +59,7 @@ public final class ResourceUtil {
             throw new RuntimeException(e);
         }
 
-        var resourcePath = Paths.get(resourceUri);
-        try {
-            return Files.readAllLines(resourcePath, UTF_8);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        return Paths.get(resourceUri);
     }
 
     private ResourceUtil() {}
