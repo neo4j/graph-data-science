@@ -28,12 +28,11 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.openjdk.jol.util.Multiset;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -41,7 +40,6 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
@@ -86,9 +84,12 @@ class StratifiedKFoldSplitterTest {
             var trainSet = split.trainSet();
             var testSet = split.testSet();
             var nodeSet = new HashSet<Long>();
-            stream(trainSet.toArray()).forEach(nodeSet::add);
-            stream(testSet.toArray()).forEach(nodeSet::add);
-            stream(testSet.toArray()).forEach(unionOfTestSets::add);
+            Arrays.stream(trainSet.toArray()).forEach(nodeSet::add);
+            Arrays.stream(testSet.toArray()).forEach(testId -> {
+                nodeSet.add(testId);
+                unionOfTestSets.add(testId);
+            });
+
             assertThat(nodeSet.size()).isEqualTo(nodeCount);
             // (k-1) * nodeCount/k - trainSet.size() should be between -1 and 1
             // multiply both sides by k
@@ -98,21 +99,24 @@ class StratifiedKFoldSplitterTest {
 
             // check that stratification works: class proportions approximately preserved
             // in test and train sets
-            var testClassCounts = classCounts(testSet);
-            var trainClassCounts = classCounts(trainSet);
-            stream(distinctTargets).forEach(
+            var testClassCounts = classCountsForSet(testSet, targets);
+            var trainClassCounts = classCountsForSet(trainSet, targets);
+
+            Arrays.stream(distinctTargets).forEach(
                 target -> {
-                    var totalOccurances = totalClassCounts.getOrDefault(target, 0);
-                    var trainOccurances = trainClassCounts.getOrDefault(target, 0);
-                    var lowerExpectedTrain = (k - 1) * totalOccurances / k;
+                    var totalOccurrences = totalClassCounts.count(target);
+                    var trainOccurrences = trainClassCounts.count(target);
+                    var lowerExpectedTrain = (k - 1) * totalOccurrences / k;
                     var upperExpectedTrain = lowerExpectedTrain + 1;
-                    assertThat(trainOccurances).isLessThanOrEqualTo(upperExpectedTrain);
-                    assertThat(trainOccurances).isGreaterThanOrEqualTo(lowerExpectedTrain);
-                    var testOccurances = testClassCounts.getOrDefault(target, 0);
-                    var lowerExpectedTest = totalOccurances / k;
+
+                    assertThat(trainOccurrences).isLessThanOrEqualTo(upperExpectedTrain);
+                    assertThat(trainOccurrences).isGreaterThanOrEqualTo(lowerExpectedTrain);
+
+                    var testOccurrences = testClassCounts.count(target);
+                    var lowerExpectedTest = totalOccurrences / k;
                     var upperExpectedTest = lowerExpectedTest + 1;
-                    assertThat(testOccurances).isLessThanOrEqualTo(upperExpectedTest);
-                    assertThat(testOccurances).isGreaterThanOrEqualTo(lowerExpectedTest);
+                    assertThat(testOccurrences).isLessThanOrEqualTo(upperExpectedTest);
+                    assertThat(testOccurrences).isGreaterThanOrEqualTo(lowerExpectedTest);
                 });
         }
         assertThat(unionOfTestSets.size()).isEqualTo(nodeCount);
@@ -148,13 +152,20 @@ class StratifiedKFoldSplitterTest {
             .isEqualTo(expectedEstimation);
     }
 
-    private Map<Long, Integer> classCounts(HugeLongArray values) {
-        // would be nice to have MultiSet or Counter class
-        var counts = new HashMap<Long, Integer>();
-        stream(values.toArray())
-            .forEach(value ->
-                counts.put(value, counts.getOrDefault(counts, 0) + 1)
-            );
+    private Multiset<Long> classCounts(HugeLongArray values) {
+        var counts = new Multiset<Long>();
+        Arrays.stream(values.toArray()).forEach(counts::add);
+
+        return counts;
+    }
+
+    private Multiset<Long> classCountsForSet(HugeLongArray idSet, HugeLongArray targets) {
+        var counts = new Multiset<Long>();
+
+        for (long i = 0; i < idSet.size(); i++) {
+            counts.add(targets.get(idSet.get(i)));
+        }
+
         return counts;
     }
 
