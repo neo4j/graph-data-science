@@ -397,8 +397,13 @@ public final class Neo4jProxy41 implements Neo4jProxyApi {
     }
 
     @Override
-    public Path homeDirectory(DatabaseLayout databaseLayout) {
-        return databaseLayout.getNeo4jLayout().homeDirectory().toPath();
+    public Path databaseDirectory(DatabaseLayout databaseLayout) {
+        return databaseLayout.databaseDirectory().toPath();
+    }
+
+    @Override
+    public Path transactionLogsDirectory(DatabaseLayout databaseLayout) {
+        return databaseLayout.getTransactionLogsDirectory().toPath();
     }
 
     @Override

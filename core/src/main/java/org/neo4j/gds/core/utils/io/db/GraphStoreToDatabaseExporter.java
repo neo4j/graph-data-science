@@ -88,8 +88,8 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
 
     @Override
     public void export(GraphStoreInput graphStoreInput) {
-        DIRECTORY_IS_WRITABLE.validate(databaseLayout.databaseDirectory());
-        DIRECTORY_IS_WRITABLE.validate(databaseLayout.getTransactionLogsDirectory());
+        DIRECTORY_IS_WRITABLE.validate(Neo4jProxy.databaseDirectory(databaseLayout));
+        DIRECTORY_IS_WRITABLE.validate(Neo4jProxy.transactionLogsDirectory(databaseLayout));
 
         var lifeSupport = new LifeSupport();
 

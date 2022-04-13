@@ -226,7 +226,9 @@ public interface Neo4jProxyApi {
 
     Path metadataStore(DatabaseLayout databaseLayout);
 
-    Path homeDirectory(DatabaseLayout databaseLayout);
+    Path databaseDirectory(DatabaseLayout databaseLayout);
+
+    Path transactionLogsDirectory(DatabaseLayout databaseLayout);
 
     BatchImporter instantiateBatchImporter(
         BatchImporterFactory factory,

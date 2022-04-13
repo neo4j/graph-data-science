@@ -340,8 +340,12 @@ public final class Neo4jProxy {
         return IMPL.metadataStore(databaseLayout);
     }
 
-    public static Path homeDirectory(DatabaseLayout databaseLayout) {
-        return IMPL.homeDirectory(databaseLayout);
+    public static Path databaseDirectory(DatabaseLayout databaseLayout) {
+        return IMPL.databaseDirectory(databaseLayout);
+    }
+
+    public static Path transactionLogsDirectory(DatabaseLayout databaseLayout) {
+        return IMPL.transactionLogsDirectory(databaseLayout);
     }
 
     public static BatchImporter instantiateBatchImporter(
