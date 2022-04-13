@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.similarity.knn.KnnSampler;
 
 import java.util.Map;
 import java.util.Optional;
@@ -70,9 +71,10 @@ class LinkPredictionPredictPipelineBaseConfigTest {
                     "topK", 10,
                     "deltaThreshold", 0.9,
                     "randomJoins", 10,
-                    "maxIterations", 102
+                    "maxIterations", 102,
+                    "initialSampler", "randomWalk"
                 ),
-                "Configuration parameters ['deltaThreshold', 'maxIterations', 'randomJoins', 'topK'] " +
+                "Configuration parameters ['deltaThreshold', 'initialSampler', 'maxIterations', 'randomJoins', 'topK'] " +
                 "may only be set if parameter 'sampleRate' is less than 1."
             )
         );
@@ -126,19 +128,21 @@ class LinkPredictionPredictPipelineBaseConfigTest {
                     "modelName", "testModel",
                     "sampleRate", 0.4,
                     "maxIterations", 42,
+                    "initialSampler", "randomWalk",
                     "concurrency", 1,
                     "randomSeed", 42L,
                     "graphName", "g"
                 )
             )
         ).approximateConfig();
+
         assertThat(approximateConfig.maxIterations()).isEqualTo(42);
         assertThat(approximateConfig.sampleRate()).isEqualTo(0.4);
         assertThat(approximateConfig.topK()).isEqualTo(10);
+        assertThat(approximateConfig.initialSampler()).isEqualTo(KnnSampler.SamplerType.RANDOMWALK);
         assertThat(approximateConfig.concurrency()).isEqualTo(1);
         assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);
         assertThat(approximateConfig.randomSeed()).isEqualTo(Optional.of(42L));
-
     }
 
     @Test

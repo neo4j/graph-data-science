@@ -28,6 +28,7 @@ import org.neo4j.gds.model.ModelConfig;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collections;
@@ -74,6 +75,13 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
     @Configuration.IntegerRange(min = 0)
     Optional<Integer> randomJoins();
 
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
+    default KnnSampler.SamplerType initialSampler() {
+        return KnnSampler.SamplerType.UNIFORM;
+    }
+
     @Value.Check
     default void validateParameterCombinations() {
         if (isApproximateStrategy()) {
@@ -87,7 +95,8 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
                 "topK",topK().isPresent(),
                 "deltaThreshold", deltaThreshold().isPresent(),
                 "maxIterations", maxIterations().isPresent(),
-                "randomJoins", randomJoins().isPresent());
+                "randomJoins", randomJoins().isPresent(),
+                "initialSampler", randomJoins().isPresent());
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
 
             topN().orElseThrow(()-> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
@@ -123,6 +132,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
             .minBatchSize(LinkPrediction.MIN_NODE_BATCH_SIZE)
+            .initialSampler(initialSampler())
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);
@@ -130,7 +140,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
         maxIterations().ifPresent(knnBuilder::maxIterations);
         randomJoins().ifPresent(knnBuilder::randomJoins);
         randomSeed().ifPresent(knnBuilder::randomSeed);
-
 
         return knnBuilder.build();
     }

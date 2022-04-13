@@ -96,4 +96,35 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             )
         );
     }
+
+    @Test
+    void shouldPredictWithInitialSamplerSet() {
+        var nodeCount = 5L;
+        assertCypherResult("CALL gds.graph.list('g') YIELD nodeCount RETURN nodeCount",
+            List.of(Map.of("nodeCount", 2 * nodeCount))
+        );
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
+            " nodeLabels: [$nodeLabel]," +
+            " modelName: 'model'," +
+            " sampleRate: 0.5," +
+            " randomSeed: 42," +
+            " topK: $topK," +
+            " initialSampler: 'randomWalk'," +
+            " concurrency:" +
+            " $concurrency" +
+            "})" +
+            "YIELD node1, node2, probability" +
+            " RETURN node1, node2, probability" +
+            " ORDER BY probability DESC, node1",
+            Map.of("topK", 1, "concurrency", 1, "nodeLabel", "N"),
+            List.of(
+                Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
+                Map.of("node1", 4L, "node2", 0L, "probability", .49750002083312506),
+                Map.of("node1", 1L, "node2", 4L, "probability", .11815697780926959),
+                Map.of("node1", 3L, "node2", 0L, "probability", .002472623156634657),
+                Map.of("node1", 2L, "node2", 0L, "probability", 2.0547103309365156E-4)
+            )
+        );
+    }
 }
