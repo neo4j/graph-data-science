@@ -435,6 +435,7 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
+                .randomSeed(42L)
                 .concurrency(4)
                 .build(),
             progressTracker
@@ -443,14 +444,64 @@ class LinkPredictionTrainTest {
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .contains(
+            .containsExactlyInAnyOrder(
+                "Link prediction train :: Start",
+                "Link prediction train :: Extract train features :: Start",
+                "Link prediction train :: Extract train features 50%",
+                "Link prediction train :: Extract train features 63%",
+                "Link prediction train :: Extract train features 73%",
+                "Link prediction train :: Extract train features 80%",
+                "Link prediction train :: Extract train features 84%",
+                "Link prediction train :: Extract train features 89%",
+                "Link prediction train :: Extract train features 91%",
+                "Link prediction train :: Extract train features 93%",
+                "Link prediction train :: Extract train features 95%",
+                "Link prediction train :: Extract train features 97%",
+                "Link prediction train :: Extract train features 100%",
+                "Link prediction train :: Extract train features :: Finished",
+                "Link prediction train :: Select best model :: Start",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Start",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, methodName=RandomForest, maxDepth=2147483647, minSplitSize=2}",
+                "Link prediction train :: Select best model :: Trial 1 of 1 50%",
+                "Link prediction train :: Select best model :: Trial 1 of 1 100%",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Main validation metric: 0.3201",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Validation metrics: {AUCPR=0.32012987012987015}",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Training metrics: {AUCPR=0.31747835497835497}",
+                "Link prediction train :: Select best model :: Trial 1 of 1 :: Finished",
+                "Link prediction train :: Select best model :: Best trial was Trial 1 with main validation metric 0.3201",
+                "Link prediction train :: Select best model :: Finished",
                 "Link prediction train :: Train best model :: Start",
-                "Link prediction train :: Train best model :: Trained decision tree 1 out of 5",
                 "Link prediction train :: Train best model :: Trained decision tree 2 out of 5",
+                "Link prediction train :: Train best model :: Trained decision tree 1 out of 5",
                 "Link prediction train :: Train best model :: Trained decision tree 3 out of 5",
                 "Link prediction train :: Train best model :: Trained decision tree 4 out of 5",
                 "Link prediction train :: Train best model :: Trained decision tree 5 out of 5",
-                "Link prediction train :: Train best model :: Finished"
+                "Link prediction train :: Train best model 100%",
+                "Link prediction train :: Train best model :: Finished",
+                "Link prediction train :: Compute train metrics :: Start",
+                "Link prediction train :: Compute train metrics 100%",
+                "Link prediction train :: Compute train metrics :: Finished",
+                "Link prediction train :: Evaluate on test data :: Start",
+                "Link prediction train :: Evaluate on test data :: Extract test features :: Start",
+                "Link prediction train :: Evaluate on test data :: Extract test features 50%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 63%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 73%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 80%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 84%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 89%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 91%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 93%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 95%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 97%",
+                "Link prediction train :: Evaluate on test data :: Extract test features 100%",
+                "Link prediction train :: Evaluate on test data :: Extract test features :: Finished",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics :: Start",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics 100%",
+                "Link prediction train :: Evaluate on test data :: Compute test metrics :: Finished",
+                "Link prediction train :: Evaluate on test data :: Finished",
+                "Link prediction train :: Final model metrics on test set: {AUCPR=0.1824878020530195}",
+                "Link prediction train :: Final model metrics on full train set: {AUCPR=0.1824878020530195}",
+                "Link prediction train :: Finished"
             );
     }
 
@@ -562,7 +613,7 @@ class LinkPredictionTrainTest {
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
-            .contains(
+            .containsExactly(
                 "Link prediction train :: Start",
                 "Link prediction train :: Extract train features :: Start",
                 "Link prediction train :: Extract train features 50%",
@@ -579,30 +630,47 @@ class LinkPredictionTrainTest {
                 "Link prediction train :: Extract train features :: Finished",
                 "Link prediction train :: Select best model :: Start",
                 "Link prediction train :: Select best model :: Trial 1 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=5, tolerance=0.001, learningRate=0.001, penalty=0.001902318112}",
                 "Link prediction train :: Select best model :: Trial 1 of 4 50%",
                 "Link prediction train :: Select best model :: Trial 1 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Main validation metric: 0.7169",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Validation metrics: {AUCPR=0.716914682539}",
+                "Link prediction train :: Select best model :: Trial 1 of 4 :: Training metrics: {AUCPR=0.701170634920}",
                 "Link prediction train :: Select best model :: Trial 1 of 4 :: Finished",
                 "Link prediction train :: Select best model :: Trial 2 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=5, tolerance=0.001, learningRate=0.001, penalty=0.056692516115}",
                 "Link prediction train :: Select best model :: Trial 2 of 4 50%",
                 "Link prediction train :: Select best model :: Trial 2 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Main validation metric: 0.7169",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Validation metrics: {AUCPR=0.716914682539}",
+                "Link prediction train :: Select best model :: Trial 2 of 4 :: Training metrics: {AUCPR=0.701170634920}",
                 "Link prediction train :: Select best model :: Trial 2 of 4 :: Finished",
                 "Link prediction train :: Select best model :: Trial 3 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=5, tolerance=0.001, learningRate=0.001, penalty=882.723345073077}",
                 "Link prediction train :: Select best model :: Trial 3 of 4 50%",
                 "Link prediction train :: Select best model :: Trial 3 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Main validation metric: 0.6812",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Validation metrics: {AUCPR=0.681150793650}",
+                "Link prediction train :: Select best model :: Trial 3 of 4 :: Training metrics: {AUCPR=0.807697510822}",
                 "Link prediction train :: Select best model :: Trial 3 of 4 :: Finished",
                 "Link prediction train :: Select best model :: Trial 4 of 4 :: Start",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=5, tolerance=0.001, learningRate=0.001, penalty=254.129460046274}",
                 "Link prediction train :: Select best model :: Trial 4 of 4 50%",
                 "Link prediction train :: Select best model :: Trial 4 of 4 100%",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Main validation metric: 0.6912",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Validation metrics: {AUCPR=0.691150793650}",
+                "Link prediction train :: Select best model :: Trial 4 of 4 :: Training metrics: {AUCPR=0.800009018759}",
                 "Link prediction train :: Select best model :: Trial 4 of 4 :: Finished",
+                "Link prediction train :: Select best model :: Best trial was Trial 1 with main validation metric 0.7169",
                 "Link prediction train :: Select best model :: Finished",
                 "Link prediction train :: Train best model :: Start",
                 "Link prediction train :: Train best model :: Epoch 1 with loss 0.688097328918",
                 "Link prediction train :: Train best model :: Epoch 2 with loss 0.683213701008",
                 "Link prediction train :: Train best model :: Epoch 3 with loss 0.678498527915",
                 "Link prediction train :: Train best model :: Epoch 4 with loss 0.673953027899",
-                "Link prediction train :: Train best model 100%",
                 "Link prediction train :: Train best model :: Epoch 5 with loss 0.669577255253",
                 "Link prediction train :: Train best model :: terminated after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.669577255253. Did not converge",
+                "Link prediction train :: Train best model 100%",
                 "Link prediction train :: Train best model :: Finished",
                 "Link prediction train :: Compute train metrics :: Start",
                 "Link prediction train :: Compute train metrics 100%",
@@ -625,6 +693,8 @@ class LinkPredictionTrainTest {
                 "Link prediction train :: Evaluate on test data :: Compute test metrics 100%",
                 "Link prediction train :: Evaluate on test data :: Compute test metrics :: Finished",
                 "Link prediction train :: Evaluate on test data :: Finished",
+                "Link prediction train :: Final model metrics on test set: {AUCPR=0.780858933729}",
+                "Link prediction train :: Final model metrics on full train set: {AUCPR=0.780858933729}",
                 "Link prediction train :: Finished"
             );
     }

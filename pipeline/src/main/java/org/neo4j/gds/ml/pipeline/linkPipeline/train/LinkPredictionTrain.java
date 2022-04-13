@@ -64,6 +64,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
 
@@ -162,6 +163,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainingStatistics.metricsForWinningModel()
         );
 
+        var testMetrics = trainingStatistics.metricsForWinningModel().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().test()));
+        var outerTrainMetrics = trainingStatistics.metricsForWinningModel().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().outerTrain()));
+        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
+        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+
         return LinkPredictionTrainResult.of(model, trainingStatistics);
     }
 
@@ -196,9 +206,14 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             config.randomSeed()
         );
 
+        int currentTrial = 1;
+        int bestTrial = -1;
+        double bestTrialScore = -1e42;
+
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
+            progressTracker.logMessage(formatWithLocale("Parameters: %s", modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,
@@ -237,9 +252,26 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
+            var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
+            var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
+            double mainMetric = validationStats.get(config.metrics().get(0));
+            if (mainMetric > bestTrialScore) {
+                bestTrial = currentTrial;
+                bestTrialScore = mainMetric;
+            }
+
+            progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
+            progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
+            progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
 
             progressTracker.endSubTask();
+            currentTrial++;
         }
+        progressTracker.logMessage(formatWithLocale(
+            "Best trial was Trial %d with main validation metric %.4f",
+            bestTrial,
+            bestTrialScore
+        ));
     }
 
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {

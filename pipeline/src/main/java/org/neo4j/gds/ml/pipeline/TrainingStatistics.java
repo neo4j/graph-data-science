@@ -100,6 +100,24 @@ public final class TrainingStatistics {
             .orElseThrow();
     }
 
+    public Map<Metric, Double> findModelValidationAvg(TrainerConfig trainerConfig) {
+        return findModelAvg(trainerConfig, validationStats);
+    }
+
+    public Map<Metric, Double> findModelTrainAvg(TrainerConfig trainerConfig) {
+        return findModelAvg(trainerConfig, trainStats);
+    }
+
+    private Map<Metric, Double> findModelAvg(TrainerConfig trainerConfig, StatsMap statsMap) {
+        return metrics.stream()
+            .collect(Collectors.toMap(
+                metric -> metric,
+                metric -> statsMap.getMetricStats(metric).stream()
+                    .filter(stats -> stats.params() == trainerConfig).findFirst().orElseThrow()
+                    .avg()
+            ));
+    }
+
     public void addValidationStats(Metric metric, ModelStats stats) {
         validationStats.add(metric, stats);
     }
