@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 @ValueClass
-interface LinearRegressionData extends Regressor.RegressorData {
+public interface LinearRegressionData extends Regressor.RegressorData {
     Weights<Vector> weights();
 
     Weights<Scalar> bias();

@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -34,6 +36,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.models.linearregression.LinearRegressionData;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
@@ -46,6 +49,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigI
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
@@ -160,7 +164,55 @@ class NodeRegressionTrainTest {
     }
 
     @Test
-    void shouldLogProgressWithRange() {
+    void trainWithMultipleEvaluationMetrics() {
+        var candidate1 = RandomForestTrainerConfig.DEFAULT;
+        var candidate2 = LinearRegressionTrainConfig.DEFAULT;
+
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate1);
+        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate2);
+
+        List<RegressionMetrics> evaluationMetrics = List.of(
+            RegressionMetrics.MEAN_SQUARED_ERROR,
+            RegressionMetrics.MEAN_ABSOLUTE_ERROR,
+            RegressionMetrics.ROOT_MEAN_SQUARED_ERROR
+        );
+        NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
+            .username("DUMMY")
+            .pipeline("DUMMY")
+            .graphName("DUMMY")
+            .modelName("DUMMY")
+            .targetProperty("target")
+            .randomSeed(42L)
+            .metrics(evaluationMetrics)
+            .build();
+
+        NodeRegressionTrainResult result = NodeRegressionTrain.create(
+            graph,
+            pipeline,
+            trainConfig,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        ).compute();
+
+        var trainingStatistics = result.trainingStatistics();
+
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
+
+        for (RegressionMetrics metric : evaluationMetrics) {
+            assertThat(trainingStatistics.getTrainStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
+            assertThat(trainingStatistics.getValidationStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
+
+            var bestMetricData = trainingStatistics.metricsForWinningModel().get(metric);
+            assertThat(bestMetricData.outerTrain()).isPositive();
+            assertThat(bestMetricData.test()).isPositive();
+        }
+    }
+
+    @Test
+    void logProgressWithRange() {
         int MAX_TRIALS = 2;
         var pipeline = new NodeRegressionTrainingPipeline();
 
@@ -197,7 +249,40 @@ class NodeRegressionTrainTest {
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log"));
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 4})
+    void seededNodeClassification(int concurrency) {
+        var pipeline = new NodeRegressionTrainingPipeline();
 
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, LinearRegressionTrainConfig.DEFAULT);
 
-    // TODO more tests: autotuning, mixed candidate space, multiple evaluation metrics, seeded
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
+            .modelName("model")
+            .randomSeed(42L)
+            .targetProperty("target")
+            .metrics(List.of(RegressionMetrics.MEAN_ABSOLUTE_ERROR))
+            .concurrency(concurrency)
+            .build();
+
+        Supplier<NodeRegressionTrain> algoSupplier = () -> NodeRegressionTrain.create(
+            graph,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var firstResult = algoSupplier.get().compute();
+        var secondResult = algoSupplier.get().compute();
+
+        assertThat(((LinearRegressionData) firstResult.regressor().data()).weights().data())
+            .matches(matrix -> matrix.equals(
+                ((LinearRegressionData) secondResult.regressor().data()).weights().data(),
+                1e-10
+            ));
+    }
 }
