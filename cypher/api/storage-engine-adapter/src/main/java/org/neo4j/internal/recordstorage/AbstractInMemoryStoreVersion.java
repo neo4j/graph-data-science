@@ -25,7 +25,7 @@ import org.neo4j.storageengine.api.format.CapabilityType;
 
 public abstract class AbstractInMemoryStoreVersion implements StoreVersion {
 
-    static final String STORE_VERSION = "gds-experimental";
+    public static final String STORE_VERSION = "gds-experimental";
 
     @Override
     public String storeVersion() {
