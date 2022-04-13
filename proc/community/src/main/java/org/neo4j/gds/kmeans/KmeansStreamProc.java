@@ -40,11 +40,11 @@ public class KmeansStreamProc extends AlgoBaseProc<
     KmeansStreamProc.StreamResult
     > {
 
-    static final String Kmeans_DESCRIPTION =
+    static final String KMEANS_DESCRIPTION =
         "The Kmeans  algorithm clusters nodes into different communities based on Euclidean distance";
 
     @Procedure(value = "gds.alpha.kmeans.stream", mode = READ)
-    @Description(Kmeans_DESCRIPTION)
+    @Description(KMEANS_DESCRIPTION)
     public Stream<KmeansStreamProc.StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -29,9 +29,9 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.kmeans.KmeansStreamProc.Kmeans_DESCRIPTION;
+import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.kmeans.stream", description = Kmeans_DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.alpha.kmeans.stream", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamProc.StreamResult>, KmeansAlgorithmFactory<KmeansStreamConfig>> {
     @Override
     public String name() {
