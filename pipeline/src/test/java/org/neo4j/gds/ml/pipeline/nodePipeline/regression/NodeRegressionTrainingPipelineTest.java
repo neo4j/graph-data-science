@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 
@@ -57,13 +57,13 @@ class NodeRegressionTrainingPipelineTest {
     @Test
     void canSelectFeature() {
         var pipeline = new NodeRegressionTrainingPipeline();
-        var fooStep = new NodeClassificationFeatureStep("foo");
+        var fooStep = new NodeFeatureStep("foo");
         pipeline.addFeatureStep(fooStep);
 
         assertThat(pipeline)
             .returns(List.of(fooStep), NodeRegressionTrainingPipeline::featureSteps);
 
-        var barStep = new NodeClassificationFeatureStep("bar");
+        var barStep = new NodeFeatureStep("bar");
         pipeline.addFeatureStep(barStep);
 
         assertThat(pipeline)
@@ -183,7 +183,7 @@ class NodeRegressionTrainingPipelineTest {
             );
             pipeline.addNodePropertyStep(nodePropertyStep);
 
-            var fooStep = new NodeClassificationFeatureStep("foo");
+            var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
             pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(

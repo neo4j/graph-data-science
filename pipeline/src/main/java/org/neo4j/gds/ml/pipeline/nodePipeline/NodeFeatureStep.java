@@ -27,15 +27,15 @@ import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 import java.util.List;
 import java.util.Map;
 
-public class NodeClassificationFeatureStep implements ToMapConvertible, FeatureStep {
+public class NodeFeatureStep implements ToMapConvertible, FeatureStep {
 
     private final String nodeProperty;
 
-    public static NodeClassificationFeatureStep of(String nodeProperty) {
-        return new NodeClassificationFeatureStep(nodeProperty);
+    public static NodeFeatureStep of(String nodeProperty) {
+        return new NodeFeatureStep(nodeProperty);
     }
 
-    public NodeClassificationFeatureStep(String nodeProperty) {
+    public NodeFeatureStep(String nodeProperty) {
         this.nodeProperty = nodeProperty;
     }
 

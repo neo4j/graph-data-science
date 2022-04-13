@@ -50,7 +50,7 @@ import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFacto
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.ImmutableNodeClassificationPipelineTrainConfig;
@@ -121,9 +121,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             "pageRank",
             Map.of("mutateProperty", "pr")
         ));
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("pr"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
@@ -178,8 +178,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void shouldLogProgress() {
         var pipeline = insertPipelineIntoCatalog();
 
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("array"));
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
 
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");

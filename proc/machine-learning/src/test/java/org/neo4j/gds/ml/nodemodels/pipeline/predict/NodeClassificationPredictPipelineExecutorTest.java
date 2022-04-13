@@ -53,7 +53,7 @@ import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
@@ -135,9 +135,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var pipeline = NodeClassificationPredictPipeline.from(
                 Stream.of(),
                 Stream.of(
-                    NodeClassificationFeatureStep.of("a"),
-                    NodeClassificationFeatureStep.of("b"),
-                    NodeClassificationFeatureStep.of("c")
+                    NodeFeatureStep.of("a"),
+                    NodeFeatureStep.of("b"),
+                    NodeFeatureStep.of("c")
                 )
             );
 
@@ -186,9 +186,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var pipeline = NodeClassificationPredictPipeline.from(
                 Stream.of(),
                 Stream.of(
-                    NodeClassificationFeatureStep.of("a"),
-                    NodeClassificationFeatureStep.of("b"),
-                    NodeClassificationFeatureStep.of("c")
+                    NodeFeatureStep.of("a"),
+                    NodeFeatureStep.of("b"),
+                    NodeFeatureStep.of("c")
                 )
             );
 
@@ -241,10 +241,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     Map.of("mutateProperty", "degree")
                 )),
                 Stream.of(
-                    NodeClassificationFeatureStep.of("a"),
-                    NodeClassificationFeatureStep.of("b"),
-                    NodeClassificationFeatureStep.of("c"),
-                    NodeClassificationFeatureStep.of("degree")
+                    NodeFeatureStep.of("a"),
+                    NodeFeatureStep.of("b"),
+                    NodeFeatureStep.of("c"),
+                    NodeFeatureStep.of("degree")
                 )
             );
 
@@ -295,10 +295,10 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     Map.of("mutateProperty", "degree")
                 )),
                 Stream.of(
-                    NodeClassificationFeatureStep.of("a"),
-                    NodeClassificationFeatureStep.of("b"),
-                    NodeClassificationFeatureStep.of("c"),
-                    NodeClassificationFeatureStep.of("degree")
+                    NodeFeatureStep.of("a"),
+                    NodeFeatureStep.of("b"),
+                    NodeFeatureStep.of("c"),
+                    NodeFeatureStep.of("degree")
                 )
             );
 

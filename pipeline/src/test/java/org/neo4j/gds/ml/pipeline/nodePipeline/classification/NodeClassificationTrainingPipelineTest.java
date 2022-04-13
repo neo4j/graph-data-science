@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 
@@ -56,13 +56,13 @@ class NodeClassificationTrainingPipelineTest {
     @Test
     void canSelectFeature() {
         var pipeline = new NodeClassificationTrainingPipeline();
-        var fooStep = new NodeClassificationFeatureStep("foo");
+        var fooStep = new NodeFeatureStep("foo");
         pipeline.addFeatureStep(fooStep);
 
         assertThat(pipeline)
             .returns(List.of(fooStep), NodeClassificationTrainingPipeline::featureSteps);
 
-        var barStep = new NodeClassificationFeatureStep("bar");
+        var barStep = new NodeFeatureStep("bar");
         pipeline.addFeatureStep(barStep);
 
         assertThat(pipeline)
@@ -182,7 +182,7 @@ class NodeClassificationTrainingPipelineTest {
             );
             pipeline.addNodePropertyStep(nodePropertyStep);
 
-            var fooStep = new NodeClassificationFeatureStep("foo");
+            var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
             pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
@@ -230,7 +230,7 @@ class NodeClassificationTrainingPipelineTest {
         @Test
         void deepCopiesFeatureSteps() {
             var pipeline = new NodeClassificationTrainingPipeline();
-            var fooStep = new NodeClassificationFeatureStep("foo");
+            var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
             var copy = pipeline.copy();
@@ -240,7 +240,7 @@ class NodeClassificationTrainingPipelineTest {
                     .isNotSameAs(pipeline.featureSteps())
                     .containsExactly(fooStep));
 
-            var barStep = new NodeClassificationFeatureStep("bar");
+            var barStep = new NodeFeatureStep("bar");
             pipeline.addFeatureStep(barStep);
 
             assertThat(copy.featureSteps()).doesNotContain(barStep);

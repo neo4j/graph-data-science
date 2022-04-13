@@ -42,7 +42,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -98,8 +98,8 @@ class NodeClassificationTrainTest {
 
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("a"));
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("b"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("a"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("b"));
 
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
@@ -174,7 +174,7 @@ class NodeClassificationTrainTest {
         var bananasPipeline = new NodeClassificationTrainingPipeline();
         bananasPipeline.setSplitConfig(SPLIT_CONFIG);
 
-        bananasPipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+        bananasPipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
 
         var modelCandidates = List.of(
             Map.<String, Object>of("penalty", 0.0625, "maxEpochs", 1000),
@@ -204,7 +204,7 @@ class NodeClassificationTrainTest {
         var arrayPipeline = new NodeClassificationTrainingPipeline();
         arrayPipeline.setSplitConfig(SPLIT_CONFIG);
 
-        arrayPipeline.addFeatureStep(NodeClassificationFeatureStep.of("arrayProperty"));
+        arrayPipeline.addFeatureStep(NodeFeatureStep.of("arrayProperty"));
 
         modelCandidates
             .stream()
@@ -257,7 +257,7 @@ class NodeClassificationTrainTest {
     void shouldLogProgress(ClassificationMetricSpecification metricSpecification) {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
 
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
@@ -387,7 +387,7 @@ class NodeClassificationTrainTest {
         int MAX_TRIALS = 2;
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
 
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
@@ -513,7 +513,7 @@ class NodeClassificationTrainTest {
         var pipeline = new NodeClassificationTrainingPipeline();
 
         pipeline.setSplitConfig(SPLIT_CONFIG);
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("bananas"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
         pipeline.addTrainerConfig(
             TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1))

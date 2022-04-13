@@ -29,21 +29,15 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
-import org.neo4j.gds.ml.pipeline.FeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,7 +70,7 @@ class NodeRegressionTrainTest {
 
         var pipeline = new NodeRegressionTrainingPipeline();
 
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
 
         pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate1);
         pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate2);
@@ -120,7 +114,7 @@ class NodeRegressionTrainTest {
 
         var pipeline = new NodeRegressionTrainingPipeline();
 
-        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate1);
         pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate2);
 

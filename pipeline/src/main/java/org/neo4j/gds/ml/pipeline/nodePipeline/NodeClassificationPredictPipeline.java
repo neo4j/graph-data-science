@@ -31,22 +31,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class NodeClassificationPredictPipeline implements Pipeline<NodeClassificationFeatureStep> {
+public final class NodeClassificationPredictPipeline implements Pipeline<NodeFeatureStep> {
     public static final NodeClassificationPredictPipeline EMPTY = new NodeClassificationPredictPipeline(List.of(), List.of());
 
     private final List<ExecutableNodePropertyStep> nodePropertySteps;
-    private final List<NodeClassificationFeatureStep> featureSteps;
+    private final List<NodeFeatureStep> featureSteps;
 
 
     private NodeClassificationPredictPipeline(
         List<ExecutableNodePropertyStep> nodePropertySteps,
-        List<NodeClassificationFeatureStep> featureSteps
+        List<NodeFeatureStep> featureSteps
     ) {
         this.nodePropertySteps = nodePropertySteps;
         this.featureSteps = featureSteps;
     }
 
-    public static NodeClassificationPredictPipeline from(Pipeline<NodeClassificationFeatureStep> pipeline) {
+    public static NodeClassificationPredictPipeline from(Pipeline<NodeFeatureStep> pipeline) {
         return new NodeClassificationPredictPipeline(
             List.copyOf(pipeline.nodePropertySteps()),
             List.copyOf(pipeline.featureSteps())
@@ -55,7 +55,7 @@ public final class NodeClassificationPredictPipeline implements Pipeline<NodeCla
 
     public static NodeClassificationPredictPipeline from(
         Stream<NodePropertyStep> nodePropertySteps,
-        Stream<NodeClassificationFeatureStep> featureSteps
+        Stream<NodeFeatureStep> featureSteps
     ) {
         return new NodeClassificationPredictPipeline(
             nodePropertySteps.collect(Collectors.toList()),
@@ -77,7 +77,7 @@ public final class NodeClassificationPredictPipeline implements Pipeline<NodeCla
     }
 
     @Override
-    public List<NodeClassificationFeatureStep> featureSteps() {
+    public List<NodeFeatureStep> featureSteps() {
         return featureSteps;
     }
 

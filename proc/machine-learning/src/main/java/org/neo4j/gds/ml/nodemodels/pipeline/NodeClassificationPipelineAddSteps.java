@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
@@ -53,7 +53,7 @@ public final class NodeClassificationPipelineAddSteps {
         var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
 
         if (nodeProperties instanceof String) {
-            pipeline.addFeatureStep(NodeClassificationFeatureStep.of((String) nodeProperties));
+            pipeline.addFeatureStep(NodeFeatureStep.of((String) nodeProperties));
         } else if (nodeProperties instanceof List) {
             var propertiesList = (List) nodeProperties;
             for (Object o : propertiesList) {
@@ -61,7 +61,7 @@ public final class NodeClassificationPipelineAddSteps {
                     throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
                 }
 
-                pipeline.addFeatureStep(NodeClassificationFeatureStep.of((String) o));
+                pipeline.addFeatureStep(NodeFeatureStep.of((String) o));
             }
         } else {
             throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");

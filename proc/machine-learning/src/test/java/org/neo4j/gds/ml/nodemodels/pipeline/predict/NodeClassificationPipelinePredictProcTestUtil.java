@@ -35,7 +35,7 @@ import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionDat
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
@@ -81,7 +81,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 Map.of("mutateProperty", "degree")
             )),
             Stream.concat(nodeFeatures.stream(), Stream.of("degree"))
-                .map(NodeClassificationFeatureStep::of)
+                .map(NodeFeatureStep::of)
         );
 
         var weights = Matrix.create(0.0, 2, dimensionOfNodeFeatures + 1);
