@@ -102,7 +102,6 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("b"));
 
         pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
         );
         LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
@@ -111,7 +110,7 @@ class NodeClassificationTrainTest {
             .maxEpochs(10000)
             .tolerance(1e-5)
             .build();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, expectedWinner);
+        pipeline.addTrainerConfig(expectedWinner);
 
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.setTrainingParameterSpace(
@@ -189,7 +188,7 @@ class NodeClassificationTrainTest {
         modelCandidates
             .stream()
             .map(LogisticRegressionTrainConfig::of)
-            .forEach(candidate -> bananasPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
+            .forEach(candidate -> bananasPipeline.addTrainerConfig(candidate));
 
         var bananasConfig = createConfig("bananasModel", metricSpecification, 1337L);
 
@@ -209,7 +208,7 @@ class NodeClassificationTrainTest {
         modelCandidates
             .stream()
             .map(LogisticRegressionTrainConfig::of)
-            .forEach(candidate -> arrayPipeline.addTrainerConfig(TrainingMethod.LogisticRegression, candidate));
+            .forEach(candidate -> arrayPipeline.addTrainerConfig(candidate));
 
 
         var arrayPropertyConfig = createConfig(
@@ -260,11 +259,9 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
 
         pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
         );
         pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
         );
 
@@ -515,7 +512,6 @@ class NodeClassificationTrainTest {
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
         pipeline.addTrainerConfig(
-            TrainingMethod.LogisticRegression,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.0625, "maxEpochs", 100, "batchSize", 1))
         );
 
