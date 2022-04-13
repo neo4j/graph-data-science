@@ -60,7 +60,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
-import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -293,7 +293,7 @@ public final class NodeClassificationTrain {
             ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
             targets::get,
             config.randomSeed(),
-            Set.copyOf(classCounts.keys())
+            new TreeSet<>(classCounts.keys())
         ).splits();
 
         warnForSmallNodeSets(

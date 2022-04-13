@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.function.ToLongFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -50,7 +50,7 @@ public class StratifiedKFoldSplitter {
     private final ReadOnlyHugeLongArray ids;
     private final LongToLongFunction targets;
     private final RandomDataGenerator random;
-    private final Set<Long> distinctTargets;
+    private final SortedSet<Long> distinctTargets;
 
     public static MemoryEstimation memoryEstimationForNodeSet(int k, double trainFraction) {
         return memoryEstimation(k, dim -> (long) (dim.nodeCount() * trainFraction));
@@ -79,7 +79,7 @@ public class StratifiedKFoldSplitter {
         );
     }
 
-    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, LongToLongFunction targets, Optional<Long> randomSeed, Set<Long> distinctTargets) {
+    public StratifiedKFoldSplitter(int k, ReadOnlyHugeLongArray ids, LongToLongFunction targets, Optional<Long> randomSeed, SortedSet<Long> distinctTargets) {
         this.k = k;
         this.ids = ids;
         this.targets = targets;

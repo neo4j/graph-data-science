@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Random;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -74,7 +75,7 @@ class StratifiedKFoldSplitterTest {
             ReadOnlyHugeLongArray.of(nodeIds),
             targets::get,
             Optional.of(42L),
-            Arrays.stream(distinctTargets).boxed().collect(Collectors.toSet())
+            new TreeSet<>(Arrays.stream(distinctTargets).boxed().collect(Collectors.toList()))
         );
         var splits = kFoldSplitter.splits();
         assertThat(splits.size()).isEqualTo(k);

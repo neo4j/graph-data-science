@@ -58,7 +58,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -76,10 +76,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private final LocalIdMap classIdMap;
 
     public static LocalIdMap makeClassIdMap() {
-        var idMap = new LocalIdMap();
-        idMap.toMapped((long) EdgeSplitter.NEGATIVE);
-        idMap.toMapped((long) EdgeSplitter.POSITIVE);
-        return idMap;
+        return LocalIdMap.of((long) EdgeSplitter.NEGATIVE, (long) EdgeSplitter.POSITIVE);
     }
 
     public LinkPredictionTrain(
@@ -285,7 +282,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainRelationshipIds,
             actualLabels::get,
             config.randomSeed(),
-            Set.copyOf(classIdMap.originalIdsList())
+            new TreeSet<>(classIdMap.originalIdsList())
         );
         return splitter.splits();
     }
