@@ -289,7 +289,8 @@ public class CSRGraphStore implements GraphStore {
 
             this.schema = GraphSchema.of(
                 schemaBuilder.build(),
-                schema().relationshipSchema()
+                schema().relationshipSchema(),
+                schema.graphProperties()
             );
         });
     }
@@ -309,7 +310,8 @@ public class CSRGraphStore implements GraphStore {
 
             this.schema = GraphSchema.of(
                 nodeSchemaBuilder.build(),
-                schema().relationshipSchema()
+                schema().relationshipSchema(),
+                schema.graphProperties()
             );
         });
     }
@@ -438,7 +440,8 @@ public class CSRGraphStore implements GraphStore {
 
                 this.schema = GraphSchema.of(
                     schema().nodeSchema(),
-                    relationshipSchemaBuilder.build()
+                    relationshipSchemaBuilder.build(),
+                    schema.graphProperties()
                 );
             }
         });
@@ -473,7 +476,8 @@ public class CSRGraphStore implements GraphStore {
 
                 this.schema = GraphSchema.of(
                     schema().nodeSchema(),
-                    relationshipSchema
+                    relationshipSchema,
+                    schema.graphProperties()
                 );
             })
         );
@@ -689,7 +693,8 @@ public class CSRGraphStore implements GraphStore {
             schema().nodeSchema(),
             schema()
                 .relationshipSchema()
-                .singleTypeAndProperty(relationshipType, maybeRelationshipProperty)
+                .singleTypeAndProperty(relationshipType, maybeRelationshipProperty),
+            schema.graphProperties()
         );
 
         var topology = relationships.get(relationshipType);

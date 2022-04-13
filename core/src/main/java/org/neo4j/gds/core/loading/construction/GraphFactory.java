@@ -317,7 +317,7 @@ public final class GraphFactory {
         }
         return HugeGraph.create(
             idMap,
-            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build()),
+            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build(), Map.of()),
             nodeProperties,
             relationships.topology(),
             relationships.properties()

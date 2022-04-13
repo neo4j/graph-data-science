@@ -198,7 +198,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
-            relationshipSchemaBuilder.build()
+            relationshipSchemaBuilder.build(),
+            Map.of()
         );
     }
 

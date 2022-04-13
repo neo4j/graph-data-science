@@ -75,7 +75,7 @@ public final class CSRGraphStoreUtil {
         RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
         relationshipProperty.ifPresent(property -> relationshipSchemaBuilder.addProperty(relationshipType, property, ValueType.DOUBLE));
 
-        var schema = GraphSchema.of(graph.schema().nodeSchema(), relationshipSchemaBuilder.build());
+        var schema = GraphSchema.of(graph.schema().nodeSchema(), relationshipSchemaBuilder.build(), Map.of());
 
         return new CSRGraphStore(
             databaseId,
@@ -250,7 +250,8 @@ public final class CSRGraphStoreUtil {
 
         return GraphSchema.of(
             nodeSchemaBuilder.build(),
-            relationshipSchemaBuilder.build()
+            relationshipSchemaBuilder.build(),
+            Map.of()
         );
     }
 
