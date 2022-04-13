@@ -106,17 +106,19 @@ class NodeClassificationTrainingPipelineTest {
     }
 
     @Test
-    void overridesTheParameterSpace() {
+    void addMultipleCandidates() {
         var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
         var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config1));
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config2, config3));
+        pipeline.addTrainerConfig(config1);
+        pipeline.addTrainerConfig(config2);
+        pipeline.addTrainerConfig(config3);
 
         var parameterSpace = pipeline.trainingParameterSpace();
         assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+            config1.toTunableConfig(),
             config2.toTunableConfig(),
             config3.toTunableConfig()
         );
