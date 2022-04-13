@@ -28,6 +28,8 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class RegressionTrainerFactory {
 
     private RegressionTrainerFactory() {}
@@ -57,7 +59,7 @@ public final class RegressionTrainerFactory {
                 );
             }
             default:
-                throw new IllegalStateException("No such training method.");
+                throw new IllegalStateException(formatWithLocale("Method %s is not a regression method", config.methodName()));
         }
     }
 }
