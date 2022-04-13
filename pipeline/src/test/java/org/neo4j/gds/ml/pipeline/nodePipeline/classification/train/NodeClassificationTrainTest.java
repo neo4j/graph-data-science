@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.assertj.core.data.Percentage;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,6 +30,8 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -252,9 +255,8 @@ class NodeClassificationTrainTest {
             .isNotEqualTo(bananasValidationScore);
     }
 
-    @ParameterizedTest
-    @MethodSource("metricArguments")
-    void shouldLogProgress(ClassificationMetricSpecification metricSpecification) {
+    @Test
+    void shouldLogProgress() {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeFeatureStep.of("bananas"));
@@ -268,122 +270,77 @@ class NodeClassificationTrainTest {
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
         );
 
-        var config = createConfig("bananasModel", metricSpecification, 42L);
+        var metrics = ClassificationMetricSpecification.parse("F1(class=1)");
+        var config = createConfig("bananasModel", metrics, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(
+        var progressTask = progressTask(
             pipeline.splitConfig().validationFolds(),
             pipeline.numberOfModelSelectionTrials()
         );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+
+        progressTracker.beginSubTask();
         NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
+        progressTracker.endSubTask();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
             .containsExactly(
-                "NCTrain :: Start",
-                "NCTrain :: ShuffleAndSplit :: Start",
-                "NCTrain :: ShuffleAndSplit :: Train set size is 10",
-                "NCTrain :: ShuffleAndSplit :: Test set size is 5",
-                "NCTrain :: ShuffleAndSplit 100%",
-                "NCTrain :: ShuffleAndSplit :: Finished",
-                "NCTrain :: SelectBestModel :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639074159",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215665620",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556577259895",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530247740563",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512608592120",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502939511082",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500436536496",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503167809769",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503167809769.",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039074072",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012155738",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675865964351",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675865964351.",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639115826",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215832287",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556577634895",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530248407229",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512609633786",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502941011082",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500438555777",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503170225499",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503170225499.",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039115739",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012322394",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675866228402",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675866228402.",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Finished",
-                "NCTrain :: TrainSelectedOnRemainder :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 with loss 0.657839074117",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 with loss 0.632615629710",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 with loss 0.617174301953",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 with loss 0.611031387815",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 with loss 0.612866775693",
-                "NCTrain :: TrainSelectedOnRemainder :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612866775693.",
-                "NCTrain :: TrainSelectedOnRemainder 100%",
-                "NCTrain :: TrainSelectedOnRemainder :: Finished",
-                "NCTrain :: EvaluateSelectedModel :: Start",
-                "NCTrain :: EvaluateSelectedModel 33%",
-                "NCTrain :: EvaluateSelectedModel 100%",
-                "NCTrain :: EvaluateSelectedModel :: Finished",
-                "NCTrain :: RetrainSelectedModel :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 1 with loss 0.664572407436",
-                "NCTrain :: RetrainSelectedModel :: Epoch 2 with loss 0.646082052793",
-                "NCTrain :: RetrainSelectedModel :: Epoch 3 with loss 0.637370639999",
-                "NCTrain :: RetrainSelectedModel :: Epoch 4 with loss 0.637608261583",
-                "NCTrain :: RetrainSelectedModel :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637608261583.",
-                "NCTrain :: RetrainSelectedModel 100%",
-                "NCTrain :: RetrainSelectedModel :: Finished",
-                "NCTrain :: Finished"
+                "MY DUMMY TASK :: Start",
+                "MY DUMMY TASK :: Shuffle and split :: Start",
+                "MY DUMMY TASK :: Shuffle and split :: Train set size is 10",
+                "MY DUMMY TASK :: Shuffle and split :: Test set size is 5",
+                "MY DUMMY TASK :: Shuffle and split 100%",
+                "MY DUMMY TASK :: Shuffle and split :: Finished",
+                "MY DUMMY TASK :: Select best model :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.020833333333}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 50%",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 100%",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Main validation metric: 0.8194",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Validation metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.041666666666}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 50%",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 100%",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Main validation metric: 0.8194",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Validation metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Training metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished",
+                "MY DUMMY TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.8194",
+                "MY DUMMY TASK :: Select best model :: Finished",
+                "MY DUMMY TASK :: Train best model :: Start",
+                "MY DUMMY TASK :: Train best model :: Epoch 1 with loss 0.657839074117",
+                "MY DUMMY TASK :: Train best model :: Epoch 2 with loss 0.632615629710",
+                "MY DUMMY TASK :: Train best model :: Epoch 3 with loss 0.617174301953",
+                "MY DUMMY TASK :: Train best model :: Epoch 4 with loss 0.611031387815",
+                "MY DUMMY TASK :: Train best model :: Epoch 5 with loss 0.612866775693",
+                "MY DUMMY TASK :: Train best model :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612866775693.",
+                "MY DUMMY TASK :: Train best model 100%",
+                "MY DUMMY TASK :: Train best model :: Finished",
+                "MY DUMMY TASK :: Evaluate on test data :: Start",
+                "MY DUMMY TASK :: Evaluate on test data 100%",
+                "MY DUMMY TASK :: Evaluate on test data :: Finished",
+                "MY DUMMY TASK :: Retrain best model :: Start",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.664572407436",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.646082052793",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 3 with loss 0.637370639999",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 4 with loss 0.637608261583",
+                "MY DUMMY TASK :: Retrain best model :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637608261583.",
+                "MY DUMMY TASK :: Retrain best model 100%",
+                "MY DUMMY TASK :: Retrain best model :: Finished",
+                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.749999993437}",
+                "MY DUMMY TASK :: Final model metrics on full train set: {F1_class_1=0.823529405951}",
+                "MY DUMMY TASK :: Finished"
             );
     }
 
-    @ParameterizedTest
-    @MethodSource("metricArguments")
-    void shouldLogProgressWithRange(ClassificationMetricSpecification metricSpecification) {
+    @Test
+    void shouldLogProgressWithRange() {
         int MAX_TRIALS = 2;
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
@@ -397,113 +354,69 @@ class NodeClassificationTrainTest {
         );
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
-        var config = createConfig("bananasModel", metricSpecification, 42L);
+        var metrics = ClassificationMetricSpecification.parse("F1(class=1)");
+        var config = createConfig("bananasModel", metrics, 42L);
 
-        var progressTask = NodeClassificationTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTask = progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+
+        progressTracker.beginSubTask();
         NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
+        progressTracker.endSubTask();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals())
             .containsExactly(
-                "NCTrain :: Start",
-                "NCTrain :: ShuffleAndSplit :: Start",
-                "NCTrain :: ShuffleAndSplit :: Train set size is 10",
-                "NCTrain :: ShuffleAndSplit :: Test set size is 5",
-                "NCTrain :: ShuffleAndSplit 100%",
-                "NCTrain :: ShuffleAndSplit :: Finished",
-                "NCTrain :: SelectBestModel :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639036297",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215514172",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556576919136",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530247134770",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512607645569",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502938148049",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500434701592",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503165614594",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503165614594.",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039036210",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012004300",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675865724407",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675865724407.",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 1 with loss 0.637639145877",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 2 with loss 0.592215952493",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 3 with loss 0.556577905360",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 4 with loss 0.530248888057",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 5 with loss 0.512610385079",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 6 with loss 0.502942092943",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 7 with loss 0.500440012161",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Epoch 8 with loss 0.503171967802",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: converged after 8 epochs. Initial loss: 0.693147180559, Last loss: 0.503171967802.",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 1 with loss 0.678039145791",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 2 with loss 0.673012442592",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Epoch 3 with loss 0.675866418844",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: converged after 3 epochs. Initial loss: 0.693147180559, Last loss: 0.675866418844.",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Start",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 50%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 100%",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Model Candidate 2 of 2 :: Finished",
-                "NCTrain :: SelectBestModel :: Finished",
-                "NCTrain :: TrainSelectedOnRemainder :: Start",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 1 with loss 0.657839036255",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 2 with loss 0.632615478262",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 3 with loss 0.617173961195",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 4 with loss 0.611030782023",
-                "NCTrain :: TrainSelectedOnRemainder :: Epoch 5 with loss 0.612865911556",
-                "NCTrain :: TrainSelectedOnRemainder :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612865911556.",
-                "NCTrain :: TrainSelectedOnRemainder 100%",
-                "NCTrain :: TrainSelectedOnRemainder :: Finished",
-                "NCTrain :: EvaluateSelectedModel :: Start",
-                "NCTrain :: EvaluateSelectedModel 33%",
-                "NCTrain :: EvaluateSelectedModel 100%",
-                "NCTrain :: EvaluateSelectedModel :: Finished",
-                "NCTrain :: RetrainSelectedModel :: Start",
-                "NCTrain :: RetrainSelectedModel :: Epoch 1 with loss 0.664572369574",
-                "NCTrain :: RetrainSelectedModel :: Epoch 2 with loss 0.646081901344",
-                "NCTrain :: RetrainSelectedModel :: Epoch 3 with loss 0.637370299241",
-                "NCTrain :: RetrainSelectedModel :: Epoch 4 with loss 0.637607698441",
-                "NCTrain :: RetrainSelectedModel :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637607698441.",
-                "NCTrain :: RetrainSelectedModel 100%",
-                "NCTrain :: RetrainSelectedModel :: Finished",
-                "NCTrain :: Finished"
+                "MY DUMMY TASK :: Start",
+                "MY DUMMY TASK :: Shuffle and split :: Start",
+                "MY DUMMY TASK :: Shuffle and split :: Train set size is 10",
+                "MY DUMMY TASK :: Shuffle and split :: Test set size is 5",
+                "MY DUMMY TASK :: Shuffle and split 100%",
+                "MY DUMMY TASK :: Shuffle and split :: Finished",
+                "MY DUMMY TASK :: Select best model :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.001902318112}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 50%",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 100%",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Main validation metric: 0.8194",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Validation metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Start",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Parameters: {methodName=LogisticRegression, batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.056692516115}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 50%",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 100%",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Main validation metric: 0.8194",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Validation metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Training metrics: {F1_class_1=0.819444437706}",
+                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished",
+                "MY DUMMY TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.8194",
+                "MY DUMMY TASK :: Select best model :: Finished",
+                "MY DUMMY TASK :: Train best model :: Start",
+                "MY DUMMY TASK :: Train best model :: Epoch 1 with loss 0.657839036255",
+                "MY DUMMY TASK :: Train best model :: Epoch 2 with loss 0.632615478262",
+                "MY DUMMY TASK :: Train best model :: Epoch 3 with loss 0.617173961195",
+                "MY DUMMY TASK :: Train best model :: Epoch 4 with loss 0.611030782023",
+                "MY DUMMY TASK :: Train best model :: Epoch 5 with loss 0.612865911556",
+                "MY DUMMY TASK :: Train best model :: converged after 5 epochs. Initial loss: 0.693147180559, Last loss: 0.612865911556.",
+                "MY DUMMY TASK :: Train best model 100%",
+                "MY DUMMY TASK :: Train best model :: Finished",
+                "MY DUMMY TASK :: Evaluate on test data :: Start",
+                "MY DUMMY TASK :: Evaluate on test data 100%",
+                "MY DUMMY TASK :: Evaluate on test data :: Finished",
+                "MY DUMMY TASK :: Retrain best model :: Start",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.664572369574",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.646081901344",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 3 with loss 0.637370299241",
+                "MY DUMMY TASK :: Retrain best model :: Epoch 4 with loss 0.637607698441",
+                "MY DUMMY TASK :: Retrain best model :: converged after 4 epochs. Initial loss: 0.693147180559, Last loss: 0.637607698441.",
+                "MY DUMMY TASK :: Retrain best model 100%",
+                "MY DUMMY TASK :: Retrain best model :: Finished",
+                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.749999993437}",
+                "MY DUMMY TASK :: Final model metrics on full train set: {F1_class_1=0.823529405951}",
+                "MY DUMMY TASK :: Finished"
             );
     }
 
@@ -546,6 +459,13 @@ class NodeClassificationTrainTest {
                 ((LogisticRegressionData) secondResult.model().data()).weights().data(),
                 1e-10
             ));
+    }
+
+    private static Task progressTask(int validationFolds, int trials) {
+        return Tasks.task(
+            "MY DUMMY TASK",
+            NodeClassificationTrain.progressTasks(validationFolds, trials)
+        );
     }
 
     private NodeClassificationPipelineTrainConfig createConfig(

@@ -60,6 +60,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
@@ -69,6 +70,7 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain {
 
@@ -145,25 +147,17 @@ public final class NodeClassificationTrain {
         return builder.build();
     }
 
-    public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
-        return Tasks.task(
-            "NCTrain",
-            Tasks.leaf("ShuffleAndSplit"),
+    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
+        return List.of(
+            Tasks.leaf("Shuffle and split"),
             Tasks.iterativeFixed(
-                "SelectBestModel",
-                () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
-                        Tasks.task(
-                            "Split",
-                            ClassifierTrainer.progressTask("Training"),
-                            Tasks.leaf("Evaluate")
-                        )
-                    ), validationFolds)
-                ),
+                "Select best model",
+                () -> List.of(Tasks.leaf("Trial", validationFolds)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("TrainSelectedOnRemainder"),
-            Tasks.leaf("EvaluateSelectedModel"),
-            ClassifierTrainer.progressTask("RetrainSelectedModel")
+            ClassifierTrainer.progressTask("Train best model"),
+            Tasks.leaf("Evaluate on test data"),
+            ClassifierTrainer.progressTask("Retrain best model")
         );
     }
 
@@ -277,9 +271,7 @@ public final class NodeClassificationTrain {
     }
 
     public NodeClassificationTrainResult compute() {
-        progressTracker.beginSubTask("NCTrain");
-
-        progressTracker.beginSubTask("ShuffleAndSplit");
+        progressTracker.beginSubTask("Shuffle and split");
 
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
@@ -293,7 +285,7 @@ public final class NodeClassificationTrain {
             config.randomSeed()
         );
 
-        progressTracker.endSubTask("ShuffleAndSplit");
+        progressTracker.endSubTask("Shuffle and split");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
@@ -302,7 +294,14 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
-        progressTracker.endSubTask("NCTrain");
+        var testMetrics = trainingStatistics.metricsForWinningModel().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().test()));
+        var outerTrainMetrics = trainingStatistics.metricsForWinningModel().entrySet()
+            .stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().outerTrain()));
+        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
+        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         return ImmutableNodeClassificationTrainResult.of(
             createModel(retrainedModelData, trainingStatistics),
@@ -311,7 +310,7 @@ public final class NodeClassificationTrain {
     }
 
     private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask("SelectBestModel");
+        progressTracker.beginSubTask("Select best model");
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -319,38 +318,55 @@ public final class NodeClassificationTrain {
             config.randomSeed()
         );
 
+
+        int currentTrial = 1;
+        int bestTrial = -1;
+        double bestTrialScore = -1e42;
+
         while (hyperParameterOptimizer.hasNext()) {
+            progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.beginSubTask("Model Candidate");
+            progressTracker.logMessage(formatWithLocale("Parameters: %s", modelParams.toMap()));
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                progressTracker.beginSubTask("Split");
-
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
 
-                progressTracker.beginSubTask("Training");
-                var classifier = trainModel(trainSet, modelParams);
+                var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
 
-                progressTracker.endSubTask("Training");
-
-                progressTracker.beginSubTask("Evaluate",validationSet.size() + trainSet.size());
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
-                progressTracker.endSubTask("Evaluate");
-
-                progressTracker.endSubTask("Split");
+                progressTracker.logProgress();
             }
-            progressTracker.endSubTask("Model Candidate");
 
             metrics.forEach(metric -> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
+            var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
+            var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
+            double mainMetric = validationStats.get(metrics.get(0));
+            if (mainMetric > bestTrialScore) {
+                bestTrial = currentTrial;
+                bestTrialScore = mainMetric;
+            }
+
+            progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
+            progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
+            progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
+
+            currentTrial++;
+
+            progressTracker.endSubTask("Trial");
         }
-        progressTracker.endSubTask("SelectBestModel");
+        progressTracker.logMessage(formatWithLocale(
+            "Best trial was Trial %d with main validation metric %.4f",
+            bestTrial,
+            bestTrialScore
+        ));
+        progressTracker.endSubTask("Select best model");
     }
 
     private void registerMetricScores(
@@ -365,7 +381,6 @@ public final class NodeClassificationTrain {
             evaluationSet,
             classifier,
             config.concurrency(),
-            progressTracker,
             terminationFlag
         );
         metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
@@ -375,20 +390,20 @@ public final class NodeClassificationTrain {
         TrainingExamplesSplit outerSplit,
         TrainingStatistics trainingStatistics
     ) {
-        progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
-        progressTracker.endSubTask("TrainSelectedOnRemainder");
+        progressTracker.beginSubTask("Train best model");
+        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask("EvaluateSelectedModel", outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
-        progressTracker.endSubTask("EvaluateSelectedModel");
+        progressTracker.endSubTask("Evaluate on test data");
     }
 
     private Classifier retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
-        progressTracker.beginSubTask("RetrainSelectedModel");
-        var retrainedClassifier = trainModel(trainSet, bestParameters);
-        progressTracker.endSubTask("RetrainSelectedModel");
+        progressTracker.beginSubTask("Retrain best model");
+        var retrainedClassifier = trainModel(trainSet, bestParameters, progressTracker);
+        progressTracker.endSubTask("Retrain best model");
 
         return retrainedClassifier;
     }
@@ -418,13 +433,14 @@ public final class NodeClassificationTrain {
 
     private Classifier trainModel(
         HugeLongArray trainSet,
-        TrainerConfig trainerConfig
+        TrainerConfig trainerConfig,
+        ProgressTracker customProgressTracker
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
             terminationFlag,
-            progressTracker,
+            customProgressTracker,
             config.concurrency(),
             config.randomSeed(),
             false

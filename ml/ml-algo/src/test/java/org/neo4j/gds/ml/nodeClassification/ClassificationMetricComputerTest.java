@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -100,7 +99,6 @@ class ClassificationMetricComputerTest {
             HugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
-            ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
 

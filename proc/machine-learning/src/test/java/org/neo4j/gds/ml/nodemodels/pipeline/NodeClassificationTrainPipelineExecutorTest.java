@@ -222,17 +222,17 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(log.getMessages(TestLog.WARN))
                 .extracting(removingThreadId())
                 .containsExactly(
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
+                    "Node Classification Train Pipeline :: NCTrain :: Shuffle and split :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
                     "Proceeding with such a small set might lead to unreliable results.",
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
+                    "Node Classification Train Pipeline :: NCTrain :: Shuffle and split :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
                     "Proceeding with such small sets might lead to unreliable results."
                 );
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .contains(
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Train set size is 6",
-                    "Node Classification Train Pipeline :: NCTrain :: ShuffleAndSplit :: Test set size is 3"
+                    "Node Classification Train Pipeline :: NCTrain :: Shuffle and split :: Train set size is 6",
+                    "Node Classification Train Pipeline :: NCTrain :: Shuffle and split :: Test set size is 3"
                 );
         });
     }
