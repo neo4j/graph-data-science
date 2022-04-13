@@ -19,13 +19,44 @@
  */
 package org.neo4j.gds.compat._434;
 
-import org.neo4j.internal.recordstorage.AbstractInMemoryVersionCheck;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.StoreVersion;
+import org.neo4j.storageengine.api.StoreVersionCheck;
 
-public class InMemoryVersionCheck extends AbstractInMemoryVersionCheck {
+import java.util.Optional;
+
+import static org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion.STORE_VERSION;
+
+public class InMemoryVersionCheck implements StoreVersionCheck {
 
     @Override
     public StoreVersion versionInformation(String storeVersion) {
         return new InMemoryStoreVersion();
+    }
+
+    @Override
+    public Optional<String> storeVersion(CursorContext cursorContext) {
+        return Optional.of(STORE_VERSION);
+    }
+
+    @Override
+    public String configuredVersion() {
+        return STORE_VERSION;
+    }
+
+    @Override
+    public Result checkUpgrade(String desiredVersion, CursorContext cursorContext) {
+        return new StoreVersionCheck.Result(Outcome.ok, STORE_VERSION, null);
+    }
+
+    @Override
+    public String storeVersionToString(long storeVersion) {
+        return Neo4jProxy.versionLongToString(storeVersion);
+    }
+
+    @Override
+    public boolean isVersionConfigured() {
+        return true;
     }
 }
