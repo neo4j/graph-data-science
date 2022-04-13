@@ -36,6 +36,8 @@ import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.pipeline.FeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 
 import java.util.List;
@@ -72,11 +74,13 @@ class NodeRegressionTrainTest {
         LinearRegressionTrainConfig candidate1 = LinearRegressionTrainConfig.DEFAULT;
         LinearRegressionTrainConfig candidate2 = LinearRegressionTrainConfigImpl.builder().maxEpochs(5).build();
 
-        var modelCandidates = Map.of(
-            TrainingMethod.LinearRegression, Stream.of(candidate1, candidate2)
-                .map(config -> TunableTrainerConfig.of(config.toMap(), TrainingMethod.valueOf(config.methodName())))
-                .collect(Collectors.toList())
-        );
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+
+        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate1);
+        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate2);
+
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
             .username("DUMMY")
@@ -90,10 +94,7 @@ class NodeRegressionTrainTest {
 
         var nrTrain = NodeRegressionTrain.create(
             graph,
-            List.of("scalar"),
-            NodePropertyPredictionSplitConfig.DEFAULT_CONFIG,
-            modelCandidates,
-            2,
+            pipeline,
             trainConfig,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -117,11 +118,11 @@ class NodeRegressionTrainTest {
         var candidate1 = RandomForestTrainerConfig.DEFAULT;
         var candidate2 = RandomForestTrainerConfigImpl.builder().numberOfDecisionTrees(20).build();
 
-        var modelCandidates = Map.of(
-            TrainingMethod.RandomForest, Stream.of(candidate1, candidate2)
-                .map(config -> TunableTrainerConfig.of(config.toMap(), TrainingMethod.valueOf(config.methodName())))
-                .collect(Collectors.toList())
-        );
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        pipeline.addFeatureStep(NodeClassificationFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate1);
+        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate2);
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
             .username("DUMMY")
@@ -135,10 +136,7 @@ class NodeRegressionTrainTest {
 
         var nrTrain = NodeRegressionTrain.create(
             graph,
-            List.of("scalar"),
-            NodePropertyPredictionSplitConfig.DEFAULT_CONFIG,
-            modelCandidates,
-            2,
+            pipeline,
             trainConfig,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

@@ -37,7 +37,6 @@ import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -46,7 +45,6 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 
@@ -57,13 +55,10 @@ public final class NodeRegressionTrain {
 
     private final Features features;
     private final HugeDoubleArray targets;
-    private final NodePropertyPredictionSplitConfig splitConfig;
-    private final Map<TrainingMethod, List<TunableTrainerConfig>> modelCandidateSpace;
+    private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
-    private final int totalNumberOfTrials;
-
 
     public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
         return Tasks.task(
@@ -89,10 +84,7 @@ public final class NodeRegressionTrain {
 
     public static NodeRegressionTrain create(
         Graph graph,
-        List<String> featureProperties,
-        NodePropertyPredictionSplitConfig splitConfig,
-        Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace,
-        int totalNumberOfTrials,
+        NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -103,17 +95,15 @@ public final class NodeRegressionTrain {
         targets.setAll(targetNodeProperty::doubleValue);
 
         Features features;
-        if (parameterSpace.getOrDefault(TrainingMethod.RandomForest, List.of()).isEmpty()) {
-            features = FeaturesFactory.extractLazyFeatures(graph, featureProperties);
+        if (pipeline.trainingParameterSpace().getOrDefault(TrainingMethod.RandomForest, List.of()).isEmpty()) {
+            features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
         } else {
             // Random forest uses feature vectors many times each.
-            features = FeaturesFactory.extractEagerFeatures(graph, featureProperties);
+            features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
         }
 
         return new NodeRegressionTrain(
-            splitConfig,
-            parameterSpace,
-            totalNumberOfTrials,
+            pipeline,
             trainConfig,
             features,
             targets,
@@ -123,23 +113,19 @@ public final class NodeRegressionTrain {
     }
 
     NodeRegressionTrain(
-        NodePropertyPredictionSplitConfig splitConfig,
-        Map<TrainingMethod, List<TunableTrainerConfig>> modelCandidateSpace,
-        int totalNumberOfTrials,
+        NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
         Features features,
         HugeDoubleArray targets,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        this.splitConfig = splitConfig;
-        this.modelCandidateSpace = modelCandidateSpace;
+        this.pipeline = pipeline;
         this.trainConfig = trainConfig;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.features = features;
         this.targets = targets;
-        this.totalNumberOfTrials = totalNumberOfTrials;
     }
 
     public NodeRegressionTrainResult compute() {
@@ -150,6 +136,7 @@ public final class NodeRegressionTrain {
         allTrainingExamples.setAll(i -> i);
 
         ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(trainConfig.randomSeed()));
+        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
         var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
 
         List<TrainingExamplesSplit> innerSplits = new StratifiedKFoldSplitter(
@@ -185,8 +172,8 @@ public final class NodeRegressionTrain {
         progressTracker.beginSubTask("SelectBestModel");
 
         var hyperParameterOptimizer = new RandomSearch(
-            modelCandidateSpace,
-            totalNumberOfTrials,
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
             trainConfig.randomSeed()
         );
 
