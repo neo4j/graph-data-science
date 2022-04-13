@@ -96,7 +96,7 @@ class NodeRegressionTrainingPipelineTest {
     }
 
     @Test
-    void canSetParameterSpace() {
+    void addCandidates() {
         var lrConfig = LinearRegressionTrainConfig.of(Map.of("penalty", 19));
         var rfConfig = RandomForestTrainerConfig.of(Map.of("maxDepth", 19));
 
@@ -114,7 +114,7 @@ class NodeRegressionTrainingPipelineTest {
     }
 
     @Test
-    void overridesTheParameterSpace() {
+    void addMultipleCandidates() {
         var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
         var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
@@ -125,6 +125,7 @@ class NodeRegressionTrainingPipelineTest {
 
         var parameterSpace = pipeline.trainingParameterSpace();
         assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+            config1.toTunableConfig(),
             config2.toTunableConfig(),
             config3.toTunableConfig()
         );
