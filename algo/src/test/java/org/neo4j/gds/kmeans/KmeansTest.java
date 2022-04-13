@@ -20,28 +20,14 @@
 package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
-import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
-import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
-
-import java.util.SplittableRandom;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
 class KmeansTest {
@@ -72,8 +58,8 @@ class KmeansTest {
 
     @Test
     void shouldRun() {
-        var kmeansConfig = ImmutableKmeansBaseConfig.builder()
-            .nodeWeightProperty("kmeans")
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
             .k(2)
@@ -89,8 +75,8 @@ class KmeansTest {
 
     @Test
     void shouldWorkOnLineGraphWithOneIteration() {
-        var kmeansConfig = ImmutableKmeansBaseConfig.builder()
-            .nodeWeightProperty("kmeans")
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
             .k(2)
@@ -107,8 +93,8 @@ class KmeansTest {
 
     @Test
     void shouldChangeOnLineGraphWithTwoIterations() {
-        var kmeansConfig = ImmutableKmeansBaseConfig.builder()
-            .nodeWeightProperty("kmeans")
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L) //init clusters 0.21 and 3.8
             .k(2)
@@ -121,49 +107,5 @@ class KmeansTest {
 
         assertThat(result.get(1)).isEqualTo(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
         assertThat(result.get(0)).isNotEqualTo(result.get(1));
-    }
-
-    @Test
-    void shouldFailOnInvalidPropertyValueTypes() {
-        var longProperties = new LongTestPropertyValues(n -> n);
-        assertThatThrownBy(() -> new Kmeans(
-                ProgressTracker.NULL_TRACKER,
-                Pools.DEFAULT,
-                graph,
-                5,
-                4,
-                10,
-                0.1,
-                longProperties,
-                new SplittableRandom()
-            ).compute()
-        ).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining(
-                "Unsupported node property value type [LONG]. Value type required: [DOUBLE_ARRAY] or [FLOAT_ARRAY].");
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.kmeans.KmeansTest#validNodePropertyValues")
-    void shouldAcceptValidPropertyValueTypes(NodePropertyValues nodePropertyValues) {
-        assertThatNoException()
-            .isThrownBy(() -> new Kmeans(
-                ProgressTracker.NULL_TRACKER,
-                Pools.DEFAULT,
-                graph,
-                5,
-                4,
-                10,
-                0.1,
-                nodePropertyValues,
-                new SplittableRandom()
-            ).compute()
-        );
-    }
-
-    static Stream<Arguments> validNodePropertyValues() {
-        return Stream.of(
-            Arguments.of(new DoubleArrayTestPropertyValues(__ -> new double[]{1.0D})),
-            Arguments.of(new FloatArrayTestPropertyValues(__ -> new float[]{1.0F}))
-        );
     }
 }

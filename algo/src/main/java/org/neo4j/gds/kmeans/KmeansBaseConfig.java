@@ -21,17 +21,18 @@ package org.neo4j.gds.kmeans;
 
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.config.NodeWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.utils.StringFormatting;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig, NodeWeightConfig {
+import java.util.Collection;
+public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
     @Configuration.IntegerRange(min = 1)
     @Override
@@ -51,6 +52,27 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Sing
     default double deltaThreshold() {
         return 0.05;
     }
+
+    String nodeProperty();
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void nodePropertyTypeValidation(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var valueType = graphStore.nodeProperty(nodeProperty()).valueType();
+        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY) {
+            return;
+        }
+        throw new IllegalArgumentException(
+            StringFormatting.formatWithLocale(
+                "Unsupported node property value type [%s]. Value type required: [%s] or [%s].",
+                valueType,
+                ValueType.DOUBLE_ARRAY,
+                ValueType.FLOAT_ARRAY
+            )
+        );
+    }
 }
-
-

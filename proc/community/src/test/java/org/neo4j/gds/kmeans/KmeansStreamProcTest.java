@@ -80,7 +80,7 @@ class KmeansStreamProcTest extends BaseProcTest {
             .algo("gds.alpha.kmeans")
             .streamMode()
             .addParameter("k", 2)
-            .addParameter("nodeWeightProperty", "kmeans")
+            .addParameter("nodeProperty", "kmeans")
             .addParameter("randomSeed", 19)
             .addParameter("concurrency", 1)
             .yields("nodeId", "communityId");
@@ -92,5 +92,5 @@ class KmeansStreamProcTest extends BaseProcTest {
 
         ));
     }
-
+    
 }
