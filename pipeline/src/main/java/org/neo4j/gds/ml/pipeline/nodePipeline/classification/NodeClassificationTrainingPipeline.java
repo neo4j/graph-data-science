@@ -23,8 +23,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
-import java.util.ArrayList;
-
 public class NodeClassificationTrainingPipeline extends NodePropertyTrainingPipeline {
     public static final String PIPELINE_TYPE = "Node classification training pipeline";
     public static final String MODEL_TYPE = "NodeClassification";
@@ -32,20 +30,6 @@ public class NodeClassificationTrainingPipeline extends NodePropertyTrainingPipe
     public NodeClassificationTrainingPipeline() {
         super(TrainingType.CLASSIFICATION);
     }
-
-    public NodeClassificationTrainingPipeline copy() {
-        var copied = new NodeClassificationTrainingPipeline();
-        copied.featureSteps.addAll(featureSteps);
-        copied.nodePropertySteps.addAll(nodePropertySteps);
-
-        trainingParameterSpace().forEach((key, value) ->
-            copied.setTrainingParameterSpace(key, new ArrayList<>(value))
-        );
-
-        copied.setSplitConfig(splitConfig);
-        return copied;
-    }
-
 
     @Override
     public String type() {
