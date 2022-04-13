@@ -21,7 +21,11 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ResourceUtil;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -29,17 +33,24 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 class NodeRegressionTrainTest {
@@ -148,5 +159,45 @@ class NodeRegressionTrainTest {
         assertThat(bestMetricData.test()).isEqualTo(1056.95979,  Offset.offset(1e-5));
     }
 
-    // TODO more tests: autotuning, mixed candidate space, multiple evaluation metrics, progress logging
+    @Test
+    void shouldLogProgressWithRange() {
+        int MAX_TRIALS = 2;
+        var pipeline = new NodeRegressionTrainingPipeline();
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().validationFolds(2).testFraction(0.5D).build());
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of("maxDepth", Map.of("range", List.of(2, 4)), "numberOfDecisionTrees", 5),
+                TrainingMethod.RandomForest
+            )
+        );
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
+
+        NodeRegressionPipelineTrainConfig config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .username("DUMMY")
+            .pipeline("DUMMY")
+            .graphName("DUMMY")
+            .modelName("DUMMY")
+            .targetProperty("target")
+            .randomSeed(42L)
+            .concurrency(1)
+            .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
+            .build();
+
+        var progressTask = NodeRegressionTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var testLog = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        NodeRegressionTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
+
+        assertThat(testLog.getMessages(INFO))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals())
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log"));
+    }
+
+
+
+    // TODO more tests: autotuning, mixed candidate space, multiple evaluation metrics, seeded
 }

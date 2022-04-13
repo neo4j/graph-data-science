@@ -1,0 +1,84 @@
+Node Regression Train :: Start
+Node Regression Train :: ShuffleAndSplit :: Start
+Node Regression Train :: ShuffleAndSplit :: Train set size is 6
+Node Regression Train :: ShuffleAndSplit :: Test set size is 7
+Node Regression Train :: ShuffleAndSplit 100%
+Node Regression Train :: ShuffleAndSplit :: Finished
+Node Regression Train :: SelectBestModel :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: trained decision tree 1 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: trained decision tree 2 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: trained decision tree 3 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: trained decision tree 4 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: trained decision tree 5 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Training :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Evaluate :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 1 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: trained decision tree 1 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: trained decision tree 2 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: trained decision tree 3 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: trained decision tree 4 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: trained decision tree 5 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Training :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Evaluate :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Split 2 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 1 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: trained decision tree 1 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: trained decision tree 2 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: trained decision tree 3 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: trained decision tree 4 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: trained decision tree 5 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Training :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Evaluate :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 1 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: trained decision tree 1 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: trained decision tree 2 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: trained decision tree 3 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: trained decision tree 4 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: trained decision tree 5 out of 5
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Training :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Start
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate 100%
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Evaluate :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Split 2 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Model Candidate 2 of 2 :: Finished
+Node Regression Train :: SelectBestModel :: Finished
+Node Regression Train :: TrainSelectedOnRemainder :: Start
+Node Regression Train :: TrainSelectedOnRemainder :: trained decision tree 1 out of 5
+Node Regression Train :: TrainSelectedOnRemainder :: trained decision tree 2 out of 5
+Node Regression Train :: TrainSelectedOnRemainder :: trained decision tree 3 out of 5
+Node Regression Train :: TrainSelectedOnRemainder :: trained decision tree 4 out of 5
+Node Regression Train :: TrainSelectedOnRemainder :: trained decision tree 5 out of 5
+Node Regression Train :: TrainSelectedOnRemainder 100%
+Node Regression Train :: TrainSelectedOnRemainder :: Finished
+Node Regression Train :: EvaluateSelectedModel :: Start
+Node Regression Train :: EvaluateSelectedModel 100%
+Node Regression Train :: EvaluateSelectedModel :: Finished
+Node Regression Train :: RetrainSelectedModel :: Start
+Node Regression Train :: RetrainSelectedModel :: trained decision tree 1 out of 5
+Node Regression Train :: RetrainSelectedModel :: trained decision tree 2 out of 5
+Node Regression Train :: RetrainSelectedModel :: trained decision tree 3 out of 5
+Node Regression Train :: RetrainSelectedModel :: trained decision tree 4 out of 5
+Node Regression Train :: RetrainSelectedModel :: trained decision tree 5 out of 5
+Node Regression Train :: RetrainSelectedModel 100%
+Node Regression Train :: RetrainSelectedModel :: Finished
+Node Regression Train :: Finished
