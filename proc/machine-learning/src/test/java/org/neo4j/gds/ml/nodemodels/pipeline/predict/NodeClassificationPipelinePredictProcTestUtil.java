@@ -155,7 +155,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
             Arguments.of("g", pipelineExecutorEstimation),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(296152)
+                MemoryRange.of(296_152)
             )
         );
     }

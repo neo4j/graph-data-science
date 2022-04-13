@@ -118,12 +118,12 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(53680, 1727520)
+                MemoryRange.of(53_680, 1_727_520)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(142576, 5324816)
+                MemoryRange.of(142_576, 5_324_816)
             ),
             Arguments.of(
                 "Higher train-set",
@@ -154,12 +154,12 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "LLR batchSize 100",
                 List.of(llrConfigs.get(1)),
-                MemoryRange.of(55232, 1729072)
+                MemoryRange.of(55_232, 1_729_072)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
                 llrConfigs,
-                MemoryRange.of(55328, 1729168)
+                MemoryRange.of(55_328, 1_729_168)
             ),
             Arguments.of(
                 "RF",
@@ -180,7 +180,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(65128, 2432440)
+                MemoryRange.of(65_128, 2_432_440)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -191,7 +191,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(65128, 2432440)
+                MemoryRange.of(65_128, 2_432_440)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -202,7 +202,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(12829024, 405699264)
+                MemoryRange.of(12_829_024, 405_699_264)
             )
         );
     }
@@ -260,10 +260,10 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10, 3312, 77792",
-        "  10,  100, 19120, 575760",
-        "  10, 1000, 55232, 1729072",
-        "1000, 1000, 55232, 1729072"
+        "  10,   10, 3_312, 77_792",
+        "  10,  100, 19_120, 575_760",
+        "  10, 1000, 55_232, 1_729_072",
+        "1000, 1000, 55_232, 1_729_072"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -363,7 +363,7 @@ class LinkPredictionTrainTest {
     @CsvSource(value = {
         "  1,  41_200, 1_279_920",
         "  2,  54_880, 1_713_040",
-        "  4,  55232, 1729072",
+        "  4,  55_232, 1_729_072",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
