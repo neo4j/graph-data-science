@@ -25,11 +25,11 @@ import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -57,25 +57,21 @@ public class StratifiedKFoldSplitter {
     }
 
     public static MemoryEstimation memoryEstimation(int k, ToLongFunction<GraphDimensions> idsSetSizeExtractor) {
-        return MemoryEstimations.setup("", (dimensions) ->  {
+        return MemoryEstimations.setup("", dimensions ->  {
             var idSetSize = idsSetSizeExtractor.applyAsLong(dimensions);
             var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
             long baseBucketSize = idSetSize / k;
             for (int fold = 0; fold < k; fold++) {
-                var testSize = fold < idSetSize % k ? baseBucketSize + 1 : baseBucketSize;
-                var test = HugeLongArray.memoryEstimation(testSize);
-                var train = HugeLongArray.memoryEstimation(idSetSize - testSize);
+                var testSize = fold < idSetSize % k
+                    ? (baseBucketSize + 1)
+                    : baseBucketSize;
+                var trainSize = idSetSize - testSize;
+
                 builder.add(
                     "Fold " + fold, MemoryEstimations.builder()
-                        .add(
-                            MemoryEstimations.builder(HugeLongArray.class)
-                            .fixed("Test", test)
-                            .build()
-                        ).add(
-                            MemoryEstimations.builder(HugeLongArray.class)
-                                .fixed("Train", train)
-                                .build()
-                        ).build()
+                        .add(MemoryEstimations.of("Test", MemoryRange.of(HugeLongArray.memoryEstimation(testSize))))
+                        .add(MemoryEstimations.of("Train", MemoryRange.of(HugeLongArray.memoryEstimation(trainSize))))
+                        .build()
                 );
             }
             return builder.build();
@@ -132,7 +128,9 @@ public class StratifiedKFoldSplitter {
         int baseBucketSize = (int) nodeCount / k;
         for (int fold = 0; fold < k; fold++) {
             // make the first buckets larger when nodeCount is not divisible by k
-            var testSize = fold < nodeCount % k ? baseBucketSize + 1 : baseBucketSize;
+            var testSize = fold < nodeCount % k
+                ? (baseBucketSize + 1)
+                : baseBucketSize;
             testSets[fold] = HugeLongArray.newArray(testSize);
             trainSets[fold] = HugeLongArray.newArray(nodeCount - testSize);
         }

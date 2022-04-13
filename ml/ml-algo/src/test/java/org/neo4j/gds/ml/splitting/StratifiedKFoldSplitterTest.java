@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
@@ -125,17 +126,26 @@ class StratifiedKFoldSplitterTest {
         assertThat(estimation.min).isEqualTo(estimation.max);
     }
 
-    @Test
-    void memoryEstimationShouldScaleWithNumberOfFolds() {
-        var dimensions = GraphDimensions.of(1000);
-        var memoryUsageForTenFolds = StratifiedKFoldSplitter.memoryEstimationForNodeSet(10, 0.1)
-            .estimate(dimensions, 1)
+    @ParameterizedTest
+    @CsvSource(value = {
+        " 1_000,  4, 0.5,  16352",
+        // x4 number of folds same factor in estimation
+        " 1_000, 16, 0.5,  65312",
+        // 1/5 trainFraction -> 1/5 train-set size and resulting folds
+        " 1_000,  4, 0.1,   3552",
+        // x10 nodeCount same factor in estimation
+        "10_000,  4, 0.5, 160352",
+    })
+    void memoryEstimationShouldScaleWithNumberOfFolds(long nodeCount, int k, double trainFraction, long expectedMemory) {
+        var dimensions = GraphDimensions.of(nodeCount);
+        var actualEstimation = StratifiedKFoldSplitter.memoryEstimationForNodeSet(k, trainFraction)
+            .estimate(dimensions, 4)
             .memoryUsage();
-        var memoryUsageForFiveFolds = StratifiedKFoldSplitter.memoryEstimationForNodeSet(5, 0.1)
-            .estimate(dimensions, 1)
-            .memoryUsage();
-        assertThat(memoryUsageForTenFolds.min).isCloseTo(2 * memoryUsageForFiveFolds.min, Offset.offset(100L));
-        assertThat(memoryUsageForTenFolds.max).isCloseTo(2 * memoryUsageForFiveFolds.max, Offset.offset(100L));
+        MemoryRange expectedEstimation = MemoryRange.of(expectedMemory);
+
+        assertThat(actualEstimation)
+            .withFailMessage("Got %d, but expected %d", actualEstimation.max, expectedEstimation.max)
+            .isEqualTo(expectedEstimation);
     }
 
     private Map<Long, Integer> classCounts(HugeLongArray values) {

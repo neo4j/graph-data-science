@@ -217,14 +217,14 @@ CALL gds.beta.pipeline.nodeClassification.train.estimate('myGraph', {
   randomSeed: 2,
   metrics: [ 'F1_WEIGHTED' ]
 })
-YIELD bytesMin, bytesMax, requiredMemory
+YIELD requiredMemory
 ----
 
 .Results
 [opts="header"]
 |===
-| bytesMin  | bytesMax  | requiredMemory
-| 10495680  | 10570760  | +"[10249 KiB ... 10323 KiB]"+
+| requiredMemory
+| +"[10249 KiB ... 10322 KiB]"+
 |===
 --
 
