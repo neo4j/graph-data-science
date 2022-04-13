@@ -205,10 +205,10 @@ public class Kmeans extends Algorithm<HugeIntArray> {
 
         private final ProgressTracker progressTracker;
         private final Partition partition;
-        private final double[][] centerSumAtDimension;
+        private final double[][] communityCoordinateSums;
         private final NodeProperties nodeProperties;
         private final HugeIntArray communities;
-        private final long[] numAssignedAtCenter;
+        private final long[] communitySizes;
         private final double[][] clusterCenters;
         private final int k;
         private final int dimensions;
@@ -227,8 +227,8 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             this.progressTracker = progressTracker;
             this.partition = partition;
             this.clusterCenters = clusterCenters;
-            this.centerSumAtDimension = new double[k][dimensions];
-            this.numAssignedAtCenter = new long[k];
+            this.communityCoordinateSums = new double[k][dimensions];
+            this.communitySizes = new long[k];
             this.k = k;
             this.dimensions = dimensions;
             this.nodeProperties = nodeProperties;
@@ -236,11 +236,11 @@ public class Kmeans extends Algorithm<HugeIntArray> {
         }
 
         double[] getCenterContribution(int ith) {
-            return centerSumAtDimension[ith];
+            return communityCoordinateSums[ith];
         }
 
         long getNumAssignedAtCenter(int ith) {
-            return numAssignedAtCenter[ith];
+            return communitySizes[ith];
         }
 
         long getSwaps() {
@@ -256,26 +256,28 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             var startNode = partition.startNode();
             long endNode = startNode + partition.nodeCount();
             swaps = 0;
-            for (int centerId = 0; centerId < k; ++centerId) {
-                numAssignedAtCenter[centerId] = 0;
+
+            for (int community = 0; community < k; ++community) {
+                communitySizes[community] = 0;
                 for (int dimension = 0; dimension < dimensions; ++dimension) {
-                    centerSumAtDimension[centerId][dimension] = 0.0;
+                    communityCoordinateSums[community][dimension] = 0.0;
                 }
             }
+
             for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-                int bestPosition = 0;
-                var nodePropertyArray = nodeProperties.doubleArrayValue(nodeId);
+                int community = 0;
+                var property = nodeProperties.doubleArrayValue(nodeId);
                 double smallestDistance = Double.MAX_VALUE;
                 for (int centerId = 0; centerId < k; ++centerId) {
-                    double distance = euclidean(nodePropertyArray, clusterCenters[centerId]);
+                    double distance = euclidean(property, clusterCenters[centerId]);
                     if (Double.compare(distance, smallestDistance) < 0) {
                         smallestDistance = distance;
-                        bestPosition = centerId;
+                        community = centerId;
                     }
                 }
-                numAssignedAtCenter[bestPosition]++;
-                int previousCluster = communities.get(nodeId);
-                if (bestPosition != previousCluster) {
+                communitySizes[community]++;
+                int previousCommunity = communities.get(nodeId);
+                if (community != previousCommunity) {
                     swaps++;
                 }
                 //Note for potential improvement : This is potentially costly when clusters have somewhat stabilized.
@@ -283,9 +285,9 @@ public class Kmeans extends Algorithm<HugeIntArray> {
                 //we keep as is and do a subtraction when a node changes its cluster.
                 //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
                 // or avoid calculating their distance from other nodes etc...
-                communities.set(nodeId, bestPosition);
+                communities.set(nodeId, community);
                 for (int j = 0; j < dimensions; ++j) {
-                    centerSumAtDimension[bestPosition][j] += nodePropertyArray[j];
+                    communityCoordinateSums[community][j] += property[j];
                 }
             }
         }
