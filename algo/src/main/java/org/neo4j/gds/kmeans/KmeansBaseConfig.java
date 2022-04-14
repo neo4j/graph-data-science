@@ -32,6 +32,7 @@ import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
+
 public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
     @Configuration.IntegerRange(min = 1)

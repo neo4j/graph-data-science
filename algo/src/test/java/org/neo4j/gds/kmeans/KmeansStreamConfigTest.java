@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
 
