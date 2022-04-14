@@ -619,4 +619,42 @@ class FilteredKnnTest {
             softly.assertThat(result.neighborsOf(nodeGId)).contains(nodeFId);
         }
     }
+
+    @Nested
+    class SourceNodeFilterTest {
+
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a { knn: 1.2 } )" +
+            ", (b { knn: 1.1 } )" +
+            ", (c { knn: 2.1 } )" +
+            ", (d { knn: 3.1 } )" +
+            ", (e { knn: 4.1 } )";
+
+        @Test
+        void shouldOnlyProduceResultsForFilteredSourceNode() {
+            var filteredSourceNode = idFunction.of("a");
+            var config = ImmutableFilteredKnnBaseConfig.builder()
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
+                .topK(3)
+                .randomJoins(0)
+                .maxIterations(1)
+                .randomSeed(20L)
+                .concurrency(1)
+                .sourceNodeFilter(List.of(filteredSourceNode))
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
+            var result = knn.compute();
+
+            result.streamSimilarityResult().forEach(
+                r -> System.out.printf("%d,%d: %f%n", r.node1, r.node2, r.similarity)
+            );
+
+            assertThat(result.neighborsOf(filteredSourceNode).count())
+                .isEqualTo(result.totalSimilarityPairs());
+        }
+
+    }
 }

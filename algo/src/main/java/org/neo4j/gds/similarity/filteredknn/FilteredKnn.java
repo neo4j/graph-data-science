@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.function.Function;
@@ -166,7 +167,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered);
+            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, config.sourceNodeFilter());
         }
     }
 
@@ -602,6 +603,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
 
         public abstract long nodePairsConsidered();
 
+        public abstract List<Long> sourceNodeFilter();
+
         public LongStream neighborsOf(long nodeId) {
             return neighborList().get(nodeId).elements().map(NeighborList::clearCheckedFlag);
         }
@@ -611,6 +614,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             var neighborList = neighborList();
             return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
                 .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                    .filter(index -> sourceNodeFilter().contains(index + cursor.base))
                     .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
                     .flatMap(Function.identity())
                 );
@@ -620,6 +624,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             var neighborList = neighborList();
             return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
                 .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                    .filter(index -> sourceNodeFilter().contains(index + cursor.base))
                     .mapToLong(index -> cursor.array[index].size()))
                 .sum();
         }
@@ -649,6 +654,11 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         @Override
         public long nodePairsConsidered() {
             return 0;
+        }
+
+        @Override
+        public List<Long> sourceNodeFilter() {
+            return List.of();
         }
 
         @Override
