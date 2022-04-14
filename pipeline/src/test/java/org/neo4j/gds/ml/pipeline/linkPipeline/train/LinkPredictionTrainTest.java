@@ -444,7 +444,7 @@ class LinkPredictionTrainTest {
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyInAnyOrder(
                 "MY TEST TASK :: Start",
                 "MY TEST TASK :: Extract train features :: Start",
@@ -551,7 +551,7 @@ class LinkPredictionTrainTest {
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .contains(
                 "MY TEST TASK :: Train best model :: Start",
                 "MY TEST TASK :: Train best model :: Epoch 1 with loss 0.688097317504",
@@ -613,7 +613,7 @@ class LinkPredictionTrainTest {
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactly(
                 "MY TEST TASK :: Start",
                 "MY TEST TASK :: Extract train features :: Start",

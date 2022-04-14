@@ -379,7 +379,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
-                .extracting(keepingFixedNumberOfDecimals())
+                .extracting(keepingFixedNumberOfDecimals(4))
                 .contains(
                     "Link Prediction Train Pipeline :: Start",
                     "Link Prediction Train Pipeline :: Split relationships :: Start",

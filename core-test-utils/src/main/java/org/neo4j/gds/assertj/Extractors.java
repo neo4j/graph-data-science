@@ -26,8 +26,6 @@ import java.util.regex.Pattern;
 public final class Extractors {
 
     private static final Pattern TIME_MEASUREMENTS_PATTERN = Pattern.compile("(\\d+\\s*)(ms|s|min)");
-    private static final Pattern FLOATING_POINT_PATTERN = Pattern.compile("(\\d+\\.\\d{1,4})\\d*");
-
     private Extractors() {}
 
     public static ThrowingExtractor<String, String, RuntimeException> removingThreadId() {
@@ -39,7 +37,8 @@ public final class Extractors {
         return message -> TIME_MEASUREMENTS_PATTERN.matcher(message).replaceAll("`some time`");
     }
 
-    public static ThrowingExtractor<String, String, RuntimeException> keepingFixedNumberOfDecimals() {
-        return msg -> FLOATING_POINT_PATTERN.matcher(msg).replaceAll("$1");
+    public static ThrowingExtractor<String, String, RuntimeException> keepingFixedNumberOfDecimals(int decimalPrecision) {
+        var pattern = Pattern.compile(String.format("(\\d+\\.\\d{1,%d})\\d*", decimalPrecision));
+        return msg -> pattern.matcher(msg).replaceAll("$1");
     }
 }

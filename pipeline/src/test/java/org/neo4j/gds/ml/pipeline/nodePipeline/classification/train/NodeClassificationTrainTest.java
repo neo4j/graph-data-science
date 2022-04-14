@@ -286,7 +286,7 @@ class NodeClassificationTrainTest {
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactly(
                 "MY DUMMY TASK :: Start",
                 "MY DUMMY TASK :: Shuffle and split :: Start",
@@ -367,7 +367,7 @@ class NodeClassificationTrainTest {
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactly(
                 "MY DUMMY TASK :: Start",
                 "MY DUMMY TASK :: Shuffle and split :: Start",
