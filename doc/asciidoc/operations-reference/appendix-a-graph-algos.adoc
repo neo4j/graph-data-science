@@ -301,7 +301,8 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.influenceMaximization.celf.stream`
 .1+<.^| <<alpha-algorithms-conductance, Conductance>>
 | `gds.alpha.conductance.stream`
-.2+<.^| Kmeans
+.3+<.^| Kmeans
+| `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
 |===
