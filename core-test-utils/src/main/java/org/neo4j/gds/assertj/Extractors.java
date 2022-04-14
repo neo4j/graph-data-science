@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public final class Extractors {
 
     private static final Pattern TIME_MEASUREMENTS_PATTERN = Pattern.compile("(\\d+\\s*)(ms|s|min)");
-    private static final Pattern FLOATING_POINT_PATTERN = Pattern.compile("(\\d+\\.\\d{1,12})\\d*");
+    private static final Pattern FLOATING_POINT_PATTERN = Pattern.compile("(\\d+\\.\\d{1,4})\\d*");
 
     private Extractors() {}
 
