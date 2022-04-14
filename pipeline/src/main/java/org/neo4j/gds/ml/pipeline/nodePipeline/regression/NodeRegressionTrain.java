@@ -204,12 +204,12 @@ public final class NodeRegressionTrain {
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
-        registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
-        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
+        registerMetricScores(outerSplit.testSet(), bestRegressor, trainingStatistics::addTestScore);
+        registerMetricScores(outerSplit.trainSet(), bestRegressor, trainingStatistics::addOuterTrainScore);
         progressTracker.endSubTask("Evaluate on test data");
     }
 
