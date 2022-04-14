@@ -28,6 +28,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class KmeansStatsProcTest extends BaseProcTest{
@@ -67,18 +68,40 @@ class KmeansStatsProcTest extends BaseProcTest{
             .addParameter("nodeProperty", "weights")
             .yields();
 
-        runQueryWithRowConsumer(query, resultRow -> {
-            assertThat(resultRow.get("communityDistribution"))
-                .isNotNull()
-                .satisfies(distribution -> assertThat(distribution).asInstanceOf(MAP).isNotEmpty());
+        runQuery(query, result -> {
+            assertThat(result.columns())
+                .containsExactlyInAnyOrder(
+                    "communityDistribution",
+                    "preProcessingMillis",
+                    "computeMillis",
+                    "postProcessingMillis",
+                    "configuration"
+                );
 
-            assertThat(resultRow.getNumber("preProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
-            assertThat(resultRow.getNumber("computeMillis").longValue()).isGreaterThanOrEqualTo(0);
-            assertThat(resultRow.getNumber("postProcessingMillis").longValue()).isGreaterThanOrEqualTo(0);
+            while (result.hasNext()) {
+                var resultRow = result.next();
+                assertThat(resultRow.get("communityDistribution"))
+                    .isNotNull()
+                    .asInstanceOf(MAP)
+                    .isNotEmpty();
 
-            assertThat(resultRow.get("configuration"))
-                .isNotNull()
-                .satisfies(distribution -> assertThat(distribution).asInstanceOf(MAP).isNotEmpty());
+                assertThat(resultRow.get("preProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThanOrEqualTo(0);
+                assertThat(resultRow.get("computeMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThanOrEqualTo(0);
+                assertThat(resultRow.get("postProcessingMillis"))
+                    .asInstanceOf(LONG)
+                    .isGreaterThanOrEqualTo(0);
+
+                assertThat(resultRow.get("configuration"))
+                    .isNotNull()
+                    .asInstanceOf(MAP)
+                    .isNotEmpty();
+            }
+
+            return true;
         });
     }
 }
