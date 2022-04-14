@@ -22,7 +22,6 @@ package org.neo4j.gds.kmeans;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.Intersections;
@@ -30,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
 import java.util.Optional;
@@ -52,7 +50,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private final KmeansIterationStopper kmeansIterationStopper;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
-        String nodeWeightProperty = config.nodeWeightProperty();
+        String nodeWeightProperty = config.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
         return new Kmeans(
             context.progressTracker(),
@@ -67,20 +65,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
         );
     }
 
-    private static void validateNodeProperties(NodePropertyValues nodePropertyValues) {
-        var valueType = nodePropertyValues.valueType();
-        if (valueType == ValueType.DOUBLE_ARRAY || valueType == ValueType.FLOAT_ARRAY) {
-            return;
-        }
-        throw new IllegalArgumentException(
-            StringFormatting.formatWithLocale(
-                "Unsupported node property value type [%s]. Value type required: [%s] or [%s].",
-                valueType,
-                ValueType.DOUBLE_ARRAY,
-                ValueType.FLOAT_ARRAY
-            )
-        );
-    }
 
     Kmeans(
         ProgressTracker progressTracker,
@@ -100,7 +84,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.concurrency = concurrency;
         this.random = random;
         this.communities = HugeIntArray.newArray(graph.nodeCount());
-        validateNodeProperties(nodePropertyValues);
         this.nodePropertyValues = nodePropertyValues;
         this.dimensions = nodePropertyValues.doubleArrayValue(0).length;
         this.kmeansIterationStopper = new KmeansIterationStopper(

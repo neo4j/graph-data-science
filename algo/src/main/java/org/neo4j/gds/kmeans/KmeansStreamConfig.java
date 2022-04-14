@@ -28,10 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public interface KmeansStreamConfig extends KmeansBaseConfig {
 
     static KmeansStreamConfig of(CypherMapWrapper userInput) {
-        KmeansStreamConfigImpl kmeansStreamConfig = new KmeansStreamConfigImpl(userInput);
-
-        kmeansStreamConfig.validate();
-
-        return kmeansStreamConfig;
+        return new KmeansStreamConfigImpl(userInput);
     }
 }
