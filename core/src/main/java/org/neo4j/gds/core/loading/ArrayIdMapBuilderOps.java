@@ -28,9 +28,9 @@ import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-public final class HugeIdMapBuilderOps {
+public final class ArrayIdMapBuilderOps {
 
-    static HugeIdMap build(
+    static ArrayIdMap build(
         HugeLongArray graphIds,
         long nodeCount,
         LabelInformation.Builder labelInformationBuilder,
@@ -50,7 +50,7 @@ public final class HugeIdMapBuilderOps {
 
         var labelInformation = labelInformationBuilder.build(nodeCount, nodeToGraphIds::get);
 
-        return new HugeIdMap(
+        return new ArrayIdMap(
             graphIds,
             nodeToGraphIds,
             labelInformation,
@@ -100,6 +100,6 @@ public final class HugeIdMapBuilderOps {
         }
     }
 
-    private HugeIdMapBuilderOps() {
+    private ArrayIdMapBuilderOps() {
     }
 }

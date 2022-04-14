@@ -27,18 +27,18 @@ import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
+public final class GrowingArrayIdMapBuilder implements IdMapBuilder {
 
     private final HugeLongArrayBuilder arrayBuilder;
     private final AtomicLong allocationIndex;
     private final AutoCloseableThreadLocal<HugeLongArrayBuilder.Allocator> allocators;
 
-    public static GrowingHugeIdMapBuilder of() {
+    public static GrowingArrayIdMapBuilder of() {
         HugeLongArrayBuilder array = HugeLongArrayBuilder.newBuilder();
-        return new GrowingHugeIdMapBuilder(array);
+        return new GrowingArrayIdMapBuilder(array);
     }
 
-    private GrowingHugeIdMapBuilder(HugeLongArrayBuilder arrayBuilder) {
+    private GrowingArrayIdMapBuilder(HugeLongArrayBuilder arrayBuilder) {
         this.arrayBuilder = arrayBuilder;
         this.allocationIndex = new AtomicLong();
         this.allocators = AutoCloseableThreadLocal.withInitial(HugeLongArrayBuilder.Allocator::new);
@@ -63,7 +63,7 @@ public final class GrowingHugeIdMapBuilder implements IdMapBuilder {
         allocators.close();
         long nodeCount = size();
         var graphIds = this.arrayBuilder.build(nodeCount);
-        return HugeIdMapBuilderOps.build(graphIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
+        return ArrayIdMapBuilderOps.build(graphIds, nodeCount, labelInformationBuilder, highestNodeId, concurrency);
     }
 
     public HugeLongArray array() {

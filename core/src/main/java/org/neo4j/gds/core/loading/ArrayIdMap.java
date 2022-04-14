@@ -22,11 +22,9 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.LabeledIdMap;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.collections.HugeSparseLongArray;
-import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -36,17 +34,15 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.Collection;
 import java.util.List;
 import java.util.OptionalLong;
-import java.util.Set;
-import java.util.function.LongPredicate;
 
 /**
  * This is basically a long to int mapper. It sorts the id's in ascending order so its
  * guaranteed that there is no ID greater then nextGraphId / capacity
  */
-public class HugeIdMap implements IdMap {
+public class ArrayIdMap extends LabeledIdMap {
 
     private static final MemoryEstimation ESTIMATION = MemoryEstimations
-        .builder(HugeIdMap.class)
+        .builder(ArrayIdMap.class)
         .perNode("Neo4j identifiers", HugeLongArray::memoryEstimation)
         .rangePerGraphDimension(
             "Mapping from Neo4j identifiers to internal identifiers",
@@ -62,10 +58,7 @@ public class HugeIdMap implements IdMap {
         )
         .build();
 
-    private final long nodeCount;
     private final long highestNeoId;
-
-    private final LabelInformation labelInformation;
 
     private final HugeLongArray graphIds;
     private final HugeSparseLongArray nodeToGraphIds;
@@ -77,17 +70,16 @@ public class HugeIdMap implements IdMap {
     /**
      * initialize the map with pre-built sub arrays
      */
-    public HugeIdMap(
+    public ArrayIdMap(
         HugeLongArray graphIds,
         HugeSparseLongArray nodeToGraphIds,
         LabelInformation labelInformation,
         long nodeCount,
         long highestNeoId
     ) {
+        super(labelInformation, nodeCount);
         this.graphIds = graphIds;
         this.nodeToGraphIds = nodeToGraphIds;
-        this.labelInformation = labelInformation;
-        this.nodeCount = nodeCount;
         this.highestNeoId = highestNeoId;
     }
 
@@ -117,13 +109,8 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public long nodeCount() {
-        return nodeCount;
-    }
-
-    @Override
     public OptionalLong rootNodeCount() {
-        return OptionalLong.of(nodeCount);
+        return OptionalLong.of(nodeCount());
     }
 
     @Override
@@ -132,56 +119,7 @@ public class HugeIdMap implements IdMap {
     }
 
     @Override
-    public void forEachNode(LongPredicate consumer) {
-        final long count = nodeCount();
-        for (long i = 0L; i < count; i++) {
-            if (!consumer.test(i)) {
-                return;
-            }
-        }
-    }
-
-    @Override
-    public PrimitiveLongIterator nodeIterator() {
-        return new IdIterator(nodeCount());
-    }
-
-    @Override
-    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
-        return labelInformation.nodeIterator(labels, nodeCount());
-    }
-
-    @Override
-    public Collection<PrimitiveLongIterable> batchIterables(long batchSize) {
-        return LazyBatchCollection.of(
-            nodeCount(),
-            batchSize,
-            IdIterable::new
-        );
-    }
-
-    @Override
-    public Set<NodeLabel> availableNodeLabels() {
-        return labelInformation.availableNodeLabels();
-    }
-
-    @Override
-    public List<NodeLabel> nodeLabels(long nodeId) {
-        return labelInformation.nodeLabelsForNodeId(nodeId);
-    }
-
-    @Override
-    public void forEachNodeLabel(long nodeId, NodeLabelConsumer consumer) {
-        labelInformation.forEachNodeLabel(nodeId, consumer);
-    }
-
-    @Override
-    public boolean hasLabel(long nodeId, NodeLabel label) {
-        return labelInformation.hasLabel(nodeId, label);
-    }
-
-    @Override
-    public HugeIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public ArrayIdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {
@@ -200,7 +138,7 @@ public class HugeIdMap implements IdMap {
             cursor++;
         }
 
-        HugeSparseLongArray newNodeToGraphIds = HugeIdMapBuilderOps.buildSparseIdMap(
+        HugeSparseLongArray newNodeToGraphIds = ArrayIdMapBuilderOps.buildSparseIdMap(
             newNodeCount,
             nodeToGraphIds.capacity(),
             concurrency,
@@ -219,7 +157,7 @@ public class HugeIdMap implements IdMap {
         );
     }
 
-    private static class FilteredIdMap extends HugeIdMap {
+    private static class FilteredIdMap extends ArrayIdMap {
 
         private final IdMap rootIdMap;
 

@@ -24,12 +24,12 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class HugeIdMapBuilderOpsTest {
+class ArrayIdMapBuilderOpsTest {
 
     @Test
     void buildSparseIdMapWithPageSizeEntries() {
         long nodeId = 4096; // equals the PAGE_SIZE in a HugeSparseLongArray
-        var hugeSparseLongArray = HugeIdMapBuilderOps.buildSparseIdMap(
+        var hugeSparseLongArray = ArrayIdMapBuilderOps.buildSparseIdMap(
             1,
             nodeId,
             1,
