@@ -109,9 +109,10 @@ public class Training {
             progressTracker.logMessage(StringFormatting.formatWithLocale("Epoch %d with loss %s", epoch, lastLoss));
         }
         progressTracker.logMessage(StringFormatting.formatWithLocale(
-            "%s after %d epochs. Initial loss: %s, Last loss: %s.%s",
+            "%s after %d%s epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             epoch,
+            stopper.converged() ? " out of " + config.maxEpochs() : "",
             initialLoss,
             lastLoss,
             stopper.converged() ? "" : " Did not converge"
