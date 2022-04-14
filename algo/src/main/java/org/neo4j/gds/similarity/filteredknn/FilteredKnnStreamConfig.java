@@ -26,9 +26,9 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface KnnStreamConfig extends KnnBaseConfig {
+public interface FilteredKnnStreamConfig extends FilteredKnnBaseConfig {
 
-    static KnnStreamConfig of(CypherMapWrapper config) {
-        return new KnnStreamConfigImpl(config);
+    static FilteredKnnStreamConfig of(CypherMapWrapper config) {
+        return new FilteredKnnStreamConfigImpl(config);
     }
 }

@@ -47,7 +47,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Knn extends Algorithm<Knn.Result> {
     private final Graph graph;
-    private final KnnBaseConfig config;
+    private final FilteredKnnBaseConfig config;
     private final NeighborFilterFactory neighborFilterFactory;
     private final KnnContext context;
     private final SplittableRandom splittableRandom;
@@ -55,7 +55,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
     private long nodePairsConsidered;
 
-    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
+    public static Knn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
         return new Knn(
             context.progressTracker(),
             graph,
@@ -69,7 +69,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
     public static Knn create(
         Graph graph,
-        KnnBaseConfig config,
+        FilteredKnnBaseConfig config,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context
@@ -94,7 +94,7 @@ public class Knn extends Algorithm<Knn.Result> {
     Knn(
         ProgressTracker progressTracker,
         Graph graph,
-        KnnBaseConfig config,
+        FilteredKnnBaseConfig config,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context,
@@ -315,7 +315,7 @@ public class Knn extends Algorithm<Knn.Result> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
-        KnnBaseConfig config,
+        FilteredKnnBaseConfig config,
         ProgressTracker progressTracker
     ) {
         long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.concurrency(), config.minBatchSize());

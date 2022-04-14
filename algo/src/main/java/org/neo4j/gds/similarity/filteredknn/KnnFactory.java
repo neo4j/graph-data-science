@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.similarity.knn.KnnSampler;
 
 import java.util.List;
 
@@ -38,7 +39,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFactory<Knn, CONFIG> {
+public class KnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<Knn, CONFIG> {
 
     private static final String KNN_BASE_TASK_NAME = "Knn";
 
@@ -120,7 +121,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         return knnTaskTree(graph, config);
     }
 
-    public static Task knnTaskTree(Graph graph, KnnBaseConfig config) {
+    public static Task knnTaskTree(Graph graph, FilteredKnnBaseConfig config) {
         return Tasks.task(
             KNN_BASE_TASK_NAME,
             Tasks.leaf("Initialize random neighbors", graph.nodeCount()),

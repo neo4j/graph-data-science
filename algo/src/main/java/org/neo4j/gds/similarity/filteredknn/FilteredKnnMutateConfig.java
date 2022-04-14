@@ -21,16 +21,16 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.WritePropertyConfig;
-import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface KnnWriteConfig extends KnnBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
+public interface FilteredKnnMutateConfig extends FilteredKnnBaseConfig, MutatePropertyConfig, MutateRelationshipConfig {
 
-    static KnnWriteConfig of(CypherMapWrapper config) {
-        return new KnnWriteConfigImpl(config);
+    static FilteredKnnMutateConfig of(CypherMapWrapper config) {
+        return new FilteredKnnMutateConfigImpl(config);
     }
 }
