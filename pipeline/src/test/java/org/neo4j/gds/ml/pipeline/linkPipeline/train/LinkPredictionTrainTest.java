@@ -554,11 +554,11 @@ class LinkPredictionTrainTest {
             .extracting(keepingFixedNumberOfDecimals(4))
             .contains(
                 "MY TEST TASK :: Train best model :: Start",
-                "MY TEST TASK :: Train best model :: Epoch 1 with loss 0.688097317504",
-                "MY TEST TASK :: Train best model :: Epoch 2 with loss 0.683213654690",
-                "MY TEST TASK :: Train best model :: Epoch 3 with loss 0.678498422872",
-                "MY TEST TASK :: Train best model :: Epoch 4 with loss 0.673952840083",
-                "MY TEST TASK :: Train best model :: Epoch 5 with loss 0.669576960529",
+                "MY TEST TASK :: Train best model :: Epoch 1 with loss 0.6880",
+                "MY TEST TASK :: Train best model :: Epoch 2 with loss 0.6832",
+                "MY TEST TASK :: Train best model :: Epoch 3 with loss 0.6784",
+                "MY TEST TASK :: Train best model :: Epoch 4 with loss 0.6739",
+                "MY TEST TASK :: Train best model :: Epoch 5 with loss 0.6695",
                 "MY TEST TASK :: Train best model :: Finished"
             );
     }
