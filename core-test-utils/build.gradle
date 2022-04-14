@@ -15,4 +15,5 @@ dependencies {
         [group: 'org.jetbrains',           name: 'annotations',             version: ver.'jetbrains-annotations'],
         [group: 'org.immutables',          name: 'value-annotations',       version: ver.'immutables'],
     )
+    implementation project(':string-formatting')
 }

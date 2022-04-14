@@ -23,6 +23,8 @@ import org.assertj.core.api.iterable.ThrowingExtractor;
 
 import java.util.regex.Pattern;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class Extractors {
 
     private static final Pattern TIME_MEASUREMENTS_PATTERN = Pattern.compile("(\\d+\\s*)(ms|s|min)");
@@ -38,7 +40,7 @@ public final class Extractors {
     }
 
     public static ThrowingExtractor<String, String, RuntimeException> keepingFixedNumberOfDecimals(int decimalPrecision) {
-        var pattern = Pattern.compile(String.format("(\\d+\\.\\d{1,%d})\\d*", decimalPrecision));
+        var pattern = Pattern.compile(formatWithLocale("(\\d+\\.\\d{1,%d})\\d*", decimalPrecision));
         return msg -> pattern.matcher(msg).replaceAll("$1");
     }
 }
