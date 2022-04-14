@@ -37,19 +37,14 @@ import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
+import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
-import org.neo4j.gds.ml.splitting.FractionSplitter;
-import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
-import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 
-import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeRegressionTrain {
@@ -123,36 +118,27 @@ public final class NodeRegressionTrain {
 
     public NodeRegressionTrainResult compute() {
         progressTracker.beginSubTask("Shuffle and Split");
-        var allTrainingExamples = HugeLongArray.newArray(features.size());
-        allTrainingExamples.setAll(i -> i);
 
-        ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(trainConfig.randomSeed()));
-        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
-        var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
-
-        List<TrainingExamplesSplit> innerSplits = new StratifiedKFoldSplitter(
-            splitConfig.validationFolds(),
-            ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
+        var splitConfig = pipeline.splitConfig();
+        var splits = new NodeSplitter(
+            features.size(),
             id -> 0L,
-            trainConfig.randomSeed(),
-            new TreeSet<>(List.of(0L))
-        ).splits();
-
-        warnForSmallNodeSets(
-            outerSplit.trainSet().size(),
-            outerSplit.testSet().size(),
-            splitConfig.validationFolds(),
+            new TreeSet<>(List.of(0L)),
             progressTracker
+        ).split(
+            splitConfig.testFraction(),
+            splitConfig.validationFolds(),
+            trainConfig.randomSeed()
         );
 
         progressTracker.endSubTask("Shuffle and Split");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(trainConfig.metrics()));
 
-        selectBestModel(innerSplits, trainingStatistics);
-        evaluateBestModel(outerSplit, trainingStatistics);
+        selectBestModel(splits.innerSplits(), trainingStatistics);
+        evaluateBestModel(splits.outerSplit(), trainingStatistics);
 
-        var retrainedModel = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
+        var retrainedModel = retrainBestModel(splits.allTrainingExamples(), trainingStatistics.bestParameters());
 
         return ImmutableNodeRegressionTrainResult.of(retrainedModel, trainingStatistics);
     }

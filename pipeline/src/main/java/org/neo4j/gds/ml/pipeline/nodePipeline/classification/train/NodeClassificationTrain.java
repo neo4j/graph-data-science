@@ -49,6 +49,7 @@ import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
+import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -56,7 +57,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
-import org.neo4j.gds.ml.util.ShuffleUtil;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
@@ -69,8 +69,6 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
-import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
-import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
 public final class NodeClassificationTrain {
 
@@ -282,35 +280,27 @@ public final class NodeClassificationTrain {
         progressTracker.beginSubTask("NCTrain");
 
         progressTracker.beginSubTask("ShuffleAndSplit");
-        var allTrainingExamples = HugeLongArray.newArray(features.size());
-        allTrainingExamples.setAll(i -> i);
 
-        ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(config.randomSeed()));
-        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
-        var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - splitConfig.testFraction());
-        var innerSplits = new StratifiedKFoldSplitter(
-            splitConfig.validationFolds(),
-            ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
+        var splitConfig = pipeline.splitConfig();
+        var nodeSplits = new NodeSplitter(
+            features.size(),
             targets::get,
-            config.randomSeed(),
-            new TreeSet<>(classCounts.keys())
-        ).splits();
-
-        warnForSmallNodeSets(
-            outerSplit.trainSet().size(),
-            outerSplit.testSet().size(),
-            splitConfig.validationFolds(),
+            new TreeSet<>(classCounts.keys()),
             progressTracker
+        ).split(
+            splitConfig.testFraction(),
+            splitConfig.validationFolds(),
+            config.randomSeed()
         );
 
         progressTracker.endSubTask("ShuffleAndSplit");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
 
-        selectBestModel(innerSplits, trainingStatistics);
-        evaluateBestModel(outerSplit, trainingStatistics);
+        selectBestModel(nodeSplits.innerSplits(), trainingStatistics);
+        evaluateBestModel(nodeSplits.outerSplit(), trainingStatistics);
 
-        Classifier retrainedModelData = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
+        Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
         progressTracker.endSubTask("NCTrain");
 
