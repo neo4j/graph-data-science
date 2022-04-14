@@ -44,7 +44,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig, ModelConfig {
 
     double DEFAULT_THRESHOLD = 0.0;
-    String MISSING_INITIAL_SAMPLER = "MISSING_VALUE";
 
     //TODO make this a parameter
     String graphName();
@@ -76,19 +75,12 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
     @Configuration.IntegerRange(min = 0)
     Optional<Integer> randomJoins();
 
-    default String initialSampler() {
-        return MISSING_INITIAL_SAMPLER;
-    }
+    Optional<String> initialSampler();
 
     @Value.Derived
     @Configuration.Ignore
-    default Optional<KnnSampler.SamplerType> derivedSampler() {
-        String sampler = initialSampler();
-        if (sampler.equals(MISSING_INITIAL_SAMPLER)) {
-            return Optional.empty();
-        }
-
-        return KnnSampler.SamplerType.parseToOptional(sampler);
+    default Optional<KnnSampler.SamplerType> derivedInitialSampler() {
+        return initialSampler().map(KnnSampler.SamplerType::parse);
     }
 
     @Value.Check
@@ -105,7 +97,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
                 "deltaThreshold", deltaThreshold().isPresent(),
                 "maxIterations", maxIterations().isPresent(),
                 "randomJoins", randomJoins().isPresent(),
-                "initialSampler", derivedSampler().isPresent());
+                "initialSampler", derivedInitialSampler().isPresent());
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
 
             topN().orElseThrow(()-> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
@@ -147,7 +139,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
         deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
         maxIterations().ifPresent(knnBuilder::maxIterations);
         randomJoins().ifPresent(knnBuilder::randomJoins);
-        derivedSampler().ifPresent(knnBuilder::initialSampler);
+        derivedInitialSampler().ifPresent(knnBuilder::initialSampler);
         randomSeed().ifPresent(knnBuilder::randomSeed);
 
         return knnBuilder.build();
