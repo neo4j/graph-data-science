@@ -35,7 +35,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -103,16 +103,16 @@ final class HugeGraphLoadingTest extends BaseTest {
             .build()
             .graph();
 
-        NodeProperties nodeProperties = graph.nodeProperties("bar");
-        long propertyCountDiff = nodeCount - nodeProperties.size();
+        NodePropertyValues nodePropertyValues = graph.nodeProperties("bar");
+        long propertyCountDiff = nodeCount - nodePropertyValues.size();
         String errorMessage = formatWithLocale(
             "Expected %d properties to be imported. Actually imported %d properties (missing %d properties).",
-            nodeCount, nodeProperties.size(), propertyCountDiff
+            nodeCount, nodePropertyValues.size(), propertyCountDiff
         );
         assertEquals(0, propertyCountDiff, errorMessage);
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            double propertyValue = nodeProperties.doubleValue(nodeId);
+            double propertyValue = nodePropertyValues.doubleValue(nodeId);
             long neoId = graph.toOriginalNodeId(nodeId);
             assertEquals(
                 neoId,

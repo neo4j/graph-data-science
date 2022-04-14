@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.node2vec;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
@@ -81,15 +81,15 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.floatArrayValue(internalNodeId));
     }
 
     @SuppressWarnings("unused")

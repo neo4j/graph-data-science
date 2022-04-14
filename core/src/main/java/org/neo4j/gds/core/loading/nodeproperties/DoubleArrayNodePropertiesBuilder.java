@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -65,12 +65,12 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
     }
 
     @Override
-    public NodeProperties buildDirect(long size) {
-        return new DoubleArrayStoreNodeProperties(builder.build(), size);
+    public NodePropertyValues buildDirect(long size) {
+        return new DoubleArrayStoreNodePropertyValues(builder.build(), size);
     }
 
     @Override
-    public DoubleArrayNodeProperties build(long size, IdMap idMap) {
+    public DoubleArrayNodePropertyValues build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArrayArray.builder(
@@ -105,14 +105,14 @@ public class DoubleArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-        return new DoubleArrayStoreNodeProperties(propertyValues, size);
+        return new DoubleArrayStoreNodePropertyValues(propertyValues, size);
     }
 
-    static class DoubleArrayStoreNodeProperties implements DoubleArrayNodeProperties {
+    static class DoubleArrayStoreNodePropertyValues implements DoubleArrayNodePropertyValues {
         private final HugeSparseDoubleArrayArray propertyValues;
         private final long size;
 
-        DoubleArrayStoreNodeProperties(
+        DoubleArrayStoreNodePropertyValues(
             HugeSparseDoubleArrayArray propertyValues,
             long size
         ) {

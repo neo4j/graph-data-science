@@ -20,7 +20,6 @@
 package org.neo4j.gds.api.properties.nodes;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.ImmutableNodePropertyStore;
 import org.neo4j.gds.api.properties.PropertyStore;
 
 import java.util.Collections;
@@ -34,19 +33,19 @@ public interface NodePropertyStore extends PropertyStore<NodePropertyValues, Nod
 
     static Builder builder() {
         // need to initialize with empty map due to `deferCollectionAllocation = true`
-        return new Builder().nodeProperties(Collections.emptyMap());
+        return new Builder().properties(Collections.emptyMap());
     }
 
     @org.immutables.builder.Builder.AccessibleFields
     final class Builder extends ImmutableNodePropertyStore.Builder {
 
         public Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
-            nodeProperties.putIfAbsent(propertyKey, nodeProperty);
+            properties.putIfAbsent(propertyKey, nodeProperty);
             return this;
         }
 
         public Builder removeProperty(String propertyKey) {
-            nodeProperties.remove(propertyKey);
+            properties.remove(propertyKey);
             return this;
         }
     }

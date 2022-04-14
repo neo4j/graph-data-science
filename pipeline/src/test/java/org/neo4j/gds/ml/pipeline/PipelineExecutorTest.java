@@ -41,7 +41,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.nodeproperties.LongTestProperties;
+import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.Collection;
 import java.util.List;
@@ -268,7 +268,7 @@ class PipelineExecutorTest {
             graphStore.addNodeProperty(
                 Set.of(NODE_LABEL_N),
                 PROPERTY,
-                new LongTestProperties(nodeId -> nodeId)
+                new LongTestPropertyValues(nodeId -> nodeId)
             );
         }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.function.LongFunction;
 
@@ -98,7 +98,7 @@ public abstract class HugeArray<Array, Box, Self extends HugeArray<Array, Box, S
      */
     public abstract Array toArray();
 
-    public abstract NodeProperties asNodeProperties();
+    public abstract NodePropertyValues asNodeProperties();
 
     /**
      * Copies data from {@code source} into this array, starting from {@code sliceStart} up until {@code sliceEnd}.

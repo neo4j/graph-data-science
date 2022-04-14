@@ -28,7 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.config.ConcurrencyConfig;
@@ -84,7 +84,7 @@ public final class NativeNodePropertyImporter {
         }
     }
 
-    public Map<PropertyMapping, NodeProperties> result(IdMap idMap) {
+    public Map<PropertyMapping, NodePropertyValues> result(IdMap idMap) {
         return buildersByLabel.build(idMap);
     }
 
@@ -233,7 +233,7 @@ public final class NativeNodePropertyImporter {
             buildersByLabel.forEach(action);
         }
 
-        Map<PropertyMapping, NodeProperties> build(IdMap idMap) {
+        Map<PropertyMapping, NodePropertyValues> build(IdMap idMap) {
             return buildersByPropertyKey
                 .entrySet()
                 .stream()

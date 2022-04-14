@@ -21,25 +21,25 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class NullCheckingNodeProperties implements NodeProperties {
+public final class NullCheckingNodePropertyValues implements NodePropertyValues {
 
-    public static NullCheckingNodeProperties create(NodeProperties properties, String name, IdMap idMap) {
+    public static NullCheckingNodePropertyValues create(NodePropertyValues properties, String name, IdMap idMap) {
         var valueType = properties.valueType();
         assert valueType != ValueType.DOUBLE && valueType != ValueType.LONG: "Don't use NullCheckingNodeProperties for primitive properties";
-        return new NullCheckingNodeProperties(properties, name, idMap);
+        return new NullCheckingNodePropertyValues(properties, name, idMap);
     }
 
-    private final NodeProperties properties;
+    private final NodePropertyValues properties;
     private final String name;
     private final IdMap idMap;
 
-    private NullCheckingNodeProperties(NodeProperties properties, String name, IdMap idMap) {
+    private NullCheckingNodePropertyValues(NodePropertyValues properties, String name, IdMap idMap) {
         this.properties = properties;
         this.name = name;
         this.idMap = idMap;

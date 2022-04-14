@@ -23,10 +23,10 @@ import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -78,7 +78,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
     private static final int SAMPLING_SIZE = 1024;
 
     private final WccBaseConfig config;
-    private final NodeProperties initialComponents;
+    private final NodePropertyValues initialComponents;
     private final ExecutorService executor;
     private final long nodeCount;
     private final long batchSize;

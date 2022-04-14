@@ -17,24 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
-public class IdentityProperties implements LongNodeProperties {
-    private final long expectedPropertyCount;
+public final class LongTestPropertyValues implements LongNodePropertyValues {
+    private final LongToLongFunction transformer;
 
-    public IdentityProperties(long expectedPropertyCount) {
-        this.expectedPropertyCount = expectedPropertyCount;
+    public LongTestPropertyValues(LongToLongFunction transformer) {this.transformer = transformer;}
+
+    @Override
+    public long size() {
+        return 0;
     }
 
     @Override
     public long longValue(long nodeId) {
-        return nodeId;
-    }
-
-    @Override
-    public long size() {
-        return expectedPropertyCount;
+        return transformer.applyAsLong(nodeId);
     }
 }

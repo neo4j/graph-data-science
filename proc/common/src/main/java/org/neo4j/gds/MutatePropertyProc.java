@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -34,7 +34,7 @@ public abstract class MutatePropertyProc<
     CONFIG extends MutatePropertyConfig> extends MutateProc<ALGO, ALGO_RESULT, PROC_RESULT, CONFIG> {
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         throw new UnsupportedOperationException(
             "Mutate procedures must implement either `nodeProperties` or `nodePropertyList`.");
     }

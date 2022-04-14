@@ -24,9 +24,9 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.gds.beta.modularity.ModularityOptimization;
 import org.neo4j.gds.beta.modularity.ModularityOptimizationFactory;
@@ -53,7 +53,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
     private final Graph rootGraph;
     private final LouvainBaseConfig config;
-    private final NodeProperties seedingValues;
+    private final NodePropertyValues seedingValues;
     private final ExecutorService executorService;
     // results
     private HugeLongArray[] dendrograms;
@@ -80,7 +80,7 @@ public final class Louvain extends Algorithm<Louvain> {
         progressTracker.beginSubTask();
 
         Graph workingGraph = rootGraph;
-        NodeProperties nextSeedingValues = seedingValues;
+        NodePropertyValues nextSeedingValues = seedingValues;
 
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
@@ -98,7 +98,7 @@ public final class Louvain extends Algorithm<Louvain> {
             long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
-            nextSeedingValues = new OriginalIdNodeProperties(workingGraph);
+            nextSeedingValues = new OriginalIdNodePropertyValues(workingGraph);
 
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
@@ -155,7 +155,7 @@ public final class Louvain extends Algorithm<Louvain> {
         return maxCommunityId.get();
     }
 
-    private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodeProperties seed) {
+    private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
         ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
             .builder()
             .maxIterations(config.maxIterations())
@@ -269,10 +269,10 @@ public final class Louvain extends Algorithm<Louvain> {
         this.rootGraph.releaseTopology();
     }
 
-    static class OriginalIdNodeProperties implements LongNodeProperties {
+    static class OriginalIdNodePropertyValues implements LongNodePropertyValues {
         private final Graph graph;
 
-        public OriginalIdNodeProperties(Graph graph) {
+        public OriginalIdNodePropertyValues(Graph graph) {
             this.graph = graph;
         }
 

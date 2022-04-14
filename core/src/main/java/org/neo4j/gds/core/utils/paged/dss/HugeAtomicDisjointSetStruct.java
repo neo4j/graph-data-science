@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged.dss;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
@@ -89,7 +89,7 @@ public final class HugeAtomicDisjointSetStruct implements DisjointSetStruct {
 
     public HugeAtomicDisjointSetStruct(
         long capacity,
-        NodeProperties communityMapping,
+        NodePropertyValues communityMapping,
         int concurrency
     ) {
         this.parent = HugeAtomicLongArray.newArray(capacity, LongPageCreator.identity(concurrency));

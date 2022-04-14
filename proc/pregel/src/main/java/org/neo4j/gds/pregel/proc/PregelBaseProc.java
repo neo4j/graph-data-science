@@ -20,9 +20,9 @@
 package org.neo4j.gds.pregel.proc;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -53,21 +53,21 @@ final class PregelBaseProc {
             .map(element -> {
                 var propertyKey = element.propertyKey();
 
-                NodeProperties nodeProperties;
+                NodePropertyValues nodePropertyValues;
                 switch (element.propertyType()) {
                     case LONG:
-                        nodeProperties = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
+                        nodePropertyValues = compositeNodeValue.longProperties(propertyKey).asNodeProperties();
                         break;
                     case DOUBLE:
-                        nodeProperties = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
+                        nodePropertyValues = compositeNodeValue.doubleProperties(propertyKey).asNodeProperties();
                         break;
                     case LONG_ARRAY:
-                        nodeProperties = new HugeObjectArrayLongArrayProperties(
+                        nodePropertyValues = new HugeObjectArrayLongArrayPropertyValues(
                             compositeNodeValue.longArrayProperties(propertyKey)
                         );
                         break;
                     case DOUBLE_ARRAY:
-                        nodeProperties = new HugeObjectArrayDoubleArrayProperties(
+                        nodePropertyValues = new HugeObjectArrayDoubleArrayPropertyValues(
                             compositeNodeValue.doubleArrayProperties(propertyKey)
                         );
                         break;
@@ -77,17 +77,17 @@ final class PregelBaseProc {
 
                 return ImmutableNodeProperty.of(
                     formatWithLocale("%s%s", propertyPrefix, propertyKey),
-                    nodeProperties
+                    nodePropertyValues
                 );
             }).collect(Collectors.toList());
     }
 
     private PregelBaseProc() {}
 
-    static class HugeObjectArrayLongArrayProperties implements LongArrayNodeProperties {
+    static class HugeObjectArrayLongArrayPropertyValues implements LongArrayNodePropertyValues {
         private final HugeObjectArray<long[]> longArrays;
 
-        HugeObjectArrayLongArrayProperties(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
+        HugeObjectArrayLongArrayPropertyValues(HugeObjectArray<long[]> longArrays) {this.longArrays = longArrays;}
 
         @Override
         public long size() {
@@ -100,10 +100,10 @@ final class PregelBaseProc {
         }
     }
 
-    static class HugeObjectArrayDoubleArrayProperties implements DoubleArrayNodeProperties {
+    static class HugeObjectArrayDoubleArrayPropertyValues implements DoubleArrayNodePropertyValues {
         private final HugeObjectArray<double[]> doubleArrays;
 
-        HugeObjectArrayDoubleArrayProperties(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
+        HugeObjectArrayDoubleArrayPropertyValues(HugeObjectArray<double[]> doubleArrays) {this.doubleArrays = doubleArrays;}
 
         @Override
         public long size() {

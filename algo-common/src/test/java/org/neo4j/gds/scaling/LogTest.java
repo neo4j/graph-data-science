@@ -22,8 +22,8 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -35,13 +35,13 @@ class LogTest {
     private static Stream<Arguments> properties() {
         double[] expected = {1, 2, 3, 4};
         return Stream.of(
-            Arguments.of(new DoubleTestProperties(nodeId -> Math.pow(Math.E, nodeId)), expected)
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> Math.pow(Math.E, nodeId)), expected)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void normalizes(NodeProperties properties, double[] expected) {
+    void normalizes(NodePropertyValues properties, double[] expected) {
         var scaler = new LogTransformer(properties);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();

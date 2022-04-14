@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.astar;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
@@ -103,14 +103,14 @@ public final class AStar extends Algorithm<DijkstraResult> {
         private final double targetLatitude;
         private final double targetLongitude;
 
-        private final NodeProperties latitudeProperties;
-        private final NodeProperties longitudeProperties;
+        private final NodePropertyValues latitudeProperties;
+        private final NodePropertyValues longitudeProperties;
 
         private final HugeLongDoubleMap distanceCache;
 
         HaversineHeuristic(
-            NodeProperties latitudeProperties,
-            NodeProperties longitudeProperties,
+            NodePropertyValues latitudeProperties,
+            NodePropertyValues longitudeProperties,
             long targetNode
         ) {
             this.latitudeProperties = latitudeProperties;

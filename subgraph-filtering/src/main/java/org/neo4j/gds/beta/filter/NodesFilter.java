@@ -24,9 +24,9 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -140,7 +140,7 @@ final class NodesFilter {
                 }
             );
 
-            builder.putNodeProperty(
+            builder.putProperty(
                 propertyKey,
                 NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, filteredIdMap))
             );
@@ -151,18 +151,18 @@ final class NodesFilter {
 
     private static NodePropertiesBuilder<?> getPropertiesBuilder(
         IdMap idMap,
-        NodeProperties inputNodeProperties,
+        NodePropertyValues inputNodePropertyValues,
         int concurrency
     ) {
         NodePropertiesBuilder<?> propertiesBuilder = null;
 
-        switch (inputNodeProperties.valueType()) {
+        switch (inputNodePropertyValues.valueType()) {
             case LONG:
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longNodePropertiesBuilder) {
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
 
@@ -176,7 +176,7 @@ final class NodesFilter {
                     DefaultValue.forDouble(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleNodePropertiesBuilder) {
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
@@ -189,7 +189,7 @@ final class NodesFilter {
                     DefaultValue.forDoubleArray(),
                     concurrency
                 );
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, doubleArrayNodePropertiesBuilder) {
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
@@ -203,7 +203,7 @@ final class NodesFilter {
                     concurrency
                 );
 
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, floatArrayNodePropertiesBuilder) {
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
@@ -217,7 +217,7 @@ final class NodesFilter {
                     concurrency
                 );
 
-                propertiesBuilder = new NodePropertiesBuilder<>(inputNodeProperties, longArrayNodePropertiesBuilder) {
+                propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {
                     @Override
                     void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
@@ -297,17 +297,17 @@ final class NodesFilter {
     }
 
     private abstract static class NodePropertiesBuilder<T extends InnerNodePropertiesBuilder> {
-        final NodeProperties inputProperties;
+        final NodePropertyValues inputProperties;
         final T propertyBuilder;
 
-        NodePropertiesBuilder(NodeProperties inputProperties, T propertyBuilder) {
+        NodePropertiesBuilder(NodePropertyValues inputProperties, T propertyBuilder) {
             this.inputProperties = inputProperties;
             this.propertyBuilder = propertyBuilder;
         }
 
         abstract void accept(long inputNode, long filteredNode);
 
-        NodeProperties build(long size, IdMap idMap) {
+        NodePropertyValues build(long size, IdMap idMap) {
             return propertyBuilder.build(size, idMap);
         }
     }

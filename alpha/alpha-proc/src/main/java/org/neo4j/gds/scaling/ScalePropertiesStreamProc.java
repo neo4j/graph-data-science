@@ -21,7 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -50,7 +50,7 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig> computationResult) {
         return ScalePropertiesProc.nodeProperties(computationResult);
     }
 
@@ -65,8 +65,8 @@ public class ScalePropertiesStreamProc extends StreamProc<ScaleProperties, Scale
     }
 
     @Override
-    protected Result streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
-        return new Result(originalNodeId, nodeProperties.doubleArrayValue(internalNodeId));
+    protected Result streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
+        return new Result(originalNodeId, nodePropertyValues.doubleArrayValue(internalNodeId));
     }
 
     public static class Result {

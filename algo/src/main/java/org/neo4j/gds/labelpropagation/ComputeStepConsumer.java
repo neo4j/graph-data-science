@@ -21,18 +21,18 @@ package org.neo4j.gds.labelpropagation;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 final class ComputeStepConsumer implements RelationshipWithPropertyConsumer {
 
-    private final NodeProperties nodeWeights;
+    private final NodePropertyValues nodeWeights;
     private final HugeLongArray existingLabels;
     private final LongDoubleScatterMap votes;
 
     ComputeStepConsumer(
-            NodeProperties nodeWeights,
+            NodePropertyValues nodeWeights,
             HugeLongArray existingLabels) {
         this.existingLabels = existingLabels;
         this.nodeWeights = nodeWeights;

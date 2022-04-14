@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,13 +38,13 @@ class L2NormTest {
         double l2norm = 16.881943016134134;
         double[] expected = {0 / l2norm, 1 / l2norm, 2 / l2norm, 3 / l2norm, 4 / l2norm, 5 / l2norm, 6 / l2norm, 7 / l2norm, 8 / l2norm, 9 / l2norm};
         return Stream.of(
-            Arguments.of(new DoubleTestProperties(nodeId -> nodeId), l2norm, expected)
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> nodeId), l2norm, expected)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void normalizes(NodeProperties properties, double euclideanLength, double[] expected) {
+    void normalizes(NodePropertyValues properties, double euclideanLength, double[] expected) {
         var scaler = (L2Norm) L2Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.euclideanLength).isEqualTo(euclideanLength);
@@ -55,7 +55,7 @@ class L2NormTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestProperties(nodeId -> 0D);
+        var properties = new DoubleTestPropertyValues(nodeId -> 0D);
         var scaler = L2Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

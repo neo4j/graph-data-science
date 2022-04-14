@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -47,11 +47,11 @@ public final class GraphSageCompanion {
     private GraphSageCompanion() {}
 
     @NotNull
-    public static <T extends GraphSageBaseConfig> DoubleArrayNodeProperties getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
+    public static <T extends GraphSageBaseConfig> DoubleArrayNodePropertyValues getNodeProperties(ComputationResult<GraphSage, GraphSage.GraphSageResult, T> computationResult) {
         var size = computationResult.graph().nodeCount();
         var embeddings = computationResult.result().embeddings();
 
-        return new DoubleArrayNodeProperties() {
+        return new DoubleArrayNodePropertyValues() {
             @Override
             public long size() {
                 return size;

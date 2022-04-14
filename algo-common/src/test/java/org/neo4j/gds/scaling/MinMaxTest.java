@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.Stream;
 
@@ -35,14 +35,14 @@ class MinMaxTest {
 
     private static Stream<Arguments> properties() {
         return Stream.of(
-            Arguments.of(new DoubleTestProperties(nodeId -> nodeId), 0D, 9D),
-            Arguments.of(new DoubleTestProperties(nodeId -> 50000000D * nodeId), 0D, 4.5e8)
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> nodeId), 0D, 9D),
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> 50000000D * nodeId), 0D, 4.5e8)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void normalizes(NodeProperties properties, double min, double max) {
+    void normalizes(NodePropertyValues properties, double min, double max) {
         var scaler = (MinMax) MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.min).isEqualTo(min);
@@ -55,7 +55,7 @@ class MinMaxTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestProperties(nodeId -> 4D);
+        var properties = new DoubleTestPropertyValues(nodeId -> 4D);
         var scaler = MinMax.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -39,13 +39,13 @@ class StdScoreTest {
         double avg = 4.5D;
         double[] expected = {-4.5 / std, -3.5 / std, -2.5 / std, -1.5 / std, -0.5 / std, 0.5 / std, 1.5 / std, 2.5 / std, 3.5 / std, 4.5 / std};
         return Stream.of(
-            Arguments.of(new DoubleTestProperties(nodeId -> nodeId), avg, std, expected)
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> nodeId), avg, std, expected)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void normalizes(NodeProperties properties, double avg, double std, double[] expected) {
+    void normalizes(NodePropertyValues properties, double avg, double std, double[] expected) {
         var scaler = (StdScore) StdScore.initialize(properties, 10, 1, Pools.DEFAULT);
 
         assertThat(scaler.avg).isEqualTo(avg);
@@ -57,7 +57,7 @@ class StdScoreTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestProperties(nodeId -> 4D);
+        var properties = new DoubleTestPropertyValues(nodeId -> 4D);
         var scaler = Mean.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

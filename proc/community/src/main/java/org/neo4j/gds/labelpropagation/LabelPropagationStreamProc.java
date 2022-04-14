@@ -21,7 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -60,9 +60,9 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
     }
 
     @Override
@@ -76,7 +76,7 @@ public class LabelPropagationStreamProc extends StreamProc<LabelPropagation, Lab
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<LabelPropagation, LabelPropagation, LabelPropagationStreamConfig> computationResult) {
         return LabelPropagationProc.nodeProperties(
             computationResult,
             UUID.randomUUID().toString()

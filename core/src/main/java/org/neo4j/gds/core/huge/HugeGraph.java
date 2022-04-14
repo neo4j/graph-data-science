@@ -30,12 +30,12 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -95,7 +95,7 @@ public class HugeGraph implements CSRGraph {
 
     protected final GraphSchema schema;
 
-    protected final Map<String, NodeProperties> nodeProperties;
+    protected final Map<String, NodePropertyValues> nodeProperties;
 
     protected final Orientation orientation;
 
@@ -118,7 +118,7 @@ public class HugeGraph implements CSRGraph {
     public static HugeGraph create(
         IdMap nodes,
         GraphSchema schema,
-        Map<String, NodeProperties> nodeProperties,
+        Map<String, NodePropertyValues> nodeProperties,
         Relationships.Topology topology,
         Optional<Relationships.Properties> maybeRelationshipProperty
     ) {
@@ -139,7 +139,7 @@ public class HugeGraph implements CSRGraph {
     protected HugeGraph(
         IdMap idMap,
         GraphSchema schema,
-        Map<String, NodeProperties> nodeProperties,
+        Map<String, NodePropertyValues> nodeProperties,
         long relationshipCount,
         @NotNull AdjacencyList adjacency,
         boolean hasRelationshipProperty,
@@ -191,7 +191,7 @@ public class HugeGraph implements CSRGraph {
         return schema;
     }
 
-    public Map<String, NodeProperties> nodeProperties() { return nodeProperties; }
+    public Map<String, NodePropertyValues> nodeProperties() { return nodeProperties; }
 
     @Override
     public long relationshipCount() {
@@ -264,7 +264,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public NodeProperties nodeProperties(String propertyKey) {
+    public NodePropertyValues nodeProperties(String propertyKey) {
         return nodeProperties.get(propertyKey);
     }
 
@@ -445,7 +445,7 @@ public class HugeGraph implements CSRGraph {
     @Override
     public void releaseProperties() {
         if (canRelease) {
-            for (NodeProperties idMap : nodeProperties.values()) {
+            for (NodePropertyValues idMap : nodeProperties.values()) {
                 idMap.release();
             }
         }

@@ -20,15 +20,15 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 @ValueClass
 public interface NodeProperty {
     String propertyKey();
 
-    NodeProperties properties();
+    NodePropertyValues properties();
 
-    static NodeProperty of(String propertyKey, NodeProperties properties) {
+    static NodeProperty of(String propertyKey, NodePropertyValues properties) {
         return ImmutableNodeProperty.of(propertyKey, properties);
     }
 

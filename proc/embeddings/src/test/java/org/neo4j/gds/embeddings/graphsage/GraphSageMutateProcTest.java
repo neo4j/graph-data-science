@@ -24,7 +24,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.StoreLoaderWithConfigBuilder;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.utils.StringJoining;
@@ -65,9 +65,9 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             assertThat(row.get("configuration")).isInstanceOf(Map.class);
         });
 
-        NodeProperties embeddingNodeProperties = graphStore.nodePropertyValues(mutatePropertyKey);
+        NodePropertyValues embeddingNodePropertyValues = graphStore.nodePropertyValues(mutatePropertyKey);
         graphStore.nodes().forEachNode(nodeId -> {
-            assertEquals(embeddingSize, embeddingNodeProperties.doubleArrayValue(nodeId).length);
+            assertEquals(embeddingSize, embeddingNodePropertyValues.doubleArrayValue(nodeId).length);
             return true;
         });
     }

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.cypher.nodeproperties;
 
-import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseFloatArrayList;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
 import org.neo4j.gds.utils.Neo4jValueConversion;
 import org.neo4j.values.storable.Value;
 
-public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, FloatArrayNodeProperties {
+public class UpdatableFloatArrayNodeProperty implements UpdatableNodeProperty, FloatArrayNodePropertyValues {
 
     private final long nodeCount;
     private final HugeSparseFloatArrayList floatArrayList;

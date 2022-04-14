@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
@@ -179,7 +179,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             concurrency
         );
 
-        Map<PropertyMapping, NodeProperties> nodeProperties = nodePropertyImporter == null
+        Map<PropertyMapping, NodePropertyValues> nodeProperties = nodePropertyImporter == null
             ? new HashMap<>()
             : nodePropertyImporter.result(idMap);
 
@@ -192,7 +192,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
     private void importPropertiesFromIndex(
         IdMap idMap,
-        Map<PropertyMapping, NodeProperties> nodeProperties
+        Map<PropertyMapping, NodePropertyValues> nodeProperties
     ) {
         long indexStart = System.nanoTime();
 
@@ -251,7 +251,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
             }
 
             for (var entry : buildersByPropertyKey.entrySet()) {
-                NodeProperties propertyValues = entry.getValue().build(idMap);
+                NodePropertyValues propertyValues = entry.getValue().build(idMap);
                 nodeProperties.put(entry.getKey(), propertyValues);
                 recordsImported += propertyValues.size();
             }

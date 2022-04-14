@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.ComponentSizeConfig;
@@ -29,8 +29,8 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
+import org.neo4j.gds.nodeproperties.LongIfChangedNodePropertyValues;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
@@ -41,10 +41,10 @@ public final class CommunityProcCompanion {
 
     private CommunityProcCompanion() {}
 
-    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodeProperties nodeProperties(
+    public static <CONFIG extends ConcurrencyConfig & SeedConfig & ConsecutiveIdsConfig> NodePropertyValues nodeProperties(
         CONFIG config,
         String resultProperty,
-        LongNodeProperties nodeProperties,
+        LongNodePropertyValues nodeProperties,
         Supplier<NodeProperty> seedPropertySupplier
     ) {
 
@@ -52,12 +52,12 @@ public final class CommunityProcCompanion {
         var isIncremental = config.isIncremental();
         var resultPropertyEqualsSeedProperty = isIncremental && resultProperty.equals(config.seedProperty());
 
-        LongNodeProperties result;
+        LongNodePropertyValues result;
 
         if (resultPropertyEqualsSeedProperty && !consecutiveIds) {
-            result = LongIfChangedNodeProperties.of(seedPropertySupplier.get(), nodeProperties);
+            result = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
         } else if (consecutiveIds && !isIncremental) {
-            result = new ConsecutiveLongNodeProperties(
+            result = new ConsecutiveLongNodePropertyValues(
                 nodeProperties,
                 nodeProperties.size()
             );
@@ -82,8 +82,8 @@ public final class CommunityProcCompanion {
         return result;
     }
 
-    private static LongNodeProperties applySizeFilter(
-        LongNodeProperties nodeProperties,
+    private static LongNodePropertyValues applySizeFilter(
+        LongNodePropertyValues nodeProperties,
         long size,
         int concurrency
     ) {
@@ -96,15 +96,15 @@ public final class CommunityProcCompanion {
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);
     }
 
-    private static class CommunitySizeFilter implements LongNodeProperties {
+    private static class CommunitySizeFilter implements LongNodePropertyValues {
 
-        private final LongNodeProperties properties;
+        private final LongNodePropertyValues properties;
 
         private final HugeSparseLongArray communitySizes;
 
         private final long minCommunitySize;
 
-        CommunitySizeFilter(LongNodeProperties properties, HugeSparseLongArray communitySizes, long minCommunitySize) {
+        CommunitySizeFilter(LongNodePropertyValues properties, HugeSparseLongArray communitySizes, long minCommunitySize) {
             this.properties = properties;
             this.communitySizes = communitySizes;
             this.minCommunitySize = minCommunitySize;

@@ -23,9 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -38,13 +38,13 @@ class L1NormTest {
         return Stream.of(
             Arguments.of(
                 5,
-                new DoubleTestProperties(nodeId -> nodeId),
+                new DoubleTestPropertyValues(nodeId -> nodeId),
                 10D,
                 new double[]{0, 0.1D, 0.2D, 0.3D, 0.4D}
             ),
             Arguments.of(
                 5,
-                new DoubleTestProperties(nodeId ->(nodeId % 2 == 0) ? -nodeId : nodeId),
+                new DoubleTestPropertyValues(nodeId ->(nodeId % 2 == 0) ? -nodeId : nodeId),
                 10D,
                 new double[]{0, 0.1D, - 0.2D, 0.3D, -0.40D}
             )
@@ -53,7 +53,7 @@ class L1NormTest {
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(int nodeCount, NodeProperties properties, double l1norm, double[] expected) {
+    void scale(int nodeCount, NodePropertyValues properties, double l1norm, double[] expected) {
         var scaler = (L1Norm) L1Norm.initialize(properties, nodeCount, 1, Pools.DEFAULT);
 
         assertThat(scaler.l1Norm).isEqualTo(l1norm);
@@ -64,7 +64,7 @@ class L1NormTest {
 
     @Test
     void avoidsDivByZero() {
-        var properties = new DoubleTestProperties(nodeId -> 0D);
+        var properties = new DoubleTestPropertyValues(nodeId -> 0D);
         var scaler = L1Norm.initialize(properties, 10, 1, Pools.DEFAULT);
 
         for (int i = 0; i < 10; i++) {

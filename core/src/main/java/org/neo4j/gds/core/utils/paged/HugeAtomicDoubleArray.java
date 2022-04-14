@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.core.utils.ArrayUtil;
 
 import java.lang.invoke.MethodHandles;
@@ -167,8 +167,8 @@ public abstract class HugeAtomicDoubleArray {
      */
     public abstract long release();
 
-    public DoubleNodeProperties asNodeProperties() {
-        return new DoubleNodeProperties() {
+    public DoubleNodePropertyValues asNodeProperties() {
+        return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 return get(nodeId);

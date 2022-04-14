@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.k1coloring;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -46,7 +46,7 @@ final class K1ColoringProc {
             .withDidConverge(computeResult.isGraphEmpty() ? false : computeResult.algorithm().didConverge());
     }
 
-    static <CONFIG extends K1ColoringConfig> NodeProperties nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
+    static <CONFIG extends K1ColoringConfig> NodePropertyValues nodeProperties(ComputationResult<K1Coloring, HugeLongArray, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 

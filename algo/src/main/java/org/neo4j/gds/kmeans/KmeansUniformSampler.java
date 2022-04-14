@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ public class KmeansUniformSampler implements KmeansSampler {
     @Override
     public List<Long> sampleClusters(
         SplittableRandom random,
-        NodeProperties nodeProperties,
+        NodePropertyValues nodePropertyValues,
         long nodeCount,
         int k
     ) {

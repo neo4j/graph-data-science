@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
@@ -29,7 +29,7 @@ public final class LabelsAndClassCountsExtractor {
     private LabelsAndClassCountsExtractor() {}
 
     static LabelsAndClassCounts extractLabelsAndClassCounts(
-        NodeProperties targetNodeProperty,
+        NodePropertyValues targetNodeProperty,
         long nodeCount
     ) {
         var classCounts = new Multiset<Long>();

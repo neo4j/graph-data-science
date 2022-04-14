@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
@@ -51,7 +51,7 @@ class WriteProcCancellationTest extends BaseTest {
 
     @Test
     void shouldRemoveTaskAfterWriteFailure() {
-        var nodeProperties = new LongNodeProperties() {
+        var nodeProperties = new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 throw new IllegalStateException("explicit fail while writing");

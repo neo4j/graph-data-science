@@ -21,7 +21,7 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -69,13 +69,13 @@ public class ApproxMaxKCutStreamProc extends StreamProc<ApproxMaxKCut, ApproxMax
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ApproxMaxKCut, ApproxMaxKCut.CutResult, ApproxMaxKCutStreamConfig> computationResult) {
         return ApproxMaxKCutProc.nodeProperties(computationResult);
     }
 

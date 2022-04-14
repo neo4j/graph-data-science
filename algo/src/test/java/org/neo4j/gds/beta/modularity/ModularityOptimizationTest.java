@@ -29,7 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -207,7 +207,7 @@ class ModularityOptimizationTest {
     private ModularityOptimization compute(
         Graph graph,
         int maxIterations,
-        NodeProperties properties,
+        NodePropertyValues properties,
         int concurrency,
         int minBatchSize
     ) {
@@ -218,7 +218,7 @@ class ModularityOptimizationTest {
     private ModularityOptimization compute(
         Graph graph,
         int maxIterations,
-        NodeProperties properties,
+        NodePropertyValues properties,
         int concurrency,
         int minBatchSize,
         Log log

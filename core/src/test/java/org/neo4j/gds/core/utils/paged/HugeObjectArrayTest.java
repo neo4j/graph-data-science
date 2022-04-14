@@ -24,9 +24,9 @@ import org.assertj.core.data.Percentage;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
@@ -50,9 +50,9 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         });
         var nodeProperties = floats.asNodeProperties();
         assertThat(nodeProperties)
-            .asInstanceOf(InstanceOfAssertFactories.type(FloatArrayNodeProperties.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(FloatArrayNodePropertyValues.class))
             .describedAs("float properties must return the same size and elements as the underlying array")
-            .returns(floats.size(), FloatArrayNodeProperties::size)
+            .returns(floats.size(), FloatArrayNodePropertyValues::size)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.floatArrayValue(nodeId))
@@ -72,9 +72,9 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         });
         var nodeProperties = doubles.asNodeProperties();
         assertThat(nodeProperties)
-            .asInstanceOf(InstanceOfAssertFactories.type(DoubleArrayNodeProperties.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(DoubleArrayNodePropertyValues.class))
             .describedAs("double properties must return the same size and elements as the underlying array")
-            .returns(doubles.size(), DoubleArrayNodeProperties::size)
+            .returns(doubles.size(), DoubleArrayNodePropertyValues::size)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.doubleArrayValue(nodeId))
@@ -94,9 +94,9 @@ final class HugeObjectArrayTest extends HugeArrayTestBase<String[], String, Huge
         });
         var nodeProperties = longs.asNodeProperties();
         assertThat(nodeProperties)
-            .asInstanceOf(InstanceOfAssertFactories.type(LongArrayNodeProperties.class))
+            .asInstanceOf(InstanceOfAssertFactories.type(LongArrayNodePropertyValues.class))
             .describedAs("long properties must return the same size and elements as the underlying array")
-            .returns(longs.size(), LongArrayNodeProperties::size)
+            .returns(longs.size(), LongArrayNodePropertyValues::size)
             .satisfies(array -> {
                 for (int nodeId = 0; nodeId < NODE_COUNT; nodeId++) {
                     assertThat(array.longArrayValue(nodeId))

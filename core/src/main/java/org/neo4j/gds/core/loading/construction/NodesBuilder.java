@@ -26,7 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.LongPropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
@@ -199,14 +199,14 @@ public final class NodesBuilder {
 
         var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
 
-        Optional<Map<String, NodeProperties>> nodeProperties = Optional.empty();
+        Optional<Map<String, NodePropertyValues>> nodeProperties = Optional.empty();
         if (hasProperties) {
             nodeProperties = Optional.of(buildProperties(idMap));
         }
         return ImmutableIdMapAndProperties.of(idMap, nodeProperties);
     }
 
-    private Map<String, NodeProperties> buildProperties(IdMap idMap) {
+    private Map<String, NodePropertyValues> buildProperties(IdMap idMap) {
         return propertyBuildersByPropertyKey.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> e.getValue().build(idMap)
@@ -263,7 +263,7 @@ public final class NodesBuilder {
     public interface IdMapAndProperties {
         IdMap idMap();
 
-        Optional<Map<String, NodeProperties>> nodeProperties();
+        Optional<Map<String, NodePropertyValues>> nodeProperties();
     }
 
     private static class ThreadLocalBuilder implements AutoCloseable {

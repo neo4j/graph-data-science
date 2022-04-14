@@ -20,7 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -46,7 +46,7 @@ final class LocalClusteringCoefficientCompanion {
 
     private LocalClusteringCoefficientCompanion() {}
 
-    static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodeProperties nodeProperties(
+    static <CONFIG extends LocalClusteringCoefficientBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, CONFIG> computeResult
     ) {
         return computeResult.result().asNodeProperties();

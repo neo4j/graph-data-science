@@ -22,7 +22,7 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -35,7 +35,7 @@ import java.util.function.LongToDoubleFunction;
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficient.Result> {
 
     private final int concurrency;
-    private final NodeProperties triangleCountProperty;
+    private final NodePropertyValues triangleCountProperty;
     private final LocalClusteringCoefficientBaseConfig configuration;
 
     private Graph graph;
@@ -152,7 +152,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
                 .build();
         }
 
-        default NodeProperties asNodeProperties() {
+        default NodePropertyValues asNodeProperties() {
             return localClusteringCoefficients().asNodeProperties();
         }
     }

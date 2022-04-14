@@ -23,7 +23,7 @@ import net.jqwik.api.ForAll;
 import net.jqwik.api.From;
 import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -51,7 +51,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             nodeCount
         );
 
-        var nodeProperties = new LongNodeProperties() {
+        var nodeProperties = new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return nodeId;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.GraphProjectConfigValidations;
@@ -37,7 +37,7 @@ public final class ClosenessCentralityProc {
 
     private ClosenessCentralityProc() {}
 
-    static <CONFIG extends ClosenessCentralityConfig> NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, CONFIG> computeResult) {
+    static <CONFIG extends ClosenessCentralityConfig> NodePropertyValues nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, CONFIG> computeResult) {
         return computeResult.result().centralities().asNodeProperties();
     }
 

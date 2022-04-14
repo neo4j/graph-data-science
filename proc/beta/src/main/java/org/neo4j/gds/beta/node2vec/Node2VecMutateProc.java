@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.node2vec;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
@@ -82,7 +82,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 

@@ -20,7 +20,7 @@
 package org.neo4j.gds.beta.pregel;
 
 import com.squareup.javapoet.MethodSpec;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.annotation.GDSMode;
 import org.neo4j.gds.pregel.proc.PregelStreamProc;
 import org.neo4j.gds.pregel.proc.PregelStreamResult;
@@ -65,7 +65,7 @@ class StreamProcedureGenerator extends ProcedureGenerator {
             .returns(procResultClass())
             .addParameter(long.class, "originalNodeId")
             .addParameter(long.class, "internalNodeId")
-            .addParameter(NodeProperties.class, "nodeProperties")
+            .addParameter(NodePropertyValues.class, "nodePropertyValues")
             .addStatement("throw new $T()", UnsupportedOperationException.class)
             .build();
     }

@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -65,15 +65,15 @@ public class FastRPStreamProc extends StreamProc<FastRP, FastRP.FastRPResult, Fa
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, FastRPStreamConfig> computationResult) {
         return FastRPCompanion.getNodeProperties(computationResult);
     }
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.floatArrayValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.floatArrayValue(internalNodeId));
     }
 
     @Override

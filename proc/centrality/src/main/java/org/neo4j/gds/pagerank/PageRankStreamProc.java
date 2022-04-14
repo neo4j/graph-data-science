@@ -21,7 +21,7 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -66,9 +66,9 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
 
     @Override
     protected CentralityStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new CentralityStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+        return new CentralityStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class PageRankStreamProc extends StreamProc<PageRankAlgorithm, PageRankRe
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, PageRankStreamConfig> computationResult) {
         return PageRankProc.nodeProperties(computationResult);
     }
 }

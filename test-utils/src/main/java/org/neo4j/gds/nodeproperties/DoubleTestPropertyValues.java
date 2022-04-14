@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 
-public final class LongArrayTestProperties implements LongArrayNodeProperties {
-    private final LongToObjectFunction<long[]> transformer;
+import java.util.function.LongToDoubleFunction;
 
-    public LongArrayTestProperties(LongToObjectFunction<long[]> transformer) {this.transformer = transformer;}
+public final class DoubleTestPropertyValues implements DoubleNodePropertyValues {
+    private final LongToDoubleFunction transformer;
+
+    public DoubleTestPropertyValues(LongToDoubleFunction transformer) {this.transformer = transformer;}
 
     @Override
     public long size() {
@@ -33,7 +34,7 @@ public final class LongArrayTestProperties implements LongArrayNodeProperties {
     }
 
     @Override
-    public long[] longArrayValue(long nodeId) {
-        return transformer.apply(nodeId);
+    public double doubleValue(long nodeId) {
+        return transformer.applyAsDouble(nodeId);
     }
 }

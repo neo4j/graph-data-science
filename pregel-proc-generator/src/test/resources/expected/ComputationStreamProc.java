@@ -25,7 +25,7 @@ import javax.annotation.processing.Generated;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -72,7 +72,8 @@ public final class ComputationStreamProc extends PregelStreamProc<ComputationAlg
 
     @Override
     protected PregelStreamResult streamResult(long originalNodeId, long internalNodeId,
-            NodeProperties nodeProperties) {
+            NodePropertyValues nodePropertyValues
+    ) {
         throw new UnsupportedOperationException();
     }
 

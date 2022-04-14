@@ -21,7 +21,7 @@ package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.impl.conductance.Conductance;
@@ -72,7 +72,7 @@ public class ConductanceStreamProc extends StreamProc<Conductance, Conductance.R
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
+    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
         throw new UnsupportedOperationException("Conductance handles result building individually.");
     }
 

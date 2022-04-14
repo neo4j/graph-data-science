@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -210,7 +210,7 @@ public final class RandomGraphGenerator {
     interface NodePropertiesAndSchema {
         NodeSchema nodeSchema();
 
-        Map<String, NodeProperties> nodeProperties();
+        Map<String, NodePropertyValues> nodeProperties();
     }
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
@@ -247,7 +247,7 @@ public final class RandomGraphGenerator {
             }
         );
 
-        Map<String, NodeProperties> generatedProperties = propertyNameToProducers.entrySet().stream().collect(toMap(
+        Map<String, NodePropertyValues> generatedProperties = propertyNameToProducers.entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             entry -> {
                 var nodeLabels = new HashSet<>(propertyNameToLabels.get(entry.getKey()));
@@ -280,7 +280,7 @@ public final class RandomGraphGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private NodeProperties generateProperties(PrimitiveLongIterator nodes, PropertyProducer<?> propertyProducer) {
+    private NodePropertyValues generateProperties(PrimitiveLongIterator nodes, PropertyProducer<?> propertyProducer) {
         switch (propertyProducer.propertyType()) {
             case LONG:
                 var longValues = HugeLongArray.newArray(nodeCount);
@@ -326,11 +326,11 @@ public final class RandomGraphGenerator {
         }
     }
 
-    private <T, A extends HugeArray<T, ?, A>> NodeProperties generateProperties(
+    private <T, A extends HugeArray<T, ?, A>> NodePropertyValues generateProperties(
         PrimitiveLongIterator nodes,
         A values,
         PropertyProducer<T> propertyProducer,
-        Function<A, NodeProperties> toProperties
+        Function<A, NodePropertyValues> toProperties
     ) {
         var cursor = values.initCursor(values.newCursor());
         while (nodes.hasNext()) {

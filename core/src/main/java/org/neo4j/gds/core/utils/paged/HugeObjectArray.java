@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -180,10 +180,10 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
     public abstract T[] toArray();
 
     @Override
-    public NodeProperties asNodeProperties() {
+    public NodePropertyValues asNodeProperties() {
         var cls = elementClass();
         if (cls == float[].class) {
-            return new FloatArrayNodeProperties() {
+            return new FloatArrayNodePropertyValues() {
                 @Override
                 public float[] floatArrayValue(long nodeId) {
                     return (float[]) get(nodeId);
@@ -196,7 +196,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             };
         }
         if (cls == double[].class) {
-            return new DoubleArrayNodeProperties() {
+            return new DoubleArrayNodePropertyValues() {
                 @Override
                 public double[] doubleArrayValue(long nodeId) {
                     return (double[]) get(nodeId);
@@ -209,7 +209,7 @@ public abstract class HugeObjectArray<T> extends HugeArray<T[], T, HugeObjectArr
             };
         }
         if (cls == long[].class) {
-            return new LongArrayNodeProperties() {
+            return new LongArrayNodePropertyValues() {
                 @Override
                 public long[] longArrayValue(long nodeId) {
                     return (long[]) get(nodeId);

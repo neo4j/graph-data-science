@@ -21,8 +21,8 @@ package org.neo4j.gds.pagerank;
 
 import com.carrotsearch.hppc.LongSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -113,7 +113,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
     public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
         var concurrency = context.config().concurrency();
 
-        var properties = new DoubleNodeProperties() {
+        var properties = new DoubleNodePropertyValues() {
             @Override
             public long size() {
                 return context.nodeCount();

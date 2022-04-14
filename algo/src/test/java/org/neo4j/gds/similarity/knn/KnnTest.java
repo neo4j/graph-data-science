@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -42,9 +42,9 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
-import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
+import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
@@ -270,7 +270,7 @@ class KnnTest {
 
     @ParameterizedTest
     @MethodSource("emptyProperties")
-    void testNonExistingProperties(NodeProperties nodeProperties) {
+    void testNonExistingProperties(NodePropertyValues nodePropertyValues) {
         var knnConfig = ImmutableKnnBaseConfig.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
@@ -279,7 +279,7 @@ class KnnTest {
         var knn = Knn.create(
             graph,
             knnConfig,
-            SimilarityComputer.ofProperty(graph, "knn", nodeProperties),
+            SimilarityComputer.ofProperty(graph, "knn", nodePropertyValues),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             knnContext
         );
@@ -290,18 +290,18 @@ class KnnTest {
             .isEqualTo(3L);
     }
 
-    static Stream<NodeProperties> emptyProperties() {
+    static Stream<NodePropertyValues> emptyProperties() {
         return Stream.of(
-            new DoubleTestProperties(nodeId -> Double.NaN),
+            new DoubleTestPropertyValues(nodeId -> Double.NaN),
             new NullPropertyMap.DoubleNullPropertyMap(Double.NaN),
-            new FloatArrayTestProperties(nodeId -> new float[]{}),
-            new DoubleArrayTestProperties(nodeId -> new double[]{})
+            new FloatArrayTestPropertyValues(nodeId -> new float[]{}),
+            new DoubleArrayTestPropertyValues(nodeId -> new double[]{})
         );
     }
 
     @Test
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
-        var nodeProperties = new DoubleTestProperties(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
+        var nodeProperties = new DoubleTestPropertyValues(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
         var knn = Knn.create(
             graph,
             ImmutableKnnBaseConfig

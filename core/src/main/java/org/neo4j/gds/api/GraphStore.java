@@ -22,6 +22,8 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -83,12 +85,12 @@ public interface GraphStore {
 
     PropertyState nodePropertyState(String propertyKey);
 
-    NodeProperties nodePropertyValues(String propertyKey);
+    NodePropertyValues nodePropertyValues(String propertyKey);
 
     void addNodeProperty(
         Set<NodeLabel> nodeLabels,
         String propertyKey,
-        NodeProperties propertyValues
+        NodePropertyValues propertyValues
     );
 
     void removeNodeProperty(String propertyKey);

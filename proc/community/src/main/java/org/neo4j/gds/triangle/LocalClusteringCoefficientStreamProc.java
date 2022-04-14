@@ -22,7 +22,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -77,9 +77,9 @@ public class LocalClusteringCoefficientStreamProc extends StreamProc<
 
     @Override
     protected Result streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new Result(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+        return new Result(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
     }
 
     @Override
@@ -88,7 +88,7 @@ public class LocalClusteringCoefficientStreamProc extends StreamProc<
     }
 
     @Override
-    protected NodeProperties nodeProperties(
+    protected NodePropertyValues nodeProperties(
         ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficient.Result, LocalClusteringCoefficientStreamConfig> computationResult
     ) {
         return LocalClusteringCoefficientCompanion.nodeProperties(computationResult);

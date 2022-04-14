@@ -22,9 +22,9 @@ package org.neo4j.gds.scaling;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -37,13 +37,13 @@ class NoneScalerTest {
     private static Stream<Arguments> properties() {
         double[] expected = {4, 6, 8, 10};
         return Stream.of(
-            Arguments.of(new DoubleTestProperties(nodeId -> 2 * (nodeId + 1)), expected)
+            Arguments.of(new DoubleTestPropertyValues(nodeId -> 2 * (nodeId + 1)), expected)
         );
     }
 
     @ParameterizedTest
     @MethodSource("properties")
-    void scale(NodeProperties properties, double[] expected) {
+    void scale(NodePropertyValues properties, double[] expected) {
         var scaler = NONE.create(properties, 4, 42, Pools.DEFAULT);
 
         double[] actual = IntStream.range(1, 5).mapToDouble(scaler::scaleProperty).toArray();

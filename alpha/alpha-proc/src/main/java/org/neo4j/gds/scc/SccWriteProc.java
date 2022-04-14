@@ -20,7 +20,7 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -97,7 +97,7 @@ public class SccWriteProc extends SccProc<SccWriteProc.SccResult> {
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .build();
 
-                var properties = new LongNodeProperties() {
+                var properties = new LongNodePropertyValues() {
                     @Override
                     public long size() {
                         return computationResult.graph().nodeCount();

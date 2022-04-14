@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 
-public interface UpdatableNodeProperty extends NodeProperties {
+public interface UpdatableNodeProperty extends NodePropertyValues {
 
     void updatePropertyValue(long nodeId, Value value);
 }

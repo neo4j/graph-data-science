@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.centrality;
 
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -90,7 +90,7 @@ public class HarmonicCentralityWriteProc extends HarmonicCentralityProc<Centrali
                     .parallel(Pools.DEFAULT, writeConcurrency)
                     .build();
 
-                var properties = new DoubleNodeProperties() {
+                var properties = new DoubleNodePropertyValues() {
                     @Override
                     public long size() {
                         return computationResult.graph().nodeCount();

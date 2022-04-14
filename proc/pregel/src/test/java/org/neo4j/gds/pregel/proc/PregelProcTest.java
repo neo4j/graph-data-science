@@ -30,8 +30,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.ConditionFactory;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.Partitioning;
@@ -425,7 +425,7 @@ public class PregelProcTest extends BaseProcTest {
 
         @Override
         protected PregelStreamResult streamResult(
-            long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+            long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
         ) {
             throw new UnsupportedOperationException();
         }

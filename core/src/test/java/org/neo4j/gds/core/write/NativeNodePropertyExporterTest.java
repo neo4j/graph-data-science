@@ -36,8 +36,8 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.nodeproperties.DoubleTestProperties;
-import org.neo4j.gds.nodeproperties.LongTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
+import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.Arrays;
 import java.util.List;
@@ -79,7 +79,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .build();
 
         int[] intData = {23, 42, 84};
-        exporter.write("newProp1",  new LongTestProperties(nodeId -> intData[(int) nodeId]));
+        exporter.write("newProp1",  new LongTestPropertyValues(nodeId -> intData[(int) nodeId]));
 
         Graph updatedGraph = new StoreLoaderBuilder().api(db)
             .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
@@ -116,8 +116,8 @@ class NativeNodePropertyExporterTest extends BaseTest {
         double[] doubleData = {123D, 142D, 184D};
 
         List<NodeProperty> nodeProperties = Arrays.asList(
-            ImmutableNodeProperty.of("newProp1", new LongTestProperties(nodeId -> intData[(int) nodeId])),
-            ImmutableNodeProperty.of("newProp2", new DoubleTestProperties(nodeId -> doubleData[(int) nodeId]))
+            ImmutableNodeProperty.of("newProp1", new LongTestPropertyValues(nodeId -> intData[(int) nodeId])),
+            ImmutableNodeProperty.of("newProp2", new DoubleTestPropertyValues(nodeId -> doubleData[(int) nodeId]))
         );
 
         exporter.write(nodeProperties);
@@ -177,7 +177,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var exporter = exporterBuilder.build();
 
         // when writing properties
-        exporter.write("newProp1", new LongTestProperties(nodeId -> 1L));
+        exporter.write("newProp1", new LongTestPropertyValues(nodeId -> 1L));
 
         // then assert messages
         assertThat(log.getMessages(TestLog.INFO))
@@ -215,7 +215,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
             .parallel(executorService, 4)
             .build();
 
-        assertTransactionTermination(() -> exporter.write("foo", new DoubleTestProperties(ignore -> 42.0)));
+        assertTransactionTermination(() -> exporter.write("foo", new DoubleTestPropertyValues(ignore -> 42.0)));
 
         runQueryWithRowConsumer(db, "MATCH (n) WHERE n.foo IS NOT NULL RETURN COUNT(*) AS count", row -> {
             Number count = row.getNumber("count");

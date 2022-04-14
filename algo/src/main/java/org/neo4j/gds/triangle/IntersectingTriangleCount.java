@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -190,7 +190,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
                 .build();
         }
 
-        default LongNodeProperties asNodeProperties() {
+        default LongNodePropertyValues asNodeProperties() {
             return localTriangles().asNodeProperties();
         }
     }

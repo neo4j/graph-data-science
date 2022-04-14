@@ -20,8 +20,8 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -34,7 +34,7 @@ final class LouvainProc {
 
     private LouvainProc() {}
 
-    static <CONFIG extends LouvainBaseConfig> NodeProperties nodeProperties(
+    static <CONFIG extends LouvainBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<Louvain, Louvain, CONFIG> computationResult,
         String resultProperty
     ) {
@@ -52,7 +52,7 @@ final class LouvainProc {
             var size = computationResult.graph().nodeCount();
             var communityResult = computationResult.result();
 
-            return new LongArrayNodeProperties() {
+            return new LongArrayNodePropertyValues() {
                 @Override
                 public long size() {
                     return size;

@@ -22,21 +22,21 @@ package org.neo4j.gds.core.huge;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
-public abstract class FilteredNodeProperties implements NodeProperties {
-    protected final NodeProperties properties;
+public abstract class FilteredNodePropertyValues implements NodePropertyValues {
+    protected final NodePropertyValues properties;
     protected NodeFilteredGraph graph;
 
     protected abstract long translateId(long nodeId);
 
-    FilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+    FilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
         this.properties = properties;
         this.graph = graph;
     }
@@ -148,9 +148,9 @@ public abstract class FilteredNodeProperties implements NodeProperties {
     }
 
     // This class is used when the ID space of the wrapped properties is wider than the id space used to retrieved node properties.
-    public static class FilteredToOriginalNodeProperties extends FilteredNodeProperties {
+    public static class FilteredToOriginalNodePropertyValues extends FilteredNodePropertyValues {
 
-        public FilteredToOriginalNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+        public FilteredToOriginalNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
             super(properties, graph);
         }
 
@@ -161,9 +161,9 @@ public abstract class FilteredNodeProperties implements NodeProperties {
     }
 
     // This class is used when the ID space of the wrapped properties is smaller than the id space used to retrieved node properties.
-    public static class OriginalToFilteredNodeProperties extends FilteredNodeProperties {
+    public static class OriginalToFilteredNodePropertyValues extends FilteredNodePropertyValues {
 
-        public OriginalToFilteredNodeProperties(NodeProperties properties, NodeFilteredGraph graph) {
+        public OriginalToFilteredNodePropertyValues(NodePropertyValues properties, NodeFilteredGraph graph) {
             super(properties, graph);
         }
 

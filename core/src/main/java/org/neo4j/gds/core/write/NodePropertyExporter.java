@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
@@ -30,7 +30,7 @@ public interface NodePropertyExporter {
     long MIN_BATCH_SIZE = 10_000L;
     long MAX_BATCH_SIZE = 100_000L;
 
-    void write(String property, NodeProperties properties);
+    void write(String property, NodePropertyValues properties);
 
     void write(NodeProperty nodeProperty);
 

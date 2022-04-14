@@ -26,7 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -228,9 +228,9 @@ class RandomGraphGeneratorTest {
             .build()
             .generate();
 
-        NodeProperties nodeProperties = graph.nodeProperties("foo");
+        NodePropertyValues nodePropertyValues = graph.nodeProperties("foo");
         graph.forEachNode(nodeId -> {
-                double value = nodeProperties.doubleValue(nodeId);
+                double value = nodePropertyValues.doubleValue(nodeId);
                 assertTrue(lowerBound <= value && value <= upperBound);
                 return true;
             }
@@ -249,9 +249,9 @@ class RandomGraphGeneratorTest {
             .build()
             .generate();
 
-        NodeProperties nodeProperties = graph.nodeProperties("foo");
+        NodePropertyValues nodePropertyValues = graph.nodeProperties("foo");
         graph.forEachNode(nodeId -> {
-            float[] values = nodeProperties.floatArrayValue(nodeId);
+            float[] values = nodePropertyValues.floatArrayValue(nodeId);
             assertEquals(values.length, 42);
             for (float value : values) {
                 assertThat(value).isBetween(lowerBound, upperBound);

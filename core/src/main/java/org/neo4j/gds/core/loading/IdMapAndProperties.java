@@ -22,10 +22,10 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.Map;
 
@@ -36,9 +36,9 @@ public interface IdMapAndProperties {
 
     NodePropertyStore properties();
 
-    static IdMapAndProperties of(IdMap idMap, Map<PropertyMapping, NodeProperties> properties) {
+    static IdMapAndProperties of(IdMap idMap, Map<PropertyMapping, NodePropertyValues> properties) {
         NodePropertyStore.Builder builder = NodePropertyStore.builder();
-        properties.forEach((mapping, nodeProperties) -> builder.putNodeProperty(
+        properties.forEach((mapping, nodeProperties) -> builder.putProperty(
             mapping.propertyKey(),
             NodeProperty.of(
                 mapping.propertyKey(),

@@ -26,8 +26,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
@@ -91,7 +91,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnLongArrays() {
         long[] data = {42L, 1337L};
         long[] defaultValue = new long[2];
-        NodeProperties properties = createNodeProperties(
+        NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -105,7 +105,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnDoubleArrays() {
         double[] data = {42.2D, 1337.1D};
         double[] defaultValue = new double[2];
-        NodeProperties properties = createNodeProperties(
+        NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -119,7 +119,7 @@ final class NodePropertiesFromStoreBuilderTest {
     void shouldReturnFloatArrays() {
         float[] data = {42.2F, 1337.1F};
         float[] defaultValue = new float[2];
-        NodeProperties properties = createNodeProperties(
+        NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(data))
@@ -134,7 +134,7 @@ final class NodePropertiesFromStoreBuilderTest {
         float[] floatData = {42.2F, 1337.1F};
         double[] doubleData = {42.2D, 1337.1D};
         float[] defaultValue = new float[2];
-        NodeProperties properties = createNodeProperties(
+        NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(floatData))
@@ -153,7 +153,7 @@ final class NodePropertiesFromStoreBuilderTest {
         double[] doubleData = {42.2D, 1337.1D};
         float[] floatData = {42.2F, 1337.1F};
         double[] defaultValue = new double[2];
-        NodeProperties properties = createNodeProperties(
+        NodePropertyValues properties = createNodeProperties(
             2L,
             defaultValue,
             b -> b.set(1, Values.of(doubleData))
@@ -315,7 +315,7 @@ final class NodePropertiesFromStoreBuilderTest {
         assertEquals(1L << 42, maxPropertyValue.getAsDouble());
     }
 
-    static NodeProperties createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
+    static NodePropertyValues createNodeProperties(long size, Object defaultValue, Consumer<NodePropertiesFromStoreBuilder> buildBlock) {
         var builder = NodePropertiesFromStoreBuilder.of(
             DefaultValue.of(defaultValue),
             1

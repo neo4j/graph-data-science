@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -36,7 +36,7 @@ public abstract class StreamProc<
     PROC_RESULT,
     CONFIG extends AlgoBaseConfig> extends AlgoBaseProc<ALGO, ALGO_RESULT, CONFIG, PROC_RESULT> {
 
-    protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties);
+    protected abstract PROC_RESULT streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues);
 
     @Override
     public ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> computationResultConsumer() {
@@ -47,10 +47,10 @@ public abstract class StreamProc<
                 }
 
                 Graph graph = computationResult.graph();
-                NodeProperties nodeProperties = nodeProperties(computationResult);
+                NodePropertyValues nodePropertyValues = nodeProperties(computationResult);
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
-                    .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodeProperties));
+                    .mapToObj(nodeId -> streamResult(graph.toOriginalNodeId(nodeId), nodeId, nodePropertyValues));
                 }
             );
     }

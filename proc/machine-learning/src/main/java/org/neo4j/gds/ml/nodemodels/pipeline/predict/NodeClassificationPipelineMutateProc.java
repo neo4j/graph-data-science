@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.nodemodels.pipeline.predict;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -101,7 +101,7 @@ public class NodeClassificationPipelineMutateProc
         nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));
 
         result.predictedProbabilities().ifPresent((probabilityProperties) -> {
-            var properties = new DoubleArrayNodeProperties() {
+            var properties = new DoubleArrayNodePropertyValues() {
                 @Override
                 public long size() {
                     return computationResult.graph().nodeCount();
