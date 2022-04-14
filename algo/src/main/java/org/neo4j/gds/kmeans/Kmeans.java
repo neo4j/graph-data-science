@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public class Kmeans extends Algorithm<HugeIntArray> {
+public class Kmeans extends Algorithm<KmeansResult> {
 
     private static final int UNASSIGNED = -1;
 
@@ -112,12 +112,14 @@ public class Kmeans extends Algorithm<HugeIntArray> {
     }
 
     @Override
-    public HugeIntArray compute() {
+    public KmeansResult compute() {
+        progressTracker.beginSubTask();
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             communities.setAll(v -> (int) v);
-            return communities;
+            progressTracker.endSubTask();
+            return ImmutableKmeansResult.of(communities);
         }
         long nodeCount = graph.nodeCount();
         double[][] clusterCenters = new double[k][dimensions];
@@ -162,7 +164,8 @@ public class Kmeans extends Algorithm<HugeIntArray> {
             recomputeCenters(clusterCenters, tasks);
 
         }
-        return communities;
+        progressTracker.endSubTask();
+        return ImmutableKmeansResult.of(communities);
     }
 
     private void recomputeCenters(double[][] clusterCenters, List<KmeansTask> tasks) {
