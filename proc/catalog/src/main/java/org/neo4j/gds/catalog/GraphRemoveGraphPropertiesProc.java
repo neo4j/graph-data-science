@@ -32,11 +32,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphStreamGraphPropertiesProc extends CatalogProc {
+public class GraphRemoveGraphPropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.streamGraphProperty", mode = READ)
-    @Description("Streams the given graph property.")
-    public Stream<PropertyResult> streamProperty(
+    @Procedure(name = "gds.graph.removeGraphProperty", mode = READ)
+    @Description("Removes a graph property from a projected graph.")
+    public Stream<Result> run(
         @Name(value = "graphName") String graphName,
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -45,34 +45,39 @@ public class GraphStreamGraphPropertiesProc extends CatalogProc {
         validateGraphName(graphName);
 
         // input
-        var cypherConfig = CypherMapWrapper.create(configuration);
+        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
         var config = GraphAccessGraphPropertyConfig.of(
             graphName,
             graphProperty,
             cypherConfig
         );
-
         // validation
         validateConfig(cypherConfig, config);
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-        return streamNGraphProperties(graphStore, config);
-    }
+        // removing
+        long propertiesRemoved = graphStore.graphPropertyValues(graphProperty).size();
+        runWithExceptionLogging(
+            "Graph property removal failed",
+            () -> graphStore.removeGraphProperty(graphProperty)
+        );
 
-    private Stream<PropertyResult> streamNGraphProperties(GraphStore graphStore, GraphAccessGraphPropertyConfig config) {
-        return graphStore
-            .graphPropertyValues(config.graphProperty())
-            .objects()
-            .map(PropertyResult::new);
+        // result
+        return Stream.of(new Result(graphName, graphProperty, propertiesRemoved));
     }
 
     @SuppressWarnings("unused")
-    public static class PropertyResult {
-        public final Object propertyValue;
+    public static class Result {
+        public final String graphName;
+        public final String graphProperty;
+        public final long propertiesRemoved;
 
-        PropertyResult(Object propertyValue) {
-            this.propertyValue = propertyValue;
+        Result(String graphName, String graphProperty, long propertiesRemoved) {
+            this.graphName = graphName;
+            this.graphProperty = graphProperty;
+            this.propertiesRemoved = propertiesRemoved;
         }
     }
+
 }

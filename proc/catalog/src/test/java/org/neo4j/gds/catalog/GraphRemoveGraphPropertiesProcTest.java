@@ -22,30 +22,21 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.graph.DoubleGraphPropertyValues;
-import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
-import org.neo4j.gds.api.properties.graph.LongArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.compat.MapUtil.map;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class GraphStreamGraphPropertyProcTest extends BaseProcTest {
+class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
@@ -58,7 +49,7 @@ class GraphStreamGraphPropertyProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphProjectProc.class, GraphStreamGraphPropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, GraphRemoveGraphPropertiesProc.class);
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
@@ -70,24 +61,9 @@ class GraphStreamGraphPropertyProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.catalog.GraphStreamGraphPropertyProcTest#graphPropertyValues")
-    void streamLoadedGraphProperty(GraphPropertyValues values) {
-        graphStore.addGraphProperty("prop", values);
-
-        String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamGraphProperty('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
-            DEFAULT_GRAPH_NAME
-        );
-
-        assertCypherResult(
-            graphWriteQuery,
-            values.objects().map(property -> map("propertyValue", property)).collect(Collectors.toList())
-        );
-    }
-
-    static Stream<Arguments> graphPropertyValues() {
-        return Stream.of(arguments(new LongGraphPropertyValues() {
+    @Test
+    void removeAGraphProperty() {
+        LongGraphPropertyValues values = new LongGraphPropertyValues() {
             @Override
             public LongStream longValues() {
                 return LongStream.range(0, 10);
@@ -98,32 +74,32 @@ class GraphStreamGraphPropertyProcTest extends BaseProcTest {
                 return 10;
 
             }
-        }), arguments(new DoubleGraphPropertyValues() {
-            @Override
-            public DoubleStream doubleValues() {
-                return DoubleStream.of(42.0, 1.337, Double.NaN);
-            }
+        };
 
-            @Override
-            public long size() {
-                return 3;
-            }
-        }), arguments(new LongArrayGraphPropertyValues() {
-            @Override
-            public Stream<long[]> longArrayValues() {
-                return Stream.of(new long[]{1L, 2L, 3L, 4L}, new long[]{42, 1337});
-            }
+        graphStore.addGraphProperty("prop", values);
 
-            @Override
-            public long size() {
-                return 2;
-            }
-        }));
+        String graphWriteQuery = formatWithLocale(
+            "CALL gds.graph.removeGraphProperty('%s', 'prop')",
+            DEFAULT_GRAPH_NAME
+        );
+
+        assertCypherResult(
+            graphWriteQuery,
+            List.of(
+                Map.of(
+                  "graphName", DEFAULT_GRAPH_NAME,
+                  "graphProperty", "prop",
+                  "propertiesRemoved", 10L
+                )
+            )
+        );
+
+        assertThat(graphStore.hasGraphProperty("prop")).isFalse();
     }
 
     @Test
     void shouldFailOnNonExistingNodeProperty() {
-        assertError("CALL gds.graph.streamGraphProperty($graph, 'UNKNOWN')",
+        assertError("CALL gds.graph.removeGraphProperty($graph, 'UNKNOWN')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'UNKNOWN' does not exist. The following properties exist in the graph []."
         );
@@ -144,7 +120,7 @@ class GraphStreamGraphPropertyProcTest extends BaseProcTest {
             }
         };
         graphStore.addGraphProperty("prop", values);
-        assertError("CALL gds.graph.streamGraphProperty($graph, 'porp')",
+        assertError("CALL gds.graph.removeGraphProperty($graph, 'porp')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'porp' does not exist. Did you mean: ['prop']."
         );

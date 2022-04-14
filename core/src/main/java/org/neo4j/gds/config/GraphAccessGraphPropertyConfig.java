@@ -34,7 +34,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStreamGraphPropertyConfig extends BaseConfig {
+public interface GraphAccessGraphPropertyConfig extends BaseConfig {
 
     @Configuration.Parameter
     Optional<String> graphName();
@@ -62,12 +62,12 @@ public interface GraphStreamGraphPropertyConfig extends BaseConfig {
         }
     }
 
-    static GraphStreamGraphPropertyConfig of(
+    static GraphAccessGraphPropertyConfig of(
         String graphName,
         String graphProperty,
         CypherMapWrapper config
     ) {
-        return new GraphStreamGraphPropertyConfigImpl(
+        return new GraphAccessGraphPropertyConfigImpl(
             Optional.of(graphName),
             graphProperty,
             config
