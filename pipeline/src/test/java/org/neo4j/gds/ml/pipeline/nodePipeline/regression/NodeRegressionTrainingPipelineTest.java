@@ -19,13 +19,14 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
-import org.assertj.core.api.InstanceOfAssertFactories;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
@@ -96,14 +97,20 @@ class NodeRegressionTrainingPipelineTest {
 
     @Test
     void canSetParameterSpace() {
-        var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
+        var lrConfig = LinearRegressionTrainConfig.of(Map.of("penalty", 19));
+        var rfConfig = RandomForestTrainerConfig.of(Map.of("maxDepth", 19));
 
         var pipeline = new NodeRegressionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config));
+        pipeline.addTrainerConfig(lrConfig.toTunableConfig());
+        pipeline.addTrainerConfig(rfConfig.toTunableConfig());
 
-        assertThat(pipeline
-            .trainingParameterSpace()
-            .get(TrainingMethod.LogisticRegression)).containsExactly(config.toTunableConfig());
+        assertThat(pipeline.trainingParameterSpace())
+            .usingRecursiveComparison()
+            .isEqualTo(
+                Map.of(
+                    TrainingMethod.LinearRegression, List.of(lrConfig.toTunableConfig()),
+                    TrainingMethod.RandomForest, List.of(rfConfig.toTunableConfig())
+                ));
     }
 
     @Test
@@ -152,26 +159,18 @@ class NodeRegressionTrainingPipelineTest {
         @Test
         void returnsCorrectDefaultsMap() {
             var pipeline = new NodeRegressionTrainingPipeline();
-            assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
-                .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
-                    .isInstanceOf(Map.class)
-                    .asInstanceOf(InstanceOfAssertFactories.MAP)
-                    .containsOnlyKeys("nodePropertySteps", "featureProperties")
-                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("nodePropertySteps"))
-                    .returns(List.of(), featurePipelineMap -> featurePipelineMap.get("featureProperties")))
-                .returns(
-                    NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
-                    pipelineMap -> pipelineMap.get("splitConfig")
-                )
-                .returns(
-                    Map.of(TrainingMethod.LinearRegression.name(), List.of(), TrainingMethod.RandomForest.name(), List.of()),
-                    pipelineMap -> pipelineMap.get("trainingParameterSpace")
-                )
-                .returns(
-                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
-                    pipelineMap -> pipelineMap.get("autoTuningConfig")
-                );
+            assertThat(pipeline.toMap()).isEqualTo(Map.of(
+                "featurePipeline", Map.of(
+                    "nodePropertySteps", List.of(),
+                    "featureProperties", List.of()
+                ),
+                "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
+                "trainingParameterSpace", Map.of(
+                    TrainingMethod.LinearRegression.name(), List.of(),
+                    TrainingMethod.RandomForest.name(), List.of()
+                ),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
+            ));
         }
 
         @Test
@@ -186,42 +185,30 @@ class NodeRegressionTrainingPipelineTest {
             var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
+            List<TrainerConfig> candidates = List.of(
                 LinearRegressionTrainConfig.of(Map.of("penalty", 1000000)),
                 LinearRegressionTrainConfig.of(Map.of("penalty", 1))
-            ));
+            );
+            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LinearRegression, candidates);
 
             var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
 
-            assertThat(pipeline.toMap())
-                .containsOnlyKeys("featurePipeline", "splitConfig", "trainingParameterSpace", "autoTuningConfig")
-                .satisfies(pipelineMap -> assertThat(pipelineMap.get("featurePipeline"))
-                    .isInstanceOf(Map.class)
-                    .asInstanceOf(InstanceOfAssertFactories.MAP)
-                    .containsOnlyKeys("nodePropertySteps", "featureProperties")
-                    .returns(
-                        List.of(nodePropertyStep.toMap()),
-                        featurePipelineMap -> featurePipelineMap.get("nodePropertySteps")
-                    )
-                    .returns(
-                        List.of(fooStep.toMap()),
-                        featurePipelineMap -> featurePipelineMap.get("featureProperties")
-                    ))
-                .returns(
-                    pipeline.splitConfig().toMap(),
-                    pipelineMap -> pipelineMap.get("splitConfig")
-                )
-                .returns(
-                    pipeline.trainingParameterSpace().get(TrainingMethod.LinearRegression)
-                        .stream()
+            assertThat(pipeline.toMap()).isEqualTo(Map.of(
+                "featurePipeline", Map.of(
+                    "nodePropertySteps", List.of(nodePropertyStep.toMap()),
+                    "featureProperties", List.of(fooStep.toMap())
+                ),
+                "splitConfig", splitConfig.toMap(),
+                "trainingParameterSpace", Map.of(
+                    TrainingMethod.LinearRegression.name(), candidates.stream()
+                        .map(TrainerConfig::toTunableConfig)
                         .map(TunableTrainerConfig::toMap)
                         .collect(Collectors.toList()),
-                    pipelineMap -> ((Map<String, Object>) pipelineMap.get("trainingParameterSpace")).get(TrainingMethod.LinearRegression.name())
-                ).returns(
-                    AutoTuningConfig.DEFAULT_CONFIG.toMap(),
-                    pipelineMap -> pipelineMap.get("autoTuningConfig")
-                );
+                    TrainingMethod.RandomForest.name(), List.of()
+                ),
+                "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
+            ));
         }
     }
 }
