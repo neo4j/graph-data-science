@@ -40,7 +40,7 @@ public interface LongArrayGraphPropertyValues extends GraphPropertyValues {
         return longArrayValues().map(value -> value == null ? null : Values.longArray(value));
     }
 
-       @Override
+    @Override
     default ValueType valueType() {
         return ValueType.LONG_ARRAY;
     }

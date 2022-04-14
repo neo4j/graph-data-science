@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api.properties.graph;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.PropertyValues;
 import org.neo4j.values.storable.Value;
@@ -38,17 +37,14 @@ public interface GraphPropertyValues extends PropertyValues {
         throw unsupportedTypeException(ValueType.LONG);
     }
 
-    @Nullable
     default Stream<double[]> doubleArrayValues() {
         throw unsupportedTypeException(ValueType.DOUBLE_ARRAY);
     }
 
-    @Nullable
     default Stream<float[]> floatArrayValues() {
         throw unsupportedTypeException(ValueType.FLOAT_ARRAY);
     }
 
-    @Nullable
     default Stream<long[]> longArrayValues() {
         throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }

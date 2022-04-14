@@ -38,7 +38,7 @@ public interface DoubleGraphPropertyValues extends GraphPropertyValues {
 
     @Override
     default Stream<Value> values() {
-        return doubleValues().boxed().map(value -> Double.isNaN(value) ? null : Values.doubleValue(value));
+        return doubleValues().mapToObj(value -> Double.isNaN(value) ? null : Values.doubleValue(value));
     }
 
     @Override
