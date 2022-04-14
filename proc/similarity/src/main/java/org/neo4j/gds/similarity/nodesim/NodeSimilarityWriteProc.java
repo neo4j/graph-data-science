@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -86,7 +86,7 @@ public class NodeSimilarityWriteProc extends SimilarityWriteProc<NodeSimilarity,
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<NodeSimilarity, NodeSimilarityResult, NodeSimilarityWriteConfig> computationResult) {
         throw new UnsupportedOperationException("NodeSimilarity does not write node properties.");
     }
 

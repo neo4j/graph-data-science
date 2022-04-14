@@ -19,23 +19,23 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 final class DoublePropertySimilarityComputer implements SimilarityComputer {
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
 
-    DoublePropertySimilarityComputer(NodeProperties nodeProperties) {
-        if (nodeProperties.valueType() != ValueType.DOUBLE) {
+    DoublePropertySimilarityComputer(NodePropertyValues nodePropertyValues) {
+        if (nodePropertyValues.valueType() != ValueType.DOUBLE) {
             throw new IllegalArgumentException("The property is not of type DOUBLE");
         }
-        this.nodeProperties = nodeProperties;
+        this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        var left = nodeProperties.doubleValue(firstNodeId);
-        var right = nodeProperties.doubleValue(secondNodeId);
+        var left = nodePropertyValues.doubleValue(firstNodeId);
+        var right = nodePropertyValues.doubleValue(secondNodeId);
         return 1.0 / (1.0 + Math.abs(left - right));
     }
 }

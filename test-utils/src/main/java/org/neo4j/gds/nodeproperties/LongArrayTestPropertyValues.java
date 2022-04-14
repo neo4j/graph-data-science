@@ -17,24 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.nodeproperties;
 
-import java.util.Set;
+import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 
-/**
- * Getter interface for node properties.
- */
-public interface NodePropertyContainer {
+public final class LongArrayTestPropertyValues implements LongArrayNodePropertyValues {
+    private final LongToObjectFunction<long[]> transformer;
 
-    /**
-     * Return the property values for a property key
-     * NOTE: Avoid using this on the hot path, favor caching the NodeProperties object when possible
-     *
-     * @param propertyKey the node property key
-     * @return the values associated with that key
-     */
-    NodeProperties nodeProperties(String propertyKey);
+    public LongArrayTestPropertyValues(LongToObjectFunction<long[]> transformer) {this.transformer = transformer;}
 
-    Set<String> availableNodeProperties();
+    @Override
+    public long size() {
+        return 0;
+    }
 
+    @Override
+    public long[] longArrayValue(long nodeId) {
+        return transformer.apply(nodeId);
+    }
 }

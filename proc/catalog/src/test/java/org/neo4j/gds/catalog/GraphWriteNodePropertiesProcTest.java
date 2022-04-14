@@ -32,10 +32,10 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.IdentityProperties;
+import org.neo4j.gds.core.IdentityPropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
@@ -222,7 +222,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         long expectedPropertyCount = 6;
 
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
-        NodeProperties identityProperties = new IdentityProperties(expectedPropertyCount);
+        NodePropertyValues identityProperties = new IdentityPropertyValues(expectedPropertyCount);
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         assertCypherResult(

@@ -26,9 +26,9 @@ import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -75,7 +75,7 @@ class MutatePropertyComputationResultConsumerTest {
 
     @BeforeEach
     void setup() {
-        var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodeProperties()));
+        var nodePropertyList = List.of(ImmutableNodeProperty.of("mutateProperty", new TestNodePropertyValues()));
         mutateResultConsumer = new MutatePropertyComputationResultConsumer<>(
             (computationResult) -> nodePropertyList,
             (computationResult, executionContext) -> new TestAlgoResultBuilder()
@@ -131,7 +131,7 @@ class MutatePropertyComputationResultConsumerTest {
         assertThat(graphStore.hasNodeProperty(NodeLabel.of("A"), mutateProperty)).isTrue();
         assertThat(graphStore.hasNodeProperty(NodeLabel.of("B"), mutateProperty)).isFalse();
 
-        NodeProperties mutatedProperty = graphStore.nodeProperty(mutateProperty).values();
+        NodePropertyValues mutatedProperty = graphStore.nodeProperty(mutateProperty).values();
         assertThat(mutatedProperty.longValue(gdlFactory.nodeId("b"))).isEqualTo(DefaultValue.LONG_DEFAULT_FALLBACK);
         assertThat(mutatedProperty.longValue(gdlFactory.nodeId("a1"))).isEqualTo(0);
         assertThat(mutatedProperty.longValue(gdlFactory.nodeId("a2"))).isEqualTo(1);
@@ -162,7 +162,7 @@ class MutatePropertyComputationResultConsumerTest {
             .build();
     }
 
-    class TestNodeProperties implements LongNodeProperties {
+    class TestNodePropertyValues implements LongNodePropertyValues {
 
         @Override
         public long size() {

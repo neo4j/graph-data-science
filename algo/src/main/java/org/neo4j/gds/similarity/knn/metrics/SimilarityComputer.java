@@ -21,10 +21,10 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
-import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayProperties;
+import org.neo4j.gds.similarity.knn.metrics.LongArrayPropertySimilarityComputer.SortedLongArrayPropertyValues;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,14 +60,15 @@ public interface SimilarityComputer {
         return ofProperty(graph, propertyName, nodeProperties, knnNodePropertySpec.metric());
     }
 
-    static SimilarityComputer ofProperty(IdMap idMap, String propertyName, NodeProperties nodeProperties) {
-        return ofProperty(idMap, propertyName, nodeProperties, SimilarityMetric.defaultMetricForType(nodeProperties.valueType()));
+    static SimilarityComputer ofProperty(IdMap idMap, String propertyName, NodePropertyValues nodePropertyValues) {
+        return ofProperty(idMap, propertyName,
+            nodePropertyValues, SimilarityMetric.defaultMetricForType(nodePropertyValues.valueType()));
     }
 
     static SimilarityComputer ofProperty(
         IdMap idMap,
         String name,
-        NodeProperties properties,
+        NodePropertyValues properties,
         SimilarityMetric defaultSimilarityMetric
     ) {
         switch (properties.valueType()) {
@@ -78,19 +79,19 @@ public interface SimilarityComputer {
             case DOUBLE_ARRAY:
                 return ofDoubleArrayProperty(
                     name,
-                    NullCheckingNodeProperties.create(properties, name, idMap),
+                    NullCheckingNodePropertyValues.create(properties, name, idMap),
                     defaultSimilarityMetric
                 );
             case FLOAT_ARRAY:
                 return ofFloatArrayProperty(
                     name,
-                    NullCheckingNodeProperties.create(properties, name, idMap),
+                    NullCheckingNodePropertyValues.create(properties, name, idMap),
                     defaultSimilarityMetric
                 );
             case LONG_ARRAY:
                 return ofLongArrayProperty(
                     name,
-                    new SortedLongArrayProperties(NullCheckingNodeProperties.create(properties, name, idMap)),
+                    new SortedLongArrayPropertyValues(NullCheckingNodePropertyValues.create(properties, name, idMap)),
                     defaultSimilarityMetric
                 );
             default:
@@ -102,15 +103,15 @@ public interface SimilarityComputer {
         }
     }
 
-    static SimilarityComputer ofDoubleProperty(NodeProperties nodeProperties) {
-        return new DoublePropertySimilarityComputer(nodeProperties);
+    static SimilarityComputer ofDoubleProperty(NodePropertyValues nodePropertyValues) {
+        return new DoublePropertySimilarityComputer(nodePropertyValues);
     }
 
-    static SimilarityComputer ofLongProperty(NodeProperties nodeProperties) {
-        return new LongPropertySimilarityComputer(nodeProperties);
+    static SimilarityComputer ofLongProperty(NodePropertyValues nodePropertyValues) {
+        return new LongPropertySimilarityComputer(nodePropertyValues);
     }
 
-    static SimilarityComputer ofFloatArrayProperty(String name, NodeProperties properties, SimilarityMetric metric) {
+    static SimilarityComputer ofFloatArrayProperty(String name, NodePropertyValues properties, SimilarityMetric metric) {
         switch (metric) {
             case COSINE:
                 return new FloatArrayPropertySimilarityComputer(properties, Cosine::floatMetric);
@@ -125,29 +126,29 @@ public interface SimilarityComputer {
 
     static SimilarityComputer ofDoubleArrayProperty(
         String propertyName,
-        NodeProperties nodeProperties,
+        NodePropertyValues nodePropertyValues,
         SimilarityMetric similarityMetric
     ) {
         switch (similarityMetric) {
             case COSINE:
-                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Cosine::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Cosine::doubleMetric);
             case EUCLIDEAN:
-                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Euclidean::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Euclidean::doubleMetric);
             case PEARSON:
-                return new DoubleArrayPropertySimilarityComputer(nodeProperties, Pearson::doubleMetric);
+                return new DoubleArrayPropertySimilarityComputer(nodePropertyValues, Pearson::doubleMetric);
             default:
-                throw unsupportedSimilarityMetric(propertyName, nodeProperties.valueType(), similarityMetric);
+                throw unsupportedSimilarityMetric(propertyName, nodePropertyValues.valueType(), similarityMetric);
         }
     }
 
-    static SimilarityComputer ofLongArrayProperty(String propertyName, NodeProperties nodeProperties, SimilarityMetric similarityMetric) {
+    static SimilarityComputer ofLongArrayProperty(String propertyName, NodePropertyValues nodePropertyValues, SimilarityMetric similarityMetric) {
         switch (similarityMetric) {
             case JACCARD:
-                return new LongArrayPropertySimilarityComputer(nodeProperties, Jaccard::metric);
+                return new LongArrayPropertySimilarityComputer(nodePropertyValues, Jaccard::metric);
             case OVERLAP:
-                return new LongArrayPropertySimilarityComputer(nodeProperties, Overlap::metric);
+                return new LongArrayPropertySimilarityComputer(nodePropertyValues, Overlap::metric);
             default:
-                throw unsupportedSimilarityMetric(propertyName, nodeProperties.valueType(), similarityMetric);
+                throw unsupportedSimilarityMetric(propertyName, nodePropertyValues.valueType(), similarityMetric);
         }
     }
 

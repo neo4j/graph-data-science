@@ -25,9 +25,9 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.beta.k1coloring.K1Coloring;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
@@ -65,7 +65,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final long minBatchSize;
     private final double tolerance;
     private final Graph graph;
-    private final NodeProperties seedProperty;
+    private final NodePropertyValues seedProperty;
     private final ExecutorService executor;
 
     private int iterationCounter;
@@ -86,7 +86,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         final Graph graph,
         int maxIterations,
         double tolerance,
-        @Nullable NodeProperties seedProperty,
+        @Nullable NodePropertyValues seedProperty,
         int concurrency,
         int minBatchSize,
         ExecutorService executor,
@@ -400,8 +400,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         return this.didConverge;
     }
 
-    public LongNodeProperties asNodeProperties() {
-        return new LongNodeProperties() {
+    public LongNodePropertyValues asNodeProperties() {
+        return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return getCommunityId(nodeId);

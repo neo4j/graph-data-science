@@ -22,7 +22,7 @@ package org.neo4j.gds.labelpropagation;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
@@ -43,8 +43,8 @@ import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_LABEL;
 public class LabelPropagation extends Algorithm<LabelPropagation> {
 
     private final long nodeCount;
-    private final NodeProperties nodeProperties;
-    private final NodeProperties nodeWeights;
+    private final NodePropertyValues nodePropertyValues;
+    private final NodePropertyValues nodeWeights;
     private final LabelPropagationBaseConfig config;
     private final ExecutorService executor;
 
@@ -68,16 +68,16 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         this.executor = executor;
         this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
-        NodeProperties seedProperty;
+        NodePropertyValues seedProperty;
         String seedPropertyKey = config.seedProperty();
         if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
             seedProperty = graph.nodeProperties(seedPropertyKey);
         } else {
             seedProperty = new LongNullPropertyMap(DefaultValue.LONG_DEFAULT_FALLBACK);
         }
-        this.nodeProperties = seedProperty;
+        this.nodePropertyValues = seedProperty;
 
-        NodeProperties nodeWeightProperty;
+        NodePropertyValues nodeWeightProperty;
         String nodeWeightPropertyKey = config.nodeWeightProperty();
         if (nodeWeightPropertyKey != null && graph.availableNodeProperties().contains(nodeWeightPropertyKey)) {
             nodeWeightProperty = graph.nodeProperties(nodeWeightPropertyKey);
@@ -157,7 +157,7 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         for (PrimitiveLongIterable iter : nodeBatches) {
             InitStep initStep = new InitStep(
                 graph,
-                nodeProperties,
+                nodePropertyValues,
                 nodeWeights,
                 iter,
                 labels,

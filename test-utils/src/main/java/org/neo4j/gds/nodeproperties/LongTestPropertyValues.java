@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
-import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
-public final class FloatArrayTestProperties implements FloatArrayNodeProperties {
-    private final LongToObjectFunction<float[]> transformer;
+public final class LongTestPropertyValues implements LongNodePropertyValues {
+    private final LongToLongFunction transformer;
 
-    public FloatArrayTestProperties(LongToObjectFunction<float[]> transformer) {this.transformer = transformer;}
+    public LongTestPropertyValues(LongToLongFunction transformer) {this.transformer = transformer;}
 
     @Override
     public long size() {
@@ -33,7 +33,7 @@ public final class FloatArrayTestProperties implements FloatArrayNodeProperties 
     }
 
     @Override
-    public float[] floatArrayValue(long nodeId) {
-        return transformer.apply(nodeId);
+    public long longValue(long nodeId) {
+        return transformer.applyAsLong(nodeId);
     }
 }

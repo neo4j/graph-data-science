@@ -17,46 +17,52 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.nodeproperties;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.ValueConversion;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-public interface FloatArrayNodeProperties extends NodeProperties {
+import java.util.OptionalLong;
+import java.util.stream.LongStream;
+
+public interface LongNodePropertyValues extends NodePropertyValues {
 
     @Override
-    float[] floatArrayValue(long nodeId);
-
-    @Override
-    default double[] doubleArrayValue(long nodeId) {
-        float[] floatArray = floatArrayValue(nodeId);
-
-        if (floatArray == null) {
-            return null;
-        } else {
-
-            double[] doubleArray = new double[floatArray.length];
-            for (int i = 0; i < floatArray.length; i++) {
-                doubleArray[i] = floatArray[i];
-            }
-            return doubleArray;
-        }
-    }
+    long longValue(long nodeId);
 
     @Override
     default Object getObject(long nodeId) {
-        return floatArrayValue(nodeId);
+        return longValue(nodeId);
     }
 
     @Override
     default Value value(long nodeId) {
-        var value = floatArrayValue(nodeId);
-        return value == null ? null : Values.floatArray(value);
+        return Values.longValue(longValue(nodeId));
     }
 
     @Override
     default ValueType valueType() {
-        return ValueType.FLOAT_ARRAY;
+        return ValueType.LONG;
+    }
+
+    @Override
+    default double doubleValue(long nodeId) {
+        long value = longValue(nodeId);
+        if (value == DefaultValue.LONG_DEFAULT_FALLBACK) {
+            return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
+        }
+        return ValueConversion.exactLongToDouble(value);
+    }
+
+    @Override
+    default OptionalLong getMaxLongPropertyValue() {
+        return LongStream
+            .range(0, size())
+            .parallel()
+            .map(this::longValue)
+            .max();
     }
 }

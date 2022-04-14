@@ -24,15 +24,15 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
-import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
-import org.neo4j.gds.nodeproperties.LongArrayTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.LongArrayTestPropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
-class NullCheckingNodePropertiesTest {
+class NullCheckingNodePropertyValuesTest {
 
     @GdlGraph
     private static final String TEST_GRAPH = "CREATE (), ()";
@@ -42,8 +42,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldWrapDoubleArrayPropertyAccess() {
-        var props = new DoubleArrayTestProperties(nodeId -> new double[]{nodeId});
-        var wrappedProps = NullCheckingNodeProperties.create(props, "propertyName", graph);
+        var props = new DoubleArrayTestPropertyValues(nodeId -> new double[]{nodeId});
+        var wrappedProps = NullCheckingNodePropertyValues.create(props, "propertyName", graph);
         graph.forEachNode(nodeId -> {
                 assertThat(wrappedProps.doubleArrayValue(nodeId))
                     .isEqualTo(props.doubleArrayValue(nodeId));
@@ -54,8 +54,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldWrapFloatArrayPropertyAccess() {
-        var props = new FloatArrayTestProperties(nodeId -> new float[]{nodeId});
-        var wrappedProps = NullCheckingNodeProperties.create(props, "propertyName", graph);
+        var props = new FloatArrayTestPropertyValues(nodeId -> new float[]{nodeId});
+        var wrappedProps = NullCheckingNodePropertyValues.create(props, "propertyName", graph);
         graph.forEachNode(nodeId -> {
                 assertThat(wrappedProps.floatArrayValue(nodeId))
                     .isEqualTo(props.floatArrayValue(nodeId));
@@ -66,8 +66,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldWrapLongArrayPropertyAccess() {
-        var props = new LongArrayTestProperties(nodeId -> new long[]{nodeId});
-        var wrappedProps = NullCheckingNodeProperties.create(props, "propertyName", graph);
+        var props = new LongArrayTestPropertyValues(nodeId -> new long[]{nodeId});
+        var wrappedProps = NullCheckingNodePropertyValues.create(props, "propertyName", graph);
         graph.forEachNode(nodeId -> {
                 assertThat(wrappedProps.longArrayValue(nodeId))
                     .isEqualTo(props.longArrayValue(nodeId));
@@ -78,8 +78,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldThrowUsefullyForNullDoubleArrayValues() {
-        var nullProps = new DoubleArrayTestProperties(nodeId -> null);
-        var nonNullProps = NullCheckingNodeProperties.create(nullProps, "propertyName", graph);
+        var nullProps = new DoubleArrayTestPropertyValues(nodeId -> null);
+        var nonNullProps = NullCheckingNodePropertyValues.create(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.doubleArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Missing `List of Float` node property `propertyName` for node with id `1`.");
@@ -87,8 +87,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldThrowUsefullyForNullFloatArrayValues() {
-        var nullProps = new FloatArrayTestProperties(nodeId -> null);
-        var nonNullProps = NullCheckingNodeProperties.create(nullProps, "propertyName", graph);
+        var nullProps = new FloatArrayTestPropertyValues(nodeId -> null);
+        var nonNullProps = NullCheckingNodePropertyValues.create(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.floatArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Missing `List of Float` node property `propertyName` for node with id `1`.");
@@ -96,8 +96,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldThrowUsefullyForNullLongArrayValues() {
-        var nullProps = new LongArrayTestProperties(nodeId -> null);
-        var nonNullProps = NullCheckingNodeProperties.create(nullProps, "propertyName", graph);
+        var nullProps = new LongArrayTestPropertyValues(nodeId -> null);
+        var nonNullProps = NullCheckingNodePropertyValues.create(nullProps, "propertyName", graph);
         assertThatThrownBy(() -> nonNullProps.longArrayValue(1))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Missing `List of Integer` node property `propertyName` for node with id `1`.");
@@ -105,8 +105,8 @@ class NullCheckingNodePropertiesTest {
 
     @Test
     void shouldThrowNormallyIfTheWrongPropertyIsAccessed() {
-        var longProps = new LongArrayTestProperties(i -> new long[]{i});
-        var wrappedProps = NullCheckingNodeProperties.create(longProps, "propertyName", graph);
+        var longProps = new LongArrayTestPropertyValues(i -> new long[]{i});
+        var wrappedProps = NullCheckingNodePropertyValues.create(longProps, "propertyName", graph);
         assertThatThrownBy(() -> wrappedProps.doubleArrayValue(0))
             .isInstanceOf(UnsupportedOperationException.class)
             .hasMessage("Tried to retrieve a value of type DOUBLE_ARRAY value from properties of type LONG_ARRAY");

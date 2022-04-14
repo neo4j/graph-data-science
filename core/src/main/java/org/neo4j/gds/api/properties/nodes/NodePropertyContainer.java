@@ -17,24 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import java.util.Set;
 
-public class IdentityProperties implements LongNodeProperties {
-    private final long expectedPropertyCount;
+/**
+ * Getter interface for node properties.
+ */
+public interface NodePropertyContainer {
 
-    public IdentityProperties(long expectedPropertyCount) {
-        this.expectedPropertyCount = expectedPropertyCount;
-    }
+    /**
+     * Return the property values for a property key
+     * NOTE: Avoid using this on the hot path, favor caching the NodeProperties object when possible
+     *
+     * @param propertyKey the node property key
+     * @return the values associated with that key
+     */
+    NodePropertyValues nodeProperties(String propertyKey);
 
-    @Override
-    public long longValue(long nodeId) {
-        return nodeId;
-    }
+    Set<String> availableNodeProperties();
 
-    @Override
-    public long size() {
-        return expectedPropertyCount;
-    }
 }

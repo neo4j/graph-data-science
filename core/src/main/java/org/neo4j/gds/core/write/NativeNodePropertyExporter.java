@@ -21,7 +21,7 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -93,7 +93,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     }
 
     @Override
-    public void write(String property, NodeProperties properties) {
+    public void write(String property, NodePropertyValues properties) {
         write(ImmutableNodeProperty.of(property, properties));
     }
 

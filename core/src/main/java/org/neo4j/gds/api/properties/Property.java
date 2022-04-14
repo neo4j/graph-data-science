@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
 
-@ValueClass
-public
-interface NodeProperty {
-
-    NodeProperties values();
+public interface Property<VALUE> {
+    VALUE values();
 
     PropertySchema propertySchema();
 
@@ -50,28 +48,5 @@ interface NodeProperty {
     @Configuration.Ignore
     default PropertyState propertyState() {
         return propertySchema().state();
-    }
-
-    static NodeProperty of(
-        String key,
-        PropertyState origin,
-        NodeProperties values
-    ) {
-        return ImmutableNodeProperty.of(
-            values,
-            PropertySchema.of(key, values.valueType(), values.valueType().fallbackValue(), origin)
-        );
-    }
-
-    static NodeProperty of(
-        String key,
-        PropertyState origin,
-        NodeProperties values,
-        DefaultValue defaultValue
-    ) {
-        return ImmutableNodeProperty.of(
-            values,
-            PropertySchema.of(key, values.valueType(), defaultValue, origin)
-        );
     }
 }

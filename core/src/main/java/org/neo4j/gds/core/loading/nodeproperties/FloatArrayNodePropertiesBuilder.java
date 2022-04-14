@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.FloatArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseFloatArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -63,12 +63,12 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
     }
 
     @Override
-    public NodeProperties buildDirect(long size) {
-        return new FloatArrayStoreNodeProperties(builder.build(), size);
+    public NodePropertyValues buildDirect(long size) {
+        return new FloatArrayStoreNodePropertyValues(builder.build(), size);
     }
 
     @Override
-    public FloatArrayNodeProperties build(long size, IdMap idMap) {
+    public FloatArrayNodePropertyValues build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseFloatArrayArray.builder(
@@ -103,14 +103,14 @@ public class FloatArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder 
         ParallelUtil.run(tasks, Pools.DEFAULT);
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-        return new FloatArrayStoreNodeProperties(propertyValues, size);
+        return new FloatArrayStoreNodePropertyValues(propertyValues, size);
     }
 
-    static class FloatArrayStoreNodeProperties implements FloatArrayNodeProperties {
+    static class FloatArrayStoreNodePropertyValues implements FloatArrayNodePropertyValues {
         private final HugeSparseFloatArrayArray propertyValues;
         private final long size;
 
-        FloatArrayStoreNodeProperties(
+        FloatArrayStoreNodePropertyValues(
             HugeSparseFloatArrayArray propertyValues,
             long size
         ) {

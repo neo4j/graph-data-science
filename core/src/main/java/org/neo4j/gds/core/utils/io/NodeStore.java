@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
 import java.util.HashMap;
@@ -40,7 +40,7 @@ public class NodeStore {
 
     final IdMap idMap;
 
-    final Map<String, Map<String, NodeProperties>> nodeProperties;
+    final Map<String, Map<String, NodePropertyValues>> nodeProperties;
     final Map<String, LongFunction<Object>> additionalProperties;
 
     private final Set<NodeLabel> availableNodeLabels;
@@ -52,7 +52,7 @@ public class NodeStore {
         HugeIntArray labelCounts,
         IdMap idMap,
         boolean hasLabels,
-        Map<String, Map<String, NodeProperties>> nodeProperties,
+        Map<String, Map<String, NodePropertyValues>> nodeProperties,
         Map<String, LongFunction<Object>> additionalProperties
     ) {
         this.nodeCount = nodeCount;
@@ -108,7 +108,7 @@ public class NodeStore {
         HugeIntArray labelCounts = null;
 
         var nodeLabels = graphStore.nodes();
-        var nodeProperties = new HashMap<String, Map<String, NodeProperties>>();
+        var nodeProperties = new HashMap<String, Map<String, NodePropertyValues>>();
 
         boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
         if (hasNodeLabels) {

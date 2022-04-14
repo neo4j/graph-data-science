@@ -23,14 +23,14 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -160,7 +160,7 @@ public final class CSRGraphStoreUtil {
     public static void extractNodeProperties(
         GraphStoreBuilder graphStoreBuilder,
         Function<String, PropertySchema> nodeSchema,
-        Map<String, NodeProperties> nodeProperties
+        Map<String, NodePropertyValues> nodeProperties
     ) {
         NodePropertyStore.Builder propertyStoreBuilder = NodePropertyStore.builder();
         nodeProperties.forEach((propertyKey, propertyValues) -> {
@@ -222,7 +222,7 @@ public final class CSRGraphStoreUtil {
         Function<NodeLabel, Collection<String>> propertiesByLabel,
         RelationshipsAndProperties relationshipsAndProperties
     ) {
-        var properties = idMapAndProperties.properties().nodeProperties();
+        var properties = idMapAndProperties.properties().properties();
 
         var nodeSchemaBuilder = NodeSchema.builder();
         for (var label : idMapAndProperties.idMap().availableNodeLabels()) {

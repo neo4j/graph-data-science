@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.k1coloring;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
@@ -70,13 +70,13 @@ public class K1ColoringStreamProc extends StreamProc<K1Coloring, HugeLongArray, 
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<K1Coloring, HugeLongArray, K1ColoringStreamConfig> computationResult) {
         return K1ColoringProc.nodeProperties(computationResult);
     }
 

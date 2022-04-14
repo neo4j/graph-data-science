@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -198,8 +198,8 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
     }
 
     @Override
-    public LongNodeProperties asNodeProperties() {
-        return new LongNodeProperties() {
+    public LongNodePropertyValues asNodeProperties() {
+        return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return get(nodeId);

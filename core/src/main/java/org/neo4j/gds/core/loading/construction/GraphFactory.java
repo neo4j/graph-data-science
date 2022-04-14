@@ -31,10 +31,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
@@ -301,7 +301,7 @@ public final class GraphFactory {
     public static HugeGraph create(
         IdMap idMap,
         NodeSchema nodeSchema,
-        Map<String, NodeProperties> nodeProperties,
+        Map<String, NodePropertyValues> nodeProperties,
         RelationshipType relationshipType,
         Relationships relationships
     ) {

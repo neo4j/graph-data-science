@@ -20,7 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
@@ -36,7 +36,7 @@ final class BetweennessCentralityProc {
 
     private BetweennessCentralityProc() {}
 
-    static <CONFIG extends BetweennessCentralityBaseConfig> NodeProperties nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
+    static <CONFIG extends BetweennessCentralityBaseConfig> NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, CONFIG> computeResult) {
         return computeResult.result().asNodeProperties();
     }
 

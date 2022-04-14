@@ -19,23 +19,23 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 final class LongPropertySimilarityComputer implements SimilarityComputer {
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
 
-    LongPropertySimilarityComputer(NodeProperties nodeProperties) {
-        if (nodeProperties.valueType() != ValueType.LONG) {
+    LongPropertySimilarityComputer(NodePropertyValues nodePropertyValues) {
+        if (nodePropertyValues.valueType() != ValueType.LONG) {
             throw new IllegalArgumentException("The property is not of type LONG");
         }
-        this.nodeProperties = nodeProperties;
+        this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        var left = nodeProperties.longValue(firstNodeId);
-        var right = nodeProperties.longValue(secondNodeId);
+        var left = nodePropertyValues.longValue(firstNodeId);
+        var right = nodePropertyValues.longValue(secondNodeId);
         var abs = Math.abs(left - right);
         if (abs == Long.MIN_VALUE) {
             abs = Long.MAX_VALUE;

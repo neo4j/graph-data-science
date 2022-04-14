@@ -31,15 +31,15 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
-import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -203,7 +203,7 @@ public class CSRGraphStore implements GraphStore {
     public void addNodeProperty(
         Set<NodeLabel> labels,
         String propertyKey,
-        NodeProperties propertyValues
+        NodePropertyValues propertyValues
     ) {
         updateGraphStore((graphStore) -> {
             if (graphStore.hasNodeProperty(propertyKey)) {
@@ -272,7 +272,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NodeProperties nodePropertyValues(String propertyKey) {
+    public NodePropertyValues nodePropertyValues(String propertyKey) {
         return nodeProperty(propertyKey).values();
     }
 
@@ -580,7 +580,7 @@ public class CSRGraphStore implements GraphStore {
         Optional<String> maybeRelationshipProperty
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(nodeLabels);
-        Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(nodeLabels);
+        Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(nodeLabels);
         return createGraphFromRelationshipType(
             filteredNodes,
             filteredNodeProperties,
@@ -595,7 +595,7 @@ public class CSRGraphStore implements GraphStore {
         Optional<String> maybeRelationshipProperty
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(filteredLabels);
-        Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
+        Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(filteredLabels);
 
         List<CSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
@@ -623,7 +623,7 @@ public class CSRGraphStore implements GraphStore {
 
     private CSRGraph createGraphFromRelationshipType(
         Optional<IdMap> filteredNodes,
-        Map<String, NodeProperties> filteredNodeProperties,
+        Map<String, NodePropertyValues> filteredNodeProperties,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
@@ -652,12 +652,12 @@ public class CSRGraphStore implements GraphStore {
             : initialGraph;
     }
 
-    private Map<String, NodeProperties> filterNodeProperties(Collection<NodeLabel> labels) {
+    private Map<String, NodePropertyValues> filterNodeProperties(Collection<NodeLabel> labels) {
         if (this.nodeProperties.isEmpty()) {
             return Collections.emptyMap();
         }
         if (labels.size() == 1 || schema().nodeSchema().containsOnlyAllNodesLabel()) {
-            return this.nodeProperties.nodePropertyValues();
+            return this.nodeProperties.propertyValues();
         }
 
 

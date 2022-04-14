@@ -24,8 +24,8 @@ import com.carrotsearch.hppc.ObjectIntScatterMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.List;
 import java.util.Map;
@@ -51,10 +51,10 @@ public abstract class EvaluationContext {
             if (!graphStore.hasNodeProperty(propertyKey)) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
-                NodeProperties nodeProperties = graphStore.nodePropertyValues(propertyKey);
+                NodePropertyValues nodePropertyValues = graphStore.nodePropertyValues(propertyKey);
                 return propertyType == ValueType.LONG
-                    ? Double.longBitsToDouble(nodeProperties.longValue(nodeId))
-                    : nodeProperties.doubleValue(nodeId);
+                    ? Double.longBitsToDouble(nodePropertyValues.longValue(nodeId))
+                    : nodePropertyValues.doubleValue(nodeId);
             }
         }
 

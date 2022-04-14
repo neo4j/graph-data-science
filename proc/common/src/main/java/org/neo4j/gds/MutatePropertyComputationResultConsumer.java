@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.core.huge.FilteredNodeProperties;
+import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
@@ -64,7 +64,7 @@ public final class MutatePropertyComputationResultConsumer<ALGO extends Algorith
                 .map(nodeProperty ->
                     ImmutableNodeProperty.of(
                         nodeProperty.propertyKey(),
-                        new FilteredNodeProperties.OriginalToFilteredNodeProperties(
+                        new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
                             nodeProperty.properties(),
                             filteredGraph
                         )

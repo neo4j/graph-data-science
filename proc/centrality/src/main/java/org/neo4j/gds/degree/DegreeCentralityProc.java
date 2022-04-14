@@ -20,8 +20,8 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
@@ -46,11 +46,11 @@ public final class DegreeCentralityProc {
         return procResultBuilder;
     }
 
-    static NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
+    static NodePropertyValues nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
         var degrees = computationResult.result();
 
-        return new DoubleNodeProperties() {
+        return new DoubleNodePropertyValues() {
             @Override
             public long size() {
                 return size;

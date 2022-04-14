@@ -25,12 +25,12 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.kernel.database.NamedDatabaseId;
@@ -131,13 +131,13 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public NodeProperties nodePropertyValues(String propertyKey) {
+    public NodePropertyValues nodePropertyValues(String propertyKey) {
         return graphStore.nodePropertyValues(propertyKey);
     }
 
     @Override
     public void addNodeProperty(
-       Set<NodeLabel> nodeLabels, String propertyKey, NodeProperties propertyValues
+       Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues
     ) {
         graphStore.addNodeProperty(nodeLabels, propertyKey, propertyValues);
     }

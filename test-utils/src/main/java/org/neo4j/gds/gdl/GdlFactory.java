@@ -29,12 +29,12 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -269,7 +269,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         return IdMapAndProperties.of(idMap, loadNodeProperties(idMap));
     }
 
-    private Map<PropertyMapping, NodeProperties> loadNodeProperties(IdMap idMap) {
+    private Map<PropertyMapping, NodePropertyValues> loadNodeProperties(IdMap idMap) {
         var propertyBuilders = new HashMap<PropertyMapping, NodePropertiesFromStoreBuilder>();
 
         gdlHandler.getVertices().forEach(vertex -> vertex

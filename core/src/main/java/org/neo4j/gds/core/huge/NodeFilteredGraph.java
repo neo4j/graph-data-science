@@ -26,10 +26,10 @@ import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -256,12 +256,12 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public NodeProperties nodeProperties(String propertyKey) {
-        NodeProperties properties = csrGraph.nodeProperties(propertyKey);
+    public NodePropertyValues nodeProperties(String propertyKey) {
+        NodePropertyValues properties = csrGraph.nodeProperties(propertyKey);
         if (properties == null) {
             return null;
         }
-        return new FilteredNodeProperties.FilteredToOriginalNodeProperties(properties, this);
+        return new FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues(properties, this);
     }
 
     @Override

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.validation.BeforeLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
@@ -57,7 +57,7 @@ final class PageRankProc {
         return procResultBuilder;
     }
 
-    static <CONFIG extends PageRankConfig> NodeProperties nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
+    static <CONFIG extends PageRankConfig> NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
         return computeResult.result().scores().asNodeProperties();
     }
 

@@ -21,7 +21,7 @@ package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -29,23 +29,23 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 final class InitStep implements Step {
 
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
     private final HugeLongArray existingLabels;
     private final PrimitiveLongIterable nodes;
     private final Graph graph;
-    private final NodeProperties nodeWeights;
+    private final NodePropertyValues nodeWeights;
     private final ProgressTracker progressTracker;
     private final long maxLabelId;
 
     InitStep(
             Graph graph,
-            NodeProperties nodeProperties,
-            NodeProperties nodeWeights,
+            NodePropertyValues nodePropertyValues,
+            NodePropertyValues nodeWeights,
             PrimitiveLongIterable nodes,
             HugeLongArray existingLabels,
             ProgressTracker progressTracker,
             long maxLabelId) {
-        this.nodeProperties = nodeProperties;
+        this.nodePropertyValues = nodePropertyValues;
         this.existingLabels = existingLabels;
         this.nodes = nodes;
         this.graph = graph;
@@ -59,7 +59,7 @@ final class InitStep implements Step {
         PrimitiveLongIterator iterator = nodes.iterator();
         while (iterator.hasNext()) {
             long nodeId = iterator.next();
-            long existingLabelValue = nodeProperties.longValue(nodeId);
+            long existingLabelValue = nodePropertyValues.longValue(nodeId);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might
             // clash with node IDs. If we have loaded a graph with a greater node ID

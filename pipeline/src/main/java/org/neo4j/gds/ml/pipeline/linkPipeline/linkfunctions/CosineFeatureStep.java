@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
@@ -47,7 +47,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
             var sourceSquareNorm = 0.0;
             var targetSquareNorm = 0.0;
 
-            for (NodeProperties props : nodeProperties) {
+            for (NodePropertyValues props : nodeProperties) {
                 var propertyType = props.valueType();
                 switch (propertyType) {
                     case DOUBLE_ARRAY:

@@ -20,7 +20,7 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -33,7 +33,7 @@ final class LabelPropagationProc {
 
     private LabelPropagationProc() {}
 
-    static <CONFIG extends LabelPropagationBaseConfig> NodeProperties nodeProperties(
+    static <CONFIG extends LabelPropagationBaseConfig> NodePropertyValues nodeProperties(
         ComputationResult<LabelPropagation, LabelPropagation, CONFIG> computationResult,
         String resultProperty
     ) {

@@ -17,42 +17,46 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.nodeproperties;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.OptionalDouble;
-import java.util.stream.LongStream;
-
-public interface DoubleNodeProperties extends NodeProperties {
+public interface FloatArrayNodePropertyValues extends NodePropertyValues {
 
     @Override
-    double doubleValue(long nodeId);
+    float[] floatArrayValue(long nodeId);
+
+    @Override
+    default double[] doubleArrayValue(long nodeId) {
+        float[] floatArray = floatArrayValue(nodeId);
+
+        if (floatArray == null) {
+            return null;
+        } else {
+
+            double[] doubleArray = new double[floatArray.length];
+            for (int i = 0; i < floatArray.length; i++) {
+                doubleArray[i] = floatArray[i];
+            }
+            return doubleArray;
+        }
+    }
 
     @Override
     default Object getObject(long nodeId) {
-        return doubleValue(nodeId);
+        return floatArrayValue(nodeId);
     }
 
     @Override
     default Value value(long nodeId) {
-        var value = doubleValue(nodeId);
-        return Double.isNaN(value) ? null : Values.doubleValue(value);
+        var value = floatArrayValue(nodeId);
+        return value == null ? null : Values.floatArray(value);
     }
 
     @Override
     default ValueType valueType() {
-        return ValueType.DOUBLE;
-    }
-
-    @Override
-    default OptionalDouble getMaxDoublePropertyValue() {
-        return LongStream
-            .range(0, size())
-            .parallel()
-            .mapToDouble(this::doubleValue)
-            .max();
+        return ValueType.FLOAT_ARRAY;
     }
 }

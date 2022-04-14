@@ -37,7 +37,7 @@ import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -116,11 +116,11 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Collections.emptySet(), graphStore.nodePropertyKeys(NodeLabel.of("N2")));
         assertEquals(Collections.singleton("prop2"), graphStore.nodePropertyKeys(NodeLabel.of("N3")));
 
-        NodeProperties prop1 = graphStore.nodePropertyValues("prop1");
+        NodePropertyValues prop1 = graphStore.nodePropertyValues("prop1");
         assertEquals(1L, prop1.longValue(0));
         assertEquals(0L, prop1.longValue(1));
 
-        NodeProperties prop2 = graphStore.nodePropertyValues("prop2");
+        NodePropertyValues prop2 = graphStore.nodePropertyValues("prop2");
         assertEquals(1L, prop2.longValue(0));
         assertEquals(2L, prop2.longValue(1));
     }
@@ -155,9 +155,9 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         assertEquals(Set.of("prop1", "prop2"), graphStore.nodePropertyKeys(allIdentifier));
         assertEquals(Set.of("prop2"), graphStore.nodePropertyKeys(node2Identifier));
 
-        NodeProperties allProp1 = graphStore.nodePropertyValues("prop1");
-        NodeProperties allProp2 = graphStore.nodePropertyValues("prop2");
-        NodeProperties node2Prop2 = graphStore.nodePropertyValues("prop2");
+        NodePropertyValues allProp1 = graphStore.nodePropertyValues("prop1");
+        NodePropertyValues allProp2 = graphStore.nodePropertyValues("prop2");
+        NodePropertyValues node2Prop2 = graphStore.nodePropertyValues("prop2");
 
         LongStream.range(0, 3).forEach(nodeId -> {
             double allProp1Value = allProp1.doubleValue(nodeId);

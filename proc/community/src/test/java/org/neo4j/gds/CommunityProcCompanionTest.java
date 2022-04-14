@@ -22,16 +22,16 @@ package org.neo4j.gds;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.config.ComponentSizeConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
-import org.neo4j.gds.nodeproperties.LongIfChangedNodeProperties;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
+import org.neo4j.gds.nodeproperties.LongIfChangedNodePropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +39,7 @@ class CommunityProcCompanionTest {
 
     @Test
     void shouldReturnConsecutiveIds() {
-        LongNodeProperties nonConsecutiveIds = new TestNodeProperties(10, id -> id % 3 * 10);
+        LongNodePropertyValues nonConsecutiveIds = new TestNodePropertyValues(10, id -> id % 3 * 10);
 
         var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withBoolean("consecutiveIds", true));
 
@@ -50,7 +50,7 @@ class CommunityProcCompanionTest {
             () -> { throw new UnsupportedOperationException("Not implemented"); }
         );
 
-        assertThat(result).isInstanceOf(ConsecutiveLongNodeProperties.class);
+        assertThat(result).isInstanceOf(ConsecutiveLongNodePropertyValues.class);
         for (int i = 0; i < 10; i++) {
             assertThat(result.longValue(i)).isEqualTo(i % 3);
         }
@@ -58,7 +58,7 @@ class CommunityProcCompanionTest {
 
     @Test
     void shouldReturnInputPropertiesInSeedOnlyCase() {
-        LongNodeProperties inputProperties = new TestNodeProperties(10, id -> id);
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(10, id -> id);
 
         var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withString("seed", "seed"));
 
@@ -74,7 +74,7 @@ class CommunityProcCompanionTest {
 
     @Test
     void shouldReturnOnlyChangedProperties() {
-        LongNodeProperties inputProperties = new TestNodeProperties(10, id -> id);
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(10, id -> id);
         var seedProperty = NodeProperty.of("seed", PropertyState.PERSISTENT, inputProperties);
 
         var config = CommunityProcCompanionConfig.of(CypherMapWrapper.empty().withString("seedProperty", "seed"));
@@ -86,7 +86,7 @@ class CommunityProcCompanionTest {
             () -> seedProperty
         );
 
-        assertThat(result).isInstanceOf(LongIfChangedNodeProperties.class);
+        assertThat(result).isInstanceOf(LongIfChangedNodePropertyValues.class);
         for (long i = 0; i < result.size(); i++) {
             assertThat(result.longValue(i)).isEqualTo(inputProperties.longValue(i));
             assertThat(result.value(i)).isNull();
@@ -95,7 +95,7 @@ class CommunityProcCompanionTest {
 
     @Test
     void shouldRestrictComponentSize() {
-        LongNodeProperties inputProperties = new TestNodeProperties(10, id -> id < 5 ? id : 5 );
+        LongNodePropertyValues inputProperties = new TestNodePropertyValues(10, id -> id < 5 ? id : 5 );
 
         var config = ConfigWithComponentSize.of(CypherMapWrapper.empty().withNumber("minComponentSize", 2L));
 
@@ -118,11 +118,11 @@ class CommunityProcCompanionTest {
         }
     }
 
-    private static final class TestNodeProperties implements LongNodeProperties {
+    private static final class TestNodePropertyValues implements LongNodePropertyValues {
         private final long size;
         private final LongToLongFunction transformer;
 
-        private TestNodeProperties(
+        private TestNodePropertyValues(
             long size,
             LongToLongFunction transformer
         ) {

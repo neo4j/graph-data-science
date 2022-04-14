@@ -17,44 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.properties.PropertyStore;
 
 import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @ValueClass
-public interface NodePropertyStore {
-
-    Map<String, NodeProperty> nodeProperties();
-
-    default Map<String, NodeProperties> nodePropertyValues() {
-        return nodeProperties()
-            .entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().values()));
-    }
-
-    default NodeProperty get(String propertyKey) {
-        return nodeProperties().get(propertyKey);
-    }
-
-    default boolean isEmpty() {
-        return nodeProperties().isEmpty();
-    }
-
-    @Value.Derived
-    default Set<String> keySet() {
-        return Collections.unmodifiableSet(nodeProperties().keySet());
-    }
-
-    default boolean containsKey(String propertyKey) {
-        return nodeProperties().containsKey(propertyKey);
-    }
+public interface NodePropertyStore extends PropertyStore<NodePropertyValues, NodeProperty> {
 
     static NodePropertyStore empty() {
         return ImmutableNodePropertyStore.of(Collections.emptyMap());
@@ -62,19 +33,19 @@ public interface NodePropertyStore {
 
     static Builder builder() {
         // need to initialize with empty map due to `deferCollectionAllocation = true`
-        return new Builder().nodeProperties(Collections.emptyMap());
+        return new Builder().properties(Collections.emptyMap());
     }
 
     @org.immutables.builder.Builder.AccessibleFields
     final class Builder extends ImmutableNodePropertyStore.Builder {
 
         public Builder putIfAbsent(String propertyKey, NodeProperty nodeProperty) {
-            nodeProperties.putIfAbsent(propertyKey, nodeProperty);
+            properties.putIfAbsent(propertyKey, nodeProperty);
             return this;
         }
 
         public Builder removeProperty(String propertyKey) {
-            nodeProperties.remove(propertyKey);
+            properties.remove(propertyKey);
             return this;
         }
     }

@@ -19,28 +19,28 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodeProperty;
 import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class LongIfChangedNodeProperties implements LongNodeProperties {
+public final class LongIfChangedNodePropertyValues implements LongNodePropertyValues {
 
-    private final NodeProperties seedProperties;
-    private final NodeProperties newProperties;
+    private final NodePropertyValues seedProperties;
+    private final NodePropertyValues newProperties;
 
-    public static LongNodeProperties of(NodeProperty seedProperty, LongNodeProperties newProperties) {
+    public static LongNodePropertyValues of(NodeProperty seedProperty, LongNodePropertyValues newProperties) {
         var propertyState = seedProperty.propertyState();
         if (propertyState == PropertyState.PERSISTENT) {
-            NodeProperties seedProperties = seedProperty.values();
+            NodePropertyValues seedProperties = seedProperty.values();
             // TODO forbid doubles once we load properties with their correct type
             if (seedProperties.valueType() == ValueType.LONG || seedProperties.valueType() == ValueType.DOUBLE) {
-                return new LongIfChangedNodeProperties(seedProperties, newProperties);
+                return new LongIfChangedNodePropertyValues(seedProperties, newProperties);
             } else {
                 throw new IllegalStateException(formatWithLocale(
                     "Expected seedProperty `%s` to be of type %s, but was %s",
@@ -54,9 +54,9 @@ public final class LongIfChangedNodeProperties implements LongNodeProperties {
         }
     }
 
-    private LongIfChangedNodeProperties(
-        NodeProperties seedProperties,
-        NodeProperties newProperties
+    private LongIfChangedNodePropertyValues(
+        NodePropertyValues seedProperties,
+        NodePropertyValues newProperties
     ) {
         this.seedProperties = seedProperties;
         this.newProperties = newProperties;

@@ -21,7 +21,7 @@ package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -67,13 +67,13 @@ public class BetweennessCentralityStreamProc extends StreamProc<BetweennessCentr
 
     @Override
     protected CentralityStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new CentralityStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+        return new CentralityStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig> computationResult) {
         return BetweennessCentralityProc.nodeProperties(computationResult);
     }
 

@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -89,12 +89,12 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public NodeProperties buildDirect(long size) {
-        return new DoubleStoreNodeProperties(builder.build(), size, OptionalDouble.empty());
+    public NodePropertyValues buildDirect(long size) {
+        return new DoubleStoreNodePropertyValues(builder.build(), size, OptionalDouble.empty());
     }
 
     @Override
-    public DoubleNodeProperties build(long size, IdMap idMap) {
+    public DoubleNodePropertyValues build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseDoubleArray.builder(
@@ -134,7 +134,7 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             ? OptionalDouble.of((double) MAX_VALUE.getVolatile(DoubleNodePropertiesBuilder.this))
             : OptionalDouble.empty();
 
-        return new DoubleStoreNodeProperties(propertyValues, size, maybeMaxValue);
+        return new DoubleStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
     }
 
     private void updateMaxValue(double value) {
@@ -171,12 +171,12 @@ public class DoubleNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
     }
 
-    static class DoubleStoreNodeProperties implements DoubleNodeProperties {
+    static class DoubleStoreNodePropertyValues implements DoubleNodePropertyValues {
         private final HugeSparseDoubleArray propertyValues;
         private final long size;
         private final OptionalDouble maxValue;
 
-        DoubleStoreNodeProperties(HugeSparseDoubleArray propertyValues, long size, OptionalDouble maxValue) {
+        DoubleStoreNodePropertyValues(HugeSparseDoubleArray propertyValues, long size, OptionalDouble maxValue) {
             this.propertyValues = propertyValues;
             this.size = size;
             this.maxValue = maxValue;

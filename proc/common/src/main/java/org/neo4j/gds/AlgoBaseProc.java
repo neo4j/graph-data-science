@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.AlgoConfigParser;
@@ -82,7 +82,7 @@ public abstract class AlgoBaseProc<
     /**
      * Returns a single node property that has been produced by the procedure.
      */
-    protected NodeProperties nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult) {
         throw new UnsupportedOperationException("Procedure must implement org.neo4j.gds.AlgoBaseProc.nodeProperty");
     }
 

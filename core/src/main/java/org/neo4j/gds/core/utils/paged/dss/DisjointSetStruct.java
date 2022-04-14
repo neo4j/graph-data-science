@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.paged.dss;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
 /**
  * Disjoint-set-struct is a data structure that keeps track of a set
@@ -69,8 +69,8 @@ public interface DisjointSetStruct {
      *
      * @return wrapped DisjointSetStruct
      */
-    default LongNodeProperties asNodeProperties() {
-        return new LongNodeProperties() {
+    default LongNodePropertyValues asNodeProperties() {
+        return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return setIdOf(nodeId);

@@ -25,11 +25,11 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
@@ -121,7 +121,7 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
-    public NodeProperties nodeProperties(final String propertyKey) {
+    public NodePropertyValues nodeProperties(final String propertyKey) {
         return first.nodeProperties(propertyKey);
     }
 

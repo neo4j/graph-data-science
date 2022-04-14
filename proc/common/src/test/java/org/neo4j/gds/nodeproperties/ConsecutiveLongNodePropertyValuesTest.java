@@ -20,15 +20,15 @@
 package org.neo4j.gds.nodeproperties;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ConsecutiveLongNodePropertiesTest {
+class ConsecutiveLongNodePropertyValuesTest {
 
     @Test
     void shouldReturnConsecutiveIds() {
-        LongNodeProperties nonConsecutiveIds = new LongNodeProperties() {
+        LongNodePropertyValues nonConsecutiveIds = new LongNodePropertyValues() {
             @Override
             public long size() {
                 return 10;
@@ -40,7 +40,7 @@ class ConsecutiveLongNodePropertiesTest {
             }
         };
 
-        var consecutiveIds = new ConsecutiveLongNodeProperties(
+        var consecutiveIds = new ConsecutiveLongNodePropertyValues(
             nonConsecutiveIds,
             10
         );

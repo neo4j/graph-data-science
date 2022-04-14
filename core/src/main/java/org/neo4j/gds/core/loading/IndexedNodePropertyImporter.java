@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -188,7 +188,7 @@ public final class IndexedNodePropertyImporter extends StatementAction {
         return imported;
     }
 
-    NodeProperties build(IdMap idMap) {
+    NodePropertyValues build(IdMap idMap) {
         return propertiesBuilder.build(idMap);
     }
 

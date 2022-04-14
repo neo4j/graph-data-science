@@ -22,7 +22,7 @@ package org.neo4j.gds.spanningtree;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.NodePropertiesWriter;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -111,7 +111,7 @@ public abstract class KSpanningTreeProc extends NodePropertiesWriter<KSpanningTr
                     .parallel(Pools.DEFAULT, config.writeConcurrency())
                     .build();
 
-                var properties = new DoubleNodeProperties() {
+                var properties = new DoubleNodePropertyValues() {
                     @Override
                     public long size() {
                         return computationResult.graph().nodeCount();

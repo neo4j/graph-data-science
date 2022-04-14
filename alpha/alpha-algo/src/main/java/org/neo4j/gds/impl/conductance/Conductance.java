@@ -23,7 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -47,7 +47,7 @@ public class Conductance extends Algorithm<Conductance.Result> {
     private final ExecutorService executor;
     private final ConductanceConfig config;
     private final WeightTransformer weightTransformer;
-    private final NodeProperties communityProperties;
+    private final NodePropertyValues communityProperties;
 
     public Conductance(
         Graph graph,

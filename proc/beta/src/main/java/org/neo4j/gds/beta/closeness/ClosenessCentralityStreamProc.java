@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.closeness;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -59,12 +59,12 @@ public class ClosenessCentralityStreamProc extends StreamProc<ClosenessCentralit
     }
 
     @Override
-    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodeProperties nodeProperties) {
-        return new StreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+    protected StreamResult streamResult(long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues) {
+        return new StreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig> computationResult) {
         return ClosenessCentralityProc.nodeProperties(computationResult);
     }
 

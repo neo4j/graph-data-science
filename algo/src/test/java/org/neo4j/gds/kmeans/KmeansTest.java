@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -32,9 +32,9 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.nodeproperties.DoubleArrayTestProperties;
-import org.neo4j.gds.nodeproperties.FloatArrayTestProperties;
-import org.neo4j.gds.nodeproperties.LongTestProperties;
+import org.neo4j.gds.nodeproperties.DoubleArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.FloatArrayTestPropertyValues;
+import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.SplittableRandom;
 import java.util.stream.Stream;
@@ -125,7 +125,7 @@ class KmeansTest {
 
     @Test
     void shouldFailOnInvalidPropertyValueTypes() {
-        var longProperties = new LongTestProperties(n -> n);
+        var longProperties = new LongTestPropertyValues(n -> n);
         assertThatThrownBy(() -> new Kmeans(
                 ProgressTracker.NULL_TRACKER,
                 Pools.DEFAULT,
@@ -143,8 +143,8 @@ class KmeansTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.kmeans.KmeansTest#validNodeProperties")
-    void shouldAcceptValidPropertyValueTypes(NodeProperties nodeProperties) {
+    @MethodSource("org.neo4j.gds.kmeans.KmeansTest#validNodePropertyValues")
+    void shouldAcceptValidPropertyValueTypes(NodePropertyValues nodePropertyValues) {
         assertThatNoException()
             .isThrownBy(() -> new Kmeans(
                 ProgressTracker.NULL_TRACKER,
@@ -154,16 +154,16 @@ class KmeansTest {
                 4,
                 10,
                 0.1,
-                nodeProperties,
+                nodePropertyValues,
                 new SplittableRandom()
             ).compute()
         );
     }
 
-    static Stream<Arguments> validNodeProperties() {
+    static Stream<Arguments> validNodePropertyValues() {
         return Stream.of(
-            Arguments.of(new DoubleArrayTestProperties(__ -> new double[]{1.0D})),
-            Arguments.of(new FloatArrayTestProperties(__ -> new float[]{1.0F}))
+            Arguments.of(new DoubleArrayTestPropertyValues(__ -> new double[]{1.0D})),
+            Arguments.of(new FloatArrayTestPropertyValues(__ -> new float[]{1.0F}))
         );
     }
 }

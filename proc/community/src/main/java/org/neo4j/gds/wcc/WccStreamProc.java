@@ -21,14 +21,14 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -81,18 +81,18 @@ public class WccStreamProc extends StreamProc<
 
     @Override
     protected StreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new StreamResult(originalNodeId, nodeProperties.longValue(internalNodeId));
+        return new StreamResult(originalNodeId, nodePropertyValues.longValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Wcc, DisjointSetStruct, WccStreamConfig> computationResult) {
         DisjointSetStruct dss = computationResult.result();
-        LongNodeProperties simpleNodeProperties = dss.asNodeProperties();
+        LongNodePropertyValues simpleNodeProperties = dss.asNodeProperties();
 
         return computationResult.config().consecutiveIds()
-            ? new ConsecutiveLongNodeProperties(simpleNodeProperties, computationResult.graph().nodeCount())
+            ? new ConsecutiveLongNodePropertyValues(simpleNodeProperties, computationResult.graph().nodeCount())
             : simpleNodeProperties;
     }
 

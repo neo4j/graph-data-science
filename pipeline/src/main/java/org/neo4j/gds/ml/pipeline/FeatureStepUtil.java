@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
@@ -60,7 +60,7 @@ public final class FeatureStepUtil {
         return dimension;
     }
 
-    static boolean isNaN(long nodeId, NodeProperties nodeProperty) {
+    static boolean isNaN(long nodeId, NodePropertyValues nodeProperty) {
         switch (nodeProperty.valueType()) {
             case DOUBLE:
                 return Double.isNaN(nodeProperty.doubleValue(nodeId));

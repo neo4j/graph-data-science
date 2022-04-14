@@ -17,52 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.nodeproperties;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.ValueConversion;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-import java.util.OptionalLong;
+import java.util.OptionalDouble;
 import java.util.stream.LongStream;
 
-public interface LongNodeProperties extends NodeProperties {
+public interface DoubleNodePropertyValues extends NodePropertyValues {
 
     @Override
-    long longValue(long nodeId);
+    double doubleValue(long nodeId);
 
     @Override
     default Object getObject(long nodeId) {
-        return longValue(nodeId);
+        return doubleValue(nodeId);
     }
 
     @Override
     default Value value(long nodeId) {
-        return Values.longValue(longValue(nodeId));
+        var value = doubleValue(nodeId);
+        return Double.isNaN(value) ? null : Values.doubleValue(value);
     }
 
     @Override
     default ValueType valueType() {
-        return ValueType.LONG;
+        return ValueType.DOUBLE;
     }
 
     @Override
-    default double doubleValue(long nodeId) {
-        long value = longValue(nodeId);
-        if (value == DefaultValue.LONG_DEFAULT_FALLBACK) {
-            return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
-        }
-        return ValueConversion.exactLongToDouble(value);
-    }
-
-    @Override
-    default OptionalLong getMaxLongPropertyValue() {
+    default OptionalDouble getMaxDoublePropertyValue() {
         return LongStream
             .range(0, size())
             .parallel()
-            .map(this::longValue)
+            .mapToDouble(this::doubleValue)
             .max();
     }
 }

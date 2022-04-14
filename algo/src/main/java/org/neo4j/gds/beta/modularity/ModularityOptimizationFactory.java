@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -92,7 +92,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationConfi
     public ModularityOptimization build(
         Graph graph,
         T configuration,
-        NodeProperties seedProperty,
+        NodePropertyValues seedProperty,
         ProgressTracker progressTracker
     ) {
         return new ModularityOptimization(

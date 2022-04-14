@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.nodeproperties;
 
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.BitUtil;
 
-public class ConsecutiveLongNodeProperties implements LongNodeProperties {
+public class ConsecutiveLongNodePropertyValues implements LongNodePropertyValues {
 
     private static final long MAPPING_SIZE_QUOTIENT = 10L;
 
     private final HugeLongArray communities;
 
-    public ConsecutiveLongNodeProperties(
-        LongNodeProperties longNodeProperties,
+    public ConsecutiveLongNodePropertyValues(
+        LongNodePropertyValues longNodeProperties,
         long nodeCount
     ) {
         var nextConsecutiveId = -1L;

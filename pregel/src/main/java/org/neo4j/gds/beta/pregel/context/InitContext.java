@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.beta.pregel.context;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.NodePropertyContainer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.ComputeStep;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 
@@ -54,7 +54,7 @@ public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricC
      * Property values can be used to access individual node
      * property values by using their node identifier.
      */
-    public NodeProperties nodeProperties(String key) {
+    public NodePropertyValues nodeProperties(String key) {
         return this.nodePropertyContainer.nodeProperties(key);
     }
 }

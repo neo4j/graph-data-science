@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -32,13 +32,13 @@ final class Mean extends ScalarScaler {
     final double avg;
     final double maxMinDiff;
 
-    private Mean(NodeProperties properties, double avg, double maxMinDiff) {
+    private Mean(NodePropertyValues properties, double avg, double maxMinDiff) {
         super(properties);
         this.avg = avg;
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -71,7 +71,7 @@ final class Mean extends ScalarScaler {
         private double min;
         private double sum;
 
-        ComputeMaxMinSum(Partition partition, NodeProperties property) {
+        ComputeMaxMinSum(Partition partition, NodePropertyValues property) {
             super(partition, property);
             this.min = Double.MAX_VALUE;
             this.max = -Double.MAX_VALUE;

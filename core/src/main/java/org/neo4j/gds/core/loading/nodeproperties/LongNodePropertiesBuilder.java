@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -96,12 +96,12 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public NodeProperties buildDirect(long size) {
-        return new LongStoreNodeProperties(builder.build(), size, OptionalLong.empty());
+    public NodePropertyValues buildDirect(long size) {
+        return new LongStoreNodePropertyValues(builder.build(), size, OptionalLong.empty());
     }
 
     @Override
-    public NodeProperties build(long size, IdMap idMap) {
+    public NodePropertyValues build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArray.builder(
@@ -141,7 +141,7 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
             ? OptionalLong.of((long) MAX_VALUE.getVolatile(LongNodePropertiesBuilder.this))
             : OptionalLong.empty();
 
-        return new LongStoreNodeProperties(propertyValues, size, maybeMaxValue);
+        return new LongStoreNodePropertyValues(propertyValues, size, maybeMaxValue);
     }
 
     private void updateMaxValue(long value) {
@@ -178,12 +178,12 @@ public class LongNodePropertiesBuilder extends InnerNodePropertiesBuilder {
         }
     }
 
-    static class LongStoreNodeProperties implements LongNodeProperties {
+    static class LongStoreNodePropertyValues implements LongNodePropertyValues {
         private final HugeSparseLongArray propertyValues;
         private final long size;
         private final OptionalLong maxValue;
 
-        LongStoreNodeProperties(HugeSparseLongArray propertyValues, long size, OptionalLong maxValue) {
+        LongStoreNodePropertyValues(HugeSparseLongArray propertyValues, long size, OptionalLong maxValue) {
             this.propertyValues = propertyValues;
             this.size = size;
             this.maxValue = maxValue;

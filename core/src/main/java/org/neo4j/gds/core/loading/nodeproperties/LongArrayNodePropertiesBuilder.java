@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseLongArrayArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -67,12 +67,12 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
     }
 
     @Override
-    public NodeProperties buildDirect(long size) {
-        return new LongArrayStoreNodeProperties(builder.build(), size);
+    public NodePropertyValues buildDirect(long size) {
+        return new LongArrayStoreNodePropertyValues(builder.build(), size);
     }
 
     @Override
-    public LongArrayNodeProperties build(long size, IdMap idMap) {
+    public LongArrayNodePropertyValues build(long size, IdMap idMap) {
         var propertiesByNeoIds = builder.build();
 
         var propertiesByMappedIdsBuilder = HugeSparseLongArrayArray.builder(
@@ -108,14 +108,14 @@ public class LongArrayNodePropertiesBuilder extends InnerNodePropertiesBuilder {
 
         var propertyValues = propertiesByMappedIdsBuilder.build();
 
-        return new LongArrayStoreNodeProperties(propertyValues, size);
+        return new LongArrayStoreNodePropertyValues(propertyValues, size);
     }
 
-    static class LongArrayStoreNodeProperties implements LongArrayNodeProperties {
+    static class LongArrayStoreNodePropertyValues implements LongArrayNodePropertyValues {
         private final HugeSparseLongArrayArray propertyValues;
         private final long size;
 
-        LongArrayStoreNodeProperties(
+        LongArrayStoreNodePropertyValues(
             HugeSparseLongArrayArray propertyValues,
             long size
         ) {

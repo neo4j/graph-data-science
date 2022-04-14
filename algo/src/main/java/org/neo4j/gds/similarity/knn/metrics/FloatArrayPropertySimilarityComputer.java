@@ -19,25 +19,25 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 final class FloatArrayPropertySimilarityComputer implements SimilarityComputer {
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
     private final FloatArraySimilarityMetric metric;
 
-    FloatArrayPropertySimilarityComputer(NodeProperties nodeProperties, FloatArraySimilarityMetric metric) {
+    FloatArrayPropertySimilarityComputer(NodePropertyValues nodePropertyValues, FloatArraySimilarityMetric metric) {
         this.metric = metric;
-        if (nodeProperties.valueType() != ValueType.FLOAT_ARRAY) {
+        if (nodePropertyValues.valueType() != ValueType.FLOAT_ARRAY) {
             throw new IllegalArgumentException("The property is not of type FLOAT_ARRAY");
         }
-        this.nodeProperties = nodeProperties;
+        this.nodePropertyValues = nodePropertyValues;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        var left = nodeProperties.floatArrayValue(firstNodeId);
-        var right = nodeProperties.floatArrayValue(secondNodeId);
+        var left = nodePropertyValues.floatArrayValue(firstNodeId);
+        var right = nodePropertyValues.floatArrayValue(secondNodeId);
         return metric.compute(left, right);
     }
 }

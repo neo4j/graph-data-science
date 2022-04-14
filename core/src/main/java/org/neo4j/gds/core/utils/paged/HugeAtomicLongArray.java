@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.utils.ArrayUtil;
 
 import java.lang.invoke.MethodHandles;
@@ -196,8 +196,8 @@ public abstract class HugeAtomicLongArray implements HugeCursorSupport<long[]> {
      */
     public abstract long release();
 
-    public LongNodeProperties asNodeProperties() {
-        return new LongNodeProperties() {
+    public LongNodePropertyValues asNodeProperties() {
+        return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return get(nodeId);

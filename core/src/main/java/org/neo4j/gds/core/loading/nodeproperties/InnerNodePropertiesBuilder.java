@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 
 public abstract class InnerNodePropertiesBuilder {
@@ -36,11 +36,11 @@ public abstract class InnerNodePropertiesBuilder {
      * by internal ids, i.e., ids ranging from 0 to node count.
      * Violating the constraint is undefined behaviour.
      */
-    public abstract NodeProperties buildDirect(long size);
+    public abstract NodePropertyValues buildDirect(long size);
 
     /**
      * Builds the underlying node properties and performs a remapping
      * to the internal id space using the given id map.
      */
-    public abstract NodeProperties build(long size, IdMap idMap);
+    public abstract NodePropertyValues build(long size, IdMap idMap);
 }

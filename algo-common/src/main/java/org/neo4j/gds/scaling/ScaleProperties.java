@@ -22,8 +22,8 @@ package org.neo4j.gds.scaling;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -204,8 +204,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         ));
     }
 
-    private DoubleNodeProperties transformFloatArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return new DoubleNodeProperties() {
+    private DoubleNodePropertyValues transformFloatArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+        return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.floatArrayValue(nodeId);
@@ -223,8 +223,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         };
     }
 
-    private DoubleNodeProperties transformDoubleArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return new DoubleNodeProperties() {
+    private DoubleNodePropertyValues transformDoubleArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+        return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.doubleArrayValue(nodeId);
@@ -242,8 +242,8 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         };
     }
 
-    private DoubleNodeProperties transformLongArrayEntryToDoubleProperty(String propertyName, NodeProperties property, int expectedArrayLength, int idx) {
-        return new DoubleNodeProperties() {
+    private DoubleNodePropertyValues transformLongArrayEntryToDoubleProperty(String propertyName, NodePropertyValues property, int expectedArrayLength, int idx) {
+        return new DoubleNodePropertyValues() {
             @Override
             public double doubleValue(long nodeId) {
                 var propertyValue = property.longArrayValue(nodeId);

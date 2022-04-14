@@ -28,7 +28,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.huge.FilteredNodeProperties.OriginalToFilteredNodeProperties;
+import org.neo4j.gds.core.huge.FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -60,7 +60,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testDoubleArray() {
-        var filteredNodeProperties = new OriginalToFilteredNodeProperties(
+        var filteredNodeProperties = new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
             graph.nodeProperties("doubleArray"),
             new NodeFilteredGraph(graph, graph)
         );
@@ -74,7 +74,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testLongArray() {
-        var filteredNodeProperties = new OriginalToFilteredNodeProperties(
+        var filteredNodeProperties = new OriginalToFilteredNodePropertyValues(
             graph.nodeProperties("longArray"),
             new NodeFilteredGraph(graph, graph)
         );
@@ -85,7 +85,7 @@ class OriginalToFilteredNodePropertiesTest {
 
     @Test
     void testFloatArray() {
-        var filteredNodeProperties = new OriginalToFilteredNodeProperties(
+        var filteredNodeProperties = new FilteredNodePropertyValues.OriginalToFilteredNodePropertyValues(
             graph.nodeProperties("floatArray"),
             new NodeFilteredGraph(graph, graph)
         );
@@ -106,7 +106,7 @@ class OriginalToFilteredNodePropertiesTest {
         var propertyArray = HugeLongArray.newArray(1);
         propertyArray.setAll((i) -> 42L);
 
-        var filteredNodeProperties = new OriginalToFilteredNodeProperties(
+        var filteredNodeProperties = new OriginalToFilteredNodePropertyValues(
             propertyArray.asNodeProperties(),
             nodeFilteredGraph
         );

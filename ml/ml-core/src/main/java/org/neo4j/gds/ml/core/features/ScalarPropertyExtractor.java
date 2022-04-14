@@ -20,24 +20,24 @@
 package org.neo4j.gds.ml.core.features;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class ScalarPropertyExtractor implements ScalarFeatureExtractor {
     private final Graph graph;
     private final String propertyKey;
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
 
     ScalarPropertyExtractor(Graph graph, String propertyKey) {
         this.graph = graph;
         this.propertyKey = propertyKey;
-        this.nodeProperties = graph.nodeProperties(propertyKey);
+        this.nodePropertyValues = graph.nodeProperties(propertyKey);
     }
 
     @Override
     public double extract(long nodeId) {
-        var propertyValue = nodeProperties.doubleValue(nodeId);
+        var propertyValue = nodePropertyValues.doubleValue(nodeId);
         if (Double.isNaN(propertyValue)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Node with ID `%d` has invalid feature property value `NaN` for property `%s`",

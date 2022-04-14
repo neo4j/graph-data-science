@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
@@ -46,7 +46,7 @@ public class HadamardFeatureStep implements LinkFeatureStep {
         var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
         return (source, target, linkFeatures, startOffset) -> {
             var localOffset = startOffset;
-            for (NodeProperties props : properties) {
+            for (NodePropertyValues props : properties) {
                 var propertyType = props.valueType();
                 switch (propertyType) {
                     case DOUBLE_ARRAY:

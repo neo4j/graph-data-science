@@ -21,7 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
@@ -84,7 +84,7 @@ public class TriangleCountStreamProc
 
     @Override
     protected Result streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
         throw new UnsupportedOperationException("TriangleCount handles result building individually.");
     }
@@ -100,7 +100,7 @@ public class TriangleCountStreamProc
     }
 
     @Override
-    protected NodeProperties nodeProperties(
+    protected NodePropertyValues nodeProperties(
         ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig> computationResult
     ) {
         return TriangleCountCompanion.nodePropertyTranslator(computationResult);

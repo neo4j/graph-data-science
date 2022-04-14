@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -32,13 +32,13 @@ final class MinMax extends ScalarScaler {
     final double min;
     final double maxMinDiff;
 
-    private MinMax(NodeProperties properties, double min, double maxMinDiff) {
+    private MinMax(NodePropertyValues properties, double min, double maxMinDiff) {
         super(properties);
         this.min = min;
         this.maxMinDiff = maxMinDiff;
     }
 
-    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -69,7 +69,7 @@ final class MinMax extends ScalarScaler {
         private double min;
         private double max;
 
-        ComputeMaxMin(Partition partition, NodeProperties property) {
+        ComputeMaxMin(Partition partition, NodePropertyValues property) {
             super(partition, property);
             this.min = Double.MAX_VALUE;
             this.max = -Double.MAX_VALUE;

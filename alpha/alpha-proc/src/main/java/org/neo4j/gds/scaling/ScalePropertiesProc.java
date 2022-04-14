@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.DoubleArrayNodeProperties;
+import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
 
 public class ScalePropertiesProc {
 
-    static NodeProperties nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
+    static NodePropertyValues nodeProperties(ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult) {
         var size = computationResult.graph().nodeCount();
         var scaledProperties = computationResult.result().scaledProperties();
 
-        return new DoubleArrayNodeProperties() {
+        return new DoubleArrayNodePropertyValues() {
             @Override
             public long size() {
                 return size;

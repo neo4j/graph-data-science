@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -33,9 +33,9 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public abstract class ScalarScaler implements Scaler {
 
-    protected final NodeProperties properties;
+    protected final NodePropertyValues properties;
 
-    public ScalarScaler(NodeProperties properties) {this.properties = properties;}
+    public ScalarScaler(NodePropertyValues properties) {this.properties = properties;}
 
     public abstract double scaleProperty(long nodeId);
 
@@ -55,7 +55,7 @@ public abstract class ScalarScaler implements Scaler {
         NONE {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return new ScalarScaler(properties) {
                     @Override
@@ -68,7 +68,7 @@ public abstract class ScalarScaler implements Scaler {
         MAX {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return Max.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -76,7 +76,7 @@ public abstract class ScalarScaler implements Scaler {
         MINMAX {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return MinMax.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -84,7 +84,7 @@ public abstract class ScalarScaler implements Scaler {
         MEAN {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return Mean.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -92,7 +92,7 @@ public abstract class ScalarScaler implements Scaler {
         LOG {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return new LogTransformer(properties);
             }
@@ -100,7 +100,7 @@ public abstract class ScalarScaler implements Scaler {
         STDSCORE {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return StdScore.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -108,7 +108,7 @@ public abstract class ScalarScaler implements Scaler {
         L1NORM {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return L1Norm.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -116,7 +116,7 @@ public abstract class ScalarScaler implements Scaler {
         L2NORM {
             @Override
             public ScalarScaler create(
-                NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
             ) {
                 return L2Norm.initialize(properties, nodeCount, concurrency, executor);
             }
@@ -152,7 +152,7 @@ public abstract class ScalarScaler implements Scaler {
          * Create a scaler. Some scalers rely on aggregate extreme values which are computed at construction time.
          */
         public abstract ScalarScaler create(
-            NodeProperties properties,
+            NodePropertyValues properties,
             long nodeCount,
             int concurrency,
             ExecutorService executor
@@ -162,9 +162,9 @@ public abstract class ScalarScaler implements Scaler {
     abstract static class AggregatesComputer implements Runnable {
 
         private final Partition partition;
-        final NodeProperties properties;
+        final NodePropertyValues properties;
 
-        AggregatesComputer(Partition partition, NodeProperties property) {
+        AggregatesComputer(Partition partition, NodePropertyValues property) {
             this.partition = partition;
             this.properties = property;
         }

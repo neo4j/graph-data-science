@@ -20,8 +20,8 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -42,7 +42,7 @@ final class ComputeStep implements Step {
 
     ComputeStep(
             Graph graph,
-            NodeProperties nodeWeights,
+            NodePropertyValues nodeWeights,
             ProgressTracker progressTracker,
             HugeLongArray existingLabels,
             PrimitiveLongIterable nodes) {

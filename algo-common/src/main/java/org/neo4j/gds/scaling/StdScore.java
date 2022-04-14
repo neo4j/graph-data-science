@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -32,13 +32,13 @@ final class StdScore extends ScalarScaler {
     final double avg;
     final double std;
 
-    private StdScore(NodeProperties properties, double avg, double std) {
+    private StdScore(NodePropertyValues properties, double avg, double std) {
         super(properties);
         this.avg = avg;
         this.std = std;
     }
 
-    static ScalarScaler initialize(NodeProperties properties, long nodeCount, int concurrency, ExecutorService executor) {
+    static ScalarScaler initialize(NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor) {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
@@ -75,7 +75,7 @@ final class StdScore extends ScalarScaler {
         private double squaredSum;
         private double sum;
 
-        ComputeSumAndSquaredSum(Partition partition, NodeProperties property) {
+        ComputeSumAndSquaredSum(Partition partition, NodePropertyValues property) {
             super(partition, property);
             this.squaredSum = 0D;
             this.sum = 0D;

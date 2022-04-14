@@ -21,7 +21,7 @@ package org.neo4j.gds.degree;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
@@ -71,13 +71,13 @@ public class DegreeCentralityStreamProc extends StreamProc<DegreeCentrality, Deg
 
     @Override
     protected CentralityStreamResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
-        return new CentralityStreamResult(originalNodeId, nodeProperties.doubleValue(internalNodeId));
+        return new CentralityStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig> computationResult) {
         return DegreeCentralityProc.nodeProperties(computationResult);
     }
 }

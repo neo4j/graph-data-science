@@ -21,8 +21,8 @@ package org.neo4j.gds.core.loading.nodeproperties;
 
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseCollections;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -85,7 +85,7 @@ public final class NodePropertiesFromStoreBuilder {
         }
     }
 
-    public NodeProperties build(IdMap idMap) {
+    public NodePropertyValues build(IdMap idMap) {
         if (innerBuilder.get() == null) {
             if (defaultValue.getObject() != null) {
                 initializeWithType(Values.of(defaultValue.getObject()));

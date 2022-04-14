@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -29,10 +29,10 @@ import java.util.OptionalDouble;
 import java.util.OptionalLong;
 
 /**
- * {@link org.neo4j.gds.api.NodeProperties} implementation which always returns
+ * {@link org.neo4j.gds.api.properties.nodes.NodePropertyValues} implementation which always returns
  * a given default property value upon invocation.
  */
-public abstract class NullPropertyMap implements NodeProperties {
+public abstract class NullPropertyMap implements NodePropertyValues {
 
     static public class DoubleNullPropertyMap extends NullPropertyMap {
         private final double defaultValue;
@@ -70,7 +70,7 @@ public abstract class NullPropertyMap implements NodeProperties {
         }
     }
 
-    static public class LongNullPropertyMap extends NullPropertyMap implements LongNodeProperties {
+    static public class LongNullPropertyMap extends NullPropertyMap implements LongNodePropertyValues {
         private final long defaultValue;
 
         public LongNullPropertyMap(long defaultValue) {this.defaultValue = defaultValue;}

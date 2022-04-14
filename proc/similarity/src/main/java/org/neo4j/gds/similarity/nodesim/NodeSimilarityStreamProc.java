@@ -22,7 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -73,7 +73,7 @@ public class NodeSimilarityStreamProc extends StreamProc<NodeSimilarity, NodeSim
 
     @Override
     protected SimilarityResult streamResult(
-        long originalNodeId, long internalNodeId, NodeProperties nodeProperties
+        long originalNodeId, long internalNodeId, NodePropertyValues nodePropertyValues
     ) {
         throw new UnsupportedOperationException("NodeSimilarity handles result building individually.");
     }

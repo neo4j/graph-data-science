@@ -19,40 +19,40 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongArrayNodeProperties;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 
 import java.util.Arrays;
 
 final class LongArrayPropertySimilarityComputer implements SimilarityComputer {
-    private final NodeProperties nodeProperties;
+    private final NodePropertyValues nodePropertyValues;
     private final LongArraySimilarityMetric metric;
 
-    LongArrayPropertySimilarityComputer(NodeProperties nodeProperties, LongArraySimilarityMetric metric) {
-        if (nodeProperties.valueType() != ValueType.LONG_ARRAY) {
+    LongArrayPropertySimilarityComputer(NodePropertyValues nodePropertyValues, LongArraySimilarityMetric metric) {
+        if (nodePropertyValues.valueType() != ValueType.LONG_ARRAY) {
             throw new IllegalArgumentException("The property is not of type LONG_ARRAY");
         }
-        this.nodeProperties = nodeProperties;
+        this.nodePropertyValues = nodePropertyValues;
         this.metric = metric;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
-        var left = nodeProperties.longArrayValue(firstNodeId);
-        var right = nodeProperties.longArrayValue(secondNodeId);
+        var left = nodePropertyValues.longArrayValue(firstNodeId);
+        var right = nodePropertyValues.longArrayValue(secondNodeId);
         return metric.compute(left, right);
     }
 
-    static final class SortedLongArrayProperties implements LongArrayNodeProperties {
+    static final class SortedLongArrayPropertyValues implements LongArrayNodePropertyValues {
 
         private final HugeObjectArray<long[]> properties;
 
-        SortedLongArrayProperties(NodeProperties nodeProperties) {
-            this.properties = HugeObjectArray.newArray(long[].class, nodeProperties.size());
+        SortedLongArrayPropertyValues(NodePropertyValues nodePropertyValues) {
+            this.properties = HugeObjectArray.newArray(long[].class, nodePropertyValues.size());
             this.properties.setAll(i -> {
-                var value = nodeProperties.longArrayValue(i).clone();
+                var value = nodePropertyValues.longArrayValue(i).clone();
                 Arrays.parallelSort(value);
                 return value;
             });

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.beta.modularity;
 
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.nodeproperties.ConsecutiveLongNodeProperties;
+import org.neo4j.gds.nodeproperties.ConsecutiveLongNodePropertyValues;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -45,12 +45,12 @@ final class ModularityOptimizationProc {
 
     }
 
-    static <CONFIG extends ModularityOptimizationConfig> NodeProperties nodeProperties(
+    static <CONFIG extends ModularityOptimizationConfig> NodePropertyValues nodeProperties(
         ComputationResult<ModularityOptimization, ModularityOptimization, CONFIG> computationResult
     ) {
-        LongNodeProperties resultCommunities = computationResult.result().asNodeProperties();
+        LongNodePropertyValues resultCommunities = computationResult.result().asNodeProperties();
         if (computationResult.config().consecutiveIds()) {
-            return new ConsecutiveLongNodeProperties(resultCommunities, computationResult.graph().nodeCount());
+            return new ConsecutiveLongNodePropertyValues(resultCommunities, computationResult.graph().nodeCount());
         } else {
             return resultCommunities;
         }

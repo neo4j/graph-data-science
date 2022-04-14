@@ -22,7 +22,7 @@ package org.neo4j.gds.core.huge;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.CSRGraph;
-import org.neo4j.gds.core.huge.FilteredNodeProperties.FilteredToOriginalNodeProperties;
+import org.neo4j.gds.core.huge.FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -31,7 +31,7 @@ import org.neo4j.gds.extension.Inject;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class FilteredToOriginalNodePropertiesTest {
+class FilteredToOriginalNodePropertyValuesTest {
 
     @GdlGraph
     private static final String GDL =
@@ -46,7 +46,7 @@ class FilteredToOriginalNodePropertiesTest {
 
     @Test
     void testDoubleArray() {
-        var filteredNodeProperties = new FilteredToOriginalNodeProperties(
+        var filteredNodeProperties = new FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("doubleArray"),
             new NodeFilteredGraph(graph, graph)
         );
@@ -60,7 +60,7 @@ class FilteredToOriginalNodePropertiesTest {
 
     @Test
     void testLongArray() {
-        var filteredNodeProperties = new FilteredToOriginalNodeProperties(
+        var filteredNodeProperties = new FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("longArray"),
             new NodeFilteredGraph(graph, graph)
         );
@@ -71,7 +71,7 @@ class FilteredToOriginalNodePropertiesTest {
 
     @Test
     void testFloatArray() {
-        var filteredNodeProperties = new FilteredToOriginalNodeProperties(
+        var filteredNodeProperties = new FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues(
             graph.nodeProperties("floatArray"),
             new NodeFilteredGraph(graph, graph)
         );

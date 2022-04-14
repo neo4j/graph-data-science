@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.nodeproperties;
+package org.neo4j.gds.api.properties.nodes;
 
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
-public interface DoubleArrayNodeProperties extends NodeProperties {
+public interface DoubleArrayNodePropertyValues extends NodePropertyValues {
 
     @Override
     double[] doubleArrayValue(long nodeId);

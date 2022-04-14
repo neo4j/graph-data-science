@@ -20,6 +20,7 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 

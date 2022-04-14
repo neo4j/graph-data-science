@@ -22,8 +22,8 @@ package org.neo4j.gds.test;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.NodeProperties;
-import org.neo4j.gds.api.nodeproperties.LongNodeProperties;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -62,8 +62,8 @@ public class TestMutateProc extends MutatePropertyProc<TestAlgorithm, TestAlgori
     }
 
     @Override
-    protected NodeProperties nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult) {
-        return new LongNodeProperties() {
+    protected NodePropertyValues nodeProperties(ComputationResult<TestAlgorithm, TestAlgorithm, TestMutateConfig> computationResult) {
+        return new LongNodePropertyValues() {
             @Override
             public long longValue(long nodeId) {
                 return nodeId;

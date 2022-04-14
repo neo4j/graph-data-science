@@ -21,7 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
-import org.neo4j.gds.api.NodeProperties;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.ComputationResult;
@@ -79,7 +79,7 @@ public class WccWriteProc extends WriteProc<Wcc, DisjointSetStruct, WccWriteProc
     }
 
     @Override
-    protected NodeProperties nodeProperties(
+    protected NodePropertyValues nodeProperties(
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computationResult
     ) {
         return WccProc.nodeProperties(computationResult, computationResult.config().writeProperty());
