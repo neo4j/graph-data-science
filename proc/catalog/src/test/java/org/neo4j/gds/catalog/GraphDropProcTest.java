@@ -146,7 +146,8 @@ class GraphDropProcTest extends BaseProcTest {
                     entry("sizeInBytes", -1L),
                     entry("schema", Map.of(
                         "nodes", Map.of("A", Map.of()),
-                        "relationships", Map.of("REL", Map.of())
+                        "relationships", Map.of("REL", Map.of()),
+                        "graphProperties", Map.of()
                     )),
                     entry("density", new Condition<>(Double::isFinite, "a finite double")),
                     entry("database", db.databaseName())

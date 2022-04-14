@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreFilter {
@@ -171,7 +172,7 @@ public final class GraphStoreFilter {
             .relationshipSchema()
             .filter(filteredRelationships.topology().keySet());
 
-        return GraphSchema.of(nodeSchema, relationshipSchema);
+        return GraphSchema.of(nodeSchema, relationshipSchema, Map.of());
     }
 
     private GraphStoreFilter() {}

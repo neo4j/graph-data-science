@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public interface PropertyStore<VALUE, PROPERTY extends Property<VALUE>> {
+public interface PropertyStore<VALUE extends PropertyValues, PROPERTY extends Property<VALUE>> {
 
     Map<String, PROPERTY> properties();
 

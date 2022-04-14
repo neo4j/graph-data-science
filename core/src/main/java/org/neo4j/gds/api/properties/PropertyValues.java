@@ -19,34 +19,29 @@
  */
 package org.neo4j.gds.api.properties;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.PropertySchema;
 
-public interface Property<VALUE extends PropertyValues> {
-    VALUE values();
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-    PropertySchema propertySchema();
+public interface PropertyValues {
 
-    @Configuration.Ignore
-    default String key() {
-        return propertySchema().key();
+    ValueType valueType();
+
+    /**
+     * Release internal data structures and return an estimate how many bytes were freed.
+     *
+     * Note that the mapping is not usable afterwards.
+     */
+    default long release() {
+        return 0;
     }
 
-    @Configuration.Ignore
-    default ValueType valueType() {
-        return propertySchema().valueType();
-    }
+    /**
+     * @return the number of values stored.
+     */
+    long size();
 
-    @Configuration.Ignore
-    default DefaultValue defaultValue() {
-        return propertySchema().defaultValue();
-    }
-
-    @Configuration.Ignore
-    default PropertyState propertyState() {
-        return propertySchema().state();
+    default UnsupportedOperationException unsupportedTypeException(ValueType expectedType) {
+        return new UnsupportedOperationException(formatWithLocale("Tried to retrieve a value of type %s value from properties of type %s", expectedType, valueType()));
     }
 }

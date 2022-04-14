@@ -206,7 +206,7 @@ YIELD graphName, schema
 |===
 | graphName | schema
 | "personsCypher"
-| {relationships={KNOWS={}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={}}, nodes={Person={}}}
 |===
 --
 
@@ -224,7 +224,7 @@ YIELD graphName, schema
 |===
 | graphName       | schema
 | "personsNative"
-| {relationships={KNOWS={}}, nodes={Person={}}}
+| {graphProperties={}, relationships={KNOWS={}}, nodes={Person={}}}
 |===
 --
 

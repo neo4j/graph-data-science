@@ -26,6 +26,8 @@ import org.neo4j.gds.annotation.ValueClass;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ValueClass
 public interface GraphSchema {
@@ -34,32 +36,62 @@ public interface GraphSchema {
 
     RelationshipSchema relationshipSchema();
 
+    Map<String, PropertySchema> graphProperties();
+
     default Map<String, Object> toMap() {
         return Map.of(
             "nodes", nodeSchema().toMap(),
-            "relationships", relationshipSchema().toMap()
+            "relationships", relationshipSchema().toMap(),
+            "graphProperties", graphProperties().entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                schema -> GraphSchema.forPropertySchema(schema.getValue())
+            ))
         );
     }
 
     default GraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
-        return of(nodeSchema().filter(labelsToKeep), relationshipSchema());
+        return of(nodeSchema().filter(labelsToKeep), relationshipSchema(), graphProperties());
     }
 
     default GraphSchema filterRelationshipTypes(Set<RelationshipType> relationshipTypesToKeep) {
-        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep));
+        return of(nodeSchema(), relationshipSchema().filter(relationshipTypesToKeep), graphProperties());
     }
 
     default GraphSchema union(GraphSchema other) {
         return GraphSchema.of(
             nodeSchema().union(other.nodeSchema()),
-            relationshipSchema().union(other.relationshipSchema())
+            relationshipSchema().union(other.relationshipSchema()),
+            unionGraphProperties(other.graphProperties())
         );
     }
 
-    static GraphSchema of(NodeSchema nodeSchema, RelationshipSchema relationshipSchema) {
+    private Map<String, PropertySchema> unionGraphProperties(Map<String, PropertySchema> otherProperties) {
+        return Stream.concat(
+            graphProperties().entrySet().stream(),
+            otherProperties.entrySet().stream()
+        ).collect(Collectors.toMap(
+            Map.Entry::getKey,
+            Map.Entry::getValue,
+            (leftType, rightType) -> {
+                if (leftType.valueType() != rightType.valueType()) {
+                    throw new IllegalArgumentException(String.format(
+                        Locale.ENGLISH,
+                        "Combining schema entries with value type %s and %s is not supported.",
+                        leftType.valueType(),
+                        rightType.valueType()
+                    ));
+                } else {
+                    return leftType;
+                }
+            }
+        ));
+    }
+
+    static GraphSchema of(NodeSchema nodeSchema, RelationshipSchema relationshipSchema, Map<String, PropertySchema> graphProperties) {
         return ImmutableGraphSchema.builder()
             .nodeSchema(nodeSchema)
             .relationshipSchema(relationshipSchema)
+            .graphProperties(graphProperties)
             .build();
     }
 
@@ -83,6 +115,6 @@ public interface GraphSchema {
     }
 
     static GraphSchema empty() {
-        return of(NodeSchema.of(Map.of()), RelationshipSchema.of(Map.of()));
+        return of(NodeSchema.of(Map.of()), RelationshipSchema.of(Map.of()), Map.of());
     }
 }
