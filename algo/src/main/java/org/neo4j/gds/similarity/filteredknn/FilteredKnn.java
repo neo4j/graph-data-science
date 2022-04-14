@@ -45,7 +45,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Knn extends Algorithm<Knn.Result> {
+public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private final Graph graph;
     private final FilteredKnnBaseConfig config;
     private final NeighborFilterFactory neighborFilterFactory;
@@ -55,8 +55,8 @@ public class Knn extends Algorithm<Knn.Result> {
 
     private long nodePairsConsidered;
 
-    public static Knn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
-        return new Knn(
+    public static FilteredKnn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+        return new FilteredKnn(
             context.progressTracker(),
             graph,
             config,
@@ -67,7 +67,7 @@ public class Knn extends Algorithm<Knn.Result> {
         );
     }
 
-    public static Knn create(
+    public static FilteredKnn create(
         Graph graph,
         FilteredKnnBaseConfig config,
         SimilarityComputer similarityComputer,
@@ -75,7 +75,7 @@ public class Knn extends Algorithm<Knn.Result> {
         KnnContext context
     ) {
         SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
-        return new Knn(
+        return new FilteredKnn(
             context.progressTracker(),
             graph,
             config,
@@ -91,7 +91,7 @@ public class Knn extends Algorithm<Knn.Result> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    Knn(
+    FilteredKnn(
         ProgressTracker progressTracker,
         Graph graph,
         FilteredKnnBaseConfig config,

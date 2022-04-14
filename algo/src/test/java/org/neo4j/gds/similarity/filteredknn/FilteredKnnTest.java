@@ -67,7 +67,7 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 @ExtendWith(SoftAssertionsExtension.class)
-class KnnTest {
+class FilteredKnnTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
@@ -112,7 +112,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -135,7 +135,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -150,7 +150,7 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeCId, nodeAId, nodeBId);
     }
     private void assertCorrectNeighborList(
-        Knn.Result result,
+        FilteredKnn.Result result,
         long nodeId,
         long... expectedNeighbors
     ) {
@@ -176,7 +176,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -213,7 +213,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(multPropMissingGraph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(multPropMissingGraph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -248,7 +248,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(simThresholdGraph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(simThresholdGraph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -265,7 +265,7 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeEveId, nodeBobId);
     }
 
-    private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
+    private void assertEmptyNeighborList(FilteredKnn.Result result, long nodeId) {
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors).isEmpty();
     }
@@ -278,7 +278,7 @@ class KnnTest {
             .topK(2)
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
-        var knn = Knn.create(
+        var knn = FilteredKnn.create(
             graph,
             knnConfig,
             SimilarityComputer.ofProperty(graph, "knn", nodeProperties),
@@ -288,7 +288,7 @@ class KnnTest {
         var result = knn.compute();
         assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(FilteredKnn.Result::size)
             .isEqualTo(3L);
     }
 
@@ -304,7 +304,7 @@ class KnnTest {
     @Test
     void testMixedExistingAndNonExistingProperties(SoftAssertions softly) {
         var nodeProperties = new DoubleTestPropertyValues(nodeId -> nodeId == 0 ? Double.NaN : 42.1337);
-        var knn = Knn.create(
+        var knn = FilteredKnn.create(
             graph,
             ImmutableFilteredKnnBaseConfig
                 .builder()
@@ -322,7 +322,7 @@ class KnnTest {
 
         softly.assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(FilteredKnn.Result::size)
             .isEqualTo(3L);
 
         long nodeAId = idFunction.of("a");
@@ -341,7 +341,7 @@ class KnnTest {
         var reverseNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         // no old elements, don't add something to the reverse neighbors
-        Knn.reverseNeighbors(0, neighbors, reverseNeighbors);
+        FilteredKnn.reverseNeighbors(0, neighbors, reverseNeighbors);
         assertThat(reverseNeighbors.get(0)).isNull();
 
         var neighborsFrom0 = LongArrayList.from(LongStream.range(1, nodeCount).toArray());
@@ -359,7 +359,7 @@ class KnnTest {
         var neighborsFrom0 = LongArrayList.from(LongStream.range(1, nodeCount).toArray());
         neighbors.set(0, neighborsFrom0);
 
-        Knn.reverseNeighbors(0, neighbors, reverseNeighbors);
+        FilteredKnn.reverseNeighbors(0, neighbors, reverseNeighbors);
         // 0 has no reverse neighbors
         assertThat(reverseNeighbors.get(0)).isNull();
         // every other node points to 0
@@ -386,7 +386,7 @@ class KnnTest {
         neighbors.setAll(nodeId -> nodeId == 0 ? null : LongArrayList.from(0));
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-            Knn.reverseNeighbors(nodeId, neighbors, reverseNeighbors);
+            FilteredKnn.reverseNeighbors(nodeId, neighbors, reverseNeighbors);
         }
 
         // all nodes point to 0
@@ -411,7 +411,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
 
         var result = knn.compute();
 
@@ -428,7 +428,7 @@ class KnnTest {
             .concurrency(1)
             .build();
 
-        var factory = new KnnFactory<>();
+        var factory = new FilteredKnnFactory<>();
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();
@@ -442,25 +442,25 @@ class KnnTest {
             .extracting(removingThreadId())
             .extracting(replaceTimings())
             .containsExactly(
-                "Knn :: Start",
-                "Knn :: Initialize random neighbors :: Start",
-                "Knn :: Initialize random neighbors 100%",
-                "Knn :: Initialize random neighbors :: Finished",
-                "Knn :: Graph init took `some time`",
-                "Knn :: Iteration :: Start",
-                "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%",
-                "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished",
-                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 100%",
-                "Knn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished",
-                "Knn :: Iteration :: Join neighbors 1 of 100 :: Start",
-                "Knn :: Iteration :: Join neighbors 1 of 100 100%",
-                "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished",
-                "Knn :: Iteration :: Graph iteration 1 took `some time`",
-                "Knn :: Iteration :: Finished",
-                "Knn :: Finished",
-                "Knn :: Graph execution took `some time`"
+                "FilteredKnn :: Start",
+                "FilteredKnn :: Initialize random neighbors :: Start",
+                "FilteredKnn :: Initialize random neighbors 100%",
+                "FilteredKnn :: Initialize random neighbors :: Finished",
+                "FilteredKnn :: Graph init took `some time`",
+                "FilteredKnn :: Iteration :: Start",
+                "FilteredKnn :: Iteration :: Split old and new neighbors 1 of 100 :: Start",
+                "FilteredKnn :: Iteration :: Split old and new neighbors 1 of 100 100%",
+                "FilteredKnn :: Iteration :: Split old and new neighbors 1 of 100 :: Finished",
+                "FilteredKnn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Start",
+                "FilteredKnn :: Iteration :: Reverse old and new neighbors 1 of 100 100%",
+                "FilteredKnn :: Iteration :: Reverse old and new neighbors 1 of 100 :: Finished",
+                "FilteredKnn :: Iteration :: Join neighbors 1 of 100 :: Start",
+                "FilteredKnn :: Iteration :: Join neighbors 1 of 100 100%",
+                "FilteredKnn :: Iteration :: Join neighbors 1 of 100 :: Finished",
+                "FilteredKnn :: Iteration :: Graph iteration 1 took `some time`",
+                "FilteredKnn :: Iteration :: Finished",
+                "FilteredKnn :: Finished",
+                "FilteredKnn :: Graph execution took `some time`"
             );
     }
 
@@ -475,7 +475,7 @@ class KnnTest {
         var knnContext = ImmutableKnnContext.builder().build();
 
         // Initializing KNN will cause the default metric to be resolved
-        Knn.createWithDefaults(graph, knnConfig, knnContext);
+        FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
 
         assertThat(knnConfig.toMap().get("nodeProperties")).isEqualTo(
             Map.of(
@@ -520,7 +520,7 @@ class KnnTest {
                 .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             assertEquals(1, result.ranIterations());
@@ -547,7 +547,7 @@ class KnnTest {
                 .build();
 
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             assertTrue(result.didConverge());
@@ -599,7 +599,7 @@ class KnnTest {
                 .initialSampler(KnnSampler.SamplerType.RANDOMWALK)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
             long nodeAId = idFunction.of("a");

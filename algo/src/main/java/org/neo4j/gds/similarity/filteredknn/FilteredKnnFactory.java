@@ -39,9 +39,9 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-public class KnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<Knn, CONFIG> {
+public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<FilteredKnn, CONFIG> {
 
-    private static final String KNN_BASE_TASK_NAME = "Knn";
+    private static final String KNN_BASE_TASK_NAME = "FilteredKnn";
 
     @Override
     public String taskName() {
@@ -49,12 +49,12 @@ public class KnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgor
     }
 
     @Override
-    public Knn build(
+    public FilteredKnn build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return Knn.createWithDefaults(
+        return FilteredKnn.createWithDefaults(
             graph,
             configuration,
             ImmutableKnnContext
@@ -79,7 +79,7 @@ public class KnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgor
                     ))
                 );
                 return MemoryEstimations
-                    .builder(Knn.class)
+                    .builder(FilteredKnn.class)
                     .add(
                         "top-k-neighbors-list",
                         HugeObjectArray.memoryEstimation(NeighborList.memoryEstimation(boundedK))
