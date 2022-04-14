@@ -44,6 +44,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig, ModelConfig {
 
     double DEFAULT_THRESHOLD = 0.0;
+    String MISSING_INITIAL_SAMPLER = "MISSING_VALUE";
 
     //TODO make this a parameter
     String graphName();
@@ -75,11 +76,19 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
     @Configuration.IntegerRange(min = 0)
     Optional<Integer> randomJoins();
 
-    @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
-    default KnnSampler.SamplerType initialSampler() {
-        return KnnSampler.SamplerType.UNIFORM;
+    default String initialSampler() {
+        return MISSING_INITIAL_SAMPLER;
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default Optional<KnnSampler.SamplerType> derivedSampler() {
+        String sampler = initialSampler();
+        if (sampler.equals(MISSING_INITIAL_SAMPLER)) {
+            return Optional.empty();
+        }
+
+        return KnnSampler.SamplerType.parseToOptional(sampler);
     }
 
     @Value.Check
@@ -96,7 +105,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
                 "deltaThreshold", deltaThreshold().isPresent(),
                 "maxIterations", maxIterations().isPresent(),
                 "randomJoins", randomJoins().isPresent(),
-                "initialSampler", randomJoins().isPresent());
+                "initialSampler", derivedSampler().isPresent());
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
 
             topN().orElseThrow(()-> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
@@ -132,13 +141,13 @@ public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig,
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
             .minBatchSize(LinkPrediction.MIN_NODE_BATCH_SIZE)
-            .initialSampler(initialSampler())
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);
         deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
         maxIterations().ifPresent(knnBuilder::maxIterations);
         randomJoins().ifPresent(knnBuilder::randomJoins);
+        derivedSampler().ifPresent(knnBuilder::initialSampler);
         randomSeed().ifPresent(knnBuilder::randomSeed);
 
         return knnBuilder.build();
