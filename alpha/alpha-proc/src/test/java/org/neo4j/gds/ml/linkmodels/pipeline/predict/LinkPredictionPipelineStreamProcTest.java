@@ -50,8 +50,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             " modelName: 'model'," +
             " threshold: 0," +
             " topN: $topN," +
-            " concurrency:" +
-            " $concurrency" +
+            " concurrency: $concurrency" +
             "})" +
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
@@ -111,8 +110,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             " randomSeed: 42," +
             " topK: $topK," +
             " initialSampler: 'randomWalk'," +
-            " concurrency:" +
-            " $concurrency" +
+            " concurrency: $concurrency" +
             "})" +
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +

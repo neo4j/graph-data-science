@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.knn;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
@@ -65,6 +66,10 @@ public interface KnnSampler {
                 "Expected Sampler or String. Got %s.",
                 input.getClass().getSimpleName()
             ));
+        }
+
+        public static Optional<SamplerType> parseToOptional(String input) {
+            return Optional.of(parse(input));
         }
 
         public static String toString(SamplerType samplerType) {
