@@ -50,6 +50,7 @@ import java.util.function.BiConsumer;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeRegressionTrain {
 
@@ -60,25 +61,17 @@ public final class NodeRegressionTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
-    public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
-        return Tasks.task(
-            "Node Regression Train",
-            Tasks.leaf("ShuffleAndSplit"),
+    public static List<Task> progressTask(int validationFolds, int numberOfModelSelectionTrials) {
+        return List.of(
+            Tasks.leaf("Shuffle and Split"),
             Tasks.iterativeFixed(
-                "SelectBestModel",
-                () -> List.of(Tasks.iterativeFixed("Model Candidate", () -> List.of(
-                        Tasks.task(
-                            "Split",
-                            ClassifierTrainer.progressTask("Training"),
-                            Tasks.leaf("Evaluate")
-                        )
-                    ), validationFolds)
-                ),
+                "Select best model",
+                () -> List.of(Tasks.leaf("Trial", validationFolds)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("TrainSelectedOnRemainder"),
-            Tasks.leaf("EvaluateSelectedModel"),
-            ClassifierTrainer.progressTask("RetrainSelectedModel")
+            ClassifierTrainer.progressTask("Train best model"),
+            Tasks.leaf("Evaluate on test data"),
+            ClassifierTrainer.progressTask("Retrain best model")
         );
     }
 
@@ -129,9 +122,7 @@ public final class NodeRegressionTrain {
     }
 
     public NodeRegressionTrainResult compute() {
-        progressTracker.beginSubTask("Node Regression Train");
-
-        progressTracker.beginSubTask("ShuffleAndSplit");
+        progressTracker.beginSubTask("Shuffle and Split");
         var allTrainingExamples = HugeLongArray.newArray(features.size());
         allTrainingExamples.setAll(i -> i);
 
@@ -154,7 +145,7 @@ public final class NodeRegressionTrain {
             progressTracker
         );
 
-        progressTracker.endSubTask("ShuffleAndSplit");
+        progressTracker.endSubTask("Shuffle and Split");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(trainConfig.metrics()));
 
@@ -163,13 +154,11 @@ public final class NodeRegressionTrain {
 
         var retrainedModel = retrainBestModel(allTrainingExamples, trainingStatistics.bestParameters());
 
-        progressTracker.endSubTask("Node Regression Train");
-
         return ImmutableNodeRegressionTrainResult.of(retrainedModel, trainingStatistics);
     }
 
     private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask("SelectBestModel");
+        progressTracker.beginSubTask("Select best model");
 
         var hyperParameterOptimizer = new RandomSearch(
             pipeline.trainingParameterSpace(),
@@ -178,37 +167,35 @@ public final class NodeRegressionTrain {
         );
 
         while (hyperParameterOptimizer.hasNext()) {
+            progressTracker.beginSubTask("Trial");
+
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.beginSubTask("Model Candidate");
+            progressTracker.logMessage(formatWithLocale("Parameters: %s", modelParams.toMap()));
+
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                progressTracker.beginSubTask("Split");
-
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
 
-                progressTracker.beginSubTask("Training");
-                var regressor = trainModel(trainSet, modelParams);
+                var regressor = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
 
-                progressTracker.endSubTask("Training");
 
-                progressTracker.beginSubTask("Evaluate",validationSet.size() + trainSet.size());
                 registerMetricScores(validationSet, regressor, validationStatsBuilder::update);
                 registerMetricScores(trainSet, regressor, trainStatsBuilder::update);
-                progressTracker.endSubTask("Evaluate");
 
-                progressTracker.endSubTask("Split");
+                progressTracker.logProgress();
             }
-            progressTracker.endSubTask("Model Candidate");
 
             trainConfig.metrics().forEach(metric -> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
+
+            progressTracker.endSubTask("Trial");
         }
-        progressTracker.endSubTask("SelectBestModel");
+        progressTracker.endSubTask("Select best model");
     }
 
     private void registerMetricScores(
@@ -230,32 +217,33 @@ public final class NodeRegressionTrain {
         TrainingExamplesSplit outerSplit,
         TrainingStatistics trainingStatistics
     ) {
-        progressTracker.beginSubTask("TrainSelectedOnRemainder");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters());
-        progressTracker.endSubTask("TrainSelectedOnRemainder");
+        progressTracker.beginSubTask("Train best model");
+        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask("EvaluateSelectedModel", outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
-        progressTracker.endSubTask("EvaluateSelectedModel");
+        progressTracker.endSubTask("Evaluate on test data");
     }
 
     private Regressor retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
-        progressTracker.beginSubTask("RetrainSelectedModel");
-        var retrainedRegressor = trainModel(trainSet, bestParameters);
-        progressTracker.endSubTask("RetrainSelectedModel");
+        progressTracker.beginSubTask("Retrain best model");
+        var retrainedRegressor = trainModel(trainSet, bestParameters, progressTracker);
+        progressTracker.endSubTask("Retrain best model");
 
         return retrainedRegressor;
     }
 
     private Regressor trainModel(
         HugeLongArray trainSet,
-        TrainerConfig trainerConfig
+        TrainerConfig trainerConfig,
+        ProgressTracker customProgressTracker
     ) {
         var trainer = RegressionTrainerFactory.create(
             trainerConfig,
             terminationFlag,
-            progressTracker,
+            customProgressTracker,
             trainConfig.concurrency(),
             trainConfig.randomSeed()
         );

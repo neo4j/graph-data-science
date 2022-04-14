@@ -29,6 +29,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -238,10 +239,17 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTask = NodeRegressionTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTasks = NodeRegressionTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTask = Tasks.task("MY CONTEXT", progressTasks);
+
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+
+        progressTracker.beginSubTask("MY CONTEXT");
+
         NodeRegressionTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
+
+        progressTracker.endSubTask("MY CONTEXT");
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
