@@ -19,11 +19,20 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 @ValueClass
-interface Groups {
-    Group left();
+interface Group {
+    HugeLongArray array();
 
-    Group right();
+    long startIdx();
+
+    long endIdx();
+
+    @Value.Derived
+    default long size() {
+        return endIdx() - startIdx() + 1;
+    }
 }

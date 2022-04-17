@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
 public interface DecisionTreeLoss {
-    double splitLoss(Groups groups, GroupSizes groupSizes);
+    double splitLoss(HugeLongArray leftGroup, HugeLongArray rightGroup, long leftGroupSize);
 }

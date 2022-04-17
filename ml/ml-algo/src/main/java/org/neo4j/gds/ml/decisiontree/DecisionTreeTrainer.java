@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.decisiontree;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeMergeSortByValue;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 
@@ -103,7 +104,15 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
-        root = splitAndPush(stack, trainSetIndices, trainSetIndices.size(), 1);
+        {
+            var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
+            mutableTrainSetIndices.setAll(trainSetIndices::get);
+            root = splitAndPush(
+                stack,
+                ImmutableGroup.of(mutableTrainSetIndices, 0, mutableTrainSetIndices.size() - 1),
+                1
+            );
+        }
 
         int maxDepth = config.maxDepth();
         int minSplitSize = config.minSplitSize();
@@ -112,27 +121,27 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
             var record = stack.pop();
             var split = record.split();
 
-            if (record.depth() >= maxDepth || split.sizes().left() < minSplitSize) {
-                record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
+            if (record.depth() >= maxDepth || split.groups().left().size() < minSplitSize) {
+                record
+                    .node()
+                    .setLeftChild(new TreeNode<>(toTerminal(split.groups().left())));
             } else {
                 record.node().setLeftChild(
                     splitAndPush(
                         stack,
                         split.groups().left(),
-                        split.sizes().left(),
                         record.depth() + 1
                     )
                 );
             }
 
-            if (record.depth() >= maxDepth || split.sizes().right() < minSplitSize) {
-                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
+            if (record.depth() >= maxDepth || split.groups().right().size() < minSplitSize) {
+                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right())));
             } else {
                 record.node().setRightChild(
                     splitAndPush(
                         stack,
                         split.groups().right(),
-                        split.sizes().right(),
                         record.depth() + 1
                     )
                 );
@@ -142,23 +151,25 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         return new DecisionTreePredictor<>(root);
     }
 
-    protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
+    protected abstract PREDICTION toTerminal(Group group);
 
     private TreeNode<PREDICTION> splitAndPush(
         Deque<StackRecord<PREDICTION>> stack,
-        ReadOnlyHugeLongArray group,
-        long groupSize,
+        Group group,
         int depth
     ) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
+        assert group.size() > 0;
         assert depth >= 1;
 
-        var split = findBestSplit(group, groupSize);
-        if (split.sizes().right() == 0) {
-            return new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
-        } else if (split.sizes().left() == 0) {
-            return new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
+        if (group.size() <= 1) {
+            return new TreeNode<>(toTerminal(group));
+        }
+
+        var split = findBestSplit(group);
+        if (split.groups().right().size() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().left()));
+        } else if (split.groups().left().size() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().right()));
         }
 
         var node = new TreeNode<PREDICTION>(split.index(), split.value());
@@ -167,86 +178,65 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         return node;
     }
 
-    private GroupSizes createSplit(
-        final int index,
-        final double value,
-        ReadOnlyHugeLongArray group,
-        final long groupSize,
-        Groups groups
-    ) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
-        assert index >= 0 && index < features.featureDimension();
-
-        long leftGroupSize = 0;
-        long rightGroupSize = 0;
-
-        final var leftGroup = groups.left();
-        final var rightGroup = groups.right();
-
-        for (int i = 0; i < groupSize; i++) {
-            var featuresIdx = group.get(i);
-            double[] featureVector = features.get(featuresIdx);
-            if (featureVector[index] < value) {
-                leftGroup.set(leftGroupSize++, featuresIdx);
-            } else {
-                rightGroup.set(rightGroupSize++, featuresIdx);
-            }
-        }
-
-        return ImmutableGroupSizes.of(leftGroupSize, rightGroupSize);
-    }
-
-    private Split findBestSplit(final ReadOnlyHugeLongArray group, final long groupSize) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
-
+    private Split findBestSplit(Group group) {
         int bestIdx = -1;
         double bestValue = Double.MAX_VALUE;
         double bestLoss = Double.MAX_VALUE;
 
-        var childGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize),
-            HugeLongArray.newArray(groupSize)
-        );
-        var bestChildGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize),
-            HugeLongArray.newArray(groupSize)
-        );
-        var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
+        var leftChildArray = HugeLongArray.newArray(group.size());
+        var rightChildArray = HugeLongArray.newArray(group.size());
+        var bestLeftChildArray = HugeLongArray.newArray(group.size());
+        var bestRightChildArray = HugeLongArray.newArray(group.size());
+        long bestLeftGroupSize = -1;
 
+        var cache = HugeLongArray.newArray(group.size());
         int[] featureBag = featureBagger.sample();
 
-        for (long j = 0; j < groupSize; j++) {
-            for (int i : featureBag) {
-                double[] featureVector = features.get(group.get(j));
+        rightChildArray.setAll(idx -> group.array().get(group.startIdx() + idx));
+        rightChildArray.copyTo(bestRightChildArray, group.size());
 
-                var groupSizes = createSplit(i, featureVector[i], group, groupSize, childGroups);
+        for (int i : featureBag) {
+            double bestLossForIdx = Double.MAX_VALUE;
+            double bestValueForIdx = Double.MAX_VALUE;
+            long bestLeftGroupSizeForIdx = -1;
 
-                var loss = lossFunction.splitLoss(childGroups, groupSizes);
+            HugeMergeSortByValue.sort(rightChildArray, (long l) -> features.get(l)[i], cache, 0, group.size() - 1, 1);
 
-                if (loss < bestLoss) {
-                    bestIdx = i;
-                    bestValue = featureVector[i];
-                    bestLoss = loss;
+            for (long j = 0; j < group.size() - 1; j++) {
+                leftChildArray.set(j, rightChildArray.get(j));
 
-                    var tmpGroups = bestChildGroups;
-                    bestChildGroups = childGroups;
-                    childGroups = tmpGroups;
+                var loss = lossFunction.splitLoss(leftChildArray, rightChildArray, j + 1);
 
-                    bestGroupSizes = groupSizes;
+                if (loss < bestLossForIdx) {
+                    bestValueForIdx = features.get(rightChildArray.get(j))[i];
+                    bestLossForIdx = loss;
+                    bestLeftGroupSizeForIdx = j + 1;
                 }
+            }
+
+            if (bestLossForIdx < bestLoss) {
+                bestIdx = i;
+                bestValue = bestValueForIdx;
+                bestLoss = bestLossForIdx;
+                bestLeftGroupSize = bestLeftGroupSizeForIdx;
+
+                var tmpChildArray = bestRightChildArray;
+                bestRightChildArray = rightChildArray;
+                rightChildArray = tmpChildArray;
+
+                tmpChildArray = bestLeftChildArray;
+                bestLeftChildArray = leftChildArray;
+                leftChildArray = tmpChildArray;
             }
         }
 
         return ImmutableSplit.of(
             bestIdx,
             bestValue,
-            ImmutableReadOnlyGroups.of(
-                ReadOnlyHugeLongArray.of(bestChildGroups.left()),
-                ReadOnlyHugeLongArray.of(bestChildGroups.right())
-            ),
-            bestGroupSizes
+            ImmutableGroups.of(
+                ImmutableGroup.of(bestLeftChildArray, 0, bestLeftGroupSize - 1),
+                ImmutableGroup.of(bestRightChildArray, bestLeftGroupSize, bestRightChildArray.size() - 1)
+            )
         );
 
     }
@@ -257,9 +247,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
 
         double value();
 
-        ReadOnlyGroups groups();
-
-        GroupSizes sizes();
+        Groups groups();
     }
 
     @ValueClass
@@ -269,12 +257,5 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         Split split();
 
         int depth();
-    }
-
-    @ValueClass
-    interface ReadOnlyGroups {
-        ReadOnlyHugeLongArray left();
-
-        ReadOnlyHugeLongArray right();
     }
 }

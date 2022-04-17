@@ -38,38 +38,44 @@ class SplitMeanSquareErrorTest {
         return Stream.of(
             Arguments.of(
                 HugeDoubleArray.of(1, 5, 1, 5),
-                ImmutableGroups.of(HugeLongArray.of(0, 1), HugeLongArray.of(2, 3)),
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 4.0 + 4.0
             ),
             Arguments.of(
                 HugeDoubleArray.of(5, 5, 1, 1),
-                ImmutableGroups.of(HugeLongArray.of(0, 1), HugeLongArray.of(2, 3)),
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 0.0 + 0.0
             ),
             Arguments.of(
                 HugeDoubleArray.of(1, 5, 5, 5),
-                ImmutableGroups.of(HugeLongArray.of(0), HugeLongArray.of(1, 2, 3)),
-                ImmutableGroupSizes.of(1, 3),
+                HugeLongArray.of(0),
+                HugeLongArray.of(0, 1, 2, 3),
+                1,
                 0.0 + 0.0
             ),
             Arguments.of(
                 HugeDoubleArray.of(1, 5, 5, 5),
-                ImmutableGroups.of(HugeLongArray.of(0, 1), HugeLongArray.of(2, 3)),
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 4.0 + 0.0
             ),
             Arguments.of(
                 HugeDoubleArray.of(1, 5, 5, 5),
-                ImmutableGroups.of(HugeLongArray.of(0, 1, 0, 1337), HugeLongArray.of(2, 3, 42, 1)),
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(0, 1, 0, 1337),
+                HugeLongArray.of(42, 1, 2, 3),
+                2,
                 4.0 + 0.0
             ),
             Arguments.of(
                 HugeDoubleArray.of(1, 10, 100, 1000),
-                ImmutableGroups.of(HugeLongArray.of(), HugeLongArray.of(0, 1, 2, 3)),
-                ImmutableGroupSizes.of(0, 4),
+                HugeLongArray.of(),
+                HugeLongArray.of(0, 1, 2, 3),
+                0,
                 0.0 + 175380.19
             )
         );
@@ -77,10 +83,16 @@ class SplitMeanSquareErrorTest {
 
     @ParameterizedTest
     @MethodSource("MSEParameters")
-    void shouldComputeCorrectLoss(HugeDoubleArray targets, Groups groups, GroupSizes groupSizes, double expectedLoss) {
+    void shouldComputeCorrectLoss(
+        HugeDoubleArray targets,
+        HugeLongArray leftGroup,
+        HugeLongArray rightGroup,
+        long leftGroupSize,
+        double expectedLoss
+    ) {
         var mse = new SplitMeanSquareError(targets);
 
-        assertThat(mse.splitLoss(ImmutableGroups.of(groups.left(), groups.right()), groupSizes))
+        assertThat(mse.splitLoss(leftGroup, rightGroup, leftGroupSize))
             .isCloseTo(expectedLoss, Offset.offset(0.01D));
     }
 

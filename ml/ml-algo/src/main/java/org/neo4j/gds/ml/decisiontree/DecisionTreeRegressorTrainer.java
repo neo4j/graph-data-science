@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
@@ -65,15 +64,14 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
     }
 
     @Override
-    protected Double toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
+    protected Double toTerminal(Group group) {
+        var array = group.array();
 
         double sum = 0;
-        for (long i = 0; i < groupSize; i++) {
-            sum += targets.get(group.get(i));
+        for (long i = group.startIdx(); i <= group.endIdx(); i++) {
+            sum += targets.get(array.get(i));
         }
 
-        return sum / groupSize;
+        return sum / group.size();
     }
 }

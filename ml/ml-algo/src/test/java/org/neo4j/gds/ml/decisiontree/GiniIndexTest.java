@@ -39,33 +39,38 @@ class GiniIndexTest {
     private static Stream<Arguments> giniParameters() {
         return Stream.of(
             Arguments.of(
-                new int[]{1, 5, 1, 5},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(1, 5, 1, 5),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 0.5D
             ),
             Arguments.of(
-                new int[]{5, 5, 1, 1},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(5, 5, 1, 1),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 0.0D
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0}, new long[]{1, 2, 3}},
-                ImmutableGroupSizes.of(1, 3),
+                HugeLongArray.of(1, 5, 5, 5),
+                HugeLongArray.of(0),
+                HugeLongArray.of(0, 1, 2, 3),
+                1,
                 0.0D
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(1, 5, 5, 5),
+                HugeLongArray.of(0, 1),
+                HugeLongArray.of(0, 0, 2, 3),
+                2,
                 0.25D
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0, 1, 0, 0}, new long[]{2, 3, 1, 1}},
-                ImmutableGroupSizes.of(2, 2),
+                HugeLongArray.of(1, 5, 5, 5),
+                HugeLongArray.of(0, 1, 0, 0),
+                HugeLongArray.of(1, 1, 2, 3),
+                2,
                 0.25D
             )
         );
@@ -73,25 +78,16 @@ class GiniIndexTest {
 
     @ParameterizedTest
     @MethodSource("giniParameters")
-    void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, GroupSizes groupSizes, double expectedLoss) {
-        var hugeLabels = HugeLongArray.newArray(allLabels.length);
-        for (int i = 0; i < allLabels.length; i++) {
-            hugeLabels.set(i, allLabels[i]);
-        }
+    void shouldComputeCorrectLoss(
+        HugeLongArray labels,
+        HugeLongArray leftGroup,
+        HugeLongArray rightGroup,
+        long leftGroupSize,
+        double expectedLoss
+    ) {
+        var giniIndexLoss = GiniIndex.fromOriginalLabels(labels, CLASS_MAPPING);
 
-        var leftGroup = HugeLongArray.newArray(groups[0].length);
-        for (int i = 0; i < groups[0].length; i++) {
-            leftGroup.set(i, groups[0][i]);
-        }
-
-        var rightGroup = HugeLongArray.newArray(groups[1].length);
-        for (int i = 0; i < groups[1].length; i++) {
-            rightGroup.set(i, groups[1][i]);
-        }
-
-        var giniIndexLoss = GiniIndex.fromOriginalLabels(hugeLabels, CLASS_MAPPING);
-
-        assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
+        assertThat(giniIndexLoss.splitLoss(leftGroup, rightGroup, leftGroupSize))
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));
     }
 

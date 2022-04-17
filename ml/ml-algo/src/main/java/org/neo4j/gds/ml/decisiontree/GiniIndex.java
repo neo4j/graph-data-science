@@ -54,28 +54,26 @@ public class GiniIndex implements DecisionTreeLoss {
     }
 
     @Override
-    public double splitLoss(Groups groups, GroupSizes groupSizes) {
-        long totalSize = groupSizes.left() + groupSizes.right();
+    public double splitLoss(HugeLongArray leftGroup, HugeLongArray rightGroup, long leftGroupSize) {
+        long totalSize = rightGroup.size();
 
         if (totalSize == 0) {
             throw new IllegalStateException("Cannot compute loss over only empty groups");
         }
 
-        double loss = computeGroupLoss(groups.left(), groupSizes.left()) + computeGroupLoss(
-            groups.right(),
-            groupSizes.right()
-        );
+        double leftLoss = computeGroupLoss(leftGroup, 0, leftGroupSize - 1);
+        double rightLoss = computeGroupLoss(rightGroup, leftGroupSize, rightGroup.size() - 1);
 
-        return loss / totalSize;
+        return (leftLoss + rightLoss) / totalSize;
     }
 
-    private double computeGroupLoss(final HugeLongArray group, final long groupSize) {
-        assert group.size() >= groupSize;
+    private double computeGroupLoss(final HugeLongArray group, long startIndex, long endIndex) {
+        long groupSize = endIndex - startIndex + 1;
 
         if (groupSize == 0) return 0;
 
         final var groupClassCounts = new long[numberOfClasses];
-        for (long i = 0; i < groupSize; i++) {
+        for (long i = startIndex; i <= endIndex; i++) {
             int expectedLabel = expectedMappedLabels.get(group.get(i));
             groupClassCounts[expectedLabel]++;
         }
@@ -87,4 +85,5 @@ public class GiniIndex implements DecisionTreeLoss {
 
         return groupSize - (double) score / groupSize;
     }
+
 }

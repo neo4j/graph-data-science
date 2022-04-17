@@ -38,32 +38,36 @@ public class SplitMeanSquareError implements DecisionTreeLoss {
     }
 
     @Override
-    public double splitLoss(Groups groups, GroupSizes groupSizes) {
-        double leftMean = groupMean(groups.left(), groupSizes.left());
-        double rightMean = groupMean(groups.right(), groupSizes.right());
+    public double splitLoss(HugeLongArray leftGroup, HugeLongArray rightGroup, long leftGroupSize) {
+        double leftMean = groupMean(leftGroup, 0, leftGroupSize - 1);
+        double rightMean = groupMean(rightGroup, leftGroupSize, rightGroup.size() - 1);
 
-        double leftMeanSquaredError = groupMeanSquaredError(groups.left(), groupSizes.left(), leftMean);
-        double rightMeanSquaredError = groupMeanSquaredError(groups.right(), groupSizes.right(), rightMean);
+        double leftMeanSquaredError = groupMeanSquaredError(leftGroup, leftMean, 0, leftGroupSize - 1);
+        double rightMeanSquaredError = groupMeanSquaredError(rightGroup, rightMean, leftGroupSize, rightGroup.size() - 1);
 
         return leftMeanSquaredError + rightMeanSquaredError;
     }
 
-    private double groupMean(HugeLongArray group, long size) {
-        if (size == 0) return 0;
+    private double groupMean(HugeLongArray group, long startIdx, long endIdx) {
+        long size = endIdx - startIdx + 1;
+
+        if (size <= 0) return 0;
 
         double sum = 0;
-        for (long i = 0; i < size; i++) {
+        for (long i = startIdx; i <= endIdx; i++) {
             sum += targets.get(group.get(i));
         }
 
         return sum / size;
     }
 
-    private double groupMeanSquaredError(HugeLongArray group, long size, double mean) {
-        if (size == 0) return 0;
+    private double groupMeanSquaredError(HugeLongArray group, double mean, long startIdx, long endIdx) {
+        long size = endIdx - startIdx + 1;
+
+        if (size <= 0) return 0;
 
         double squaredError = 0;
-        for (long i = 0; i < size; i++) {
+        for (long i = startIdx; i <= endIdx; i++) {
             double error = mean - targets.get(group.get(i));
             squaredError += error * error;
         }
