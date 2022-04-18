@@ -35,11 +35,21 @@ public interface DecisionTreeLoss {
         return leftWeight * leftImpurityData.impurity() + rightWeight * rightImpurityData.impurity();
     }
 
+    /**
+     * A lightweight representation of a decision tree node's impurity.
+     */
     interface ImpurityData {
         double impurity();
 
         long groupSize();
 
-        ImpurityData deepCopy();
+        /**
+         * Copies all significant data to `impurityData`.
+         *
+         * Can be called frequently during split searching so should be as lightweight as possible.
+         *
+         * @param impurityData  the object to copy to
+         */
+        void copyTo(ImpurityData impurityData);
     }
 }

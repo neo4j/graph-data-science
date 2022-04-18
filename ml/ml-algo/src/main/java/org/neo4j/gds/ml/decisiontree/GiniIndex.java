@@ -124,11 +124,11 @@ public class GiniIndex implements DecisionTreeLoss {
         }
 
         @Override
-        public ImpurityData deepCopy() {
-            var classCountsCopy = new long[classCounts().length];
-            System.arraycopy(classCounts(), 0, classCountsCopy, 0, classCounts().length);
-
-            return new GiniImpurityData(impurity(), classCountsCopy, groupSize());
+        public void copyTo(ImpurityData impurityData) {
+            var giniImpurityData = (GiniImpurityData) impurityData;
+            giniImpurityData.setImpurity(impurity());
+            giniImpurityData.setGroupSize(groupSize());
+            System.arraycopy(classCounts(), 0, giniImpurityData.classCounts(), 0, classCounts().length);
         }
 
         @Override

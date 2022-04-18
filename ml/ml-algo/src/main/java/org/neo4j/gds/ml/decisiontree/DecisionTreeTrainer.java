@@ -183,16 +183,19 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         int bestIdx = -1;
         double bestValue = Double.MAX_VALUE;
         double bestLoss = Double.MAX_VALUE;
+        var sortCache = HugeLongArray.newArray(group.size());
 
         var leftChildArray = HugeLongArray.newArray(group.size());
         var rightChildArray = HugeLongArray.newArray(group.size());
         var bestLeftChildArray = HugeLongArray.newArray(group.size());
         var bestRightChildArray = HugeLongArray.newArray(group.size());
         long bestLeftGroupSize = -1;
-        DecisionTreeLoss.ImpurityData bestLeftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        DecisionTreeLoss.ImpurityData bestRightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
 
-        var sortCache = HugeLongArray.newArray(group.size());
+        var bestLeftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        var bestRightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        var bestLeftImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        var bestRightImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        var rightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
 
         rightChildArray.setAll(idx -> group.array().get(group.startIdx() + idx));
         rightChildArray.copyTo(bestRightChildArray, group.size());
@@ -207,9 +210,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
             HugeIterativeMergeSort.sort(rightChildArray, (long l) -> features.get(l)[i], sortCache);
 
             var leftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-            var rightImpurityData = group.impurityData().deepCopy();
-            var bestLeftImpurityDataForIdx = leftImpurityData.deepCopy();
-            var bestRightImpurityDataForIdx = rightImpurityData.deepCopy();
+            group.impurityData().copyTo(rightImpurityData);
 
             for (long j = 0; j < group.size() - 1; j++) {
                 long splittingFeatureVectorIdx = rightChildArray.get(j);
@@ -222,8 +223,8 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
                 if (loss < bestLossForIdx) {
                     bestValueForIdx = features.get(splittingFeatureVectorIdx)[i];
                     bestLossForIdx = loss;
-                    bestLeftImpurityDataForIdx = leftImpurityData.deepCopy();
-                    bestRightImpurityDataForIdx = rightImpurityData.deepCopy();
+                    leftImpurityData.copyTo(bestLeftImpurityDataForIdx);
+                    rightImpurityData.copyTo(bestRightImpurityDataForIdx);
                     bestLeftGroupSizeForIdx = j + 1;
                 }
             }
@@ -234,8 +235,8 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
                 bestLoss = bestLossForIdx;
                 bestLeftGroupSize = bestLeftGroupSizeForIdx;
 
-                bestLeftImpurityData = bestLeftImpurityDataForIdx;
-                bestRightImpurityData = bestRightImpurityDataForIdx;
+                bestLeftImpurityDataForIdx.copyTo(bestLeftImpurityData);
+                bestRightImpurityDataForIdx.copyTo(bestRightImpurityData);
 
                 var tmpChildArray = bestRightChildArray;
                 bestRightChildArray = rightChildArray;
