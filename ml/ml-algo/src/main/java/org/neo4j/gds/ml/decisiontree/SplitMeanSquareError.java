@@ -38,40 +38,116 @@ public class SplitMeanSquareError implements DecisionTreeLoss {
     }
 
     @Override
-    public double splitLoss(HugeLongArray leftGroup, HugeLongArray rightGroup, long leftGroupSize) {
-        double leftMean = groupMean(leftGroup, 0, leftGroupSize - 1);
-        double rightMean = groupMean(rightGroup, leftGroupSize, rightGroup.size() - 1);
-
-        double leftMeanSquaredError = groupMeanSquaredError(leftGroup, leftMean, 0, leftGroupSize - 1);
-        double rightMeanSquaredError = groupMeanSquaredError(rightGroup, rightMean, leftGroupSize, rightGroup.size() - 1);
-
-        return leftMeanSquaredError + rightMeanSquaredError;
-    }
-
-    private double groupMean(HugeLongArray group, long startIdx, long endIdx) {
-        long size = endIdx - startIdx + 1;
-
-        if (size <= 0) return 0;
+    public MSEImpurityData groupImpurity(HugeLongArray group, long startIdx, long size) {
+        if (size <= 0) {
+            return new MSEImpurityData(0, 0, 0, 0);
+        }
 
         double sum = 0;
-        for (long i = startIdx; i <= endIdx; i++) {
-            sum += targets.get(group.get(i));
+        double sumOfSquares = 0;
+        for (long i = startIdx; i < size; i++) {
+            double value = targets.get(group.get(i));
+            sum += value;
+            sumOfSquares += value * value;
         }
 
-        return sum / size;
+        double mean = sum / size;
+        double mse = sumOfSquares / size - mean * mean;
+
+        return new MSEImpurityData(mse, sumOfSquares, sum, size);
     }
 
-    private double groupMeanSquaredError(HugeLongArray group, double mean, long startIdx, long endIdx) {
-        long size = endIdx - startIdx + 1;
+    @Override
+    public void incrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
+        var mseImpurityData = (MSEImpurityData) impurityData;
 
-        if (size <= 0) return 0;
+        double value = targets.get(featureVectorIdx);
 
-        double squaredError = 0;
-        for (long i = startIdx; i <= endIdx; i++) {
-            double error = mean - targets.get(group.get(i));
-            squaredError += error * error;
+        double sum = mseImpurityData.sum() + value;
+        double sumOfSquares = mseImpurityData.sumOfSquares + value * value;
+        long groupSize = mseImpurityData.groupSize + 1;
+
+        updateImpurityData(sum, sumOfSquares, groupSize, mseImpurityData);
+    }
+
+    @Override
+    public void decrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
+        var mseImpurityData = (MSEImpurityData) impurityData;
+
+        double value = targets.get(featureVectorIdx);
+
+        double sum = mseImpurityData.sum() - value;
+        double sumOfSquares = mseImpurityData.sumOfSquares - value * value;
+        long groupSize = mseImpurityData.groupSize - 1;
+
+        updateImpurityData(sum, sumOfSquares, groupSize, mseImpurityData);
+    }
+
+    private static void updateImpurityData(double sum, double sumOfSquares, long groupSize, MSEImpurityData mseImpurityData) {
+        double mean = sum / groupSize;
+        double mse = sumOfSquares / groupSize - mean * mean;
+
+        mseImpurityData.setImpurity(mse);
+        mseImpurityData.setSum(sum);
+        mseImpurityData.setSumOfSquares(sumOfSquares);
+        mseImpurityData.setGroupSize(groupSize);
+    }
+
+    static class MSEImpurityData implements DecisionTreeLoss.ImpurityData {
+
+        private double impurity;
+        private double sumOfSquares;
+        private double sum;
+        private long groupSize;
+
+        MSEImpurityData(double impurity, double sumOfSquares, double sum, long groupSize) {
+            this.impurity = impurity;
+            this.sumOfSquares = sumOfSquares;
+            this.sum = sum;
+            this.groupSize = groupSize;
         }
 
-        return squaredError / size;
+        @Override
+        public double impurity() {
+            return impurity;
+        }
+
+        @Override
+        public long groupSize() {
+            return groupSize;
+        }
+
+        @Override
+        public void copyTo(ImpurityData impurityData) {
+            var mseImpurityData = (MSEImpurityData) impurityData;
+            mseImpurityData.setImpurity(impurity());
+            mseImpurityData.setSumOfSquares(sumOfSquares());
+            mseImpurityData.setSum(sum());
+            mseImpurityData.setGroupSize(groupSize());
+        }
+
+        public void setGroupSize(long groupSize) {
+            this.groupSize = groupSize;
+        }
+
+        public void setSum(double sum) {
+            this.sum = sum;
+        }
+
+        public void setSumOfSquares(double sumOfSquares) {
+            this.sumOfSquares = sumOfSquares;
+        }
+
+        public double sum() {
+            return sum;
+        }
+
+        public double sumOfSquares() {
+            return sumOfSquares;
+        }
+
+        public void setImpurity(double impurity) {
+            this.impurity = impurity;
+        }
     }
 }

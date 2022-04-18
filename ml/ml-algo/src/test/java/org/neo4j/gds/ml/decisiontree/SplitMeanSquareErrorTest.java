@@ -34,66 +34,153 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class SplitMeanSquareErrorTest {
 
-    private static Stream<Arguments> MSEParameters() {
+    private static Stream<Arguments> groupParameters() {
         return Stream.of(
             Arguments.of(
-                HugeDoubleArray.of(1, 5, 1, 5),
+                HugeDoubleArray.of(1, 5),
                 HugeLongArray.of(0, 1),
-                HugeLongArray.of(0, 0, 2, 3),
+                0,
                 2,
-                4.0 + 4.0
+                4,
+                6,
+                26
             ),
             Arguments.of(
-                HugeDoubleArray.of(5, 5, 1, 1),
-                HugeLongArray.of(0, 1),
-                HugeLongArray.of(0, 0, 2, 3),
-                2,
-                0.0 + 0.0
-            ),
-            Arguments.of(
-                HugeDoubleArray.of(1, 5, 5, 5),
-                HugeLongArray.of(0),
-                HugeLongArray.of(0, 1, 2, 3),
-                1,
-                0.0 + 0.0
-            ),
-            Arguments.of(
-                HugeDoubleArray.of(1, 5, 5, 5),
-                HugeLongArray.of(0, 1),
-                HugeLongArray.of(0, 0, 2, 3),
-                2,
-                4.0 + 0.0
-            ),
-            Arguments.of(
-                HugeDoubleArray.of(1, 5, 5, 5),
-                HugeLongArray.of(0, 1, 0, 1337),
-                HugeLongArray.of(42, 1, 2, 3),
-                2,
-                4.0 + 0.0
-            ),
-            Arguments.of(
-                HugeDoubleArray.of(1, 10, 100, 1000),
-                HugeLongArray.of(),
+                HugeDoubleArray.of(1, 5),
                 HugeLongArray.of(0, 1, 2, 3),
                 0,
-                0.0 + 175380.19
+                2,
+                4,
+                6,
+                26
+            ),
+            Arguments.of(
+                HugeDoubleArray.of(1, 5),
+                HugeLongArray.of(),
+                0,
+                0,
+                0,
+                0,
+                0
+            ),
+            Arguments.of(
+                HugeDoubleArray.of(1, 3.2, 12.9, 5),
+                HugeLongArray.of(0, 1, 2, 3),
+                0,
+                4,
+                20.136875,
+                22.1,
+                202.65
+            ),
+            Arguments.of(
+                HugeDoubleArray.of(1, 3.2, 12.9, 5),
+                HugeLongArray.of(2, 1, 3, 0),
+                0,
+                4,
+                20.136875,
+                22.1,
+                202.65
             )
         );
     }
 
     @ParameterizedTest
-    @MethodSource("MSEParameters")
-    void shouldComputeCorrectLoss(
+    @MethodSource("groupParameters")
+    void shouldComputeCorrectGroupMetaData(
         HugeDoubleArray targets,
-        HugeLongArray leftGroup,
-        HugeLongArray rightGroup,
-        long leftGroupSize,
-        double expectedLoss
+        HugeLongArray group,
+        long startIdx,
+        long size,
+        double expectedImpurity,
+        double expectedSum,
+        double expectedSumOfSquares
     ) {
-        var mse = new SplitMeanSquareError(targets);
+        var mseLoss = new SplitMeanSquareError(targets);
+        var impurityData = mseLoss.groupImpurity(group, startIdx, size);
 
-        assertThat(mse.splitLoss(leftGroup, rightGroup, leftGroupSize))
-            .isCloseTo(expectedLoss, Offset.offset(0.01D));
+        assertThat(impurityData.impurity())
+            .isCloseTo(expectedImpurity, Offset.offset(0.00001D));
+        assertThat(impurityData.sum()).isCloseTo(expectedSum, Offset.offset(0.00001D));
+        assertThat(impurityData.sumOfSquares()).isCloseTo(expectedSumOfSquares, Offset.offset(0.00001D));
+        assertThat(impurityData.groupSize()).isEqualTo(size);
+    }
+
+    private static Stream<Arguments> incrementParameters() {
+        return Stream.of(
+            Arguments.of(
+                1,
+                4,
+                119.506875,
+                37.3,
+                825.85
+            ),
+            Arguments.of(
+                2,
+                4,
+                107.4425,
+                47,
+                982.02
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("incrementParameters")
+    void shouldComputeCorrectIncrementalMetaData(
+        long featureVectorIdx,
+        long size,
+        double expectedImpurity,
+        double expectedSum,
+        double expectedSumOfSquares
+    ) {
+        var mseLoss = new SplitMeanSquareError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
+        var impurityData = mseLoss.groupImpurity(HugeLongArray.of(0, 4, 3), 0, 3);
+        mseLoss.incrementalImpurity(featureVectorIdx, impurityData);
+
+        assertThat(impurityData.impurity())
+            .isCloseTo(expectedImpurity, Offset.offset(0.00001D));
+        assertThat(impurityData.sum()).isCloseTo(expectedSum, Offset.offset(0.00001D));
+        assertThat(impurityData.sumOfSquares()).isCloseTo(expectedSumOfSquares, Offset.offset(0.00001D));
+        assertThat(impurityData.groupSize()).isEqualTo(size);
+    }
+
+    private static Stream<Arguments> decrementParameters() {
+        return Stream.of(
+            Arguments.of(
+                2,
+                4,
+                119.506875,
+                37.3,
+                825.85
+            ),
+            Arguments.of(
+                1,
+                4,
+                107.4425,
+                47,
+                982.02
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("decrementParameters")
+    void shouldComputeCorrectDecrementalMetaData(
+        long featureVectorIdx,
+        long size,
+        double expectedImpurity,
+        double expectedSum,
+        double expectedSumOfSquares
+    ) {
+        var mseLoss = new SplitMeanSquareError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
+        var impurityData = mseLoss.groupImpurity(HugeLongArray.of(0, 2, 1, 4, 3), 0, 5);
+        mseLoss.decrementalImpurity(featureVectorIdx, impurityData);
+
+        assertThat(impurityData.impurity())
+            .isCloseTo(expectedImpurity, Offset.offset(0.00001D));
+        assertThat(impurityData.sum()).isCloseTo(expectedSum, Offset.offset(0.00001D));
+        assertThat(impurityData.sumOfSquares()).isCloseTo(expectedSumOfSquares, Offset.offset(0.00001D));
+        assertThat(impurityData.groupSize()).isEqualTo(size);
     }
 
     @Test

@@ -75,7 +75,7 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
         final var classesInGroup = new long[classIdMap.size()];
         var array = group.array();
 
-        for (long i = group.startIdx(); i <= group.endIdx(); i++) {
+        for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {
             long label = allLabels.get(array.get(i));
             classesInGroup[classIdMap.toMapped(label)]++;
         }

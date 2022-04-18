@@ -157,7 +157,7 @@ class RandomForestClassifierTest {
             randomForestTrainer::outOfBagError
         );
         assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
-        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.4, 0.6);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
     }
 
     @ParameterizedTest
@@ -181,7 +181,7 @@ class RandomForestClassifierTest {
 
         randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
 
-        assertThat(randomForestTrainer.outOfBagError()).isCloseTo(0.2, Offset.offset(0.000001D));
+        assertThat(randomForestTrainer.outOfBagError()).isCloseTo(0.1, Offset.offset(0.000001D));
     }
 
     @ParameterizedTest

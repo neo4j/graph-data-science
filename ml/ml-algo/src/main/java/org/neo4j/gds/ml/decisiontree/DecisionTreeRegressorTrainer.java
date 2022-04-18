@@ -68,7 +68,7 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
         var array = group.array();
 
         double sum = 0;
-        for (long i = group.startIdx(); i <= group.endIdx(); i++) {
+        for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {
             sum += targets.get(array.get(i));
         }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -29,10 +28,7 @@ interface Group {
 
     long startIdx();
 
-    long endIdx();
+    long size();
 
-    @Value.Derived
-    default long size() {
-        return endIdx() - startIdx() + 1;
-    }
+    DecisionTreeLoss.ImpurityData impurityData();
 }

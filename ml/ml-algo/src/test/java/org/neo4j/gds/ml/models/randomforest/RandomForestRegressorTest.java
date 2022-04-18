@@ -125,7 +125,7 @@ class RandomForestRegressorTest {
 
         var featureVector = new double[]{10.0, 3.2};
 
-        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(3.273, Offset.offset(0.01D));
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(3.61, Offset.offset(0.01D));
     }
 
     @ParameterizedTest
@@ -154,7 +154,7 @@ class RandomForestRegressorTest {
         // target 3.9 example (see setup above)
         var featureVector = new double[]{10.12493903, 3.234550982};
 
-        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(0.235, Offset.offset(0.01D));
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(0.185, Offset.offset(0.01D));
     }
 
     @Test

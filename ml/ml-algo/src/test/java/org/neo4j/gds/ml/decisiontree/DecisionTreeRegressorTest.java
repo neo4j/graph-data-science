@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -82,15 +81,17 @@ class DecisionTreeRegressorTest {
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 4.175, 1),
-                Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1),
-                Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2),
-                Arguments.of(new double[]{0.0, 4.0}, 4.5, 3),
-                Arguments.of(new double[]{5.0, 1.0}, 0.15, 4)
-            ),
-            () -> Stream.of(Arguments.of(2), Arguments.of(4))
+        return Stream.of(
+            Arguments.of(new double[]{8.0, 0.0}, 4.175, 1, 2),
+            Arguments.of(new double[]{8.0, 0.0}, 4.175, 1, 4),
+            Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1, 2),
+            Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1, 4),
+            Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2, 2),
+            Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2, 4),
+            Arguments.of(new double[]{0.0, 4.0}, 4.5, 3, 2),
+            Arguments.of(new double[]{0.0, 4.0}, 4.5, 3, 4),
+            Arguments.of(new double[]{5.0, 1.0}, 0.3, 4, 2),
+            Arguments.of(new double[]{5.0, 1.0}, 0.225, 4, 4)
         );
     }
 
@@ -155,7 +156,7 @@ class DecisionTreeRegressorTest {
         );
 
         decisionTreeRegressor = decisionTreeTrainer.train(featureVectors);
-        assertThat(decisionTreeRegressor.predict(featureVector)).isCloseTo(1.93, Offset.offset(0.01D));
+        assertThat(decisionTreeRegressor.predict(featureVector)).isCloseTo(1.09, Offset.offset(0.01D));
     }
 
     @Test
