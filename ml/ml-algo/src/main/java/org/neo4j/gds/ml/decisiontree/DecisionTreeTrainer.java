@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeIterativeMergeSort;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
@@ -38,6 +37,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     private final Features features;
     private final DecisionTreeTrainerConfig config;
     private final FeatureBagger featureBagger;
+    private Splitter splitter;
 
     DecisionTreeTrainer(
         Features features,
@@ -101,6 +101,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
+        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features);
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
@@ -166,7 +167,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
             return new TreeNode<>(toTerminal(group));
         }
 
-        var split = findBestSplit(group);
+        var split = splitter.findBestSplit(group);
         if (split.groups().right().size() == 0) {
             return new TreeNode<>(toTerminal(split.groups().left()));
         } else if (split.groups().left().size() == 0) {
@@ -177,96 +178,6 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         stack.push(ImmutableStackRecord.of(node, split, depth));
 
         return node;
-    }
-
-    private Split findBestSplit(Group group) {
-        int bestIdx = -1;
-        double bestValue = Double.MAX_VALUE;
-        double bestLoss = Double.MAX_VALUE;
-        var sortCache = HugeLongArray.newArray(group.size());
-
-        var leftChildArray = HugeLongArray.newArray(group.size());
-        var rightChildArray = HugeLongArray.newArray(group.size());
-        var bestLeftChildArray = HugeLongArray.newArray(group.size());
-        var bestRightChildArray = HugeLongArray.newArray(group.size());
-        long bestLeftGroupSize = -1;
-
-        var bestLeftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        var bestRightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        var bestLeftImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        var bestRightImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        var rightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-
-        rightChildArray.setAll(idx -> group.array().get(group.startIdx() + idx));
-        rightChildArray.copyTo(bestRightChildArray, group.size());
-
-        int[] featureBag = featureBagger.sample();
-
-        for (int i : featureBag) {
-            double bestLossForIdx = Double.MAX_VALUE;
-            double bestValueForIdx = Double.MAX_VALUE;
-            long bestLeftGroupSizeForIdx = -1;
-
-            HugeIterativeMergeSort.sort(rightChildArray, (long l) -> features.get(l)[i], sortCache);
-
-            var leftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-            group.impurityData().copyTo(rightImpurityData);
-
-            for (long j = 0; j < group.size() - 1; j++) {
-                long splittingFeatureVectorIdx = rightChildArray.get(j);
-                leftChildArray.set(j, splittingFeatureVectorIdx);
-
-                lossFunction.incrementalImpurity(splittingFeatureVectorIdx, leftImpurityData);
-                lossFunction.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
-                double loss = lossFunction.loss(leftImpurityData, rightImpurityData);
-
-                if (loss < bestLossForIdx) {
-                    bestValueForIdx = features.get(splittingFeatureVectorIdx)[i];
-                    bestLossForIdx = loss;
-                    leftImpurityData.copyTo(bestLeftImpurityDataForIdx);
-                    rightImpurityData.copyTo(bestRightImpurityDataForIdx);
-                    bestLeftGroupSizeForIdx = j + 1;
-                }
-            }
-
-            if (bestLossForIdx < bestLoss) {
-                bestIdx = i;
-                bestValue = bestValueForIdx;
-                bestLoss = bestLossForIdx;
-                bestLeftGroupSize = bestLeftGroupSizeForIdx;
-
-                bestLeftImpurityDataForIdx.copyTo(bestLeftImpurityData);
-                bestRightImpurityDataForIdx.copyTo(bestRightImpurityData);
-
-                var tmpChildArray = bestRightChildArray;
-                bestRightChildArray = rightChildArray;
-                rightChildArray = tmpChildArray;
-
-                tmpChildArray = bestLeftChildArray;
-                bestLeftChildArray = leftChildArray;
-                leftChildArray = tmpChildArray;
-            }
-        }
-
-        return ImmutableSplit.of(
-            bestIdx,
-            bestValue,
-            ImmutableGroups.of(
-                ImmutableGroup.of(
-                    bestLeftChildArray,
-                    0,
-                    bestLeftGroupSize,
-                    bestLeftImpurityData
-                ),
-                ImmutableGroup.of(
-                    bestRightChildArray,
-                    bestLeftGroupSize,
-                    bestRightChildArray.size() - bestLeftGroupSize,
-                    bestRightImpurityData
-                )
-            )
-        );
-
     }
 
     @ValueClass

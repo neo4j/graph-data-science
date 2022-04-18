@@ -73,7 +73,6 @@ class DecisionTreeClassifierTest {
         features = FeaturesFactory.wrap(featureVectorArray);
 
         giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
-
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
