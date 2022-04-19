@@ -43,6 +43,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
+        "gds.alpha.graph.streamGraphProperty",
+        "gds.alpha.graph.removeGraphProperty",
+        
         "gds.alpha.create.cypherdb",
 
         "gds.alpha.allShortestPaths.stream",
@@ -437,7 +440,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 298;
+        int expectedCount = 300;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
