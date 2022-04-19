@@ -6,7 +6,7 @@ ext.vendor = { ->
     if (project.hasProperty("javaLanguageVendor")) {
         return JvmVendorSpec.matching(project.property('javaLanguageVendor'))
     } else {
-        return JvmVendorSpec.matching("ADOPTIUM")
+        return JvmVendorSpec.ADOPTIUM
     }
 }
 
