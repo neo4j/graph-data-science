@@ -670,7 +670,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Train best model :: Epoch 3 with loss 0.6784",
                 "MY TEST TASK :: Train best model :: Epoch 4 with loss 0.6739",
                 "MY TEST TASK :: Train best model :: Epoch 5 with loss 0.6695",
-                "MY TEST TASK :: Train best model :: terminated after 5 epochs. Initial loss: 0.6931, Last loss: 0.6695. Did not converge",
+                "MY TEST TASK :: Train best model :: terminated after 5 out of 5 epochs. Initial loss: 0.6931, Last loss: 0.6695. Did not converge",
                 "MY TEST TASK :: Train best model 100%",
                 "MY TEST TASK :: Train best model :: Finished",
                 "MY TEST TASK :: Compute train metrics :: Start",
