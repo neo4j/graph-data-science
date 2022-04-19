@@ -149,7 +149,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             trainData,
             classifier,
             trainRelationshipIds,
-            trainingStatistics::addOuterTrainScore
+            trainingStatistics::addOuterTrainScore,
+            progressTracker
         );
         progressTracker.endSubTask("Compute train metrics");
 
@@ -229,13 +230,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(trainSet),
-                    trainStatsBuilder::update
+                    trainStatsBuilder::update,
+                    ProgressTracker.NULL_TRACKER
                 );
                 computeTrainMetric(
                     trainData,
                     classifier,
                     ReadOnlyHugeLongArray.of(validationSet),
-                    validationStatsBuilder::update
+                    validationStatsBuilder::update,
+                    ProgressTracker.NULL_TRACKER
                 );
                 progressTracker.logProgress();
             }
@@ -282,7 +285,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             classifier,
             new BatchQueue(testData.size()),
             config.concurrency(),
-            terminationFlag
+            terminationFlag,
+            progressTracker
         );
 
         config.metrics().forEach(metric -> {
@@ -310,7 +314,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         FeaturesAndLabels trainData,
         Classifier classifier,
         ReadOnlyHugeLongArray evaluationSet,
-        BiConsumer<Metric, Double> scoreConsumer
+        BiConsumer<Metric, Double> scoreConsumer,
+        ProgressTracker progressTracker
     ) {
         var signedProbabilities = SignedProbabilities.computeFromLabeledData(
             trainData.features(),
@@ -318,7 +323,8 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             classifier,
             new HugeBatchQueue(evaluationSet),
             config.concurrency(),
-            terminationFlag
+            terminationFlag,
+            progressTracker
         );
 
         config.metrics().forEach(metric ->

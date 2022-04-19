@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.models.Classifier;
@@ -83,8 +84,11 @@ public final class SignedProbabilities {
         Classifier classifier,
         BatchQueue evaluationQueue,
         int concurrency,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
+        progressTracker.setVolume(features.size());
+
         var signedProbabilities = SignedProbabilities.create(features.size());
 
         int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
@@ -99,7 +103,7 @@ public final class SignedProbabilities {
                     var signedProbability = isEdge ? probabilityOfPositiveEdge : -1 * probabilityOfPositiveEdge;
                     signedProbabilities.add(signedProbability);
                 }
-
+                progressTracker.logProgress(batch.size());
             },
             terminationFlag
         );
