@@ -30,9 +30,8 @@ class LogisticRegressionTrainConfigTest {
 
     @Test
     void failOnUnexpectedKeys() {
-        assertThatThrownBy(() -> LogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1)))
+        assertThatThrownBy(() -> LogisticRegressionTrainConfig.of(Map.of("boogiewoogie", 1, "methodName", "myMethod")))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Unexpected configuration key: boogiewoogie");
+            .hasMessageContaining("Unexpected configuration keys: boogiewoogie, methodName");
     }
-
 }

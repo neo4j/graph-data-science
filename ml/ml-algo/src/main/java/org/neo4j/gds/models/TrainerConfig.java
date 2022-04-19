@@ -19,13 +19,11 @@
  */
 package org.neo4j.gds.models;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
 
 public interface TrainerConfig extends ToMapConvertible {
 
-    @Value.Derived
     @Configuration.Ignore
     String methodName();
 }

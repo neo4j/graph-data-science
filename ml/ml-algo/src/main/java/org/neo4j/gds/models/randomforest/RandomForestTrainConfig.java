@@ -53,6 +53,7 @@ public interface RandomForestTrainConfig extends DecisionTreeTrainConfig, Traine
     }
 
     @Override
+    @Configuration.Ignore
     default String methodName() {
         return TrainingMethod.RandomForest.name();
     }
