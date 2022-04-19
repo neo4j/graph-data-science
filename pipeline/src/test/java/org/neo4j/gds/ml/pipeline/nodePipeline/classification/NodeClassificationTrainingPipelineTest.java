@@ -98,7 +98,7 @@ class NodeClassificationTrainingPipelineTest {
         var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
 
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config));
+        pipeline.addTrainerConfig(config);
 
         assertThat(pipeline
             .trainingParameterSpace()
@@ -187,10 +187,8 @@ class NodeClassificationTrainingPipelineTest {
             var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
-            ));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
             var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);

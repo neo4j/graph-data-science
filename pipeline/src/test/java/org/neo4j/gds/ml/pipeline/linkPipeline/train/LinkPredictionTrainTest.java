@@ -562,10 +562,17 @@ class LinkPredictionTrainTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
-        ));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+            "penalty", 1,
+            "patience", 5,
+            "tolerance", 0.00001
+        )));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+            "penalty", 100,
+            "patience", 5,
+            "tolerance", 0.00001
+        )));
+
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(

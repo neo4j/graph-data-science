@@ -120,8 +120,9 @@ class NodeRegressionTrainingPipelineTest {
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new NodeRegressionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config1));
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config2, config3));
+        pipeline.addTrainerConfig(config1);
+        pipeline.addTrainerConfig(config2);
+        pipeline.addTrainerConfig(config3);
 
         var parameterSpace = pipeline.trainingParameterSpace();
         assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
@@ -190,7 +191,8 @@ class NodeRegressionTrainingPipelineTest {
                 LinearRegressionTrainConfig.of(Map.of("penalty", 1000000)),
                 LinearRegressionTrainConfig.of(Map.of("penalty", 1))
             );
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LinearRegression, candidates);
+
+            candidates.forEach(pipeline::addTrainerConfig);
 
             var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
