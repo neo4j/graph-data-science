@@ -123,7 +123,7 @@ public final class TrainingStatistics {
             ));
     }
 
-    private Metric evaluationMetric() {
+    public Metric evaluationMetric() {
         return metrics.get(0);
     }
 

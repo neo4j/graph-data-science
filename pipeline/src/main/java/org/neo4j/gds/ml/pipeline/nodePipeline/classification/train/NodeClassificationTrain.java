@@ -346,7 +346,11 @@ public final class NodeClassificationTrain {
             var trainStats = trainingStatistics.findModelTrainAvg(trial);
             double mainMetric = trainingStatistics.getMainValidationMetric(trial);
 
-            progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
+            progressTracker.logMessage(formatWithLocale(
+                "Main validation metric (%s): %.4f",
+                trainingStatistics.evaluationMetric(),
+                mainMetric
+            ));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
             progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
 
