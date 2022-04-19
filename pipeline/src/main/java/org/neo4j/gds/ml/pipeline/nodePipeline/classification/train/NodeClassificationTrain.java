@@ -60,7 +60,6 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
@@ -293,15 +292,6 @@ public final class NodeClassificationTrain {
         evaluateBestModel(nodeSplits.outerSplit(), trainingStatistics);
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics);
-
-        var testMetrics = trainingStatistics.metricsForWinningModel().entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().test()));
-        var outerTrainMetrics = trainingStatistics.metricsForWinningModel().entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().outerTrain()));
-        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
-        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         return ImmutableNodeClassificationTrainResult.of(
             createModel(retrainedModelData, trainingStatistics),

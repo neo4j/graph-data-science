@@ -253,7 +253,7 @@ class NodeRegressionTrainTest {
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
-            .extracting(keepingFixedNumberOfDecimals())
+            .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log"));
     }
 
