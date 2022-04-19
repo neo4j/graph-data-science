@@ -325,6 +325,7 @@ class NodeClassificationTrainTest {
                 "MY DUMMY TASK :: Evaluate on test data :: Start",
                 "MY DUMMY TASK :: Evaluate on test data 100%",
                 "MY DUMMY TASK :: Evaluate on test data :: Finished",
+                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.7499}",
                 "MY DUMMY TASK :: Retrain best model :: Start",
                 "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.6645",
                 "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.6460",
@@ -333,7 +334,6 @@ class NodeClassificationTrainTest {
                 "MY DUMMY TASK :: Retrain best model :: converged after 4 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6376.",
                 "MY DUMMY TASK :: Retrain best model 100%",
                 "MY DUMMY TASK :: Retrain best model :: Finished",
-                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.7499}",
                 "MY DUMMY TASK :: Final model metrics on full train set: {F1_class_1=0.8235}",
                 "MY DUMMY TASK :: Finished"
             );
@@ -406,6 +406,7 @@ class NodeClassificationTrainTest {
                 "MY DUMMY TASK :: Evaluate on test data :: Start",
                 "MY DUMMY TASK :: Evaluate on test data 100%",
                 "MY DUMMY TASK :: Evaluate on test data :: Finished",
+                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.7499}",
                 "MY DUMMY TASK :: Retrain best model :: Start",
                 "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.6645",
                 "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.6460",
@@ -414,7 +415,6 @@ class NodeClassificationTrainTest {
                 "MY DUMMY TASK :: Retrain best model :: converged after 4 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6376.",
                 "MY DUMMY TASK :: Retrain best model 100%",
                 "MY DUMMY TASK :: Retrain best model :: Finished",
-                "MY DUMMY TASK :: Final model metrics on test set: {F1_class_1=0.7499}",
                 "MY DUMMY TASK :: Final model metrics on full train set: {F1_class_1=0.8235}",
                 "MY DUMMY TASK :: Finished"
             );

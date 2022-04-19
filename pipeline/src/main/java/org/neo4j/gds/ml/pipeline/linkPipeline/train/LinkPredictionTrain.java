@@ -153,24 +153,21 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         );
         progressTracker.endSubTask("Compute train metrics");
 
+        var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
+        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+
         progressTracker.beginSubTask("Evaluate on test data");
         computeTestMetric(classifier, trainingStatistics);
         progressTracker.endSubTask("Evaluate on test data");
+
+        var testMetrics = trainingStatistics.winningModelTestMetrics();
+        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
         var model = createModel(
             trainingStatistics.bestParameters(),
             classifier.data(),
             trainingStatistics.metricsForWinningModel()
         );
-
-        var testMetrics = trainingStatistics.metricsForWinningModel().entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().test()));
-        var outerTrainMetrics = trainingStatistics.metricsForWinningModel().entrySet()
-            .stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().outerTrain()));
-        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
-        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         return LinkPredictionTrainResult.of(model, trainingStatistics);
     }

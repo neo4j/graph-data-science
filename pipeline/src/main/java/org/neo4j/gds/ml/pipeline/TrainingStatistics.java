@@ -92,7 +92,10 @@ public final class TrainingStatistics {
         ));
     }
 
-    private static BestModelStats findBestModelStats(List<ModelStats> metricStatsForModels, TrainerConfig bestParameters) {
+    private static BestModelStats findBestModelStats(
+        List<ModelStats> metricStatsForModels,
+        TrainerConfig bestParameters
+    ) {
         return metricStatsForModels.stream()
             .filter(metricStatsForModel -> metricStatsForModel.params() == bestParameters)
             .findFirst()
@@ -129,7 +132,16 @@ public final class TrainingStatistics {
     public void addTestScore(Metric metric, double score) {
         testScores.put(metric, score);
     }
+
     public void addOuterTrainScore(Metric metric, double score) {
         outerTrainScores.put(metric, score);
+    }
+
+    public Map<Metric, Double> winningModelTestMetrics() {
+        return testScores;
+    }
+
+    public Map<Metric, Double> winningModelOuterTrainMetrics() {
+        return outerTrainScores;
     }
 }

@@ -676,6 +676,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Compute train metrics :: Start",
                 "MY TEST TASK :: Compute train metrics 100%",
                 "MY TEST TASK :: Compute train metrics :: Finished",
+                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.7808}",
                 "MY TEST TASK :: Evaluate on test data :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features 50%",
@@ -695,7 +696,6 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Evaluate on test data :: Compute test metrics :: Finished",
                 "MY TEST TASK :: Evaluate on test data :: Finished",
                 "MY TEST TASK :: Final model metrics on test set: {AUCPR=0.7808}",
-                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.7808}",
                 "MY TEST TASK :: Finished"
             );
     }
