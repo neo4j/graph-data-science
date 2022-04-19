@@ -45,7 +45,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class GraphStreamGraphPropertyProcTest extends BaseProcTest {
+class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
@@ -71,7 +71,7 @@ class GraphStreamGraphPropertyProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @MethodSource("org.neo4j.gds.catalog.GraphStreamGraphPropertyProcTest#graphPropertyValues")
+    @MethodSource("org.neo4j.gds.catalog.GraphStreamGraphPropertiesProcTest#graphPropertyValues")
     void streamLoadedGraphProperty(GraphPropertyValues values) {
         graphStore.addGraphProperty("prop", values);
 
