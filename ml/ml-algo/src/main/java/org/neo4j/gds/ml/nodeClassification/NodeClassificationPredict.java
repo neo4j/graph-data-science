@@ -69,7 +69,8 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
             features,
             batchSize,
             concurrency,
-            terminationFlag
+            terminationFlag,
+            progressTracker
         );
     }
 

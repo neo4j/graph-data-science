@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -62,14 +63,16 @@ public final class ClassificationMetricComputer {
         HugeLongArray evaluationSet,
         Classifier classifier,
         int concurrency,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         var predictor = new ParallelNodeClassifier(
             classifier,
             features,
             DEFAULT_BATCH_SIZE,
             concurrency,
-            terminationFlag
+            terminationFlag,
+            progressTracker
         );
 
         return new ClassificationMetricComputer(

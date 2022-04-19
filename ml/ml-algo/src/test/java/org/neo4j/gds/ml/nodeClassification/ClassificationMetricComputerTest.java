@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -99,7 +100,8 @@ class ClassificationMetricComputerTest {
             HugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         );
 
         assertThat(classificationMetricComputer.score(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));

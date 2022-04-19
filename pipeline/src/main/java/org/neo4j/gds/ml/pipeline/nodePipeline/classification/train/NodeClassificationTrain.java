@@ -331,8 +331,8 @@ public final class NodeClassificationTrain {
 
                 var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
 
-                registerMetricScores(validationSet, classifier, validationStatsBuilder::update);
-                registerMetricScores(trainSet, classifier, trainStatsBuilder::update);
+                registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
+                registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 progressTracker.logProgress();
             }
 
@@ -366,7 +366,8 @@ public final class NodeClassificationTrain {
     private void registerMetricScores(
         HugeLongArray evaluationSet,
         Classifier classifier,
-        BiConsumer<Metric, Double> scoreConsumer
+        BiConsumer<Metric, Double> scoreConsumer,
+        ProgressTracker customProgressTracker
     ) {
         var trainMetricComputer = ClassificationMetricComputer.forEvaluationSet(
             features,
@@ -375,7 +376,8 @@ public final class NodeClassificationTrain {
             evaluationSet,
             classifier,
             config.concurrency(),
-            terminationFlag
+            terminationFlag,
+            customProgressTracker
         );
         metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
@@ -388,9 +390,14 @@ public final class NodeClassificationTrain {
         var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
         progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
-        registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore);
-        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore);
+        progressTracker.beginSubTask(
+            "Evaluate on test data",
+            outerSplit.testSet().size() + outerSplit.trainSet().size()
+        );
+        registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore, progressTracker);
+        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore,
+            progressTracker
+        );
         progressTracker.endSubTask("Evaluate on test data");
 
         var testMetrics = trainingStatistics.winningModelTestMetrics();

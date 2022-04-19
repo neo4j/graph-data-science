@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.models.Classifier;
@@ -35,19 +36,22 @@ public class ParallelNodeClassifier {
     private final int batchSize;
     private final int concurrency;
     private final TerminationFlag terminationFlag;
+    private final ProgressTracker progressTracker;
 
     ParallelNodeClassifier(
         Classifier classifier,
         Features features,
         int batchSize,
         int concurrency,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ProgressTracker progressTracker
     ) {
         this.classifier = classifier;
         this.features = features;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
         this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
     }
 
     public HugeLongArray predict(HugeLongArray evaluationSet) {
@@ -65,7 +69,8 @@ public class ParallelNodeClassifier {
             batchTransformer,
             classifier,
             predictedProbabilities,
-            predictedClasses
+            predictedClasses,
+            progressTracker
         );
         var batchQueue = new BatchQueue(evaluationSetSize, batchSize, concurrency);
         batchQueue.parallelConsume(consumer, concurrency, terminationFlag);

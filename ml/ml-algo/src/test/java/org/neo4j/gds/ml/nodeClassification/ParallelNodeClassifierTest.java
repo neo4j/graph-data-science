@@ -29,6 +29,7 @@ import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -91,7 +92,8 @@ class ParallelNodeClassifierTest {
             features,
             batchSize,
             1,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         );
 
         this.parallelPredictor = new ParallelNodeClassifier(
@@ -99,7 +101,8 @@ class ParallelNodeClassifierTest {
             features,
             batchSize,
             4,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ProgressTracker.NULL_TRACKER
         );
     }
 

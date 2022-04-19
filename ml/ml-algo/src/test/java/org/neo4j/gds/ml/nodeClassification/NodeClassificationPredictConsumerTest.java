@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
@@ -70,7 +71,8 @@ class NodeClassificationPredictConsumerTest {
             BatchTransformer.IDENTITY,
             classifier,
             probabilities,
-            predictedClasses
+            predictedClasses,
+            ProgressTracker.NULL_TRACKER
         );
 
         predictConsumer.accept(new SingletonBatch(0));
@@ -108,7 +110,8 @@ class NodeClassificationPredictConsumerTest {
             BatchTransformer.IDENTITY,
             classifier,
             null,
-            predictedClasses
+            predictedClasses,
+            ProgressTracker.NULL_TRACKER
         ).accept(new ListBatch(List.of(0L, 1L)));
 
         assertThat(predictedClasses.get(0)).isEqualTo(10);
