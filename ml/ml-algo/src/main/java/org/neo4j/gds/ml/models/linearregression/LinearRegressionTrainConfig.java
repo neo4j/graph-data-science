@@ -51,6 +51,7 @@ public interface LinearRegressionTrainConfig extends GradientDescentConfig, Pena
     }
 
     @Override
+    @Configuration.Ignore
     default String methodName() {
         return TrainingMethod.LinearRegression.name();
     }

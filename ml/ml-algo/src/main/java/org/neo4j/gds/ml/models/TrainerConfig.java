@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
 public interface TrainerConfig extends ToMapConvertible {
 
-    @Value.Derived
     @Configuration.Ignore
     String methodName();
 

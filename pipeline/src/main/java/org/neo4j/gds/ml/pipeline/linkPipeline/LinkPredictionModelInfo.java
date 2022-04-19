@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -39,8 +40,13 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     @Override
     default Map<String, Object> toMap() {
+        // we add the methodName manually to not break the API for 2.0 but still mark the field as not a user-input
+        var parametersMap = new HashMap<String, Object>();
+        parametersMap.put("methodName", bestParameters().methodName());
+        parametersMap.putAll(bestParameters().toMap());
+
         return Map.of(
-            "bestParameters", bestParameters().toMap(),
+            "bestParameters", parametersMap,
             "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().name(),
                 entry -> entry.getValue().toMap()

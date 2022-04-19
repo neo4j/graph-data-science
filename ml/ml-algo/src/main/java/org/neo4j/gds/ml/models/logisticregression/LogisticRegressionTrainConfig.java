@@ -51,6 +51,7 @@ public interface LogisticRegressionTrainConfig extends GradientDescentConfig, Pe
     }
 
     @Override
+    @Configuration.Ignore
     default String methodName() {
         return TrainingMethod.LogisticRegression.name();
     }
