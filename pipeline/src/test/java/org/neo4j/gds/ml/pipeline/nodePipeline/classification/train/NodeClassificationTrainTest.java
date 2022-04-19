@@ -113,29 +113,27 @@ class NodeClassificationTrainTest {
         pipeline.addTrainerConfig(expectedWinner);
 
         // Should NOT be the winning model, so give it bad hyperparams.
-        pipeline.setTrainingParameterSpace(
-            TrainingMethod.RandomForest,
-            List.of(
-                TunableTrainerConfig.of(
-                    Map.of(
-                        "minSplitSize", 2,
-                        "maxDepth", 1,
-                        "numberOfDecisionTrees", 1,
-                        "maxFeaturesRatio", 0.1
-                    ),
-                    TrainingMethod.RandomForest
+        pipeline.addTrainerConfig(
+
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", 0.1
                 ),
-                TunableTrainerConfig.of(
-                    Map.of(
-                        "minSplitSize", 2,
-                        "maxDepth", 1,
-                        "numberOfDecisionTrees", 1,
-                        "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
-                    ),
-                    TrainingMethod.RandomForest
-                )
-            )
-        );
+                TrainingMethod.RandomForest
+            ));
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                ),
+                TrainingMethod.RandomForest
+            ));
 
         var config = createConfig("model", metricSpecification, 1L);
 

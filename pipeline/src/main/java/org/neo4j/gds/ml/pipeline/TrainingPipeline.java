@@ -124,10 +124,6 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
             : autoTuningConfig().maxTrials();
     }
 
-    public void setTrainingParameterSpace(TrainingMethod method, List<TunableTrainerConfig> trainingConfigs) {
-        this.trainingParameterSpace.put(method, trainingConfigs);
-    }
-
     public void setConcreteTrainingParameterSpace(TrainingMethod method, List<TrainerConfig> trainingConfigs) {
         var tunableTrainerConfigs = trainingConfigs
             .stream()
