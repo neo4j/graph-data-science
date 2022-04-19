@@ -76,7 +76,7 @@ class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.removeGraphProperty('%s', 'prop')",
+            "CALL gds.alpha.graph.removeGraphProperty('%s', 'prop')",
             DEFAULT_GRAPH_NAME
         );
 
@@ -96,7 +96,8 @@ class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperty() {
-        assertError("CALL gds.graph.removeGraphProperty($graph, 'UNKNOWN')",
+        assertError(
+            "CALL gds.alpha.graph.removeGraphProperty($graph, 'UNKNOWN')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'UNKNOWN' does not exist. The following properties exist in the graph []."
         );
@@ -117,7 +118,8 @@ class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
             }
         };
         graphStore.addGraphProperty("prop", values);
-        assertError("CALL gds.graph.removeGraphProperty($graph, 'porp')",
+        assertError(
+            "CALL gds.alpha.graph.removeGraphProperty($graph, 'porp')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'porp' does not exist. Did you mean: ['prop']."
         );

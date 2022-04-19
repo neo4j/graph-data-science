@@ -73,7 +73,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
         graphStore.addGraphProperty("prop", values);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamGraphProperty('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
+            "CALL gds.alpha.graph.streamGraphProperty('%s', 'prop')" + " YIELD propertyValue" + " RETURN propertyValue",
             DEFAULT_GRAPH_NAME
         );
 
@@ -120,7 +120,8 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingNodeProperty() {
-        assertError("CALL gds.graph.streamGraphProperty($graph, 'UNKNOWN')",
+        assertError(
+            "CALL gds.alpha.graph.streamGraphProperty($graph, 'UNKNOWN')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'UNKNOWN' does not exist. The following properties exist in the graph []."
         );
@@ -141,7 +142,8 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
             }
         };
         graphStore.addGraphProperty("prop", values);
-        assertError("CALL gds.graph.streamGraphProperty($graph, 'porp')",
+        assertError(
+            "CALL gds.alpha.graph.streamGraphProperty($graph, 'porp')",
             Map.of("graph", DEFAULT_GRAPH_NAME),
             "The specified graph property 'porp' does not exist. Did you mean: ['prop']."
         );

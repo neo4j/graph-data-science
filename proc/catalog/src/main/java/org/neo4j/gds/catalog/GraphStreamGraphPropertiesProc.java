@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamGraphPropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.streamGraphProperty", mode = READ)
+    @Procedure(name = "gds.alpha.graph.streamGraphProperty", mode = READ)
     @Description("Streams the given graph property.")
     public Stream<PropertyResult> streamProperty(
         @Name(value = "graphName") String graphName,
