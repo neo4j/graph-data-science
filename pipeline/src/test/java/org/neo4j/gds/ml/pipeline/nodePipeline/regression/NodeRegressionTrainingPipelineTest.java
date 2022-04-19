@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -115,9 +114,9 @@ class NodeRegressionTrainingPipelineTest {
 
     @Test
     void addMultipleCandidates() {
-        var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
-        var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
-        var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
+        var config1 = LinearRegressionTrainConfig.of(Map.of("penalty", 19));
+        var config2 = LinearRegressionTrainConfig.of(Map.of("penalty", 1337));
+        var config3 = LinearRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new NodeRegressionTrainingPipeline();
         pipeline.addTrainerConfig(config1);
@@ -125,7 +124,7 @@ class NodeRegressionTrainingPipelineTest {
         pipeline.addTrainerConfig(config3);
 
         var parameterSpace = pipeline.trainingParameterSpace();
-        assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+        assertThat(parameterSpace.get(TrainingMethod.LinearRegression)).containsExactly(
             config1.toTunableConfig(),
             config2.toTunableConfig(),
             config3.toTunableConfig()
