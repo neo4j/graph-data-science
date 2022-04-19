@@ -24,11 +24,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.StringSimilarity;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-public interface GraphAccessGraphPropertyConfig extends BaseConfig {
+public interface GraphAccessGraphPropertiesConfig extends BaseConfig {
 
     @Configuration.Parameter
     Optional<String> graphName();
@@ -39,7 +38,7 @@ public interface GraphAccessGraphPropertyConfig extends BaseConfig {
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
         if (!graphStore.hasGraphProperty(graphProperty())) {
-            List<String> candidates = StringSimilarity.similarStringsIgnoreCase(
+            var candidates = StringSimilarity.similarStringsIgnoreCase(
                 graphProperty(),
                 graphStore.graphPropertyKeys()
             );

@@ -47,9 +47,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
-    private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
-    private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
-
     @Neo4jGraph
     private static final String GRAPH = "CREATE (a)";
 

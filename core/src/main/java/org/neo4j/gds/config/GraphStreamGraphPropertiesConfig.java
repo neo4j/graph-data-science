@@ -28,14 +28,14 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStreamGraphPropertyConfig extends GraphAccessGraphPropertyConfig {
+public interface GraphStreamGraphPropertiesConfig extends GraphAccessGraphPropertiesConfig {
 
-    static GraphStreamGraphPropertyConfig of(
+    static GraphStreamGraphPropertiesConfig of(
         String graphName,
         String graphProperty,
         CypherMapWrapper config
     ) {
-        return new GraphStreamGraphPropertyConfigImpl(
+        return new GraphStreamGraphPropertiesConfigImpl(
             Optional.of(graphName),
             graphProperty,
             config

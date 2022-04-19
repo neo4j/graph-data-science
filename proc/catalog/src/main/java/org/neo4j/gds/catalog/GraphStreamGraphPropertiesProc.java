@@ -21,8 +21,8 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphAccessGraphPropertyConfig;
-import org.neo4j.gds.config.GraphStreamGraphPropertyConfig;
+import org.neo4j.gds.config.GraphAccessGraphPropertiesConfig;
+import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -47,7 +47,7 @@ public class GraphStreamGraphPropertiesProc extends CatalogProc {
 
         // input
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var config = GraphStreamGraphPropertyConfig.of(
+        var config = GraphStreamGraphPropertiesConfig.of(
             graphName,
             graphProperty,
             cypherConfig
@@ -55,13 +55,16 @@ public class GraphStreamGraphPropertiesProc extends CatalogProc {
 
         // validation
         validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
+        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-        return streamNGraphProperties(graphStore, config);
+        return streamGraphProperties(graphStore, config);
     }
 
-    private Stream<PropertyResult> streamNGraphProperties(GraphStore graphStore, GraphAccessGraphPropertyConfig config) {
+    private Stream<PropertyResult> streamGraphProperties(
+        GraphStore graphStore,
+        GraphAccessGraphPropertiesConfig config
+    ) {
         return graphStore
             .graphPropertyValues(config.graphProperty())
             .objects()
