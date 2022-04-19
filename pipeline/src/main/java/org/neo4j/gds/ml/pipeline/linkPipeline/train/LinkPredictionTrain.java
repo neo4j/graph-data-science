@@ -251,7 +251,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             });
             var validationStats = trainingStatistics.findModelValidationAvg(trial);
             var trainStats = trainingStatistics.findModelTrainAvg(trial);
-            double mainMetric = validationStats.get(config.metrics().get(0));
+            double mainMetric = trainingStatistics.getMainValidationMetric(trial);
 
             progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));

@@ -51,7 +51,7 @@ public final class TrainingStatistics {
     }
 
     public TrainerConfig bestParameters() {
-        var modelStats = validationStats.getMetricStats(metrics.get(0));
+        var modelStats = validationStats.getMetricStats(evaluationMetric());
         return Collections.max(modelStats, ModelStats.COMPARE_AVERAGE).params();
     }
 
@@ -103,6 +103,10 @@ public final class TrainingStatistics {
             .orElseThrow();
     }
 
+    public double getMainValidationMetric(int trial) {
+        return findModelValidationAvg(trial).get(evaluationMetric());
+    }
+
     public Map<Metric, Double> findModelValidationAvg(int trial) {
         return findModelAvg(trial, validationStats);
     }
@@ -117,6 +121,10 @@ public final class TrainingStatistics {
                 metric -> metric,
                 metric -> statsMap.getMetricStats(metric).get(trial).avg()
             ));
+    }
+
+    private Metric evaluationMetric() {
+        return metrics.get(0);
     }
 
     public void addValidationStats(Metric metric, ModelStats stats) {
@@ -144,7 +152,7 @@ public final class TrainingStatistics {
     }
 
     public double getBestTrialScore() {
-        return validationStats.getMetricStats(metrics.get(0))
+        return validationStats.getMetricStats(evaluationMetric())
             .stream()
             .mapToDouble(ModelStats::avg)
             .max()
@@ -152,7 +160,7 @@ public final class TrainingStatistics {
     }
 
     public int getBestTrialIdx() {
-        return validationStats.getMetricStats(metrics.get(0))
+        return validationStats.getMetricStats(evaluationMetric())
             .stream()
             .map(ModelStats::avg)
             .collect(Collectors.toList())
