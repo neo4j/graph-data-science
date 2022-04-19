@@ -19,8 +19,10 @@
 | `_gds.graph.exists_`
 |<<catalog-graph-list, List graphs>> | `gds.graph.list`
 |<<catalog-graph-remove-node-properties-example, Remove node properties from a named graph>> | `gds.graph.removeNodeProperties`
+|Remove graph property from a named graph>> | `gds.graph.removeGraphProperty`
 |<<catalog-graph-delete-rel-type, Delete relationships from a named graph>> | `gds.graph.deleteRelationships`
 |<<catalog-graph-drop, Remove a named graph from memory>> | `gds.graph.drop`
+|Stream a single graph property to the procedure caller | `gds.graph.streamGraphProperty`
 |<<catalog-graph-stream-single-node-property-example, Stream a single node property to the procedure caller>> | `gds.graph.streamNodeProperty`
 |<<catalog-graph-stream-node-properties-example, Stream node properties to the procedure caller>> | `gds.graph.streamNodeProperties`
 |<<catalog-graph-stream-single-relationship-property-example, Stream a single relationship property to the procedure caller>> | `gds.graph.streamRelationshipProperty`
