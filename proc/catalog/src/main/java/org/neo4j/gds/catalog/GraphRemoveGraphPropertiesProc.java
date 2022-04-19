@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphAccessGraphPropertyConfig;
+import org.neo4j.gds.config.GraphRemoveGraphPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,7 +46,7 @@ public class GraphRemoveGraphPropertiesProc extends CatalogProc {
 
         // input
         CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        var config = GraphAccessGraphPropertyConfig.of(
+        var config = GraphRemoveGraphPropertyConfig.of(
             graphName,
             graphProperty,
             cypherConfig

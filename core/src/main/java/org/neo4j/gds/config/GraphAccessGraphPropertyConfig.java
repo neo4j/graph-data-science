@@ -20,9 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringSimilarity;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -30,10 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphAccessGraphPropertyConfig extends BaseConfig {
 
     @Configuration.Parameter
@@ -61,17 +55,4 @@ public interface GraphAccessGraphPropertyConfig extends BaseConfig {
             ));
         }
     }
-
-    static GraphAccessGraphPropertyConfig of(
-        String graphName,
-        String graphProperty,
-        CypherMapWrapper config
-    ) {
-        return new GraphAccessGraphPropertyConfigImpl(
-            Optional.of(graphName),
-            graphProperty,
-            config
-        );
-    }
-
 }

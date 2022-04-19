@@ -22,6 +22,7 @@ package org.neo4j.gds.catalog;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphAccessGraphPropertyConfig;
+import org.neo4j.gds.config.GraphStreamGraphPropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,7 +47,7 @@ public class GraphStreamGraphPropertiesProc extends CatalogProc {
 
         // input
         var cypherConfig = CypherMapWrapper.create(configuration);
-        var config = GraphAccessGraphPropertyConfig.of(
+        var config = GraphStreamGraphPropertyConfig.of(
             graphName,
             graphProperty,
             cypherConfig
