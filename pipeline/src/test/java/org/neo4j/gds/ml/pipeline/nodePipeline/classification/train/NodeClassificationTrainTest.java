@@ -186,7 +186,7 @@ class NodeClassificationTrainTest {
         modelCandidates
             .stream()
             .map(LogisticRegressionTrainConfig::of)
-            .forEach(candidate -> bananasPipeline.addTrainerConfig(candidate));
+            .forEach(bananasPipeline::addTrainerConfig);
 
         var bananasConfig = createConfig("bananasModel", metricSpecification, 1337L);
 
@@ -206,7 +206,7 @@ class NodeClassificationTrainTest {
         modelCandidates
             .stream()
             .map(LogisticRegressionTrainConfig::of)
-            .forEach(candidate -> arrayPipeline.addTrainerConfig(candidate));
+            .forEach(arrayPipeline::addTrainerConfig);
 
 
         var arrayPropertyConfig = createConfig(

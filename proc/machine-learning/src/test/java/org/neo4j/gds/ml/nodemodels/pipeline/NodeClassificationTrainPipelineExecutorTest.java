@@ -128,9 +128,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.of(
-            Map.of("penalty", 1, "maxEpochs", 1)
-        )));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1)));
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)

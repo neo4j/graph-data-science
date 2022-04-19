@@ -100,8 +100,8 @@ class LinkPredictionPipelineTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(lrConfig));
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(rfConfg));
+        pipeline.addTrainerConfig(lrConfig);
+        pipeline.addTrainerConfig(rfConfg);
 
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
             .containsExactly(lrConfig.toTunableConfig());
@@ -111,23 +111,20 @@ class LinkPredictionPipelineTest {
     }
 
     @Test
-    void overridesTheParameterSpace() {
+    void addMultipleCandidates() {
         var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
         var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            config1
-        ));
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            config2,
-            config3
-        ));
+        pipeline.addTrainerConfig(config1);
+        pipeline.addTrainerConfig(config2);
+        pipeline.addTrainerConfig(config3);
 
         var parameterSpace = pipeline.trainingParameterSpace();
 
         assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+            config1.toTunableConfig(),
             config2.toTunableConfig(),
             config3.toTunableConfig()
         );
@@ -200,12 +197,10 @@ class LinkPredictionPipelineTest {
             var hadamardFeatureStep = new HadamardFeatureStep(List.of("a"));
             pipeline.addFeatureStep(hadamardFeatureStep);
 
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
-            ));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.RandomForest, List.of(
+            pipeline.addTrainerConfig(
                 RandomForestTrainerConfigImpl
                     .builder()
                     .maxDepth(2)
@@ -213,7 +208,7 @@ class LinkPredictionPipelineTest {
                     .minSplitSize(2)
                     .numberOfDecisionTrees(1)
                     .build()
-            ));
+            );
 
             var splitConfig = LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
