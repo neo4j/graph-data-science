@@ -204,6 +204,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             config.randomSeed()
         );
 
+        int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
@@ -248,13 +249,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
-            var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
-            var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
+            var validationStats = trainingStatistics.findModelValidationAvg(trial);
+            var trainStats = trainingStatistics.findModelTrainAvg(trial);
             double mainMetric = validationStats.get(config.metrics().get(0));
 
             progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
             progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
+
+            trial++;
 
             progressTracker.endSubTask();
         }

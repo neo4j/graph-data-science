@@ -318,6 +318,7 @@ public final class NodeClassificationTrain {
             config.randomSeed()
         );
 
+        int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
@@ -341,13 +342,15 @@ public final class NodeClassificationTrain {
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
 
-            var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
-            var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
+            var validationStats = trainingStatistics.findModelValidationAvg(trial);
+            var trainStats = trainingStatistics.findModelTrainAvg(trial);
             double mainMetric = validationStats.get(metrics.get(0));
 
             progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
             progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
+
+            trial++;
 
             progressTracker.endSubTask("Trial");
         }

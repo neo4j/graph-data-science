@@ -103,21 +103,19 @@ public final class TrainingStatistics {
             .orElseThrow();
     }
 
-    public Map<Metric, Double> findModelValidationAvg(TrainerConfig trainerConfig) {
-        return findModelAvg(trainerConfig, validationStats);
+    public Map<Metric, Double> findModelValidationAvg(int trial) {
+        return findModelAvg(trial, validationStats);
     }
 
-    public Map<Metric, Double> findModelTrainAvg(TrainerConfig trainerConfig) {
-        return findModelAvg(trainerConfig, trainStats);
+    public Map<Metric, Double> findModelTrainAvg(int trial) {
+        return findModelAvg(trial, trainStats);
     }
 
-    private Map<Metric, Double> findModelAvg(TrainerConfig trainerConfig, StatsMap statsMap) {
+    private Map<Metric, Double> findModelAvg(int trial, StatsMap statsMap) {
         return metrics.stream()
             .collect(Collectors.toMap(
                 metric -> metric,
-                metric -> statsMap.getMetricStats(metric).stream()
-                    .filter(stats -> stats.params() == trainerConfig).findFirst().orElseThrow()
-                    .avg()
+                metric -> statsMap.getMetricStats(metric).get(trial).avg()
             ));
     }
 
