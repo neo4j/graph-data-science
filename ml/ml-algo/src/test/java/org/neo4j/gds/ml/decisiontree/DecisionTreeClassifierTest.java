@@ -202,16 +202,16 @@ class DecisionTreeClassifierTest {
     @ParameterizedTest
     @CsvSource(value = {
         // When maxDepth is limiting tree size minSplitSize does not matter.
-        "     6, 100_000,  2, 56,     5_096",
-        "     6, 100_000,  4, 56,     5_096",
+        "     6, 100_000,  2, 72,       6_120",
+        "     6, 100_000,  4, 72,       6_120",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        "    10, 100_000,  2, 56,    81_896",
+        "    10, 100_000,  2, 72,      98_280",
         // maxDepth does not matter for small training sets.
-        "   100,     500,  2, 56,    39_976",
-        " 8_000,     500,  2, 56,    39_976",
+        "   100,     500,  2, 72,      47_976",
+        " 8_000,     500,  2, 72,      47_976",
         // Max should scale almost inverse linearly with minSplitSize.
-        " 8_000, 100_000,  2, 56, 79_99_976",
-        " 8_000, 100_000, 20, 56,   799_976"
+        " 8_000, 100_000,  2, 72,   9_599_976",
+        " 8_000, 100_000, 20, 72,     959_976"
     })
     void estimateDecisionTree(
         int maxDepth,
@@ -220,7 +220,12 @@ class DecisionTreeClassifierTest {
         long expectedMin,
         long expectedMax
     ) {
-        var range = DecisionTreeTrainer.estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
+        var range = DecisionTreeTrainer.estimateTree(
+            maxDepth,
+            numberOfTrainingSamples,
+            minSplitSize,
+            TreeNode.leafMemoryEstimation(Integer.class)
+        );
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);
@@ -229,10 +234,10 @@ class DecisionTreeClassifierTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
-        "  6,  1_000,  32_456,    46_208",
-        "  6, 10_000, 320_456,   406_208",
+        "  6,  1_000,  32_472,    47_232",
+        "  6, 10_000, 320_472,   407_232",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 320_456, 1_202_912",
+        " 20, 10_000, 320_472, 1_362_912",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
         var range = DecisionTreeClassifierTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10, 10);

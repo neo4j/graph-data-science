@@ -55,9 +55,10 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures
+        long numberOfBaggedFeatures,
+        long leafNodeSize
     ) {
-        var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize);
+        var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize, leafNodeSize);
 
         // The actual depth of the produced tree is capped by the number of samples to populate the leaves.
         long normalizedMaxDepth = Math.min(maxDepth, Math.max(1, numberOfTrainingSamples - minSplitSize + 2));
@@ -78,7 +79,12 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
             .add(findBestSplitEstimation);
     }
 
-    public static MemoryRange estimateTree(int maxDepth, long numberOfTrainingSamples, int minSplitSize) {
+    public static MemoryRange estimateTree(
+        int maxDepth,
+        long numberOfTrainingSamples,
+        int minSplitSize,
+        long leafNodeSize
+    ) {
         long maxNumLeafNodes = (long) Math.ceil(
             Math.min(
                 Math.pow(2.0, maxDepth),
@@ -87,10 +93,10 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
                 2 * Math.ceil((double) numberOfTrainingSamples / minSplitSize)
             )
         );
-        long maxNumNodes = 2 * maxNumLeafNodes - 1;
         return MemoryRange.of(sizeOfInstance(DecisionTreePredictor.class))
             // Minimum size of tree depends on class distribution.
-            .add(MemoryRange.of(1, maxNumNodes).times(TreeNode.memoryEstimation()));
+            .add(MemoryRange.of(1, maxNumLeafNodes).times(leafNodeSize))
+            .add(MemoryRange.of(0, maxNumLeafNodes - 1).times(TreeNode.splitMemoryEstimation()));
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {

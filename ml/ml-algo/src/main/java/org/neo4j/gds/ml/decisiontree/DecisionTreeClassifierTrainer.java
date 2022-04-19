@@ -65,7 +65,8 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
-                numberOfBaggedFeatures
+                numberOfBaggedFeatures,
+                TreeNode.leafMemoryEstimation(Integer.class)
             ))
             .add(sizeOfLongArray(numberOfClasses));
     }

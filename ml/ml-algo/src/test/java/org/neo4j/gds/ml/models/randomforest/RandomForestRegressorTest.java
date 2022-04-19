@@ -165,17 +165,17 @@ class RandomForestRegressorTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000, 10, 1,   1, 0.1, 1.0,  4013394, 4824202",
+        "     6, 100_000, 10, 1,   1, 0.1, 1.0,  4013442, 4827274",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000, 10, 1,  10, 0.1, 1.0,  4013898, 5715410",
+        "    10, 100_000, 10, 1,  10, 0.1, 1.0,  4014162, 5985746",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500, 10, 1,   1, 0.1, 1.0,    20954,  164786",
+        " 8_000,     500, 10, 1,   1, 0.1, 1.0,     21002, 188786",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 10, 1,  10, 0.9, 1.0,  4013970, 5715574",
+        "    10, 100_000, 10, 1,  10, 0.9, 1.0,  4014234, 5985910",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 10, 1,  10, 0.1, 0.2,   803898, 1865410",
+        "    10, 100_000, 10, 1,  10, 0.1, 0.2,   804162, 2135746",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 16053648, 20404496",
+        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 16053984, 20748560",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -210,13 +210,13 @@ class RandomForestRegressorTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Max should almost scale linearly with numberOfDecisionTrees.
-        "     6, 100_000,   1,  2,    96,     5_136",
-        "     6, 100_000, 100,  2, 5_640,   509_640",
+        "     6, 100_000,   1,  2,  120,     6672",
+        "     6, 100_000, 100,  2, 8040,   663240",
         // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
-        "    10, 100_000,   1,  2,    96,    81_936",
+        "    10, 100_000,   1,  2,  120,   106512",
         // Max should scale almost inverse linearly with minSplitSize.
-        "   800, 100_000,   1,  2,    96, 8_000_016",
-        "   800, 100_000,   1, 10,    96, 1_600_016",
+        "   800, 100_000,   1,  2,  120, 10400016",
+        "   800, 100_000,   1, 10,  120,  2080016",
     })
     void memoryEstimation(
         int maxDepth,

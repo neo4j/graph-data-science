@@ -172,7 +172,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(59616, 899376)
+                MemoryRange.of(59696, 900016)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -180,7 +180,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(65032, 2432344)
+                MemoryRange.of(66696, 2731864)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -191,7 +191,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(65032, 2432344)
+                MemoryRange.of(66696, 2731864)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
