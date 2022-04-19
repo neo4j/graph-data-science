@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
@@ -33,8 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class TrainingStatisticsTest {
 
@@ -62,6 +63,39 @@ class TrainingStatisticsTest {
         ));
 
         assertThat(trainingStatistics.bestParameters().methodName()).isEqualTo("better");
+    }
+
+    @Test
+    void getBestTrialStuff() {
+        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
+
+        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+            new TestTrainerConfig("bad"),
+            0.1,
+            1000,
+            1000
+        ));
+        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+            new TestTrainerConfig("better"),
+            0.2,
+            0.2,
+            0.2
+        ));
+        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+            new TestTrainerConfig("same as better"),
+            0.2,
+            0.2,
+            0.2
+        ));
+        trainingStatistics.addValidationStats(F1_WEIGHTED, ModelStats.of(
+            new TestTrainerConfig("notprimarymetric"),
+            5000,
+            5000,
+            5000
+        ));
+
+        assertThat(trainingStatistics.getBestTrialScore()).isCloseTo(0.2, Offset.offset(0.001));
+        assertThat(trainingStatistics.getBestTrialIdx()).isEqualTo(1);
     }
 
     @Test

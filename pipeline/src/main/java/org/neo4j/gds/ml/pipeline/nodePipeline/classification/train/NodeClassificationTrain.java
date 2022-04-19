@@ -318,11 +318,6 @@ public final class NodeClassificationTrain {
             config.randomSeed()
         );
 
-
-        int currentTrial = 1;
-        int bestTrial = -1;
-        double bestTrialScore = -1e42;
-
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
@@ -345,27 +340,26 @@ public final class NodeClassificationTrain {
                 trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
                 trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
             });
+
             var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
             var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
             double mainMetric = validationStats.get(metrics.get(0));
-            if (mainMetric > bestTrialScore) {
-                bestTrial = currentTrial;
-                bestTrialScore = mainMetric;
-            }
 
             progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
             progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
 
-            currentTrial++;
-
             progressTracker.endSubTask("Trial");
         }
+
+        int bestTrial = trainingStatistics.getBestTrialIdx() + 1;
+        double bestTrialScore = trainingStatistics.getBestTrialScore();
         progressTracker.logMessage(formatWithLocale(
             "Best trial was Trial %d with main validation metric %.4f",
             bestTrial,
             bestTrialScore
         ));
+
         progressTracker.endSubTask("Select best model");
     }
 

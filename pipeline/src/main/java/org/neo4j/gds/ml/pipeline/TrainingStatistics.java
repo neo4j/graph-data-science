@@ -144,4 +144,20 @@ public final class TrainingStatistics {
     public Map<Metric, Double> winningModelOuterTrainMetrics() {
         return outerTrainScores;
     }
+
+    public double getBestTrialScore() {
+        return validationStats.getMetricStats(metrics.get(0))
+            .stream()
+            .mapToDouble(ModelStats::avg)
+            .max()
+            .getAsDouble();
+    }
+
+    public int getBestTrialIdx() {
+        return validationStats.getMetricStats(metrics.get(0))
+            .stream()
+            .map(ModelStats::avg)
+            .collect(Collectors.toList())
+            .indexOf(getBestTrialScore());
+    }
 }

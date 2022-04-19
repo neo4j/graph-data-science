@@ -203,10 +203,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             config.randomSeed()
         );
 
-        int currentTrial = 1;
-        int bestTrial = -1;
-        double bestTrialScore = -1e42;
-
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
@@ -252,18 +248,16 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
             var validationStats = trainingStatistics.findModelValidationAvg(modelParams);
             var trainStats = trainingStatistics.findModelTrainAvg(modelParams);
             double mainMetric = validationStats.get(config.metrics().get(0));
-            if (mainMetric > bestTrialScore) {
-                bestTrial = currentTrial;
-                bestTrialScore = mainMetric;
-            }
 
             progressTracker.logMessage(formatWithLocale("Main validation metric: %.4f", mainMetric));
             progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
             progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
 
             progressTracker.endSubTask();
-            currentTrial++;
         }
+
+        int bestTrial = trainingStatistics.getBestTrialIdx() + 1;
+        double bestTrialScore = trainingStatistics.getBestTrialScore();
         progressTracker.logMessage(formatWithLocale(
             "Best trial was Trial %d with main validation metric %.4f",
             bestTrial,
