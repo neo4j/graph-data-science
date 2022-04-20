@@ -35,6 +35,15 @@ public interface Inheritance {
             return 42;
         }
 
+        @Configuration.Ignore
+        default long ignoredValue() {
+            return 88;
+        }
+
+        @Configuration.Ignore
+        default int ignoredInBaseValue() {
+            return 111;
+        }
     }
 
     @Configuration("MyConfigImpl")
@@ -51,5 +60,15 @@ public interface Inheritance {
         default long overwrittenValue() {
             return 1337;
         }
+
+        @Override
+        @Configuration.Ignore
+        default long ignoredValue() {
+            return 1337;
+        }
+
+        @Override
+        @Configuration.Key("myKey")
+        int ignoredInBaseValue();
     }
 }

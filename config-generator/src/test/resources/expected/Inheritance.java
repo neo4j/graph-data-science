@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
+
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -35,11 +36,13 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
 
     private long overwrittenValue;
 
+    private int ignoredInBaseValue;
+
     private double inheritedValue;
 
     private short inheritedDefaultValue;
 
-    public MyConfig(@NotNull CypherMapWrapper config) {
+    public MyConfigImpl(@NotNull CypherMapWrapper config) {
         ArrayList<IllegalArgumentException> errors = new ArrayList<>();
         try {
             this.baseValue = CypherMapWrapper.failOnNull("baseValue", config.requireString("baseValue"));
@@ -53,6 +56,11 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
         }
         try {
             this.overwrittenValue = config.getLong("overwrittenValue", Inheritance.MyConfig.super.overwrittenValue());
+        } catch (IllegalArgumentException e) {
+            errors.add(e);
+        }
+        try {
+            this.ignoredInBaseValue = config.requireInt("myKey");
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -102,6 +110,11 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
     }
 
     @Override
+    public int ignoredInBaseValue() {
+        return this.ignoredInBaseValue;
+    }
+
+    @Override
     public double inheritedValue() {
         return this.inheritedValue;
     }
@@ -134,6 +147,11 @@ public final class MyConfigImpl implements Inheritance.MyConfig {
 
         public MyConfigImpl.Builder overwrittenValue(long overwrittenValue) {
             this.config.put("overwrittenValue", overwrittenValue);
+            return this;
+        }
+
+        public MyConfigImpl.Builder ignoredInBaseValue(int ignoredInBaseValue) {
+            this.config.put("myKey", ignoredInBaseValue);
             return this;
         }
 
