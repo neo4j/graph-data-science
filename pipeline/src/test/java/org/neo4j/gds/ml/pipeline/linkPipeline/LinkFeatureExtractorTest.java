@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -58,7 +59,8 @@ class LinkFeatureExtractorTest {
             graph,
             List.of(new HadamardFeatureStep(List.of("array"))),
             1,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var expected = HugeObjectArray.of(
@@ -86,7 +88,8 @@ class LinkFeatureExtractorTest {
                 new CosineFeatureStep(List.of("noise", "z"))
             ),
             1,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         var normA = Math.sqrt(42 * 42 + 13 * 13);

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -71,7 +72,8 @@ public final class LinkFeatureExtractor {
         Graph graph,
         List<LinkFeatureStep> linkFeatureSteps,
         int concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var extractor = of(graph, linkFeatureSteps);
 
@@ -101,7 +103,7 @@ public final class LinkFeatureExtractor {
             relationshipOffset += partition.totalDegree();
         }
 
-        ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, terminationFlag, Pools.DEFAULT);
 
         return FeaturesFactory.wrap(linkFeatures);
     }

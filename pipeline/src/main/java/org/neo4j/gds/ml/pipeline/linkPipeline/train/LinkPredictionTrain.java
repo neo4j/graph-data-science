@@ -125,7 +125,8 @@ public final class LinkPredictionTrain {
             trainGraph,
             pipeline.featureSteps(),
             config.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         var trainRelationshipIds = new ReadOnlyHugeLongIdentityArray(trainData.size());
         progressTracker.endSubTask("Extract train features");
@@ -285,7 +286,8 @@ public final class LinkPredictionTrain {
             validationGraph,
             pipeline.featureSteps(),
             config.concurrency(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
         progressTracker.endSubTask("Extract test features");
 
