@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HugeIterativeMergeSortTest {
+class HugeSerialIndirectMergeSortTest {
 
     static Stream<Arguments> sizeAndConcurrency() {
         var random = new Random();
@@ -66,7 +66,7 @@ class HugeIterativeMergeSortTest {
             array.set(i, longs[i]);
         }
 
-        HugeIterativeMergeSort.sort(array, l -> doubles[(int) l]);
+        HugeSerialIndirectMergeSort.sort(array, l -> doubles[(int) l]);
 
         var Longs = ArrayUtils.toObject(longs);
         Arrays.sort(Longs, Comparator.comparingDouble(lhs -> doubles[(int) (long) lhs]));

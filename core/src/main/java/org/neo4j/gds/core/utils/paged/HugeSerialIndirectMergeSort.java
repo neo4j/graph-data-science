@@ -23,8 +23,8 @@ import java.util.function.LongToDoubleFunction;
 
 
 // Only runs single-threaded. See HugeMergeSort for a concurrent version.
-public final class HugeIterativeMergeSort {
-    private HugeIterativeMergeSort() {}
+public final class HugeSerialIndirectMergeSort {
+    private HugeSerialIndirectMergeSort() {}
 
     public static void sort(HugeLongArray array, LongToDoubleFunction toSortValue) {
         HugeLongArray temp = HugeLongArray.newArray(array.size());
@@ -58,7 +58,7 @@ public final class HugeIterativeMergeSort {
 
                 i = i + 2 * tempSize;
             }
-            tempSize = 2 * tempSize;
+            tempSize *= 2;
         }
     }
 
@@ -77,25 +77,20 @@ public final class HugeIterativeMergeSort {
             long lsIdx = array.get(leftStart);
             long rsIdx = array.get(rightStart);
             if (Double.compare(toSortValue.applyAsDouble(lsIdx), toSortValue.applyAsDouble(rsIdx)) <= 0) {
-                temp.set(idx, lsIdx);
+                temp.set(idx++, lsIdx);
                 leftStart++;
             } else {
-                temp.set(idx, rsIdx);
+                temp.set(idx++, rsIdx);
                 rightStart++;
             }
-            idx++;
         }
 
         while (leftStart <= leftEnd) {
-            temp.set(idx, array.get(leftStart));
-            leftStart++;
-            idx++;
+            temp.set(idx++, array.get(leftStart++));
         }
 
         while (rightStart <= rightEnd) {
-            temp.set(idx, array.get(rightStart));
-            rightStart++;
-            idx++;
+            temp.set(idx++, array.get(rightStart++));
         }
     }
 }
