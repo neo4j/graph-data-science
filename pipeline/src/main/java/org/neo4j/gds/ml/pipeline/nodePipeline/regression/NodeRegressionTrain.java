@@ -156,7 +156,7 @@ public final class NodeRegressionTrain {
             progressTracker.beginSubTask("Trial");
 
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Parameters: %s", modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.methodName(), modelParams.toMap()));
 
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());

@@ -208,7 +208,7 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Parameters: %s", modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.methodName(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,
