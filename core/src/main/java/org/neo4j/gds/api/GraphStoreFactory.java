@@ -71,6 +71,10 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
         return dimensions;
     }
 
+    public CONFIG graphProjectConfig() {
+        return graphProjectConfig;
+    }
+
     protected abstract ProgressTracker initProgressTracker();
 
     @ValueClass
