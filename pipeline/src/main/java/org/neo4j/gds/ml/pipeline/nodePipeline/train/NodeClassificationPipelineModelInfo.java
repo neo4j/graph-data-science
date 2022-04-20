@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.nodemodels.Metric;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPipeline;
 import org.neo4j.gds.models.TrainerConfig;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,13 +56,8 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
     @Value.Auxiliary
     @Value.Derived
     default Map<String, Object> toMap() {
-        // we add the methodName manually to not break the API for 2.0 but still mark the field as not a user-input
-        var parametersMap = new HashMap<String, Object>();
-        parametersMap.put("methodName", bestParameters().methodName());
-        parametersMap.putAll(bestParameters().toMap());
-
         return Map.of(
-            "bestParameters", parametersMap,
+            "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "classes", classes(),
             "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().toString(),

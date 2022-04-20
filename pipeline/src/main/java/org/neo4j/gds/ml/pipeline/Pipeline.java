@@ -54,7 +54,7 @@ public abstract class Pipeline<FEATURE_STEP extends FeatureStep> implements ToMa
             .collect(Collectors.toMap(
                 entry -> entry.getKey().name(),
                 entry -> entry.getValue().stream()
-                    .map(ToMapConvertible::toMap)
+                    .map(TrainerConfig::toMapWithTrainerMethod)
                     .collect(Collectors.toList())
             ));
     }

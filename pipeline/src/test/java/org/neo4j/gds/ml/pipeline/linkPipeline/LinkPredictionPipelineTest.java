@@ -238,11 +238,11 @@ class LinkPredictionPipelineTest {
                             .trainingParameterSpace()
                             .get(TrainingMethod.LogisticRegression)
                             .stream()
-                            .map(TrainerConfig::toMap)
+                            .map(TrainerConfig::toMapWithTrainerMethod)
                             .collect(Collectors.toList()),
                         TrainingMethod.RandomForest.name(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)
                             .stream()
-                            .map(TrainerConfig::toMap)
+                            .map(TrainerConfig::toMapWithTrainerMethod)
                             .collect(Collectors.toList())
                     ),
                       pipelineMap -> pipelineMap.get("trainingParameterSpace")

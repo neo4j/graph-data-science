@@ -62,6 +62,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "minEpochs", 42,
                         "penalty", 0.0,
                         "patience", 1,
+                        "methodName", TrainingMethod.LogisticRegression.name(),
                         "batchSize", 100,
                         "tolerance", 0.001
                     )))
@@ -88,6 +89,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "minEpochs", 42,
                             "penalty", 0.0,
                             "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
                             "tolerance", 0.001
                         ),
@@ -96,6 +98,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "minEpochs", 4,
                             "penalty", 0.0,
                             "patience", 1,
+                            "methodName", TrainingMethod.LogisticRegression.name(),
                             "batchSize", 100,
                             "tolerance", 0.001
                         )
@@ -122,7 +125,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         .numberOfDecisionTrees(10)
                         .minSplitSize(2)
                         .build()
-                        .toMap()),
+                        .toMapWithTrainerMethod()),
                     TrainingMethod.LogisticRegression.name(), List.of()
                 )
             ))
