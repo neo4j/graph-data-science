@@ -78,7 +78,7 @@ final class ConfigParser {
         return config.build();
     }
 
-    private void process(ImmutableSpec.Builder output, Set<String> seen, TypeElement configElement, TypeElement root) {
+    private void process(ImmutableSpec.Builder output, Set<ExecutableElement> seen, TypeElement configElement, TypeElement root) {
         var members = methodsIn(configElement.getEnclosedElements())
             .stream()
             .map(m -> validateMember(seen, root, m))
@@ -126,12 +126,60 @@ final class ConfigParser {
         return Optional.of(member);
     }
 
-    private Optional<Member> validateMember(Collection<String> seen, TypeElement root, ExecutableElement method) {
+    private Optional<Member> validateMember(Set<ExecutableElement> seenMembers, TypeElement root, ExecutableElement method) {
+        var seenMembersWithSameName = seenMembers.stream().filter(m -> m.getSimpleName().equals(method.getSimpleName()));
+
+        // check Ignore corner cases
         if (isAnnotationPresent(method, Ignore.class)) {
-            seen.add(method.getSimpleName().toString());
+            var invalidRelatedMember = seenMembersWithSameName
+                .filter(m -> !(methodMarkedAsInput(m) || isAnnotationPresent(m, Ignore.class)))
+                .findAny();
+
+            invalidRelatedMember.ifPresent(relatedMember -> messager.printMessage(
+                Diagnostic.Kind.ERROR,
+                String.format(
+                    Locale.ENGLISH,
+                    "Method `%1$s` annotated with `%2$s` cannot override without explicit clarifying the parent method by using the `%2$s`, `%3$s` or `%4$s` annotation.",
+                    method.getSimpleName(),
+                    Ignore.class.getSimpleName(),
+                    Parameter.class.getSimpleName(),
+                    Key.class.getSimpleName()
+                ),
+                method
+            ));
+
+            seenMembers.add(method);
+
             return Optional.empty();
         }
-        if (!seen.add(method.getSimpleName().toString()) || method.getModifiers().contains(Modifier.STATIC)) {
+
+        var seenMembersList = seenMembersWithSameName.collect(Collectors.toList());
+        if (!seenMembersList.isEmpty()) {
+            var anyRelatedIgnoredSeenMember = seenMembersList.stream().anyMatch(m -> isAnnotationPresent(m, Ignore.class) );
+            if (anyRelatedIgnoredSeenMember && !methodMarkedAsInput(method)) {
+                // for inheritance must clarify the status of the member to avoid exposing ignored fields from the parent
+                messager.printMessage(
+                    Diagnostic.Kind.ERROR,
+                    String.format(
+                        Locale.ENGLISH,
+                        "Method `%1$s` was previously annotated with `%2$s` but cannot be overridden without explicit clarification by using the `%2$s`, `%3$s` or `%4$s` annotation.",
+                        method.getSimpleName(),
+                        Ignore.class.getSimpleName(),
+                        Parameter.class.getSimpleName(),
+                        Key.class.getSimpleName()
+                    ),
+                    method
+                );
+            }
+
+            seenMembers.add(method);
+
+            return Optional.empty();
+        }
+
+        seenMembers.add(method);
+
+        if (method.getModifiers().contains(Modifier.STATIC)) {
             // static method cannot be config fields
             return Optional.empty();
         }
@@ -194,6 +242,10 @@ final class ConfigParser {
             messager.printMessage(Diagnostic.Kind.ERROR, invalid.getMessage(), method);
             return Optional.empty();
         }
+    }
+
+    private static boolean methodMarkedAsInput(ExecutableElement method) {
+        return isAnnotationPresent(method, Key.class) || isAnnotationPresent(method, Parameter.class);
     }
 
     private void validateToMap(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
@@ -268,7 +320,7 @@ final class ConfigParser {
         }
     }
 
-    private void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
+    private static void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
         if (isAnnotationPresent(method, Value.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
                 memberBuilder.validates(true);

@@ -136,6 +136,15 @@ class ConfigurationProcessorTest {
     }
 
     @Test
+    void invalidOverridingIgnoredFields() {
+        runNegativeTest(
+            "InvalidInheritance",
+            e("Method `ignoredValue` annotated with `Ignore` cannot override without explicit clarifying the parent method by using the `Ignore`, `Parameter` or `Key` annotation.", 28, 14),
+            e("Method `baseValue` was previously annotated with `Ignore` but cannot be overridden without explicit clarification by using the `Ignore`, `Parameter` or `Key` annotation", 30, 14)
+        );
+    }
+
+    @Test
     void invalidConversionsClassTargets() {
         runNegativeTest(
             "InvalidConversionsClasses",

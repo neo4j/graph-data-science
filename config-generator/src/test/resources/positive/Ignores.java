@@ -27,6 +27,7 @@ import java.util.Map;
 public interface Ignores {
 
     public interface BaseConfig {
+        @Configuration.Key("canAlsoIgnoredInheritedMethods")
         double canAlsoIgnoredInheritedMethods();
 
         long notIgnored();
