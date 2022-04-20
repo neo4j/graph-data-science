@@ -20,10 +20,10 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -66,7 +66,7 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
+public final class LinkPredictionTrain {
 
     public static final String MODEL_TYPE = "LinkPrediction";
 
@@ -75,6 +75,9 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
     private final LinkPredictionTrainingPipeline pipeline;
     private final LinkPredictionTrainConfig config;
     private final LocalIdMap classIdMap;
+    private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
+
 
     public static LocalIdMap makeClassIdMap() {
         return LocalIdMap.of((long) EdgeSplitter.NEGATIVE, (long) EdgeSplitter.POSITIVE);
@@ -85,13 +88,15 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         Graph validationGraph,
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
         this.trainGraph = trainGraph;
         this.validationGraph = validationGraph;
         this.pipeline = pipeline;
         this.config = config;
+        this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
         this.classIdMap = makeClassIdMap();
     }
 
@@ -113,7 +118,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
         );
     }
 
-    @Override
     public LinkPredictionTrainResult compute() {
 
         progressTracker.beginSubTask("Extract train features");
@@ -360,11 +364,6 @@ public class LinkPredictionTrain extends Algorithm<LinkPredictionTrainResult> {
                 LinkPredictionPredictPipeline.from(pipeline)
             )
         );
-    }
-
-    @Override
-    public void release() {
-
     }
 
     public static MemoryEstimation estimate(
