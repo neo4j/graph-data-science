@@ -137,6 +137,7 @@ public final class TunableTrainerConfig {
         concreteParameters.forEach((key, value) -> result.put(key, value.value()));
         doubleRanges.forEach((key, value) -> result.put(key, value.toMap()));
         integerRanges.forEach((key, value) -> result.put(key, value.toMap()));
+        // this is an ignored field that should still be part of the toMap version
         result.put("methodName", trainingMethod().name());
         return result;
     }

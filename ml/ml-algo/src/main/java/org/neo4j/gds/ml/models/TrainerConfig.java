@@ -24,6 +24,9 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public interface TrainerConfig extends ToMapConvertible {
 
     @Configuration.Ignore
@@ -35,4 +38,11 @@ public interface TrainerConfig extends ToMapConvertible {
         return TunableTrainerConfig.of(toMap(), TrainingMethod.valueOf(methodName()));
     }
 
+    @Configuration.Ignore
+    default Map<String, Object> toMapWithTrainerMethod() {
+        var mapWithTrainerMethod = new HashMap<>(toMap());
+        mapWithTrainerMethod.put("methodName", methodName());
+
+        return mapWithTrainerMethod;
+    }
 }
