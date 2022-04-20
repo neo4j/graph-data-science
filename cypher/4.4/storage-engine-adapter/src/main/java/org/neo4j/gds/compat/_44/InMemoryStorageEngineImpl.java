@@ -133,6 +133,15 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         super.createCommands(txState);
     }
 
+    @Override
+    public void forceClose() {
+        try {
+            shutdown();
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static final class Builder extends InMemoryStorageEngineBuilder<InMemoryStorageEngineImpl> {
         public Builder(
             DatabaseLayout databaseLayout,

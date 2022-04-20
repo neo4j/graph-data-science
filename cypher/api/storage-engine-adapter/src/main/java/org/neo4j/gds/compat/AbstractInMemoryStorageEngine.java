@@ -139,15 +139,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     }
 
     @Override
-    public void forceClose() {
-        try {
-            shutdown();
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @Override
     public List<StorageCommand> createUpgradeCommands(
         KernelVersion versionToUpgradeTo, InjectedNLIUpgradeCallback injectedNLIUpgradeCallback
     ) {
