@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
@@ -33,7 +32,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {

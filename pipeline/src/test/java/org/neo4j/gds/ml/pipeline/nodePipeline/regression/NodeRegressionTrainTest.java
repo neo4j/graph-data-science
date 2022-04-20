@@ -88,8 +88,8 @@ class NodeRegressionTrainTest {
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
 
-        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate1);
-        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate2);
+        pipeline.addTrainerConfig(candidate1);
+        pipeline.addTrainerConfig(candidate2);
 
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
@@ -131,8 +131,8 @@ class NodeRegressionTrainTest {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate1);
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate2);
+        pipeline.addTrainerConfig(candidate1);
+        pipeline.addTrainerConfig(candidate2);
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
             .username("DUMMY")
@@ -172,8 +172,8 @@ class NodeRegressionTrainTest {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.RandomForest, candidate1);
-        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, candidate2);
+        pipeline.addTrainerConfig(candidate1);
+        pipeline.addTrainerConfig(candidate2);
 
         List<RegressionMetrics> evaluationMetrics = List.of(
             RegressionMetrics.MEAN_SQUARED_ERROR,
@@ -263,7 +263,7 @@ class NodeRegressionTrainTest {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.LinearRegression, LinearRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LinearRegressionTrainConfig.DEFAULT);
 
         var config = NodeRegressionPipelineTrainConfigImpl.builder()
             .graphName("IGNORE")

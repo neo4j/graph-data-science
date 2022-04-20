@@ -277,7 +277,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
         MemoryTree actualEstimation = LinkPredictionTrain
@@ -307,7 +307,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
         pipeline.setSplitConfig(splitConfig);
 
         var graphDim = GraphDimensions.of(100, 1_000);
@@ -378,7 +378,7 @@ class LinkPredictionTrainTest {
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
@@ -408,7 +408,6 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.addTrainerConfig(
-            TrainingMethod.RandomForest,
             RandomForestTrainerConfigImpl.builder().numberOfDecisionTrees(5).build()
         );
 
@@ -516,7 +515,7 @@ class LinkPredictionTrainTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression,
+        pipeline.addTrainerConfig(
             LogisticRegressionTrainConfigImpl.builder().maxEpochs(5).minEpochs(5).build()
         );
 
@@ -714,33 +713,39 @@ class LinkPredictionTrainTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)),
-            LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "patience", 5, "tolerance", 0.00001))
-        ));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+            "penalty", 1,
+            "patience", 5,
+            "tolerance", 0.00001
+        )));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of(
+            "penalty", 100,
+            "patience", 5,
+            "tolerance", 0.00001
+        )));
+
         // Should NOT be the winning model, so give it bad hyperparams.
-        pipeline.setTrainingParameterSpace(TrainingMethod.RandomForest,
-            List.of(
-                TunableTrainerConfig.of(
-                    Map.of(
-                        "minSplitSize", 2,
-                        "maxDepth", 1,
-                        "numberOfDecisionTrees", 1,
-                        "maxFeaturesRatio", 0.1
-                    ),
-                    TrainingMethod.RandomForest
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", 0.1
                 ),
-                TunableTrainerConfig.of(
-                    Map.of(
-                        "minSplitSize", 2,
-                        "maxDepth", 1,
-                        "numberOfDecisionTrees", 1,
-                        "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
-                    ),
-                    TrainingMethod.RandomForest
-                )
-            )
-        );
+                TrainingMethod.RandomForest
+            ));
+
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                ),
+                TrainingMethod.RandomForest
+            ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
         return pipeline;

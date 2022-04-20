@@ -53,9 +53,9 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.ImmutableNodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -128,9 +128,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(LogisticRegressionTrainConfig.of(
-            Map.of("penalty", 1, "maxEpochs", 1)
-        )));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1)));
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
@@ -180,7 +178,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addFeatureStep(NodeFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(TrainingMethod.LogisticRegression, LogisticRegressionTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
 
@@ -242,12 +240,13 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.featureProperties().addAll(List.of("array"));
 
-        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .username(getUsername())
             .pipeline(PIPELINE_NAME)
             .graphName(GRAPH_NAME)
             .modelName("myModel")
             .targetProperty("INVALID_PROPERTY")
-            .addMetric(ClassificationMetricSpecification.parse("F1(class=1)"))
+            .metrics(List.of(ClassificationMetricSpecification.parse("F1(class=1)")))
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -324,7 +323,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
 
-        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline(PIPELINE_NAME)
             .username("myUser")
             .graphName(GRAPH_NAME)
@@ -332,9 +331,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .concurrency(1)
             .randomSeed(42L)
             .targetProperty("t")
-            .addRelationshipType("SOME_REL")
-            .addNodeLabel("SOME_LABEL")
-            .minBatchSize(1)
+            .relationshipTypes(List.of("SOME_REL"))
+            .nodeLabels(List.of("SOME_LABEL"))
             .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
@@ -354,7 +352,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.featureProperties().addAll(List.of("array", "scalar"));
 
-        var config = ImmutableNodeClassificationPipelineTrainConfig.builder()
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline(PIPELINE_NAME)
             .username("myUser")
             .graphName(GRAPH_NAME)
@@ -362,9 +360,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .concurrency(1)
             .randomSeed(42L)
             .targetProperty("t")
-            .addRelationshipType("SOME_REL")
-            .addNodeLabel("SOME_LABEL")
-            .minBatchSize(1)
+            .relationshipTypes(List.of("SOME_REL"))
+            .nodeLabels(List.of("SOME_LABEL"))
             .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
             .build();
 
@@ -383,9 +380,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         ClassificationMetricSpecification metricSpecification,
         long randomSeed
     ) {
-        return ImmutableNodeClassificationPipelineTrainConfig.builder()
+        return NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline(PIPELINE_NAME)
             .graphName(GRAPH_NAME)
+            .username(getUsername())
             .modelName(modelName)
             .concurrency(1)
             .randomSeed(randomSeed)

@@ -98,7 +98,7 @@ class NodeClassificationTrainingPipelineTest {
         var config = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
 
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config));
+        pipeline.addTrainerConfig(config);
 
         assertThat(pipeline
             .trainingParameterSpace()
@@ -106,17 +106,19 @@ class NodeClassificationTrainingPipelineTest {
     }
 
     @Test
-    void overridesTheParameterSpace() {
+    void addMultipleCandidates() {
         var config1 = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
         var config2 = LogisticRegressionTrainConfig.of(Map.of("penalty", 1337));
         var config3 = LogisticRegressionTrainConfig.of(Map.of("penalty", 42));
 
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config1));
-        pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(config2, config3));
+        pipeline.addTrainerConfig(config1);
+        pipeline.addTrainerConfig(config2);
+        pipeline.addTrainerConfig(config3);
 
         var parameterSpace = pipeline.trainingParameterSpace();
         assertThat(parameterSpace.get(TrainingMethod.LogisticRegression)).containsExactly(
+            config1.toTunableConfig(),
             config2.toTunableConfig(),
             config3.toTunableConfig()
         );
@@ -185,10 +187,8 @@ class NodeClassificationTrainingPipelineTest {
             var fooStep = new NodeFeatureStep("foo");
             pipeline.addFeatureStep(fooStep);
 
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
-            ));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)));
+            pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
             var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
             pipeline.setSplitConfig(splitConfig);
@@ -221,89 +221,6 @@ class NodeClassificationTrainingPipelineTest {
                     AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                     pipelineMap -> pipelineMap.get("autoTuningConfig")
                 );
-        }
-    }
-
-    @Nested
-    class CopyPipelineTest {
-
-        @Test
-        void deepCopiesFeatureSteps() {
-            var pipeline = new NodeClassificationTrainingPipeline();
-            var fooStep = new NodeFeatureStep("foo");
-            pipeline.addFeatureStep(fooStep);
-
-            var copy = pipeline.copy();
-            assertThat(copy)
-                .isNotSameAs(pipeline)
-                .satisfies(copiedPipeline -> assertThat(copiedPipeline.featureSteps())
-                    .isNotSameAs(pipeline.featureSteps())
-                    .containsExactly(fooStep));
-
-            var barStep = new NodeFeatureStep("bar");
-            pipeline.addFeatureStep(barStep);
-
-            assertThat(copy.featureSteps()).doesNotContain(barStep);
-        }
-
-        @Test
-        void deepCopiesNodePropertySteps() {
-            var pipeline = new NodeClassificationTrainingPipeline();
-            var nodePropertyStep = new NodePropertyStep(
-                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop1")
-            );
-            pipeline.addNodePropertyStep(nodePropertyStep);
-
-            var copy = pipeline.copy();
-            assertThat(copy)
-                .isNotSameAs(pipeline)
-                .satisfies(copiedPipeline -> assertThat(copiedPipeline.nodePropertySteps())
-                    .isNotSameAs(pipeline.nodePropertySteps())
-                    .containsExactly(nodePropertyStep));
-
-            var otherNodePropertyStep = new NodePropertyStep(
-                TestGdsCallableFinder.findByName("gds.testProc.mutate").orElseThrow(),
-                Map.of("mutateProperty", "prop2")
-            );
-            pipeline.addNodePropertyStep(otherNodePropertyStep);
-
-            assertThat(copy.nodePropertySteps()).doesNotContain(otherNodePropertyStep);
-        }
-
-        @Test
-        void deepCopiesParameterSpace() {
-            var pipeline = new NodeClassificationTrainingPipeline();
-            pipeline.setConcreteTrainingParameterSpace(TrainingMethod.LogisticRegression, List.of(
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1000000)),
-                LogisticRegressionTrainConfig.of(Map.of("penalty", 1))
-            ));
-
-            var copy = pipeline.copy();
-
-            assertThat(copy)
-                .isNotSameAs(pipeline)
-                .satisfies(copiedPipeline -> {
-                    var copiedParameterSpace = copiedPipeline.trainingParameterSpace();
-                    var originalParameterSpace = pipeline.trainingParameterSpace();
-                    assertThat(copiedParameterSpace.get(TrainingMethod.LogisticRegression))
-                        // Look at the pipeline because there are some defaults are added behind the scene.
-                        .isNotSameAs(originalParameterSpace)
-                        .containsExactlyInAnyOrderElementsOf(originalParameterSpace.get(TrainingMethod.LogisticRegression));
-                });
-        }
-
-        @Test
-        void doesntDeepCopySplitConfig() {
-            var pipeline = new NodeClassificationTrainingPipeline();
-            var splitConfig = NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.5).build();
-            pipeline.setSplitConfig(splitConfig);
-
-            var copy = pipeline.copy();
-
-            assertThat(copy)
-                .isNotSameAs(pipeline)
-                .satisfies(copiedPipeline -> assertThat(copiedPipeline.splitConfig()).isSameAs(splitConfig));
         }
     }
 }
