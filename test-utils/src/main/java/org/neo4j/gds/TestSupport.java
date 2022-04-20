@@ -47,6 +47,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -138,7 +139,8 @@ public final class TestSupport {
         Optional<String> name,
         Optional<Orientation> orientation,
         Optional<Aggregation> aggregation,
-        Optional<LongSupplier> idSupplier
+        Optional<LongSupplier> idSupplier,
+        Optional<NamedDatabaseId> namedDatabaseId
     ) {
         Objects.requireNonNull(gdl);
 
@@ -155,7 +157,7 @@ public final class TestSupport {
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .namedDatabaseId(GdlSupportPerMethodExtension.DATABASE_ID)
+            .namedDatabaseId(namedDatabaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
             .build();
 
         return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);
