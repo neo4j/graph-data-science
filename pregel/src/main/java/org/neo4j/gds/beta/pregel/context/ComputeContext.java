@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.pregel.context;
 
 import org.neo4j.gds.beta.pregel.ComputeStep;
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 /**
  * A context that is used during the computation. It allows an implementation
@@ -29,8 +30,8 @@ import org.neo4j.gds.beta.pregel.PregelConfig;
  */
 public final class ComputeContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
 
-    public ComputeContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config) {
-        super(computeStep, config);
+    public ComputeContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, ProgressTracker progressTracker) {
+        super(computeStep, config, progressTracker);
         this.sendMessagesFunction = config.hasRelationshipWeightProperty()
             ? computeStep::sendToNeighborsWeighted
             : computeStep::sendToNeighbors;
