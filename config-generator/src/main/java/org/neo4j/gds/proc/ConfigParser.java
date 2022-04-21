@@ -23,11 +23,7 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.TypeName;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.Configuration.CollectKeys;
-import org.neo4j.gds.annotation.Configuration.Ignore;
-import org.neo4j.gds.annotation.Configuration.Key;
-import org.neo4j.gds.annotation.Configuration.Parameter;
-import org.neo4j.gds.annotation.Configuration.ToMap;
+import org.neo4j.gds.annotation.Configuration.*;
 import org.neo4j.gds.annotation.ValueClass;
 
 import javax.annotation.processing.Messager;
@@ -42,15 +38,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.lang.annotation.Annotation;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -245,7 +233,11 @@ final class ConfigParser {
     }
 
     private static boolean methodMarkedAsInput(ExecutableElement method) {
-        return isAnnotationPresent(method, Key.class) || isAnnotationPresent(method, Parameter.class);
+        return isAnnotationPresent(method, Key.class)
+                || isAnnotationPresent(method, Parameter.class)
+                || isAnnotationPresent(method, Configuration.ConvertWith.class)
+                || isAnnotationPresent(method, Configuration.DoubleRange.class)
+                || isAnnotationPresent(method, Configuration.IntegerRange.class);
     }
 
     private void validateToMap(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
