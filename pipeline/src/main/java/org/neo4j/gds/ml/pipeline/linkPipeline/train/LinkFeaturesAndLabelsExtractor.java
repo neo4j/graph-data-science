@@ -22,20 +22,28 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.partition.DegreePartition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.ml.gradientdescent.GradientDescentConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -72,32 +80,48 @@ final class LinkFeaturesAndLabelsExtractor {
         progressTracker.setVolume(graph.relationshipCount() * 2);
         var features = LinkFeatureExtractor.extractFeatures(graph, featureSteps, concurrency, progressTracker);
 
-        var labels = extractLabels(graph, features.size(), progressTracker);
+        var labels = extractLabels(graph, features.size(), concurrency, progressTracker);
 
         return ImmutableFeaturesAndLabels.of(features, labels);
     }
 
     private static HugeLongArray extractLabels(
-        Graph graph, long numberOfTargets, ProgressTracker progressTracker
+        Graph graph, long numberOfTargets, int concurrency, ProgressTracker progressTracker
     ) {
         var globalLabels = HugeLongArray.newArray(numberOfTargets);
-        var relationshipIdx = new MutableLong();
-        graph.forEachNode(nodeId -> {
-            graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
-                if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
-                    globalLabels.set(relationshipIdx.getAndIncrement(), (long) weight);
-                } else {
-                    throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
-                        weight,
-                        src,
-                        trg
-                    ));
-                }
-                return true;
-            });
-            progressTracker.logProgress(graph.degree(nodeId));
-            return true;
-        });
+        var partitions = PartitionUtils.degreePartition(
+            graph,
+            concurrency,
+            Function.identity(),
+            Optional.of(GradientDescentConfig.DEFAULT_BATCH_SIZE)
+        );
+        var tasks = new ArrayList<Runnable>();
+        final var relationshipOffset = new MutableLong();
+        for (DegreePartition partition : partitions) {
+            var startRelationshipOffset = relationshipOffset.getValue();
+            tasks.add(() -> {
+                var currentRelationshipOffset = new MutableLong(startRelationshipOffset);
+                partition.consume(nodeId -> {
+                    graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
+                        if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
+                            globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
+                        } else {
+                            throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
+                                weight,
+                                src,
+                                trg
+                            ));
+                        }
+                        return true;
+                    });
+                });
+                progressTracker.logProgress(partition.totalDegree());
+            }
+            );
+            relationshipOffset.add(partition.totalDegree());
+        }
+
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
         return globalLabels;
     }
 }
