@@ -54,7 +54,7 @@ ext {
         'ipaddress'            : '5.3.3',
         'jackson'              : '2.13.1',
         'javapoet'             : '1.11.1',
-        'jetbrains-annotations': '18.0.0',
+        'jetbrains-annotations': '23.0.0',
         'jjwt'                 : '0.11.0',
         'jol'                  : '0.16',
         'jqwik'                : '1.6.2',
