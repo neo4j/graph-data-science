@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -75,18 +76,29 @@ final class LinkFeaturesAndLabelsExtractor {
         Graph graph,
         List<LinkFeatureStep> featureSteps,
         int concurrency,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         progressTracker.setVolume(graph.relationshipCount() * 2);
-        var features = LinkFeatureExtractor.extractFeatures(graph, featureSteps, concurrency, progressTracker);
+        var features = LinkFeatureExtractor.extractFeatures(
+            graph,
+            featureSteps,
+            concurrency,
+            progressTracker,
+            terminationFlag
+        );
 
-        var labels = extractLabels(graph, features.size(), concurrency, progressTracker);
+        var labels = extractLabels(graph, features.size(), concurrency, progressTracker, terminationFlag);
 
         return ImmutableFeaturesAndLabels.of(features, labels);
     }
 
     private static HugeLongArray extractLabels(
-        Graph graph, long numberOfTargets, int concurrency, ProgressTracker progressTracker
+        Graph graph,
+        long numberOfTargets,
+        int concurrency,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var globalLabels = HugeLongArray.newArray(numberOfTargets);
         var partitions = PartitionUtils.degreePartition(
@@ -121,7 +133,7 @@ final class LinkFeaturesAndLabelsExtractor {
             relationshipOffset.add(partition.totalDegree());
         }
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
         return globalLabels;
     }
 }

@@ -63,7 +63,8 @@ public class ClassifierTrainerFactory {
                     (RandomForestTrainerConfig) config,
                     false,
                     randomSeed,
-                    progressTracker
+                    progressTracker,
+                    terminationFlag
                 );
             }
             default:

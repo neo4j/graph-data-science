@@ -41,7 +41,8 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
-public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainResult> {
+public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
+    <LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainResult> {
 
     private final RelationshipSplitter relationshipSplitter;
 
@@ -140,13 +141,13 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor<LinkPr
             pipeline.splitConfig().validationFolds(),
             progressTracker
         );
-
         return new LinkPredictionTrain(
             trainGraph,
             testGraph,
             pipeline,
             config,
-            progressTracker
+            progressTracker,
+            terminationFlag
         ).compute();
     }
 

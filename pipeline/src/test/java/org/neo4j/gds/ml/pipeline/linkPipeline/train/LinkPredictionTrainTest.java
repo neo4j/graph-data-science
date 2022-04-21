@@ -30,6 +30,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -174,7 +175,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(59696, 900016)
+                MemoryRange.of(59704, 900024)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -182,7 +183,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66696, 2731864)
+                MemoryRange.of(66704, 2731872)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -193,7 +194,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66696, 2731864)
+                MemoryRange.of(66704, 2731872)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -437,7 +438,8 @@ class LinkPredictionTrainTest {
                 .randomSeed(42L)
                 .concurrency(4)
                 .build(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         progressTracker.endSubTask();
 
@@ -526,7 +528,8 @@ class LinkPredictionTrainTest {
                 .pipeline("DUMMY")
                 .concurrency(4)
                 .build(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         progressTracker.endSubTask();
 
@@ -588,7 +591,8 @@ class LinkPredictionTrainTest {
                 .pipeline("DUMMY")
                 .concurrency(4)
                 .build(),
-            progressTracker
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         ).compute();
         progressTracker.endSubTask();
 
@@ -734,7 +738,8 @@ class LinkPredictionTrainTest {
             trainGraph,
             linkPredictionPipeline(),
             trainConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         return linkPredictionTrain.compute();

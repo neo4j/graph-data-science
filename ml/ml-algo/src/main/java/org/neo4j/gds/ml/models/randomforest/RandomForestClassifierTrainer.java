@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -60,6 +61,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private final boolean computeOutOfBagError;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
     private Optional<Double> outOfBagError = Optional.empty();
 
     public RandomForestClassifierTrainer(
@@ -68,7 +70,8 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         RandomForestTrainerConfig config,
         boolean computeOutOfBagError,
         Optional<Long> randomSeed,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.classIdMap = classIdMap;
         this.config = config;
@@ -76,6 +79,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         this.computeOutOfBagError = computeOutOfBagError;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -153,7 +157,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
 
         outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
             trainSet,
