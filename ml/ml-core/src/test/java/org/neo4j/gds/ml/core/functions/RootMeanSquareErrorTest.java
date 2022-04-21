@@ -20,6 +20,8 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 
@@ -37,5 +39,18 @@ class RootMeanSquareErrorTest {
         ComputationContext ctx = new ComputationContext();
         assertThat(ctx.forward(variable)).isEqualTo(new Scalar(Math.sqrt(0.375)));
     }
+
+    @ParameterizedTest
+    @ValueSource(doubles = {Double.NaN, Double.MAX_VALUE, 1e155})
+    void applyOnExtremeValues(double extremeValue) {
+        var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
+        var predictions = Constant.vector(new double[]{extremeValue, 3, 2, 8});
+
+        var variable = new RootMeanSquareError(predictions, targets);
+
+        ComputationContext ctx = new ComputationContext();
+        assertThat(ctx.forward(variable)).isEqualTo(new Scalar(Double.MAX_VALUE));
+    }
+
 
 }

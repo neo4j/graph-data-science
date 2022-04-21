@@ -41,6 +41,7 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
         super(List.of(predictions, targets), Dimensions.scalar());
 
         assert Dimensions.isVector(predictions.dimensions()) : "Predictions need to be a vector";
+        assert Dimensions.totalSize(predictions.dimensions()) > 0;
         assert Dimensions.totalSize(predictions.dimensions()) == Dimensions.totalSize(targets.dimensions()) : "Predictions and targets need to have the same total size";
 
         this.predictionsVar = predictions;
@@ -57,6 +58,10 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
         for (int idx = 0; idx < predictions.length(); idx++) {
             double error = targets.dataAt(idx) - predictions.dataAt(idx);
             squaredErrorSum += error * error;
+        }
+
+        if (!Double.isFinite(squaredErrorSum)) {
+            return new Scalar(Double.MAX_VALUE);
         }
 
         return new Scalar(Math.sqrt(squaredErrorSum / predictions.length()));
