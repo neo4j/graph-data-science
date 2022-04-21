@@ -23,6 +23,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.pregel.ComputeStep;
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Set;
 
@@ -35,8 +36,13 @@ import java.util.Set;
 public final class InitContext<CONFIG extends PregelConfig> extends NodeCentricContext<CONFIG> {
     private final NodePropertyContainer nodePropertyContainer;
 
-    public InitContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, NodePropertyContainer nodePropertyContainer) {
-        super(computeStep, config);
+    public InitContext(
+        ComputeStep<CONFIG, ?> computeStep,
+        CONFIG config,
+        NodePropertyContainer nodePropertyContainer,
+        ProgressTracker progressTracker
+    ) {
+        super(computeStep, config, progressTracker);
         this.nodePropertyContainer = nodePropertyContainer;
     }
 

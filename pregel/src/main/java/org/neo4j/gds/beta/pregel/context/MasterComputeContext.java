@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.pregel.context;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.NodeValue;
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongPredicate;
@@ -39,9 +40,10 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
         Graph graph,
         int iteration,
         NodeValue nodeValue,
-        ExecutorService executorService
+        ExecutorService executorService,
+        ProgressTracker progressTracker
     ) {
-        super(config);
+        super(config, progressTracker);
         this.graph = graph;
         this.iteration = iteration;
         this.nodeValue = nodeValue;
