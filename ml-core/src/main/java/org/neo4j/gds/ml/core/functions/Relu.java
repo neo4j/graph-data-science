@@ -38,6 +38,8 @@ public class Relu<T extends Tensor<T>> extends SingleParentVariable<T> {
 
     @Override
     public T gradient(Variable<?> contextParent, ComputationContext ctx) {
-        return (T) ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
+        var gradient = ctx.data(contextParent).map(value -> value > 0 ? 1 : ALPHA);
+        gradient.elementwiseProductMutate(ctx.gradient(this));
+        return (T) gradient;
     }
 }
