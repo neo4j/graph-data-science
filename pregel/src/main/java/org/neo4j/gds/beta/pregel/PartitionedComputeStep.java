@@ -60,9 +60,9 @@ public final class PartitionedComputeStep<CONFIG extends PregelConfig, ITERATOR 
         this.voteBits = voteBits;
         this.nodeBatch = nodeBatch;
         this.messenger = messenger;
-        this.computeContext = new ComputeContext<>(this, config);
+        this.computeContext = new ComputeContext<>(this, config, progressTracker);
         this.progressTracker = progressTracker;
-        this.initContext = new InitContext<>(this, config, graph);
+        this.initContext = new InitContext<>(this, config, graph, progressTracker);
     }
 
     @Override

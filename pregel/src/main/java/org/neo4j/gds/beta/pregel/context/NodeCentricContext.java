@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.pregel.context;
 
 import org.neo4j.gds.beta.pregel.ComputeStep;
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.function.LongConsumer;
 
@@ -30,8 +31,8 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
 
     long nodeId;
 
-    NodeCentricContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config) {
-        super(config);
+    NodeCentricContext(ComputeStep<CONFIG, ?> computeStep, CONFIG config, ProgressTracker progressTracker) {
+        super(config, progressTracker);
         this.computeStep = computeStep;
     }
 
