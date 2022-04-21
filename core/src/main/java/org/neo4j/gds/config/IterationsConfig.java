@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.annotation.Configuration;
+
 public interface IterationsConfig {
 
+    @Configuration.IntegerRange(min = 0)
     int maxIterations();
 
 }

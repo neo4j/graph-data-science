@@ -28,6 +28,8 @@ import org.neo4j.gds.model.ModelConfig;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseConfig, ModelConfig {
+
+    @Configuration.Key("includePredictedProbabilities")
     boolean includePredictedProbabilities();
 
     // TODO make this a parameter

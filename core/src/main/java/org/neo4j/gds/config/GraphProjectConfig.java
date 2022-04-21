@@ -88,6 +88,7 @@ public interface GraphProjectConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
+    @Configuration.Key("validateRelationships")
     default boolean validateRelationships() {
         return false;
     }

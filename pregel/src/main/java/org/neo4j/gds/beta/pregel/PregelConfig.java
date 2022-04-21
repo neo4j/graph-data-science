@@ -37,6 +37,7 @@ public interface PregelConfig extends
     ConcurrencyConfig {
 
     @Value.Default
+    @Configuration.Key("isAsynchronous")
     default boolean isAsynchronous() {
         return false;
     }
