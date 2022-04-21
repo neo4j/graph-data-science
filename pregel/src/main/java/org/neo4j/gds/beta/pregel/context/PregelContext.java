@@ -20,13 +20,16 @@
 package org.neo4j.gds.beta.pregel.context;
 
 import org.neo4j.gds.beta.pregel.PregelConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public abstract class PregelContext<CONFIG extends PregelConfig> {
 
     protected final CONFIG config;
+    private final ProgressTracker progressTracker;
 
-    protected PregelContext(CONFIG config) {
+    protected PregelContext(CONFIG config, ProgressTracker progressTracker) {
         this.config = config;
+        this.progressTracker = progressTracker;
     }
 
     /**
@@ -34,6 +37,27 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
      */
     public CONFIG config() {
         return config;
+    }
+
+    /**
+     * Log a debug message to the Neo4j log.
+     */
+    public void logDebug(String message) {
+        progressTracker.logDebug(message);
+    }
+
+    /**
+     * Log a warning message to the Neo4j log.
+     */
+    public void logWarning(String message) {
+        progressTracker.logWarning(message);
+    }
+
+    /**
+     * Log a info message to the Neo4j log
+     */
+    public void logMessage(String message) {
+        progressTracker.logMessage(message);
     }
 
     /**
