@@ -35,8 +35,8 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
     private final Variable<Vector> targetsVar;
 
     protected RootMeanSquareError(
-            Variable<Vector> predictions,
-            Variable<Vector> targets
+        Variable<Vector> predictions,
+        Variable<Vector> targets
     ) {
         super(List.of(predictions, targets), Dimensions.scalar());
 
@@ -56,7 +56,7 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
 
         double squaredErrorSum = 0D;
         for (int idx = 0; idx < predictions.length(); idx++) {
-            double error = targets.dataAt(idx) - predictions.dataAt(idx);
+            double error = predictions.dataAt(idx) - targets.dataAt(idx);
             squaredErrorSum += error * error;
         }
 
@@ -69,6 +69,30 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        return null;
+        if (parent == predictionsVar) {
+            Vector predictions = ctx.data(predictionsVar);
+            var numberOfExamples = predictions.length();
+            var rootOfSumOfSquareErrorOverN = ctx.data(this);
+
+            var parentGradient = ctx.data(parent).createWithSameDimensions();
+            if (Double.compare(rootOfSumOfSquareErrorOverN.value(), 0) == 0) {
+                return parentGradient;
+            }
+
+            var denominator = rootOfSumOfSquareErrorOverN.scalarMultiply(numberOfExamples).value();
+            double selfGradient = ctx.gradient(this).value();
+            var scale = selfGradient / denominator;
+
+            Vector targets = ctx.data(targetsVar);
+            for (int idx = 0; idx < numberOfExamples; idx++) {
+                double error = predictions.dataAt(idx) - targets.dataAt(idx);
+                parentGradient.setDataAt(idx, error * scale);
+            }
+
+            return parentGradient;
+        }
+        throw new IllegalStateException(
+            "The gradient should only be computed for the prediction parent, but got " + parent.render()
+        );
     }
 }

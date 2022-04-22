@@ -23,11 +23,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Vector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RootMeanSquareErrorTest {
+class RootMeanSquareErrorTest implements FiniteDifferenceTest {
+
+    @Override
+    public double epsilon() {
+        return 1e-9;
+    }
 
     @Test
     void apply() {
@@ -52,5 +59,38 @@ class RootMeanSquareErrorTest {
         assertThat(ctx.forward(variable)).isEqualTo(new Scalar(Double.MAX_VALUE));
     }
 
+    @Test
+    void gradient() {
+        var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
+        var weights = new Weights<>(new Vector(2.5, 0, 2, 8));
 
+        var rmse = new RootMeanSquareError(weights, targets);
+
+        finiteDifferenceShouldApproximateGradient(weights, rmse);
+    }
+
+    @Test
+    void gradientWithChild() {
+        var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
+        var weights = new Weights<>(new Vector(2.5, 0, 2, 8));
+
+        var rmse = new RootMeanSquareError(weights, targets);
+
+        finiteDifferenceShouldApproximateGradient(weights, new Sigmoid<>(rmse));
+    }
+
+    @Test
+    void gradientForPerfectPrediction() {
+        var targets = Constant.vector(new double[]{30.0});
+        var weights = new Weights<>(new Vector(30.0));
+
+        var rmse = new RootMeanSquareError(weights, targets);
+
+        ComputationContext ctx = new ComputationContext();
+        ctx.forward(rmse);
+        assertThat(ctx.data(rmse)).isEqualTo(new Scalar(0));
+        ctx.backward(rmse);
+        assertThat(ctx.gradient(rmse)).isEqualTo(new Scalar(1));
+        assertThat(ctx.gradient(weights)).isEqualTo(new Vector(0.0));
+    }
 }
