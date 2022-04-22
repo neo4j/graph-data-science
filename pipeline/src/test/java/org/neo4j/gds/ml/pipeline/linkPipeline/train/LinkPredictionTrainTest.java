@@ -62,6 +62,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
@@ -121,22 +122,22 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(53616, 1727456)
+                MemoryRange.of(53_368, 1_727_208)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(142512, 5324752)
+                MemoryRange.of(142_264, 5_324_504)
             ),
             Arguments.of(
                 "Higher train-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
-                MemoryRange.of(186544, 6133184)
+                MemoryRange.of(186_296, 6_132_936)
             ),
             Arguments.of(
                 "Higher validation folds",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
-                MemoryRange.of(212704, 6159344)
+                MemoryRange.of(212_456, 6_159_096)
             )
         );
     }
@@ -152,17 +153,17 @@ class LinkPredictionTrainTest {
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                List.of(llrConfigs.get(0)), MemoryRange.of(36064, 1121904)
+                List.of(llrConfigs.get(0)), MemoryRange.of(35_816, 1_121_656)
             ),
             Arguments.of(
                 "LLR batchSize 100",
                 List.of(llrConfigs.get(1)),
-                MemoryRange.of(55136, 1728976)
+                MemoryRange.of(54_888, 1_728_728)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
                 llrConfigs,
-                MemoryRange.of(55232, 1729072)
+                MemoryRange.of(54_984, 1_728_824)
             ),
             Arguments.of(
                 "RF",
@@ -175,7 +176,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(59704, 900024)
+                MemoryRange.of(59_504, 899_824)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -183,7 +184,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66704, 2731872)
+                MemoryRange.of(66_504, 2_731_672)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -194,7 +195,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66704, 2731872)
+                MemoryRange.of(66_504, 2_731_672)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -205,7 +206,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(12828928, 405699168)
+                MemoryRange.of(12_828_680, 405_698_920)
             )
         );
     }
@@ -263,11 +264,11 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10, 3216, 77696",
-        "  10,  100, 19024, 575664",
-        "  10, 1000, 55136, 1728976",
+        "  10,   10, 2_968, 77_448",
+        "  10,  100, 18_776, 575_416",
+        "  10, 1000, 54_888, 1_728_728",
         // nodeCount has no effect on the estimation
-        "1000, 1000, 55136, 1728976"
+        "1000, 1000, 54_888, 1_728_728"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -286,15 +287,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertThat(actualRange)
-            .withFailMessage(
-                "Expected (%d, %d), but got (%d, %d)",
-                expectedMinEstimation,
-                expectedMaxEstimation,
-                actualRange.min,
-                actualRange.max
-            )
-            .isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+        assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -317,15 +310,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertThat(actualRange)
-            .withFailMessage(
-                "Expected (%d, %d), but got (%d, %d)",
-                expectedRange.min,
-                expectedRange.max,
-                actualRange.min,
-                actualRange.max
-            )
-            .isEqualTo(expectedRange);
+        assertMemoryRange(actualRange, expectedRange);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -352,22 +337,14 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertThat(actualRange)
-            .withFailMessage(
-                "Expected (%d, %d), but got (%d, %d)",
-                expectedRange.min,
-                expectedRange.max,
-                actualRange.min,
-                actualRange.max
-            )
-            .isEqualTo(expectedRange);
+        assertMemoryRange(actualRange, expectedRange);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  1,  41104, 1279824",
-        "  2,  54784, 1712944",
-        "  4,  55136, 1728976",
+        "  1,  40_856, 1_279_576",
+        "  2,  54_536, 1_712_696",
+        "  4,  54_888, 1_728_728",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -387,15 +364,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertThat(actualRange)
-            .withFailMessage(
-                "Expected (%d, %d), but got (%d, %d)",
-                expectedMinEstimation,
-                expectedMaxEstimation,
-                actualRange.min,
-                actualRange.max
-            )
-            .isEqualTo(MemoryRange.of(expectedMinEstimation, expectedMaxEstimation));
+        assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
     }
 
     @Test

@@ -33,6 +33,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -52,6 +53,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
 @Neo4jModelCatalogExtension
 class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
@@ -339,13 +341,17 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
 
-        assertCypherResult(
-            "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +
+        var query = "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +
             "   $graphName, " +
             "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337}" +
-            ") YIELD requiredMemory",
+            ") YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
+        assertCypherMemoryEstimation(
+            db,
+            query,
             Map.of("graphName", GRAPH_NAME),
-            List.of(Map.of("requiredMemory", "[17 KiB ... 514 KiB]"))
+            MemoryRange.of(17_240, 526_840),
+            16,
+            42
         );
     }
 

@@ -50,6 +50,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.ApproximateLinkPredictionTest.compareWithPrecision;
 
 class ExhaustiveLinkPredictionTest extends BaseProcTest {
@@ -192,8 +193,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "1, 3684",
-        "10, 3900"
+        "1, 3_636",
+        "10, 3_852"
     })
     void estimateWithDifferentTopN(int topN, long expectedEstimation) {
         var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
@@ -207,13 +208,13 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .estimate(config, 100)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertThat(actualEstimate.memoryUsage().max).isEqualTo(expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "10, 1020",
-        "1000, 32700"
+        "10, 972",
+        "1000, 32_652"
     })
     void estimateWithDifferentLinkFeatureDimension(int linkFeatureDimension, long expectedEstimation) {
         var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
@@ -227,6 +228,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .estimate(config, linkFeatureDimension)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertThat(actualEstimate.memoryUsage().max).isEqualTo(expectedEstimation);
+        assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }
 }
