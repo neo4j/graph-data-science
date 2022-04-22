@@ -26,7 +26,6 @@ import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.MeanSquareError;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -60,23 +59,11 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
         Batch batch, long trainSize
     ) {
         LinearRegressor regressor = new LinearRegressor(modelData);
-        var batchFeatures = batchFeatureMatrix(batch, features);
+        var batchFeatures = Objective.batchFeatureMatrix(batch, features);
         var predictionsVariable = regressor.predictionsVariable(batchFeatures);
         var batchTargets = batchTargets(batch);
 
         return new MeanSquareError(predictionsVariable, batchTargets);
-    }
-
-    // FIXME: copied from LogisticRegressionClassifier
-    private static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
-        var batchFeatures = new Matrix(batch.size(), features.featureDimension());
-        var batchFeaturesOffset = new MutableInt();
-
-        batch
-            .nodeIds()
-            .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
-
-        return new Constant<>(batchFeatures);
     }
 
     private Constant<Vector> batchTargets(Batch batch) {
