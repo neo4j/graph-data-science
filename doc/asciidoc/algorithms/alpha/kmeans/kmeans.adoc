@@ -15,6 +15,14 @@ This section describes the K-Means algorithm in the Neo4j Graph Data Science lib
 [[algorithms-k-means-intro]]
 == Introduction
 
+K-Means clustering is an unsupervised learning algorithm that is used to solve clustering problems.
+It follows a simple procedure of classifying a given data set into a number of clusters, defined by the parameter `k`.
+The clusters are then positioned as points and all observations or data points are associated with the nearest cluster, computed, adjusted and then the process starts over using the new adjustments until a desired result is reached.
+
+For more information on this algorithm, see:
+
+* https://en.wikipedia.org/wiki/K-means_clustering
+
 
 [[algorithms-k-means-syntax]]
 == Syntax
