@@ -23,8 +23,9 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipProperties;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.queue.IntPriorityQueue;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.function.DoubleUnaryOperator;
 
@@ -43,7 +44,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
     private Graph graph;
     private RelationshipProperties weights;
     private final DoubleUnaryOperator minMax;
-    private final int startNodeId;
+    private final long startNodeId;
     private final long k;
 
     private SpanningTree spanningTree;
@@ -78,13 +79,14 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
             progressTracker
         );
         prim.setTerminationFlag(getTerminationFlag());
-
-        IntPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? IntPriorityQueue.min() : IntPriorityQueue.max();
         SpanningTree spanningTree = prim.compute();
-        int[] parent = spanningTree.parent;
-        progressTracker.beginSubTask(parent.length);
-        for (int i = 0; i < parent.length && running(); i++) {
-            int p = parent[i];
+        HugeLongArray parent = spanningTree.parent;
+        long parentSize = parent.size();
+        HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? HugeLongPriorityQueue.min(parentSize) : HugeLongPriorityQueue.max(
+            parentSize);
+        progressTracker.beginSubTask(parentSize);
+        for (long i = 0; i < parentSize && running(); i++) {
+            long p = parent.get(i);
             if (p == -1) {
                 continue;
             }
@@ -94,9 +96,9 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         progressTracker.endSubTask();
         progressTracker.beginSubTask(k - 1);
         // remove k-1 relationships
-        for (int i = 0; i < k - 1 && running(); i++) {
-            int cutNode = priorityQueue.pop();
-            parent[cutNode] = -1;
+        for (long i = 0; i < k - 1 && running(); i++) {
+            long cutNode = priorityQueue.pop();
+            parent.set(cutNode, -1);
             progressTracker.logProgress();
         }
         progressTracker.endSubTask();
