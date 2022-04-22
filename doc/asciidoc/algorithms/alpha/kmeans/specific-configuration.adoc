@@ -2,8 +2,8 @@
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name              | Type      | Default   | Optional  | Description
-| nodeProperty      | String    | n/a       | no        |
-| k                 | Integer   | 1         | yes       |
-| maxIterations     | Integer   | 10        | yes       |
-| deltaThreshold    | Float     | 0.05      | yes       |
+| nodeProperty      | String    | n/a       | no        | A node property to be used by the algorithm.
+| k                 | Integer   | 10        | yes       | Number of desired clusters.
+| maxIterations     | Integer   | 10        | yes       | The maximum number of iterations of K-Means to run.
+| deltaThreshold    | Float     | 0.05      | yes       | Delta of convergence (delta between old and new centroid's values).
 |===
