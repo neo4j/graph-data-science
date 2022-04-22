@@ -27,10 +27,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.ArrayList;
@@ -47,10 +48,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.MapUtil.map;
-import static org.neo4j.gds.core.CypherMapWrapper.create;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_DISTRIBUTION_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_MAX_KEY;
@@ -59,7 +59,9 @@ import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPE
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_TYPE_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_PROPERTY_VALUE_KEY;
 import static org.neo4j.gds.config.RandomGraphGeneratorConfig.RELATIONSHIP_SEED_KEY;
+import static org.neo4j.gds.core.CypherMapWrapper.create;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphGenerateProcTest extends BaseProcTest {
 
@@ -120,7 +122,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @MethodSource("estimations")
-    void shouldWorkWithEstimate(int nodeCount, int avgDegree, String memReq) {
+    void shouldWorkWithEstimate(int nodeCount, int avgDegree, MemoryRange expected) {
         String generateQ =
             "CALL gds.beta.graph.generate( " +
             "  'g', " +
@@ -134,11 +136,9 @@ class GraphGenerateProcTest extends BaseProcTest {
             "CALL gds.nodeSimilarity.stats.estimate( " +
             "  'g', " +
             "  {} " +
-            ") YIELD requiredMemory";
+            ") YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
 
-        runQueryWithRowConsumer(estimateQ, row ->
-            assertEquals(memReq, row.getString("requiredMemory"))
-        );
+        assertCypherMemoryEstimation(db, estimateQ, expected, nodeCount, nodeCount * avgDegree);
     }
 
     @Test
@@ -389,9 +389,9 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     private static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(100, 2, "[27 KiB ... 30 KiB]"),
-            Arguments.of(100, 4, "[29 KiB ... 33 KiB]"),
-            Arguments.of(200, 4, "[57 KiB ... 67 KiB]")
+            Arguments.of(100, 2, MemoryRange.of(28_088, 31_288)),
+            Arguments.of(100, 4, MemoryRange.of(29_688, 34_488)),
+            Arguments.of(200, 4, MemoryRange.of(59_304, 68_904))
         );
     }
 }
