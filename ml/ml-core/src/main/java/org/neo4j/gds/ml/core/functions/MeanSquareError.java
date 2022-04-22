@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
@@ -76,14 +75,14 @@ public class MeanSquareError extends AbstractVariable<Scalar> {
         var otherParentData = parent == predictions ? ctx.data(targets) : ctx.data(predictions);
 
         var length = parentData.totalSize();
-        double[] grad = new double[length];
+        var parentGradient = parentData.createWithSameDimensions();
         double scale = 2 * ctx.gradient(this).dataAt(0) / length;
         for (int i = 0; i < length; i++) {
             double error = parentData.dataAt(i) - otherParentData.dataAt(i);
-            grad[i] = scale * error;
+            parentGradient.setDataAt(i, scale * error);
         }
 
-        return new Vector(grad);
+        return parentGradient;
     }
 
     private void validateDimensions(Variable<?> predictions, Variable<?> targets) {
