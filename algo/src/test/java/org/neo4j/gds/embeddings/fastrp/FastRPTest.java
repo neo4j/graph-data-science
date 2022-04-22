@@ -53,6 +53,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -457,9 +458,7 @@ class FastRPTest extends BaseTest {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertThat(estimate.min)
-            .isEqualTo(estimate.max)
-            .isEqualTo(159_840);
+        assertMemoryRange(estimate, 159_736);
     }
 
     @Test
@@ -473,9 +472,7 @@ class FastRPTest extends BaseTest {
         var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
 
         var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertThat(estimate.min)
-            .isEqualTo(estimate.max)
-            .isEqualTo(159_840);
+        assertMemoryRange(estimate, 159_736);
     }
 
     @Test
