@@ -1,0 +1,9 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name              | Type      | Default   | Optional  | Description
+| nodeProperty      | String    | n/a       | no        |
+| k                 | Integer   | 1         | yes       |
+| maxIterations     | Integer   | 10        | yes       |
+| deltaThreshold    | Float     | 0.05      | yes       |
+|===

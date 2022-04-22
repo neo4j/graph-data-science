@@ -171,6 +171,9 @@
             <d:tocentry linkend="alpha-algorithms-conductance">
                 <?dbhtml filename="algorithms/alpha/conductance/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-k-means">
+                <?dbhtml filename="algorithms/alpha/kmeans/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-similarity">

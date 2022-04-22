@@ -23,6 +23,7 @@ The Neo4j GDS library includes the following community detection algorithms, gro
 ** <<algorithms-sllpa, Speaker-Listener Label Propagation>>
 ** <<alpha-algorithms-approx-max-k-cut, Approximate Maximum k-cut>>
 ** <<alpha-algorithms-conductance, Conductance metric>>
+** <<alpha-algorithms-k-means, K-Means Clustering>>
 
 include::louvain/louvain.adoc[leveloffset=+1]
 
@@ -45,3 +46,5 @@ include::alpha/sllpa/sllpa.adoc[leveloffset=+1]
 include::alpha/approx-max-k-cut/approx-max-k-cut.adoc[leveloffset=+1]
 
 include::alpha/conductance/conductance.adoc[leveloffset=+1]
+
+include::alpha/kmeans/kmeans.adoc[leveloffset=+1]
