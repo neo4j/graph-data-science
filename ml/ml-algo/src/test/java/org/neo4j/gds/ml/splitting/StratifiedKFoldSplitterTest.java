@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.openjdk.jol.util.Multiset;
@@ -42,6 +41,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 class StratifiedKFoldSplitterTest {
@@ -133,24 +133,21 @@ class StratifiedKFoldSplitterTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        " 1_000,  4, 0.5,  16352",
+        " 1_000,  4, 0.5,  16_320",
         // x4 number of folds same factor in estimation
-        " 1_000, 16, 0.5,  65312",
+        " 1_000, 16, 0.5,  65_280",
         // 1/5 trainFraction -> 1/5 train-set size and resulting folds
-        " 1_000,  4, 0.1,   3552",
+        " 1_000,  4, 0.1,   3_520",
         // x10 nodeCount same factor in estimation
-        "10_000,  4, 0.5, 160352",
+        "10_000,  4, 0.5, 160_320",
     })
     void memoryEstimationShouldScaleWithNumberOfFolds(long nodeCount, int k, double trainFraction, long expectedMemory) {
         var dimensions = GraphDimensions.of(nodeCount);
         var actualEstimation = StratifiedKFoldSplitter.memoryEstimationForNodeSet(k, trainFraction)
             .estimate(dimensions, 4)
             .memoryUsage();
-        MemoryRange expectedEstimation = MemoryRange.of(expectedMemory);
 
-        assertThat(actualEstimation)
-            .withFailMessage("Got %d, but expected %d", actualEstimation.max, expectedEstimation.max)
-            .isEqualTo(expectedEstimation);
+        assertMemoryRange(actualEstimation, expectedMemory);
     }
 
     private Multiset<Long> classCounts(HugeLongArray values) {

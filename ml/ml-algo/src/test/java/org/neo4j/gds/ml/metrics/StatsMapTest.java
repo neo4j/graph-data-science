@@ -24,10 +24,12 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
@@ -44,7 +46,7 @@ class StatsMapTest {
 
     @Test
     void estimationShouldScaleWithMetricsAndParamsCounts() {
-        var overheadForOneStatsMap = 40;
+        var overheadForOneStatsMap = sizeOfInstance(ArrayList.class);
         var dimensions = GraphDimensions.of(1000);
 
         var _1_05 = StatsMap.memoryEstimation(1, 5).estimate(dimensions, 1).memoryUsage();

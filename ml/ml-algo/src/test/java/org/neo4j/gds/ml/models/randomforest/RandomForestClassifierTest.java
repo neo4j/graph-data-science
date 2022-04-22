@@ -39,6 +39,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class RandomForestClassifierTest {
     private static final long NUM_SAMPLES = 10;
@@ -231,25 +232,24 @@ class RandomForestClassifierTest {
     ) {
         var estimation = RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
 
-        assertThat(estimation.min).isEqualTo(expectedMin);
-        assertThat(estimation.max).isEqualTo(expectedMax);
+        assertMemoryRange(estimation, expectedMin, expectedMax);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4413602, 5226426",
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,  4_413_538, 5_226_362",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4414250, 6295810",
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,  4_414_186, 6_295_746",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23162, 182962",
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,    23_098, 182_898",
         // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4414970, 6296530",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,  4_414_906, 6_296_466",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4415042, 6296694",
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,  4_414_978, 6_296_630",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1204970, 2446530",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,  1_204_906, 2_446_466",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16457264, 21037264",
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 16_457_200, 21_037_200",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -278,21 +278,19 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertThat(estimation)
-            .withFailMessage("Got (%s, %s)", estimation.min, estimation.max)
-            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
+        assertMemoryRange(estimation, expectedMin, expectedMax);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
         // Max should almost scale linearly with numberOfDecisionTrees.
-        "     6, 100_000,   1,  2,    112,     6_160",
-        "     6, 100_000, 100,  2,  7_240,   612_040",
+        "     6, 100_000,   1,  2,    96, 6_144",
+        "     6, 100_000, 100,  2,  7_224, 612_024",
         // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
-        "    10, 100_000,   1,  2,    112,    98_320",
+        "    10, 100_000,   1,  2,    96, 98_304",
         // Max should scale almost inverse linearly with minSplitSize.
-        "   800, 100_000,   1,  2,    112, 9_600_016",
-        "   800, 100_000,   1, 10,    112, 1_920_016",
+        "   800, 100_000,   1,  2,    96, 9_600_000",
+        "   800, 100_000,   1, 10,    96, 1_920_000",
     })
     void memoryEstimation(
         int maxDepth,
@@ -314,7 +312,6 @@ class RandomForestClassifierTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
 
-        assertThat(estimation.min).isEqualTo(expectedMin);
-        assertThat(estimation.max).isEqualTo(expectedMax);
+        assertMemoryRange(estimation, expectedMin, expectedMax);
     }
 }

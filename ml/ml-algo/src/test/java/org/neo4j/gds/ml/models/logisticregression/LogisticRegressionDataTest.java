@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class LogisticRegressionDataTest {
 
@@ -46,10 +47,11 @@ class LogisticRegressionDataTest {
             .estimate(dimensions, 1)
             .memoryUsage();
 
-        var overheadForOneClassIdMap = 24 + 16 + 32;
+        // LocalIdMap is backed by 3 arrays with each have a base estimation of 16
+        var overheadForOneClassIdMap = 3 * 16;
         var overheadForOneWeigths = 16;
         var overheadForOneBias = 16;
-        var overheadForOneNLRData = 16 + overheadForOneClassIdMap + overheadForOneWeigths + overheadForOneBias;
+        var overheadForOneNLRData = overheadForOneClassIdMap + overheadForOneWeigths + overheadForOneBias;
 
         // scaling number of classes scales memory usage linearly, modulo overhead
         assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
@@ -67,8 +69,8 @@ class LogisticRegressionDataTest {
         // * 4: the number of classes
         // * 8: size per stored value in the weights matrix
         // => the size of the change based on varying the number of features
-        assertThat(_04_05.max).isEqualTo(392);
-        assertThat(_04_10.max).isEqualTo(392 + 5 * 4 * 8); // five is the number of added features
+        assertThat(_04_05.max).isEqualTo(352);
+        assertThat(_04_10.max).isEqualTo(352 + 5 * 4 * 8); // five is the number of added features
         assertThat(_04_10.max).isEqualTo(_04_05.max + 5 * 4 * 8);
         assertThat(_08_10.max).isEqualTo(_08_05.max + 5 * 8 * 8);
         assertThat(_04_20.max).isEqualTo(_04_05.max + 15 * 4 * 8);
@@ -77,10 +79,10 @@ class LogisticRegressionDataTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "100,   0, 100, 168,   968",
-        "1000,  0, 100, 168,   968",
-        "100,  50, 500, 568, 4_168",
-        "1000, 50, 500, 568, 4_168"
+        "100,   0, 100, 128, 928",
+        "1000,  0, 100, 128, 928",
+        "100,  50, 500, 528, 4_128",
+        "1000, 50, 500, 528, 4_128"
     })
     void shouldEstimateCorrectlyBinaryReduced(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
@@ -89,7 +91,7 @@ class LogisticRegressionDataTest {
             .memoryEstimation(true, 2, estimatedFeatureCount)
             .estimate(dimensions, 5000);
 
-        assertThat(memoryEstimation.memoryUsage()).isEqualTo(MemoryRange.of(minEstimation, maxEstimation));
+        assertMemoryRange(memoryEstimation.memoryUsage(), minEstimation, maxEstimation);
     }
 
     @Test
