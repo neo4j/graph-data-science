@@ -56,7 +56,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         int topN = Math.abs(config.normalizedN());
         int topK = Math.abs(config.normalizedK());
 
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class)
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
                 "vectors",

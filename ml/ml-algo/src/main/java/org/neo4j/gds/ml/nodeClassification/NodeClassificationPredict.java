@@ -84,7 +84,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         int featureCount,
         int classCount
     ) {
-        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class.getSimpleName());
         if (produceProbabilities) {
             builder.perNode(
                 "predicted probabilities",
@@ -112,7 +112,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         int classCount,
         boolean isReduced
     ) {
-        var builder = MemoryEstimations.builder(NodeClassificationPredict.class);
+        var builder = MemoryEstimations.builder(NodeClassificationPredict.class.getSimpleName());
         if (produceProbabilities) {
             builder.perNode(
                 "predicted probabilities",

@@ -72,7 +72,7 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
 
     static MemoryEstimation memoryEstimation(boolean isReduced, int numberOfClasses, MemoryRange featureDimension) {
         int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
-        return MemoryEstimations.builder("Logistic regression model data", LogisticRegressionData.class)
+        return MemoryEstimations.builder("Logistic regression model data")
             .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
             .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
                 normalizedNumberOfClasses,

@@ -378,7 +378,7 @@ public final class LinkPredictionTrain {
 
         var splitConfig = pipeline.splitConfig();
 
-        var builder = MemoryEstimations.builder(LinkPredictionTrain.class);
+        var builder = MemoryEstimations.builder(LinkPredictionTrain.class.getSimpleName());
 
         var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
 

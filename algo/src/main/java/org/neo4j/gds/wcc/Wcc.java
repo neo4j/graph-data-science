@@ -88,7 +88,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
     public static MemoryEstimation memoryEstimation(boolean incremental) {
         return MemoryEstimations
-            .builder(Wcc.class)
+            .builder(Wcc.class.getSimpleName())
             .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(incremental))
             .build();
     }

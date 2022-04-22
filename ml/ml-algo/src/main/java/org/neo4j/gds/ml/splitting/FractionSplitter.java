@@ -28,7 +28,7 @@ import java.util.function.Function;
 public class FractionSplitter {
 
     public static MemoryEstimation estimate(double trainFraction) {
-        return MemoryEstimations.builder(FractionSplitter.class)
+        return MemoryEstimations.builder(FractionSplitter.class.getSimpleName())
             .perNode("train", (n) -> HugeLongArray.memoryEstimation(trainSize(n, trainFraction)))
             .perNode("test", (n) -> HugeLongArray.memoryEstimation(n - trainSize(n, trainFraction)))
             .build();

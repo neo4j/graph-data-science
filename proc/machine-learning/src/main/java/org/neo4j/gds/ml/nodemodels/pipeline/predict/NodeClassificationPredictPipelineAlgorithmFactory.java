@@ -103,7 +103,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration.username()
         );
 
-        return MemoryEstimations.builder(NodeClassificationPredictPipelineExecutor.class)
+        return MemoryEstimations.builder(NodeClassificationPredictPipelineExecutor.class.getSimpleName())
             .add("Pipeline executor", NodeClassificationPredictPipelineExecutor.estimate(model, configuration, modelCatalog))
             .build();
     }

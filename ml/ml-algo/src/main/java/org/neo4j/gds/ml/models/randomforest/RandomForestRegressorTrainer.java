@@ -77,7 +77,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
-        return MemoryEstimations.builder("Training", RandomForestRegressorTrainer.class)
+        return MemoryEstimations.builder("Training")
             // estimating the final forest produced
             .add(RandomForestRegressorData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(

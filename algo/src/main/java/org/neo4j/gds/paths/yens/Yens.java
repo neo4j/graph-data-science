@@ -82,7 +82,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
     private static final long AVERAGE_BLACKLIST_SIZE = 10L;
 
     public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(Yens.class)
+        return MemoryEstimations.builder(Yens.class.getSimpleName())
             .add("Dijkstra", Dijkstra.memoryEstimation(false))
             .fixed("nodeBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE))
             .fixed("relationshipBlackList", MemoryUsage.sizeOfLongArray(AVERAGE_BLACKLIST_SIZE * 2))

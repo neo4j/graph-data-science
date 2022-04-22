@@ -38,7 +38,7 @@ public class LocalIdMap {
     private final LongIntHashMap originalToInternalIdMap;
 
     public static MemoryEstimation memoryEstimation(int numberOfClasses) {
-        return MemoryEstimations.builder(LocalIdMap.class)
+        return MemoryEstimations.builder(LocalIdMap.class.getSimpleName())
             .fixed("original IDs", MemoryUsage.sizeOfLongArray(numberOfClasses))
             .fixed("id mapping", MemoryUsage.sizeOfLongArray(numberOfClasses) + MemoryUsage.sizeOfIntArray(numberOfClasses))
             .build();

@@ -55,7 +55,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         int batchSize,
         LongUnaryOperator numberOfTrainingExamples
     ) {
-        return MemoryEstimations.builder("train logistic regression", LogisticRegressionTrainer.class)
+        return MemoryEstimations.builder("train logistic regression")
             .add("model data", LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, featureDimension))
             .add("update weights", Training.memoryEstimation(featureDimension, numberOfClasses))
             .perGraphDimension(

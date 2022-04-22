@@ -73,7 +73,7 @@ public class Training {
         MemoryRange numberOfFeaturesRange,
         int numberOfClasses
     ) {
-        return MemoryEstimations.builder(Training.class)
+        return MemoryEstimations.builder(Training.class.getSimpleName())
             .add(MemoryEstimations.of(
                     "updater",
                     numberOfFeaturesRange.apply(features -> AdamOptimizer.sizeInBytes(

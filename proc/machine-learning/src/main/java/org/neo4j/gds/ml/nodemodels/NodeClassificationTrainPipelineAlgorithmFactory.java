@@ -74,7 +74,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             NodeClassificationTrainingPipeline.class
         );
 
-        return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class)
+        return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class.getSimpleName())
             .add("Pipeline executor", NodeClassificationTrainPipelineExecutor.estimate(
                 pipeline,
                 configuration,

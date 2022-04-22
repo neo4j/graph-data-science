@@ -120,7 +120,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
             .add(MemoryEstimations.of("Classifier runtime", classificationRange))
             .build();
 
-        return MemoryEstimations.builder(LinkPredictionPredictPipelineExecutor.class)
+        return MemoryEstimations.builder(LinkPredictionPredictPipelineExecutor.class.getSimpleName())
             .max("Pipeline execution", List.of(maxOverNodePropertySteps, predictEstimation))
             .build();
     }

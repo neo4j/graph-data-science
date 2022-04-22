@@ -35,7 +35,7 @@ public class Node2Vec extends Algorithm<HugeObjectArray<FloatVector>> {
     private final Node2VecBaseConfig config;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
-        return MemoryEstimations.builder(Node2Vec.class)
+        return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
             .perNode("random walks", (nodeCount) -> {
                 var numberOfRandomWalks = nodeCount * config.walksPerNode();
                 var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(config.walkLength());

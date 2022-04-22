@@ -88,7 +88,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             .add("Train pipeline", LinkPredictionTrain.estimate(pipeline, configuration))
             .build();
 
-        return MemoryEstimations.builder(LinkPredictionTrainPipelineExecutor.class)
+        return MemoryEstimations.builder(LinkPredictionTrainPipelineExecutor.class.getSimpleName())
             .max("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation))
             .build();
     }

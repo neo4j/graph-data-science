@@ -50,7 +50,7 @@ public class Node2VecModel {
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
 
-        return MemoryEstimations.builder(Node2Vec.class)
+        return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
             .perNode(
                 "center embeddings",
                 (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation)

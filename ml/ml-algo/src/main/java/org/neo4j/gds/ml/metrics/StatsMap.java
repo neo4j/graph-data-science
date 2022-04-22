@@ -42,7 +42,7 @@ public final class StatsMap {
         var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
         var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
-        return MemoryEstimations.builder(StatsMap.class)
+        return MemoryEstimations.builder(StatsMap.class.getSimpleName())
             .fixed("array list", sizeOfInstance(ArrayList.class))
             .fixed("model stats", sizeOfAllModelStatsInBytes)
             .build();
