@@ -48,7 +48,6 @@ import org.neo4j.storageengine.api.StorageCommand;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StoreFileMetadata;
-import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.token.TokenHolders;
@@ -71,7 +70,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
-    private final MetadataProvider metadataProvider;
+    protected final MetadataProvider metadataProvider;
     protected final CypherGraphStore graphStore;
 
     public AbstractInMemoryStorageEngine(
@@ -150,11 +149,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         Collection<StoreFileMetadata> atomic, Collection<StoreFileMetadata> replayable
     ) {
 
-    }
-
-    @Override
-    public StoreId getStoreId() {
-        return metadataProvider.getStoreId();
     }
 
     @Override

@@ -38,6 +38,7 @@ import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.MetadataProvider;
 import org.neo4j.storageengine.api.StorageCommand;
 import org.neo4j.storageengine.api.StorageReader;
+import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
@@ -119,5 +120,10 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
     @Override
     public void dumpDiagnostics(Log errorLog, DiagnosticsLogger diagnosticsLog) {
 
+    }
+
+    @Override
+    public StoreId getStoreId() {
+        return metadataProvider.getStoreId();
     }
 }
