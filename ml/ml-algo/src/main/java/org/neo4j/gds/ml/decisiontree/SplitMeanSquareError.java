@@ -107,6 +107,10 @@ public class SplitMeanSquareError implements DecisionTreeLoss {
             this.groupSize = groupSize;
         }
 
+        public static long memoryEstimation() {
+            return sizeOfInstance(MSEImpurityData.class);
+        }
+
         @Override
         public double impurity() {
             return impurity;

@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class GiniIndex implements DecisionTreeLoss {
 
@@ -121,6 +122,10 @@ public class GiniIndex implements DecisionTreeLoss {
             this.impurity = impurity;
             this.classCounts = classCounts;
             this.groupSize = groupSize;
+        }
+
+        public static long memoryEstimation(int numberOfClasses) {
+            return sizeOfInstance(GiniImpurityData.class) + sizeOfLongArray(numberOfClasses);
         }
 
         @Override

@@ -56,7 +56,6 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures,
         int numberOfClasses
     ) {
         return MemoryRange.of(sizeOfInstance(DecisionTreeClassifierTrainer.class))
@@ -64,8 +63,8 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
-                numberOfBaggedFeatures,
-                TreeNode.leafMemoryEstimation(Integer.class)
+                TreeNode.leafMemoryEstimation(Integer.class),
+                GiniIndex.GiniImpurityData.memoryEstimation(numberOfClasses)
             ))
             .add(sizeOfLongArray(numberOfClasses));
     }

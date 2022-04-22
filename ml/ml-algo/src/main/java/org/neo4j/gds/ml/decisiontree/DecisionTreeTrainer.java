@@ -29,7 +29,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICTION> {
 
@@ -56,8 +55,8 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures,
-        long leafNodeSize
+        long leafNodeSize,
+        long sizeOfImpurityData
     ) {
         var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize, leafNodeSize);
 
@@ -72,12 +71,11 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
                 HugeLongArray.memoryEstimation(numberOfTrainingSamples / maxItemsOnStack) * maxItemsOnStack
             ));
 
-        var findBestSplitEstimation = MemoryRange.of(HugeLongArray.memoryEstimation(numberOfTrainingSamples) * 4)
-            .add(sizeOfIntArray(numberOfBaggedFeatures));
+        var splitterEstimation = Splitter.memoryEstimation(numberOfTrainingSamples, sizeOfImpurityData);
 
         return predictorEstimation
             .add(maxStackSize)
-            .add(findBestSplitEstimation);
+            .add(splitterEstimation);
     }
 
     public static MemoryRange estimateTree(

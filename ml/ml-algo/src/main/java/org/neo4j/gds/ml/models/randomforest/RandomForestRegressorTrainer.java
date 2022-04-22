@@ -194,8 +194,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 .add(DecisionTreeRegressorTrainer.memoryEstimation(
                     maxDepth,
                     minSplitSize,
-                    usedNumberOfTrainingSamples,
-                    numberOfBaggedFeatures
+                    usedNumberOfTrainingSamples
                 ))
                 .add(bootstrappedDatasetEstimation);
         }

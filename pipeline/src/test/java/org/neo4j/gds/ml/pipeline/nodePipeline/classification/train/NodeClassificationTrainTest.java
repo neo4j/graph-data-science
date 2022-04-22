@@ -104,9 +104,6 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeFeatureStep.of("b"));
 
-        pipeline.addTrainerConfig(
-            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
-        );
         LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
             .builder()
             .penalty(1 * 2.0 / 3.0 * 0.5)
@@ -115,14 +112,17 @@ class NodeClassificationTrainTest {
             .build();
         pipeline.addTrainerConfig(expectedWinner);
 
-        // Should NOT be the winning model, so give it bad hyperparams.
+        // Should NOT be the winning model, so give bad hyperparams.
         pipeline.addTrainerConfig(
-
+            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
+        );
+        pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
-                    "minSplitSize", 2,
+                    "minSplitSize", 2000,
                     "maxDepth", 1,
                     "numberOfDecisionTrees", 1,
+                    "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", 0.1
                 ),
                 TrainingMethod.RandomForest
@@ -130,9 +130,10 @@ class NodeClassificationTrainTest {
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
-                    "minSplitSize", 2,
+                    "minSplitSize", 2000,
                     "maxDepth", 1,
                     "numberOfDecisionTrees", 1,
+                    "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
                 ),
                 TrainingMethod.RandomForest

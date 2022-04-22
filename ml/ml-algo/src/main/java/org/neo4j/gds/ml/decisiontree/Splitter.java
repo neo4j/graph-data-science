@@ -23,6 +23,8 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeSerialIndirectMergeSort;
 import org.neo4j.gds.ml.models.Features;
 
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+
 public class Splitter {
 
     private final DecisionTreeLoss lossFunction;
@@ -41,6 +43,16 @@ public class Splitter {
         this.bestLeftImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
         this.bestRightImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
         this.rightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+    }
+
+    static long memoryEstimation(long numberOfTrainingSamples, long sizeOfImpurityData) {
+        return sizeOfInstance(Splitter.class)
+               // sort cache
+               + HugeLongArray.memoryEstimation(numberOfTrainingSamples)
+               // impurity data cache
+               + 6 * sizeOfImpurityData
+               // group cache
+               + 4 * HugeLongArray.memoryEstimation(numberOfTrainingSamples);
     }
 
     DecisionTreeTrainer.Split findBestSplit(Group group) {

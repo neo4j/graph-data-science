@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -45,7 +46,6 @@ class SplitterTest {
 
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private final FeatureBagger featureBagger = new FeatureBagger(new SplittableRandom(42), NUM_FEATURES, 1.0);
-    private Features features;
     private GiniIndex giniIndexLoss;
     private Splitter splitter;
 
@@ -73,7 +73,7 @@ class SplitterTest {
         featureVectorArray.set(8, new double[]{10.12493903, 3.234550982});
         featureVectorArray.set(9, new double[]{6.642287351, 3.319983761});
 
-        features = FeaturesFactory.wrap(featureVectorArray);
+        Features features = FeaturesFactory.wrap(featureVectorArray);
 
         giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
 
@@ -166,5 +166,18 @@ class SplitterTest {
                 .isLessThan(rightChildGroup.startIdx() + expectedRightChildArray.size())
                 .isGreaterThanOrEqualTo(rightChildGroup.startIdx());
         }
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        // Scales with training set size.
+        "  1_000,  20,   40_360",
+        " 10_000,  20,  400_360",
+        // Changes a little with impurity data size.
+        "  1_000, 100,   40_840",
+    })
+    void memoryEstimation(long numberOfTrainingSamples, long sizeOfImpurityData, long expectedSize) {
+        long size  = Splitter.memoryEstimation(numberOfTrainingSamples, sizeOfImpurityData);
+        assertThat(size).isEqualTo(expectedSize);
     }
 }

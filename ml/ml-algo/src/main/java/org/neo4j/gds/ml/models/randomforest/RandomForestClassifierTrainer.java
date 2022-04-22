@@ -237,7 +237,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                     maxDepth,
                     minSplitSize,
                     usedNumberOfTrainingSamples,
-                    numberOfBaggedFeatures,
                     numberOfClasses
                 ))
                 .add(bootstrappedDatasetEstimation);

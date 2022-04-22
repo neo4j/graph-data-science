@@ -281,7 +281,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             ),
             Arguments.of(
                 List.of(RandomForestTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(106_442, 223_214)
+                MemoryRange.of(107322L, 224094L)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainerConfig.DEFAULT.toTunableConfig()),

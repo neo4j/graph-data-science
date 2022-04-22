@@ -176,7 +176,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(59_504, 899_824)
+                MemoryRange.of(67096, 899576)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -184,7 +184,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66_504, 2_731_672)
+                MemoryRange.of(74192, 2739040)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -195,7 +195,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(66_504, 2_731_672)
+                MemoryRange.of(74192, 2739040)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -420,11 +420,11 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 50%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 100%",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.6846",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Validation metrics: {AUCPR=0.6846}",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Training metrics: {AUCPR=0.8961}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.7684",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Validation metrics: {AUCPR=0.7683}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Training metrics: {AUCPR=0.7804}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Finished",
-                "MY TEST TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.6846",
+                "MY TEST TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.7684",
                 "MY TEST TASK :: Select best model :: Finished",
                 "MY TEST TASK :: Train best model :: Start",
                 "MY TEST TASK :: Train best model :: Trained decision tree 2 out of 5",
