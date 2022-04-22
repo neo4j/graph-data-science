@@ -32,7 +32,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-public class ClassifierTrainerFactory {
+public final class ClassifierTrainerFactory {
 
     private ClassifierTrainerFactory() {}
 
@@ -45,7 +45,7 @@ public class ClassifierTrainerFactory {
         Optional<Long> randomSeed,
         boolean reduceClassCount
     ) {
-        switch (TrainingMethod.valueOf(config.methodName())) {
+        switch (config.method()) {
             case LogisticRegression: {
                 return new LogisticRegressionTrainer(
                     concurrency,
@@ -79,7 +79,7 @@ public class ClassifierTrainerFactory {
         MemoryRange featureDimension,
         boolean isReduced
     ) {
-        switch (TrainingMethod.valueOf(config.methodName())) {
+        switch (config.method()) {
             case LogisticRegression:
                 return LogisticRegressionTrainer.memoryEstimation(
                     isReduced,

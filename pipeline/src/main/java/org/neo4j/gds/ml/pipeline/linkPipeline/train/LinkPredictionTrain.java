@@ -213,7 +213,7 @@ public final class LinkPredictionTrain {
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.methodName(), modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new ModelStatsBuilder(
                 modelParams,

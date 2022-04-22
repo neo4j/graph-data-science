@@ -129,7 +129,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     }
 
     public void addTrainerConfig(TrainerConfig trainingConfig) {
-        this.trainingParameterSpace.get(TrainingMethod.valueOf(trainingConfig.methodName())).add(trainingConfig.toTunableConfig());
+        this.trainingParameterSpace.get(trainingConfig.method()).add(trainingConfig.toTunableConfig());
     }
 
     public AutoTuningConfig autoTuningConfig() {
