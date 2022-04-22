@@ -23,6 +23,7 @@ import org.neo4j.gds.ml.core.AbstractVariable;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -31,11 +32,11 @@ import java.util.List;
 
 public class RootMeanSquareError extends AbstractVariable<Scalar> {
 
-    private final Variable<Vector> predictionsVar;
+    private final Variable<Matrix> predictionsVar;
     private final Variable<Vector> targetsVar;
 
-    protected RootMeanSquareError(
-        Variable<Vector> predictions,
+    public RootMeanSquareError(
+        Variable<Matrix> predictions,
         Variable<Vector> targets
     ) {
         super(List.of(predictions, targets), Dimensions.scalar());
@@ -51,11 +52,11 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
-        Vector predictions = ctx.data(predictionsVar);
+        Matrix predictions = ctx.data(predictionsVar);
         Vector targets = ctx.data(targetsVar);
 
         double squaredErrorSum = 0D;
-        for (int idx = 0; idx < predictions.length(); idx++) {
+        for (int idx = 0; idx < targets.length(); idx++) {
             double error = predictions.dataAt(idx) - targets.dataAt(idx);
             squaredErrorSum += error * error;
         }
@@ -64,14 +65,14 @@ public class RootMeanSquareError extends AbstractVariable<Scalar> {
             return new Scalar(Double.MAX_VALUE);
         }
 
-        return new Scalar(Math.sqrt(squaredErrorSum / predictions.length()));
+        return new Scalar(Math.sqrt(squaredErrorSum / targets.length()));
     }
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
         if (parent == predictionsVar) {
-            Vector predictions = ctx.data(predictionsVar);
-            var numberOfExamples = predictions.length();
+            Matrix predictions = ctx.data(predictionsVar);
+            var numberOfExamples = ctx.data(targetsVar).length();
             var rootOfSumOfSquareErrorOverN = ctx.data(this);
 
             var parentGradient = ctx.data(parent).createWithSameDimensions();

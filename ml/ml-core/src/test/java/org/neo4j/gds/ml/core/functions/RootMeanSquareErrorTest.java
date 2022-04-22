@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -39,7 +39,7 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
     @Test
     void apply() {
         var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
-        var predictions = Constant.vector(new double[]{2.5, 0, 2, 8});
+        var predictions = Constant.matrix(new double[]{2.5, 0, 2, 8}, 1, 4);
 
         var variable = new RootMeanSquareError(predictions, targets);
 
@@ -51,7 +51,7 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
     @ValueSource(doubles = {Double.NaN, Double.MAX_VALUE, 1e155})
     void applyOnExtremeValues(double extremeValue) {
         var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
-        var predictions = Constant.vector(new double[]{extremeValue, 3, 2, 8});
+        var predictions = Constant.matrix(new double[]{extremeValue, 3, 2, 8}, 1, 4);
 
         var variable = new RootMeanSquareError(predictions, targets);
 
@@ -62,7 +62,7 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
     @Test
     void gradient() {
         var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
-        var weights = new Weights<>(new Vector(2.5, 0, 2, 8));
+        var weights = new Weights<>(new Matrix(new double[]{2.5, 0, 2, 8}, 1, 4));
 
         var rmse = new RootMeanSquareError(weights, targets);
 
@@ -72,7 +72,7 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
     @Test
     void gradientWithChild() {
         var targets = Constant.vector(new double[]{3, -0.5, 2, 7});
-        var weights = new Weights<>(new Vector(2.5, 0, 2, 8));
+        var weights = new Weights<>(new Matrix(new double[]{2.5, 0, 2, 8}, 1, 4));
 
         var rmse = new RootMeanSquareError(weights, targets);
 
@@ -82,7 +82,7 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
     @Test
     void gradientForPerfectPrediction() {
         var targets = Constant.vector(new double[]{30.0});
-        var weights = new Weights<>(new Vector(30.0));
+        var weights = new Weights<>(new Matrix(new double[]{30.0}, 1, 1));
 
         var rmse = new RootMeanSquareError(weights, targets);
 
@@ -91,6 +91,6 @@ class RootMeanSquareErrorTest implements FiniteDifferenceTest {
         assertThat(ctx.data(rmse)).isEqualTo(new Scalar(0));
         ctx.backward(rmse);
         assertThat(ctx.gradient(rmse)).isEqualTo(new Scalar(1));
-        assertThat(ctx.gradient(weights)).isEqualTo(new Vector(0.0));
+        assertThat(ctx.gradient(weights)).isEqualTo(new Matrix(new double[]{0.0}, 1, 1));
     }
 }
