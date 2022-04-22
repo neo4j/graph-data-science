@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.models.linearregression;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -47,7 +49,8 @@ class LinearRegressionObjectiveTest {
 
         var objective = new LinearRegressionObjective(
             features,
-            HugeDoubleArray.of(1.0, 2.5, 3.5)
+            HugeDoubleArray.of(1.0, 2.5, 3.5),
+            0.0
         );
 
         Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
@@ -70,7 +73,8 @@ class LinearRegressionObjectiveTest {
                 // these have no effect because weights are zero
                 Stream.of(-100.0, 420.1, 13.37).map(i -> new double[]{i}).collect(Collectors.toList())
             ),
-            HugeDoubleArray.of(1.0, 2.5, 3.5)
+            HugeDoubleArray.of(1.0, 2.5, 3.5),
+            0.0
         );
         // set the bias
         objective.weights().get(1).data().setDataAt(0, 3);
@@ -92,7 +96,8 @@ class LinearRegressionObjectiveTest {
                     new double[]{7.5, -0.001}
                 )
             ),
-            HugeDoubleArray.of(1.0, 2.5, 3.5)
+            HugeDoubleArray.of(1.0, 2.5, 3.5),
+            0.0
         );
         // set the weights
         objective.weights().get(0).data().setDataAt(0, 1);
@@ -105,6 +110,36 @@ class LinearRegressionObjectiveTest {
 
         double expectedMeanSquareError = 53.460668;
         assertThat(lossValue).isCloseTo(expectedMeanSquareError, Offset.offset(1e-10));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+        "   1,   2,  5,      20.83666",
+        "   1,   2, 10,      28.33666",
+        "0.01, 100, 10,  115094.87057",
+        "100,  110, 10,  235701.16666"
+    }
+    )
+    void testLossWithWeightsAndPenalty(double firstWeight, double secondWeight, double penalty, double expectedLoss) {
+        var objective = new LinearRegressionObjective(
+            FeaturesFactory.wrap(
+                List.of(
+                    new double[]{1.0, 2.0},
+                    new double[]{-1.0, 4.2},
+                    new double[]{7.5, -2.0}
+                )
+            ),
+            HugeDoubleArray.of(1.0, 2.5, 3.5),
+            penalty
+        );
+        // set the weights
+        objective.weights().get(0).data().setDataAt(0, firstWeight);
+        objective.weights().get(0).data().setDataAt(1, secondWeight);
+
+        Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
+        double lossValue = new ComputationContext().forward(loss).value();
+
+        assertThat(lossValue).isCloseTo(expectedLoss, Offset.offset(1e-5));
     }
 
 }
