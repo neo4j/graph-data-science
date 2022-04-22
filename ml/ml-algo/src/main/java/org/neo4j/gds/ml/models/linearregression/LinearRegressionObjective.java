@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.functions.ElementSum;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.MeanSquareError;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Features;
 
@@ -55,11 +59,38 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
     public Variable<Scalar> loss(
         Batch batch, long trainSize
     ) {
-        // FIXME implement actual implementation
-        return new ElementSum(List.of(
-            modelData().weights(),
-            modelData().bias())
+        LinearRegressor regressor = new LinearRegressor(modelData);
+        var batchFeatures = batchFeatureMatrix(batch, features);
+        var predictionsVariable = regressor.predictionsVariable(batchFeatures);
+        var batchTargets = batchTargets(batch);
+
+        return new MeanSquareError(predictionsVariable, batchTargets);
+    }
+
+    // FIXME: copied from LogisticRegressionClassifier
+    private static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
+        var batchFeatures = new Matrix(batch.size(), features.featureDimension());
+        var batchFeaturesOffset = new MutableInt();
+
+        batch
+            .nodeIds()
+            .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
+
+        return new Constant<>(batchFeatures);
+    }
+
+    private Constant<Vector> batchTargets(Batch batch) {
+        var batchedTargets = new Vector(batch.size());
+        var batchOffset = new MutableInt();
+
+        batch.nodeIds().forEach(elementId ->
+            batchedTargets.setDataAt(
+                batchOffset.getAndIncrement(),
+                targets.get(elementId)
+            )
         );
+
+        return new Constant<>(batchedTargets);
     }
 
     @Override

@@ -114,13 +114,12 @@ class NodeRegressionTrainTest {
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(LinearRegressor.class);
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        // FIXME change these with actual loss implementation
-        assertThat(bestMetricData.outerTrain()).isEqualTo(259.52916, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(2109.82749,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(232.64223, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1899.22256,  Offset.offset(1e-5));
     }
 
     @Test
