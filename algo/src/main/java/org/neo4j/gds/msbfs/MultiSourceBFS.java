@@ -84,7 +84,7 @@ public final class MultiSourceBFS implements Runnable {
     private final CloseableThreadLocal<HugeLongArray> visits;
     private final CloseableThreadLocal<HugeLongArray> visitsNext;
     private final CloseableThreadLocal<HugeLongArray> seens;
-    private final CloseableThreadLocal<HugeLongArray> seensNext;
+    private final @Nullable CloseableThreadLocal<HugeLongArray> seensNext;
 
     private final long nodeCount;
     private final RelationshipIterator relationships;
@@ -156,7 +156,7 @@ public final class MultiSourceBFS implements Runnable {
         CloseableThreadLocal<HugeLongArray> visits,
         CloseableThreadLocal<HugeLongArray> visitsNext,
         CloseableThreadLocal<HugeLongArray> seens,
-        CloseableThreadLocal<HugeLongArray> seensNext,
+        @Nullable CloseableThreadLocal<HugeLongArray> seensNext,
         long... sourceNodes
     ) {
         assert sourceNodes != null && sourceNodes.length > 0;
@@ -181,7 +181,7 @@ public final class MultiSourceBFS implements Runnable {
         CloseableThreadLocal<HugeLongArray> visits,
         CloseableThreadLocal<HugeLongArray> visitsNext,
         CloseableThreadLocal<HugeLongArray> seens,
-        CloseableThreadLocal<HugeLongArray> seensNext
+        @Nullable CloseableThreadLocal<HugeLongArray> seensNext
     ) {
         this.relationships = relationships;
         this.strategy = strategy;

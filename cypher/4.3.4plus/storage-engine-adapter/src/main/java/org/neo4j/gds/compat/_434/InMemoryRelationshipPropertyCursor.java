@@ -37,9 +37,10 @@ public class InMemoryRelationshipPropertyCursor extends AbstractInMemoryRelation
 
     @Override
     public void initRelationshipProperties(long reference, long ownerReference) {
-        var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
-        relationshipCursor.single(reference);
-        relationshipCursor.next();
-        relationshipCursor.properties(this, InMemoryPropertySelection.SELECT_ALL);
+        try (var relationshipCursor = new InMemoryRelationshipScanCursor(graphStore, tokenHolders)) {
+            relationshipCursor.single(reference);
+            relationshipCursor.next();
+            relationshipCursor.properties(this, InMemoryPropertySelection.SELECT_ALL);
+        }
     }
 }

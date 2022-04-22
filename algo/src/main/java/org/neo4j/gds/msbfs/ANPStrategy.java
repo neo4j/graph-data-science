@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.msbfs;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -57,7 +58,7 @@ public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
         HugeLongArray visitSet,
         HugeLongArray visitNextSet,
         HugeLongArray seenSet,
-        HugeLongArray seenNextSet
+        @Nullable HugeLongArray seenNextSet
     ) {
         HugeCursor<long[]> visitCursor = visitSet.newCursor();
         HugeCursor<long[]> nextCursor = visitNextSet.newCursor();
