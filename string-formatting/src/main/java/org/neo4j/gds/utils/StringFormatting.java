@@ -22,6 +22,8 @@ package org.neo4j.gds.utils;
 import org.apache.commons.lang3.StringUtils;
 import org.intellij.lang.annotations.PrintFormat;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Locale;
 
 public final class StringFormatting {
@@ -30,6 +32,18 @@ public final class StringFormatting {
 
     public static String formatWithLocale(@PrintFormat String template, Object... inputs) {
         return String.format(Locale.ENGLISH, template, inputs);
+    }
+
+    public static String formatNumber(long number) {
+        var formatter = (DecimalFormat) NumberFormat.getInstance(Locale.ENGLISH);
+        var symbols = formatter.getDecimalFormatSymbols();
+        symbols.setGroupingSeparator('_');
+        formatter.setDecimalFormatSymbols(symbols);
+        return formatter.format(number);
+    }
+
+    public static String formatNumber(int number) {
+        return formatNumber((long) number);
     }
 
     public static String toLowerCaseWithLocale(String string) {
