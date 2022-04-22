@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.FiniteDifferenceTest;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -45,7 +46,27 @@ class NormalizeRowsTest extends ComputationGraphBaseTest implements FiniteDiffer
         Weights<Matrix> w = new Weights<>(new Matrix(data, 3, 2));
         Variable<Matrix> normalizeRows = new NormalizeRows(w);
 
-        finiteDifferenceShouldApproximateGradient(w, new ElementSum(List.of(normalizeRows)));
+        finiteDifferenceShouldApproximateGradient(w, new ElementSum(List.of(new Sigmoid<>(normalizeRows))));
+    }
+
+    @Test
+    void testGradientOnZeroData() {
+        double[] data = new double[] {
+            0, 0,
+            0, 0,
+            0, 0
+        };
+
+        Weights<Matrix> w = new Weights<>(new Matrix(data, 3, 2));
+        Variable<Matrix> normalizeRows = new NormalizeRows(w);
+
+        ComputationContext ctx = new ComputationContext();
+
+        ElementSum loss = new ElementSum(List.of(normalizeRows));
+        ctx.forward(loss);
+        ctx.backward(loss);
+
+        assertThat(ctx.gradient(w)).isEqualTo(Matrix.create(0, 3, 2));
     }
 
     @Test
@@ -65,6 +86,20 @@ class NormalizeRowsTest extends ComputationGraphBaseTest implements FiniteDiffer
         var normalizeRows = new NormalizeRows(w);
 
         assertThat(ctx.forward(normalizeRows)).matches(tensor -> tensor.equals(expected, 1e-8));
+    }
+
+    @Test
+    void testApplyOnZeroData() {
+        double[] data = new double[] {
+            0, 0,
+            0, 0,
+            0, 0
+        };
+
+        Weights<Matrix> w = new Weights<>(new Matrix(data, 3, 2));
+        var expected = Matrix.create(0.0D, 3, 2);
+
+        assertThat(ctx.forward(new NormalizeRows(w))).matches(tensor -> tensor.equals(expected, 1e-8));
     }
 
 

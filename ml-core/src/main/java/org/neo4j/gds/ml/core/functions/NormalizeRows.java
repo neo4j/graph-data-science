@@ -73,6 +73,11 @@ public class NormalizeRows extends SingleParentVariable<Matrix> {
             }
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
+
+            if (Double.compare(l2Cubed, 0) == 0) {
+                continue;
+            }
+
             for (int col = 0; col < cols; col++) {
                 int elementIndex = row * cols + col;
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
