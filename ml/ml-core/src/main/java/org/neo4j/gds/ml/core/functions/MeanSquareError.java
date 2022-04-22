@@ -33,11 +33,11 @@ import static org.neo4j.gds.ml.core.Dimensions.scalar;
 import static org.neo4j.gds.ml.core.Dimensions.totalSize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MeanSquaredError extends AbstractVariable<Scalar> {
+public class MeanSquareError extends AbstractVariable<Scalar> {
     private final Variable<?> predictions;
     private final Variable<?> targets;
 
-    public MeanSquaredError(
+    public MeanSquareError(
         Variable<?> predictions,
         Variable<?> targets
     ) {
@@ -61,6 +61,12 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
 
         return new Scalar(sumOfSquares / length);
     }
+
+    /*
+     *   f(x)  = ∑e_i^2/n
+     *
+     *   f'(x) = ∑2e_i/n = 2/n∑e_i
+     */
 
     @Override
     public Tensor<?> gradient(

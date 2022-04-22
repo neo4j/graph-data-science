@@ -29,14 +29,14 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class MeanSquaredErrorTest implements FiniteDifferenceTest {
+class MeanSquareErrorTest implements FiniteDifferenceTest {
     @Test
     void testForward() {
         ComputationContext ctx = new ComputationContext();
         var a = new Weights<>(new Vector(new double[]{1, 1, 1, 1, 1, 1}));
         var b = new Weights<>(new Vector(new double[]{3, 2, 2, 2, 2, 1}));
 
-        var meanSquaredError = new MeanSquaredError(a, b);
+        var meanSquaredError = new MeanSquareError(a, b);
         assertThat(ctx.forward(meanSquaredError).value()).isEqualTo((4 + 1 + 1 + 1 + 1 + 0) / 6.0);
     }
 
@@ -45,12 +45,12 @@ class MeanSquaredErrorTest implements FiniteDifferenceTest {
         var a = new Weights<>(new Vector(new double[]{1, 1, 1, 1, 1, 1}));
         var b = new Weights<>(new Vector(new double[]{3, 2, 2, 2, 2, 1}));
 
-        finiteDifferenceShouldApproximateGradient(List.of(a, b), new MeanSquaredError(a, b));
+        finiteDifferenceShouldApproximateGradient(List.of(a, b), new MeanSquareError(a, b));
     }
 
     @Test
     void failOnWrongSizedArguments() {
-        assertThatThrownBy(() -> new MeanSquaredError(Constant.vector(new double[]{1, 1, 1, 1, 1, 1}), Constant.vector(new double[]{1, 1, 1, 1, 1})))
+        assertThatThrownBy(() -> new MeanSquareError(Constant.vector(new double[]{1, 1, 1, 1, 1, 1}), Constant.vector(new double[]{1, 1, 1, 1, 1})))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Targets and predictions must be of equal size. Got predictions: Vector(6), targets: Vector(5)");
     }
