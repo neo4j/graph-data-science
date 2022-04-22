@@ -47,9 +47,9 @@ import java.util.Collection;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
-public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
+public final class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
 
-    public InMemoryStorageEngineImpl(
+    private InMemoryStorageEngineImpl(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders,
         BiFunction<GraphStore, TokenHolders, CountsStore> countsStoreFn,
@@ -94,6 +94,15 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
         }
     }
     
+    @Override
+    public void dumpDiagnostics(Log errorLog, DiagnosticsLogger diagnosticsLog) {
+    }
+
+    @Override
+    public StoreId getStoreId() {
+        return metadataProvider.getStoreId();
+    }
+
     public static final class Builder extends InMemoryStorageEngineBuilder<InMemoryStorageEngineImpl> {
         public Builder(
             DatabaseLayout databaseLayout,
@@ -115,14 +124,5 @@ public class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngine {
                 storageReaderFn
             );
         }
-    }
-
-    @Override
-    public void dumpDiagnostics(Log errorLog, DiagnosticsLogger diagnosticsLog) {
-    }
-
-    @Override
-    public StoreId getStoreId() {
-        return metadataProvider.getStoreId();
     }
 }
