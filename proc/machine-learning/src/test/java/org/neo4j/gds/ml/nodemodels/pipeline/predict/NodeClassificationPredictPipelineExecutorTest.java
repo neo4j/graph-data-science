@@ -38,6 +38,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Inject;
@@ -53,8 +54,8 @@ import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -418,8 +419,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
-            864L,
-            864L
+            MemoryRange.of(824)
         );
 
     }
@@ -471,8 +471,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
-            392L,
-            392L
+            MemoryRange.of(352)
         );
     }
 }

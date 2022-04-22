@@ -54,6 +54,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.aMapWithSize;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
 @Neo4jModelCatalogExtension
 class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
@@ -86,11 +87,11 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 GRAPH_NAME,
-                MemoryRange.of(903512, 935472)
+                MemoryRange.of(903_280, 935_240)
             ),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(1198904, 1230864)
+                MemoryRange.of(1_198_672, 1_230_632)
             )
         );
     }
@@ -244,7 +245,8 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.beta.pipeline.nodeClassification.create($pipeline)", pipe);
         runQuery("CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline)", pipe);
 
-        assertCypherResult(
+        assertCypherMemoryEstimation(
+            db,
             "CALL gds.beta.pipeline.nodeClassification.train.estimate(" +
             "   $graphDefinition, {" +
             "       pipeline: $pipeline," +
@@ -253,10 +255,11 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "       metrics: ['F1(class=1)']," +
             "       randomSeed: 1" +
             "})" +
-            "YIELD bytesMin, bytesMax",
+            "YIELD bytesMin, bytesMax, nodeCount, relationshipCount",
             params,
-            List.of(Map.of("bytesMin", expected.min, "bytesMax", expected.max)
-            )
+            expected,
+            9,
+            7
         );
     }
 }
