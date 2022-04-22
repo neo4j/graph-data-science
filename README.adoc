@@ -2,7 +2,7 @@
 
 image:https://github.com/neo4j/graph-data-science/actions/workflows/gradle_cipr.yml/badge.svg?branch=master[https://github.com/neo4j/graph-data-science/actions/workflows/gradle_cipr.yml]
 image:https://img.shields.io/maven-central/v/org.neo4j.gds/proc.svg?label=Maven%20Central[https://search.maven.org/search?q=g:%22org.neo4j.gds%22%20AND%20a:%22proc%22]
-https://neo4j.com/docs/graph-data-science/current/installation/[image:https://img.shields.io/badge/Documentation-latest-blue[Documentation]]
+https://neo4j.com/docs/graph-data-science/preview/installation/[image:https://img.shields.io/badge/Documentation-latest-blue[Documentation]]
 https://discord.gg/neo4j[image:https://img.shields.io/discord/787399249741479977?label=Chat&logo=discord&style=flat-square[Discord]]
 https://community.neo4j.com/c/neo4j-graph-platform/graph-algorithms[image:https://img.shields.io/discourse/users?label=Forums&logo=discourse&server=https%3A%2F%2Fcommunity.neo4j.com&style=flat-square[Discourse users]]
 
