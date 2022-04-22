@@ -37,7 +37,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.extension.GdlSupportExtension;
+import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -155,7 +155,7 @@ public final class TestSupport {
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
+            .namedDatabaseId(GdlSupportPerMethodExtension.DATABASE_ID)
             .build();
 
         return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);

@@ -19,17 +19,19 @@
  */
 package org.neo4j.gds.extension;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
+import org.junit.jupiter.api.extension.ExtensionContext;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public class GdlSupportPerClassExtension extends BaseGdlSupportExtension implements BeforeAllCallback, AfterAllCallback {
 
-@Inherited
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GdlSupportPerMethodExtension.class)
-public @interface GdlExtension {
+    @Override
+    public void beforeAll(ExtensionContext context) {
+        beforeAction(context);
+    }
+
+    @Override
+    public void afterAll(ExtensionContext context) {
+        afterAction(context);
+    }
 }

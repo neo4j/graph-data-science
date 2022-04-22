@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.extension;
 
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.lang.annotation.ElementType;
@@ -30,6 +31,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GdlSupportPerMethodExtension.class)
-public @interface GdlExtension {
+@ExtendWith(GdlSupportPerClassExtension.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+public @interface GdlPerClassExtension {
 }
