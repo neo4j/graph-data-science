@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.core.functions;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.ml.core.ComputationContext;
 
-public class ComputationGraphBaseTest {
+abstract class ComputationGraphTestBase {
     protected ComputationContext ctx;
 
     @BeforeEach

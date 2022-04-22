@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models.automl;
 
+import org.assertj.core.api.InstanceOfAssertFactories;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -124,8 +125,9 @@ class RandomSearchTest {
             var trainerConfig = randomSearch.next();
             assertThat(trainerConfig).isInstanceOf(RandomForestTrainerConfig.class);
             var lrConfig = (RandomForestTrainerConfig) trainerConfig;
-            assertThat(lrConfig.maxFeaturesRatio().get()).isBetween(0.0, 1.0);
-            if (lrConfig.maxFeaturesRatio().get() > 0.5) penaltiesHigherThanAHalf++;
+            var maxFeaturesRatio = lrConfig.maxFeaturesRatio();
+            assertThat(maxFeaturesRatio).isPresent().get(InstanceOfAssertFactories.DOUBLE).isBetween(0.0, 1.0);
+            if (maxFeaturesRatio.get() > 0.5) penaltiesHigherThanAHalf++;
         }
         assertThat(penaltiesHigherThanAHalf).isCloseTo((int) (0.5 * maxTrials), Offset.offset((int) (0.05 * maxTrials)));
     }
@@ -152,8 +154,8 @@ class RandomSearchTest {
             maxTrials,
             System.currentTimeMillis()
         );
-        assertThat(randomSearch.hasNext());
+        assertThat(randomSearch.hasNext()).isTrue();
         assertThat(randomSearch.next()).isInstanceOf(RandomForestTrainerConfig.class);
-        assertThat(!randomSearch.hasNext());
+        assertThat(randomSearch.hasNext()).isFalse();
     }
 }
