@@ -24,13 +24,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.closeTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
 class PageRankPregelProcTest extends BaseProcTest {
@@ -111,12 +112,7 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
 
-        runQueryWithRowConsumer(query, r -> {
-            assertEquals(11, r.getNumber("nodeCount").longValue());
-            assertEquals(17, r.getNumber("relationshipCount").longValue());
-            assertEquals(768, r.getNumber("bytesMin").longValue());
-            assertEquals(768, r.getNumber("bytesMax").longValue());
-        });
+        assertCypherMemoryEstimation(db, query, MemoryRange.of(768), 11, 17);
     }
 
     @Test

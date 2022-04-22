@@ -25,6 +25,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.beta.pregel.cc.ConnectedComponentsPregel.COMPONENT;
 
 class ConnectedComponentsPregelProcTest extends BaseProcTest {
@@ -132,12 +134,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
 
-        runQueryWithRowConsumer(query, r -> {
-            assertEquals(10, r.getNumber("nodeCount").longValue());
-            assertEquals(9, r.getNumber("relationshipCount").longValue());
-            assertEquals(4424, r.getNumber("bytesMin").longValue());
-            assertEquals(4424, r.getNumber("bytesMax").longValue());
-        });
+        assertCypherMemoryEstimation(db, query, MemoryRange.of(4_424), 10, 9);
     }
 
     @Test
