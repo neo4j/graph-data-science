@@ -37,7 +37,7 @@ class NormalizeRowsTest extends ComputationGraphBaseTest implements FiniteDiffer
 
     @Test
     void testGradient() {
-        double[] data = new double[] {
+        double[] data = new double[]{
             3, 4,
             1, 0,
             0, 1

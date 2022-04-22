@@ -25,7 +25,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.Map;
 
-abstract class ModelProcTestBase extends BaseProcTest {
+abstract class ModelProcBaseTest extends BaseProcTest {
 
     static final GraphSchema GRAPH_SCHEMA =
         GdlFactory.of("(:Node {p: 1})-[:REL {r: 0}]->(:Node)").build().schema();

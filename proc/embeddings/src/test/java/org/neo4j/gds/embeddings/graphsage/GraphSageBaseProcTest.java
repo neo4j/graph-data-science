@@ -48,7 +48,7 @@ import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.TestSupport.crossArguments;
 
 @Neo4jModelCatalogExtension
-class GraphSageBaseProcTest extends BaseProcTest {
+abstract class GraphSageBaseProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
         "CREATE" +
