@@ -19,17 +19,25 @@
  */
 package org.neo4j.gds.extension;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import static org.assertj.core.api.Assertions.assertThat;
 
-@Inherited
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GdlSupportPerMethodExtension.class)
-public @interface GdlExtension {
+@GdlExtension
+class GdlSupportPerMethodExtensionTest {
+
+    @GdlGraph(idOffset = 42, graphNamePrefix = "idOffset")
+    public static final String ID_OFFSET_GRAPH = "(a)-[:REL]->(b)";
+    @Inject
+    private TestGraph idOffsetGraph;
+    @Inject
+    private IdFunction idOffsetIdFunction;
+
+    @Test
+    void testIdOffset() {
+        assertThat(idOffsetGraph.nodeCount()).isEqualTo(2L);
+        assertThat(idOffsetGraph.relationshipCount()).isEqualTo(1L);
+        assertThat(idOffsetIdFunction.of("a")).isEqualTo(42L);
+        assertThat(idOffsetIdFunction.of("b")).isEqualTo(43L);
+    }
 }

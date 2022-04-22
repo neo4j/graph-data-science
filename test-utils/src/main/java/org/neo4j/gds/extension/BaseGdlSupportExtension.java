@@ -20,8 +20,6 @@
 package org.neo4j.gds.extension;
 
 import org.immutables.value.Value;
-import org.junit.jupiter.api.extension.AfterEachCallback;
-import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionConfigurationException;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.gds.Orientation;
@@ -52,18 +50,16 @@ import static org.junit.platform.commons.support.AnnotationSupport.isAnnotated;
 import static org.neo4j.gds.extension.ExtensionUtil.getStringValueOfField;
 import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
-public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallback {
+abstract class BaseGdlSupportExtension {
 
     public static final NamedDatabaseId DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
 
-    @Override
-    public void beforeEach(ExtensionContext context) {
+    void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
         gdlGraphs(requiredTestClass).forEach(setup -> injectGraphStore(setup, context));
     }
 
-    @Override
-    public void afterEach(ExtensionContext context) {
+    void afterAction(ExtensionContext context) {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
@@ -73,7 +69,7 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         do {
             stream(testClass.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(GdlGraph.class) || f.isAnnotationPresent(GdlGraphs.class))
-                .flatMap(GdlSupportExtension::gdlGraphsForField)
+                .flatMap(BaseGdlSupportExtension::gdlGraphsForField)
                 .peek(setup -> {
                     if (setups.contains(setup)) {
                         throw new ExtensionConfigurationException(String.format(
@@ -158,7 +154,13 @@ public class GdlSupportExtension implements BeforeEachCallback, AfterEachCallbac
         });
     }
 
-    private static <T> void injectInstance(Object testInstance, String graphNamePrefix, T instance, Class<T> clazz, String suffix) {
+    private static <T> void injectInstance(
+        Object testInstance,
+        String graphNamePrefix,
+        T instance,
+        Class<T> clazz,
+        String suffix
+    ) {
         Stream.<Class<?>>iterate(testInstance.getClass(), Objects::nonNull, Class::getSuperclass)
             .flatMap(c -> Arrays.stream(c.getDeclaredFields()))
             .filter(field -> field.getType() == clazz)

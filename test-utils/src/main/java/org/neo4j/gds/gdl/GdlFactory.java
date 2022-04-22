@@ -54,7 +54,7 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.GdlSupportExtension;
+import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
@@ -106,7 +106,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .build()
             : graphProjectConfig.get();
 
-        var databaseId = namedDatabaseId.orElse(GdlSupportExtension.DATABASE_ID);
+        var databaseId = namedDatabaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID);
 
         var nextVertexId = nodeIdFunction
             .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())

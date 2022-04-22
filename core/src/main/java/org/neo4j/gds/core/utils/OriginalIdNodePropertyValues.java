@@ -17,19 +17,32 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.extension;
+package org.neo4j.gds.core.utils;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.OptionalLong;
 
-@Inherited
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GdlSupportPerMethodExtension.class)
-public @interface GdlExtension {
+public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
+    private final IdMap idMap;
+
+    public OriginalIdNodePropertyValues(IdMap idMap) {
+        this.idMap = idMap;
+    }
+
+    @Override
+    public long longValue(long nodeId) {
+        return idMap.toOriginalNodeId(nodeId);
+    }
+
+    @Override
+    public OptionalLong getMaxLongPropertyValue() {
+        return OptionalLong.of(idMap.highestNeoId());
+    }
+
+    @Override
+    public long size() {
+        return idMap.nodeCount();
+    }
 }

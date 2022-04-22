@@ -19,25 +19,36 @@
  */
 package org.neo4j.gds.extension;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@GdlExtension
-class GdlSupportExtensionTest {
+@GdlPerClassExtension
+class GdlSupportPerClassExtensionTest {
 
-    @GdlGraph(idOffset = 42, graphNamePrefix = "idOffset")
-    public static final String ID_OFFSET_GRAPH = "(a)-[:REL]->(b)";
+    @GdlGraph
+    public static final String GRAPH = "(a)-[:REL]->(b)";
+
     @Inject
-    private TestGraph idOffsetGraph;
-    @Inject
-    private IdFunction idOffsetIdFunction;
+    GraphStore graphStore;
+
+    @BeforeAll
+    void setUp() {
+        var graphProjectConfig = GraphProjectFromStoreConfig.emptyWithName("", "graph");
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
+    }
 
     @Test
-    void testIdOffset() {
-        assertThat(idOffsetGraph.nodeCount()).isEqualTo(2L);
-        assertThat(idOffsetGraph.relationshipCount()).isEqualTo(1L);
-        assertThat(idOffsetIdFunction.of("a")).isEqualTo(42L);
-        assertThat(idOffsetIdFunction.of("b")).isEqualTo(43L);
+    void testHasGraph() {
+        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
+    }
+
+    @Test
+    void testStillHasGraph() {
+        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
     }
 }
