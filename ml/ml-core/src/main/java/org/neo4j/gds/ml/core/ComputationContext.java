@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.core;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.ml.core.functions.PassthroughVariable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.TensorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -110,8 +109,11 @@ public class ComputationContext {
     }
 
     private void updateGradient(Variable<?> variable, Tensor<?> gradient) {
-        gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
-        gradients.get(variable).addInPlace(gradient);
+        if (gradients.containsKey(variable)) {
+            gradients.get(variable).addInPlace(gradient);
+        } else {
+            gradients.put(variable, gradient);
+        }
     }
 
     public String render() {
