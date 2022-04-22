@@ -159,8 +159,8 @@ class NodeRegressionTrainTest {
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        assertThat(bestMetricData.outerTrain()).isEqualTo(27.64444, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1051.43499,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(104.69688, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1110.8388,  Offset.offset(1e-5));
     }
 
     @Test
