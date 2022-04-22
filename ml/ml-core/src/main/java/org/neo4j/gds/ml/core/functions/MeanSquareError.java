@@ -56,17 +56,16 @@ public class MeanSquareError extends AbstractVariable<Scalar> {
         double sumOfSquares = 0;
         var length = predictedData.totalSize();
         for (int i = 0; i < length; i++) {
-            sumOfSquares += Math.pow((predictedData.dataAt(i) - targetData.dataAt(i)), 2);
+            double error = predictedData.dataAt(i) - targetData.dataAt(i);
+            sumOfSquares += error * error;
+        }
+
+        if (!Double.isFinite(sumOfSquares)) {
+            return new Scalar(Double.MAX_VALUE);
         }
 
         return new Scalar(sumOfSquares / length);
     }
-
-    /*
-     *   f(x)  = ∑e_i^2/n
-     *
-     *   f'(x) = ∑2e_i/n = 2/n∑e_i
-     */
 
     @Override
     public Tensor<?> gradient(
@@ -78,9 +77,10 @@ public class MeanSquareError extends AbstractVariable<Scalar> {
 
         var length = parentData.totalSize();
         double[] grad = new double[length];
-        double scale = ctx.gradient(this).dataAt(0) / length;
+        double scale = 2 * ctx.gradient(this).dataAt(0) / length;
         for (int i = 0; i < length; i++) {
-            grad[i] = scale * 2 * (parentData.dataAt(i) - otherParentData.dataAt(i));
+            double error = parentData.dataAt(i) - otherParentData.dataAt(i);
+            grad[i] = scale * error;
         }
 
         return new Vector(grad);
