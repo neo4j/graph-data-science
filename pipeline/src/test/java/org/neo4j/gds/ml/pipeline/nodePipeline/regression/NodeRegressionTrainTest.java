@@ -155,12 +155,12 @@ class NodeRegressionTrainTest {
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(RandomForestRegressor.class);
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        assertThat(bestMetricData.outerTrain()).isEqualTo(21.36533, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1056.95979,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(27.64444, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1051.43499,  Offset.offset(1e-5));
     }
 
     @Test
@@ -199,7 +199,7 @@ class NodeRegressionTrainTest {
 
         var trainingStatistics = result.trainingStatistics();
 
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
 
         for (RegressionMetrics metric : evaluationMetrics) {
             assertThat(trainingStatistics.getTrainStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
