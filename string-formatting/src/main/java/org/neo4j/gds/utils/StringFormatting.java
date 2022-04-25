@@ -20,6 +20,7 @@
 package org.neo4j.gds.utils;
 
 import org.apache.commons.lang3.StringUtils;
+import org.intellij.lang.annotations.PrintFormat;
 
 import java.util.Locale;
 
@@ -27,7 +28,7 @@ public final class StringFormatting {
 
     private StringFormatting() {}
 
-    public static String formatWithLocale(String template, Object... inputs) {
+    public static String formatWithLocale(@PrintFormat String template, Object... inputs) {
         return String.format(Locale.ENGLISH, template, inputs);
     }
 
