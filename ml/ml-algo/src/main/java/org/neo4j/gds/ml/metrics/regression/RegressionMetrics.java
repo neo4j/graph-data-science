@@ -33,6 +33,11 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public enum RegressionMetrics implements Metric {
     MEAN_SQUARED_ERROR {
         @Override
+        public boolean higherIsBetter() {
+            return false;
+        }
+
+        @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             long numberOfExamples = targets.size();
             assert numberOfExamples == predictions.size();
@@ -48,11 +53,21 @@ public enum RegressionMetrics implements Metric {
     },
     ROOT_MEAN_SQUARED_ERROR {
         @Override
+        public boolean higherIsBetter() {
+            return false;
+        }
+
+        @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             return Math.sqrt(MEAN_SQUARED_ERROR.compute(targets, predictions));
         }
     },
     MEAN_ABSOLUTE_ERROR {
+        @Override
+        public boolean higherIsBetter() {
+            return false;
+        }
+
         @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             long numberOfExamples = targets.size();

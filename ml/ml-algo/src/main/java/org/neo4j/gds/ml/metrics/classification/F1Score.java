@@ -103,4 +103,9 @@ public class F1Score implements ClassificationMetric {
     public String name() {
         return formatWithLocale("%s(class=%d)", NAME, positiveTarget);
     }
+
+    @Override
+    public boolean higherIsBetter() {
+        return true;
+    }
 }

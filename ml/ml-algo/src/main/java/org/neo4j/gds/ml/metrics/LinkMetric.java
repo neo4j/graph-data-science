@@ -20,7 +20,12 @@
 package org.neo4j.gds.ml.metrics;
 
 public enum LinkMetric implements Metric {
-    AUCPR;
+    AUCPR {
+        @Override
+        public boolean higherIsBetter() {
+            return true;
+        }
+    };
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {
         var positiveCount = signedProbabilities.positiveCount();

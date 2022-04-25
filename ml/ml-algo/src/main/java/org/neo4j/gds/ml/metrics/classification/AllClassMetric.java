@@ -31,6 +31,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public enum AllClassMetric implements ClassificationMetric {
     F1_WEIGHTED {
         @Override
+        public boolean higherIsBetter() {
+            return true;
+        }
+
+        @Override
         public double compute(
             HugeLongArray targets,
             HugeLongArray predictions,
@@ -50,6 +55,11 @@ public enum AllClassMetric implements ClassificationMetric {
     },
     F1_MACRO {
         @Override
+        public boolean higherIsBetter() {
+            return true;
+        }
+
+        @Override
         public double compute(
             HugeLongArray targets,
             HugeLongArray predictions,
@@ -67,6 +77,11 @@ public enum AllClassMetric implements ClassificationMetric {
         }
     },
     ACCURACY {
+        @Override
+        public boolean higherIsBetter() {
+            return true;
+        }
+
         @Override
         public double compute(
             HugeLongArray targets,

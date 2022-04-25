@@ -21,4 +21,6 @@ package org.neo4j.gds.ml.metrics;
 
 public interface Metric {
     String name();
+
+    boolean higherIsBetter();
 }

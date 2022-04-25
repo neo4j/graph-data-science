@@ -114,12 +114,12 @@ class NodeRegressionTrainTest {
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(LinearRegressor.class);
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        assertThat(bestMetricData.outerTrain()).isEqualTo(232.64223, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1899.22256,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(209.59583, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1718.22750,  Offset.offset(1e-5));
     }
 
     @Test

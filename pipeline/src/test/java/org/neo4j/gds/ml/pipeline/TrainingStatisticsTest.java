@@ -21,9 +21,13 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
@@ -33,25 +37,35 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQUARED_ERROR;
 
 class TrainingStatisticsTest {
 
-    @Test
-    void selectsBestParametersAccordingToMainMetric() {
-        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
+    public static Stream<Arguments> mainMetricWithExpectecWinner() {
+        return Stream.of(
+            Arguments.of(AUCPR, "higher average"),
+            Arguments.of(ROOT_MEAN_SQUARED_ERROR, "lower average")
+        );
+    }
 
-        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
-            new TestTrainerConfig("bad"),
+    @ParameterizedTest
+    @MethodSource("mainMetricWithExpectecWinner")
+    void selectsBestParametersAccordingToMainMetric(Metric mainMetric, String expectedWinner) {
+        var trainingStatistics = new TrainingStatistics(List.of(mainMetric, F1_WEIGHTED));
+
+        trainingStatistics.addValidationStats(mainMetric, ModelStats.of(
+            new TestTrainerConfig("lower average"),
             0.1,
             1000,
             1000
         ));
-        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
-            new TestTrainerConfig("better"),
+        trainingStatistics.addValidationStats(mainMetric, ModelStats.of(
+            new TestTrainerConfig("higher average"),
             0.2,
             0.2,
             0.2
@@ -63,7 +77,7 @@ class TrainingStatisticsTest {
             5000
         ));
 
-        assertThat(((TestTrainerConfig) trainingStatistics.bestParameters()).name).isEqualTo("better");
+        assertThat(((TestTrainerConfig) trainingStatistics.bestParameters()).name).isEqualTo(expectedWinner);
     }
 
     @Test
