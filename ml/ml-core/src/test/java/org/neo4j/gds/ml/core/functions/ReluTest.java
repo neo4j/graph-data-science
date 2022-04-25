@@ -51,13 +51,21 @@ public class ReluTest extends ComputationGraphBaseTest implements FiniteDifferen
     }
 
     @Test
+    void considerSelfGradient() {
+        Weights<Vector> weights = new Weights<>(new Vector(-1, 5, 2));
+        var chainedRelu = new Sigmoid<>(new Relu<>(weights));
+
+        finiteDifferenceShouldApproximateGradient(weights, new ElementSum(List.of(chainedRelu)));
+    }
+
+    @Test
     void shouldComputeRelu() {
         double[] vectorData = {14, -5, 36, 0};
         Constant<Vector> p = Constant.vector(vectorData);
 
         Variable<Vector> relu = new Relu<>(p);
 
-        var expected = new Vector(new double[]{14, 0.01 * -5, 36, 0});
+        var expected = new Vector(14, 0.01 * -5, 36, 0);
         assertThat(ctx.forward(relu)).isEqualTo(expected);
     }
 
@@ -68,7 +76,7 @@ public class ReluTest extends ComputationGraphBaseTest implements FiniteDifferen
 
         Variable<Vector> relu = new Relu<>(p);
 
-        var expected = new Vector(new double[]{});
+        var expected = new Vector();
         assertThat(ctx.forward(relu)).isEqualTo(expected);
     }
 

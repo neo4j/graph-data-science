@@ -56,7 +56,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
         Matrix parentData = ctx.data(parent);
-        Matrix thisGradient = ctx.gradient(this);
+        Matrix normalizeRowsGradient = ctx.gradient(this);
 
         Matrix parentGradient = parentData.createWithSameDimensions();
         int rows = parentData.rows();
@@ -71,14 +71,18 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
             double l2 = Math.sqrt(l2Squared);
             double l2Cubed = l2 * l2Squared;
 
+            if (Double.compare(l2Cubed, 0) == 0) {
+                continue;
+            }
+
             for (int col = 0; col < cols; col++) {
                 double parentCellValue = parentData.dataAt(row, col);
                 for (int gradCol = 0; gradCol < cols; gradCol++) {
                     double partialGradient;
                     if (col == gradCol) {
-                        partialGradient = thisGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue);
+                        partialGradient = normalizeRowsGradient.dataAt(row, col) * (l2Squared - parentCellValue * parentCellValue);
                     } else {
-                        partialGradient = -thisGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol));
+                        partialGradient = -normalizeRowsGradient.dataAt(row, gradCol) * (parentCellValue * parentData.dataAt(row, gradCol));
                     }
                     parentGradient.addDataAt(row, col, partialGradient);
                 }
@@ -86,6 +90,7 @@ public class NormalizeRows extends SingleParentVariable<Matrix, Matrix> {
                 parentGradient.setDataAt(row, col, parentGradient.dataAt(row, col) / l2Cubed);
             }
         }
+
         return parentGradient;
     }
 }
