@@ -87,7 +87,7 @@ class SoftmaxTest implements FiniteDifferenceTest {
             )
         );
         var softmax = new Softmax(weights);
-        var loss = new MeanSquaredError(softmax, matrixConstant);
+        var loss = new MeanSquareError(softmax, matrixConstant);
 
         finiteDifferenceShouldApproximateGradient(weights, loss);
 

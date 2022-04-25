@@ -45,7 +45,7 @@ class DecisionTreeRegressorTest {
 
     private final HugeDoubleArray targets = HugeDoubleArray.newArray(NUM_SAMPLES);
     private Features features;
-    private MeanSquaredError mse;
+    private SplitMeanSquareError mse;
 
     @BeforeEach
     void setup() {
@@ -78,7 +78,7 @@ class DecisionTreeRegressorTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        mse = new MeanSquaredError(targets);
+        mse = new SplitMeanSquareError(targets);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {

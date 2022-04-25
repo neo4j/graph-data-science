@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import java.util.Comparator;
+
 public enum LinkMetric implements Metric {
-    AUCPR;
+    AUCPR {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
+        }
+    };
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {
         var positiveCount = signedProbabilities.positiveCount();

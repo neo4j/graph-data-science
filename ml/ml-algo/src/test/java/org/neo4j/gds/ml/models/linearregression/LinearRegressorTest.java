@@ -20,6 +20,10 @@
 package org.neo4j.gds.ml.models.linearregression;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.ml.core.ComputationContext;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
 import java.util.List;
@@ -47,5 +51,27 @@ class LinearRegressorTest {
 
         assertThat(regressor.predict(features.get(0))).isEqualTo(12 + 2.5);
         assertThat(regressor.predict(features.get(1))).isEqualTo(30 + 2.5);
+    }
+
+    @Test
+    void predictionsVariable() {
+        int featureDimension = 3;
+        LinearRegressionData modelData = LinearRegressionData.of(featureDimension);
+
+        modelData.weights().data().mapInPlace(ignore -> 2);
+        modelData.bias().data().setDataAt(0, 2.5);
+
+        var regressor = new LinearRegressor(modelData);
+
+        Variable<Matrix> predictionsVariable = regressor.predictionsVariable(Constant.matrix(
+            new double[]{1, 2, 3, 4, 5, 6},
+            2,
+            featureDimension
+        ));
+
+        Matrix predictions = new ComputationContext().forward(predictionsVariable);
+
+        assertThat(predictions.dataAt(0)).isEqualTo(12 + 2.5);
+        assertThat(predictions.dataAt(1)).isEqualTo(30 + 2.5);
     }
 }

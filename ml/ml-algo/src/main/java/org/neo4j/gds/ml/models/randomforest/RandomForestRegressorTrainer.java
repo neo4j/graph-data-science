@@ -36,7 +36,7 @@ import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
-import org.neo4j.gds.ml.decisiontree.MeanSquaredError;
+import org.neo4j.gds.ml.decisiontree.SplitMeanSquareError;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.RegressorTrainer;
 
@@ -82,7 +82,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             .add(RandomForestRegressorData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
                 "Mean Squared Error Loss",
-                nodeCount -> MeanSquaredError.memoryEstimation()
+                nodeCount -> SplitMeanSquareError.memoryEstimation()
             ).perGraphDimension(
                 "Decision tree training",
                 (dim, concurrency) ->
@@ -116,7 +116,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var lossFunction = new MeanSquaredError(targets);
+        var lossFunction = new SplitMeanSquareError(targets);
 
         progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);

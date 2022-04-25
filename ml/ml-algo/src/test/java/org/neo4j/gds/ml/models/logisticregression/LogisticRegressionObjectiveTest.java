@@ -39,6 +39,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
 import java.util.Arrays;
@@ -143,8 +144,7 @@ class LogisticRegressionObjectiveTest {
             return features;
         });
 
-        Constant<Matrix> batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch,
-            FeaturesFactory.wrap(allFeatures));
+        Constant<Matrix> batchFeatures = Objective.batchFeatureMatrix(batch, FeaturesFactory.wrap(allFeatures));
 
         assertThat(batchFeatures.data()).isEqualTo(expected);
     }

@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -32,6 +33,11 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum RegressionMetrics implements Metric {
     MEAN_SQUARED_ERROR {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.reverseOrder();
+        }
+
         @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             long numberOfExamples = targets.size();
@@ -48,11 +54,21 @@ public enum RegressionMetrics implements Metric {
     },
     ROOT_MEAN_SQUARED_ERROR {
         @Override
+        public Comparator<Double> comparator() {
+            return Comparator.reverseOrder();
+        }
+
+        @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             return Math.sqrt(MEAN_SQUARED_ERROR.compute(targets, predictions));
         }
     },
     MEAN_ABSOLUTE_ERROR {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.reverseOrder();
+        }
+
         @Override
         public double compute(HugeDoubleArray targets, HugeDoubleArray predictions) {
             long numberOfExamples = targets.size();

@@ -19,7 +19,10 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
-import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.EWiseAddMatrixScalar;
+import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.Regressor;
 
 public class LinearRegressor implements Regressor {
@@ -29,15 +32,24 @@ public class LinearRegressor implements Regressor {
 
     @Override
     public double predict(double[] features) {
-        Vector weights = this.data.weights().data();
+        Matrix weights = this.data.weights().data();
 
         double prediction = 0;
 
-        for (int i = 0; i < weights.length(); i++) {
+        for (int i = 0; i < data.featureDimension(); i++) {
             prediction += weights.dataAt(i) * features[i];
         }
 
         return prediction + this.data.bias().data().value();
+    }
+
+    Variable<Matrix> predictionsVariable(Variable<Matrix> features) {
+        var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(
+            features,
+            data.weights()
+        );
+
+        return new EWiseAddMatrixScalar(weightedFeatures, data.bias());
     }
 
     @Override

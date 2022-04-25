@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class MeanSquaredErrorTest {
+class SplitMeanSquareErrorTest {
 
     private static Stream<Arguments> MSEParameters() {
         return Stream.of(
@@ -78,7 +78,7 @@ class MeanSquaredErrorTest {
     @ParameterizedTest
     @MethodSource("MSEParameters")
     void shouldComputeCorrectLoss(HugeDoubleArray targets, Groups groups, GroupSizes groupSizes, double expectedLoss) {
-        var mse = new MeanSquaredError(targets);
+        var mse = new SplitMeanSquareError(targets);
 
         assertThat(mse.splitLoss(ImmutableGroups.of(groups.left(), groups.right()), groupSizes))
             .isCloseTo(expectedLoss, Offset.offset(0.01D));
@@ -86,7 +86,7 @@ class MeanSquaredErrorTest {
 
     @Test
     void shouldEstimateMemory() {
-        assertThat(MeanSquaredError.memoryEstimation())
+        assertThat(SplitMeanSquareError.memoryEstimation())
             .isEqualTo(MemoryRange.of(16));
     }
 }

@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.Vector;
 
 import java.util.List;
 
@@ -33,11 +32,11 @@ import static org.neo4j.gds.ml.core.Dimensions.scalar;
 import static org.neo4j.gds.ml.core.Dimensions.totalSize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class MeanSquaredError extends AbstractVariable<Scalar> {
+public class MeanSquareError extends AbstractVariable<Scalar> {
     private final Variable<?> predictions;
     private final Variable<?> targets;
 
-    public MeanSquaredError(
+    public MeanSquareError(
         Variable<?> predictions,
         Variable<?> targets
     ) {
@@ -56,7 +55,12 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
         double sumOfSquares = 0;
         var length = predictedData.totalSize();
         for (int i = 0; i < length; i++) {
-            sumOfSquares += Math.pow((predictedData.dataAt(i) - targetData.dataAt(i)), 2);
+            double error = predictedData.dataAt(i) - targetData.dataAt(i);
+            sumOfSquares += error * error;
+        }
+
+        if (!Double.isFinite(sumOfSquares)) {
+            return new Scalar(Double.MAX_VALUE);
         }
 
         return new Scalar(sumOfSquares / length);
@@ -71,13 +75,14 @@ public class MeanSquaredError extends AbstractVariable<Scalar> {
         var otherParentData = parent == predictions ? ctx.data(targets) : ctx.data(predictions);
 
         var length = parentData.totalSize();
-        double[] grad = new double[length];
-        double scale = ctx.gradient(this).dataAt(0) / length;
+        var parentGradient = parentData.createWithSameDimensions();
+        double scale = 2 * ctx.gradient(this).dataAt(0) / length;
         for (int i = 0; i < length; i++) {
-            grad[i] = scale * 2 * (parentData.dataAt(i) - otherParentData.dataAt(i));
+            double error = parentData.dataAt(i) - otherParentData.dataAt(i);
+            parentGradient.setDataAt(i, scale * error);
         }
 
-        return new Vector(grad);
+        return parentGradient;
     }
 
     private void validateDimensions(Variable<?> predictions, Variable<?> targets) {
