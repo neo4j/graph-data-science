@@ -69,6 +69,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Scalar apply(ComputationContext ctx) {
+        // manually call forward as `predictions` is not registered as a parent
         var predictionsMatrix = ctx.forward(predictions);
         var labelsVector = ctx.data(labels);
 
@@ -85,6 +86,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+        // manually call forward as `predictions` is not registered as a parent
         var predMatrix = ctx.forward(predictions);
         var labelsVector = ctx.data(labels);
         int numberOfExamples = labelsVector.length();

@@ -52,10 +52,11 @@ public class EWiseAddMatrixScalar extends AbstractVariable<Matrix> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+        Matrix selfGradient = ctx.gradient(this);
         if (parent == matrixVariable) {
-            return ctx.gradient(this);
+            return selfGradient;
         } else {
-            return new Scalar(ctx.gradient(this).aggregateSum());
+            return new Scalar(selfGradient.aggregateSum());
         }
     }
 }

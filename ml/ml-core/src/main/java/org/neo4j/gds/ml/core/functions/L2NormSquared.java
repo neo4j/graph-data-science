@@ -54,6 +54,7 @@ public class L2NormSquared extends SingleParentVariable<Matrix, Scalar> {
 
     @Override
     public Matrix gradientForParent(ComputationContext ctx) {
-        return ctx.data(parent).copy().scalarMultiply(2 * ctx.gradient(this).value());
+        double selfGradient = ctx.gradient(this).value();
+        return ctx.data(parent).scalarMultiply(2 * selfGradient);
     }
 }
