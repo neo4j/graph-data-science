@@ -36,7 +36,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -227,82 +226,28 @@ class WccTest {
     void memRecParallel() {
         GraphDimensions dimensions0 = ImmutableGraphDimensions.builder().nodeCount(0).build();
 
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage(),
-            MemoryRange.of(64)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage(),
-            MemoryRange.of(104)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage(),
-            MemoryRange.of(64)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage(),
-            MemoryRange.of(104)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage(),
-            MemoryRange.of(64)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage(),
-            MemoryRange.of(104)
-        );
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions0, 1).memoryUsage(), 64);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions0, 1).memoryUsage(), 104);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions0, 8).memoryUsage(), 64);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions0, 8).memoryUsage(), 104);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions0, 64).memoryUsage(), 64);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions0, 64).memoryUsage(), 104);
 
         GraphDimensions dimensions100 = ImmutableGraphDimensions.builder().nodeCount(100).build();
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage(),
-            MemoryRange.of(864)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage(),
-            MemoryRange.of(1704)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage(),
-            MemoryRange.of(864)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage(),
-            MemoryRange.of(1704)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage(),
-            MemoryRange.of(864)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage(),
-            MemoryRange.of(1704)
-        );
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100, 1).memoryUsage(), 864);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100, 1).memoryUsage(), 1704);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100, 8).memoryUsage(), 864);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100, 8).memoryUsage(), 1704);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100, 64).memoryUsage(), 864);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100, 64).memoryUsage(), 1704);
 
         GraphDimensions dimensions100B = ImmutableGraphDimensions.builder().nodeCount(100_000_000_000L).build();
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage(),
-            MemoryRange.of(800_122_070_392L)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage(),
-            MemoryRange.of(1_600_244_140_760L)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage(),
-            MemoryRange.of(800_122_070_392L)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage(),
-            MemoryRange.of(1_600_244_140_760L)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage(),
-            MemoryRange.of(800_122_070_392L)
-        );
-        assertMemoryRange(
-            Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage(),
-            MemoryRange.of(1_600_244_140_760L)
-        );
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100B, 1).memoryUsage(), 800_122_070_392L);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100B, 1).memoryUsage(), 1_600_244_140_760L);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100B, 8).memoryUsage(), 800_122_070_392L);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100B, 8).memoryUsage(), 1_600_244_140_760L);
+        assertMemoryRange(Wcc.memoryEstimation(false).estimate(dimensions100B, 64).memoryUsage(), 800_122_070_392L);
+        assertMemoryRange(Wcc.memoryEstimation(true).estimate(dimensions100B, 64).memoryUsage(), 1_600_244_140_760L);
     }
 
     private static Graph createTestGraph(Orientation orientation) {

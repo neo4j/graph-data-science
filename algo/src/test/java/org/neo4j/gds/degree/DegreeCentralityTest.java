@@ -29,6 +29,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -181,8 +182,7 @@ final class DegreeCentralityTest {
             () -> new DegreeCentralityFactory<>().memoryEstimation(config),
             10_000L,
             concurrency,
-            expectedMemory,
-            expectedMemory
+            MemoryRange.of(expectedMemory)
         );
     }
 

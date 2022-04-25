@@ -194,26 +194,6 @@ public final class TestSupport {
         });
     }
 
-    public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
-        assertMemoryRange(actual, expected.min, expected.max);
-    }
-
-    public static void assertMemoryRange(MemoryRange actual, long expected) {
-        assertMemoryRange(actual, expected, expected);
-    }
-
-    public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {
-        assertThat(actual)
-            .withFailMessage(
-                "Got (%s, %s), but expected (%s, %s)",
-                formatNumber(actual.min),
-                formatNumber(actual.max),
-                formatNumber(expectedMin),
-                formatNumber(expectedMax)
-            )
-            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
-    }
-
     public static void assertDoubleValues(TestGraph graph, Function<Long, Double> actualValues, Map<String, Double> expectedValues, double delta) {
         expectedValues.forEach((variable, expectedValue) -> {
             Double actualValue = actualValues.apply(graph.toMappedNodeId(variable));
@@ -266,7 +246,7 @@ public final class TestSupport {
         int concurrency,
         MemoryRange expected
     ) {
-        assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expected.min, expected.max);
+        assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expected);
     }
 
     public static void assertMemoryEstimation(
@@ -276,46 +256,27 @@ public final class TestSupport {
         int concurrency,
         MemoryRange expected
     ) {
-        assertMemoryEstimation(actualMemoryEstimation, nodeCount, relationshipCount, concurrency, expected.min, expected.max);
+        var actual = actualMemoryEstimation
+            .get().estimate(GraphDimensions.of(nodeCount, relationshipCount), concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        long nodeCount,
-        int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
-    ) {
-       assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expectedMinBytes, expectedMaxBytes);
+    public static void assertMemoryRange(MemoryRange actual, long expected) {
+        assertMemoryRange(actual, expected, expected);
     }
 
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        long nodeCount,
-        long relationshipCount,
-        int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
-    ) {
-        assertMemoryEstimation(
-            actualMemoryEstimation,
-            GraphDimensions.of(nodeCount, relationshipCount),
-            concurrency,
-            expectedMinBytes,
-            expectedMaxBytes
-        );
+    public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {
+        assertThat(actual)
+            .withFailMessage(
+                "Got (%s, %s), but expected (%s, %s)",
+                formatNumber(actual.min),
+                formatNumber(actual.max),
+                formatNumber(expectedMin),
+                formatNumber(expectedMax)
+            )
+            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        GraphDimensions dimensions,
-        int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
-    ) {
-        var actual = actualMemoryEstimation.get().estimate(dimensions, concurrency).memoryUsage();
-        assertMemoryRange(actual, expectedMinBytes, expectedMaxBytes);
-    }
 
     public static void assertTransactionTermination(Executable executable) {
         TransactionTerminatedException exception = assertThrows(
@@ -363,7 +324,7 @@ public final class TestSupport {
                 softly.assertThatCode(() ->
                     assertMemoryRange(
                         MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")),
-                        expected
+                        expected.min, expected.max
                     )
                 ).doesNotThrowAnyException();
                 var actualNodeCount = (long) row.getNumber("nodeCount");

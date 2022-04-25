@@ -310,7 +310,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, expectedRange);
+        assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
     }
 
     @ParameterizedTest(name = "{0}")
@@ -337,7 +337,7 @@ class LinkPredictionTrainTest {
             .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
-        assertMemoryRange(actualRange, expectedRange);
+        assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
     }
 
     @ParameterizedTest

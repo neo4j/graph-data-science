@@ -37,6 +37,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -614,8 +615,7 @@ class PageRankTest {
             nodeCount,
             relationshipCount,
             concurrency,
-            expectedMinBytes,
-            expectedMaxBytes
+            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
         );
     }
 
@@ -652,8 +652,7 @@ class PageRankTest {
             nodeCount,
             relationshipCount,
             4,
-            241_286_621_640L,
-            241_286_621_640L
+            MemoryRange.of(241_286_621_640L, 241_286_621_640L)
         );
     }
 

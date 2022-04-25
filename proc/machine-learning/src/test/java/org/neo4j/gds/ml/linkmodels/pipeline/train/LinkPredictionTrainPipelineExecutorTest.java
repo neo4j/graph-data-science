@@ -473,7 +473,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .estimate(graphDimensions, config.concurrency())
             .memoryUsage();
 
-        assertMemoryRange(actualRange, expectedRange);
+        assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
     }
 
     @Test

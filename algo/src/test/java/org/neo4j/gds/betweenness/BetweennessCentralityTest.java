@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
@@ -176,8 +177,7 @@ class BetweennessCentralityTest {
             () -> new BetweennessCentralityFactory<>().memoryEstimation(DEFAULT_CONFIG),
             100_000L,
             concurrency,
-            expectedMinBytes,
-            expectedMaxBytes
+            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
         );
     }
 }

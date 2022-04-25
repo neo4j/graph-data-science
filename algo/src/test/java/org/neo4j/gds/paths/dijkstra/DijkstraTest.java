@@ -30,6 +30,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -87,8 +88,7 @@ final class DijkstraTest {
             () -> Dijkstra.memoryEstimation(trackRelationships),
             nodeCount,
             1,
-            expectedBytes,
-            expectedBytes
+            MemoryRange.of(expectedBytes)
         );
     }
 
