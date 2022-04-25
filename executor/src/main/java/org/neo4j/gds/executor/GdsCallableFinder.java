@@ -42,10 +42,7 @@ public final class GdsCallableFinder {
         "org.neo4j.gds"
     );
 
-    private static final List<String> DEFAULT_PACKAGE_BLACKLIST = List.of(
-        "org.neo4j.gds.pregel",
-        "org.neo4j.gds.test"
-    );
+    private static final List<String> DEFAULT_PACKAGE_BLACKLIST = List.of("org.neo4j.gds.pregel");
 
     public static Stream<GdsCallableDefinition> findAll() {
         return findAll(DEFAULT_PACKAGE_BLACKLIST);
