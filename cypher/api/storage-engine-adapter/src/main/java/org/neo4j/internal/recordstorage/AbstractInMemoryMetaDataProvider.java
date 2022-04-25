@@ -23,7 +23,6 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.KernelVersion;
 import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.MetadataProvider;
-import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
 
 import java.io.IOException;
@@ -57,11 +56,6 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
     @Override
     public long getCheckpointLogVersion() {
         return this.logVersionRepository.getCheckpointLogVersion();
-    }
-
-    @Override
-    public StoreId getStoreId() {
-        return StoreId.UNKNOWN;
     }
 
     @Override

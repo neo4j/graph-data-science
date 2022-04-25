@@ -23,6 +23,7 @@ import org.neo4j.internal.recordstorage.AbstractInMemoryMetaDataProvider;
 import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
@@ -116,5 +117,10 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     @Override
     public void flush(CursorContext cursorContext) {
         this.transactionIdStore().flush(cursorContext);
+    }
+
+    @Override
+    public StoreId getStoreId() {
+        return StoreId.UNKNOWN;
     }
 }

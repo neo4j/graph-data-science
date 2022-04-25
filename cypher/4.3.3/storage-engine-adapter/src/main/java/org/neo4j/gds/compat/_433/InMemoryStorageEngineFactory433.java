@@ -254,4 +254,14 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
             cursorContext
         );
     }
+
+    @Override
+    public StoreId storeId(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext
+    ) {
+        return metadataProvider.getStoreId();
+    }
 }

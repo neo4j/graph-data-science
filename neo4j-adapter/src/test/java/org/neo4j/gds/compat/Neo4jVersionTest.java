@@ -22,13 +22,14 @@ package org.neo4j.gds.compat;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.kernel.internal.CustomVersionSetting;
 import org.neo4j.kernel.internal.Version;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class Neo4jVersionTest {
-    private static final String CUSTOM_VERSION_SETTING = "unsupported.neo4j.custom.version";
+    private static final String CUSTOM_VERSION_SETTING = CustomVersionSetting.getConfigKey();
 
     @ParameterizedTest
     @CsvSource({

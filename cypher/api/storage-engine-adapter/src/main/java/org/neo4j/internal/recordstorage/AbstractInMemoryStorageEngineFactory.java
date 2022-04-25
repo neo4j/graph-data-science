@@ -26,7 +26,6 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.storageengine.api.StorageFilesState;
-import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.migration.RollingUpgradeCompatibility;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 
@@ -59,13 +58,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
     @Override
     public RollingUpgradeCompatibility rollingUpgradeCompatibility() {
         return null;
-    }
-
-    @Override
-    public StoreId storeId(
-        FileSystemAbstraction fs, DatabaseLayout databaseLayout, PageCache pageCache, CursorContext cursorContext
-    ) {
-        return StoreId.UNKNOWN;
     }
 
     @Override
