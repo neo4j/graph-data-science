@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.AfterEach;
@@ -46,16 +46,12 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -68,7 +64,7 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
-    private static String PIPELINE_NAME = "pipe";
+    private static final String PIPELINE_NAME = "pipe";
     private static final String GRAPH_NAME = "g";
 
     @Neo4jGraph
@@ -118,7 +114,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void trainsAModel() {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "pageRank",
+            "testProc",
             Map.of("mutateProperty", "pr")
         ));
         pipeline.addFeatureStep(NodeFeatureStep.of("array"));
@@ -160,12 +156,14 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
             assertThat(customInfo.metrics().get(metric).validation().toMap())
-                .usingComparatorForType(new DoubleComparator(1e-10), Double.class)
-                .isEqualTo(Map.of("avg",0.24999999687500002, "max",0.49999999375000004, "min",0.0));
+                .usingRecursiveComparison()
+                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
 
             assertThat(customInfo.metrics().get(metric).train().toMap())
-                .usingComparatorForType(new DoubleComparator(1e-10), Double.class)
-                .isEqualTo(Map.of("avg",0.399999996, "max",0.799999992, "min",0.0));
+                .usingRecursiveComparison()
+                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
 
             assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
             assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
@@ -307,13 +305,12 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
         var pipeline = insertPipelineIntoCatalog();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "pageRank",
+            "testProc",
             Map.of("mutateProperty", "pr")
         ));
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "wcc",
-            Map.of("mutateProperty", "myNewProp", "threshold", 0.42F, "relationshipWeightProperty", "weight")
-        ));
+            "testProc", Map.of("mutateProperty", "myNewProp"))
+        );
         pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
 
         for (TunableTrainerConfig tunableConfig : tunableConfigs) {
