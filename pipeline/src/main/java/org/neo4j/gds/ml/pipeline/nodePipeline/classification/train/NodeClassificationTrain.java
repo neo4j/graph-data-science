@@ -312,7 +312,7 @@ public final class NodeClassificationTrain {
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.methodName(), modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
 

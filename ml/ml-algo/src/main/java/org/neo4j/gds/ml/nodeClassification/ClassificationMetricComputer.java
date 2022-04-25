@@ -29,7 +29,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.function.LongUnaryOperator;
@@ -120,7 +119,7 @@ public final class ClassificationMetricComputer {
             .rangePerNode(
                 "classifier runtime",
                 nodeCount -> ClassifierFactory.runtimeOverheadMemoryEstimation(
-                    TrainingMethod.valueOf(config.methodName()),
+                    config.method(),
                     batchSize,
                     fudgedClassCount,
                     fudgedFeatureCount,
