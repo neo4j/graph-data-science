@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.functions;
 
 import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.core.ComputationContext;
@@ -69,6 +70,21 @@ class LogisticLossTest implements FiniteDifferenceTest {
             : new LogisticLoss(weights, predictions, features, targets);
 
         finiteDifferenceShouldApproximateGradient(weights, loss);
+    }
+
+    @Test
+    void considerSelfGradient() {
+        var features = Constant.matrix(new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71}, 2, 3);
+        var targets = Constant.vector(new double[]{1.0, 0.0});
+        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0}, 1, 3));
+        var bias = Weights.ofScalar(2.5);
+
+        var predictions = new Sigmoid<>(new MatrixMultiplyWithTransposedSecondOperand(features, weights));
+
+        var loss = new LogisticLoss(weights, bias, predictions, features, targets);
+        var chainedLoss = new Sigmoid<>(loss);
+
+        finiteDifferenceShouldApproximateGradient(weights, chainedLoss);
     }
 
     @Override

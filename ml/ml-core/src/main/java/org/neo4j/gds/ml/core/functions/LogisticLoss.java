@@ -128,6 +128,8 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
+        var selfGradient = ctx.gradient(this).value();
+
         if (parent == weights) {
             ctx.forward(predictions);
             var predVector = ctx.data(predictions);
@@ -141,7 +143,7 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
             for (int idx = 0; idx < numberOfExamples; idx++) {
                 double errorPerExample = (predVector.dataAt(idx) - targetVector.dataAt(idx)) / numberOfExamples;
                 for (int feature = 0; feature < featureCount; feature++) {
-                    gradient.addDataAt(feature, errorPerExample * featuresTensor.dataAt(idx, feature));
+                    gradient.addDataAt(feature, selfGradient * errorPerExample * featuresTensor.dataAt(idx, feature));
                 }
             }
             return gradient;
@@ -154,13 +156,14 @@ public class LogisticLoss extends AbstractVariable<Scalar> {
 
             for (int idx = 0; idx < numberOfExamples; idx++) {
                 double errorPerExample = (predVector.dataAt(idx) - targetVector.dataAt(idx));
-                gradient.addDataAt(0, errorPerExample);
+                gradient.addDataAt(0, selfGradient * errorPerExample);
             }
 
             return gradient.scalarMultiplyMutate(1.0D / numberOfExamples);
         } else {
-            // assume feature and target variables do not require gradient
-            return ctx.data(parent).createWithSameDimensions();
+            throw new IllegalStateException(
+                "The gradient should only be computed for the bias and the weights parents, but got " + parent.render()
+            );
         }
     }
 
