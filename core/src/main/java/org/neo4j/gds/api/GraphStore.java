@@ -172,6 +172,10 @@ public interface GraphStore {
         return getGraph(nodeLabels(), Arrays.asList(relationshipType), Optional.empty());
     }
 
+    default Graph getGraph(String relationshipProperty) {
+        return getGraph(nodeLabels(), relationshipTypes(), Optional.of(relationshipProperty));
+    }
+
     default Graph getGraph(RelationshipType relationshipType, Optional<String> relationshipProperty) {
         return getGraph(nodeLabels(), singletonList(relationshipType), relationshipProperty);
     }

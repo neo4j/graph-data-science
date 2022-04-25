@@ -251,6 +251,11 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
+    public Graph getGraph(String relationshipProperty) {
+        return graphStore.getGraph(relationshipProperty);
+    }
+
+    @Override
     public Graph getGraph(
         RelationshipType relationshipType, Optional<String> relationshipProperty
     ) {
