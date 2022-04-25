@@ -90,6 +90,9 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
         var predMatrix = ctx.forward(predictions);
         var labelsVector = ctx.data(labels);
         int numberOfExamples = labelsVector.length();
+
+        var selfGradient = ctx.gradient(this).value();
+
         if (parent == weights) {
             var weightsMatrix = ctx.data(weights);
             var featureMatrix = ctx.data(features);
@@ -104,7 +107,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
                     for (int feature = 0; feature < featureCount; feature++) {
-                        gradient.addDataAt(classIdx, feature, errorPerExample * featureMatrix.dataAt(row, feature));
+                        gradient.addDataAt(classIdx, feature, selfGradient * errorPerExample * featureMatrix.dataAt(row, feature));
                     }
                 }
             }
@@ -120,7 +123,7 @@ public class ReducedCrossEntropyLoss extends AbstractVariable<Scalar> {
                     double predictedClassProbability = predMatrix.dataAt(row, classIdx);
                     var indicatorIsTrueClass = trueClass == classIdx ? 1.0 : 0.0;
                     var errorPerExample = (predictedClassProbability - indicatorIsTrueClass) / numberOfExamples;
-                    gradient.addDataAt(classIdx, errorPerExample);
+                    gradient.addDataAt(classIdx, selfGradient * errorPerExample);
                 }
             }
             return gradient;

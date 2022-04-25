@@ -172,6 +172,35 @@ class ReducedCrossEntropyLossTest implements FiniteDifferenceTest {
         finiteDifferenceShouldApproximateGradient(List.of(bias, weights), loss);
     }
 
+    @Test
+    void considerSelfGradient() {
+        var features = Constant.matrix(
+            new double[]{0.23, 0.52, 0.62, 0.32, 0.64, 0.71, 0.29, -0.52, 0.12, -0.92, 0.6, -0.11},
+            3,
+            4
+        );
+        var labels = Constant.vector(new double[]{1.0, 0.0, 2.0});
+
+        var weights = new Weights<>(new Matrix(new double[]{0.35, 0.41, 1.0, 0.1, 0.54, 0.12, 0.81, 0.7}, 2, 4));
+        var bias = Weights.ofVector(0.37, 0.37);
+
+        var weightedFeatures = new MatrixMultiplyWithTransposedSecondOperand(features, weights);
+        var affineVariable = new MatrixVectorSum(weightedFeatures, bias);
+
+        var predictions = new ReducedSoftmax(affineVariable);
+
+        var loss = new ReducedCrossEntropyLoss(
+            predictions,
+            weights,
+            bias,
+            features,
+            labels
+        );
+        var chainedLoss = new Sigmoid<>(loss);
+
+        finiteDifferenceShouldApproximateGradient(List.of(bias, weights), chainedLoss);
+    }
+
     @Override
     public double epsilon() {
         return 1e-7;
