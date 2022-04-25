@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import java.util.Comparator;
+
 public enum LinkMetric implements Metric {
     AUCPR {
         @Override
-        public boolean higherIsBetter() {
-            return true;
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
         }
     };
 

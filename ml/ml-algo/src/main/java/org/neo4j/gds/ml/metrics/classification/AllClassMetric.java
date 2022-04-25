@@ -24,6 +24,7 @@ import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -31,8 +32,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public enum AllClassMetric implements ClassificationMetric {
     F1_WEIGHTED {
         @Override
-        public boolean higherIsBetter() {
-            return true;
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
         }
 
         @Override
@@ -55,8 +56,8 @@ public enum AllClassMetric implements ClassificationMetric {
     },
     F1_MACRO {
         @Override
-        public boolean higherIsBetter() {
-            return true;
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
         }
 
         @Override
@@ -78,8 +79,8 @@ public enum AllClassMetric implements ClassificationMetric {
     },
     ACCURACY {
         @Override
-        public boolean higherIsBetter() {
-            return true;
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
         }
 
         @Override

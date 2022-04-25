@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.metrics.classification;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -91,7 +92,7 @@ public class Recall implements ClassificationMetric {
     }
 
     @Override
-    public boolean higherIsBetter() {
-        return true;
+    public Comparator<Double> comparator() {
+        return Comparator.naturalOrder();
     }
 }

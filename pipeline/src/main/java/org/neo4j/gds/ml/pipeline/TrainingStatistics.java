@@ -53,11 +53,9 @@ public final class TrainingStatistics {
     public TrainerConfig bestParameters() {
         var modelStats = validationStats.getMetricStats(evaluationMetric());
 
-        if (evaluationMetric().higherIsBetter()) {
-            return Collections.max(modelStats, ModelStats.COMPARE_AVERAGE).params();
-        } else {
-            return Collections.min(modelStats, ModelStats.COMPARE_AVERAGE).params();
-        }
+        return Collections
+            .max(modelStats, (a, b) -> evaluationMetric().comparator().compare(a.avg(), b.avg()))
+            .params();
     }
 
     @TestOnly

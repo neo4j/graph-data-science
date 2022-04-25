@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import java.util.Comparator;
+
 public interface Metric {
     String name();
 
-    boolean higherIsBetter();
+    Comparator<Double> comparator();
 }
