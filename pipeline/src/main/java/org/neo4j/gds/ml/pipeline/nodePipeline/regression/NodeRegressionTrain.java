@@ -56,7 +56,7 @@ public final class NodeRegressionTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
-    public static List<Task> progressTask(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
         return List.of(
             Tasks.leaf("Shuffle and Split"),
             Tasks.iterativeFixed(
