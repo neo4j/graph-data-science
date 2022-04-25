@@ -71,16 +71,14 @@ public class CrossEntropyLoss extends AbstractVariable<Scalar> {
             Matrix gradient = predictionsMatrix.createWithSameDimensions();
             var targetsVector = ctx.data(targets);
 
-            var multiplier = -1.0 / gradient.rows();
+            var multiplier = - ctx.gradient(this).value() / gradient.rows();
             for (int row = 0; row < gradient.rows(); row++) {
                 var trueClass = (int) targetsVector.dataAt(row);
                 var predictedProbabilityForTrueClass = predictionsMatrix.dataAt(row * predictionsMatrix.cols() + trueClass);
 
                 // Compare to a threshold value rather than `0`, very small probability can result in setting infinite gradient values.
                 if (predictedProbabilityForTrueClass > PREDICTED_PROBABILITY_THRESHOLD) {
-                    gradient.setDataAt(
-                        row * predictionsMatrix.cols() + trueClass,
-                        multiplier / predictedProbabilityForTrueClass
+                    gradient.setDataAt(row, trueClass, multiplier / predictedProbabilityForTrueClass
                     );
                 }
             }

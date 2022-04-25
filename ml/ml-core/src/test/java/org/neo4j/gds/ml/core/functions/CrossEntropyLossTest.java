@@ -76,8 +76,28 @@ class CrossEntropyLossTest implements FiniteDifferenceTest {
     }
 
     @Test
-    void infiniteSmallProbabilities() {
+    void considerSelfGradient() {
+        var targets = Constant.vector(new double[]{1.0, 2.0, 0.0});
+        var predictions = new Weights<>(
+            new Matrix(
+                new double[]{
+                    0.35, 0.65, 0.0,
+                    0.45, 0.45, 0.1,
+                    0.14, 0.66, 0.2
+                },
+                3, 3
+            )
+        );
 
+        var loss = new CrossEntropyLoss(predictions, targets);
+        var chainedLoss = new Sigmoid<>(loss);
+
+        finiteDifferenceShouldApproximateGradient(predictions, chainedLoss);
+    }
+
+
+    @Test
+    void infiniteSmallProbabilities() {
         var predictions = new Weights<>(new Matrix(new double[]{5.277E-321, 5.277E-321}, 1, 2));
         var targets = Constant.vector(new double[]{1});
 
