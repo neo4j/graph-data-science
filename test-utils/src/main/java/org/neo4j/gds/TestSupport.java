@@ -321,12 +321,14 @@ public final class TestSupport {
             query,
             queryParameters,
             (transaction, row) -> {
-                softly.assertThatCode(() ->
+                try {
                     assertMemoryRange(
                         MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")),
                         expected.min, expected.max
-                    )
-                ).doesNotThrowAnyException();
+                    );
+                } catch (Throwable e) {
+                    softly.fail(e.getMessage());
+                }
                 var actualNodeCount = (long) row.getNumber("nodeCount");
                 var actualRelationshipCount = (long) row.getNumber("relationshipCount");
                 softly.assertThat(expectedNodeCount)
