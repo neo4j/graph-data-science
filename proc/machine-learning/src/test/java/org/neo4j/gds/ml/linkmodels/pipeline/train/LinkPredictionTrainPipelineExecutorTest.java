@@ -56,7 +56,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
@@ -178,7 +177,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(actualModel.name()).isEqualTo("model");
 
-            assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
+            assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrainingPipeline.MODEL_TYPE);
             assertThat(actualModel.trainConfig()).isEqualTo(config);
             // length of the linkFeatures
             assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);

@@ -27,9 +27,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.PipelineCompanion;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -40,12 +39,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
+import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.train", description = "Trains a link prediction model based on a pipeline", executionMode = TRAIN)
 public class LinkPredictionPipelineTrainProc extends TrainProc<
     LinkPredictionTrainPipelineExecutor,
-    LinkPredictionTrainResult,
+    LinkPredictionTrainPipelineResult,
     LinkPredictionTrainConfig,
     LinkPredictionPipelineTrainProc.LPTrainResult
     > {
@@ -82,17 +82,17 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
     @Override
     protected String modelType() {
-        return LinkPredictionTrain.MODEL_TYPE;
+        return LinkPredictionTrainingPipeline.MODEL_TYPE;
     }
 
     @Override
-    protected Model<?, ?, ?> extractModel(LinkPredictionTrainResult algoResult) {
+    protected Model<?, ?, ?> extractModel(LinkPredictionTrainPipelineResult algoResult) {
         return algoResult.model();
     }
 
     @Override
     protected LPTrainResult constructProcResult(
-        ComputationResult<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainResult, LinkPredictionTrainConfig> computationResult
+        ComputationResult<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainPipelineResult, LinkPredictionTrainConfig> computationResult
     ) {
         return new LPTrainResult(computationResult.result(), computationResult.computeMillis());
     }
@@ -102,7 +102,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public LPTrainResult(LinkPredictionTrainResult algoResult, long trainMillis) {
+        public LPTrainResult(LinkPredictionTrainPipelineResult algoResult, long trainMillis) {
             super(algoResult.model(), trainMillis);
 
             this.modelSelectionStats = algoResult.trainingStatistics().toMap();

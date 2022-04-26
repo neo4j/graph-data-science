@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -48,8 +47,6 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
@@ -57,7 +54,6 @@ import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.List;
-import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -67,8 +63,6 @@ import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabels
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LinkPredictionTrain {
-
-    public static final String MODEL_TYPE = "LinkPrediction";
 
     private final Graph trainGraph;
     private final Graph validationGraph;
@@ -119,7 +113,6 @@ public final class LinkPredictionTrain {
     }
 
     public LinkPredictionTrainResult compute() {
-
         progressTracker.beginSubTask("Extract train features");
         var trainData = extractFeaturesAndLabels(
             trainGraph,
@@ -169,13 +162,7 @@ public final class LinkPredictionTrain {
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
-        var model = createModel(
-            trainingStatistics.bestParameters(),
-            classifier.data(),
-            trainingStatistics.metricsForWinningModel()
-        );
-
-        return LinkPredictionTrainResult.of(model, trainingStatistics);
+        return ImmutableLinkPredictionTrainResult.of(classifier, trainingStatistics);
     }
 
     @NotNull
@@ -344,26 +331,6 @@ public final class LinkPredictionTrain {
             scoreConsumer.accept(
                 metric,
                 metric.compute(signedProbabilities, config.negativeClassWeight())
-            )
-        );
-    }
-
-    private Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> createModel(
-        TrainerConfig bestParameters,
-        Classifier.ClassifierData classifierData,
-        Map<Metric, BestMetricData> winnerMetrics
-    ) {
-        return Model.of(
-            config.username(),
-            config.modelName(),
-            MODEL_TYPE,
-            trainGraph.schema(),
-            classifierData,
-            config,
-            LinkPredictionModelInfo.of(
-                bestParameters,
-                winnerMetrics,
-                LinkPredictionPredictPipeline.from(pipeline)
             )
         );
     }
