@@ -174,11 +174,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.knn.stream.estimate`
 | `gds.knn.write`
 | `gds.knn.write.estimate`
-.4+<.^|<<algorithms-bfs, BFS>>
+.6+<.^|<<algorithms-bfs, BFS>>
 | `gds.bfs.mutate`
 | `gds.bfs.mutate.estimate`
 | `gds.bfs.stream`
 | `gds.bfs.stream.estimate`
+| `gds.bfs.stats`
+| `gds.bfs.stats.estimate`
 .4+<.^|<<algorithms-dfs, Depth First Search>>
 | `gds.dfs.mutate`
 | `gds.dfs.mutate.estimate`

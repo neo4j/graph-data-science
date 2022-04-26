@@ -108,6 +108,46 @@ include::specific-configuration.adoc[]
 |===
 ======
 
+[.include-with-stats]
+======
+.Run Breadth First Search in stats mode:
+[source, cypher, role=noplay]
+----
+CALL gds.bfs.stats(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::../common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution.
+[opts="header",cols="2,1,1m,1,4"]
+|===
+| Name                                                          | Type              | Default | Optional | Description
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
+|===
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
 ====
 
 [[algorithms-bfs-examples]]

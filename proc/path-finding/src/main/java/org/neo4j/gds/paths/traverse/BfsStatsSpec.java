@@ -24,31 +24,36 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.bfs.mutate", description = BfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutateConfig, Stream<MutateResult>, BfsAlgorithmFactory<BfsMutateConfig>> {
+@GdsCallable(name = "gds.bfs.stats", description = BfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+public class BfsStatsSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStatsConfig, Stream<StandardStatsResult>, BfsAlgorithmFactory<BfsStatsConfig>> {
     @Override
     public String name() {
-        return "gds.bfs.mutate";
+        return "gds.bfs.stats";
     }
 
     @Override
-    public BfsAlgorithmFactory<BfsMutateConfig> algorithmFactory() {
+    public BfsAlgorithmFactory<BfsStatsConfig> algorithmFactory() {
         return new BfsAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<BfsMutateConfig> newConfigFunction() {
-        return (__, config) -> BfsMutateConfig.of(config);
+    public NewConfigFunction<BfsStatsConfig> newConfigFunction() {
+        return (__, config) -> BfsStatsConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, Stream<MutateResult>> computationResultConsumer() {
-        return new BfsMutateComputationResultConsumer();
+    public ComputationResultConsumer<BFS, HugeLongArray, BfsStatsConfig, Stream<StandardStatsResult>> computationResultConsumer() {
+        return (computationResult, executionContext) -> Stream.of(new StandardStatsResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            0,
+            computationResult.config().toMap()
+        ));
     }
 }

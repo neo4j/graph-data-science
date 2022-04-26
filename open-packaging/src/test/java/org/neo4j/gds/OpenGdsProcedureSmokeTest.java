@@ -235,6 +235,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.bfs.mutate.estimate",
         "gds.bfs.stream",
         "gds.bfs.stream.estimate",
+        "gds.bfs.stats",
+        "gds.bfs.stats.estimate",
 
         "gds.debug.sysInfo",
 
@@ -442,7 +444,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 302;
+        int expectedCount = 304;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
