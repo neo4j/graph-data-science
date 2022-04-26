@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineAlgorithmFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -42,11 +41,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor.NodeClassificationTrainPipelineResult;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
 public class NodeClassificationPipelineTrainProc extends TrainProc<
     NodeClassificationTrainPipelineExecutor,
-    NodeClassificationTrainResult,
+    NodeClassificationTrainPipelineResult,
     NodeClassificationPipelineTrainConfig,
     NodeClassificationPipelineTrainProc.NCTrainResult
     > {
@@ -87,12 +87,12 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    protected NCTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, NodeClassificationTrainResult, NodeClassificationPipelineTrainConfig> computationResult) {
+    protected NCTrainResult constructProcResult(ComputationResult<NodeClassificationTrainPipelineExecutor, NodeClassificationTrainPipelineResult, NodeClassificationPipelineTrainConfig> computationResult) {
         return new NCTrainResult(computationResult.result(), computationResult.computeMillis());
     }
 
     @Override
-    protected Model<?, ?, ?> extractModel(NodeClassificationTrainResult algoResult) {
+    protected Model<?, ?, ?> extractModel(NodeClassificationTrainPipelineResult algoResult) {
         return algoResult.model();
     }
 
@@ -100,9 +100,9 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
 
         public final Map<String, Object> modelSelectionStats;
 
-        public NCTrainResult(NodeClassificationTrainResult algoResult, long trainMillis) {
-            super(algoResult.model(), trainMillis);
-            this.modelSelectionStats = algoResult.trainingStatistics().toMap();
+        public NCTrainResult(NodeClassificationTrainPipelineResult pipelineResult, long trainMillis) {
+            super(pipelineResult.model(), trainMillis);
+            this.modelSelectionStats = pipelineResult.trainingStatistics().toMap();
         }
     }
 }
