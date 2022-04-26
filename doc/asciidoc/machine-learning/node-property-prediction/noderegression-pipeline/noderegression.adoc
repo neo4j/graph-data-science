@@ -1,4 +1,28 @@
 [[noderegression-pipelines]]
 = Node regression pipelines
+:max-trials: 10
 
-// TODO add config content
+[abstract]
+--
+This section describes Node regression pipelines in the Neo4j Graph Data Science library.
+--
+
+
+Node Regression is a common machine learning task applied to graphs: training models to predict node property values.
+Concretely, Node Regression models are used to predict the value of node property based on other node properties.
+During training, the property to predict is referred to as the target property.
+
+In GDS, we have Node Regression pipelines which offer an end-to-end workflow, from feature extraction to predicting node property values.
+The training pipelines reside in the <<pipeline-catalog-ops,pipeline catalog>>.
+When a training pipeline is <<nodeclassification-pipelines-train,executed>>, a regression model is created and stored in the <<model-catalog-ops,model catalog>>.
+
+A training pipeline is a sequence of two phases:
+[upperroman]
+. The graph is augmented with new node properties in a series of steps.
+. The augmented graph is used for training a node regression model.
+
+This segment is divided into the following pages:
+
+* <<noderegression-pipelines-config, Configuring the pipeline>>
+
+include::config.adoc[leveloffset =+ 1]
