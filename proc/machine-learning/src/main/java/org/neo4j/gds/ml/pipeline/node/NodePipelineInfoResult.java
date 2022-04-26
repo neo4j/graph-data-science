@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.classification;
+package org.neo4j.gds.ml.pipeline.node;
 
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class PipelineInfoResult {
+public class NodePipelineInfoResult {
     public final String name;
     public final List<Map<String, Object>> nodePropertySteps;
     public final List<String> featureProperties;
@@ -35,7 +35,7 @@ public class PipelineInfoResult {
     public final Map<String, Object> autoTuningConfig;
     public final Object parameterSpace;
 
-    PipelineInfoResult(String pipelineName, NodeClassificationTrainingPipeline pipeline) {
+    public NodePipelineInfoResult(String pipelineName, NodePropertyTrainingPipeline pipeline) {
         this.name = pipelineName;
         this.nodePropertySteps = pipeline
             .nodePropertySteps()

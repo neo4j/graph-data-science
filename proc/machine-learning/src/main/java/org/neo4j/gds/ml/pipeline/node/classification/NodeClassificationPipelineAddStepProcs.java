@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.node.classification;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
@@ -36,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
 
-    public static PipelineInfoResult addNodeProperty(
+    public static NodePipelineInfoResult addNodeProperty(
         String username,
         String pipelineName,
         String taskName,
@@ -46,10 +47,10 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
 
         pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
 
-        return new PipelineInfoResult(pipelineName, pipeline);
+        return new NodePipelineInfoResult(pipelineName, pipeline);
     }
 
-    public static PipelineInfoResult selectFeatures(
+    public static NodePipelineInfoResult selectFeatures(
         String username,
         String pipelineName,
         Object nodeProperties
@@ -71,12 +72,12 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
             throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
         }
 
-        return new PipelineInfoResult(pipelineName, pipeline);
+        return new NodePipelineInfoResult(pipelineName, pipeline);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing node classification training pipeline.")
-    public Stream<PipelineInfoResult> addNodeProperty(
+    public Stream<NodePipelineInfoResult> addNodeProperty(
         @Name("pipelineName") String pipelineName,
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
@@ -91,7 +92,7 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.selectFeatures", mode = READ)
     @Description("Add one or several features to an existing node classification training pipeline.")
-    public Stream<PipelineInfoResult> selectFeatures(
+    public Stream<NodePipelineInfoResult> selectFeatures(
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
     ) {

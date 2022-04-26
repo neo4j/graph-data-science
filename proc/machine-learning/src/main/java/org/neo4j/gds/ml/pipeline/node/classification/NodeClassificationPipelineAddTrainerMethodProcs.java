@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -40,7 +41,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addLogisticRegression", mode = READ)
     @Description("Add a logistic regression configuration to the parameter space of the node classification train pipeline.")
-    public Stream<PipelineInfoResult> addLogisticRegression(
+    public Stream<NodePipelineInfoResult> addLogisticRegression(
         @Name("pipelineName") String pipelineName,
         @Name(value = "config", defaultValue = "{}") Map<String, Object> config
     ) {
@@ -54,12 +55,12 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
             tunableTrainerConfig
         );
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.addRandomForest", mode = READ)
     @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
-    public Stream<PipelineInfoResult> addRandomForest(
+    public Stream<NodePipelineInfoResult> addRandomForest(
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> randomForestConfig
     ) {
@@ -73,6 +74,6 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
             tunableTrainerConfig
         );
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
 }

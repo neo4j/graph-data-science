@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.node.classification;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -36,13 +37,13 @@ public class NodeClassificationPipelineConfigureAutoTuningProc extends BaseProc 
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.configureAutoTuning", mode = READ)
     @Description("Configures the auto-tuning of the node classification pipeline.")
-    public Stream<PipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
+    public Stream<NodePipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
         return PipelineCompanion.configureAutoTuning(
             username(),
             pipelineName,
             configMap,
-            pipeline -> new PipelineInfoResult(pipelineName, (NodeClassificationTrainingPipeline) pipeline)
+            pipeline -> new NodePipelineInfoResult(pipelineName, (NodeClassificationTrainingPipeline) pipeline)
         );
     }
 
