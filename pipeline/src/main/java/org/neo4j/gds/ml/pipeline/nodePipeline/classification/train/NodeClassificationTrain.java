@@ -71,7 +71,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain {
 
-    private final Graph graph;
     private final NodeClassificationPipelineTrainConfig config;
     private final NodeClassificationTrainingPipeline pipeline;
     private final Features features;
@@ -230,7 +229,6 @@ public final class NodeClassificationTrain {
         }
 
         return new NodeClassificationTrain(
-            graph,
             pipeline,
             config,
             features,
@@ -244,7 +242,6 @@ public final class NodeClassificationTrain {
     }
 
     private NodeClassificationTrain(
-        Graph graph,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         Features features,
@@ -257,7 +254,6 @@ public final class NodeClassificationTrain {
     ) {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
-        this.graph = graph;
         this.pipeline = pipeline;
         this.config = config;
         this.features = features;
