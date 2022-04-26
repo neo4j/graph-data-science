@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
 
-class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
+class NodeClassificationPipelineAddStepProcsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() {
@@ -49,7 +49,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldAddNodePropertyStep() {
-        var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+        var result = NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
@@ -68,12 +68,12 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldSelectFeatures() {
-        NodeClassificationPipelineAddSteps.selectFeatures(
+        NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "myPipeline",
             "test"
         );
-        var result = NodeClassificationPipelineAddSteps.selectFeatures(
+        var result = NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "myPipeline",
             List.of("pr", "pr2")
@@ -87,7 +87,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void failOnIncompleteNodePropertyStepConfig() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "fastRP",
@@ -101,13 +101,13 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void failOnDuplicateMutateProperty() {
-        NodeClassificationPipelineAddSteps.addNodeProperty(
+        NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
@@ -120,7 +120,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void failOnUnexpectedConfigKeysInNodePropertyStepConfig() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
@@ -132,18 +132,18 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldAddNodeAndSelectFeatureProperties() {
-        NodeClassificationPipelineAddSteps.addNodeProperty(
+        NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        NodeClassificationPipelineAddSteps.selectFeatures(
+        NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "myPipeline",
             "pr"
         );
-        var result = NodeClassificationPipelineAddSteps.selectFeatures(
+        var result = NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "myPipeline",
             "pr2"
@@ -161,13 +161,13 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldAddTwoNodePropertySteps() {
-        NodeClassificationPipelineAddSteps.addNodeProperty(
+        NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
             Map.of("mutateProperty", "pr")
         );
-        var result = NodeClassificationPipelineAddSteps.addNodeProperty(
+        var result = NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
@@ -192,7 +192,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfPipelineDoesntExistForNodePropertyStep() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "ceci n'est pas une pipe",
             "pageRank",
@@ -204,7 +204,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowIfPipelineDoesntExistForFeatureStep() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "ceci n'est pas une pipe",
             "test"
@@ -215,7 +215,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void shouldThrowInvalidNodePropertyStepName() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "juggleSpoons",
@@ -227,7 +227,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @Test
     void failOnConfiguringReservedConfigFields() {
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "myPipeline",
             "pageRank",
@@ -243,7 +243,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldThrowIfAddingNodePropertyToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
 
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.addNodeProperty(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.addNodeProperty(
             getUsername(),
             "testPipe",
             "pageRank",
@@ -259,7 +259,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
     void shouldThrowIfAddingFeatureToANonPipeline() {
         PipelineCatalog.set(getUsername(), "testPipe", new LinkPredictionTrainingPipeline());
 
-        assertThatThrownBy(() -> NodeClassificationPipelineAddSteps.selectFeatures(
+        assertThatThrownBy(() -> NodeClassificationPipelineAddStepProcs.selectFeatures(
             getUsername(),
             "testPipe",
             "something"

@@ -20,16 +20,59 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
+
+    public static PipelineInfoResult addNodeProperty(
+        String username,
+        String pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
+
+        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
+
+        return new PipelineInfoResult(pipelineName, pipeline);
+    }
+
+    public static PipelineInfoResult selectFeatures(
+        String username,
+        String pipelineName,
+        Object nodeProperties
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
+
+        if (nodeProperties instanceof String) {
+            pipeline.addFeatureStep(NodeFeatureStep.of((String) nodeProperties));
+        } else if (nodeProperties instanceof List) {
+            var propertiesList = (List) nodeProperties;
+            for (Object o : propertiesList) {
+                if (!(o instanceof String)) {
+                    throw new IllegalArgumentException("The list `nodeProperties` is required to contain only strings.");
+                }
+
+                pipeline.addFeatureStep(NodeFeatureStep.of((String) o));
+            }
+        } else {
+            throw new IllegalArgumentException("The value of `nodeProperties` is required to be a list of strings.");
+        }
+
+        return new PipelineInfoResult(pipelineName, pipeline);
+    }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.addNodeProperty", mode = READ)
     @Description("Add a node property step to an existing node classification training pipeline.")
@@ -38,7 +81,7 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        return Stream.of(NodeClassificationPipelineAddSteps.addNodeProperty(
+        return Stream.of(addNodeProperty(
             username(),
             pipelineName,
             taskName,
@@ -52,6 +95,6 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         @Name("pipelineName") String pipelineName,
         @Name("nodeProperties") Object nodeProperties
     ) {
-        return Stream.of(NodeClassificationPipelineAddSteps.selectFeatures(username(), pipelineName, nodeProperties));
+        return Stream.of(selectFeatures(username(), pipelineName, nodeProperties));
     }
 }
