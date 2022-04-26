@@ -50,7 +50,7 @@ YIELD
 | pipelineName    | String  | The name of the created pipeline.
 |===
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 
 
@@ -121,7 +121,7 @@ YIELD
 | procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
 |===
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 
 
@@ -187,7 +187,7 @@ YIELD
 | nodeProperties         | List or String  | Configuration for splitting the relationships.
 |===
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 
 
@@ -279,7 +279,7 @@ YIELD
 | testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
 |===
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 
 
@@ -366,7 +366,7 @@ YIELD
 
 include::../../training-methods/logisticRegressionConfig.adoc[]
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 ======
 
@@ -401,7 +401,7 @@ YIELD
 
 include::../../training-methods//randomForestConfig.adoc[]
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 ======
 ====
@@ -498,7 +498,7 @@ YIELD
 |===
 
 
-include::pipelineInfoResult.adoc[]
+include::../pipelineInfoResult.adoc[]
 --
 
 
