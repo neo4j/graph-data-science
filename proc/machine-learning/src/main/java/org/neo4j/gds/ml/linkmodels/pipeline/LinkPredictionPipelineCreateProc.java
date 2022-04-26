@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class LinkPredictionPipelineCreateProc extends BaseProc {
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.create", mode = READ)
-    @Description("Creates a link prediction pipeline in the model catalog.")
+    @Description("Creates a link prediction pipeline in the pipeline catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
         var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
 

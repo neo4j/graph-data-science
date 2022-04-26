@@ -46,7 +46,7 @@ public class NodeClassificationPipelineCreateProc extends BaseProc {
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.create", mode = READ)
-    @Description("Creates a node classification training pipeline in the model catalog.")
+    @Description("Creates a node classification training pipeline in the pipeline catalog.")
     public Stream<NodePipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
         return Stream.of(create(username(), pipelineName));
     }
