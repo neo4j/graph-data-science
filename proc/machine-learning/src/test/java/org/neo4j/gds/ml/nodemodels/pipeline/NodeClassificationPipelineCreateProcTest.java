@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.DEFAULT_PARAM_CONFIG;
 
-class NodeClassificationPipelineCreateTest extends BaseProcTest {
+class NodeClassificationPipelineCreateProcTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -46,7 +46,7 @@ class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
     @Test
     void createPipeline() {
-        var result = NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
+        var result = NodeClassificationPipelineCreateProc.create(getUsername(), "myPipeline");
         assertThat(result.name).isEqualTo("myPipeline");
         assertThat(result.nodePropertySteps).isEqualTo(List.of());
         assertThat(result.featureProperties).isEqualTo(List.of());
@@ -58,14 +58,14 @@ class NodeClassificationPipelineCreateTest extends BaseProcTest {
 
     @Test
     void failOnCreatingPipelineWithExistingName() {
-        NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
-        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), "myPipeline"))
+        NodeClassificationPipelineCreateProc.create(getUsername(), "myPipeline");
+        assertThatThrownBy(() -> NodeClassificationPipelineCreateProc.create(getUsername(), "myPipeline"))
             .hasMessageContaining("Pipeline named `myPipeline` already exists.");
     }
 
     @Test
     void failOnCreatingPipelineWithInvalidName() {
-        assertThatThrownBy(() -> NodeClassificationPipelineCreate.create(getUsername(), " "))
+        assertThatThrownBy(() -> NodeClassificationPipelineCreateProc.create(getUsername(), " "))
             .hasMessageContaining("`pipelineName` must not end or begin with whitespace characters, but got ` `.");
     }
 }

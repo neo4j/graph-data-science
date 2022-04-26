@@ -39,7 +39,7 @@ class NodeClassificationPipelineAddStepsTest extends BaseProcTest {
 
     @BeforeEach
     void setUp() {
-        NodeClassificationPipelineCreate.create(getUsername(), "myPipeline");
+        NodeClassificationPipelineCreateProc.create(getUsername(), "myPipeline");
     }
 
     @AfterEach

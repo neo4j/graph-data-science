@@ -20,6 +20,9 @@
 package org.neo4j.gds.ml.nodemodels.pipeline;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.StringIdentifierValidations;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,9 +34,19 @@ import static org.neo4j.procedure.Mode.READ;
 @SuppressWarnings("immutables:subtype")
 public class NodeClassificationPipelineCreateProc extends BaseProc {
 
+    public static PipelineInfoResult create(String username, String pipelineName) {
+        StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
+
+        var pipeline = new NodeClassificationTrainingPipeline();
+
+        PipelineCatalog.set(username, pipelineName, pipeline);
+
+        return new PipelineInfoResult(pipelineName, pipeline);
+    }
+
     @Procedure(name = "gds.beta.pipeline.nodeClassification.create", mode = READ)
     @Description("Creates a node classification training pipeline in the model catalog.")
     public Stream<PipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
-        return Stream.of(NodeClassificationPipelineCreate.create(username(), pipelineName));
+        return Stream.of(create(username(), pipelineName));
     }
 }
