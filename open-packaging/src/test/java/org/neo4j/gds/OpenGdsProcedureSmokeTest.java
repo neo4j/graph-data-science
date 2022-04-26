@@ -219,6 +219,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.allShortestPaths.delta.mutate.estimate",
         "gds.allShortestPaths.delta.write",
         "gds.allShortestPaths.delta.write.estimate",
+        "gds.allShortestPaths.delta.stats",
+        "gds.allShortestPaths.delta.stats.estimate",
 
         "gds.betweenness.mutate",
         "gds.betweenness.mutate.estimate",
@@ -440,7 +442,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 300;
+        int expectedCount = 302;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),
