@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -51,7 +50,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -293,10 +291,7 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics);
 
-        return ImmutableNodeClassificationTrainResult.of(
-            createModel(retrainedModelData, trainingStatistics),
-            trainingStatistics
-        );
+        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics);
     }
 
     private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
@@ -410,29 +405,6 @@ public final class NodeClassificationTrain {
         progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         return retrainedClassifier;
-    }
-
-    private Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
-        Classifier classifier,
-        TrainingStatistics trainingStatistics
-    ) {
-
-        var modelInfo = NodeClassificationPipelineModelInfo.builder()
-            .classes(classIdMap.originalIdsList())
-            .bestParameters(trainingStatistics.bestParameters())
-            .metrics(trainingStatistics.metricsForWinningModel())
-            .pipeline(NodeClassificationPredictPipeline.from(pipeline))
-            .build();
-
-        return Model.of(
-            config.username(),
-            config.modelName(),
-            NodeClassificationTrainingPipeline.MODEL_TYPE,
-            graph.schema(),
-            classifier.data(),
-            config,
-            modelInfo
-        );
     }
 
     private Classifier trainModel(

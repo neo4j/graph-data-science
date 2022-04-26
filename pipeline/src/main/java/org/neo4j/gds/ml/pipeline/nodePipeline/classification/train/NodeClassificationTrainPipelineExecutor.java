@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
@@ -108,7 +109,22 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             .create(graph, pipeline, config, progressTracker, terminationFlag)
             .compute();
 
-        return ImmutableNodeClassificationTrainPipelineResult.of(trainResult.model(), trainResult.trainingStatistics());
+        var catalogModel = Model.of(
+            config.username(),
+            config.modelName(),
+            NodeClassificationTrainingPipeline.MODEL_TYPE,
+            schemaBeforeSteps,
+            trainResult.classifier().data(),
+            config,
+            NodeClassificationPipelineModelInfo.builder()
+                .classes(trainResult.classifier().classIdMap().originalIdsList())
+                .bestParameters(trainResult.trainingStatistics().bestParameters())
+                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
+                .pipeline(NodeClassificationPredictPipeline.from(pipeline))
+                .build()
+        );
+
+        return ImmutableNodeClassificationTrainPipelineResult.of(catalogModel, trainResult.trainingStatistics());
     }
 
     @ValueClass
