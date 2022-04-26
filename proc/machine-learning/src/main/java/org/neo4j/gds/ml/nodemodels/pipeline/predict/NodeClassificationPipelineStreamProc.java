@@ -31,7 +31,6 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
-import org.neo4j.gds.ml.nodemodels.NodeClassificationStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -56,7 +55,7 @@ public class NodeClassificationPipelineStreamProc
     extends StreamProc<
     NodeClassificationPredictPipelineExecutor,
     NodeClassificationPredict.NodeClassificationResult,
-    NodeClassificationStreamResult,
+    NodeClassificationPipelineStreamProc.NodeClassificationStreamResult,
     NodeClassificationPredictPipelineStreamConfig>
 {
 
@@ -138,5 +137,19 @@ public class NodeClassificationPipelineStreamProc
     ) {
         this.setModelCatalog(modelCatalog);
         return this;
+    }
+
+    @SuppressWarnings("unused")
+    public static final class NodeClassificationStreamResult {
+
+        public long nodeId;
+        public long predictedClass;
+        public List<Double> predictedProbabilities;
+
+        public NodeClassificationStreamResult(long nodeId, long predictedClass, List<Double> predictedProbabilities) {
+            this.nodeId = nodeId;
+            this.predictedClass = predictedClass;
+            this.predictedProbabilities = predictedProbabilities;
+        }
     }
 }
