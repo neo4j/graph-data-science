@@ -17,32 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
+package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.junit.jupiter.api.AfterEach;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCreateProc;
-import org.neo4j.gds.pipeline.catalog.PipelineExistsProc;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
-
-class PipelineCatalogExistsDocTest extends DocTestBase {
-
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface NodeClassificationPredictPipelineStreamConfig
+    extends NodeClassificationPredictPipelineBaseConfig
+{
     @Override
-    protected List<Class<?>> procedures() {
-        return List.of(
-            PipelineExistsProc.class,
-            NodeClassificationPipelineCreateProc.class
-        );
+    @Value.Default
+    default boolean includePredictedProbabilities() {
+        return false;
     }
 
-    @Override
-    protected String adocFile() {
-        return "machine-learning/pipeline-catalog/pipeline-catalog-exists.adoc";
-    }
-
-    @AfterEach
-    void afterAll() {
-        PipelineCatalog.removeAll();
+    static NodeClassificationPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {
+        return new NodeClassificationPredictPipelineStreamConfigImpl(username, config);
     }
 }
