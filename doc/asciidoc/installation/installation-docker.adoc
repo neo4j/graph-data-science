@@ -13,5 +13,5 @@ docker run -it --rm \
   --user="$(id -u):$(id -g)" \
   -e NEO4J_AUTH=none \
   --env NEO4JLABS_PLUGINS='["graph-data-science"]' \
-  neo4j:4.2
+  neo4j:4.4
 ----
