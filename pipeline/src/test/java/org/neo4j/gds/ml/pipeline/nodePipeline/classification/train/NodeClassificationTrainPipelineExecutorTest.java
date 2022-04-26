@@ -44,6 +44,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
@@ -124,7 +125,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
-        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1)));
+        var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
+        pipeline.addTrainerConfig(modelCandidate);
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
@@ -152,6 +154,14 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             var model = result.model();
 
             assertThat(model.creator()).isEqualTo(getUsername());
+            assertThat(model.algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
+            assertThat(model.data()).isInstanceOf(LogisticRegressionData.class);
+            assertThat(model.trainConfig()).isEqualTo(config);
+            assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
+            assertThat(model.name()).isEqualTo("model");
+            assertThat(model.stored()).isFalse();
+            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().metrics()).containsOnlyKeys(metric);
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
