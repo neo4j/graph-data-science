@@ -247,7 +247,7 @@ image::train-test-splitting/validation-folds-node-classification.gif[validation-
 
 [.pipeline-configure-split-syntax]
 --
-.Configure the relationship split syntax
+.Configure the node split syntax
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.configureSplit(
