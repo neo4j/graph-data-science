@@ -264,6 +264,27 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         });
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void failOnNaNProperties(boolean multiLabel) {
+        clearDb();
+        runQuery("CREATE ({a: 100.0})-[:REL]->()");
+        runQuery(GdsCypher.call("nanGraph").graphProject().withNodeProperty("a").yields());
+
+        var trainCallBuilder = GdsCypher.call("nanGraph")
+            .algo("gds.beta.graphSage")
+            .trainMode()
+            .addParameter("modelName", "myModel")
+            .addParameter("featureProperties", List.of("a"));
+
+        var trainQuery = multiLabel
+            ? trainCallBuilder.addParameter("projectedFeatureDimension", 42).yields()
+            : trainCallBuilder.yields();
+
+        assertError(trainQuery, "invalid feature property value `NaN` for property `a`");
+    }
+
+
     @Test
     void estimates() {
         String query = GdsCypher.call(graphName)
