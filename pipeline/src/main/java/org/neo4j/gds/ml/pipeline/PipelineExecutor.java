@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,6 +36,7 @@ import org.neo4j.gds.executor.GraphStoreValidation;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
@@ -56,6 +58,7 @@ public abstract class PipelineExecutor<
     protected final PIPELINE_CONFIG config;
     protected final ExecutionContext executionContext;
     protected final GraphStore graphStore;
+    protected final GraphSchema schemaBeforeSteps;
     protected final String graphName;
 
     protected PipelineExecutor(
@@ -72,6 +75,10 @@ public abstract class PipelineExecutor<
         this.executionContext = executionContext;
         this.graphStore = graphStore;
         this.graphName = graphName;
+        this.schemaBeforeSteps = graphStore
+            .schema()
+            .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
+            .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
     public static MemoryEstimation estimateNodePropertySteps(ModelCatalog modelCatalog, List<ExecutableNodePropertyStep> nodePropertySteps, List<String> nodeLabels, List<String> relationshipTypes) {

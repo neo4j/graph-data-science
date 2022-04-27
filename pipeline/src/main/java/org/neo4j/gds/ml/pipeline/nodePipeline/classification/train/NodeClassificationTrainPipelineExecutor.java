@@ -17,29 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.nodemodels.pipeline;
+package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor.NodeClassificationTrainPipelineResult;
+
 public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     NodeClassificationPipelineTrainConfig,
     NodeClassificationTrainingPipeline,
-    NodeClassificationTrainResult
+    NodeClassificationTrainPipelineResult
 > {
 
     public NodeClassificationTrainPipelineExecutor(
@@ -92,7 +96,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected NodeClassificationTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationTrainPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
@@ -101,8 +105,31 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
 
         this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
 
-        return NodeClassificationTrain
+        var trainResult = NodeClassificationTrain
             .create(graph, pipeline, config, progressTracker, terminationFlag)
             .compute();
+
+        var catalogModel = Model.of(
+            config.username(),
+            config.modelName(),
+            NodeClassificationTrainingPipeline.MODEL_TYPE,
+            schemaBeforeSteps,
+            trainResult.classifier().data(),
+            config,
+            NodeClassificationPipelineModelInfo.builder()
+                .classes(trainResult.classifier().classIdMap().originalIdsList())
+                .bestParameters(trainResult.trainingStatistics().bestParameters())
+                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
+                .pipeline(NodeClassificationPredictPipeline.from(pipeline))
+                .build()
+        );
+
+        return ImmutableNodeClassificationTrainPipelineResult.of(catalogModel, trainResult.trainingStatistics());
+    }
+
+    @ValueClass
+    public interface NodeClassificationTrainPipelineResult {
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
+        TrainingStatistics trainingStatistics();
     }
 }
