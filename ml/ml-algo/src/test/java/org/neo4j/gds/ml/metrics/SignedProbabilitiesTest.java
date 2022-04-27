@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.metrics.SignedProbabilities.ALMOST_ZERO;
 
-public class SignedProbabilitiesTest {
+final class SignedProbabilitiesTest {
 
     @ParameterizedTest
     @MethodSource("parameters")
@@ -88,5 +88,21 @@ public class SignedProbabilitiesTest {
                )
            )
         );
+    }
+
+    @Test
+    void storeDuplicateProbabilities() {
+        var signedProbabilities = SignedProbabilities.create(5);
+
+        signedProbabilities.add(0.5, true);
+        signedProbabilities.add(0.5, true);
+        signedProbabilities.add(0.2, false);
+        signedProbabilities.add(0.3, false);
+        signedProbabilities.add(0.6, false);
+
+        assertThat(signedProbabilities.positiveCount()).isEqualTo(2);
+        assertThat(signedProbabilities.negativeCount()).isEqualTo(3);
+
+        assertThat(signedProbabilities.stream()).containsExactly(-0.2, -0.3, 0.5, 0.5, -0.6);
     }
 }

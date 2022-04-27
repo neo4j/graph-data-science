@@ -31,7 +31,6 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -39,22 +38,21 @@ import java.util.TreeSet;
 import java.util.stream.DoubleStream;
 
 /**
- * Represents a sorted set of doubles, sorted according to their absolute value in increasing order.
+ * Represents a sorted list of doubles, sorted according to their absolute value in increasing order.
  */
 public final class SignedProbabilities {
     static double ALMOST_ZERO = 1e-100;
     private static final Comparator<Double> ABSOLUTE_VALUE_COMPARATOR = Comparator.comparingDouble(Math::abs);
 
-    private final Optional<TreeSet<Double>> tree;
-    private final Optional<List<Double>> list;
-    private final boolean isTree;
+    private final Optional<TreeSet<Double>> maybeTree;
+    private final Optional<List<Double>> maybeList;
     private long positiveCount;
     private long negativeCount;
 
     public static long estimateMemory(GraphDimensions dimensions, RelationshipType relationshipType, double relationshipFraction) {
         var relationshipCount = dimensions.relationshipCounts().containsKey(relationshipType)
-            ? dimensions.relationshipCounts().get(relationshipType) * relationshipFraction
-            : dimensions.relCountUpperBound() * relationshipFraction;
+            ? (dimensions.relationshipCounts().get(relationshipType) * relationshipFraction)
+            : (dimensions.relCountUpperBound() * relationshipFraction);
 
         return estimateMemory((long) relationshipCount);
     }
@@ -66,17 +64,22 @@ public final class SignedProbabilities {
                MemoryUsage.sizeOfInstance(Double.class) * relationshipSetSize;
     }
 
-    private SignedProbabilities(Optional<TreeSet<Double>> tree, Optional<List<Double>> list, boolean isTree) {
-        this.tree = tree;
-        this.list = list;
-        this.isTree = isTree;
+    private SignedProbabilities(TreeSet<Double> tree) {
+        this.maybeTree = Optional.of(tree);
+        this.maybeList = Optional.empty();
+    }
+
+    private SignedProbabilities(List<Double> maybeList) {
+        this.maybeTree = Optional.empty();
+        this.maybeList = Optional.of(maybeList);
     }
 
     public static SignedProbabilities create(long capacity) {
-        var isTree = capacity > Integer.MAX_VALUE;
-        Optional<TreeSet<Double>> tree = isTree ? Optional.of(new TreeSet<>(ABSOLUTE_VALUE_COMPARATOR)) : Optional.empty();
-        Optional<List<Double>> list = !isTree ? Optional.of(new ArrayList<>((int) capacity)) : Optional.empty();
-        return new SignedProbabilities(tree, list, isTree);
+        if (capacity > Integer.MAX_VALUE) {
+            return new SignedProbabilities(new TreeSet<>(ABSOLUTE_VALUE_COMPARATOR));
+        } else {
+            return new SignedProbabilities(new ArrayList<>((int) capacity));
+        }
     }
 
     public static SignedProbabilities computeFromLabeledData(
@@ -93,7 +96,7 @@ public final class SignedProbabilities {
         var signedProbabilities = SignedProbabilities.create(features.size());
 
         int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
-        evaluationQueue.parallelConsume(concurrency, thread -> (batch) -> {
+        evaluationQueue.parallelConsume(concurrency, thread -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
                 for (Long relationshipIdx : batch.nodeIds()) {
@@ -115,21 +118,25 @@ public final class SignedProbabilities {
     public synchronized void add(double probability, boolean isPositive) {
         var nonZeroProbability = probability == 0 ? ALMOST_ZERO : probability;
         var signedProbability = isPositive ? nonZeroProbability : -1 * nonZeroProbability;
-        if (signedProbability > 0) positiveCount++;
-        else negativeCount++;
-        if (isTree) {
-            tree.get().add(signedProbability);
+        if (signedProbability > 0) {
+            positiveCount++;
         } else {
-            list.get().add(signedProbability);
+            negativeCount++;
         }
+
+        maybeTree.ifPresentOrElse(
+            tree -> tree.add(signedProbability),
+            () -> maybeList.orElseThrow().add(signedProbability)
+        );
     }
 
     public DoubleStream stream() {
-        if (isTree) {
-            return tree.get().stream().mapToDouble(d -> d);
+        if (maybeTree.isPresent()) {
+            return maybeTree.get().stream().mapToDouble(d -> d);
         } else {
-            Collections.sort(list.get(), ABSOLUTE_VALUE_COMPARATOR);
-            return list.get().stream().mapToDouble(d -> d);
+            var list = maybeList.orElseThrow();
+            list.sort(ABSOLUTE_VALUE_COMPARATOR);
+            return list.stream().mapToDouble(d -> d);
         }
     }
 
