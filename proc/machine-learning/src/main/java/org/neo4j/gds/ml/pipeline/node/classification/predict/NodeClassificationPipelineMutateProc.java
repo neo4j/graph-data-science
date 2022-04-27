@@ -47,8 +47,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.mutate", description = org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
     NodeClassificationPredictPipelineExecutor,
@@ -57,7 +59,7 @@ public class NodeClassificationPipelineMutateProc
     NodeClassificationPredictPipelineMutateConfig>
 {
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
-    @Description(org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -67,7 +69,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate.estimate", mode = Mode.READ)
-    @Description(org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION)
+    @Description(ESTIMATE_PREDICT_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -98,7 +100,7 @@ public class NodeClassificationPipelineMutateProc
         var nodeProperties = new ArrayList<NodeProperty>();
         nodeProperties.add(NodeProperty.of(mutateProperty, classProperties));
 
-        result.predictedProbabilities().ifPresent((probabilityProperties) -> {
+        result.predictedProbabilities().ifPresent(probabilityProperties -> {
             var properties = new DoubleArrayNodePropertyValues() {
                 @Override
                 public long size() {

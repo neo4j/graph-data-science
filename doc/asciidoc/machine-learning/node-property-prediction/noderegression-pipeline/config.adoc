@@ -2,19 +2,19 @@
 = Configuring the pipeline
 :max-trials: 10
 
-This page explains how to create and configure a node classification pipeline.
+This page explains how to create and configure a node regression pipeline.
 It consists of the following sections:
 
-* <<nodregression-creating-a-pipeline, Creating the pipeline>>
+* <<noderegression-creating-a-pipeline, Creating the pipeline>>
 
 
-[[nodregression-creating-a-pipeline]]
+[[noderegression-creating-a-pipeline]]
 == Creating a pipeline
 
 The first step of building a new pipeline is to create one using `gds.alpha.pipeline.nodeRegression.create`.
 This stores a trainable pipeline object in the pipeline catalog of type `Node regression training pipeline`.
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a regression model.
-The latter is also a model which is stored in the catalog with type `NodeRegression`.
+The latter is a model which is stored in the catalog with type `NodeRegression`.
 
 
 === Syntax

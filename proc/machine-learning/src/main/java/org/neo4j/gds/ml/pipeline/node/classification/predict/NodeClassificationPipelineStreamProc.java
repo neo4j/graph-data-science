@@ -49,13 +49,14 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc.NodeClassificationStreamResult;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class NodeClassificationPipelineStreamProc
     extends StreamProc<
     NodeClassificationPredictPipelineExecutor,
     NodeClassificationPredict.NodeClassificationResult,
-    NodeClassificationPipelineStreamProc.NodeClassificationStreamResult,
+    NodeClassificationStreamResult,
     NodeClassificationPredictPipelineStreamConfig>
 {
 
@@ -96,7 +97,7 @@ public class NodeClassificationPipelineStreamProc
             return LongStream
                 .range(0, graph.nodeCount())
                 .boxed()
-                .map((nodeId) ->
+                .map(nodeId ->
                     new NodeClassificationStreamResult(
                         graph.toOriginalNodeId(nodeId),
                         predictedClasses.get(nodeId),
@@ -106,7 +107,7 @@ public class NodeClassificationPipelineStreamProc
         });
     }
 
-    private List<Double> nodePropertiesAsList(Optional<HugeObjectArray<double[]>> predictedProbabilities, long nodeId) {
+    private static List<Double> nodePropertiesAsList(Optional<HugeObjectArray<double[]>> predictedProbabilities, long nodeId) {
         return predictedProbabilities.map(p -> {
             var values = p.get(nodeId);
             return Arrays.stream(values).boxed().collect(Collectors.toList());
