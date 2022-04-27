@@ -28,6 +28,11 @@ The `gds.model.store_location` parameter must be configured for this feature.
 * <<nodeclassification-pipelines, Node Classification model>>
 * <<linkprediction-pipelines, Link Prediction model>>
 
+For <<nodeclassification-pipelines, Node Classification>> and <<linkprediction-pipelines, Link Prediction>>, storing a model is only supported for a subset of <<ml-training-methods, trainer-methods>>.
+The trainer method of a model can be inspected in the `modelInfo` under `bestParameters`.
+
+Currently, we only support <<machine-learning-training-methods-logistic-regression, Logistic Regression>>.
+
 
 === Syntax
 
