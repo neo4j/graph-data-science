@@ -92,6 +92,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         initializeTokenHolders();
         graphStore.initialize(tokenHolders);
         graphStore.registerPropertyRemovalCallback(txStateVisitor::removeNodeProperty);
+        graphStore.registerPropertyAddedCallback(this::addProperty);
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
@@ -207,6 +208,14 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
             .forEach(relType -> tokenHolders
                 .relationshipTypeTokens()
                 .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
+    }
+
+    private void addProperty(String propertyName) {
+        try {
+            tokenHolders.propertyKeyTokens().getOrCreateId(propertyName);
+        } catch (KernelException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static CypherGraphStore getGraphStoreFromCatalog(String graphName) {
