@@ -105,4 +105,20 @@ final class SignedProbabilitiesTest {
 
         assertThat(signedProbabilities.stream()).containsExactly(-0.2, -0.3, 0.5, 0.5, -0.6);
     }
+
+    @Test
+    void hugeVersionStoresDuplicateProbabilities() {
+        var signedProbabilities = SignedProbabilities.create((long) 1e10);
+
+        signedProbabilities.add(0.5, true);
+        signedProbabilities.add(0.5, true);
+        signedProbabilities.add(0.2, false);
+        signedProbabilities.add(0.3, false);
+        signedProbabilities.add(0.6, false);
+
+        assertThat(signedProbabilities.positiveCount()).isEqualTo(2);
+        assertThat(signedProbabilities.negativeCount()).isEqualTo(3);
+
+        assertThat(signedProbabilities.stream()).containsExactly(-0.2, -0.3, 0.5, 0.5, -0.6);
+    }
 }
