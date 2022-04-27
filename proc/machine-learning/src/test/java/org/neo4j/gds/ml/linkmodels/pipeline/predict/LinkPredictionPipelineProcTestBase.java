@@ -47,7 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain.MODEL_TYPE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
 @Neo4jModelCatalogExtension
 abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {

@@ -221,24 +221,18 @@ class LinkPredictionTrainTest {
 
         assertThat(result.trainingStatistics().getTrainStats(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
 
-        var actualModel = result.model();
+        var trainedClassifier = result.classifier();
 
-        assertThat(actualModel.name()).isEqualTo(modelName);
-        assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
-        assertThat(actualModel.trainConfig()).isEqualTo(trainConfig);
-        // length of the linkFeatures
-
-        assertThat((LogisticRegressionData) actualModel.data())
+        assertThat((LogisticRegressionData) trainedClassifier.data())
             .extracting(llrData -> llrData.weights().data().totalSize())
             .isEqualTo(6);
 
-        var customInfo = actualModel.customInfo();
         assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
             .satisfies(scores ->
                 assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))
             );
 
-        assertThat(customInfo.bestParameters())
+        assertThat(result.trainingStatistics().bestParameters())
             .usingRecursiveComparison()
             .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
     }
@@ -250,10 +244,10 @@ class LinkPredictionTrainTest {
         LinkPredictionTrainConfig trainConfig = trainingConfig(modelName);
 
         var modelData = runLinkPrediction(trainConfig)
-            .model()
+            .classifier()
             .data();
         var modelDataRepeated = runLinkPrediction(trainConfig)
-            .model()
+            .classifier()
             .data();
 
         assertThat(modelData)

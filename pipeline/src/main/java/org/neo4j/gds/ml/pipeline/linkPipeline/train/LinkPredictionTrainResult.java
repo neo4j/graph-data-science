@@ -20,21 +20,12 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 
 @ValueClass
 public interface LinkPredictionTrainResult {
-    Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
+    Classifier classifier();
 
     TrainingStatistics trainingStatistics();
-
-    static LinkPredictionTrainResult of(
-        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model,
-        TrainingStatistics trainingStatistics
-    ) {
-        return ImmutableLinkPredictionTrainResult.of(model, trainingStatistics);
-    }
 }
