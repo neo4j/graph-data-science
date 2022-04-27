@@ -17,22 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.ml.pipeline.node.regression.configure;
+
+import org.junit.jupiter.api.AfterEach;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
+import java.util.Map;
 
-class NodeRegressionPipelineSyntaxTest extends SyntaxTestBase {
+abstract class NodeRegressionPipelineBaseProcTest extends BaseProcTest {
 
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT)
-        );
-    }
+    static final Map<String, List<Object>> DEFAULT_PARAMETERSPACE = Map.of(
+        TrainingMethod.LinearRegression.name(), List.of(),
+        TrainingMethod.RandomForestRegression.name(), List.of()
+    );
 
-    @Override
-    protected String adocFile() {
-        return "machine-learning/node-property-prediction/noderegression-pipeline/noderegression.adoc";
+    @AfterEach
+    void tearDown() {
+        PipelineCatalog.removeAll();
     }
 }

@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -32,7 +30,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodeRegressionPipelineCreateProcTest extends BaseProcTest {
+class NodeRegressionPipelineCreateProcTest extends NodeRegressionPipelineBaseProcTest {
 
     @BeforeEach
     void setUp() throws Exception {
@@ -47,10 +45,7 @@ class NodeRegressionPipelineCreateProcTest extends BaseProcTest {
             "featureProperties", List.of(),
             "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
             "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
-            "parameterSpace", Map.of(
-                TrainingMethod.LinearRegression.toString(), List.of(),
-                TrainingMethod.RandomForestRegression.toString(), List.of()
-            )
+            "parameterSpace", DEFAULT_PARAMETERSPACE
         )));
 
         assertThat(PipelineCatalog.exists(getUsername(), "p")).isTrue();
