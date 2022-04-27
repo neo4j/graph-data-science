@@ -71,7 +71,6 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         }
     }
 
-    @Override
     public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
         throw new UnsupportedOperationException();
     }

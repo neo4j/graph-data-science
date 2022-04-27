@@ -29,7 +29,6 @@ public class InMemoryNodeScan extends BaseRecordScan<AbstractInMemoryNodeCursor>
         return cursor.scanRange(start, stopInclusive);
     }
 
-    @Override
     public boolean scanBatch(int sizeHint, AbstractInMemoryNodeCursor cursor) {
         return super.scanBatch(sizeHint, cursor);
     }
