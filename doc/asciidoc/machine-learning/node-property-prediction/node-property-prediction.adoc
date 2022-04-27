@@ -11,5 +11,9 @@ The Neo4j Graph Data Science library support the following node property predict
 
 * Beta
 ** <<nodeclassification-pipelines>>
+* Alpha
+** <<noderegression-pipelines>>
 
 include::nodeclassification-pipeline/nodeclassification.adoc[leveloffset=+1]
+include::noderegression-pipeline/noderegression.adoc[leveloffset=+1]
+

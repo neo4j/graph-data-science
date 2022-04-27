@@ -1,0 +1,71 @@
+[[noderegression-pipelines-config]]
+= Configuring the pipeline
+:max-trials: 10
+
+This page explains how to create and configure a node regression pipeline.
+It consists of the following sections:
+
+* <<noderegression-creating-a-pipeline, Creating the pipeline>>
+
+
+[[noderegression-creating-a-pipeline]]
+== Creating a pipeline
+
+The first step of building a new pipeline is to create one using `gds.alpha.pipeline.nodeRegression.create`.
+This stores a trainable pipeline object in the pipeline catalog of type `Node regression training pipeline`.
+This represents a configurable pipeline that can later be invoked for training, which in turn creates a regression model.
+The latter is a model which is stored in the catalog with type `NodeRegression`.
+
+
+=== Syntax
+
+[.pipeline-create-syntax]
+--
+.Create pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.create(
+  pipelineName: String
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the created pipeline.
+|===
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will create a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.create('pipe')
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1,1"]
+|===
+| name     | nodePropertySteps | featureProperties | splitConfig | autoTuningConfig | parameterSpace
+| "pipe"   | []                | []
+| {testFraction=0.3, validationFolds=3}
+| {maxTrials={max-trials}}
+| {RandomForest=[], LinearRegression=[]}
+|===
+--
+
+This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.

@@ -19,30 +19,28 @@
  */
 package org.neo4j.gds.doc;
 
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCreateProc;
-import org.neo4j.gds.pipeline.catalog.PipelineExistsProc;
+import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineCreateProc;
 
 import java.util.List;
 
-class PipelineCatalogExistsDocTest extends DocTestBase {
+class NodeRegressionPipelineDocTest extends DocTestBase {
+
+    @AfterAll
+    static void tearDown() {
+        PipelineCatalog.removeAll();
+    }
 
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            PipelineExistsProc.class,
-            NodeClassificationPipelineCreateProc.class
+            NodeRegressionPipelineCreateProc.class
         );
     }
 
     @Override
     protected String adocFile() {
-        return "machine-learning/pipeline-catalog/pipeline-catalog-exists.adoc";
-    }
-
-    @AfterEach
-    void afterAll() {
-        PipelineCatalog.removeAll();
+        return "machine-learning/node-property-prediction/noderegression-pipeline/noderegression.adoc";
     }
 }

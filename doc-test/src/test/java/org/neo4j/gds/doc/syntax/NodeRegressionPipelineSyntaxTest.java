@@ -17,32 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc;
-
-import org.junit.jupiter.api.AfterEach;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCreateProc;
-import org.neo4j.gds.pipeline.catalog.PipelineExistsProc;
+package org.neo4j.gds.doc.syntax;
 
 import java.util.List;
 
-class PipelineCatalogExistsDocTest extends DocTestBase {
+class NodeRegressionPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
-    protected List<Class<?>> procedures() {
+    protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            PipelineExistsProc.class,
-            NodeClassificationPipelineCreateProc.class
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE)
         );
     }
 
     @Override
     protected String adocFile() {
-        return "machine-learning/pipeline-catalog/pipeline-catalog-exists.adoc";
-    }
-
-    @AfterEach
-    void afterAll() {
-        PipelineCatalog.removeAll();
+        return "machine-learning/node-property-prediction/noderegression-pipeline/noderegression.adoc";
     }
 }

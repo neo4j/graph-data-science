@@ -17,12 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline;
+package org.neo4j.gds.ml.pipeline.node.regression.configure;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,18 +32,17 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-@SuppressWarnings("immutables:subtype")
-public class LinkPredictionPipelineCreateProc extends BaseProc {
+public class NodeRegressionPipelineCreateProc extends BaseProc {
 
-    @Procedure(name = "gds.beta.pipeline.linkPrediction.create", mode = READ)
-    @Description("Creates a link prediction pipeline in the pipeline catalog.")
-    public Stream<PipelineInfoResult> create(@Name("pipelineName") String input) {
-        var pipelineName = StringIdentifierValidations.validateNoWhiteCharacter(input, "pipelineName");
+    @Procedure(name = "gds.alpha.pipeline.nodeRegression.create", mode = READ)
+    @Description("Creates a node regression training pipeline in the pipeline catalog.")
+    public Stream<NodePipelineInfoResult> create(@Name("pipelineName") String pipelineName) {
+        StringIdentifierValidations.validateNoWhiteCharacter(pipelineName, "pipelineName");
 
-        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+        var pipeline = new NodeRegressionTrainingPipeline();
+
         PipelineCatalog.set(username(), pipelineName, pipeline);
 
-        return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
-
 }

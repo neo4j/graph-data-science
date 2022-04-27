@@ -59,15 +59,14 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LinkPredictionPipelineMutateProc.DESCRIPTION;
-import static org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
-@GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
-    static final String DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained Link prediction pipeline.";
 
     @Procedure(name = "gds.beta.pipeline.linkPrediction.predict.mutate", mode = Mode.READ)
-    @Description(DESCRIPTION)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<LinkPredictionPipelineMutateProc.MutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
