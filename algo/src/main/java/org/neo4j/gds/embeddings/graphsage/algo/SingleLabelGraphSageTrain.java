@@ -50,12 +50,16 @@ public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+        progressTracker.beginSubTask("GraphSageTrain");
+
         var graphSageModel = new GraphSageModelTrainer(config, executor, progressTracker);
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
             initializeSingleLabelFeatures(graph, config)
         );
+
+        progressTracker.endSubTask("GraphSageTrain");
 
         return Model.of(
             config.username(),
