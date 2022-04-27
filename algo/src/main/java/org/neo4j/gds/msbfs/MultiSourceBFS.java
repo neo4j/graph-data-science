@@ -383,7 +383,7 @@ public final class MultiSourceBFS implements Runnable {
         }
 
         @Override
-        public long next() {
+        public long nextLong() {
             int current = this.pos;
             fetchNext();
             return sourceNodes != null ? sourceNodes[current] : (long) current + offset;

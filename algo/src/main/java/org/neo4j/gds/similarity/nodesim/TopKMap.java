@@ -82,7 +82,7 @@ public class TopKMap {
 
         long size = 0L;
         while (iterator.hasNext()) {
-            size += topKLists.get(iterator.next()).size();
+            size += topKLists.get(iterator.nextLong()).size();
         }
 
         return size;

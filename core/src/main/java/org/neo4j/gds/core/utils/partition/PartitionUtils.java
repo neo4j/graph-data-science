@@ -22,7 +22,6 @@ package org.neo4j.gds.core.utils.partition;
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.PrimitiveIterator;
 import java.util.function.Function;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -133,7 +133,7 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> degreePartitionWithBatchSize(
-        PrimitiveLongIterator nodes,
+        PrimitiveIterator.OfLong nodes,
         DegreeFunction degrees,
         long batchSize,
         Function<DegreePartition, TASK> taskCreator
@@ -145,7 +145,7 @@ public final class PartitionUtils {
             long partitionSize = 0L;
             long nodeId = 0L;
             while (nodes.hasNext() && partitionSize <= batchSize && nodeId - start < Partition.MAX_NODE_COUNT) {
-                nodeId = nodes.next();
+                nodeId = nodes.nextLong();
                 partitionSize += degrees.degree(nodeId);
             }
 

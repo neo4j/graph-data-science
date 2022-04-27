@@ -23,7 +23,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -56,9 +55,9 @@ final class InitStep implements Step {
 
     @Override
     public void run() {
-        PrimitiveLongIterator iterator = nodes.iterator();
+        var iterator = nodes.iterator();
         while (iterator.hasNext()) {
-            long nodeId = iterator.next();
+            long nodeId = iterator.nextLong();
             long existingLabelValue = nodePropertyValues.longValue(nodeId);
             // if there is no provided value for this node, we could start adding
             // to the max provided id and continue from there, but that might

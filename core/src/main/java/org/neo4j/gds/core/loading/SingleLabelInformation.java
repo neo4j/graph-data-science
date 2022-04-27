@@ -24,11 +24,11 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
@@ -106,7 +106,7 @@ final class SingleLabelInformation implements LabelInformation {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(
+    public PrimitiveIterator.OfLong nodeIterator(
         Collection<NodeLabel> labels, long nodeCount
     ) {
         if (labels.size() == 1 && (labels.contains(label) || labels.contains(NodeLabel.ALL_NODES))) {

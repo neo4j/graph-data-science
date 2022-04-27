@@ -21,9 +21,9 @@ package org.neo4j.gds.api;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
+import java.util.PrimitiveIterator;
 
 /**
  * Iterate over each graph-nodeId in batches.
@@ -46,12 +46,12 @@ public interface BatchNodeIterable {
         }
 
         @Override
-        public PrimitiveLongIterator iterator() {
+        public PrimitiveIterator.OfLong iterator() {
             return new IdIterator(start, length);
         }
     }
 
-    final class IdIterator implements PrimitiveLongIterator {
+    final class IdIterator implements PrimitiveIterator.OfLong {
 
         private long current;
         private final long limit; // exclusive upper bound
@@ -72,12 +72,12 @@ public interface BatchNodeIterable {
         }
 
         @Override
-        public long next() {
+        public long nextLong() {
             return current++;
         }
     }
 
-    final class BitSetIdIterator implements PrimitiveLongIterator {
+    final class BitSetIdIterator implements PrimitiveIterator.OfLong {
         private final BitSet labelBitSet;
 
         long position;
@@ -93,7 +93,7 @@ public interface BatchNodeIterable {
         }
 
         @Override
-        public long next() {
+        public long nextLong() {
             var tmp = this.position;
             this.position = labelBitSet.nextSetBit(this.position + 1);
             return tmp;

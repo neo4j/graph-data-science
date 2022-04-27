@@ -43,7 +43,7 @@ class BatchNodeIterableTest {
 
             var actual = new ArrayList<Long>();
             while (iter.hasNext()) {
-                actual.add(iter.next());
+                actual.add(iter.nextLong());
             }
 
             assertThat(actual).containsExactly(0L, 2L, 4L);
@@ -57,7 +57,7 @@ class BatchNodeIterableTest {
 
             var actual = new ArrayList<Long>();
             while (iter.hasNext()) {
-                actual.add(iter.next());
+                actual.add(iter.nextLong());
             }
 
             assertThat(actual).isEmpty();
