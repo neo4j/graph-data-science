@@ -115,7 +115,6 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         this.highMark = reference;
     }
 
-    @Override
     public boolean scanBatch(AllNodeScan scan, int sizeHint) {
         if (getId() != NO_ID) {
             reset();
