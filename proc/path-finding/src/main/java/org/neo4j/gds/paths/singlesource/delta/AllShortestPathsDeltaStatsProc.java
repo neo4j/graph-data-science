@@ -22,10 +22,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
@@ -46,11 +43,9 @@ public class AllShortestPathsDeltaStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var statsSpec = new AllShortestPathsDeltaStatsSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStatsConfig>();
 
         return new ProcedureExecutor<>(
             statsSpec,
-            pipelineSpec,
             executionContext()
         ).compute(graphName, configuration, false, false);
     }
@@ -62,11 +57,9 @@ public class AllShortestPathsDeltaStatsProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         var statsSpec = new AllShortestPathsDeltaStatsSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, DijkstraResult, AllShortestPathsDeltaStatsConfig>();
 
         return new MemoryEstimationExecutor<>(
             statsSpec,
-            pipelineSpec,
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
