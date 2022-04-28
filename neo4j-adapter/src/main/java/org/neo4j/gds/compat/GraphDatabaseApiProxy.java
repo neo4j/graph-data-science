@@ -42,6 +42,14 @@ public final class GraphDatabaseApiProxy {
         return Neo4jVersion.findNeo4jVersion();
     }
 
+    public static boolean containsDependency(GraphDatabaseService db, Class<?> dependency) {
+        return containsDependency(((GraphDatabaseAPI) db).getDependencyResolver(), dependency);
+    }
+
+    public static boolean containsDependency(DependencyResolver resolver, Class<?> dependency) {
+        return resolver.containsDependency(dependency);
+    }
+
     public static <T> T resolveDependency(GraphDatabaseService db, Class<T> dependency) {
         return resolveDependency(((GraphDatabaseAPI) db).getDependencyResolver(), dependency);
     }
