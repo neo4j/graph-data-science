@@ -35,9 +35,11 @@ public enum LinkMetric {
             negativeCount,
             negativeClassWeight
         );
+        double recall = signedProbabilitiesConsumer.recall(positiveCount);
+        double precision = signedProbabilitiesConsumer.precision(positiveCount);
         curveConsumer.acceptFirstPoint(
-            signedProbabilitiesConsumer.recall(positiveCount),
-            signedProbabilitiesConsumer.precision(positiveCount)
+            recall,
+            precision
         );
         signedProbabilities.stream().forEach(signedProbabilitiesConsumer::accept);
         curveConsumer.accept(0.0, 1.0);
@@ -119,7 +121,7 @@ public enum LinkMetric {
         }
 
         void accept(double x, double y) {
-            auc += (previousYcoordinate + y) / 2.0 * (previousXcoordinate - x);
+            auc += (previousYcoordinate + y) * (previousXcoordinate - x) / 2.0;
             this.previousXcoordinate = x;
             this.previousYcoordinate = y;
         }
