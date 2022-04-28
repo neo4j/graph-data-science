@@ -80,7 +80,7 @@ public enum LinkMetric {
                 }
             }
             lastThreshold = Math.abs(signedProbability);
-            if (signedProbability >= 0) {
+            if (signedProbability > 0) {
                 positivesSeen++;
             } else {
                 negativesSeen++;
