@@ -60,6 +60,8 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
+        progressTracker.beginSubTask("GraphSageTrain");
+
         var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
         var weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(config, multiLabelFeatureExtractors);
         var projectedFeatureDimension = config.projectedFeatureDimension().orElseThrow();
@@ -76,6 +78,8 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
             graph,
             initializeMultiLabelFeatures(graph, multiLabelFeatureExtractors)
         );
+
+        progressTracker.endSubTask("GraphSageTrain");
 
         return Model.of(
             config.username(),

@@ -108,8 +108,6 @@ public class GraphSageModelTrainer {
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        progressTracker.beginSubTask();
-
         var layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
@@ -129,18 +127,17 @@ public class GraphSageModelTrainer {
         boolean converged = false;
         var epochLosses = new ArrayList<Double>();
         for (int epoch = 1; epoch <= epochs; epoch++) {
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("train epoch");
 
             double newLoss = trainEpoch(batchTasks, weights);
             epochLosses.add(newLoss);
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("train epoch");
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
                 break;
             }
             previousLoss = newLoss;
         }
-        progressTracker.endSubTask();
 
         return ModelTrainResult.of(epochLosses, converged, layers);
     }
@@ -151,7 +148,7 @@ public class GraphSageModelTrainer {
         double totalLoss = Double.NaN;
         int iteration = 1;
         for (;iteration <= maxIterations; iteration++) {
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("iteration");
 
             // run forward + maybe backward for each Batch
             ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
@@ -174,7 +171,7 @@ public class GraphSageModelTrainer {
 
             progressTracker.logMessage(formatWithLocale("LOSS: %.10f", totalLoss));
 
-            progressTracker.endSubTask();
+            progressTracker.endSubTask("iteration");
         }
 
         return totalLoss;
