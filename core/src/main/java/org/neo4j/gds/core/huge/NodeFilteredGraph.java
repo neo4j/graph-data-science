@@ -202,7 +202,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
             .map(rel -> ImmutableRelationshipCursor.of(filteredIdMap.toMappedNodeId(rel.sourceId()), filteredIdMap.toMappedNodeId(rel.targetId()), rel.property()));
     }
 
-    long getFilteredMappedNodeId(long nodeId) {
+    public long getFilteredMappedNodeId(long nodeId) {
         return filteredIdMap.toMappedNodeId(nodeId);
     }
 
