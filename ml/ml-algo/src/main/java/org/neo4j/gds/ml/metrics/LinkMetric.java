@@ -85,7 +85,7 @@ public enum LinkMetric implements Metric {
                 }
             }
             lastThreshold = Math.abs(signedProbability);
-            if (signedProbability >= 0) {
+            if (signedProbability > 0) {
                 positivesSeen++;
             } else {
                 negativesSeen++;
