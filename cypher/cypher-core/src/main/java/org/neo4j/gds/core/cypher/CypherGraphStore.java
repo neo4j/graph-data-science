@@ -20,38 +20,39 @@
 package org.neo4j.gds.core.cypher;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.values.storable.NumberType;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
 
     private final CypherIdMap cypherIdMap;
+    private final List<StateVisitor> stateVisitors;
 
     private RelationshipIds relationshipIds;
-    private Consumer<String> propertyRemovalCallback;
-    private Consumer<String> propertyAddedCallback;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
         this.cypherIdMap = new CypherIdMap(super.nodes());
+        this.stateVisitors = new ArrayList<>();
     }
 
     public void initialize(TokenHolders tokenHolders) {
         this.relationshipIds = RelationshipIds.fromGraphStore(innerGraphStore(), tokenHolders);
     }
 
-    public void registerPropertyRemovalCallback(Consumer<String> propertyRemovalCallback) {
-        this.propertyRemovalCallback = propertyRemovalCallback;
-    }
-
-    public void registerPropertyAddedCallback(Consumer<String> propertyAddedCallback) {
-        this.propertyAddedCallback = propertyAddedCallback;
+    public void registerStateVisitor(StateVisitor stateVisitor) {
+        this.stateVisitors.add(stateVisitor);
     }
 
     @Override
@@ -72,9 +73,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     @Override
     public void removeNodeProperty(String propertyKey) {
         super.removeNodeProperty(propertyKey);
-        if (propertyRemovalCallback != null) {
-            propertyRemovalCallback.accept(propertyKey);
-        }
+        stateVisitors.forEach(stateVisitor -> stateVisitor.nodePropertyRemoved(propertyKey));
     }
 
     @Override
@@ -82,12 +81,31 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues
     ) {
         super.addNodeProperty(nodeLabels, propertyKey, propertyValues);
-        if (propertyAddedCallback != null) {
-            propertyAddedCallback.accept(propertyKey);
-        }
+        stateVisitors.forEach(stateVisitor -> stateVisitor.nodePropertyAdded(propertyKey));
+    }
+
+    @Override
+    public void addRelationshipType(
+        RelationshipType relationshipType,
+        Optional<String> relationshipPropertyKey,
+        Optional<NumberType> relationshipPropertyType,
+        Relationships relationships
+    ) {
+        super.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType, relationships);
+        stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
     }
 
     public RelationshipIds relationshipIds() {
         return this.relationshipIds;
+    }
+
+    public interface StateVisitor {
+        void nodePropertyRemoved(String propertyKey);
+
+        void nodePropertyAdded(String propertyKey);
+
+        void nodeLabelAdded(String nodeLabel);
+
+        void relationshipTypeAdded(String relationshipType);
     }
 }

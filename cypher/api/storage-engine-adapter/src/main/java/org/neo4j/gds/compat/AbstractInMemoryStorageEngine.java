@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.exceptions.KernelException;
@@ -51,10 +50,8 @@ import org.neo4j.storageengine.api.StoreFileMetadata;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.NamedToken;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
@@ -65,10 +62,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     private final DatabaseLayout databaseLayout;
-    private final TokenHolders tokenHolders;
     private final InMemoryTransactionStateVisitor txStateVisitor;
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
+    private final TokenManager tokenManager;
     private final CountsStore countsStore;
     protected final MetadataProvider metadataProvider;
     protected final CypherGraphStore graphStore;
@@ -83,16 +80,11 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn
     ) {
         this.databaseLayout = databaseLayout;
-        this.tokenHolders = tokenHolders;
-        var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseLayout.getDatabaseName());
-        this.graphStore = getGraphStoreFromCatalog(graphName);
+        this.graphStore = getGraphStoreFromCatalog(databaseLayout.getDatabaseName());
         this.txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders);
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
-        initializeTokenHolders();
-        graphStore.initialize(tokenHolders);
-        graphStore.registerPropertyRemovalCallback(txStateVisitor::removeNodeProperty);
-        graphStore.registerPropertyAddedCallback(this::addProperty);
+        this.tokenManager = new TokenManager(tokenHolders, txStateVisitor, graphStore);
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
@@ -103,7 +95,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     @Override
     public StorageReader newReader() {
-        return storageReaderFn.apply(graphStore, tokenHolders, countsStore);
+        return storageReaderFn.apply(graphStore, tokenManager.tokenHolders(), countsStore);
     }
 
     @Override
@@ -116,7 +108,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     }
 
     @Override
-    public void init() { }
+    public void init() {
+    }
 
     @Override
     public void start() {
@@ -184,41 +177,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
 
     }
 
-    private void initializeTokenHolders() {
-        MutableInt labelCounter = new MutableInt(0);
-        MutableInt typeCounter = new MutableInt(0);
-        MutableInt propertyCounter = new MutableInt(0);
-
-        var propertyKeys = new HashSet<>(graphStore.nodePropertyKeys());
-        propertyKeys.addAll(graphStore.relationshipPropertyKeys());
-        propertyKeys.forEach(propertyKey ->
-            tokenHolders
-                .propertyKeyTokens()
-                .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement()))
-        );
-
-        graphStore
-            .nodeLabels()
-            .forEach(nodeLabel -> tokenHolders
-                .labelTokens()
-                .addToken(new NamedToken(nodeLabel.name(), labelCounter.getAndIncrement())));
-
-        graphStore
-            .relationshipTypes()
-            .forEach(relType -> tokenHolders
-                .relationshipTypeTokens()
-                .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
-    }
-
-    private void addProperty(String propertyName) {
-        try {
-            tokenHolders.propertyKeyTokens().getOrCreateId(propertyName);
-        } catch (KernelException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static CypherGraphStore getGraphStoreFromCatalog(String graphName) {
+    private static CypherGraphStore getGraphStoreFromCatalog(String databaseName) {
+        var graphName = InMemoryDatabaseCreationCatalog.getRegisteredDbCreationGraphName(databaseName);
         return (CypherGraphStore) GraphStoreCatalog.getAllGraphStores()
             .filter(graphStoreWithUserNameAndConfig -> graphStoreWithUserNameAndConfig
                 .config()
