@@ -39,11 +39,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOf;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface ClassificationMetricSpecification {
-    SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
+    List<String> MODEL_SPECIFIC_METRICS = List.of(((ClassificationMetric) OUT_OF_BAG_ERROR).name());
+    SortedMap<String, Function<Long, ClassificationCrossValidationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
         F1Score.NAME, F1Score::new,
         Precision.NAME, Precision::new,
         Recall.NAME, Recall::new,
@@ -117,6 +119,10 @@ public interface ClassificationMetricSpecification {
             String input = (String) userSpecification;
 
             var upperCaseSpecification = toUpperCaseWithLocale(input);
+            if (upperCaseSpecification.equals(((ClassificationMetric) OUT_OF_BAG_ERROR).name())) {
+                return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
+            }
+
             var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
             if (!matcher.matches()) {
                 try {
@@ -131,7 +137,7 @@ public interface ClassificationMetricSpecification {
             }
             var metricType = matcher.group(1);
             if (matcher.group(2).equals("*")) {
-                for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
+                for (Map.Entry<String, Function<Long, ClassificationCrossValidationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
                     String metric = entry.getKey();
                     if (metric.equals(metricType)) {
                         return createSpecification(
@@ -204,6 +210,7 @@ public interface ClassificationMetricSpecification {
 
     private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
         var validExpressions = new LinkedList<String>();
+        validExpressions.addAll(MODEL_SPECIFIC_METRICS);
         var allClassExpressions = AllClassMetric.values();
         for (AllClassMetric allClassExpression : allClassExpressions) {
             validExpressions.add(allClassExpression.name());
@@ -238,6 +245,7 @@ public interface ClassificationMetricSpecification {
 
     static boolean invalidSpecification(String userSpecification) {
         var upperCaseSpecification = userSpecification.toUpperCase(Locale.ENGLISH);
+        if (MODEL_SPECIFIC_METRICS.contains(upperCaseSpecification)) return false;
         var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
         if (matcher.matches()) return false;
         return Arrays
