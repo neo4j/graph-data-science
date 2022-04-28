@@ -27,6 +27,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineCompanion {
@@ -62,5 +63,23 @@ public final class PipelineCompanion {
         pipeline.setAutoTuningConfig(config);
 
         return Stream.of(factory.apply(pipeline));
+    }
+
+    public static void validateMainMetric(TrainingPipeline<?> pipeline, String mainMetric) {
+        if (mainMetric.equals(((ClassificationMetric) OUT_OF_BAG_ERROR).name())) {
+            var nonRFMethods = pipeline.trainingParameterSpace().entrySet().stream()
+                .filter(entry -> !entry.getValue().isEmpty())
+                .map(Map.Entry::getKey)
+                .map(method -> "`" + method.name() + "`")
+                .collect(Collectors.toList());
+            if (!nonRFMethods.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "If %s is used as the main metric (the first one), then only RandomForest model candidates are allowed." +
+                    " Training methods used are: [%s].",
+                    ((ClassificationMetric) OUT_OF_BAG_ERROR).name(),
+                    String.join(", ", nonRFMethods)
+                ));
+            }
+        }
     }
 }

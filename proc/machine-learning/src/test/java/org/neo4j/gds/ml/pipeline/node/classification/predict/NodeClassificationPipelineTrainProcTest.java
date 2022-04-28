@@ -267,4 +267,45 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             7
         );
     }
+
+    @Test
+    void cannotUseOOBAsMainMetricWithLR() {
+
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.addNodeProperty($pipeline, 'pageRank', {mutateProperty: 'pr'})",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar', 'pr'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline, {penalty: 1000, maxEpochs: 1})",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        assertError(
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 't'," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'F1(class=1)']," +
+            "       randomSeed: 1" +
+            "})",
+            Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
+            "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
+            " then only RandomForest model candidates are allowed." +
+            " Training methods used are: [`LogisticRegression`, `RandomForest`]"
+        );
+    }
 }

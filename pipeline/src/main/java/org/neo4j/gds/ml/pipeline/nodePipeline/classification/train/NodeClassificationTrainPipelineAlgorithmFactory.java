@@ -29,6 +29,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
+
 public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
 
     private final ExecutionContext executionContext;
@@ -48,6 +50,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             configuration.pipeline(),
             NodeClassificationTrainingPipeline.class
         );
+
+        validateMainMetric(pipeline, configuration.metrics().get(0).asString());
 
         return new NodeClassificationTrainPipelineExecutor(
             pipeline,

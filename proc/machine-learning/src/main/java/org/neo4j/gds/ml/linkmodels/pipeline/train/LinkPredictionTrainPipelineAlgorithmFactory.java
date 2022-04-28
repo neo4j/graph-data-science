@@ -30,6 +30,8 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
+
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final ExecutionContext executionContext;
 
@@ -48,6 +50,8 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             trainConfig.pipeline(),
             LinkPredictionTrainingPipeline.class
         );
+
+        validateMainMetric(pipeline, trainConfig.metrics().get(0).name());
 
         return new LinkPredictionTrainPipelineExecutor(
             pipeline,
