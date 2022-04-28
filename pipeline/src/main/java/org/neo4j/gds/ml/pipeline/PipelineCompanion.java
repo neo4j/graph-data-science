@@ -17,16 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineCompanion {
 
