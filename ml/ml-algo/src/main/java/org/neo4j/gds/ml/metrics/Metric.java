@@ -21,7 +21,13 @@ package org.neo4j.gds.ml.metrics;
 
 import java.util.Comparator;
 
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
+
 public interface Metric {
+    static boolean isSpecific(Metric metric) {
+        return metric.name().equals((OUT_OF_BAG_ERROR).name());
+    }
+
     String name();
 
     Comparator<Double> comparator();

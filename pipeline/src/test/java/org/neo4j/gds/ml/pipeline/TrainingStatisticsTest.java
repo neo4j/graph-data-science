@@ -24,7 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.BestMetricSpecificData;
+import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -42,6 +43,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQUARED_ERROR;
 
 class TrainingStatisticsTest {
@@ -115,7 +117,7 @@ class TrainingStatisticsTest {
 
     @Test
     void getsMetricsForWinningModel() {
-        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
+        var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED, OUT_OF_BAG_ERROR));
 
         var candidate = new TestTrainerConfig("train");
         ModelStats trainStats = ModelStats.of(
@@ -130,10 +132,17 @@ class TrainingStatisticsTest {
             0.3,
             0.5
         );
+        ModelStats specificStats = ModelStats.of(
+            candidate,
+            0.5,
+            0.4,
+            0.9
+        );
         trainingStatistics.addTrainStats(AUCPR, trainStats);
         trainingStatistics.addTrainStats(F1_WEIGHTED, trainStats);
         trainingStatistics.addValidationStats(AUCPR, validationStats);
         trainingStatistics.addValidationStats(F1_WEIGHTED, validationStats);
+        trainingStatistics.addSpecificStats(OUT_OF_BAG_ERROR, specificStats);
         trainingStatistics.addTestScore(AUCPR, 1);
         trainingStatistics.addTestScore(F1_WEIGHTED, 2);
         trainingStatistics.addOuterTrainScore(AUCPR, 3);
@@ -142,14 +151,18 @@ class TrainingStatisticsTest {
         var winningModelMetrics = trainingStatistics.metricsForWinningModel();
 
         assertThat(winningModelMetrics)
-            .hasSize(2)
+            .hasSize(3)
             .containsEntry(
                 AUCPR,
-                BestMetricData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 3, 1)
+                BestMetricStandardData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 3, 1)
             )
             .containsEntry(
                 F1_WEIGHTED,
-                BestMetricData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 4, 2)
+                BestMetricStandardData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 4, 2)
+            )
+            .containsEntry(
+                OUT_OF_BAG_ERROR,
+                BestMetricSpecificData.of(BestModelStats.of(specificStats))
             );
 
     }

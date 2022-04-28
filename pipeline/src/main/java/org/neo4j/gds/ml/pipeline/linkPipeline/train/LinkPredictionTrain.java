@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -136,6 +136,7 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
+            config.metrics(),
             progressTracker
         );
         progressTracker.endSubTask("Train best model");
@@ -169,10 +170,12 @@ public final class LinkPredictionTrain {
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
+        List<? extends Metric> metrics,
         ProgressTracker customProgressTracker
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
+            metrics,
             classIdMap,
             terminationFlag,
             customProgressTracker,
@@ -214,6 +217,7 @@ public final class LinkPredictionTrain {
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
+                    config.metrics(),
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -242,7 +246,7 @@ public final class LinkPredictionTrain {
             });
             var validationStats = trainingStatistics.findModelValidationAvg(trial);
             var trainStats = trainingStatistics.findModelTrainAvg(trial);
-            double mainMetric = trainingStatistics.getMainValidationMetric(trial);
+            double mainMetric = trainingStatistics.getMainMetric(trial);
 
             progressTracker.logMessage(formatWithLocale(
                 "Main validation metric (%s): %.4f",
@@ -369,7 +373,7 @@ public final class LinkPredictionTrain {
             // this assumes the training is independent of the relationship set size
             .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
             .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-            .fixed("Best model stats", numberOfMetrics * BestMetricData.estimateMemory())
+            .fixed("Best model stats", numberOfMetrics * BestMetricStandardData.estimateMemory())
             .build();
     }
 

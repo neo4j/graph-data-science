@@ -19,7 +19,23 @@
  */
 package org.neo4j.gds.ml.metrics;
 
-import org.neo4j.gds.config.ToMapConvertible;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.ValueClass;
 
-public interface BestMetricData extends ToMapConvertible {
+import java.util.Map;
+
+@ValueClass
+public interface BestMetricSpecificData extends BestMetricData {
+    BestModelStats specific();
+
+    @Value.Derived
+    default Map<String, Object> toMap() {
+        return Map.of(
+            "specific", specific().toMap()
+        );
+    }
+
+    static BestMetricSpecificData of(BestModelStats specific) {
+        return ImmutableBestMetricSpecificData.of(specific);
+    }
 }

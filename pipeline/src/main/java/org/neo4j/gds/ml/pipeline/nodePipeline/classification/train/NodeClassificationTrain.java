@@ -375,7 +375,7 @@ public final class NodeClassificationTrain {
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), metrics, progressTracker);
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask(
@@ -394,7 +394,7 @@ public final class NodeClassificationTrain {
 
     private Classifier retrainBestModel(HugeLongArray trainSet, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedClassifier = trainModel(trainSet, trainingStatistics.bestParameters(), progressTracker);
+        var retrainedClassifier = trainModel(trainSet, trainingStatistics.bestParameters(), metrics, progressTracker);
         progressTracker.endSubTask("Retrain best model");
 
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
@@ -406,10 +406,12 @@ public final class NodeClassificationTrain {
     private Classifier trainModel(
         HugeLongArray trainSet,
         TrainerConfig trainerConfig,
+        List<? extends Metric> metrics,
         ProgressTracker customProgressTracker
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
+            metrics,
             classIdMap,
             terminationFlag,
             customProgressTracker,

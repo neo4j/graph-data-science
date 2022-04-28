@@ -40,6 +40,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -158,12 +159,13 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            assertThat(customInfo.metrics().get(metric).validation().toMap())
+            var bestMetricData = (BestMetricStandardData) customInfo.metrics().get(metric);
+            assertThat(bestMetricData.validation().toMap())
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
 
-            assertThat(customInfo.metrics().get(metric).train().toMap())
+            assertThat(bestMetricData.train().toMap())
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
