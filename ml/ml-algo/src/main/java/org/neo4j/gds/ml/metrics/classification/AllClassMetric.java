@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public enum AllClassMetric implements ClassificationMetric {
+public enum AllClassMetric implements ClassificationCrossValidationMetric {
     F1_WEIGHTED {
         @Override
         public Comparator<Double> comparator() {
