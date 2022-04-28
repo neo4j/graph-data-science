@@ -170,7 +170,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
-        return new RandomForestClassifier(decisionTrees, classIdMap, allFeatureVectors.featureDimension());
+        return new RandomForestClassifier(decisionTrees, classIdMap, allFeatureVectors.featureDimension(), outOfBagError);
     }
 
     double outOfBagError() {

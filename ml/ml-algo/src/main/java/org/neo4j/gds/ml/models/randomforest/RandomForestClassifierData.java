@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
@@ -41,12 +42,14 @@ public interface RandomForestClassifierData extends Classifier.ClassifierData {
 
     List<DecisionTreePredictor<Integer>> decisionTrees();
 
+    Optional<Double> outOfBagError();
+
     @Value.Derived
     default TrainingMethod trainerMethod() {
         return TrainingMethod.RandomForestClassification;
     }
 
-    public static MemoryEstimation memoryEstimation(
+    static MemoryEstimation memoryEstimation(
         LongUnaryOperator numberOfTrainingExamples,
         RandomForestTrainerConfig config
     ) {
