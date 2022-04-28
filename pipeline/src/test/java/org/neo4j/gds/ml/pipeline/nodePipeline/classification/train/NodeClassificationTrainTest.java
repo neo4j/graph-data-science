@@ -53,6 +53,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -163,6 +164,103 @@ class NodeClassificationTrainTest {
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {
+
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeFeatureStep.of("a"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("b"));
+
+        pipeline.addTrainerConfig(
+            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
+        );
+
+        LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
+            .builder()
+            .penalty(1 * 2.0 / 3.0 * 0.5)
+            .maxEpochs(10000)
+            .tolerance(1e-5)
+            .build();
+        pipeline.addTrainerConfig(expectedWinner);
+
+        // Should NOT be the winning model, so give it bad hyperparams.
+        pipeline.addTrainerConfig(
+
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", 0.1
+                ),
+                TrainingMethod.RandomForest
+            ));
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                ),
+                TrainingMethod.RandomForest
+            ));
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
+            .modelName("anyThing")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .metrics(
+                includeOOB
+                    ? List.of(
+                    ClassificationMetricSpecification.parse("F1_WEIGHTED"),
+                    ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR"))
+                    : List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED"))
+            )
+            .build();
+
+        var ncTrain = NodeClassificationTrain.create(
+            graph,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var result = ncTrain.compute();
+
+        var trainingStatistics = result.trainingStatistics().toMap();
+        var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
+
+        var expectedKeys = includeOOB
+            ? Set.of("trainStats", "validationStats", "modelSpecificStats", "bestParameters")
+            : Set.of("trainStats", "validationStats", "bestParameters");
+        assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
+
+        var trainStats = (Map<String, Object>) trainingStatisticsMap.get("trainStats");
+        assertThat(trainStats.keySet()).isEqualTo(Set.of("F1_WEIGHTED"));
+        var f1Train = (List) trainStats.get("F1_WEIGHTED");
+        assertThat(f1Train.size()).isEqualTo(10);
+
+        var validationStats = (Map<String, Object>) trainingStatisticsMap.get("validationStats");
+        assertThat(validationStats.keySet()).isEqualTo(Set.of("F1_WEIGHTED"));
+        var f1Valid = (List) validationStats.get("F1_WEIGHTED");
+        assertThat(f1Valid.size()).isEqualTo(10);
+
+        if (includeOOB) {
+            var specificStats = (Map<String, Object>) trainingStatisticsMap.get("modelSpecificStats");
+            assertThat(specificStats.keySet()).isEqualTo(Set.of("OUT_OF_BAG_ERROR"));
+            var outOfBagErrors = (List) specificStats.get("OUT_OF_BAG_ERROR");
+            assertThat(outOfBagErrors.size()).isEqualTo(10);
+        }
     }
 
     @ParameterizedTest

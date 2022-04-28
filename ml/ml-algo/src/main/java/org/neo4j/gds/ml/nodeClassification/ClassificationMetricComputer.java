@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.classification.ClassificationCrossValidationMetric;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
@@ -51,7 +51,7 @@ public final class ClassificationMetricComputer {
         this.predictedClasses = predictedClasses;
     }
 
-    public double score(ClassificationMetric metric) {
+    public double score(ClassificationCrossValidationMetric metric) {
         return metric.compute(labels, predictedClasses, classCounts);
     }
 

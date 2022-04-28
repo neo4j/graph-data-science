@@ -145,6 +145,10 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        runQuery(
             "CALL gds.beta.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.3, validationFolds: 2})",
             pipe
         );
@@ -166,7 +170,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                 .containsKey("bestParameters")
                 .containsEntry("classes", List.of(0L, 1L));
 
-            var metrics = modelInfo
+            modelInfo
                 .extractingByKey("metrics", soMap)
                 .extractingByKey("F1_class_1", soMap)
                 .usingRecursiveComparison()
@@ -199,7 +203,8 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             assertThat(mss).asInstanceOf(soMap)
                 .containsKey("bestParameters")
                 .containsKey("trainStats")
-                .containsKey("validationStats");
+                .containsKey("validationStats")
+                .containsKey("modelSpecificStats");
             return true;
         }, "a model selection statistics map");
 
@@ -209,7 +214,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "       pipeline: $pipeline," +
             "       modelName: $modelName," +
             "       targetProperty: 't'," +
-            "       metrics: ['F1(class=1)']," +
+            "       metrics: ['F1(class=1)', 'OUT_OF_BAG_ERROR']," +
             "       randomSeed: 1" +
             "})",
             params,
@@ -222,7 +227,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasEntry("modelName", MODEL_NAME),
                         aMapWithSize(11)
                     ),
-                    "modelSelectionStats",modelSelectionStatsCheck
+                    "modelSelectionStats", modelSelectionStatsCheck
                 )
             )
         );
