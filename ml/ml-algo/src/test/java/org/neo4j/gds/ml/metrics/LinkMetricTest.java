@@ -23,11 +23,18 @@ package org.neo4j.gds.ml.metrics;
 import org.apache.commons.io.IOUtils;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.SplittableRandom;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 
 class LinkMetricTest {
 
@@ -188,4 +195,28 @@ class LinkMetricTest {
         });
         assertThat(LinkMetric.AUCPR.compute(signedProbabilites, 1.0)).isEqualTo(expectedAUC, Offset.offset(1e-24));
     }
+
+    @ParameterizedTest
+    @MethodSource("randomSeeds")
+    void shouldProduceAUCPRBetween0And1(long randomSeed) {
+        SplittableRandom rng = new SplittableRandom(randomSeed);
+
+        int numberOfTrees = 100;
+        int examples = 100;
+        SignedProbabilities signedProbabilities = SignedProbabilities.create(examples);
+        for (int i = 0; i < examples; i++) {
+            double prob = (double) rng.nextInt(numberOfTrees + 1) / numberOfTrees;
+            double signedP = rng.nextBoolean() ? prob : -prob;
+            signedProbabilities.add(signedP);
+        }
+
+        double compute = AUCPR.compute(signedProbabilities, 200);
+
+        assertThat(compute).isGreaterThanOrEqualTo(0.0).isLessThanOrEqualTo(1.0);
+    }
+
+    static Stream<Arguments> randomSeeds() {
+        return IntStream.range(1, 101).mapToObj(Arguments::of);
+    }
+
 }
