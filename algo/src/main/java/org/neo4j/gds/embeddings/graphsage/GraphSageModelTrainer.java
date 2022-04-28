@@ -126,8 +126,6 @@ public class GraphSageModelTrainer {
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        progressTracker.beginSubTask("GraphSageTrain");
-
         var layers = layerConfigsFunction.apply(graph).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
@@ -167,7 +165,6 @@ public class GraphSageModelTrainer {
         }
 
         progressTracker.endSubTask("Train model");
-        progressTracker.endSubTask("GraphSageTrain");
 
         return ModelTrainResult.of(epochLosses, converged, layers);
     }
