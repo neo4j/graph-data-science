@@ -420,11 +420,11 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 50%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 100%",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.3201",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Validation metrics: {AUCPR=0.3201}",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Training metrics: {AUCPR=0.3174}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.6846",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Validation metrics: {AUCPR=0.6846}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Training metrics: {AUCPR=0.8961}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Finished",
-                "MY TEST TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.3201",
+                "MY TEST TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.6846",
                 "MY TEST TASK :: Select best model :: Finished",
                 "MY TEST TASK :: Train best model :: Start",
                 "MY TEST TASK :: Train best model :: Trained decision tree 2 out of 5",
@@ -437,6 +437,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Compute train metrics :: Start",
                 "MY TEST TASK :: Compute train metrics 100%",
                 "MY TEST TASK :: Compute train metrics :: Finished",
+                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.9510}",
                 "MY TEST TASK :: Evaluate on test data :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features 50%",
@@ -446,8 +447,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Evaluate on test data :: Compute test metrics 100%",
                 "MY TEST TASK :: Evaluate on test data :: Compute test metrics :: Finished",
                 "MY TEST TASK :: Evaluate on test data :: Finished",
-                "MY TEST TASK :: Final model metrics on test set: {AUCPR=0.1824}",
-                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.1824}",
+                "MY TEST TASK :: Final model metrics on test set: {AUCPR=0.9510}",
                 "MY TEST TASK :: Finished"
             );
     }
