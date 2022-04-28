@@ -45,6 +45,10 @@ public interface BestModelStats {
 
     @Value.Derived
     default Map<String, Object> toMap() {
+        // temporary hack which will be removed in following commits/PR
+        if (avg() == -1) {
+            return Map.of();
+        }
         return Map.of(
             "avg", avg(),
             "min", min(),

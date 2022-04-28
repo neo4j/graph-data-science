@@ -59,7 +59,9 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "classes", classes(),
-            "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
+            "metrics", metrics().entrySet().stream()
+                .filter(entry -> !entry.getValue().toMap().equals(Map.of("specific", Map.of())))
+                .collect(Collectors.toMap(
                 entry -> entry.getKey().toString(),
                 entry -> entry.getValue().toMap()
             )),
