@@ -233,11 +233,11 @@ RETURN
 .Results
 [opts="header", cols="6, 2, 2, 2"]
 |===
-| winningModel                                                                                               | avgTrainScore      | outerTrainScore     | testScore
-| {maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001} | 0.3721560846560847 |  0.3801587301587301 | 0.7638888888888888
+| winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore
+| {maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.904365079365079 |  0.971428571428572 | 0.583333333333333
 |===
 
-We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.
+We can see the RandomForest model configuration with `numberOfDecisionTrees = 5` (and defaults filled for remaining parameters) was selected, and has a score of `0.58` on the test set.
 The score computed as the <<linkprediction-pipelines-metrics, AUCPR>> metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 

@@ -63,8 +63,7 @@ public final class LinkPredictionEvaluationMetricComputer {
                     offset += 1;
                     boolean isEdge = targets.get(relationshipIdx) == EdgeSplitter.POSITIVE;
 
-                    var signedProbability = isEdge ? probabilityOfPositiveEdge : -1 * probabilityOfPositiveEdge;
-                    signedProbabilities.add(signedProbability);
+                    signedProbabilities.add(probabilityOfPositiveEdge, isEdge);
                 }
 
                 progressTracker.logProgress(batch.size());

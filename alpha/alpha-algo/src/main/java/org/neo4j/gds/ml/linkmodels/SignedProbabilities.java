@@ -35,6 +35,7 @@ import java.util.stream.DoubleStream;
  * Represents a sorted set of doubles, sorted according to their absolute value in increasing order.
  */
 public final class SignedProbabilities {
+    public static double ALMOST_ZERO = 1e-100;
     private static final Comparator<Double> ABSOLUTE_VALUE_COMPARATOR = Comparator.comparingDouble(Math::abs);
 
     private final Optional<TreeSet<Double>> tree;
@@ -71,13 +72,15 @@ public final class SignedProbabilities {
         return new SignedProbabilities(tree, list, isTree);
     }
 
-    public synchronized void add(double value) {
-        if (value > 0) positiveCount++;
+    public synchronized void add(double probability, boolean isPositive) {
+        var nonZeroProbability = probability == 0 ? ALMOST_ZERO : probability;
+        var signedProbability = isPositive ? nonZeroProbability : -1 * nonZeroProbability;
+        if (signedProbability > 0) positiveCount++;
         else negativeCount++;
         if (isTree) {
-            tree.get().add(value);
+            tree.get().add(signedProbability);
         } else {
-            list.get().add(value);
+            list.get().add(signedProbability);
         }
     }
 
