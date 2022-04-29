@@ -27,10 +27,10 @@ public interface WriteRelationshipConfig extends WriteConfig {
 
     String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
 
-    @Configuration.ConvertWith("validatePropertyName")
+    @Configuration.ConvertWith("validateRelationshipTypeName")
     String writeRelationshipType();
 
-    static @Nullable String validatePropertyName(String input) {
+    static @Nullable String validateRelationshipTypeName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "writeRelationshipType");
     }
 }
