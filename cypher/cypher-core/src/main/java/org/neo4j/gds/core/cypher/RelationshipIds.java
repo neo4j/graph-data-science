@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.cypher;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -32,6 +31,7 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.token.TokenHolders;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,11 +39,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class RelationshipIds {
 
-    private final RelationshipIdContext[] relationshipIdContexts;
+    private final List<RelationshipIdContext> relationshipIdContexts;
 
     static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
-        var relationshipIdContexts = new RelationshipIdContext[graphStore.relationshipTypes().size()];
-        var index = new MutableInt(0);
+        var relationshipIdContexts = new ArrayList<RelationshipIdContext>(graphStore.relationshipTypes().size());
 
         graphStore.relationshipTypes().forEach(relType -> {
             var relCount = graphStore.relationshipCount(relType);
@@ -68,16 +67,16 @@ public final class RelationshipIds {
                 .map(relationshipProperty -> relationshipProperty.values().propertiesList())
                 .toArray(AdjacencyProperties[]::new);
 
-            relationshipIdContexts[index.getAndIncrement()] = ImmutableRelationshipIdContext.of(relType, relTypeId, relCount, graph, offsets, propertyIds, adjacencyProperties);
+            relationshipIdContexts.add(ImmutableRelationshipIdContext.of(relType, relTypeId, relCount, graph, offsets, propertyIds, adjacencyProperties));
         });
         return new RelationshipIds(relationshipIdContexts);
     }
 
-    private RelationshipIds(RelationshipIdContext[] relationshipIdContexts) {
+    private RelationshipIds(List<RelationshipIdContext> relationshipIdContexts) {
         this.relationshipIdContexts = relationshipIdContexts;
     }
 
-    public RelationshipIdContext[] relationshipIdContexts() {
+    public List<RelationshipIdContext> relationshipIdContexts() {
         return relationshipIdContexts;
     }
 

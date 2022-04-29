@@ -34,12 +34,13 @@ import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Arrays;
+import java.util.List;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
-    private final RelationshipIds.RelationshipIdContext[] relationshipIdContexts;
+    private final List<RelationshipIds.RelationshipIdContext> relationshipIdContexts;
     private final AdjacencyCursor[] adjacencyCursorCache;
     private final PropertyCursor[][] propertyCursorCache;
 
@@ -59,11 +60,11 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.relationshipIdContexts = this.graphStore.relationshipIds().relationshipIdContexts();
-        this.adjacencyCursorCache = Arrays.stream(relationshipIdContexts)
+        this.adjacencyCursorCache = relationshipIdContexts.stream()
             .map(context -> context.adjacencyList().rawAdjacencyCursor())
             .toArray(AdjacencyCursor[]::new);
 
-        this.propertyCursorCache = Arrays.stream(relationshipIdContexts)
+        this.propertyCursorCache = relationshipIdContexts.stream()
             .map(context -> Arrays
                 .stream(context.adjacencyProperties())
                 .map(AdjacencyProperties::rawPropertyCursor)
@@ -96,7 +97,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     @Override
     public boolean hasProperties() {
-        return relationshipIdContexts[relationshipContextIndex].graph().hasRelationshipProperty();
+        return relationshipIdContexts.get(relationshipContextIndex).graph().hasRelationshipProperty();
     }
 
     @Override
@@ -160,15 +161,15 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     private boolean progressToNextContext() {
         relationshipContextIndex++;
 
-        if (relationshipContextIndex >= relationshipIdContexts.length) {
+        if (relationshipContextIndex >= relationshipIdContexts.size()) {
             return false;
         }
 
         if (relationshipContextIndex > 0) {
-            relationshipTypeOffset += relationshipIdContexts[relationshipContextIndex - 1].relationshipCount();
+            relationshipTypeOffset += relationshipIdContexts.get(relationshipContextIndex - 1).relationshipCount();
         }
 
-        var context = relationshipIdContexts[relationshipContextIndex];
+        var context = relationshipIdContexts.get(relationshipContextIndex);
 
         if (!selection.test(context.relationshipTypeId())) {
             return progressToNextContext();
