@@ -35,6 +35,7 @@ import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricStandardData;
+import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -203,11 +204,8 @@ public final class LinkPredictionTrain {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-            var validationStatsBuilder = new ModelStatsBuilder(
-                modelParams,
-                pipeline.splitConfig().validationFolds()
-            );
+            var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
             for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = relSplit.trainSet();
@@ -240,12 +238,15 @@ public final class LinkPredictionTrain {
             }
 
             // insert the candidates' metrics into trainStats and validationStats
-            config.metrics().forEach(metric -> {
-                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
-            });
-            var validationStats = trainingStatistics.findModelValidationAvg(trial);
-            var trainStats = trainingStatistics.findModelTrainAvg(trial);
+            var candidateStats = CandidateStats.of(
+                modelParams,
+                trainStatsBuilder.build(config.metrics()),
+                validationStatsBuilder.build(config.metrics())
+            );
+            trainingStatistics.addCandidateStats(candidateStats);
+
+            var validationStats = trainingStatistics.validationMetricsAvg(trial);
+            var trainStats = trainingStatistics.trainMetricsAvg(trial);
             double mainMetric = trainingStatistics.getMainMetric(trial);
 
             progressTracker.logMessage(formatWithLocale(

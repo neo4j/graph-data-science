@@ -108,8 +108,9 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
             trainResult.regressor().data(),
             config,
             NodeRegressionPipelineModelInfo.builder()
-                .bestParameters(trainResult.trainingStatistics().bestParameters())
-                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
+                .testMetrics(trainResult.trainingStatistics().winningModelTestMetrics())
+                .outerTrainMetrics(trainResult.trainingStatistics().winningModelOuterTrainMetrics())
+                .bestCandidate(trainResult.trainingStatistics().bestCandidate())
                 .pipeline(NodePropertyPredictPipeline.from(pipeline))
                 .build()
         );

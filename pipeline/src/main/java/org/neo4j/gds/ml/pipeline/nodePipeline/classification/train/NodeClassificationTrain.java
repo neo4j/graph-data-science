@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.StatsMap;
@@ -307,9 +308,8 @@ public final class NodeClassificationTrain {
             progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-            var specificStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+            var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 var trainSet = nodeSplit.trainSet();
@@ -319,21 +319,19 @@ public final class NodeClassificationTrain {
 
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
-                registerSpecificMetricScores(classifier, specificStatsBuilder::update);
+                registerSpecificMetricScores(classifier, validationStatsBuilder::update);
                 progressTracker.logProgress();
             }
 
-            metrics.forEach(metric -> {
-                if (Metric.isSpecific(metric)) {
-                    trainingStatistics.addSpecificStats(metric, specificStatsBuilder.build(metric));
-                } else {
-                    trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
-                    trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
-                }
-            });
+            var candidateStats = CandidateStats.of(
+                modelParams,
+                trainStatsBuilder.build(metrics),
+                validationStatsBuilder.build(metrics)
+            );
+            trainingStatistics.addCandidateStats(candidateStats);
 
-            var validationStats = trainingStatistics.findModelValidationAvg(trial);
-            var trainStats = trainingStatistics.findModelTrainAvg(trial);
+            var validationStats = trainingStatistics.validationMetricsAvg(trial);
+            var trainStats = trainingStatistics.trainMetricsAvg(trial);
             double mainMetric = trainingStatistics.getMainMetric(trial);
 
             progressTracker.logMessage(formatWithLocale(
@@ -362,10 +360,7 @@ public final class NodeClassificationTrain {
 
     private void registerSpecificMetricScores(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
         if (!metrics.contains(OUT_OF_BAG_ERROR)) return;
-        if (!(classifier.data() instanceof RandomForestClassifierData)) {
-            scoreConsumer.accept(OUT_OF_BAG_ERROR, -1.0);
-            return;
-        }
+        if (!(classifier.data() instanceof RandomForestClassifierData)) return;
         var data = (RandomForestClassifierData) classifier.data();
         data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
     }

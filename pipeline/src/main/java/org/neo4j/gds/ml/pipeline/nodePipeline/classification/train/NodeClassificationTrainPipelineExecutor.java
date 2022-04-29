@@ -139,8 +139,9 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             config,
             NodeClassificationPipelineModelInfo.builder()
                 .classes(trainResult.classifier().classIdMap().originalIdsList())
-                .bestParameters(trainResult.trainingStatistics().bestParameters())
-                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
+                .bestCandidate(trainResult.trainingStatistics().bestCandidate())
+                .testMetrics(trainResult.trainingStatistics().winningModelTestMetrics())
+                .outerTrainMetrics(trainResult.trainingStatistics().winningModelOuterTrainMetrics())
                 .pipeline(NodePropertyPredictPipeline.from(pipeline))
                 .build()
         );

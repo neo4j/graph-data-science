@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -152,14 +151,14 @@ class NodeClassificationTrainTest {
 
         var result = ncTrain.compute();
 
-        List<ModelStats> validationScores = result.trainingStatistics().getValidationStats(metric);
+        var validationStats = result.trainingStatistics().getValidationStats(metric);
 
-        assertThat(validationScores).hasSize(MAX_TRIALS);
+        assertThat(validationStats).hasSize(MAX_TRIALS);
 
-        double model1Score = validationScores.get(0).avg();
+        double model1Score = validationStats.get(0).avg();
         for (int i = 1; i < MAX_TRIALS; i++) {
             assertThat(model1Score)
-                .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
+                .isNotCloseTo(validationStats.get(i).avg(), Percentage.withPercentage(0.2));
         }
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
@@ -167,7 +166,7 @@ class NodeClassificationTrainTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = {true})
     void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {
 
         var pipeline = new NodeClassificationTrainingPipeline();
@@ -197,7 +196,7 @@ class NodeClassificationTrainTest {
                     "numberOfDecisionTrees", 1,
                     "maxFeaturesRatio", 0.1
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
@@ -207,7 +206,7 @@ class NodeClassificationTrainTest {
                     "numberOfDecisionTrees", 1,
                     "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
@@ -240,26 +239,20 @@ class NodeClassificationTrainTest {
         var trainingStatistics = result.trainingStatistics().toMap();
         var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
 
-        var expectedKeys = includeOOB
-            ? Set.of("trainStats", "validationStats", "modelSpecificStats", "bestParameters")
-            : Set.of("trainStats", "validationStats", "bestParameters");
+        var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
         assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
 
-        var trainStats = (Map<String, Object>) trainingStatisticsMap.get("trainStats");
-        assertThat(trainStats.keySet()).isEqualTo(Set.of("F1_WEIGHTED"));
-        var f1Train = (List) trainStats.get("F1_WEIGHTED");
-        assertThat(f1Train.size()).isEqualTo(10);
+        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(1, 11);
 
-        var validationStats = (Map<String, Object>) trainingStatisticsMap.get("validationStats");
-        assertThat(validationStats.keySet()).isEqualTo(Set.of("F1_WEIGHTED"));
-        var f1Valid = (List) validationStats.get("F1_WEIGHTED");
-        assertThat(f1Valid.size()).isEqualTo(10);
-
-        if (includeOOB) {
-            var specificStats = (Map<String, Object>) trainingStatisticsMap.get("modelSpecificStats");
-            assertThat(specificStats.keySet()).isEqualTo(Set.of("OUT_OF_BAG_ERROR"));
-            var outOfBagErrors = (List) specificStats.get("OUT_OF_BAG_ERROR");
-            assertThat(outOfBagErrors.size()).isEqualTo(10);
+        var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
+        assertThat(candidateStats.size()).isEqualTo(10);
+        for (int i = 0; i < candidateStats.size(); i++) {
+            var candidateMap = (Map) candidateStats.get(i);
+            assertThat(candidateMap).containsKey("parameters");
+            assertThat((Map) candidateMap.get("metrics")).containsKeys("F1_WEIGHTED");
+            if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).containsKeys("OUT_OF_BAG_ERROR");
+            }
         }
     }
 
@@ -337,8 +330,8 @@ class NodeClassificationTrainTest {
             .withFailMessage("Should not produce the same trained `data`!")
             .isNotEqualTo(bananasClassifier.data());
 
-        var bananasMetrics = bananasModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
-        var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
+        var bananasMetrics = bananasModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
+        var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
 
         assertThat(arrayPropertyMetrics)
             .usingRecursiveComparison()

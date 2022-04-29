@@ -184,8 +184,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             trainResult.classifier().data(),
             config,
             LinkPredictionModelInfo.of(
-                trainResult.trainingStatistics().bestParameters(),
-                trainResult.trainingStatistics().metricsForWinningModel(),
+                trainResult.trainingStatistics().winningModelTestMetrics(),
+                trainResult.trainingStatistics().winningModelOuterTrainMetrics(),
+                trainResult.trainingStatistics().bestCandidate(),
                 LinkPredictionPredictPipeline.from(pipeline)
             )
         );

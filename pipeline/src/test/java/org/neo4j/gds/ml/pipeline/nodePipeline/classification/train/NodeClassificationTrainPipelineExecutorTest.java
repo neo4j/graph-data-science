@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -154,18 +154,26 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
             assertThat(model.name()).isEqualTo("model");
             assertThat(model.stored()).isFalse();
-            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
-            assertThat(model.customInfo().metrics()).containsOnlyKeys(metric);
+            assertThat(model.customInfo().bestCandidate().trainerConfig().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().outerTrainMetrics().keySet()).containsExactly(metric);
+            assertThat(model.customInfo().testMetrics().keySet()).containsExactly(metric);
+            assertThat(model.customInfo().bestCandidate().trainingStats().keySet()).containsExactly(metric);
+            assertThat(model.customInfo().bestCandidate().validationStats().keySet()).containsExactly(metric);
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            var bestMetricData = (BestMetricStandardData) customInfo.metrics().get(metric);
-            assertThat(bestMetricData.validation().toMap())
+            var testScore = customInfo.testMetrics().get(metric);
+            assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
+            var outerTrainScore = customInfo.outerTrainMetrics().get(metric);
+            assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
+            var validationStats = customInfo.bestCandidate().validationStats().get(metric).toMap();
+            var trainStats = customInfo.bestCandidate().trainingStats().get(metric).toMap();
+            assertThat(validationStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
 
-            assertThat(bestMetricData.train().toMap())
+            assertThat(trainStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));

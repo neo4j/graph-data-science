@@ -149,8 +149,11 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
             assertThat(model.name()).isEqualTo("model");
             assertThat(model.stored()).isFalse();
-            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
-            assertThat(model.customInfo().metrics()).containsOnlyKeys(evaluationMetric);
+            assertThat(model.customInfo().bestCandidate().trainerConfig().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().outerTrainMetrics().keySet()).containsExactly(evaluationMetric);
+            assertThat(model.customInfo().testMetrics().keySet()).containsExactly(evaluationMetric);
+            assertThat(model.customInfo().bestCandidate().trainingStats().keySet()).containsExactly(evaluationMetric);
+            assertThat(model.customInfo().bestCandidate().validationStats().keySet()).containsExactly(evaluationMetric);
         });
     }
 

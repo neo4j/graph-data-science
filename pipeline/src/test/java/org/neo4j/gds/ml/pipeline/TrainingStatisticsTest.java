@@ -24,13 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.metrics.BestMetricSpecificData;
-import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.BestModelStats;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -42,6 +38,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQUARED_ERROR;
@@ -50,33 +47,47 @@ class TrainingStatisticsTest {
 
     public static Stream<Arguments> mainMetricWithExpectecWinner() {
         return Stream.of(
-            Arguments.of(AUCPR, "higher average"),
-            Arguments.of(ROOT_MEAN_SQUARED_ERROR, "lower average")
+            Arguments.of(List.of(ROOT_MEAN_SQUARED_ERROR, AUCPR), "lower average rmse"),
+            Arguments.of(List.of(AUCPR, ROOT_MEAN_SQUARED_ERROR), "higher average aucpr")
         );
     }
 
     @ParameterizedTest
     @MethodSource("mainMetricWithExpectecWinner")
-    void selectsBestParametersAccordingToMainMetric(Metric mainMetric, String expectedWinner) {
-        var trainingStatistics = new TrainingStatistics(List.of(mainMetric, F1_WEIGHTED));
+    void selectsBestParametersAccordingToMainMetric(List<Metric> metrics, String expectedWinner) {
+        var trainingStatistics = new TrainingStatistics(metrics);
 
-        trainingStatistics.addValidationStats(mainMetric, ModelStats.of(
-            new TestTrainerConfig("lower average"),
-            0.1,
-            1000,
-            1000
+        trainingStatistics.addCandidateStats(CandidateStats.of(
+            new TestTrainerConfig("lower average rmse"),
+            Map.of(),
+            Map.of(
+                ROOT_MEAN_SQUARED_ERROR, BestModelStats.of(
+                    0.2,
+                    0.2,
+                    0.2
+                ),
+                AUCPR, BestModelStats.of(
+                    0.0,
+                    1000,
+                    1000
+                )
+            )
         ));
-        trainingStatistics.addValidationStats(mainMetric, ModelStats.of(
-            new TestTrainerConfig("higher average"),
-            0.2,
-            0.2,
-            0.2
-        ));
-        trainingStatistics.addValidationStats(F1_WEIGHTED, ModelStats.of(
-            new TestTrainerConfig("notprimarymetric"),
-            5000,
-            5000,
-            5000
+        trainingStatistics.addCandidateStats(CandidateStats.of(
+            new TestTrainerConfig("higher average aucpr"),
+            Map.of(),
+            Map.of(
+                ROOT_MEAN_SQUARED_ERROR, BestModelStats.of(
+                    0.3,
+                    0.1,
+                    0.1
+                ),
+                AUCPR, BestModelStats.of(
+                    0.4,
+                    0.2,
+                    0.2
+                )
+            )
         ));
 
         assertThat(((TestTrainerConfig) trainingStatistics.bestParameters()).name).isEqualTo(expectedWinner);
@@ -86,29 +97,57 @@ class TrainingStatisticsTest {
     void getBestTrialStuff() {
         var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED));
 
-        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+        trainingStatistics.addCandidateStats(CandidateStats.of(
             new TestTrainerConfig("bad"),
-            0.1,
-            1000,
-            1000
+            Map.of(),
+            Map.of(
+                AUCPR,
+                BestModelStats.of(
+                    0.1,
+                    1000,
+                    1000
+                )
+            )
         ));
-        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+        trainingStatistics.addCandidateStats(CandidateStats.of(
             new TestTrainerConfig("better"),
-            0.2,
-            0.2,
-            0.2
+            Map.of(),
+            Map.of(
+                AUCPR,
+                BestModelStats.of(
+                    0.2,
+                    0.2,
+                    0.2
+                )
+            )
         ));
-        trainingStatistics.addValidationStats(AUCPR, ModelStats.of(
+        trainingStatistics.addCandidateStats(CandidateStats.of(
             new TestTrainerConfig("same as better"),
-            0.2,
-            0.2,
-            0.2
+            Map.of(),
+            Map.of(
+                AUCPR,
+                BestModelStats.of(
+                    0.2,
+                    0.2,
+                    0.2
+                )
+            )
         ));
-        trainingStatistics.addValidationStats(F1_WEIGHTED, ModelStats.of(
+        trainingStatistics.addCandidateStats(CandidateStats.of(
             new TestTrainerConfig("notprimarymetric"),
-            5000,
-            5000,
-            5000
+            Map.of(),
+            Map.of(
+                AUCPR, BestModelStats.of(
+                    0.0,
+                    0.0,
+                    0.0
+                ),
+                F1_WEIGHTED, BestModelStats.of(
+                    5000,
+                    5000,
+                    5000
+                )
+            )
         ));
 
         assertThat(trainingStatistics.getBestTrialScore()).isCloseTo(0.2, Offset.offset(0.001));
@@ -116,55 +155,75 @@ class TrainingStatisticsTest {
     }
 
     @Test
-    void getsMetricsForWinningModel() {
+    void rendersBestModel() {
         var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED, OUT_OF_BAG_ERROR));
 
         var candidate = new TestTrainerConfig("train");
-        ModelStats trainStats = ModelStats.of(
-            candidate,
+        BestModelStats trainStats = BestModelStats.of(
             0.1,
             0.1,
             0.1
         );
-        ModelStats validationStats = ModelStats.of(
-            candidate,
+        BestModelStats validationStats = BestModelStats.of(
             0.4,
             0.3,
             0.5
         );
-        ModelStats specificStats = ModelStats.of(
-            candidate,
+        BestModelStats oobStats = BestModelStats.of(
             0.5,
             0.4,
             0.9
         );
-        trainingStatistics.addTrainStats(AUCPR, trainStats);
-        trainingStatistics.addTrainStats(F1_WEIGHTED, trainStats);
-        trainingStatistics.addValidationStats(AUCPR, validationStats);
-        trainingStatistics.addValidationStats(F1_WEIGHTED, validationStats);
-        trainingStatistics.addSpecificStats(OUT_OF_BAG_ERROR, specificStats);
+        trainingStatistics.addCandidateStats(CandidateStats.of(
+            candidate,
+            Map.of(
+                AUCPR, trainStats,
+                F1_WEIGHTED, trainStats
+            ),
+            Map.of(
+                AUCPR, validationStats,
+                F1_WEIGHTED, validationStats,
+                OUT_OF_BAG_ERROR, oobStats
+            )
+        ));
         trainingStatistics.addTestScore(AUCPR, 1);
         trainingStatistics.addTestScore(F1_WEIGHTED, 2);
         trainingStatistics.addOuterTrainScore(AUCPR, 3);
         trainingStatistics.addOuterTrainScore(F1_WEIGHTED, 4);
 
-        var winningModelMetrics = trainingStatistics.metricsForWinningModel();
+        var winningModelMetrics = trainingStatistics.bestCandidate().toMap();
 
-        assertThat(winningModelMetrics)
-            .hasSize(3)
-            .containsEntry(
-                AUCPR,
-                BestMetricStandardData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 3, 1)
+        assertThat(winningModelMetrics).isEqualTo(
+            Map.of(
+                "metrics", Map.of(
+                    "AUCPR", Map.of(
+                        "train", Map.of("avg", 0.1, "max", 0.1, "min", 0.1),
+                        "validation", Map.of("avg", 0.4, "max", 0.5, "min", 0.3)
+                    ),
+                    "F1_WEIGHTED", Map.of(
+                        "train", Map.of("avg", 0.1, "max", 0.1, "min", 0.1),
+                        "validation", Map.of("avg", 0.4, "max", 0.5, "min", 0.3)
+                    ),
+                    "OUT_OF_BAG_ERROR", Map.of(
+                        "validation", Map.of("avg", 0.5, "max", 0.9, "min", 0.4)
+                    )
+                ),
+                "parameters", Map.of("methodName", "RandomForest", "name", "train")
             )
-            .containsEntry(
-                F1_WEIGHTED,
-                BestMetricStandardData.of(BestModelStats.of(trainStats), BestModelStats.of(validationStats), 4, 2)
-            )
-            .containsEntry(
-                OUT_OF_BAG_ERROR,
-                BestMetricSpecificData.of(BestModelStats.of(specificStats))
-            );
+        );
 
+        assertThat(trainingStatistics.winningModelTestMetrics()).isEqualTo(
+            Map.of(
+                AUCPR, 1.0,
+                F1_WEIGHTED, 2.0
+            )
+        );
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).isEqualTo(
+            Map.of(
+                AUCPR, 3.0,
+                F1_WEIGHTED, 4.0
+            )
+        );
     }
 
     @Test
@@ -172,41 +231,50 @@ class TrainingStatisticsTest {
         RandomForestClassifierTrainerConfig firstCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
         LogisticRegressionTrainConfig secondCandidate = LogisticRegressionTrainConfig.DEFAULT;
 
-        var selectResult = new TrainingStatistics(List.of(AllClassMetric.ACCURACY));
+        var selectResult = new TrainingStatistics(List.of(ACCURACY));
 
-        selectResult.addTrainStats(
-            AllClassMetric.ACCURACY,
-            ImmutableModelStats.of(firstCandidate, 0.33, 0.1, 0.6)
-        );
-        selectResult.addTrainStats(
-            AllClassMetric.ACCURACY,
-            ImmutableModelStats.of(secondCandidate, 0.2, 0.01, 0.7)
-        );
+        selectResult.addCandidateStats(CandidateStats.of(
+            firstCandidate,
+            Map.of(ACCURACY, BestModelStats.of(0.33, 0.1, 0.6)),
+            Map.of(ACCURACY, BestModelStats.of(0.4, 0.3, 0.5))
+        ));
+        selectResult.addCandidateStats(CandidateStats.of(
+            secondCandidate,
+            Map.of(ACCURACY, BestModelStats.of(0.2, 0.01, 0.7)),
+            Map.of(ACCURACY, BestModelStats.of(0.8, 0.7, 0.9))
+        ));
 
-        selectResult.addValidationStats(
-            AllClassMetric.ACCURACY,
-            ImmutableModelStats.of(firstCandidate, 0.4, 0.3, 0.5)
-        );
-        selectResult.addValidationStats(
-            AllClassMetric.ACCURACY,
-            ImmutableModelStats.of(secondCandidate, 0.8, 0.7, 0.9)
-        );
+        var expectedTrainAccuracyStats1 = Map.of("avg", 0.33, "min", 0.1, "max", 0.6);
+        var expectedTrainAccuracyStats2 = Map.of("avg", 0.2, "min", 0.01, "max", 0.7);
 
+        var expectedValidationAccuracyStats1 = Map.of("avg", 0.4, "min", 0.3, "max", 0.5);
+        var expectedValidationAccuracyStats2 = Map.of("avg", 0.8, "min", 0.7, "max", 0.9);
 
-        List<Map<String, Object>> expectedTrainAccuracyStats = List.of(
-            Map.of("params", firstCandidate.toMap(), "avg", 0.33, "min", 0.1, "max", 0.6),
-            Map.of("params", secondCandidate.toMap(), "avg", 0.2, "min", 0.01, "max", 0.7)
-        );
-
-        List<Map<String, Object>> expectedValidationAccuracyStats = List.of(
-            Map.of("params", firstCandidate.toMap(), "avg", 0.4, "min", 0.3, "max", 0.5),
-            Map.of("params", secondCandidate.toMap(), "avg", 0.8, "min", 0.7, "max", 0.9)
-        );
-
-        assertThat(selectResult.toMap())
+        var mapResult = selectResult.toMap();
+        assertThat(mapResult)
             .containsEntry("bestParameters", secondCandidate.toMap())
-            .containsEntry("trainStats", Map.of("ACCURACY", expectedTrainAccuracyStats))
-            .containsEntry("validationStats", Map.of("ACCURACY", expectedValidationAccuracyStats));
+            .containsKey("modelCandidates");
+        assertThat((List) mapResult.get("modelCandidates"))
+            .containsExactlyInAnyOrder(
+                Map.of(
+                    "metrics", Map.of(
+                        ACCURACY.name(), Map.of(
+                            "train", expectedTrainAccuracyStats1,
+                            "validation", expectedValidationAccuracyStats1
+                        )
+                    ),
+                    "parameters", firstCandidate.toMapWithTrainerMethod()
+                ),
+                Map.of(
+                    "metrics", Map.of(
+                        ACCURACY.name(), Map.of(
+                            "train", expectedTrainAccuracyStats2,
+                            "validation", expectedValidationAccuracyStats2
+                        )
+                    ),
+                    "parameters", secondCandidate.toMapWithTrainerMethod()
+                )
+            );
     }
 
     private static final class TestTrainerConfig implements TrainerConfig {
