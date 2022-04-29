@@ -95,7 +95,7 @@ class SplitMeanSquareErrorTest {
         double expectedSum,
         double expectedSumOfSquares
     ) {
-        var mseLoss = new SplitMeanSquareError(targets);
+        var mseLoss = new SplitMeanSquaredError(targets);
         var impurityData = mseLoss.groupImpurity(group, startIdx, size);
 
         assertThat(impurityData.impurity())
@@ -133,7 +133,7 @@ class SplitMeanSquareErrorTest {
         double expectedSum,
         double expectedSumOfSquares
     ) {
-        var mseLoss = new SplitMeanSquareError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
+        var mseLoss = new SplitMeanSquaredError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
         var impurityData = mseLoss.groupImpurity(HugeLongArray.of(0, 4, 3), 0, 3);
         mseLoss.incrementalImpurity(featureVectorIdx, impurityData);
 
@@ -172,7 +172,7 @@ class SplitMeanSquareErrorTest {
         double expectedSum,
         double expectedSumOfSquares
     ) {
-        var mseLoss = new SplitMeanSquareError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
+        var mseLoss = new SplitMeanSquaredError(HugeDoubleArray.of(1, 3.2, 12.9, 5, 28.1));
         var impurityData = mseLoss.groupImpurity(HugeLongArray.of(0, 2, 1, 4, 3), 0, 5);
         mseLoss.decrementalImpurity(featureVectorIdx, impurityData);
 
@@ -185,7 +185,7 @@ class SplitMeanSquareErrorTest {
 
     @Test
     void shouldEstimateMemory() {
-        assertThat(SplitMeanSquareError.memoryEstimation())
+        assertThat(SplitMeanSquaredError.memoryEstimation())
             .isEqualTo(MemoryRange.of(16));
     }
 }

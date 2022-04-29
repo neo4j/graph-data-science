@@ -58,7 +58,7 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
                 minSplitSize,
                 numberOfTrainingSamples,
                 TreeNode.leafMemoryEstimation(Double.class),
-                SplitMeanSquareError.MSEImpurityData.memoryEstimation()
+                SplitMeanSquaredError.MSEImpurityData.memoryEstimation()
             ));
     }
 

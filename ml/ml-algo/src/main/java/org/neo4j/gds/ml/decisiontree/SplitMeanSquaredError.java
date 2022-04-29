@@ -25,16 +25,16 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-public class SplitMeanSquareError implements DecisionTreeLoss {
+public class SplitMeanSquaredError implements DecisionTreeLoss {
 
     private final HugeDoubleArray targets;
 
-    public SplitMeanSquareError(HugeDoubleArray targets) {
+    public SplitMeanSquaredError(HugeDoubleArray targets) {
         this.targets = targets;
     }
 
     public static MemoryRange memoryEstimation() {
-        return MemoryRange.of(sizeOfInstance(SplitMeanSquareError.class));
+        return MemoryRange.of(sizeOfInstance(SplitMeanSquaredError.class));
     }
 
     @Override
