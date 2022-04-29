@@ -49,6 +49,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     public void initialize(TokenHolders tokenHolders) {
         this.relationshipIds = RelationshipIds.fromGraphStore(innerGraphStore(), tokenHolders);
+        registerStateVisitor(relationshipIds);
     }
 
     public void registerStateVisitor(StateVisitor stateVisitor) {

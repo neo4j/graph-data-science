@@ -51,7 +51,6 @@ class TokenManager implements CypherGraphStore.StateVisitor {
 
     public void init() {
         initializeTokensFromGraphStore();
-        graphStore.initialize(tokenHolders);
         graphStore.registerStateVisitor(this);
     }
 

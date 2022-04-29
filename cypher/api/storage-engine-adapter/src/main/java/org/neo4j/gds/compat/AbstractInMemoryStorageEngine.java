@@ -91,6 +91,8 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
             graphStore,
             newCommandCreationContext(EmptyMemoryTracker.INSTANCE)
         );
+        graphStore.initialize(tokenHolders);
+
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
