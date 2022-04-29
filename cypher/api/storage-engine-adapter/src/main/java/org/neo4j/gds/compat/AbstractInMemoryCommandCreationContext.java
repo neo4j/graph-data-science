@@ -29,11 +29,13 @@ public abstract class AbstractInMemoryCommandCreationContext implements CommandC
     private final AtomicLong schemaTokens;
     private final AtomicInteger propertyTokens;
     private final AtomicInteger labelTokens;
+    private final AtomicInteger typeTokens;
 
     public AbstractInMemoryCommandCreationContext() {
-        schemaTokens = new AtomicLong(0);
-        propertyTokens = new AtomicInteger(0);
-        labelTokens = new AtomicInteger(0);
+        this.schemaTokens = new AtomicLong(0);
+        this.propertyTokens = new AtomicInteger(0);
+        this.labelTokens = new AtomicInteger(0);
+        this.typeTokens = new AtomicInteger(0);
     }
 
     @Override
@@ -58,7 +60,7 @@ public abstract class AbstractInMemoryCommandCreationContext implements CommandC
 
     @Override
     public int reserveRelationshipTypeTokenId() {
-        throw new UnsupportedOperationException("Creating relationship types is not supported");
+        return typeTokens.getAndIncrement();
     }
 
     @Override

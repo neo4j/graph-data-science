@@ -37,6 +37,7 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.lock.LockGroup;
 import org.neo4j.lock.LockService;
+import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.CommandStream;
@@ -84,7 +85,12 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         this.txStateVisitor = txStateVisitorFn.apply(graphStore, tokenHolders);
         this.commandCreationContextSupplier = commandCreationContextSupplier;
         this.storageReaderFn = storageReaderFn;
-        this.tokenManager = new TokenManager(tokenHolders, txStateVisitor, graphStore);
+        this.tokenManager = new TokenManager(
+            tokenHolders,
+            txStateVisitor,
+            graphStore,
+            newCommandCreationContext(EmptyMemoryTracker.INSTANCE)
+        );
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }

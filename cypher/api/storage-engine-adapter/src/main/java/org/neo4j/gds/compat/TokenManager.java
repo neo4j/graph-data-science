@@ -19,35 +19,36 @@
  */
 package org.neo4j.gds.compat;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
-import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.NamedToken;
 
 import java.util.HashSet;
 
-class TokenManager extends LifecycleAdapter implements CypherGraphStore.StateVisitor {
+class TokenManager implements CypherGraphStore.StateVisitor {
 
     private final TokenHolders tokenHolders;
     private final InMemoryTransactionStateVisitor transactionStateVisitor;
     private final CypherGraphStore graphStore;
+    private final CommandCreationContext commandCreationContext;
 
     TokenManager(
         TokenHolders tokenHolders,
         InMemoryTransactionStateVisitor transactionStateVisitor,
-        CypherGraphStore graphStore
+        CypherGraphStore graphStore,
+        CommandCreationContext commandCreationContext
     ) {
         this.tokenHolders = tokenHolders;
         this.transactionStateVisitor = transactionStateVisitor;
         this.graphStore = graphStore;
+        this.commandCreationContext = commandCreationContext;
 
         init();
     }
 
-    @Override
     public void init() {
         initializeTokensFromGraphStore();
         graphStore.initialize(tokenHolders);
@@ -106,29 +107,26 @@ class TokenManager extends LifecycleAdapter implements CypherGraphStore.StateVis
         // When this method is called there is no kernel available
         // which is needed to use the `getOrCreate` method on
         // the `TokenHolders`
-        var labelCounter = new MutableInt(0);
-        var typeCounter = new MutableInt(0);
-        var propertyCounter = new MutableInt(0);
 
         var propertyKeys = new HashSet<>(graphStore.nodePropertyKeys());
         propertyKeys.addAll(graphStore.relationshipPropertyKeys());
         propertyKeys.forEach(propertyKey ->
             tokenHolders
                 .propertyKeyTokens()
-                .addToken(new NamedToken(propertyKey, propertyCounter.getAndIncrement()))
+                .addToken(new NamedToken(propertyKey, commandCreationContext.reservePropertyKeyTokenId()))
         );
 
         graphStore
             .nodeLabels()
             .forEach(nodeLabel -> tokenHolders
                 .labelTokens()
-                .addToken(new NamedToken(nodeLabel.name(), labelCounter.getAndIncrement())));
+                .addToken(new NamedToken(nodeLabel.name(), commandCreationContext.reserveLabelTokenId())));
 
         graphStore
             .relationshipTypes()
             .forEach(relType -> tokenHolders
                 .relationshipTypeTokens()
-                .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
+                .addToken(new NamedToken(relType.name(), commandCreationContext.reserveRelationshipTypeTokenId())));
     }
 
 
