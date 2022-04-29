@@ -48,14 +48,12 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
     }
 
     public static MemoryRange memoryEstimation(
-        int maxDepth,
-        int minSplitSize,
+        DecisionTreeTrainerConfig config,
         long numberOfTrainingSamples
     ) {
         return MemoryRange.of(sizeOfInstance(DecisionTreeRegressorTrainer.class))
             .add(DecisionTreeTrainer.estimateTree(
-                maxDepth,
-                minSplitSize,
+                config,
                 numberOfTrainingSamples,
                 TreeNode.leafMemoryEstimation(Double.class),
                 SplitMeanSquaredError.MSEImpurityData.memoryEstimation()

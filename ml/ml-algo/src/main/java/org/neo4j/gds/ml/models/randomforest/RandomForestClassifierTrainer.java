@@ -103,16 +103,14 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 "Decision tree training",
                 (dim, concurrency) ->
                     TrainDecisionTreeTask.memoryEstimation(
-                        config.maxDepth(),
-                        config.minSplitSize(),
+                        config,
                         numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
                         numberOfClasses,
                         minNumberOfBaggedFeatures,
                         config.numberOfSamplesRatio()
                     ).union(
                         TrainDecisionTreeTask.memoryEstimation(
-                            config.maxDepth(),
-                            config.minSplitSize(),
+                            config,
                             numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
                             numberOfClasses,
                             maxNumberOfBaggedFeatures,
@@ -218,8 +216,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         }
 
         public static MemoryRange memoryEstimation(
-            int maxDepth,
-            int minSplitSize,
+            DecisionTreeTrainerConfig decisionTreeTrainConfig,
             long numberOfTrainingSamples,
             int numberOfClasses,
             int numberOfBaggedFeatures,
@@ -234,8 +231,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
                 .add(DecisionTreeClassifierTrainer.memoryEstimation(
-                    maxDepth,
-                    minSplitSize,
+                    decisionTreeTrainConfig,
                     usedNumberOfTrainingSamples,
                     numberOfClasses
                 ))

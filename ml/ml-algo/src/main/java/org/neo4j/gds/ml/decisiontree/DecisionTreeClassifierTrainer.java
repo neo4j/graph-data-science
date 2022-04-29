@@ -53,15 +53,13 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
     }
 
     public static MemoryRange memoryEstimation(
-        int maxDepth,
-        int minSplitSize,
+        DecisionTreeTrainerConfig config,
         long numberOfTrainingSamples,
         int numberOfClasses
     ) {
         return MemoryRange.of(sizeOfInstance(DecisionTreeClassifierTrainer.class))
             .add(DecisionTreeTrainer.estimateTree(
-                maxDepth,
-                minSplitSize,
+                config,
                 numberOfTrainingSamples,
                 TreeNode.leafMemoryEstimation(Integer.class),
                 GiniIndex.GiniImpurityData.memoryEstimation(numberOfClasses)

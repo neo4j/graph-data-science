@@ -176,7 +176,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(66_896, 899_376)
+                MemoryRange.of(66_928, 899_408)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -184,7 +184,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(73_992, 2_738_840)
+                MemoryRange.of(74_024, 2_738_872)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -195,7 +195,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(73_992, 2_738_840)
+                MemoryRange.of(74_024, 2_738_872)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -417,7 +417,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Extract train features :: Finished",
                 "MY TEST TASK :: Select best model :: Start",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Start",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2, minLeafSize=1}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 50%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 100%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.7684",

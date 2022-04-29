@@ -195,10 +195,10 @@ class SplitterTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size.
-        "  1_000,  20,   40_360",
-        " 10_000,  20,  400_360",
+        "  1_000,  20,   40_368",
+        " 10_000,  20,  400_368",
         // Changes a little with impurity data size.
-        "  1_000, 100,   40_840",
+        "  1_000, 100,   40_848",
     })
     void memoryEstimation(long numberOfTrainingSamples, long sizeOfImpurityData, long expectedSize) {
         long size  = Splitter.memoryEstimation(numberOfTrainingSamples, sizeOfImpurityData);

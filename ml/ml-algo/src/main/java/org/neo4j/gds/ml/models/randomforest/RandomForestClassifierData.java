@@ -57,9 +57,8 @@ public interface RandomForestClassifierData extends Classifier.ClassifierData {
                     MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
                         .add(DecisionTreeTrainer
                             .estimateTree(
-                                config.maxDepth(),
+                                config,
                                 numberOfTrainingExamples.applyAsLong(nodeCount),
-                                config.minSplitSize(),
                                 TreeNode.leafMemoryEstimation(Integer.class)
                             )
                             .times(config.numberOfDecisionTrees())

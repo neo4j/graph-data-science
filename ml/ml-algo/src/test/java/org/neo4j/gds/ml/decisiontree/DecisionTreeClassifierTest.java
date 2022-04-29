@@ -200,29 +200,36 @@ class DecisionTreeClassifierTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        // When maxDepth is limiting tree size minSplitSize does not matter.
-        "     6, 100_000,  2, 72,       6_120",
-        "     6, 100_000,  4, 72,       6_120",
+        // When maxDepth is limiting tree size minSplitSize or minLeafSize does not matter.
+        "     6, 100_000,  2, 1, 72,       6_120",
+        "     6, 100_000,  4, 1, 72,       6_120",
+        "     6, 100_000,  4, 3, 72,       6_120",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        "    10, 100_000,  2, 72,      98_280",
+        "    10, 100_000,  2, 1, 72,      98_280",
         // maxDepth does not matter for small training sets.
-        "   100,     500,  2, 72,      47_976",
-        " 8_000,     500,  2, 72,      47_976",
-        // Max should scale almost inverse linearly with minSplitSize.
-        " 8_000, 100_000,  2, 72,   9_599_976",
-        " 8_000, 100_000, 20, 72,     959_976"
+        "   100,     500,  2, 1, 72,      47_976",
+        " 8_000,     500,  2, 1, 72,      47_976",
+        // Max should scale almost inverse linearly with minSplitSize or minLeafSize.
+        " 8_000, 100_000,  2, 1, 72,   9_599_976",
+        " 8_000, 100_000, 20, 1, 72,     959_976",
+        " 8_000, 100_000, 20, 19, 72,    505_320"
     })
     void estimateDecisionTree(
         int maxDepth,
         long numberOfTrainingSamples,
         int minSplitSize,
+        int minLeafSize,
         long expectedMin,
         long expectedMax
     ) {
+        var config = ImmutableDecisionTreeTrainerConfig.builder()
+            .maxDepth(maxDepth)
+            .minSplitSize(minSplitSize)
+            .minLeafSize(minLeafSize)
+            .build();
         var range = DecisionTreeTrainer.estimateTree(
-            maxDepth,
+            config,
             numberOfTrainingSamples,
-            minSplitSize,
             TreeNode.leafMemoryEstimation(Integer.class)
         );
 
@@ -233,13 +240,16 @@ class DecisionTreeClassifierTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
-        "  6,  1_000,  41_264,    56_024",
-        "  6, 10_000, 401_264,   488_024",
+        "  6,  1_000,  41_272,    56_032",
+        "  6, 10_000, 401_272,   488_032",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 401_264, 1_443_704",
+        " 20, 10_000, 401_272, 1_443_712",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = DecisionTreeClassifierTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10);
+        var config = ImmutableDecisionTreeTrainerConfig.builder()
+            .maxDepth(maxDepth)
+            .build();
+        var range = DecisionTreeClassifierTrainer.memoryEstimation(config, numberOfTrainingSamples, 10);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);
