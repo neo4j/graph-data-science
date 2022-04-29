@@ -46,6 +46,7 @@ class DecisionTreeClassifierTest {
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private Features features;
     private GiniIndex giniIndexLoss;
+    private Entropy entropyLoss;
 
     @BeforeEach
     void setup() {
@@ -73,6 +74,7 @@ class DecisionTreeClassifierTest {
         features = FeaturesFactory.wrap(featureVectorArray);
 
         giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
+        entropyLoss = Entropy.fromOriginalLabels(allLabels, CLASS_MAPPING);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
@@ -84,7 +86,8 @@ class DecisionTreeClassifierTest {
                 Arguments.of(new double[]{3.0, 0.0}, 1337, 100),
                 Arguments.of(new double[]{0.0, 4.0}, 42, 100)
             ),
-            () -> Stream.of(Arguments.of(2), Arguments.of(4))
+            () -> Stream.of(Arguments.of(2), Arguments.of(4)),
+            () -> Stream.of(Arguments.of(true), Arguments.of(false))
         );
     }
 
@@ -94,10 +97,11 @@ class DecisionTreeClassifierTest {
         double[] featureVector,
         long expectedPrediction,
         int maxDepth,
-        int minSplitSize
+        int minSplitSize,
+        boolean useGini
     ) {
         var decisionTree = new DecisionTreeClassifierTrainer<>(
-            giniIndexLoss,
+            useGini ? giniIndexLoss : entropyLoss,
             features,
             allLabels,
             CLASS_MAPPING,

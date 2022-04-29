@@ -27,17 +27,19 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class GiniIndex implements DecisionTreeLoss {
+public class Entropy implements DecisionTreeLoss {
+
+    private static final double LN_2 = Math.log(2);
 
     private final HugeIntArray expectedMappedLabels;
     private final int numberOfClasses;
 
-    public GiniIndex(HugeIntArray expectedMappedLabels, int numberOfClasses) {
+    public Entropy(HugeIntArray expectedMappedLabels, int numberOfClasses) {
         this.expectedMappedLabels = expectedMappedLabels;
         this.numberOfClasses = numberOfClasses;
     }
 
-    public static GiniIndex fromOriginalLabels(
+    public static Entropy fromOriginalLabels(
         HugeLongArray expectedOriginalLabels, LocalIdMap classMapping
     ) {
         assert expectedOriginalLabels.size() > 0;
@@ -45,19 +47,19 @@ public class GiniIndex implements DecisionTreeLoss {
         var mappedLabels = HugeIntArray.newArray(expectedOriginalLabels.size());
         mappedLabels.setAll(idx -> classMapping.toMapped(expectedOriginalLabels.get(idx)));
 
-        return new GiniIndex(mappedLabels, classMapping.size());
+        return new Entropy(mappedLabels, classMapping.size());
     }
 
     public static MemoryRange memoryEstimation(long numberOfTrainingSamples) {
         return MemoryRange
             .of(HugeIntArray.memoryEstimation(numberOfTrainingSamples))
-            .add(MemoryRange.of(sizeOfInstance(GiniIndex.class)));
+            .add(MemoryRange.of(sizeOfInstance(Entropy.class)));
     }
 
     @Override
-    public GiniImpurityData groupImpurity(final HugeLongArray group, long startIndex, long size) {
+    public EntropyImpurityData groupImpurity(final HugeLongArray group, long startIndex, long size) {
         if (size == 0) {
-            return new GiniImpurityData(0, new long[numberOfClasses], size);
+            return new EntropyImpurityData(0, new long[numberOfClasses], size);
         }
 
         final var groupClassCounts = new long[numberOfClasses];
@@ -66,74 +68,86 @@ public class GiniIndex implements DecisionTreeLoss {
             groupClassCounts[expectedLabel]++;
         }
 
-        long sumOfSquares = 0;
+        double impurity = 0;
         for (var count : groupClassCounts) {
-            sumOfSquares += count * count;
-        }
-        double impurity = 1.0 - (double) sumOfSquares / (size * size);
+            if (count == 0L) continue;
 
-        return new GiniImpurityData(impurity, groupClassCounts, size);
+            double p = (double) count / size;
+            impurity -= p * Math.log(p);
+        }
+        impurity /= LN_2;
+
+        return new EntropyImpurityData(impurity, groupClassCounts, size);
     }
 
     @Override
     public void incrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
-        var giniImpurityData = (GiniImpurityData) impurityData;
+        var entropyImpurityData = (EntropyImpurityData) impurityData;
 
         int label = expectedMappedLabels.get(featureVectorIdx);
-        long newClassCount = giniImpurityData.classCounts[label] + 1;
-        long newGroupSize = giniImpurityData.groupSize() + 1;
+        long newClassCount = entropyImpurityData.classCounts[label] + 1;
+        long newGroupSize = entropyImpurityData.groupSize() + 1;
 
-        updateImpurityData(label, newGroupSize, newClassCount, giniImpurityData);
+        updateImpurityData(label, newGroupSize, newClassCount, entropyImpurityData);
     }
 
     @Override
     public void decrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
-        var giniImpurityData = (GiniImpurityData) impurityData;
+        var entropyImpurityData = (EntropyImpurityData) impurityData;
 
         int label = expectedMappedLabels.get(featureVectorIdx);
-        long newClassCount = giniImpurityData.classCounts[label] - 1;
-        long newGroupSize = giniImpurityData.groupSize() - 1;
+        long newClassCount = entropyImpurityData.classCounts[label] - 1;
+        long newGroupSize = entropyImpurityData.groupSize() - 1;
 
-        updateImpurityData(label, newGroupSize, newClassCount, giniImpurityData);
+        updateImpurityData(label, newGroupSize, newClassCount, entropyImpurityData);
     }
 
-    private static void updateImpurityData(int label, long newGroupSize, long newClassCount, GiniImpurityData impurityData) {
-        long groupSizeSquared = impurityData.groupSize() * impurityData.groupSize();
-        long newGroupSizeSquared = newGroupSize * newGroupSize;
+    private static void updateImpurityData(int label, long newGroupSize, long newClassCount, EntropyImpurityData impurityData) {
         long prevClassCount = impurityData.classCounts()[label];
 
-        double newImpurity = impurityData.impurity();
-        newImpurity *= (double) groupSizeSquared / newGroupSizeSquared;
-        newImpurity += 1.0 - ((double) groupSizeSquared / newGroupSizeSquared);
-        newImpurity += (double) (prevClassCount * prevClassCount) / newGroupSizeSquared;
-        newImpurity -= (double) (newClassCount * newClassCount) / newGroupSizeSquared;
+        double newImpurity = impurityData.impurity() * LN_2;
+        if (impurityData.groupSize() > 0) {
+            newImpurity -= Math.log(impurityData.groupSize());
+            newImpurity *= impurityData.groupSize();
+        }
+        if (prevClassCount > 0) {
+            newImpurity += prevClassCount * Math.log(prevClassCount);
+        }
+        if (newClassCount > 0) {
+            newImpurity -= newClassCount * Math.log(newClassCount);
+        }
+        if (newGroupSize > 0) {
+            newImpurity /= newGroupSize;
+            newImpurity += Math.log(newGroupSize);
+        }
+        newImpurity /= LN_2;
 
         impurityData.classCounts()[label] = newClassCount;
         impurityData.setGroupSize(newGroupSize);
         impurityData.setImpurity(newImpurity);
     }
 
-    static class GiniImpurityData implements ImpurityData {
+    static class EntropyImpurityData implements ImpurityData {
         private double impurity;
         private final long[] classCounts;
         private long groupSize;
 
-        GiniImpurityData(double impurity, long[] classCounts, long groupSize) {
+        EntropyImpurityData(double impurity, long[] classCounts, long groupSize) {
             this.impurity = impurity;
             this.classCounts = classCounts;
             this.groupSize = groupSize;
         }
 
         public static long memoryEstimation(int numberOfClasses) {
-            return sizeOfInstance(GiniImpurityData.class) + sizeOfLongArray(numberOfClasses);
+            return sizeOfInstance(EntropyImpurityData.class) + sizeOfLongArray(numberOfClasses);
         }
 
         @Override
         public void copyTo(ImpurityData impurityData) {
-            var giniImpurityData = (GiniImpurityData) impurityData;
-            giniImpurityData.setImpurity(impurity());
-            giniImpurityData.setGroupSize(groupSize());
-            System.arraycopy(classCounts(), 0, giniImpurityData.classCounts(), 0, classCounts().length);
+            var entropyImpurityData = (EntropyImpurityData) impurityData;
+            entropyImpurityData.setImpurity(impurity());
+            entropyImpurityData.setGroupSize(groupSize());
+            System.arraycopy(classCounts(), 0, entropyImpurityData.classCounts(), 0, classCounts().length);
         }
 
         @Override
