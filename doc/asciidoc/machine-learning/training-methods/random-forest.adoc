@@ -2,16 +2,24 @@
 [.alpha]
 = Random forest
 
-Random forest is a popular supervised machine learning method for classification (and regression) that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
+Random forest is a popular supervised machine learning method for classification and regression that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
 To train the random forest is to train each of its decision trees independently.
 Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.
 
-Random forest predictions are made by simply taking the majority votes of its decision trees.
 The idea is that the difference in how each decision tree is trained will help avoid overfitting which is not uncommon when just training a single decision tree on the entire training set.
-
 The approach of combining several predictors (in this case decision trees) is also known as _ensemble learning_, and using different parts of the training set for each predictor is often referred to as _bootstrap aggregating_ or _bagging_.
 
-The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
+
+== Classification
+
+For classification, a random forest prediction is made by simply taking a majority vote of its decision trees' predictions.
+The impurity criteria available for computing the potential of a node split in decision tree classifier training in GDS are https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity] (default) and https://en.wikipedia.org/wiki/Entropy_(information_theory)[Entropy].
+
+
+== Regression
+
+For regression, a random forest prediction is made by simply taking the average of its decision trees' predictions.
+The impurity criterion used for computing the potential of a node split in decision tree regressor training in GDS is the https://en.wikipedia.org/wiki/Mean_squared_error[Mean squared error].
 
 
 == Tuning the hyperparameters
@@ -51,7 +59,7 @@ The memory footprint of the produced prediction model might also be higher since
 A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
 
 
-==== Min leaf size
+=== Min leaf size
 
 This parameter sets the minimum number of training samples required to be present in a leaf node of a decision tree.
 
@@ -59,7 +67,7 @@ A large leaf size means less specialization on the training set, and thus possib
 It will likely also mean that the training and prediction will be faster, since probably the trees will contain fewer nodes.
 
 
-==== Min split size
+=== Min split size
 
 This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
 To split a node means to continue the tree construction process to add further children below the node.
@@ -68,7 +76,7 @@ A large split size means less specialization on the training set, and thus possi
 It will likely also mean that the training and prediction will be faster, since probably fewer node splits will be considered, and thus the trees will contain fewer nodes.
 
 
-==== Number of samples ratio
+=== Number of samples ratio
 
 Each decision tree in the random forest is trained using a subset of the training set.
 This subset is sampled with replacement, meaning that a feature vector of the training may be sampled several times for a single decision tree.
