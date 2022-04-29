@@ -31,11 +31,12 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.BestMetricStandardData;
 import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ImmutableBestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -110,6 +111,11 @@ public final class LinkPredictionTrain {
                 Tasks.leaf("Compute test metrics")
             )
         );
+    }
+
+    @Deprecated
+    public static long estimateMemory() {
+        return MemoryUsage.sizeOfInstance(ImmutableBestModelStats.class) * 2 + Double.BYTES * 2;
     }
 
     public LinkPredictionTrainResult compute() {
@@ -374,7 +380,7 @@ public final class LinkPredictionTrain {
             // this assumes the training is independent of the relationship set size
             .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
             .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-            .fixed("Best model stats", numberOfMetrics * BestMetricStandardData.estimateMemory())
+            .fixed("Best model stats", numberOfMetrics * estimateMemory())
             .build();
     }
 
