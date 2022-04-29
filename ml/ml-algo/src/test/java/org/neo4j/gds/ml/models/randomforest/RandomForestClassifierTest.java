@@ -237,19 +237,19 @@ class RandomForestClassifierTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,   5214426, 6027250",
+        "     6, 100_000,  10, 10, 1,   1, 0.1, 1.0,   5_214_362, 6_027_186",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,   5215074, 7096634",
+        "    10, 100_000,  10, 10, 1,  10, 0.1, 1.0,   5_215_010, 7_096_570",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,      27986, 187786",
+        " 8_000,     500,  10, 10, 1,   1, 0.1, 1.0,        27_922, 187_722",
         // Should increase very little when having more classes.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,   5220114, 7101674",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 1.0,   5_220_050, 7_101_610",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,   5220154, 7101806",
+        "    10, 100_000, 100, 10, 1,  10, 0.9, 1.0,   5_220_090, 7_101_742",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,   1370114, 2611674",
+        "    10, 100_000, 100, 10, 1,  10, 0.1, 0.2,   1_370_050, 2_611_610",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 19677840, 24257840",
+        "    10, 100_000, 100, 10, 4,  10, 0.1, 1.0, 19_677_776, 24_257_776",
     })
     void trainMemoryEstimation(
         int maxDepth,

@@ -176,7 +176,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(67096, 899576)
+                MemoryRange.of(66_896, 899_376)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -184,7 +184,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(74192, 2739040)
+                MemoryRange.of(73_992, 2_738_840)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -195,7 +195,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(74192, 2739040)
+                MemoryRange.of(73_992, 2_738_840)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -437,7 +437,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Compute train metrics :: Start",
                 "MY TEST TASK :: Compute train metrics 100%",
                 "MY TEST TASK :: Compute train metrics :: Finished",
-                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.9510}",
+                "MY TEST TASK :: Final model metrics on full train set: {AUCPR=0.7117}",
                 "MY TEST TASK :: Evaluate on test data :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features :: Start",
                 "MY TEST TASK :: Evaluate on test data :: Extract test features 50%",
@@ -447,7 +447,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Evaluate on test data :: Compute test metrics 100%",
                 "MY TEST TASK :: Evaluate on test data :: Compute test metrics :: Finished",
                 "MY TEST TASK :: Evaluate on test data :: Finished",
-                "MY TEST TASK :: Final model metrics on test set: {AUCPR=0.9510}",
+                "MY TEST TASK :: Final model metrics on test set: {AUCPR=0.7117}",
                 "MY TEST TASK :: Finished"
             );
     }
