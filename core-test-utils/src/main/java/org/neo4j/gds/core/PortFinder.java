@@ -134,7 +134,7 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
         return freePort(PREFERRED_PORT);
     }
 
-    private static int freePort(int preferred) {
+    public static int freePort(int preferred) {
         var random = new Random();
         return IntStream.concat(
             IntStream.of(preferred),
