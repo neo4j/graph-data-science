@@ -233,7 +233,7 @@ class DecisionTreeRegressorTest {
         " 20, 10_000, 400_704, 1_523_136",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var config = ImmutableDecisionTreeTrainerConfig.builder()
+        var config = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .build();
         var range = DecisionTreeRegressorTrainer.memoryEstimation(config, numberOfTrainingSamples);

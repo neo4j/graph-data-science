@@ -222,7 +222,7 @@ class DecisionTreeClassifierTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = ImmutableDecisionTreeTrainerConfig.builder()
+        var config = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .minSplitSize(minSplitSize)
             .minLeafSize(minLeafSize)
@@ -246,7 +246,7 @@ class DecisionTreeClassifierTest {
         " 20, 10_000, 401_272, 1_443_712",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var config = ImmutableDecisionTreeTrainerConfig.builder()
+        var config = DecisionTreeTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .build();
         var range = DecisionTreeClassifierTrainer.memoryEstimation(config, numberOfTrainingSamples, 10);

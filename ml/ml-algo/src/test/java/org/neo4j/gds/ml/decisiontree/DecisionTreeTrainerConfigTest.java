@@ -27,7 +27,7 @@ class DecisionTreeTrainerConfigTest {
 
     @Test
     void validateMinSizes() {
-        var configBuilder = ImmutableDecisionTreeTrainerConfig.builder()
+        var configBuilder = DecisionTreeTrainerConfigImpl.builder()
             .minSplitSize(42)
             .minLeafSize(42);
         assertThrows(IllegalArgumentException.class, configBuilder::build);
