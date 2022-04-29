@@ -99,7 +99,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
-        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features);
+        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features, config.minLeafSize());
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 

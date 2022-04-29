@@ -47,8 +47,7 @@ class SplitterTest {
     private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
     private final FeatureBagger featureBagger = new FeatureBagger(new SplittableRandom(42), NUM_FEATURES, 1.0);
     private GiniIndex giniIndexLoss;
-    private Splitter splitter;
-
+    private Features features;
 
     @BeforeEach
     void setup() {
@@ -73,11 +72,9 @@ class SplitterTest {
         featureVectorArray.set(8, new double[]{10.12493903, 3.234550982});
         featureVectorArray.set(9, new double[]{6.642287351, 3.319983761});
 
-        Features features = FeaturesFactory.wrap(featureVectorArray);
+        features = FeaturesFactory.wrap(featureVectorArray);
 
         giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
-
-        splitter = new Splitter(NUM_SAMPLES, giniIndexLoss, featureBagger, features);
     }
 
     private static Stream<Arguments> bestSplitParams() {
@@ -86,6 +83,7 @@ class SplitterTest {
                 HugeLongArray.of(0, 8),
                 0,
                 2,
+                1,
                 0,
                 2.771244718,
                 HugeLongArray.of(0),
@@ -95,6 +93,7 @@ class SplitterTest {
                 HugeLongArray.of(0, 2, 7),
                 0,
                 3,
+                1,
                 0,
                 3.678319846,
                 HugeLongArray.of(0, 2),
@@ -105,6 +104,7 @@ class SplitterTest {
                 0,
                 4,
                 1,
+                1,
                 2.61995032,
                 HugeLongArray.of(3, 4),
                 HugeLongArray.of(5, 9)
@@ -113,6 +113,7 @@ class SplitterTest {
                 HugeLongArray.of(3, 4, 9),
                 0,
                 3,
+                1,
                 0,
                 6.642287351,
                 HugeLongArray.of(9),
@@ -122,10 +123,31 @@ class SplitterTest {
                 HugeLongArray.of(3, 4, 9, 5),
                 0,
                 3,
+                1,
                 0,
                 6.642287351,
                 HugeLongArray.of(9),
                 HugeLongArray.of(3, 4)
+            ),
+            Arguments.of(
+                HugeLongArray.of(1, 9, 3, 2),
+                0,
+                4,
+                1,
+                1,
+                3.31281357,
+                HugeLongArray.of(1, 2, 3),
+                HugeLongArray.of(9)
+            ),
+            Arguments.of(
+                HugeLongArray.of(1, 9, 3, 2),
+                0,
+                4,
+                2,
+                0,
+                3.678319846,
+                HugeLongArray.of(1, 2),
+                HugeLongArray.of(3, 9)
             )
         );
     }
@@ -136,12 +158,14 @@ class SplitterTest {
         HugeLongArray groupArray,
         long startIdx,
         long size,
+        int minLeafSize,
         long expectedIdx,
         double expectedValue,
         // The order of these depend on the random seed
         HugeLongArray expectedLeftChildArray,
         HugeLongArray expectedRightChildArray
     ) {
+        var splitter = new Splitter(NUM_SAMPLES, giniIndexLoss, featureBagger, features, minLeafSize);
         var impurityData = giniIndexLoss.groupImpurity(groupArray, startIdx, size);
         var group = ImmutableGroup.of(groupArray, startIdx, size, impurityData);
         var split = splitter.findBestSplit(group);

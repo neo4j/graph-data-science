@@ -19,18 +19,42 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
+@ValueClass
 public interface DecisionTreeTrainerConfig {
 
     @Configuration.IntegerRange(min = 1)
+    @Value.Default
     default int maxDepth() {
         return Integer.MAX_VALUE;
     }
 
     @Configuration.IntegerRange(min = 2)
+    @Value.Default
     default int minSplitSize() {
         return 2;
+    }
+
+    @Configuration.IntegerRange(min = 1)
+    @Value.Default
+    default int minLeafSize() {
+        return 1;
+    }
+
+    @Value.Check
+    default void validateMinSizes() {
+        if (minLeafSize() >= minSplitSize()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Configuration parameter 'minLeafSize' which was equal to %d, must be strictly smaller than configuration parameter 'minSplitSize' which was equal to %d",
+                minLeafSize(),
+                minSplitSize()
+            ));
+        }
     }
 }
