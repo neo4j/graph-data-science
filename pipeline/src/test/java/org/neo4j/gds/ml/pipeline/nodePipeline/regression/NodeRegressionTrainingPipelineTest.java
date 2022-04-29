@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
@@ -51,7 +51,7 @@ class NodeRegressionTrainingPipelineTest {
             .returns(NodePropertyPredictionSplitConfig.DEFAULT_CONFIG, NodeRegressionTrainingPipeline::splitConfig);
 
         assertThat(pipeline.trainingParameterSpace())
-            .isEqualTo(Map.of(TrainingMethod.RandomForest, List.of(), TrainingMethod.LinearRegression, List.of()));
+            .isEqualTo(Map.of(TrainingMethod.RandomForestRegression, List.of(), TrainingMethod.LinearRegression, List.of()));
     }
 
     @Test
@@ -97,7 +97,7 @@ class NodeRegressionTrainingPipelineTest {
     @Test
     void addCandidates() {
         var lrConfig = LinearRegressionTrainConfig.of(Map.of("penalty", 19));
-        var rfConfig = RandomForestTrainerConfig.of(Map.of("maxDepth", 19));
+        var rfConfig = RandomForestRegressorTrainerConfig.of(Map.of("maxDepth", 19));
 
         var pipeline = new NodeRegressionTrainingPipeline();
         pipeline.addTrainerConfig(lrConfig.toTunableConfig());
@@ -108,7 +108,7 @@ class NodeRegressionTrainingPipelineTest {
             .isEqualTo(
                 Map.of(
                     TrainingMethod.LinearRegression, List.of(lrConfig.toTunableConfig()),
-                    TrainingMethod.RandomForest, List.of(rfConfig.toTunableConfig())
+                    TrainingMethod.RandomForestRegression, List.of(rfConfig.toTunableConfig())
                 ));
     }
 
@@ -168,7 +168,7 @@ class NodeRegressionTrainingPipelineTest {
                 "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                 "trainingParameterSpace", Map.of(
                     TrainingMethod.LinearRegression.name(), List.of(),
-                    TrainingMethod.RandomForest.name(), List.of()
+                    TrainingMethod.RandomForestRegression.name(), List.of()
                 ),
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
             ));
@@ -207,7 +207,7 @@ class NodeRegressionTrainingPipelineTest {
                         .map(TrainerConfig::toTunableConfig)
                         .map(TunableTrainerConfig::toMap)
                         .collect(Collectors.toList()),
-                    TrainingMethod.RandomForest.name(), List.of()
+                    TrainingMethod.RandomForestRegression.name(), List.of()
                 ),
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
             ));

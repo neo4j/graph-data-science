@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
+import org.neo4j.gds.ml.decisiontree.Entropy;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -56,7 +57,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     private final LocalIdMap classIdMap;
-    private final RandomForestTrainerConfig config;
+    private final RandomForestClassifierTrainerConfig config;
     private final int concurrency;
     private final boolean computeOutOfBagError;
     private final SplittableRandom random;
@@ -67,7 +68,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     public RandomForestClassifierTrainer(
         int concurrency,
         LocalIdMap classIdMap,
-        RandomForestTrainerConfig config,
+        RandomForestClassifierTrainerConfig config,
         boolean computeOutOfBagError,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker,
@@ -136,8 +137,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var lossFunction = GiniIndex.fromOriginalLabels(allLabels, classIdMap);
-
+        var loss = initializeLoss(allLabels);
         var numberOfTreesTrained = new AtomicInteger(0);
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
@@ -149,7 +149,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 allFeatureVectors,
                 allLabels,
                 classIdMap,
-                lossFunction,
+                loss,
                 trainSet,
                 progressTracker,
                 numberOfTreesTrained
@@ -174,6 +174,17 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         return outOfBagError.orElseThrow(() -> new IllegalAccessError("Out of bag error has not been computed."));
     }
 
+    private DecisionTreeLoss initializeLoss(HugeLongArray allLabels) {
+        switch(config.criterion()) {
+            case GINI:
+                return GiniIndex.fromOriginalLabels(allLabels, classIdMap);
+            case ENTROPY:
+                return Entropy.fromOriginalLabels(allLabels, classIdMap);
+            default:
+                throw new IllegalStateException("Invalid decision tree classifier impurity criterion.");
+        }
+    }
+
     static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
 
         private DecisionTreePredictor<Integer> trainedTree;
@@ -184,7 +195,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         private final Features allFeatureVectors;
         private final HugeLongArray allLabels;
         private final LocalIdMap classIdMap;
-        private final LOSS lossFunction;
+        private final LOSS loss;
         private final ReadOnlyHugeLongArray trainSet;
         private final ProgressTracker progressTracker;
         private final AtomicInteger numberOfTreesTrained;
@@ -197,7 +208,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             Features allFeatureVectors,
             HugeLongArray allLabels,
             LocalIdMap classIdMap,
-            LOSS lossFunction,
+            LOSS loss,
             ReadOnlyHugeLongArray trainSet,
             ProgressTracker progressTracker,
             AtomicInteger numberOfTreesTrained
@@ -209,7 +220,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             this.allFeatureVectors = allFeatureVectors;
             this.allLabels = allLabels;
             this.classIdMap = classIdMap;
-            this.lossFunction = lossFunction;
+            this.loss = loss;
             this.trainSet = trainSet;
             this.progressTracker = progressTracker;
             this.numberOfTreesTrained = numberOfTreesTrained;
@@ -251,7 +262,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             );
 
             var decisionTree = new DecisionTreeClassifierTrainer<>(
-                lossFunction,
+                loss,
                 allFeatureVectors,
                 allLabels,
                 classIdMap,

@@ -25,8 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -102,10 +102,11 @@ class TunableTrainerConfigTest {
     void shouldProduceToMapRF(boolean useLong) {
         var value = useLong ? 5L : 5;
         var userInput = Map.<String, Object>of("maxDepth", value);
-        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
         assertThat(config.toMap()).isEqualTo(Map.of(
+            "criterion", "GINI",
             "maxDepth", 5,
-            "methodName", "RandomForest",
+            "methodName", "RandomForestClassification",
             "minSplitSize", 2,
             "minLeafSize", 1,
             "numberOfDecisionTrees", 100,
@@ -116,11 +117,11 @@ class TunableTrainerConfigTest {
     @Test
     void shouldMaterializeRFConfig() {
         var userInput = Map.<String, Object>of("maxDepth", 5L);
-        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
         var trainerConfig = config.materialize(Map.of());
         assertThat(trainerConfig)
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainerConfigImpl.builder().maxDepth(5).build());
+            .isEqualTo(RandomForestClassifierTrainerConfigImpl.builder().maxDepth(5).build());
     }
 
     @Test
@@ -130,14 +131,14 @@ class TunableTrainerConfigTest {
             "maxFeaturesRatio", Map.of("range", List.of(0.1, 0.2)),
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
-        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
         var trainerConfig = config.materialize(Map.of(
             "maxFeaturesRatio", 0.1337,
             "numberOfDecisionTrees", 55
         ));
         assertThat(trainerConfig)
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainerConfigImpl
+            .isEqualTo(RandomForestClassifierTrainerConfigImpl
                 .builder()
                 .maxDepth(5)
                 .maxFeaturesRatio(0.1337)
@@ -148,12 +149,12 @@ class TunableTrainerConfigTest {
     @Test
     void shouldMaterializeCornerCasesWhenConcrete() {
         var userInput = Map.<String, Object>of();
-        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
         var trainerConfigs = config.streamCornerCaseConfigs().collect(Collectors.toList());
         assertThat(trainerConfigs.size()).isEqualTo(1);
         assertThat(trainerConfigs.get(0))
             .usingRecursiveComparison()
-            .isEqualTo(RandomForestTrainerConfig.DEFAULT);
+            .isEqualTo(RandomForestClassifierTrainerConfig.DEFAULT);
     }
 
     @Test
@@ -164,30 +165,26 @@ class TunableTrainerConfigTest {
             "maxFeaturesRatio", Map.of("range", List.of(0.1 - EPSILON, 0.2 + EPSILON)),
             "numberOfDecisionTrees", Map.of("range", List.of(10, 100))
         );
-        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest);
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
         assertThat(config.streamCornerCaseConfigs())
             .usingRecursiveFieldByFieldElementComparator()
             .containsExactlyInAnyOrder(
-                RandomForestTrainerConfigImpl
-                    .builder()
+                RandomForestClassifierTrainerConfigImpl.builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.1)
                     .numberOfDecisionTrees(10)
                     .build(),
-                RandomForestTrainerConfigImpl
-                    .builder()
+                RandomForestClassifierTrainerConfigImpl.builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.1)
                     .numberOfDecisionTrees(100)
                     .build(),
-                RandomForestTrainerConfigImpl
-                    .builder()
+                RandomForestClassifierTrainerConfigImpl.builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.2)
                     .numberOfDecisionTrees(10)
                     .build(),
-                RandomForestTrainerConfigImpl
-                    .builder()
+                RandomForestClassifierTrainerConfigImpl.builder()
                     .maxDepth(5)
                     .maxFeaturesRatio(0.2)
                     .numberOfDecisionTrees(100)
@@ -196,17 +193,25 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void failsOnNonMapNonNumericValue() {
+    void failsOnWrongTypeInConfigValidation() {
         var userInput = Map.<String, Object>of("maxDepth", "foo");
-        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
-            .hasMessage("Parameter `maxDepth` must be numeric or of the form {range: {min, max}}.")
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
+            .hasMessage("The value of `maxDepth` must be of type `Integer` but was `String`.")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnInvalidType() {
+        var userInput = Map.<String, Object>of("maxDepth", List.of(1));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
+            .hasMessage("Parameter `maxDepth` must be string, numeric or a map of the form {range: {min, max}}.")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
     @RepeatedTest(100)
     void failsOnIllegalMapKeys() {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo", "bar", "bat"));
-        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
             .hasMessageMatching("Ranges for training hyper-parameters must be of the form \\{range: \\{min, max\\}}, " +
                                 "where both min and max are numerical. Invalid parameters: \\[`maxDepth=\\{(bar=bat, range=foo|range=foo, bar=bat)\\}`\\]")
             .isInstanceOf(IllegalArgumentException.class);
@@ -215,7 +220,7 @@ class TunableTrainerConfigTest {
     @Test
     void failsOnIllegalMapValueType() {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", "foo"));
-        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
                         "where both min and max are numerical. Invalid parameters: [`maxDepth={range=foo}`]")
             .isInstanceOf(IllegalArgumentException.class);
@@ -224,7 +229,7 @@ class TunableTrainerConfigTest {
     @Test
     void failsOnIllegalRangeListSize() {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of(1,2,3)));
-        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
                         "where both min and max are numerical. Invalid parameters: [`maxDepth={range=[1, 2, 3]}`]")
             .isInstanceOf(IllegalArgumentException.class);
@@ -233,7 +238,7 @@ class TunableTrainerConfigTest {
     @Test
     void failsOnIllegalRangeValueType() {
         var userInput = Map.<String, Object>of("maxDepth", Map.of("range", List.of("foo", "bar")));
-        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForest))
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
             .hasMessage("Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
                         "where both min and max are numerical. Invalid parameters: [`maxDepth={range=[foo, bar]}`]")
             .isInstanceOf(IllegalArgumentException.class);

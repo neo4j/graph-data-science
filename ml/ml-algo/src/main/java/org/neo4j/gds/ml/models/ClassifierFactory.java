@@ -39,7 +39,7 @@ public final class ClassifierFactory {
         switch (classifierData.trainerMethod()) {
             case LogisticRegression:
                 return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
-            case RandomForest:
+            case RandomForestClassification:
                 return new RandomForestClassifier((RandomForestClassifierData) classifierData);
             default:
                 throw new IllegalStateException("No such classifier.");
@@ -61,7 +61,7 @@ public final class ClassifierFactory {
                     numberOfClasses,
                     isReduced
                 );
-            case RandomForest:
+            case RandomForestClassification:
                 return RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
             default:
                 throw new IllegalStateException("No such classifier.");
@@ -78,7 +78,7 @@ public final class ClassifierFactory {
         switch (trainerConfig.method()) {
             case LogisticRegression:
                 return LogisticRegressionData.memoryEstimation(isReduced, numberOfClasses, MemoryRange.of(featureDimension));
-            case RandomForest:
+            case RandomForestClassification:
                 return RandomForestClassifierData.memoryEstimation(
                     numberOfTrainingSamples,
                     (RandomForestTrainerConfig) trainerConfig

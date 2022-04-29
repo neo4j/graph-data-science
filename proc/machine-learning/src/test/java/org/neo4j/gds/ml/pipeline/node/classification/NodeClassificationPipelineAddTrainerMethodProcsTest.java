@@ -24,7 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
@@ -58,7 +58,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.RandomForestClassification.name(), List.of(),
                     TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                             "maxEpochs", 100,
                             "minEpochs", 42,
@@ -85,9 +85,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(),
-                    List.of(RandomForestTrainerConfigImpl
-                        .builder()
+                    TrainingMethod.RandomForestClassification.name(),
+                    List.of(RandomForestClassifierTrainerConfigImpl.builder()
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)
                         .numberOfDecisionTrees(10)
@@ -113,7 +112,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.RandomForestClassification.name(), List.of(),
                     TrainingMethod.LogisticRegression.name(), List.of(
                         Map.of(
                             "maxEpochs", 100,

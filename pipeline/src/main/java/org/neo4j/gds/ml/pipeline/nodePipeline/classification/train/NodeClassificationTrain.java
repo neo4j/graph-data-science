@@ -132,7 +132,7 @@ public final class NodeClassificationTrain {
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
-        if (!pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
+        if (!pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
             // Having a random forest model candidate forces using eager feature extraction.
             builder.perGraphDimension("cached feature vectors", (dim, threads) -> MemoryRange.of(
                 HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(10)),
@@ -221,7 +221,7 @@ public final class NodeClassificationTrain {
         var metrics = config.metrics(classCounts.keys());
 
         Features features;
-        if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest).isEmpty()) {
+        if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
             features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
         } else {
             // Random forest uses feature vectors many times each.

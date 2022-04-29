@@ -50,7 +50,7 @@ class NodeClassificationTrainingPipelineTest {
             .returns(NodePropertyPredictionSplitConfig.DEFAULT_CONFIG, NodeClassificationTrainingPipeline::splitConfig);
 
         assertThat(pipeline.trainingParameterSpace())
-            .isEqualTo(Map.of(TrainingMethod.LogisticRegression, List.of(), TrainingMethod.RandomForest, List.of()));
+            .isEqualTo(Map.of(TrainingMethod.LogisticRegression, List.of(), TrainingMethod.RandomForestClassification, List.of()));
     }
 
     @Test
@@ -166,7 +166,7 @@ class NodeClassificationTrainingPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    Map.of(TrainingMethod.LogisticRegression.name(), List.of(), TrainingMethod.RandomForest.name(), List.of()),
+                    Map.of(TrainingMethod.LogisticRegression.name(), List.of(), TrainingMethod.RandomForestClassification.name(), List.of()),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 )
                 .returns(

@@ -24,7 +24,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -62,14 +62,14 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
     @Description("Add a random forest configuration to the parameter space of the node classification train pipeline.")
     public Stream<NodePipelineInfoResult> addRandomForest(
         @Name("pipelineName") String pipelineName,
-        @Name(value = "config") Map<String, Object> randomForestConfig
+        @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
 
-        var allowedKeys = RandomForestTrainerConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
+        var allowedKeys = RandomForestClassifierTrainerConfig.DEFAULT.configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestClassifierConfig.keySet());
 
-        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest);
+        var tunableTrainerConfig = TunableTrainerConfig.of(randomForestClassifierConfig, TrainingMethod.RandomForestClassification);
         pipeline.addTrainerConfig(
             tunableTrainerConfig
         );

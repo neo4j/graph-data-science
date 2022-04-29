@@ -46,7 +46,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -280,11 +280,11 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                 MemoryRange.of(795_232, 827_192)
             ),
             Arguments.of(
-                List.of(RandomForestTrainerConfig.DEFAULT.toTunableConfig()),
+                List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
                 MemoryRange.of(107_186, 223_958)
             ),
             Arguments.of(
-                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestTrainerConfig.DEFAULT.toTunableConfig()),
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
                 MemoryRange.of(892_200, 959_440)
             ),
             Arguments.of(
@@ -293,7 +293,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                         Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(892_200, 959_440)
             ),
@@ -303,7 +303,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                         Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(430_062_600, 430_129_840)
             )

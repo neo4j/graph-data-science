@@ -83,7 +83,7 @@ public final class NodeRegressionTrain {
         targets.setAll(targetNodeProperty::doubleValue);
 
         Features features;
-        if (pipeline.trainingParameterSpace().getOrDefault(TrainingMethod.RandomForest, List.of()).isEmpty()) {
+        if (pipeline.trainingParameterSpace().getOrDefault(TrainingMethod.RandomForestRegression, List.of()).isEmpty()) {
             features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
         } else {
             // Random forest uses feature vectors many times each.

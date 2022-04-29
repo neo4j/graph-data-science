@@ -93,7 +93,7 @@ class StatsMapTest {
 
         @Override
         public TrainingMethod method() {
-            return TrainingMethod.RandomForest;
+            return TrainingMethod.RandomForestClassification;
         }
     }
 

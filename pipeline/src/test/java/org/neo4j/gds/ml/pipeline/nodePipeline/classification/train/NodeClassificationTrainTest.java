@@ -125,7 +125,7 @@ class NodeClassificationTrainTest {
                     "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", 0.1
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
@@ -136,7 +136,7 @@ class NodeClassificationTrainTest {
                     "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
 
         var config = createConfig("model", metricSpecification, 1L);

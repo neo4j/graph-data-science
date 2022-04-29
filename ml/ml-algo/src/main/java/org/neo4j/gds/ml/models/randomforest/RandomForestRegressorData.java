@@ -43,7 +43,7 @@ public interface RandomForestRegressorData extends Regressor.RegressorData {
 
     @Value.Derived
     default TrainingMethod trainerMethod() {
-        return TrainingMethod.RandomForest;
+        return TrainingMethod.RandomForestClassification;
     }
 
     public static MemoryEstimation memoryEstimation(

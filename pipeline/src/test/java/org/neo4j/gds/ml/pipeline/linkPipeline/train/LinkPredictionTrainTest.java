@@ -48,8 +48,8 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
@@ -167,7 +167,7 @@ class LinkPredictionTrainTest {
             ),
             Arguments.of(
                 "RF",
-                List.of(RandomForestTrainerConfigImpl
+                List.of(RandomForestClassifierTrainerConfigImpl
                     .builder()
                     .maxDepth(3)
                     .minSplitSize(2)
@@ -182,7 +182,7 @@ class LinkPredictionTrainTest {
                 "Default RF and default LR",
                 List.of(
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
-                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(74_024, 2_738_872)
             ),
@@ -193,7 +193,7 @@ class LinkPredictionTrainTest {
                         Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(74_024, 2_738_872)
             ),
@@ -204,7 +204,7 @@ class LinkPredictionTrainTest {
                         Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
                         TrainingMethod.LogisticRegression
                     ),
-                    RandomForestTrainerConfig.DEFAULT.toTunableConfig()
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
                 MemoryRange.of(12_828_680, 405_698_920)
             )
@@ -372,7 +372,7 @@ class LinkPredictionTrainTest {
             .build());
 
         pipeline.addTrainerConfig(
-            RandomForestTrainerConfigImpl.builder().numberOfDecisionTrees(5).build()
+            RandomForestClassifierTrainerConfigImpl.builder().numberOfDecisionTrees(5).build()
         );
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
@@ -417,7 +417,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Extract train features :: Finished",
                 "MY TEST TASK :: Select best model :: Start",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Start",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2, minLeafSize=1}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForestClassification, Parameters: {criterion=GINI, numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2, minLeafSize=1}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 50%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 100%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.7684",
@@ -664,7 +664,7 @@ class LinkPredictionTrainTest {
                     "numberOfDecisionTrees", 1,
                     "maxFeaturesRatio", 0.1
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
 
         pipeline.addTrainerConfig(
@@ -675,7 +675,7 @@ class LinkPredictionTrainTest {
                     "numberOfDecisionTrees", 1,
                     "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
                 ),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestClassification
             ));
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));

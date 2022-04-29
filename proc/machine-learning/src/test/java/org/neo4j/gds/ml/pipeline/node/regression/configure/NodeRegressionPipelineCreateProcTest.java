@@ -49,7 +49,7 @@ class NodeRegressionPipelineCreateProcTest extends BaseProcTest {
             "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
             "parameterSpace", Map.of(
                 TrainingMethod.LinearRegression.name(), List.of(),
-                TrainingMethod.RandomForest.name(), List.of()
+                TrainingMethod.RandomForestRegression.name(), List.of()
             )
         )));
 

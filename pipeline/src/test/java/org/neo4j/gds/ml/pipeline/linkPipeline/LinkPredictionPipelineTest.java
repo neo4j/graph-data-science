@@ -26,7 +26,7 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
@@ -92,7 +92,7 @@ class LinkPredictionPipelineTest {
     @Test
     void canSetParameterSpace() {
         var lrConfig = LogisticRegressionTrainConfig.of(Map.of("penalty", 19));
-        var rfConfg = RandomForestTrainerConfigImpl.builder()
+        var rfConfg = RandomForestClassifierTrainerConfigImpl.builder()
             .maxFeaturesRatio(0.5)
             .numberOfDecisionTrees(1)
             .minSplitSize(2)
@@ -106,7 +106,7 @@ class LinkPredictionPipelineTest {
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LogisticRegression))
             .containsExactly(lrConfig.toTunableConfig());
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest))
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification))
             .containsExactly(rfConfg.toTunableConfig());
     }
 
@@ -176,7 +176,7 @@ class LinkPredictionPipelineTest {
                 .returns(
                     Map.of(
                         TrainingMethod.LogisticRegression.name(), List.of(),
-                        TrainingMethod.RandomForest.name(), List.of()
+                        TrainingMethod.RandomForestClassification.name(), List.of()
                     ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 ).returns(
@@ -201,8 +201,7 @@ class LinkPredictionPipelineTest {
             pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
             pipeline.addTrainerConfig(
-                RandomForestTrainerConfigImpl
-                    .builder()
+                RandomForestClassifierTrainerConfigImpl.builder()
                     .maxDepth(2)
                     .maxFeaturesRatio(0.5)
                     .minSplitSize(2)
@@ -242,7 +241,7 @@ class LinkPredictionPipelineTest {
                             .stream()
                             .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList()),
-                        TrainingMethod.RandomForest.name(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)
+                        TrainingMethod.RandomForestClassification.name(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification)
                             .stream()
                             .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList())

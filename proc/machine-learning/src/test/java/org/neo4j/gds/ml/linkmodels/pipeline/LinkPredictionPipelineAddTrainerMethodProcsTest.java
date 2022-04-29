@@ -23,8 +23,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierImpurityCriterion;
 import org.neo4j.gds.ml.models.TrainingMethod;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
@@ -58,7 +59,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.RandomForestClassification.name(), List.of(),
                     TrainingMethod.LogisticRegression.name(), List.of(Map.of(
                         "maxEpochs", 100,
                         "minEpochs", 42,
@@ -68,8 +69,9 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "batchSize", 100,
                         "learningRate", 0.001,
                         "tolerance", 0.001
-                    )))
-                ))
+                    ))
+                )
+            ))
         );
     }
 
@@ -86,7 +88,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.RandomForestClassification.name(), List.of(),
                     TrainingMethod.LogisticRegression.name(), List.of(
                         Map.of(
                             "maxEpochs", 100,
@@ -108,7 +110,8 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "learningRate", 0.001,
                             "tolerance", 0.001
                         )
-                    ))
+                    )
+                )
             ))
         );
     }
@@ -116,7 +119,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void addRandomForest() {
         assertCypherResult(
-            "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
+            "CALL gds.alpha.pipeline.linkPrediction.addRandomForest('myPipeline', {criterion: 'ENTROPY', maxDepth: 42, maxFeaturesRatio: 0.5, numberOfDecisionTrees: 10, minSplitSize: 2})",
             List.of(Map.of("name",
                 "myPipeline",
                 "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -124,9 +127,9 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(),
-                    List.of(RandomForestTrainerConfigImpl
-                        .builder()
+                    TrainingMethod.RandomForestClassification.name(),
+                    List.of(RandomForestClassifierTrainerConfigImpl.builder()
+                        .criterion(DecisionTreeClassifierImpurityCriterion.ENTROPY)
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)
                         .numberOfDecisionTrees(10)

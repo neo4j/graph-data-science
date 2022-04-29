@@ -33,7 +33,7 @@ import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
 import java.util.List;
 import java.util.Map;
@@ -156,7 +156,7 @@ class TrainingStatisticsTest {
 
     @Test
     void toMap() {
-        RandomForestTrainerConfig firstCandidate = RandomForestTrainerConfig.DEFAULT;
+        RandomForestClassifierTrainerConfig firstCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
         LogisticRegressionTrainConfig secondCandidate = LogisticRegressionTrainConfig.DEFAULT;
 
         var selectResult = new TrainingStatistics(List.of(AllClassMetric.ACCURACY));
@@ -209,7 +209,7 @@ class TrainingStatisticsTest {
 
         @Override
         public TrainingMethod method() {
-            return TrainingMethod.RandomForest;
+            return TrainingMethod.RandomForestClassification;
         }
     }
 

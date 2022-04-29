@@ -44,17 +44,17 @@ class RandomSearchTest {
                         TrainingMethod.LogisticRegression
                     )
                 ),
-                TrainingMethod.RandomForest,
+                TrainingMethod.RandomForestClassification,
                 List.of(
                     TunableTrainerConfig.of(
                         Map.of(
                             "maxFeaturesRatio", Map.of("range", List.of(0.0, 1.0))
                         ),
-                        TrainingMethod.RandomForest
+                        TrainingMethod.RandomForestClassification
                     ),
                     TunableTrainerConfig.of(
                         Map.of(),
-                        TrainingMethod.RandomForest
+                        TrainingMethod.RandomForestClassification
                     )
                 )
             ),
@@ -106,13 +106,13 @@ class RandomSearchTest {
         var maxTrials = 10000;
         var randomSearch = new RandomSearch(
             Map.of(
-                TrainingMethod.RandomForest,
+                TrainingMethod.RandomForestClassification,
                 List.of(
                     TunableTrainerConfig.of(
                         Map.of(
                             "maxFeaturesRatio", Map.of("range", List.of(0.0, 1.0))
                         ),
-                        TrainingMethod.RandomForest
+                        TrainingMethod.RandomForestClassification
                     )
                 )
             ),
@@ -147,7 +147,7 @@ class RandomSearchTest {
                     ),
                     TunableTrainerConfig.of(
                         Map.of(),
-                        TrainingMethod.RandomForest
+                        TrainingMethod.RandomForestClassification
                     )
                 )
             ),

@@ -51,7 +51,7 @@ import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
@@ -452,7 +452,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(RandomForestTrainerConfigImpl.builder().build())
+                .bestParameters(RandomForestClassifierTrainerConfigImpl.builder().build())
                 .metrics(Map.of())
                 .pipeline(NodeClassificationPredictPipeline.EMPTY)
                 .build()

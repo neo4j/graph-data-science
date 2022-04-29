@@ -103,8 +103,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainerConfigImpl
-                .builder()
+            RandomForestClassifierTrainerConfigImpl.builder()
                 .maxDepth(1)
                 .minSplitSize(2)
                 .maxFeaturesRatio(1.0D)
@@ -134,8 +133,39 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainerConfigImpl
-                .builder()
+            RandomForestClassifierTrainerConfigImpl.builder()
+                .maxDepth(2)
+                .minSplitSize(2)
+                .numberOfSamplesRatio(0.5D)
+                .maxFeaturesRatio(1.0D)
+                .numberOfDecisionTrees(20)
+                .build(),
+            false,
+            Optional.of(1337L),
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
+
+        var featureVector = new double[]{8.0, 3.2};
+
+        assertThrows(
+            IllegalAccessError.class,
+            randomForestTrainer::outOfBagError
+        );
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void usingTwentyTreesAndEntropyLoss(int concurrency) {
+        var randomForestTrainer = new RandomForestClassifierTrainer(
+            concurrency,
+            CLASS_MAPPING,
+            RandomForestClassifierTrainerConfigImpl.builder()
+                .criterion("entropy")
                 .maxDepth(2)
                 .minSplitSize(2)
                 .numberOfSamplesRatio(0.5D)
@@ -166,7 +196,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainerConfigImpl
+            RandomForestClassifierTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)
@@ -190,7 +220,7 @@ class RandomForestClassifierTest {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
             CLASS_MAPPING,
-            RandomForestTrainerConfigImpl
+            RandomForestClassifierTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
                 .minSplitSize(2)

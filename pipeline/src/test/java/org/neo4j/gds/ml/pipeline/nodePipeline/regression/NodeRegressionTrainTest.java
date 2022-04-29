@@ -42,8 +42,8 @@ import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
@@ -124,8 +124,8 @@ class NodeRegressionTrainTest {
 
     @Test
     void trainWithOnlyRF() {
-        var candidate1 = RandomForestTrainerConfig.DEFAULT;
-        var candidate2 = RandomForestTrainerConfigImpl.builder().numberOfDecisionTrees(20).build();
+        var candidate1 = RandomForestRegressorTrainerConfig.DEFAULT;
+        var candidate2 = RandomForestRegressorTrainerConfigImpl.builder().numberOfDecisionTrees(20).build();
 
         var pipeline = new NodeRegressionTrainingPipeline();
 
@@ -165,7 +165,7 @@ class NodeRegressionTrainTest {
 
     @Test
     void trainWithMultipleEvaluationMetrics() {
-        var candidate1 = RandomForestTrainerConfig.DEFAULT;
+        var candidate1 = RandomForestRegressorTrainerConfig.DEFAULT;
         var candidate2 = LinearRegressionTrainConfig.DEFAULT;
 
         var pipeline = new NodeRegressionTrainingPipeline();
@@ -222,7 +222,7 @@ class NodeRegressionTrainTest {
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of("maxDepth", Map.of("range", List.of(2, 4)), "numberOfDecisionTrees", 5),
-                TrainingMethod.RandomForest
+                TrainingMethod.RandomForestRegression
             )
         );
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());

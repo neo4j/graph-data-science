@@ -50,7 +50,7 @@ public final class RegressionTrainerFactory {
                     progressTracker
                 );
             }
-            case RandomForest: {
+            case RandomForestRegression: {
                 return new RandomForestRegressorTrainer(
                     concurrency,
                     (RandomForestTrainerConfig) config,

@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.StringParameter;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -63,7 +64,7 @@ final class ParameterParser {
                 }
                 var minObject = range.get(0);
                 var maxObject = range.get(1);
-                if (!typeIsSupported(minObject) || !typeIsSupported(maxObject)) {
+                if (!typeIsSupportedInRange(minObject) || !typeIsSupportedInRange(maxObject)) {
                     incorrectMaps.put(key, value);
                     return;
                 }
@@ -90,7 +91,7 @@ final class ParameterParser {
         );
     }
 
-    private static boolean typeIsSupported(Object value) {
+    private static boolean typeIsSupportedInRange(Object value) {
         return value instanceof Double || value instanceof Float || value instanceof Integer || value instanceof Long;
     }
 
@@ -117,12 +118,19 @@ final class ParameterParser {
         if (value instanceof Double) {
             return DoubleParameter.of((Double) value);
         }
-        throw new IllegalArgumentException(formatWithLocale("Parameter `%s` must be numeric or of the form {range: {min, max}}.", key));
+        if (value instanceof String) {
+            return StringParameter.of((String) value);
+        }
+        throw new IllegalArgumentException(formatWithLocale(
+            "Parameter `%s` must be string, numeric or a map of the form {range: {min, max}}.",
+            key
+        ));
     }
 
     @ValueClass
     interface RangeParameters {
         Map<String, DoubleRangeParameter> doubleRanges();
+
         Map<String, IntegerRangeParameter> integerRanges();
     }
 }

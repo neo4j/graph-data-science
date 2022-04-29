@@ -71,7 +71,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 | "pipe"   | []                | []
 | {testFraction=0.3, validationFolds=3}
 | {maxTrials={max-trials}}
-| {RandomForest=[], LogisticRegression=[]}
+| {RandomForestClassification=[], LogisticRegression=[]}
 |===
 --
 
@@ -432,14 +432,14 @@ YIELD parameterSpace
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
 YIELD parameterSpace
-RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
+RETURN parameterSpace.RandomForestClassification AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
 
 .Results
 [opts="header",cols="1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace
-| [{maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForestClassification, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 

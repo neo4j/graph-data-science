@@ -40,7 +40,7 @@ public final class LinkPredictionPipelineCompanion {
 
     static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_SPACE = Map.of(
         TrainingMethod.LogisticRegression.name(), List.of(),
-        TrainingMethod.RandomForest.name(), List.of()
+        TrainingMethod.RandomForestClassification.name(), List.of()
     );
 
     private LinkPredictionPipelineCompanion() {}

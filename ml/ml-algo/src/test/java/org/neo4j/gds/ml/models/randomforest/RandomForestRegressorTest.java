@@ -85,7 +85,7 @@ class RandomForestRegressorTest {
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            RandomForestTrainerConfigImpl
+            RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(1)
                 .minSplitSize(2)
@@ -109,7 +109,7 @@ class RandomForestRegressorTest {
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            RandomForestTrainerConfigImpl
+            RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)
                 .minSplitSize(2)
@@ -133,7 +133,7 @@ class RandomForestRegressorTest {
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
             concurrency,
-            RandomForestTrainerConfigImpl
+            RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)
                 .minSplitSize(2)
@@ -189,7 +189,7 @@ class RandomForestRegressorTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainerConfigImpl.builder()
+        var config = RandomForestRegressorTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
             .maxFeaturesRatio(maxFeaturesRatio)
@@ -225,7 +225,7 @@ class RandomForestRegressorTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainerConfigImpl.builder()
+        var config = RandomForestRegressorTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
             .minSplitSize(minSplitSize)
