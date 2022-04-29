@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.eclipse.collections.api.list.primitive.DoubleList;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.values.storable.Value;
@@ -30,7 +31,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
     protected InMemoryPropertySelection selection;
-    private double[] propertyValues;
+    private DoubleList propertyValues;
     private int[] propertyIds;
     private int index;
 
@@ -41,7 +42,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
         reset();
     }
 
-    public void initRelationshipPropertyCursor(long id, int[] propertyIds, double[] propertyValues, InMemoryPropertySelection selection) {
+    public void initRelationshipPropertyCursor(long id, int[] propertyIds, DoubleList propertyValues, InMemoryPropertySelection selection) {
         setId(id);
         setRelId(id);
         this.index = -1;
@@ -82,7 +83,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
     @Override
     public Value propertyValue() {
         if (getRelId() != NO_ID && this.index < propertyIds.length) {
-            return Values.doubleValue(propertyValues[this.index]);
+            return Values.doubleValue(propertyValues.get(this.index));
         }
         throw new IllegalStateException("Property cursor is not initialized.");
     }

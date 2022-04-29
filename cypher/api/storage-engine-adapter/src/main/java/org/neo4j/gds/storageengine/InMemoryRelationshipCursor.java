@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.storageengine;
 
+import org.eclipse.collections.api.list.primitive.MutableDoubleList;
+import org.eclipse.collections.impl.list.mutable.primitive.DoubleArrayList;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.PropertyCursor;
@@ -35,14 +37,16 @@ import org.neo4j.token.TokenHolders;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
     private final List<RelationshipIds.RelationshipIdContext> relationshipIdContexts;
-    private final AdjacencyCursor[] adjacencyCursorCache;
-    private final PropertyCursor[][] propertyCursorCache;
+    private final List<AdjacencyCursor> adjacencyCursorCache;
+    private final List<PropertyCursor[]> propertyCursorCache;
+    private final MutableDoubleList propertyValuesCache;
 
     protected long sourceId;
     protected long targetId;
@@ -50,7 +54,6 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     private AdjacencyCursor adjacencyCursor;
     private PropertyCursor[] propertyCursors;
-    private final double[] propertyValuesCache;
     private int relationshipTypeOffset;
     private int relationshipContextIndex;
     private int[] propertyIds;
@@ -62,7 +65,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         this.relationshipIdContexts = this.graphStore.relationshipIds().relationshipIdContexts();
         this.adjacencyCursorCache = relationshipIdContexts.stream()
             .map(context -> context.adjacencyList().rawAdjacencyCursor())
-            .toArray(AdjacencyCursor[]::new);
+            .collect(Collectors.toList());
 
         this.propertyCursorCache = relationshipIdContexts.stream()
             .map(context -> Arrays
@@ -70,10 +73,10 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
                 .map(AdjacencyProperties::rawPropertyCursor)
                 .toArray(PropertyCursor[]::new)
             )
-            .toArray(PropertyCursor[][]::new);
+            .collect(Collectors.toList());
 
-        var maxPropertySize = Arrays.stream(propertyCursorCache).mapToInt(a -> a.length).max().orElse(0);
-        this.propertyValuesCache = new double[maxPropertySize];
+        var maxPropertySize = propertyCursorCache.stream().mapToInt(a -> a.length).max().orElse(0);
+        this.propertyValuesCache = new DoubleArrayList(new double[maxPropertySize]);
     }
 
     @Override
@@ -117,7 +120,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
                 setId(getId() + 1);
 
                 for (int i = 0; i < propertyCursors.length; i++) {
-                    propertyValuesCache[i] = Double.longBitsToDouble(propertyCursors[i].nextLong());
+                    propertyValuesCache.set(i, Double.longBitsToDouble(propertyCursors[i].nextLong()));
                 }
 
                 return true;
@@ -178,14 +181,14 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         setType(context.relationshipTypeId());
 
         // initialize the adjacency cursor
-        var reuseCursor = adjacencyCursorCache[relationshipContextIndex];
+        var reuseCursor = adjacencyCursorCache.get(relationshipContextIndex);
         this.adjacencyCursor = context
             .adjacencyList()
             .adjacencyCursor(reuseCursor, this.sourceId);
 
         // initialize the property cursors
         this.propertyIds = context.propertyIds();
-        this.propertyCursors = propertyCursorCache[relationshipContextIndex];
+        this.propertyCursors = propertyCursorCache.get(relationshipContextIndex);
         var adjacencyProperties = context.adjacencyProperties();
         for (int i = 0; i < propertyCursors.length; i++) {
                 adjacencyProperties[i].propertyCursor(propertyCursors[i], this.sourceId);
