@@ -199,6 +199,31 @@ class DecisionTreeRegressorTest {
         assertThat(decisionTreeRegressor.predict(featureVector)).isEqualTo(4.5);
     }
 
+    @Test
+    void considersMinLeafSize() {
+        var featureVector = new double[]{8.0, 0.0};
+
+        var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
+            .minLeafSize(5)
+            .minSplitSize(6)
+            .build();
+
+        var mutableSampledVectors = HugeLongArray.newArray(NUM_SAMPLES);
+        mutableSampledVectors.setAll(i -> i);
+        var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
+
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+            mse,
+            features,
+            targets,
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(5677377167946646799L), featureVector.length, 1)
+        );
+
+        var decisionTreeRegressor = decisionTreeTrainer.train(sampledVectors);
+        assertThat(decisionTreeRegressor.predict(featureVector)).isEqualTo((0.15 + 4.1 + 4.0 + 4.7 + 3.9) / 5);
+    }
+
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
