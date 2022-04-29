@@ -103,6 +103,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
+        // Use anonymous block to make `mutableTrainSetIndices` eligible for GC as soon as possible.
         {
             var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
             mutableTrainSetIndices.setAll(trainSetIndices::get);
