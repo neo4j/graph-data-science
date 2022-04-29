@@ -234,7 +234,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore
-| {maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.904365079365079 |  0.971428571428572 | 0.583333333333333
+| {maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 5` (and defaults filled for remaining parameters) was selected, and has a score of `0.58` on the test set.
