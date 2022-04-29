@@ -107,5 +107,27 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         void nodeLabelAdded(String nodeLabel);
 
         void relationshipTypeAdded(String relationshipType);
+
+        class Adapter implements StateVisitor {
+            @Override
+            public void nodePropertyRemoved(String propertyKey) {
+
+            }
+
+            @Override
+            public void nodePropertyAdded(String propertyKey) {
+
+            }
+
+            @Override
+            public void nodeLabelAdded(String nodeLabel) {
+
+            }
+
+            @Override
+            public void relationshipTypeAdded(String relationshipType) {
+
+            }
+        }
     }
 }

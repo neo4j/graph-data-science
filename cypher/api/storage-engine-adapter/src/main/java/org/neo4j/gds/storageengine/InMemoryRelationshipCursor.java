@@ -35,9 +35,9 @@ import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipCursor;
 import org.neo4j.token.TokenHolders;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
 
@@ -46,7 +46,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     private final List<RelationshipIds.RelationshipIdContext> relationshipIdContexts;
     private final List<AdjacencyCursor> adjacencyCursorCache;
     private final List<PropertyCursor[]> propertyCursorCache;
-    private final MutableDoubleList propertyValuesCache;
+    private MutableDoubleList propertyValuesCache;
 
     protected long sourceId;
     protected long targetId;
@@ -62,21 +62,12 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         super(NO_ID);
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
-        this.relationshipIdContexts = this.graphStore.relationshipIds().relationshipIdContexts();
-        this.adjacencyCursorCache = relationshipIdContexts.stream()
-            .map(context -> context.adjacencyList().rawAdjacencyCursor())
-            .collect(Collectors.toList());
+        this.relationshipIdContexts = new ArrayList<>();
+        this.adjacencyCursorCache = new ArrayList<>();
+        this.propertyCursorCache = new ArrayList<>();
+        this.propertyValuesCache = new DoubleArrayList();
 
-        this.propertyCursorCache = relationshipIdContexts.stream()
-            .map(context -> Arrays
-                .stream(context.adjacencyProperties())
-                .map(AdjacencyProperties::rawPropertyCursor)
-                .toArray(PropertyCursor[]::new)
-            )
-            .collect(Collectors.toList());
-
-        var maxPropertySize = propertyCursorCache.stream().mapToInt(a -> a.length).max().orElse(0);
-        this.propertyValuesCache = new DoubleArrayList(new double[maxPropertySize]);
+        this.graphStore.relationshipIds().registerUpdateListener(this::newRelationshipIdContextAdded);
     }
 
     @Override
@@ -159,6 +150,19 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     public void properties(StoragePropertyCursor propertyCursor, InMemoryPropertySelection selection) {
         var inMemoryCursor = (AbstractInMemoryRelationshipPropertyCursor) propertyCursor;
         inMemoryCursor.initRelationshipPropertyCursor(this.sourceId, propertyIds, propertyValuesCache, selection);
+    }
+
+    private void newRelationshipIdContextAdded(RelationshipIds.RelationshipIdContext relationshipIdContext) {
+        this.relationshipIdContexts.add(relationshipIdContext);
+        this.adjacencyCursorCache.add(relationshipIdContext.adjacencyList().rawAdjacencyCursor());
+        this.propertyCursorCache.add(
+            Arrays
+                .stream(relationshipIdContext.adjacencyProperties())
+                .map(AdjacencyProperties::rawPropertyCursor)
+                .toArray(PropertyCursor[]::new)
+        );
+        var newSize = this.propertyCursorCache.size() + relationshipIdContext.adjacencyProperties().length;
+        this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
     }
 
     private boolean progressToNextContext() {

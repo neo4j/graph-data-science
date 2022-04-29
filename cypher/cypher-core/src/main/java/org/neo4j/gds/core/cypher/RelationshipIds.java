@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.cypher;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AdjacencyList;
@@ -37,47 +38,32 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class RelationshipIds {
+public final class RelationshipIds extends CypherGraphStore.StateVisitor.Adapter {
 
+    private final GraphStore graphStore;
+    private final TokenHolders tokenHolders;
     private final List<RelationshipIdContext> relationshipIdContexts;
+    private final List<UpdateListener> updateListeners;
+
+    public interface UpdateListener {
+        void onRelationshipIdsAdded(RelationshipIdContext relationshipIdContext);
+    }
 
     static RelationshipIds fromGraphStore(GraphStore graphStore, TokenHolders tokenHolders) {
         var relationshipIdContexts = new ArrayList<RelationshipIdContext>(graphStore.relationshipTypes().size());
 
-        graphStore.relationshipTypes().forEach(relType -> {
-            var relCount = graphStore.relationshipCount(relType);
-            var graph = (CSRGraph) graphStore.getGraph(relType);
-            var offsets = computeAccumulatedOffsets(graph);
-            int relTypeId = tokenHolders.relationshipTypeTokens().getIdByName(relType.name);
-
-            List<RelationshipProperty> relationshipProperties = graphStore.relationshipPropertyKeys(relType)
-                .stream()
-                .map(relProperty -> graphStore.relationshipPropertyValues(relType, relProperty))
-                .collect(Collectors.toList());
-
-            int[] propertyIds = relationshipProperties
-                .stream()
-                .mapToInt(relationshipProperty -> tokenHolders
-                    .propertyKeyTokens()
-                    .getIdByName(relationshipProperty.key()))
-                .toArray();
-
-            AdjacencyProperties[] adjacencyProperties = relationshipProperties
-                .stream()
-                .map(relationshipProperty -> relationshipProperty.values().propertiesList())
-                .toArray(AdjacencyProperties[]::new);
-
-            relationshipIdContexts.add(ImmutableRelationshipIdContext.of(relType, relTypeId, relCount, graph, offsets, propertyIds, adjacencyProperties));
-        });
-        return new RelationshipIds(relationshipIdContexts);
+        graphStore.relationshipTypes()
+            .stream()
+            .map(relType -> relationshipIdContextFromRelType(graphStore, tokenHolders, relType))
+            .forEach(relationshipIdContexts::add);
+        return new RelationshipIds(graphStore, tokenHolders, relationshipIdContexts);
     }
 
-    private RelationshipIds(List<RelationshipIdContext> relationshipIdContexts) {
+    private RelationshipIds(GraphStore graphStore, TokenHolders tokenHolders, List<RelationshipIdContext> relationshipIdContexts) {
+        this.graphStore = graphStore;
+        this.tokenHolders = tokenHolders;
         this.relationshipIdContexts = relationshipIdContexts;
-    }
-
-    public List<RelationshipIdContext> relationshipIdContexts() {
-        return relationshipIdContexts;
+        this.updateListeners = new ArrayList<>();
     }
 
     public <T> T resolveRelationshipId(long relationshipId, ResolvedRelationshipIdFunction<T> relationshipIdConsumer) {
@@ -106,6 +92,58 @@ public final class RelationshipIds {
             }
         }
         throw new IllegalArgumentException(formatWithLocale("No relationship with id %d was found.", relationshipId));
+    }
+
+    public void registerUpdateListener(UpdateListener updateListener) {
+        this.updateListeners.add(updateListener);
+        // replay added relationship id contexts
+        relationshipIdContexts.forEach(updateListener::onRelationshipIdsAdded);
+    }
+
+    @Override
+    public void relationshipTypeAdded(String relationshipType) {
+        var relationshipIdContext = relationshipIdContextFromRelType(graphStore, tokenHolders, RelationshipType.of(relationshipType));
+        relationshipIdContexts.add(relationshipIdContext);
+        updateListeners.forEach(updateListener -> updateListener.onRelationshipIdsAdded(relationshipIdContext));
+    }
+
+    @NotNull
+    private static RelationshipIdContext relationshipIdContextFromRelType(
+        GraphStore graphStore,
+        TokenHolders tokenHolders,
+        RelationshipType relType
+    ) {
+        var relCount = graphStore.relationshipCount(relType);
+        var graph = (CSRGraph) graphStore.getGraph(relType);
+        var offsets = computeAccumulatedOffsets(graph);
+        int relTypeId = tokenHolders.relationshipTypeTokens().getIdByName(relType.name);
+
+        List<RelationshipProperty> relationshipProperties = graphStore.relationshipPropertyKeys(relType)
+            .stream()
+            .map(relProperty -> graphStore.relationshipPropertyValues(relType, relProperty))
+            .collect(Collectors.toList());
+
+        int[] propertyIds = relationshipProperties
+            .stream()
+            .mapToInt(relationshipProperty -> tokenHolders
+                .propertyKeyTokens()
+                .getIdByName(relationshipProperty.key()))
+            .toArray();
+
+        AdjacencyProperties[] adjacencyProperties = relationshipProperties
+            .stream()
+            .map(relationshipProperty -> relationshipProperty.values().propertiesList())
+            .toArray(AdjacencyProperties[]::new);
+
+        return ImmutableRelationshipIdContext.of(
+            relType,
+            relTypeId,
+            relCount,
+            graph,
+            offsets,
+            propertyIds,
+            adjacencyProperties
+        );
     }
 
     private static HugeLongArray computeAccumulatedOffsets(Graph graph) {
