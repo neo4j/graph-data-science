@@ -166,7 +166,7 @@ class NodeClassificationTrainTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true})
+    @ValueSource(booleans = {true, false})
     void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {
 
         var pipeline = new NodeClassificationTrainingPipeline();
@@ -242,16 +242,19 @@ class NodeClassificationTrainTest {
         var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
         assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
 
-        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(1, 11);
+        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(0, 10);
 
         var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
         assertThat(candidateStats.size()).isEqualTo(10);
         for (int i = 0; i < candidateStats.size(); i++) {
             var candidateMap = (Map) candidateStats.get(i);
             assertThat(candidateMap).containsKey("parameters");
-            assertThat((Map) candidateMap.get("metrics")).containsKeys("F1_WEIGHTED");
+            assertThat((Map) candidateMap.get("metrics")).containsKey("F1_WEIGHTED");
             if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
-                assertThat((Map) candidateMap.get("metrics")).containsKeys("OUT_OF_BAG_ERROR");
+                assertThat((Map) candidateMap.get("metrics")).containsKey("OUT_OF_BAG_ERROR");
+            }
+            if (!includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).doesNotContainKey("OUT_OF_BAG_ERROR");
             }
         }
     }
