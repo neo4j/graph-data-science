@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class Precision implements ClassificationCrossValidationMetric {
+public class Precision implements ClassificationMetric {
 
     public static final String NAME = "PRECISION";
 

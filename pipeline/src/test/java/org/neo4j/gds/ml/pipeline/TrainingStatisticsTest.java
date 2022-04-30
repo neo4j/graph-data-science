@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.LinkCrossValidationMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;

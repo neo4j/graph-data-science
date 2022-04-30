@@ -34,9 +34,9 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.LinkCrossValidationMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 
-class LinkCrossValidationMetricTest {
+class LinkMetricTest {
 
     /**
      * Example computation lifted from https://sanchom.wordpress.com/tag/average-precision/
@@ -92,7 +92,7 @@ class LinkCrossValidationMetricTest {
         double expectedAUCScore = area10to9 + area9to8 + area8to7 + area7to6 + area6to5
                                   + area5to4 + area4to3 + area3to2 + area2to1 + area1to0;
 
-        var aucScore = LinkCrossValidationMetric.AUCPR.compute(signedProbabilities, 1.0);
+        var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
         assertThat(aucScore).isCloseTo(expectedAUCScore, Offset.offset(1e-24));
     }
 
@@ -121,7 +121,7 @@ class LinkCrossValidationMetricTest {
         var area1to0 = (r1 - r0) * (p1 + p0) / 2.0;
 
         double expectedAUCScore = area4to3 + area3to2 + area2to1 + area1to0;
-        var aucScore = LinkCrossValidationMetric.AUCPR.compute(signedProbabilities, 10.0);
+        var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 10.0);
         assertThat(aucScore).isCloseTo(expectedAUCScore, Offset.offset(1e-24));
     }
 
@@ -135,7 +135,7 @@ class LinkCrossValidationMetricTest {
         signedProbabilities.add(2, true);
         signedProbabilities.add(2, false);
         signedProbabilities.add(1, true);
-        var aucScore = LinkCrossValidationMetric.AUCPR.compute(signedProbabilities, 1.0);
+        var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
         // r4 means recall when extracting 4 groups , r3 means recall when extracting 3 groups etc
         var r4 = 1.0;
         var p4 = 4.0/7.0;
@@ -164,7 +164,7 @@ class LinkCrossValidationMetricTest {
         signedProbabilities.add(3, true);
         signedProbabilities.add(2, false);
         signedProbabilities.add(1, true);
-        var aucScore = LinkCrossValidationMetric.AUCPR.compute(signedProbabilities, 1.0);
+        var aucScore = LinkMetric.AUCPR.compute(signedProbabilities, 1.0);
         // r4 means recall when extracting 4 examples , r3 means recall when extracting 3 examples etc
         var r4 = 1.0;
         var p4 = 0.5;
@@ -193,7 +193,7 @@ class LinkCrossValidationMetricTest {
             var prob = Float.parseFloat(split[1]);
             signedProbabilites.add(prob, split[0].equals("+"));
         });
-        assertThat(LinkCrossValidationMetric.AUCPR.compute(signedProbabilites, 1.0)).isEqualTo(expectedAUC, Offset.offset(1e-24));
+        assertThat(LinkMetric.AUCPR.compute(signedProbabilites, 1.0)).isEqualTo(expectedAUC, Offset.offset(1e-24));
     }
 
     @ParameterizedTest

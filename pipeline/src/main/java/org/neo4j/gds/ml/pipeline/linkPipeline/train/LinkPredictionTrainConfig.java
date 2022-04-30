@@ -24,8 +24,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
 import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
@@ -47,11 +47,11 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
 
     // ConvertWith + default doesnt work (yet)
     default List<String> metrics() {
-        return List.of(LinkCrossValidationMetric.AUCPR.name());
+        return List.of(LinkMetric.AUCPR.name());
     }
 
     @Configuration.Ignore
-    default List<LinkMetric> linkMetrics() {
+    default List<Metric> linkMetrics() {
         return namesToMetrics(metrics());
     }
 
@@ -59,7 +59,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         return new LinkPredictionTrainConfigImpl(username, config);
     }
 
-    static List<LinkMetric> namesToMetrics(List<String> names) {
-        return names.stream().map(name -> LinkMetric.valueOf((String) name)).collect(Collectors.toList());
+    static List<Metric> namesToMetrics(List<String> names) {
+        return names.stream().map(name -> Metric.parseLinkMetric((String) name)).collect(Collectors.toList());
     }
 }

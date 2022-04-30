@@ -44,7 +44,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
+import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -178,7 +178,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
 
             var customInfo = actualModel.customInfo();
-            assertThat(result.trainingStatistics().getValidationStats(LinkCrossValidationMetric.AUCPR))
+            assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
                 .hasSize(2)
                 .satisfies(scores ->
                     assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))

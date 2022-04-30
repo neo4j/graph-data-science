@@ -37,7 +37,7 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
-import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
+import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -312,8 +312,8 @@ public final class LinkPredictionTrain {
         );
 
         config.linkMetrics().stream()
-            .filter(metric -> metric instanceof LinkCrossValidationMetric)
-            .map(metric -> (LinkCrossValidationMetric) metric)
+            .filter(metric -> metric instanceof LinkMetric)
+            .map(metric -> (LinkMetric) metric)
             .forEach(metric -> {
                 double score = metric.compute(signedProbabilities, config.negativeClassWeight());
                 trainingStatistics.addTestScore(metric, score);
@@ -354,8 +354,8 @@ public final class LinkPredictionTrain {
 
         config.linkMetrics()
             .stream()
-            .filter(metric -> metric instanceof LinkCrossValidationMetric)
-            .map(metric -> (LinkCrossValidationMetric) metric)
+            .filter(metric -> metric instanceof LinkMetric)
+            .map(metric -> (LinkMetric) metric)
             .forEach(metric ->
                 scoreConsumer.accept(
                     metric,

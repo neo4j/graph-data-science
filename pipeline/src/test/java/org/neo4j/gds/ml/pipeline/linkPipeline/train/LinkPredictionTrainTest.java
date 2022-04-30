@@ -42,7 +42,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -67,7 +67,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.ml.metrics.LinkCrossValidationMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
@@ -725,13 +725,13 @@ class LinkPredictionTrainTest {
         return trainingConfig(modelName, List.of(AUCPR));
     }
 
-    private LinkPredictionTrainConfig trainingConfig(String modelName, List<LinkMetric> metrics) {
+    private LinkPredictionTrainConfig trainingConfig(String modelName, List<Metric> metrics) {
         return LinkPredictionTrainConfigImpl.builder()
             .username("DUMMY")
             .modelName(modelName)
             .graphName("g")
             .pipeline("DUMMY")
-            .metrics(metrics.stream().map(LinkMetric::name).collect(Collectors.toList()))
+            .metrics(metrics.stream().map(Metric::name).collect(Collectors.toList()))
             .negativeClassWeight(1)
             .randomSeed(1337L)
             .build();

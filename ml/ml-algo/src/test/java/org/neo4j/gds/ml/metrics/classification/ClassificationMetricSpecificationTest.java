@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class ClassificationCrossValidationMetricSpecificationTest {
+public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);

@@ -23,7 +23,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -71,7 +71,7 @@ public final class PipelineCompanion {
     }
 
     public static void validateMainMetric(TrainingPipeline<?> pipeline, String mainMetric) {
-        if (mainMetric.equals(((ClassificationMetric) OUT_OF_BAG_ERROR).name())) {
+        if (mainMetric.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
             var nonRFMethods = pipeline.trainingParameterSpace().entrySet().stream()
                 .filter(entry -> !entry.getValue().isEmpty())
                 .map(Map.Entry::getKey)
@@ -81,7 +81,7 @@ public final class PipelineCompanion {
                 throw new IllegalArgumentException(formatWithLocale(
                     "If %s is used as the main metric (the first one), then only RandomForest model candidates are allowed." +
                     " Training methods used are: [%s].",
-                    ((ClassificationMetric) OUT_OF_BAG_ERROR).name(),
+                    ((Metric) OUT_OF_BAG_ERROR).name(),
                     String.join(", ", nonRFMethods)
                 ));
             }

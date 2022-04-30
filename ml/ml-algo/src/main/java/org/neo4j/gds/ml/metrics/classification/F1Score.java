@@ -27,7 +27,7 @@ import java.util.Objects;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class F1Score implements ClassificationCrossValidationMetric {
+public class F1Score implements ClassificationMetric {
 
     public static final String NAME = "F1";
 

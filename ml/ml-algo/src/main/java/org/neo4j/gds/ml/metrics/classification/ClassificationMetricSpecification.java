@@ -23,6 +23,7 @@ import org.intellij.lang.annotations.RegExp;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,8 +45,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface ClassificationMetricSpecification {
-    List<String> MODEL_SPECIFIC_METRICS = List.of(((ClassificationMetric) OUT_OF_BAG_ERROR).name());
-    SortedMap<String, Function<Long, ClassificationCrossValidationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
+    List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
+    SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
         F1Score.NAME, F1Score::new,
         Precision.NAME, Precision::new,
         Recall.NAME, Recall::new,
@@ -71,7 +72,7 @@ public interface ClassificationMetricSpecification {
         return formatWithLocale("%s(class=%s)", metricType, classId);
     }
 
-    Stream<ClassificationMetric> createMetrics(Collection<Long> classes);
+    Stream<Metric> createMetrics(Collection<Long> classes);
 
     String asString();
 
@@ -119,7 +120,7 @@ public interface ClassificationMetricSpecification {
             String input = (String) userSpecification;
 
             var upperCaseSpecification = toUpperCaseWithLocale(input);
-            if (upperCaseSpecification.equals(((ClassificationMetric) OUT_OF_BAG_ERROR).name())) {
+            if (upperCaseSpecification.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
                 return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
             }
 
@@ -137,7 +138,7 @@ public interface ClassificationMetricSpecification {
             }
             var metricType = matcher.group(1);
             if (matcher.group(2).equals("*")) {
-                for (Map.Entry<String, Function<Long, ClassificationCrossValidationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
+                for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
                     String metric = entry.getKey();
                     if (metric.equals(metricType)) {
                         return createSpecification(
@@ -165,12 +166,12 @@ public interface ClassificationMetricSpecification {
     }
 
     static ClassificationMetricSpecification createSpecification(
-        Function<Collection<Long>, Stream<ClassificationMetric>> metricFactory,
+        Function<Collection<Long>, Stream<Metric>> metricFactory,
         String stringRepresentation
     ) {
         return new ClassificationMetricSpecification() {
             @Override
-            public Stream<ClassificationMetric> createMetrics(Collection<Long> classes) {
+            public Stream<Metric> createMetrics(Collection<Long> classes) {
                 return metricFactory.apply(classes);
             }
 

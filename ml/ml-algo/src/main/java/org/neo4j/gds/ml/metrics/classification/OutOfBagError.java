@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
-import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.Comparator;
 
-public final class OutOfBagError implements ClassificationMetric, LinkMetric {
+public final class OutOfBagError implements Metric {
     private OutOfBagError() {
     }
 

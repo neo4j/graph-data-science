@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
-import org.neo4j.gds.ml.metrics.classification.ClassificationCrossValidationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
@@ -80,7 +79,7 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
-    private final List<ClassificationMetric> metrics;
+    private final List<Metric> metrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -251,7 +250,7 @@ public final class NodeClassificationTrain {
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
-        List<ClassificationMetric> metrics,
+        List<Metric> metrics,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -383,8 +382,8 @@ public final class NodeClassificationTrain {
         );
         metrics
             .stream()
-            .filter(metric -> metric instanceof ClassificationCrossValidationMetric)
-            .map(metric -> (ClassificationCrossValidationMetric) metric)
+            .filter(metric -> metric instanceof ClassificationMetric)
+            .map(metric -> (ClassificationMetric) metric)
             .forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
