@@ -63,7 +63,7 @@ public final class TrainingStatistics {
     public Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMap(),
-            "bestTrial", getBestTrialIdx(),
+            "bestTrial", getBestTrialIdx() + 1,
             "modelCandidates", candidateStats.stream().map(CandidateStats::toMap).collect(Collectors.toList())
         );
     }
