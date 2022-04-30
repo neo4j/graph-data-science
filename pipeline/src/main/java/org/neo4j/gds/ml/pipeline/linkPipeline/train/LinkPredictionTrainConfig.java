@@ -24,10 +24,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -43,13 +45,21 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
 
     String pipeline();
 
+    // ConvertWith + default doesnt work (yet)
+    default List<String> metrics() {
+        return List.of(LinkCrossValidationMetric.AUCPR.name());
+    }
+
     @Configuration.Ignore
-    @Value.Default
-    default List<LinkMetric> metrics() {
-        return List.of(LinkMetric.AUCPR);
+    default List<LinkMetric> linkMetrics() {
+        return namesToMetrics(metrics());
     }
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
         return new LinkPredictionTrainConfigImpl(username, config);
+    }
+
+    static List<LinkMetric> namesToMetrics(List<String> names) {
+        return names.stream().map(name -> LinkMetric.valueOf((String) name)).collect(Collectors.toList());
     }
 }
