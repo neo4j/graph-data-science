@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.ml.metrics.ImmutableBestModelStats;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 
 import java.util.ArrayList;
@@ -96,7 +96,7 @@ public final class PipelineCompanion {
     public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
         var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
         var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
-        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableBestModelStats.class);
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
         var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
         return MemoryEstimations.builder("StatsMap")
             .fixed("array list", sizeOfInstance(ArrayList.class))

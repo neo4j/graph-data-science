@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.metrics.BestModelStats;
+import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
@@ -46,12 +46,12 @@ public final class TrainingStatistics {
     }
 
     @TestOnly
-    public List<BestModelStats> getTrainStats(Metric metric) {
+    public List<ModelStats> getTrainStats(Metric metric) {
         return candidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
     }
 
     @TestOnly
-    public List<BestModelStats> getValidationStats(Metric metric) {
+    public List<ModelStats> getValidationStats(Metric metric) {
         return candidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
     }
 
@@ -80,7 +80,7 @@ public final class TrainingStatistics {
         return extractAverage(candidateStats.get(trial).trainingStats());
     }
 
-    private Map<Metric, Double> extractAverage(Map<Metric, BestModelStats> statsMap) {
+    private Map<Metric, Double> extractAverage(Map<Metric, ModelStats> statsMap) {
         return statsMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,

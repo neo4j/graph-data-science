@@ -36,7 +36,7 @@ import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.CandidateStats;
-import org.neo4j.gds.ml.metrics.ImmutableBestModelStats;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -115,7 +115,7 @@ public final class LinkPredictionTrain {
 
     @Deprecated
     public static long estimateMemory() {
-        return MemoryUsage.sizeOfInstance(ImmutableBestModelStats.class) * 2 + Double.BYTES * 2;
+        return MemoryUsage.sizeOfInstance(ImmutableModelStats.class) * 2 + Double.BYTES * 2;
     }
 
     public LinkPredictionTrainResult compute() {

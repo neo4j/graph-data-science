@@ -34,8 +34,8 @@ import java.util.stream.Stream;
 @ValueClass
 public interface CandidateStats extends ToMapConvertible {
     TrainerConfig trainerConfig();
-    Map<Metric, BestModelStats> trainingStats();
-    Map<Metric, BestModelStats> validationStats();
+    Map<Metric, ModelStats> trainingStats();
+    Map<Metric, ModelStats> validationStats();
 
     @Override
     @Value.Auxiliary
@@ -98,8 +98,8 @@ public interface CandidateStats extends ToMapConvertible {
 
     static CandidateStats of(
         TrainerConfig trainerConfig,
-        Map<Metric, BestModelStats> trainStats,
-        Map<Metric, BestModelStats> validationStats
+        Map<Metric, ModelStats> trainStats,
+        Map<Metric, ModelStats> validationStats
     ) {
         return ImmutableCandidateStats.of(trainerConfig, trainStats, validationStats);
     }

@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import java.util.Map;
 
 @ValueClass
-public interface BestModelStats {
+public interface ModelStats {
 
     /**
      * The average of the metric of the winning model
@@ -52,7 +52,7 @@ public interface BestModelStats {
         );
     }
 
-    static BestModelStats of(double avg, double min, double max) {
-        return ImmutableBestModelStats.of(avg, min, max);
+    static ModelStats of(double avg, double min, double max) {
+        return ImmutableModelStats.of(avg, min, max);
     }
 }

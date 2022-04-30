@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.ml.metrics.BestModelStats;
+import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
@@ -61,12 +61,12 @@ class TrainingStatisticsTest {
             new TestTrainerConfig("lower average rmse"),
             Map.of(),
             Map.of(
-                ROOT_MEAN_SQUARED_ERROR, BestModelStats.of(
+                ROOT_MEAN_SQUARED_ERROR, ModelStats.of(
                     0.2,
                     0.2,
                     0.2
                 ),
-                AUCPR, BestModelStats.of(
+                AUCPR, ModelStats.of(
                     0.0,
                     1000,
                     1000
@@ -77,12 +77,12 @@ class TrainingStatisticsTest {
             new TestTrainerConfig("higher average aucpr"),
             Map.of(),
             Map.of(
-                ROOT_MEAN_SQUARED_ERROR, BestModelStats.of(
+                ROOT_MEAN_SQUARED_ERROR, ModelStats.of(
                     0.3,
                     0.1,
                     0.1
                 ),
-                AUCPR, BestModelStats.of(
+                AUCPR, ModelStats.of(
                     0.4,
                     0.2,
                     0.2
@@ -102,7 +102,7 @@ class TrainingStatisticsTest {
             Map.of(),
             Map.of(
                 AUCPR,
-                BestModelStats.of(
+                ModelStats.of(
                     0.1,
                     1000,
                     1000
@@ -114,7 +114,7 @@ class TrainingStatisticsTest {
             Map.of(),
             Map.of(
                 AUCPR,
-                BestModelStats.of(
+                ModelStats.of(
                     0.2,
                     0.2,
                     0.2
@@ -126,7 +126,7 @@ class TrainingStatisticsTest {
             Map.of(),
             Map.of(
                 AUCPR,
-                BestModelStats.of(
+                ModelStats.of(
                     0.2,
                     0.2,
                     0.2
@@ -137,12 +137,12 @@ class TrainingStatisticsTest {
             new TestTrainerConfig("notprimarymetric"),
             Map.of(),
             Map.of(
-                AUCPR, BestModelStats.of(
+                AUCPR, ModelStats.of(
                     0.0,
                     0.0,
                     0.0
                 ),
-                F1_WEIGHTED, BestModelStats.of(
+                F1_WEIGHTED, ModelStats.of(
                     5000,
                     5000,
                     5000
@@ -159,17 +159,17 @@ class TrainingStatisticsTest {
         var trainingStatistics = new TrainingStatistics(List.of(AUCPR, F1_WEIGHTED, OUT_OF_BAG_ERROR));
 
         var candidate = new TestTrainerConfig("train");
-        BestModelStats trainStats = BestModelStats.of(
+        ModelStats trainStats = ModelStats.of(
             0.1,
             0.1,
             0.1
         );
-        BestModelStats validationStats = BestModelStats.of(
+        ModelStats validationStats = ModelStats.of(
             0.4,
             0.3,
             0.5
         );
-        BestModelStats oobStats = BestModelStats.of(
+        ModelStats oobStats = ModelStats.of(
             0.5,
             0.4,
             0.9
@@ -235,13 +235,13 @@ class TrainingStatisticsTest {
 
         selectResult.addCandidateStats(CandidateStats.of(
             firstCandidate,
-            Map.of(ACCURACY, BestModelStats.of(0.33, 0.1, 0.6)),
-            Map.of(ACCURACY, BestModelStats.of(0.4, 0.3, 0.5))
+            Map.of(ACCURACY, ModelStats.of(0.33, 0.1, 0.6)),
+            Map.of(ACCURACY, ModelStats.of(0.4, 0.3, 0.5))
         ));
         selectResult.addCandidateStats(CandidateStats.of(
             secondCandidate,
-            Map.of(ACCURACY, BestModelStats.of(0.2, 0.01, 0.7)),
-            Map.of(ACCURACY, BestModelStats.of(0.8, 0.7, 0.9))
+            Map.of(ACCURACY, ModelStats.of(0.2, 0.01, 0.7)),
+            Map.of(ACCURACY, ModelStats.of(0.8, 0.7, 0.9))
         ));
 
         var expectedTrainAccuracyStats1 = Map.of("avg", 0.33, "min", 0.1, "max", 0.6);

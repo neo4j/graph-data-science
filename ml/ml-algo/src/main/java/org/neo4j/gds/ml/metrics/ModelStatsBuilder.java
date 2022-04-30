@@ -48,15 +48,15 @@ public class ModelStatsBuilder {
         sum.merge(metric, value, Double::sum);
     }
 
-    public BestModelStats build(Metric metric) {
-        return BestModelStats.of(
+    public ModelStats build(Metric metric) {
+        return ModelStats.of(
             sum.get(metric) / numberOfSplits,
             min.get(metric),
             max.get(metric)
         );
     }
 
-    public Map<Metric, BestModelStats> build(List<? extends Metric> metrics) {
+    public Map<Metric, ModelStats> build(List<? extends Metric> metrics) {
         return metrics.stream()
             .filter(sum::containsKey)
             .collect(
