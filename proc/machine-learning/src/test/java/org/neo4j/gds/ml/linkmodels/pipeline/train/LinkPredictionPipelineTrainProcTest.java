@@ -155,7 +155,12 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe1', modelName: 'trainedModel1', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            "   { " +
+            "     pipeline: 'pipe1'," +
+            "     modelName: 'trainedModel1'," +
+            "     metrics: ['AUCPR', 'OUT_OF_BAG_ERROR']," +
+            "     negativeClassWeight: 1.0," +
+            "     randomSeed: 1337 }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
@@ -172,7 +177,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(10)
+                    "configuration", aMapWithSize(11)
                 ))
         );
 
@@ -243,7 +248,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(10)
+                    "configuration", aMapWithSize(11)
                 ))
         );
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
@@ -350,6 +355,29 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             MemoryRange.of(17_240, 526_840),
             16,
             42
+        );
+    }
+
+    @Test
+    void cannotUseOOBAsMainMetricWithLR() {
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')");
+        runQuery("CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {})");
+        assertError(
+            "CALL gds.beta.pipeline.linkPrediction.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'AUCPR']," +
+            "       randomSeed: 1" +
+            "})",
+            Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
+            "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
+            " then only RandomForest model candidates are allowed." +
+            " Training methods used are: [`LogisticRegression`, `RandomForest`]"
         );
     }
 

@@ -37,6 +37,7 @@ import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
@@ -46,6 +47,7 @@ import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -60,6 +62,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -132,7 +135,7 @@ public final class LinkPredictionTrain {
 
         progressTracker.beginSubTask("Select best model");
 
-        var trainingStatistics = new TrainingStatistics(List.copyOf(config.metrics()));
+        var trainingStatistics = new TrainingStatistics(List.copyOf(config.linkMetrics()));
 
         modelSelect(trainData, trainRelationshipIds, trainingStatistics);
         progressTracker.endSubTask("Select best model");
@@ -143,7 +146,7 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
-            config.metrics(),
+            config.linkMetrics(),
             progressTracker
         );
         progressTracker.endSubTask("Train best model");
@@ -221,7 +224,7 @@ public final class LinkPredictionTrain {
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
-                    config.metrics(),
+                    config.linkMetrics(),
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -240,14 +243,16 @@ public final class LinkPredictionTrain {
                     validationStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
                 );
+                computeSpecificMetrics(classifier, validationStatsBuilder::update);
+
                 progressTracker.logProgress();
             }
 
             // insert the candidates' metrics into trainStats and validationStats
             var candidateStats = CandidateStats.of(
                 modelParams,
-                trainStatsBuilder.build(config.metrics()),
-                validationStatsBuilder.build(config.metrics())
+                trainStatsBuilder.build(config.linkMetrics()),
+                validationStatsBuilder.build(config.linkMetrics())
             );
             trainingStatistics.addCandidateStats(candidateStats);
 
@@ -277,6 +282,13 @@ public final class LinkPredictionTrain {
         ));
     }
 
+    private void computeSpecificMetrics(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
+        if (!config.linkMetrics().contains(OUT_OF_BAG_ERROR)) return;
+        if (!(classifier.data() instanceof RandomForestClassifierData)) return;
+        var data = (RandomForestClassifierData) classifier.data();
+        data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
+    }
+
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask("Extract test features");
         var testData = extractFeaturesAndLabels(
@@ -299,10 +311,13 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.metrics().forEach(metric -> {
-            double score = metric.compute(signedProbabilities, config.negativeClassWeight());
-            trainingStatistics.addTestScore(metric, score);
-        });
+        config.linkMetrics().stream()
+            .filter(metric -> metric instanceof LinkCrossValidationMetric)
+            .map(metric -> (LinkCrossValidationMetric) metric)
+            .forEach(metric -> {
+                double score = metric.compute(signedProbabilities, config.negativeClassWeight());
+                trainingStatistics.addTestScore(metric, score);
+            });
         progressTracker.endSubTask("Compute test metrics");
     }
 
@@ -337,12 +352,16 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.metrics().forEach(metric ->
-            scoreConsumer.accept(
-                metric,
-                metric.compute(signedProbabilities, config.negativeClassWeight())
-            )
-        );
+        config.linkMetrics()
+            .stream()
+            .filter(metric -> metric instanceof LinkCrossValidationMetric)
+            .map(metric -> (LinkCrossValidationMetric) metric)
+            .forEach(metric ->
+                scoreConsumer.accept(
+                    metric,
+                    metric.compute(signedProbabilities, config.negativeClassWeight())
+                )
+            );
     }
 
     public static MemoryEstimation estimate(
@@ -359,7 +378,7 @@ public final class LinkPredictionTrain {
 
         var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
 
-        int numberOfMetrics = trainConfig.metrics().size();
+        int numberOfMetrics = trainConfig.linkMetrics().size();
         return builder
             // After the training, the training features and labels are no longer accessed.
             // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
