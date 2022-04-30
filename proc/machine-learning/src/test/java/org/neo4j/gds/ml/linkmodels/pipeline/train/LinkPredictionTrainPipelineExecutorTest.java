@@ -45,8 +45,10 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.LinkCrossValidationMetric;
+import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -185,6 +187,49 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(customInfo.bestCandidate().trainerConfig())
                 .usingRecursiveComparison()
                 .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
+        });
+    }
+
+    @Test
+    void runWithOnlyOOBError() {
+        LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
+
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+
+        pipeline.addTrainerConfig(RandomForestTrainerConfig.DEFAULT);
+
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var config = LinkPredictionTrainConfigImpl.builder()
+            .username(getUsername())
+            .modelName("model")
+            .graphName(GRAPH_NAME)
+            .metrics(List.of(OutOfBagError.OUT_OF_BAG_ERROR.name()))
+            .pipeline("DUMMY")
+            .negativeClassWeight(1)
+            .randomSeed(1337L)
+            .build();
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var result = new LinkPredictionTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            ).compute();
+
+            var actualModel = result.model();
+            assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
+                Map.of("OUT_OF_BAG_ERROR", Map.of("validation", Map.of("avg", 0.75, "max", 0.75, "min", 0.75)))
+            );
+            assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
         });
     }
 

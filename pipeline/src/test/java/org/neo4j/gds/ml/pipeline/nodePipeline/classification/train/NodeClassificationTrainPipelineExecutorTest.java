@@ -184,6 +184,46 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     }
 
     @Test
+    void runWithOnlyOOBError() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+
+        var metricSpecification = ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR");
+
+        var modelCandidate = RandomForestTrainerConfig.DEFAULT;
+        pipeline.addTrainerConfig(modelCandidate);
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            var actualModel = ncPipeTrain.compute().model();
+            assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
+                Map.of("OUT_OF_BAG_ERROR", Map.of("validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666)))
+            );
+            assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
+        });
+    }
+
+    @Test
     void shouldLogProgress() {
         var pipeline = new NodeClassificationTrainingPipeline();
 
