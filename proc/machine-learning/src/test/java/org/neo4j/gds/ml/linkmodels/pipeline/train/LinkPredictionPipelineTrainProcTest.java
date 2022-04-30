@@ -352,7 +352,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             db,
             query,
             Map.of("graphName", GRAPH_NAME),
-            MemoryRange.of(17_240, 526_840),
+            MemoryRange.of(17_208, 526_808),
             16,
             42
         );

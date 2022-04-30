@@ -75,7 +75,7 @@ public final class PipelineCompanion {
             var nonRFMethods = pipeline.trainingParameterSpace().entrySet().stream()
                 .filter(entry -> !entry.getValue().isEmpty())
                 .map(Map.Entry::getKey)
-                .map(method -> "`" + method.name() + "`")
+                .map(method -> "`" + method.toString() + "`")
                 .collect(Collectors.toList());
             if (!nonRFMethods.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(

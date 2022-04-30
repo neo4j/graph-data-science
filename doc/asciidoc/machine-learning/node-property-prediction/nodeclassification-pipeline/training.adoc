@@ -224,7 +224,7 @@ YIELD requiredMemory
 [opts="header"]
 |===
 | requiredMemory
-| +"[10249 KiB ... 10322 KiB]"+
+| +"[8686 KiB ... 8760 KiB]"+
 |===
 --
 

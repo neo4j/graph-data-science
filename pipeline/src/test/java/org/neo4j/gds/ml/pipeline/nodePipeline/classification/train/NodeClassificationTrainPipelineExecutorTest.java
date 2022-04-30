@@ -277,15 +277,15 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(795_232, 827_192)
+                MemoryRange.of(779_232, 811_192)
             ),
             Arguments.of(
                 List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(107_186, 223_958)
+                MemoryRange.of(91_178, 207_950)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(892_200, 959_440)
+                MemoryRange.of(860_200, 927_440)
             ),
             Arguments.of(
                 List.of(
@@ -295,7 +295,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(892_200, 959_440)
+                MemoryRange.of(860_200, 927_440)
             ),
             Arguments.of(
                 List.of(
@@ -305,7 +305,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(430_062_600, 430_129_840)
+                MemoryRange.of(430_030_600, 430_097_840)
             )
         );
     }
