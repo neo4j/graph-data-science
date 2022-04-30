@@ -15,7 +15,7 @@ These graphs are internally managed and exist only for the duration of the train
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
 . Train each model candidate given by the <<linkprediction-adding-model-candidates,parameter space>> for each of the folds and evaluate the model on the respective validation set.
-The training process uses a logistic regression or random forest algorithm, and the evaluation uses the <<linkprediction-pipelines-metrics, AUCPR metric>>.
+The training process uses a logistic regression or random forest algorithm, and the evaluation uses the specified <<linkprediction-pipelines-metrics,metric>>.
 . Declare as winner the model with the highest average metric across the folds.
 . Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
@@ -49,14 +49,15 @@ include::../../algorithms/common-configuration/common-parameters-named-graph.ado
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                                                          | Type              | Default | Optional | Description
-| modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
-| pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
-| negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details <<linkprediction-pipelines-classimbalance, here>>.
-| randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
-| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
-| <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
+| Name                                                          | Type              | Default   | Optional | Description
+| modelName                                                     | String            | n/a       | no       | The name of the model to train, must not exist in the Model Catalog.
+| pipeline                                                      | String            | n/a       | no       | The name of the pipeline to execute.
+| negativeClassWeight                                           | Float             | 1.0       | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details <<linkprediction-pipelines-classimbalance, here>>.
+| metrics                                                       | List of String    | [`AUCPR`] | no       | <<linkprediction-pipelines-metrics,Metrics>> used to evaluate the models.
+| randomSeed                                                    | Integer           | n/a       | yes      | Seed for the random number generator used during training.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']     | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']     | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4         | yes      | The number of concurrent threads used for running the algorithm.
 |===
 
 
@@ -73,10 +74,21 @@ include::../../algorithms/common-configuration/common-parameters-named-graph.ado
 The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
 The `modelInfo` return field has the following algorithm-specific subfields:
 
-.Model info fields
+.Fields of modelSelectionStats
 [opts="header",cols="1,1,6"]
 |===
 | Name                    | Type          | Description
+| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
+| modelCandidates         | List          | List of maps, where each map contains information about one model candidate. This information includes the candidates parameters, training statistics and validation statistics.
+| bestTrial               | Integer       | The trial that produced the best model. The first trial has number 1.
+|===
+
+.Fields of modelInfo
+[opts="header",cols="1,1,6"]
+|===
+| Name                    | Type          | Description
+| modelName               | String        | The name of the trained model.
+| modelType               | String        | The type of the trained model.
 | bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
 | metrics                 | Map           | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
 | trainingPipeline        | Map           | The pipeline used for the training.
@@ -116,6 +128,13 @@ The structure of `modelInfo` is:
 <6> The `train` entry summarizes the metric results over the `train` set.
 <7> The `validation` entry summarizes the metric results over the `validation` set.
 --
+
+
+[Note]
+====
+In <4>-<6>, if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
+The `OUT_OF_BAG_ERROR` is only reported in <7> as validation metric and only if the model is RandomForest.
+====
 
 == Example
 
@@ -221,20 +240,22 @@ YIELD requiredMemory
 CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
+  metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
   randomSeed: 42
-}) YIELD modelInfo
+}) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
   modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
   modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
-  modelInfo.metrics.AUCPR.test AS testScore
+  modelInfo.metrics.AUCPR.test AS testScore,
+  modelSelectionStats.bestTrial as bestTrial
 ----
 
 .Results
-[opts="header", cols="6, 2, 2, 2"]
+[opts="header", cols="6, 2, 2, 2, 2"]
 |===
-| winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore
-| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667
+| winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | bestTrial
+| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667 | 2
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 5` (and defaults filled for remaining parameters) was selected, and has a score of `0.58` on the test set.
