@@ -52,10 +52,6 @@ public interface BestModelStats {
         );
     }
 
-    static BestModelStats of(ModelStats modelStats) {
-        return ImmutableBestModelStats.of(modelStats.avg(), modelStats.min(), modelStats.max());
-    }
-
     static BestModelStats of(double avg, double min, double max) {
         return ImmutableBestModelStats.of(avg, min, max);
     }

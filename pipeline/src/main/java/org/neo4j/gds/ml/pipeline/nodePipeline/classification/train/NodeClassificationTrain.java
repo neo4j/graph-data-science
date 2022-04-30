@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationCrossValidationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
@@ -52,6 +51,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -128,11 +128,11 @@ public final class NodeClassificationTrain {
             )
             .add(
                 "stats map train",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                PipelineCompanion.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add(
                 "stats map validation",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                PipelineCompanion.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 

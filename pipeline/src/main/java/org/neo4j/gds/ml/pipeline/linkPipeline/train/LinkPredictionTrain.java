@@ -40,13 +40,13 @@ import org.neo4j.gds.ml.metrics.ImmutableBestModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -378,8 +378,8 @@ public final class LinkPredictionTrain {
             .add(estimateTrainingAndEvaluation(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
             // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
             // this assumes the training is independent of the relationship set size
-            .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-            .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
+            .add("Outer train stats map", PipelineCompanion.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
+            .add("Test stats map", PipelineCompanion.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .fixed("Best model stats", numberOfMetrics * estimateMemory())
             .build();
     }
@@ -419,11 +419,11 @@ public final class LinkPredictionTrain {
             .add(maxEstimationOverModelCandidates)
             .add(
                 "Inner train stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
+                PipelineCompanion.memoryEstimationStatsMap(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .add(
                 "Validation stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
+                PipelineCompanion.memoryEstimationStatsMap(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .build();
     }
