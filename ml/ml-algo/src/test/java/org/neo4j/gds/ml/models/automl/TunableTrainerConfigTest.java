@@ -193,18 +193,41 @@ class TunableTrainerConfigTest {
     }
 
     @Test
-    void failsOnWrongTypeInConfigValidation() {
-        var userInput = Map.<String, Object>of("maxDepth", "foo");
+    void shouldProduceToMapWithNonNumericParam() {
+        var userInput = Map.<String, Object>of("criterion", "entropy");
+        var config = TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification);
+        assertThat(config.toMap()).isEqualTo(Map.of(
+            "criterion", "entropy",
+            "maxDepth", Integer.MAX_VALUE,
+            "methodName", "RandomForestClassification",
+            "minSplitSize", 2,
+            "minLeafSize", 1,
+            "numberOfDecisionTrees", 100,
+            "numberOfSamplesRatio", 1.0
+        ));
+    }
+
+    @Test
+    void failsOnIntegerForNonNumericParam() {
+        var userInput = Map.<String, Object>of("criterion", 10);
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
-            .hasMessage("The value of `maxDepth` must be of type `Integer` but was `String`.")
+            .hasMessage("Parameter `criterion` must be of the type `String`.")
             .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void failsOnInvalidType() {
+    void failsOnRangeForNonNumericParam() {
+        var userInput = Map.<String, Object>of("criterion", Map.of("range", List.of(1)));
+        assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
+            .hasMessage("Ranges of the form {range: {min, max}} should not be provided for non-numeric parameters. Invalid parameters: [`criterion={range=[1]}` (`criterion` is of type String)]")
+            .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void failsOnInvalidTypeForNumericParam() {
         var userInput = Map.<String, Object>of("maxDepth", List.of(1));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
-            .hasMessage("Parameter `maxDepth` must be string, numeric or a map of the form {range: {min, max}}.")
+            .hasMessage("Parameter `maxDepth` must be numeric or a map of the form {range: {min, max}}.")
             .isInstanceOf(IllegalArgumentException.class);
     }
 

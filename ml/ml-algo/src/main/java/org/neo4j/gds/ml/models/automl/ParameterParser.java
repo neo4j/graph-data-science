@@ -35,6 +35,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.ml.models.automl.TunableTrainerConfig.LOG_SCALE_PARAMETERS;
+import static org.neo4j.gds.ml.models.automl.TunableTrainerConfig.NON_NUMERIC_PARAMETERS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ParameterParser {
@@ -45,10 +46,15 @@ final class ParameterParser {
     ) {
         var doubleRanges = new HashMap<String, DoubleRangeParameter>();
         var integerRanges = new HashMap<String, IntegerRangeParameter>();
+        var incorrectParameters = new LinkedHashMap<String, Object>();
         var incorrectMaps = new LinkedHashMap<String, Object>();
 
         input.forEach((key, value) -> {
             if (value instanceof Map) {
+                if (NON_NUMERIC_PARAMETERS.containsKey(key)) {
+                    incorrectParameters.put(key, value);
+                    return;
+                }
                 if (!((Map<?, ?>) value).keySet().equals(Set.of("range"))) {
                     incorrectMaps.put(key, value);
                     return;
@@ -78,6 +84,19 @@ final class ParameterParser {
                 integerRanges.put(key, IntegerRangeParameter.of(min.intValue(), max.intValue()));
             }
         });
+        if (!incorrectParameters.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Ranges of the form {range: {min, max}} should not be provided for non-numeric parameters. " +
+                "Invalid parameters: [%s]",
+                incorrectParameters
+                    .entrySet()
+                    .stream()
+                    .map(s -> "`" + s + "`" + " (`" + s.getKey() + "` is of type " + NON_NUMERIC_PARAMETERS
+                        .get(s.getKey())
+                        .getSimpleName() + ")")
+                    .collect(Collectors.joining(", "))
+            ));
+        }
         if (!incorrectMaps.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Ranges for training hyper-parameters must be of the form {range: {min, max}}, " +
@@ -109,6 +128,34 @@ final class ParameterParser {
     }
 
     private static ConcreteParameter<?> parseConcreteParameter(String key, Object value) {
+        if (NON_NUMERIC_PARAMETERS.containsKey(key)) {
+            return parseConcreteNonNumericParameter(key, value);
+        } else {
+            return parseConcreteNumericParameter(key, value);
+        }
+    }
+
+    private static ConcreteParameter<?> parseConcreteNonNumericParameter(String key, Object value) {
+        var correctParameterType = NON_NUMERIC_PARAMETERS.get(key);
+        if (correctParameterType != value.getClass()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Parameter `%s` must be of the type `%s`.",
+                key,
+                correctParameterType.getSimpleName()
+            ));
+        }
+
+        if (correctParameterType == String.class) {
+            return StringParameter.of((String) value);
+        }
+
+        throw new IllegalStateException(formatWithLocale(
+            "Was not able to resolve type of parameter `%s`.",
+            key
+        ));
+    }
+
+    private static ConcreteParameter<?> parseConcreteNumericParameter(String key, Object value) {
         if (value instanceof Integer) {
             return IntegerParameter.of((Integer) value);
         }
@@ -118,11 +165,8 @@ final class ParameterParser {
         if (value instanceof Double) {
             return DoubleParameter.of((Double) value);
         }
-        if (value instanceof String) {
-            return StringParameter.of((String) value);
-        }
         throw new IllegalArgumentException(formatWithLocale(
-            "Parameter `%s` must be string, numeric or a map of the form {range: {min, max}}.",
+            "Parameter `%s` must be numeric or a map of the form {range: {min, max}}.",
             key
         ));
     }
