@@ -30,7 +30,7 @@ import java.util.Deque;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-public abstract class DecisionTreeTrainer <PREDICTION extends Number> {
+public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
 
     private final ImpurityCriterion impurityCriterion;
     private final Features features;
@@ -64,7 +64,10 @@ public abstract class DecisionTreeTrainer <PREDICTION extends Number> {
         );
 
         // The actual depth of the produced tree is capped by the number of samples that populate the leaves.
-        long normalizedMaxDepth = Math.min(config.maxDepth(), Math.max(1, numberOfTrainingSamples - config.minSplitSize() + 2));
+        long normalizedMaxDepth = Math.min(
+            config.maxDepth(),
+            Math.max(1, numberOfTrainingSamples - config.minSplitSize() + 2)
+        );
         // Stack implies DFS, so will at most have 2 * normalizedMaxDepth entries for a binary tree.
         long maxItemsOnStack = 2L * normalizedMaxDepth;
         var maxStackSize = MemoryRange.of(sizeOfInstance(ArrayDeque.class))
@@ -104,7 +107,13 @@ public abstract class DecisionTreeTrainer <PREDICTION extends Number> {
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
-        splitter = new Splitter(trainSetIndices.size(), impurityCriterion, featureBagger, features, config.minLeafSize());
+        splitter = new Splitter(
+            trainSetIndices.size(),
+            impurityCriterion,
+            featureBagger,
+            features,
+            config.minLeafSize()
+        );
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
@@ -112,7 +121,11 @@ public abstract class DecisionTreeTrainer <PREDICTION extends Number> {
         {
             var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
             mutableTrainSetIndices.setAll(trainSetIndices::get);
-            var impurityData = impurityCriterion.groupImpurity(mutableTrainSetIndices, 0, mutableTrainSetIndices.size());
+            var impurityData = impurityCriterion.groupImpurity(
+                mutableTrainSetIndices,
+                0,
+                mutableTrainSetIndices.size()
+            );
             root = splitAndPush(
                 stack,
                 ImmutableGroup.of(mutableTrainSetIndices, 0, mutableTrainSetIndices.size(), impurityData),
