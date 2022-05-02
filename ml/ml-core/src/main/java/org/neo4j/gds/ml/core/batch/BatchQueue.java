@@ -30,24 +30,18 @@ import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class BatchQueue {
+public abstract class BatchQueue {
+
     public static final int DEFAULT_BATCH_SIZE = 100;
-    protected final long totalSize;
-    protected final int batchSize;
+
+    final long totalSize;
+    final int batchSize;
     long currentBatch;
 
-    public BatchQueue(long totalSize) {
-        this(totalSize, DEFAULT_BATCH_SIZE);
-    }
-
-    public BatchQueue(long totalSize, int batchSize) {
+    BatchQueue(long totalSize, int batchSize) {
         this.totalSize = totalSize;
         this.batchSize = batchSize;
         this.currentBatch = 0;
-    }
-
-    public BatchQueue(long totalSize, int minBatchSize, int concurrency) {
-        this(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
     }
 
     public static int computeBatchSize(long nodeCount, int minBatchSize, int concurrency) {
@@ -57,14 +51,7 @@ public class BatchQueue {
         ));
     }
 
-    synchronized Optional<Batch> pop() {
-        if (currentBatch * batchSize >= totalSize) {
-            return Optional.empty();
-        }
-        var batch = new LazyBatch(currentBatch * batchSize, batchSize, totalSize);
-        currentBatch += 1;
-        return Optional.of(batch);
-    }
+    abstract Optional<Batch> pop();
 
     public long totalSize() {
         return totalSize;

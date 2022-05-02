@@ -19,34 +19,28 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-
-import java.util.ArrayList;
 import java.util.Optional;
 
-public class ArraySourcedBatchQueue extends BatchQueue {
-    private final ReadOnlyHugeLongArray data;
+public class ConsecutiveBatchQueue extends BatchQueue {
 
-    public ArraySourcedBatchQueue(ReadOnlyHugeLongArray data) {
-        super(data.size(), DEFAULT_BATCH_SIZE);
-        this.data = data;
+    public ConsecutiveBatchQueue(long totalSize, int batchSize) {
+        super(totalSize, batchSize);
+    }
+    public ConsecutiveBatchQueue(long totalSize) {
+        super(totalSize, DEFAULT_BATCH_SIZE);
     }
 
-    public ArraySourcedBatchQueue(ReadOnlyHugeLongArray data, int batchSize) {
-        super(data.size(), batchSize);
-        this.data = data;
+    public ConsecutiveBatchQueue(long totalSize, int minBatchSize, int concurrency) {
+        super(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
     }
 
     @Override
     synchronized Optional<Batch> pop() {
-        if (currentBatch * batchSize >= data.size()) {
+        if (currentBatch * batchSize >= totalSize) {
             return Optional.empty();
         }
-        var batchIds = new ArrayList<Long>(batchSize);
-        for (long offset = currentBatch * batchSize; offset < data.size() && offset < (currentBatch + 1) * batchSize; offset++) {
-            batchIds.add(data.get(offset));
-        }
+        var batch = new LazyBatch(currentBatch * batchSize, batchSize, totalSize);
         currentBatch += 1;
-        return Optional.of(new ListBatch(batchIds));
+        return Optional.of(batch);
     }
 }

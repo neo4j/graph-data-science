@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
+import org.neo4j.gds.ml.core.batch.ConsecutiveBatchQueue;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
@@ -58,7 +59,7 @@ class TrainingTest {
         var objective = new TestTrainingObjective();
         var singleThreadedObjective = new TestTrainingObjective();
 
-        Supplier<BatchQueue> queueSupplier = () -> new BatchQueue(100, 10);
+        Supplier<BatchQueue> queueSupplier = () -> new ConsecutiveBatchQueue(100, 10);
 
         training.train(objective, queueSupplier, 4);
         singleThreadedTraining.train(singleThreadedObjective, queueSupplier, 1);
@@ -80,7 +81,7 @@ class TrainingTest {
 
         var objective = new TestTrainingObjective();
 
-        assertThatThrownBy(() -> training.train(objective, () -> new BatchQueue(100, 10), 4))
+        assertThatThrownBy(() -> training.train(objective, () -> new ConsecutiveBatchQueue(100, 10), 4))
             .isInstanceOf(TransactionTerminatedException.class)
             .hasMessageContaining("The transaction has been terminated.");
     }
