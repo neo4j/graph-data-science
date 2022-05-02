@@ -28,17 +28,17 @@ import java.util.Map;
 public interface ModelStats {
 
     /**
-     * The average of the metric of the winning model
+     * The average of the metric of the model candidate over (inner) folds
      * @return
      */
     double avg();
     /**
-     * The minimum of the metric of the winning model
+     * The average of the metric of the model candidate over (inner) folds
      * @return
      */
     double min();
     /**
-     * The maximum of the metric of the winning model
+     * The average of the metric of the model candidate over (inner) folds
      * @return
      */
     double max();
