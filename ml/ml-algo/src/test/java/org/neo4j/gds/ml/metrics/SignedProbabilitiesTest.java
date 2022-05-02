@@ -108,7 +108,7 @@ final class SignedProbabilitiesTest {
 
     @Test
     void hugeVersionStoresDuplicateProbabilities() {
-        var signedProbabilities = SignedProbabilities.create((long) 1e10);
+        var signedProbabilities = new SignedProbabilities.Huge(5L);
 
         signedProbabilities.add(0.5, true);
         signedProbabilities.add(0.5, true);

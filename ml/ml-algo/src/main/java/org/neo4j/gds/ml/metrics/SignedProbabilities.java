@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.metrics;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -32,20 +33,16 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.stream.DoubleStream;
 
 /**
  * Represents a sorted list of doubles, sorted according to their absolute value in increasing order.
  */
-public final class SignedProbabilities {
+public abstract class SignedProbabilities {
     static double ALMOST_ZERO = 1e-100;
     private static final Comparator<Double> ABSOLUTE_VALUE_COMPARATOR = Comparator.comparingDouble(Math::abs);
 
-    private final Optional<TreeSet<Double>> maybeTree;
-    private final Optional<List<Double>> maybeList;
     private long positiveCount;
     private long negativeCount;
 
@@ -64,21 +61,52 @@ public final class SignedProbabilities {
                MemoryUsage.sizeOfInstance(Double.class) * relationshipSetSize;
     }
 
-    private SignedProbabilities(TreeSet<Double> tree) {
-        this.maybeTree = Optional.of(tree);
-        this.maybeList = Optional.empty();
-    }
-
-    private SignedProbabilities(List<Double> maybeList) {
-        this.maybeTree = Optional.empty();
-        this.maybeList = Optional.of(maybeList);
-    }
-
-    public static SignedProbabilities create(long capacity) {
+    static SignedProbabilities create(long capacity) {
         if (capacity > Integer.MAX_VALUE) {
-            return new SignedProbabilities(new TreeSet<>(ABSOLUTE_VALUE_COMPARATOR));
+            return new Huge(capacity);
         } else {
-            return new SignedProbabilities(new ArrayList<>((int) capacity));
+            return new ArrayBased((int) capacity);
+        }
+    }
+
+    private static final class ArrayBased extends SignedProbabilities {
+
+        private final ArrayList<Double> probabilities;
+
+        private ArrayBased(int capacity) {
+            this.probabilities = new ArrayList<>(capacity);
+        }
+
+        @Override
+        void doAdd(double signedProbability) {
+            probabilities.add(signedProbability);
+        }
+
+        @Override
+        public DoubleStream stream() {
+            probabilities.sort(ABSOLUTE_VALUE_COMPARATOR);
+            return probabilities.stream().mapToDouble(d -> d);
+        }
+    }
+
+    static final class Huge extends SignedProbabilities {
+
+        private final HugeDoubleArray probabilities;
+        private long index;
+
+        Huge(long capacity) {
+            this.probabilities = HugeDoubleArray.newArray(capacity);
+            this.index = 0;
+        }
+
+        @Override
+        void doAdd(double signedProbability) {
+            probabilities.set(index++, signedProbability);
+        }
+
+        @Override
+        public DoubleStream stream() {
+            return probabilities.stream().boxed().sorted(ABSOLUTE_VALUE_COMPARATOR).mapToDouble(d -> d);
         }
     }
 
@@ -124,21 +152,12 @@ public final class SignedProbabilities {
             negativeCount++;
         }
 
-        maybeTree.ifPresentOrElse(
-            tree -> tree.add(signedProbability),
-            () -> maybeList.orElseThrow().add(signedProbability)
-        );
+        doAdd(signedProbability);
     }
 
-    public DoubleStream stream() {
-        if (maybeTree.isPresent()) {
-            return maybeTree.get().stream().mapToDouble(d -> d);
-        } else {
-            var list = maybeList.orElseThrow();
-            list.sort(ABSOLUTE_VALUE_COMPARATOR);
-            return list.stream().mapToDouble(d -> d);
-        }
-    }
+    abstract void doAdd(double signedProbability);
+
+    public abstract DoubleStream stream();
 
     public long positiveCount() {
         return positiveCount;
