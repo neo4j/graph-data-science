@@ -36,63 +36,156 @@ class GiniIndexTest {
 
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(5, 1);
 
-    private static Stream<Arguments> giniParameters() {
+    private static Stream<Arguments> groupParameters() {
         return Stream.of(
             Arguments.of(
-                new int[]{1, 5, 1, 5},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
-                0.5D
+                HugeLongArray.of(1, 5),
+                HugeLongArray.of(0, 1),
+                0,
+                2,
+                0.5D,
+                new long[]{1, 1}
             ),
             Arguments.of(
-                new int[]{5, 5, 1, 1},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
-                0.0D
+                HugeLongArray.of(1, 5),
+                HugeLongArray.of(0, 1),
+                0,
+                1,
+                0.0D,
+                new long[]{0, 1}
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0}, new long[]{1, 2, 3}},
-                ImmutableGroupSizes.of(1, 3),
-                0.0D
+                HugeLongArray.of(1, 5),
+                HugeLongArray.of(),
+                0,
+                0,
+                0.0D,
+                new long[]{0, 0}
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0, 1}, new long[]{2, 3}},
-                ImmutableGroupSizes.of(2, 2),
-                0.25D
+                HugeLongArray.of(1, 1, 5, 5),
+                HugeLongArray.of(0, 1, 2, 3),
+                0,
+                4,
+                0.5D,
+                new long[]{2, 2}
             ),
             Arguments.of(
-                new int[]{1, 5, 5, 5},
-                new long[][]{new long[]{0, 1, 0, 0}, new long[]{2, 3, 1, 1}},
-                ImmutableGroupSizes.of(2, 2),
-                0.25D
+                HugeLongArray.of(1, 1, 5, 5, 1, 1),
+                HugeLongArray.of(0, 1, 2, 3, 4, 5),
+                0,
+                4,
+                0.5D,
+                new long[]{2, 2}
+            ),
+            Arguments.of(
+                HugeLongArray.of(1, 5, 5),
+                HugeLongArray.of(0, 1, 2),
+                0,
+                3,
+                0.44444444D,
+                new long[]{2, 1}
+            ),
+            Arguments.of(
+                HugeLongArray.of(1, 5, 5),
+                HugeLongArray.of(1, 2, 0),
+                0,
+                3,
+                0.44444444D,
+                new long[]{2, 1}
             )
         );
     }
 
     @ParameterizedTest
-    @MethodSource("giniParameters")
-    void shouldComputeCorrectLoss(int[] allLabels, long[][] groups, GroupSizes groupSizes, double expectedLoss) {
-        var hugeLabels = HugeLongArray.newArray(allLabels.length);
-        for (int i = 0; i < allLabels.length; i++) {
-            hugeLabels.set(i, allLabels[i]);
-        }
+    @MethodSource("groupParameters")
+    void shouldComputeCorrectGroupMetaData(
+        HugeLongArray labels,
+        HugeLongArray group,
+        long startIdx,
+        long size,
+        double expectedImpurity,
+        long[] expectedClassCounts
+    ) {
+        var giniIndexLoss = GiniIndex.fromOriginalLabels(labels, CLASS_MAPPING);
+        var impurityData = giniIndexLoss.groupImpurity(group, startIdx, size);
 
-        var leftGroup = HugeLongArray.newArray(groups[0].length);
-        for (int i = 0; i < groups[0].length; i++) {
-            leftGroup.set(i, groups[0][i]);
-        }
+        assertThat(impurityData.impurity())
+            .isCloseTo(expectedImpurity, Offset.offset(0.00001D));
+        assertThat(impurityData.classCounts()).containsExactly(expectedClassCounts);
+        assertThat(impurityData.groupSize()).isEqualTo(size);
+    }
 
-        var rightGroup = HugeLongArray.newArray(groups[1].length);
-        for (int i = 0; i < groups[1].length; i++) {
-            rightGroup.set(i, groups[1][i]);
-        }
+    private static Stream<Arguments> incrementParameters() {
+        return Stream.of(
+            Arguments.of(
+                1,
+                4,
+                0.375D,
+                new long[]{3, 1}
+            ),
+            Arguments.of(
+                4,
+                4,
+                0.5D,
+                new long[]{2, 2}
+            )
+        );
+    }
 
-        var giniIndexLoss = GiniIndex.fromOriginalLabels(hugeLabels, CLASS_MAPPING);
+    @ParameterizedTest
+    @MethodSource("incrementParameters")
+    void shouldComputeCorrectIncrementalMetaData(
+        long featureVectorIdx,
+        long size,
+        double expectedLoss,
+        long[] expectedClassCounts
+    ) {
+        var labels = HugeLongArray.of(1, 5, 5, 5, 1);
+        var giniIndexLoss = GiniIndex.fromOriginalLabels(labels, CLASS_MAPPING);
+        var impurityData = giniIndexLoss.groupImpurity(HugeLongArray.of(2, 0, 3), 0, 3);
+        giniIndexLoss.incrementalImpurity(featureVectorIdx, impurityData);
 
-        assertThat(giniIndexLoss.splitLoss(ImmutableGroups.of(leftGroup, rightGroup), groupSizes))
+        assertThat(impurityData.impurity())
             .isCloseTo(expectedLoss, Offset.offset(0.00001D));
+        assertThat(impurityData.classCounts()).containsExactly(expectedClassCounts);
+        assertThat(impurityData.groupSize()).isEqualTo(size);
+    }
+
+    private static Stream<Arguments> decrementParameters() {
+        return Stream.of(
+            Arguments.of(
+                1,
+                4,
+                0.5,
+                new long[]{2, 2}
+            ),
+            Arguments.of(
+                4,
+                4,
+                0.375D,
+                new long[]{3, 1}
+            )
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("decrementParameters")
+    void shouldComputeCorrectDecrementalMetaData(
+        long featureVectorIdx,
+        long size,
+        double expectedLoss,
+        long[] expectedClassCounts
+    ) {
+        var labels = HugeLongArray.of(1, 5, 5, 5, 1);
+        var giniIndexLoss = GiniIndex.fromOriginalLabels(labels, CLASS_MAPPING);
+        var impurityData = giniIndexLoss.groupImpurity(HugeLongArray.of(2, 0, 3, 1, 4), 0, 5);
+        giniIndexLoss.decrementalImpurity(featureVectorIdx, impurityData);
+
+        assertThat(impurityData.impurity())
+            .isCloseTo(expectedLoss, Offset.offset(0.00001D));
+        assertThat(impurityData.classCounts()).containsExactly(expectedClassCounts);
+        assertThat(impurityData.groupSize()).isEqualTo(size);
     }
 
     @ParameterizedTest

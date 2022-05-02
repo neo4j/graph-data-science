@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,11 +30,13 @@ import org.neo4j.gds.mem.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.metrics.SignedProbabilities.ALMOST_ZERO;
 
 public class SignedProbabilitiesTest {
 
@@ -59,6 +62,21 @@ public class SignedProbabilitiesTest {
                        relevantRelationships * (8 + 16);
         assertThat(memory).isEqualTo(expected);
 
+    }
+
+    @Test
+    void shouldAddWithCorrectSignsAndReplaceZeroValues() {
+        var signedProbabilities = SignedProbabilities.create(4);
+        signedProbabilities.add(0.8, true);
+        signedProbabilities.add(0.0, false);
+        signedProbabilities.add(0.4, false);
+        signedProbabilities.add(0.0, true);
+        assertThat(signedProbabilities.stream().boxed().collect(Collectors.toList())).containsExactly(
+            -ALMOST_ZERO,
+            ALMOST_ZERO,
+            -0.4,
+            0.8
+        );
     }
 
     static Stream<Arguments> parameters() {

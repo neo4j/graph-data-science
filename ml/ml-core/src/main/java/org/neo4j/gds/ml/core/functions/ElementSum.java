@@ -45,6 +45,7 @@ public class ElementSum extends AbstractVariable<Scalar> {
 
     @Override
     public Tensor<?> gradient(Variable<?> parent, ComputationContext ctx) {
-        return ctx.data(parent).map(ignore -> ctx.gradient(this).value());
+        double selfGradient = ctx.gradient(this).value();
+        return ctx.data(parent).map(ignore -> selfGradient);
     }
 }

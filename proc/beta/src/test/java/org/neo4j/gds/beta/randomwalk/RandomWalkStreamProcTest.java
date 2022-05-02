@@ -30,6 +30,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.SourceNodesConfigTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import org.neo4j.graphdb.Path;
@@ -38,13 +39,13 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
 @SuppressWarnings("unchecked")
 class RandomWalkStreamProcTest extends BaseProcTest implements
@@ -161,13 +162,9 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .estimationMode(GdsCypher.ExecutionModes.STREAM)
             .addParameter("walksPerNode", 3)
             .addParameter("walkLength", 10)
-            .yields("bytesMin", "bytesMax");
+            .yields("bytesMin", "bytesMax", "nodeCount", "relationshipCount");
 
-
-        assertCypherResult(query, List.of(Map.of(
-            "bytesMin", 4048L,
-            "bytesMax", 100064L
-        )));
+        assertCypherMemoryEstimation(db, query, MemoryRange.of(4_016, 100_032), 5, 12);
     }
 
     @Override

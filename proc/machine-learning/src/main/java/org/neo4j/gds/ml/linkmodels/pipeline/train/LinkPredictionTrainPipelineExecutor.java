@@ -20,29 +20,36 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
+import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
+import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainResult;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
 import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
-    <LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainResult> {
+    <LinkPredictionTrainConfig, LinkPredictionTrainingPipeline, LinkPredictionTrainPipelineResult> {
 
     private final RelationshipSplitter relationshipSplitter;
 
@@ -88,7 +95,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             .add("Train pipeline", LinkPredictionTrain.estimate(pipeline, configuration))
             .build();
 
-        return MemoryEstimations.builder(LinkPredictionTrainPipelineExecutor.class)
+        return MemoryEstimations.builder(LinkPredictionTrainPipelineExecutor.class.getSimpleName())
             .max("Pipeline execution", List.of(splitEstimations, maxOverNodePropertySteps, trainingEstimation))
             .build();
     }
@@ -118,7 +125,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    protected LinkPredictionTrainResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected LinkPredictionTrainPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
@@ -141,7 +148,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             pipeline.splitConfig().validationFolds(),
             progressTracker
         );
-        return new LinkPredictionTrain(
+
+        var trainResult = new LinkPredictionTrain(
             trainGraph,
             testGraph,
             pipeline,
@@ -149,6 +157,23 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             progressTracker,
             terminationFlag
         ).compute();
+
+        var model = Model.of(
+            config.username(),
+            config.modelName(),
+            MODEL_TYPE,
+            schemaBeforeSteps,
+            trainResult.classifier().data(),
+            config,
+            LinkPredictionModelInfo.of(
+                trainResult.trainingStatistics().bestParameters(),
+                trainResult.trainingStatistics().metricsForWinningModel(),
+                LinkPredictionPredictPipeline.from(pipeline)
+            )
+        );
+
+
+        return ImmutableLinkPredictionTrainPipelineResult.of(model, trainResult.trainingStatistics());
     }
 
     private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
@@ -164,5 +189,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
         removeDataSplitRelationships(datasets);
         super.cleanUpGraphStore(datasets);
+    }
+
+    @ValueClass
+    public interface LinkPredictionTrainPipelineResult {
+        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
+        TrainingStatistics trainingStatistics();
     }
 }

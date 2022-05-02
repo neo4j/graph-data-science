@@ -20,9 +20,8 @@
 package org.neo4j.gds.ml.core;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.core.functions.PassthroughVariable;
+import org.neo4j.gds.ml.core.functions.SingleParentVariable;
 import org.neo4j.gds.ml.core.tensor.Tensor;
-import org.neo4j.gds.ml.core.tensor.TensorFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -71,7 +70,7 @@ public class ComputationContext {
 
         gradients.clear();
         Queue<BackPropTask> executionQueue = new LinkedBlockingQueue<>();
-        PassthroughVariable<?> dummy = new PassthroughVariable<>(function);
+        var dummy = new PassthroughVariable<>(function);
         executionQueue.add(new BackPropTask(function, dummy));
         Map<Variable<?>, AtomicInteger> upstreamCounters = new HashMap<>();
         initUpstream(dummy, upstreamCounters);
@@ -110,8 +109,11 @@ public class ComputationContext {
     }
 
     private void updateGradient(Variable<?> variable, Tensor<?> gradient) {
-        gradients.putIfAbsent(variable, TensorFactory.constant(0D, variable.dimensions()));
-        gradients.get(variable).addInPlace(gradient);
+        if (gradients.containsKey(variable)) {
+            gradients.get(variable).addInPlace(gradient);
+        } else {
+            gradients.put(variable, gradient);
+        }
     }
 
     public String render() {
@@ -167,4 +169,25 @@ public class ComputationContext {
         }
     }
 
+    private static class PassthroughVariable<T extends Tensor<T>> extends SingleParentVariable<T, T> {
+
+        public PassthroughVariable(Variable<T> parent) {
+            super(parent, parent.dimensions());
+
+            if (parent instanceof PassthroughVariable) {
+                throw new IllegalArgumentException("Redundant use of PassthroughVariables. Chaining does not make sense.");
+            }
+        }
+
+        @Override
+        public T apply(ComputationContext ctx) {
+            return ctx.data(parent);
+        }
+
+        @Override
+        public T gradientForParent(ComputationContext ctx) {
+            // initialize gradient computation with `1`
+            return ctx.data(parent).map(v -> 1);
+        }
+    }
 }

@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -113,20 +113,18 @@ final class LinkFeaturesAndLabelsExtractor {
             var startRelationshipOffset = relationshipOffset.getValue();
             tasks.add(() -> {
                 var currentRelationshipOffset = new MutableLong(startRelationshipOffset);
-                partition.consume(nodeId -> {
-                    graph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
-                        if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
-                            globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
-                        } else {
-                            throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
-                                weight,
-                                src,
-                                trg
-                            ));
-                        }
-                        return true;
-                    });
-                });
+                partition.consume(nodeId -> graph.concurrentCopy().forEachRelationship(nodeId, -10, (src, trg, weight) -> {
+                    if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
+                        globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
+                    } else {
+                        throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
+                            weight,
+                            src,
+                            trg
+                        ));
+                    }
+                    return true;
+                }));
                 progressTracker.logProgress(partition.totalDegree());
             }
             );

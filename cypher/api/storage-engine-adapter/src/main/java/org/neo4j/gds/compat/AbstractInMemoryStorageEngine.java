@@ -48,7 +48,6 @@ import org.neo4j.storageengine.api.StorageCommand;
 import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StoreFileMetadata;
-import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionApplicationMode;
 import org.neo4j.storageengine.api.txstate.ReadableTransactionState;
 import org.neo4j.token.TokenHolders;
@@ -71,7 +70,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     private final Supplier<CommandCreationContext> commandCreationContextSupplier;
     private final TriFunction<CypherGraphStore, TokenHolders, CountsStore, StorageReader> storageReaderFn;
     private final CountsStore countsStore;
-    private final MetadataProvider metadataProvider;
+    protected final MetadataProvider metadataProvider;
     protected final CypherGraphStore graphStore;
 
     public AbstractInMemoryStorageEngine(
@@ -93,6 +92,7 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
         initializeTokenHolders();
         graphStore.initialize(tokenHolders);
         graphStore.registerPropertyRemovalCallback(txStateVisitor::removeNodeProperty);
+        graphStore.registerPropertyAddedCallback(this::addProperty);
         this.countsStore = countsStoreFn.apply(graphStore, tokenHolders);
         this.metadataProvider = metadataProvider;
     }
@@ -153,11 +153,6 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
     }
 
     @Override
-    public StoreId getStoreId() {
-        return metadataProvider.getStoreId();
-    }
-
-    @Override
     public Lifecycle schemaAndTokensLifecycle() {
         return new LifecycleAdapter() {
             @Override
@@ -213,6 +208,14 @@ public abstract class AbstractInMemoryStorageEngine implements StorageEngine {
             .forEach(relType -> tokenHolders
                 .relationshipTypeTokens()
                 .addToken(new NamedToken(relType.name(), typeCounter.getAndIncrement())));
+    }
+
+    private void addProperty(String propertyName) {
+        try {
+            tokenHolders.propertyKeyTokens().getOrCreateId(propertyName);
+        } catch (KernelException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static CypherGraphStore getGraphStoreFromCatalog(String graphName) {

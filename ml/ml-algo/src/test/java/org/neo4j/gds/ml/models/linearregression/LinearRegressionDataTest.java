@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.models.linearregression;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,6 +32,7 @@ class LinearRegressionDataTest {
         LinearRegressionData data = LinearRegressionData.of(featureDimension);
 
         assertThat(data.bias().data().value()).isZero();
-        assertThat(data.weights().data()).isEqualTo(Vector.create(0, featureDimension));
+        assertThat(data.weights().data()).isEqualTo(Matrix.create(0, 1, featureDimension));
+        assertThat(data.featureDimension()).isEqualTo(featureDimension);
     }
 }

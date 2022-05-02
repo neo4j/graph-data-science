@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import java.util.Comparator;
+
 public enum LinkMetric implements Metric {
-    AUCPR;
+    AUCPR {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
+        }
+    };
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {
         var positiveCount = signedProbabilities.positiveCount();
@@ -33,9 +40,11 @@ public enum LinkMetric implements Metric {
             negativeCount,
             negativeClassWeight
         );
+        double recall = signedProbabilitiesConsumer.recall(positiveCount);
+        double precision = signedProbabilitiesConsumer.precision(positiveCount);
         curveConsumer.acceptFirstPoint(
-            signedProbabilitiesConsumer.recall(positiveCount),
-            signedProbabilitiesConsumer.precision(positiveCount)
+            recall,
+            precision
         );
         signedProbabilities.stream().forEach(signedProbabilitiesConsumer::accept);
         curveConsumer.accept(0.0, 1.0);
@@ -76,7 +85,7 @@ public enum LinkMetric implements Metric {
                 }
             }
             lastThreshold = Math.abs(signedProbability);
-            if (signedProbability >= 0) {
+            if (signedProbability > 0) {
                 positivesSeen++;
             } else {
                 negativesSeen++;
@@ -117,7 +126,7 @@ public enum LinkMetric implements Metric {
         }
 
         void accept(double x, double y) {
-            auc += (previousYcoordinate + y) / 2.0 * (previousXcoordinate - x);
+            auc += (previousYcoordinate + y) * (previousXcoordinate - x) / 2.0;
             this.previousXcoordinate = x;
             this.previousYcoordinate = y;
         }

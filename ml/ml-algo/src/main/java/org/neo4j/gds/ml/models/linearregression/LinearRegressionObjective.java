@@ -19,13 +19,19 @@
  */
 package org.neo4j.gds.ml.models.linearregression;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.core.functions.Constant;
+import org.neo4j.gds.ml.core.functions.ConstantScale;
 import org.neo4j.gds.ml.core.functions.ElementSum;
+import org.neo4j.gds.ml.core.functions.L2NormSquared;
+import org.neo4j.gds.ml.core.functions.MeanSquareError;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Features;
 
@@ -36,30 +42,49 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
     private final Features features;
     private final HugeDoubleArray targets;
     private final LinearRegressionData modelData;
+    private final double penalty;
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
         return List.of(modelData.weights(), modelData.bias());
     }
 
-    LinearRegressionObjective(
-        Features features,
-        HugeDoubleArray targets
-    ) {
+    LinearRegressionObjective(Features features, HugeDoubleArray targets, double penalty) {
         this.features = features;
         this.targets = targets;
         this.modelData = LinearRegressionData.of(features.featureDimension());
+        this.penalty = penalty;
     }
 
     @Override
-    public Variable<Scalar> loss(
-        Batch batch, long trainSize
-    ) {
-        // FIXME implement actual implementation
+    public Variable<Scalar> loss(Batch batch, long trainSize) {
+        LinearRegressor regressor = new LinearRegressor(modelData);
+        var batchFeatures = Objective.batchFeatureMatrix(batch, features);
+        var predictionsVariable = regressor.predictionsVariable(batchFeatures);
+        var batchTargets = batchTargets(batch);
+
         return new ElementSum(List.of(
-            modelData().weights(),
-            modelData().bias())
+            new MeanSquareError(predictionsVariable, batchTargets),
+            penaltyForBatch(batch, trainSize)
+        ));
+    }
+
+    private Variable<Scalar> penaltyForBatch(Batch batch, long trainSize) {
+        return new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
+    }
+
+    private Constant<Vector> batchTargets(Batch batch) {
+        var batchedTargets = new Vector(batch.size());
+        var batchOffset = new MutableInt();
+
+        batch.nodeIds().forEach(elementId ->
+            batchedTargets.setDataAt(
+                batchOffset.getAndIncrement(),
+                targets.get(elementId)
+            )
         );
+
+        return new Constant<>(batchedTargets);
     }
 
     @Override

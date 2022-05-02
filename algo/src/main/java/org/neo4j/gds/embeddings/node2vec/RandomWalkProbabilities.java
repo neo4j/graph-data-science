@@ -40,7 +40,7 @@ interface RandomWalkProbabilities {
     long sampleCount();
 
     static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(RandomWalkProbabilities.class)
+        return MemoryEstimations.builder(RandomWalkProbabilities.class.getSimpleName())
             .perNode("node frequencies", HugeLongArray::memoryEstimation)
             .perNode("positive sampling probabilities", HugeDoubleArray::memoryEstimation)
             .perNode("negative sampling distribution", HugeLongArray::memoryEstimation)

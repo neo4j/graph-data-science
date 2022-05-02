@@ -35,7 +35,9 @@ import java.util.Map;
 
 public final class LinkPredictionPipelineCompanion {
 
-    public static final String PREDICT_DESCRIPTION = "Predicts relationships for all node pairs based on a previously trained link prediction model.";
+    public static final String PREDICT_DESCRIPTION = "Predicts relationships for all non-connected node pairs based on a previously trained LinkPrediction model.";
+    public static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting relationships for all non-connected node pairs based on a previously trained LinkPrediction model";
+
     static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_SPACE = Map.of(
         TrainingMethod.LogisticRegression.name(), List.of(),
         TrainingMethod.RandomForest.name(), List.of()

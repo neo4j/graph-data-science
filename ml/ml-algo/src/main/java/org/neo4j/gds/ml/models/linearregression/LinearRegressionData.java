@@ -22,14 +22,14 @@ package org.neo4j.gds.ml.models.linearregression;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
 @ValueClass
 public interface LinearRegressionData extends Regressor.RegressorData {
-    Weights<Vector> weights();
+    Weights<Matrix> weights();
 
     Weights<Scalar> bias();
 
@@ -40,12 +40,12 @@ public interface LinearRegressionData extends Regressor.RegressorData {
 
     @Value.Derived
     default int featureDimension() {
-        return weights().data().length();
+        return weights().data().cols();
     }
 
     static LinearRegressionData of(int featureDimension) {
         return ImmutableLinearRegressionData.builder()
-            .weights(new Weights<>(Vector.create(0D, featureDimension)))
+            .weights(Weights.ofMatrix(1, featureDimension))
             .bias(Weights.ofScalar(0D))
             .build();
     }

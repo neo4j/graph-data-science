@@ -26,7 +26,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -45,7 +44,7 @@ class DecisionTreeRegressorTest {
 
     private final HugeDoubleArray targets = HugeDoubleArray.newArray(NUM_SAMPLES);
     private Features features;
-    private MeanSquaredError mse;
+    private SplitMeanSquaredError mse;
 
     @BeforeEach
     void setup() {
@@ -78,19 +77,21 @@ class DecisionTreeRegressorTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        mse = new MeanSquaredError(targets);
+        mse = new SplitMeanSquaredError(targets);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
-        return TestSupport.crossArguments(
-            () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 4.175, 1),
-                Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1),
-                Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2),
-                Arguments.of(new double[]{0.0, 4.0}, 4.5, 3),
-                Arguments.of(new double[]{5.0, 1.0}, 0.15, 4)
-            ),
-            () -> Stream.of(Arguments.of(2), Arguments.of(4))
+        return Stream.of(
+            Arguments.of(new double[]{8.0, 0.0}, 4.175, 1, 2),
+            Arguments.of(new double[]{8.0, 0.0}, 4.175, 1, 4),
+            Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1, 2),
+            Arguments.of(new double[]{2.0, 0.0}, 0.8916, 1, 4),
+            Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2, 2),
+            Arguments.of(new double[]{2.0, 0.0}, 0.1699, 2, 4),
+            Arguments.of(new double[]{0.0, 4.0}, 4.5, 3, 2),
+            Arguments.of(new double[]{0.0, 4.0}, 4.5, 3, 4),
+            Arguments.of(new double[]{5.0, 1.0}, 0.3, 4, 2),
+            Arguments.of(new double[]{5.0, 1.0}, 0.225, 4, 4)
         );
     }
 
@@ -155,7 +156,7 @@ class DecisionTreeRegressorTest {
         );
 
         decisionTreeRegressor = decisionTreeTrainer.train(featureVectors);
-        assertThat(decisionTreeRegressor.predict(featureVector)).isCloseTo(1.93, Offset.offset(0.01D));
+        assertThat(decisionTreeRegressor.predict(featureVector)).isCloseTo(1.09, Offset.offset(0.01D));
     }
 
     @Test
@@ -201,13 +202,13 @@ class DecisionTreeRegressorTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
-        "  6,  1_000,  32_376,    47_640",
-        "  6, 10_000, 320_376,   407_640",
+        "  6,  1_000,  40_696,    55_960",
+        "  6, 10_000, 400_696,   487_960",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 320_376, 1_442_808",
+        " 20, 10_000, 400_696, 1_523_128",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = DecisionTreeRegressorTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples, 10);
+        var range = DecisionTreeRegressorTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);

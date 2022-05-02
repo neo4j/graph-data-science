@@ -36,7 +36,7 @@ import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.stream.Stream;
 
-public class BaseProgressTest extends BaseTest {
+public abstract class BaseProgressTest extends BaseTest {
 
     protected static final MemoryRange MEMORY_ESTIMATION_RANGE = MemoryRange.of(10, 20);
     protected static final int REQUESTED_CPU_CORES = 5;

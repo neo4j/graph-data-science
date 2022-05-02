@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.models.FeaturesFactory;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 class RandomForestRegressorTest {
     private static final long NUM_SAMPLES = 10;
@@ -124,7 +125,7 @@ class RandomForestRegressorTest {
 
         var featureVector = new double[]{10.0, 3.2};
 
-        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(3.273, Offset.offset(0.01D));
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(3.61, Offset.offset(0.01D));
     }
 
     @ParameterizedTest
@@ -153,29 +154,29 @@ class RandomForestRegressorTest {
         // target 3.9 example (see setup above)
         var featureVector = new double[]{10.12493903, 3.234550982};
 
-        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(0.235, Offset.offset(0.01D));
+        assertThat(randomForestRegressor.predict(featureVector)).isCloseTo(0.185, Offset.offset(0.01D));
     }
 
     @Test
     void predictOverheadMemoryEstimation() {
         var estimation = RandomForestRegressor.runtimeOverheadMemoryEstimation();
 
-        assertThat(estimation).isEqualTo(MemoryRange.of(16));
+        assertMemoryRange(estimation, 16);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000, 10, 1,   1, 0.1, 1.0,  4013442, 4827274",
+        "     6, 100_000, 10, 1,   1, 0.1, 1.0,   4_813_746, 5_627_578",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000, 10, 1,  10, 0.1, 1.0,  4014162, 5985746",
+        "    10, 100_000, 10, 1,  10, 0.1, 1.0,   4_814_466, 6_786_050",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500, 10, 1,   1, 0.1, 1.0,     21002, 188786",
+        " 8_000,     500, 10, 1,   1, 0.1, 1.0,        25_306, 193_090",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 10, 1,  10, 0.9, 1.0,  4014234, 5985910",
+        "    10, 100_000, 10, 1,  10, 0.9, 1.0,   4_814_506, 6_786_182",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 10, 1,  10, 0.1, 0.2,   804162, 2135746",
+        "    10, 100_000, 10, 1,  10, 0.1, 0.2,     964_466, 2_296_050",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 16053984, 20748560",
+        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 19_255_344, 23_949_920",
     })
     void trainMemoryEstimation(
         int maxDepth,
@@ -202,21 +203,19 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
-        assertThat(estimation)
-            .withFailMessage("Got (%s, %s)", estimation.min, estimation.max)
-            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
+        assertMemoryRange(estimation, expectedMin, expectedMax);
     }
 
     @ParameterizedTest
     @CsvSource(value = {
         // Max should almost scale linearly with numberOfDecisionTrees.
-        "     6, 100_000,   1,  2,  120,     6672",
-        "     6, 100_000, 100,  2, 8040,   663240",
+        "     6, 100_000,   1,  2,  104, 6_656",
+        "     6, 100_000, 100,  2, 8_024, 663_224",
         // Max should increase with maxDepth when maxDepth limiting factor of trees' sizes.
-        "    10, 100_000,   1,  2,  120,   106512",
+        "    10, 100_000,   1,  2,  104, 106_496",
         // Max should scale almost inverse linearly with minSplitSize.
-        "   800, 100_000,   1,  2,  120, 10400016",
-        "   800, 100_000,   1, 10,  120,  2080016",
+        "   800, 100_000,   1,  2,  104, 10_400_000",
+        "   800, 100_000,   1, 10,  104, 2_080_000",
     })
     void memoryEstimation(
         int maxDepth,
@@ -238,7 +237,6 @@ class RandomForestRegressorTest {
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
 
-        assertThat(estimation.min).isEqualTo(expectedMin);
-        assertThat(estimation.max).isEqualTo(expectedMax);
+        assertMemoryRange(estimation, expectedMin, expectedMax);
     }
 }

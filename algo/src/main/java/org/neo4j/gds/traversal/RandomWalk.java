@@ -114,6 +114,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 progressTracker.endSubTask("RandomWalk");
                 walks.put(TOMB);
             } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }).start();
         return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
@@ -232,7 +233,9 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                     buffer[bufferPosition.getAndIncrement()] = sampler.walk(nodeId);
 
                     if (bufferPosition.getValue() == buffer.length) {
-                        flushBuffer();
+                        if (!flushBuffer()) {
+                            return;
+                        }
                     }
                 }
 
@@ -242,15 +245,18 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             flushBuffer();
         }
 
-        private void flushBuffer() {
-            for (int i = 0; i < bufferPosition.getValue(); i++) {
-                try {
+        private boolean flushBuffer() {
+            try {
+                var bufferLength = bufferPosition.getValue();
+                for (int i = 0; i < bufferLength; i++) {
                     walks.put(buffer[i]);
-                } catch (InterruptedException e) {
-
                 }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
             }
             bufferPosition.setValue(0);
+            return true;
         }
     }
 

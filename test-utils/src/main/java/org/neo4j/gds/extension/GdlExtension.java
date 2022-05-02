@@ -30,6 +30,6 @@ import java.lang.annotation.Target;
 @Inherited
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@ExtendWith(GdlSupportExtension.class)
+@ExtendWith(GdlSupportPerMethodExtension.class)
 public @interface GdlExtension {
 }

@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class GiniIndex implements DecisionTreeLoss {
 
@@ -37,8 +38,7 @@ public class GiniIndex implements DecisionTreeLoss {
     }
 
     public static GiniIndex fromOriginalLabels(
-        HugeLongArray expectedOriginalLabels,
-        LocalIdMap classMapping
+        HugeLongArray expectedOriginalLabels, LocalIdMap classMapping
     ) {
         assert expectedOriginalLabels.size() > 0;
 
@@ -49,42 +49,113 @@ public class GiniIndex implements DecisionTreeLoss {
     }
 
     public static MemoryRange memoryEstimation(long numberOfTrainingSamples) {
-        return MemoryRange.of(HugeIntArray.memoryEstimation(numberOfTrainingSamples))
+        return MemoryRange
+            .of(HugeIntArray.memoryEstimation(numberOfTrainingSamples))
             .add(MemoryRange.of(sizeOfInstance(GiniIndex.class)));
     }
 
     @Override
-    public double splitLoss(Groups groups, GroupSizes groupSizes) {
-        long totalSize = groupSizes.left() + groupSizes.right();
-
-        if (totalSize == 0) {
-            throw new IllegalStateException("Cannot compute loss over only empty groups");
+    public GiniImpurityData groupImpurity(final HugeLongArray group, long startIndex, long size) {
+        if (size == 0) {
+            return new GiniImpurityData(0, new long[numberOfClasses], size);
         }
 
-        double loss = computeGroupLoss(groups.left(), groupSizes.left()) + computeGroupLoss(
-            groups.right(),
-            groupSizes.right()
-        );
-
-        return loss / totalSize;
-    }
-
-    private double computeGroupLoss(final HugeLongArray group, final long groupSize) {
-        assert group.size() >= groupSize;
-
-        if (groupSize == 0) return 0;
-
         final var groupClassCounts = new long[numberOfClasses];
-        for (long i = 0; i < groupSize; i++) {
+        for (long i = startIndex; i < size; i++) {
             int expectedLabel = expectedMappedLabels.get(group.get(i));
             groupClassCounts[expectedLabel]++;
         }
 
-        long score = 0;
+        long sumOfSquares = 0;
         for (var count : groupClassCounts) {
-            score += count * count;
+            sumOfSquares += count * count;
+        }
+        double impurity = 1.0 - (double) sumOfSquares / (size * size);
+
+        return new GiniImpurityData(impurity, groupClassCounts, size);
+    }
+
+    @Override
+    public void incrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
+        var giniImpurityData = (GiniImpurityData) impurityData;
+
+        int label = expectedMappedLabels.get(featureVectorIdx);
+        long newClassCount = giniImpurityData.classCounts[label] + 1;
+        long newGroupSize = giniImpurityData.groupSize() + 1;
+
+        updateImpurityData(label, newGroupSize, newClassCount, giniImpurityData);
+    }
+
+    @Override
+    public void decrementalImpurity(long featureVectorIdx, ImpurityData impurityData) {
+        var giniImpurityData = (GiniImpurityData) impurityData;
+
+        int label = expectedMappedLabels.get(featureVectorIdx);
+        long newClassCount = giniImpurityData.classCounts[label] - 1;
+        long newGroupSize = giniImpurityData.groupSize() - 1;
+
+        updateImpurityData(label, newGroupSize, newClassCount, giniImpurityData);
+    }
+
+    private static void updateImpurityData(int label, long newGroupSize, long newClassCount, GiniImpurityData impurityData) {
+        long groupSizeSquared = impurityData.groupSize() * impurityData.groupSize();
+        long newGroupSizeSquared = newGroupSize * newGroupSize;
+        long prevClassCount = impurityData.classCounts()[label];
+
+        double newLoss = impurityData.impurity();
+        newLoss *= (double) groupSizeSquared / newGroupSizeSquared;
+        newLoss += 1.0 - ((double) groupSizeSquared / newGroupSizeSquared);
+        newLoss += (double) (prevClassCount * prevClassCount) / newGroupSizeSquared;
+        newLoss -= (double) (newClassCount * newClassCount) / newGroupSizeSquared;
+
+        impurityData.classCounts()[label] = newClassCount;
+        impurityData.setGroupSize(newGroupSize);
+        impurityData.setImpurity(newLoss);
+    }
+
+    static class GiniImpurityData implements ImpurityData {
+        private double impurity;
+        private final long[] classCounts;
+        private long groupSize;
+
+        GiniImpurityData(double impurity, long[] classCounts, long groupSize) {
+            this.impurity = impurity;
+            this.classCounts = classCounts;
+            this.groupSize = groupSize;
         }
 
-        return groupSize - (double) score / groupSize;
+        public static long memoryEstimation(int numberOfClasses) {
+            return sizeOfInstance(GiniImpurityData.class) + sizeOfLongArray(numberOfClasses);
+        }
+
+        @Override
+        public void copyTo(ImpurityData impurityData) {
+            var giniImpurityData = (GiniImpurityData) impurityData;
+            giniImpurityData.setImpurity(impurity());
+            giniImpurityData.setGroupSize(groupSize());
+            System.arraycopy(classCounts(), 0, giniImpurityData.classCounts(), 0, classCounts().length);
+        }
+
+        @Override
+        public double impurity() {
+            return impurity;
+        }
+
+        public void setImpurity(double impurity) {
+            this.impurity = impurity;
+        }
+
+        public long[] classCounts() {
+            return classCounts;
+        }
+
+        @Override
+        public long groupSize() {
+            return groupSize;
+        }
+
+        public void setGroupSize(long groupSize) {
+            this.groupSize = groupSize;
+        }
     }
 }

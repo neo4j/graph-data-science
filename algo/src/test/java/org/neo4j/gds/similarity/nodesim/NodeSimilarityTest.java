@@ -683,8 +683,6 @@ final class NodeSimilarityTest {
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
-        long thisInstance = 64;
-
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
@@ -698,7 +696,6 @@ final class NodeSimilarityTest {
         MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)
@@ -739,8 +736,6 @@ final class NodeSimilarityTest {
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
-        long thisInstance = 64;
-
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
         MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
@@ -758,7 +753,6 @@ final class NodeSimilarityTest {
         MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("this.instance", thisInstance)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)

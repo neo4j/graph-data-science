@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
@@ -51,29 +50,27 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
     public static MemoryRange memoryEstimation(
         int maxDepth,
         int minSplitSize,
-        long numberOfTrainingSamples,
-        long numberOfBaggedFeatures
+        long numberOfTrainingSamples
     ) {
         return MemoryRange.of(sizeOfInstance(DecisionTreeRegressorTrainer.class))
             .add(DecisionTreeTrainer.estimateTree(
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
-                numberOfBaggedFeatures,
-                TreeNode.leafMemoryEstimation(Double.class)
+                TreeNode.leafMemoryEstimation(Double.class),
+                SplitMeanSquaredError.MSEImpurityData.memoryEstimation()
             ));
     }
 
     @Override
-    protected Double toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
+    protected Double toTerminal(Group group) {
+        var array = group.array();
 
         double sum = 0;
-        for (long i = 0; i < groupSize; i++) {
-            sum += targets.get(group.get(i));
+        for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {
+            sum += targets.get(array.get(i));
         }
 
-        return sum / groupSize;
+        return sum / group.size();
     }
 }

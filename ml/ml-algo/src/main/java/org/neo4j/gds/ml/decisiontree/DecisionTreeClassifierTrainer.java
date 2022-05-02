@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 
@@ -57,7 +56,6 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures,
         int numberOfClasses
     ) {
         return MemoryRange.of(sizeOfInstance(DecisionTreeClassifierTrainer.class))
@@ -65,21 +63,19 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
                 maxDepth,
                 minSplitSize,
                 numberOfTrainingSamples,
-                numberOfBaggedFeatures,
-                TreeNode.leafMemoryEstimation(Integer.class)
+                TreeNode.leafMemoryEstimation(Integer.class),
+                GiniIndex.GiniImpurityData.memoryEstimation(numberOfClasses)
             ))
             .add(sizeOfLongArray(numberOfClasses));
     }
 
     @Override
-    protected Integer toTerminal(final ReadOnlyHugeLongArray group, final long groupSize) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
-
+    protected Integer toTerminal(Group group) {
         final var classesInGroup = new long[classIdMap.size()];
+        var array = group.array();
 
-        for (long i = 0; i < groupSize; i++) {
-            long label = allLabels.get(group.get(i));
+        for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {
+            long label = allLabels.get(array.get(i));
             classesInGroup[classIdMap.toMapped(label)]++;
         }
 

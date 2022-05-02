@@ -63,7 +63,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config, int linkFeatureDimension) {
-        return MemoryEstimations.builder(ExhaustiveLinkPrediction.class)
+        return MemoryEstimations.builder(ExhaustiveLinkPrediction.class.getSimpleName())
             .add("Priority queue", BoundedLongLongPriorityQueue.memoryEstimation(config.topN().orElseThrow()))
             .perGraphDimension("Predict links operation", (dim, threads) -> MemoryRange.of(
                 MemoryUsage.sizeOfDoubleArray(linkFeatureDimension) + MemoryUsage.sizeOfLongHashSet(dim.averageDegree())

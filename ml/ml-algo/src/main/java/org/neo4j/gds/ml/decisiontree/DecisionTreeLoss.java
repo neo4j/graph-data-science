@@ -19,6 +19,37 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+
 public interface DecisionTreeLoss {
-    double splitLoss(Groups groups, GroupSizes groupSizes);
+    ImpurityData groupImpurity(HugeLongArray group, long startIdx, long size);
+
+    void incrementalImpurity(long featureVectorIdx, ImpurityData impurityData);
+
+    void decrementalImpurity(long featureVectorIdx, ImpurityData impurityData);
+
+    default double loss(ImpurityData leftImpurityData, ImpurityData rightImpurityData) {
+        long totalSize = leftImpurityData.groupSize() + rightImpurityData.groupSize();
+        double leftWeight = (double) leftImpurityData.groupSize() / totalSize;
+        double rightWeight = (double) rightImpurityData.groupSize() / totalSize;
+        return leftWeight * leftImpurityData.impurity() + rightWeight * rightImpurityData.impurity();
+    }
+
+    /**
+     * A lightweight representation of a decision tree node's impurity.
+     */
+    interface ImpurityData {
+        double impurity();
+
+        long groupSize();
+
+        /**
+         * Copies all significant data to `impurityData`.
+         *
+         * Can be called frequently during split searching so should be as lightweight as possible.
+         *
+         * @param impurityData  the object to copy to
+         */
+        void copyTo(ImpurityData impurityData);
+    }
 }

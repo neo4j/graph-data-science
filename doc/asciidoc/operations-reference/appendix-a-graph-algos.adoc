@@ -121,13 +121,15 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.eigenvector.stream.estimate`
 | `gds.eigenvector.stats`
 | `gds.eigenvector.stats.estimate`
-.6+<.^| <<algorithms-delta-single-source, All Shortest Paths Delta-Stepping>>
+.8+<.^| <<algorithms-delta-single-source, All Shortest Paths Delta-Stepping>>
 | `gds.allShortestPaths.delta.stream`
 | `gds.allShortestPaths.delta.stream.estimate`
 | `gds.allShortestPaths.delta.write`
 | `gds.allShortestPaths.delta.write.estimate`
 | `gds.allShortestPaths.delta.mutate`
 | `gds.allShortestPaths.delta.mutate.estimate`
+| `gds.allShortestPaths.delta.stats`
+| `gds.allShortestPaths.delta.stats.estimate`
 .6+<.^| <<algorithms-dijkstra-source-target, Shortest Path Dijkstra>>
 | `gds.shortestPath.dijkstra.stream`
 | `gds.shortestPath.dijkstra.stream.estimate`
@@ -172,11 +174,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.knn.stream.estimate`
 | `gds.knn.write`
 | `gds.knn.write.estimate`
-.4+<.^|<<algorithms-bfs, BFS>>
+.6+<.^|<<algorithms-bfs, BFS>>
 | `gds.bfs.mutate`
 | `gds.bfs.mutate.estimate`
 | `gds.bfs.stream`
 | `gds.bfs.stream.estimate`
+| `gds.bfs.stats`
+| `gds.bfs.stats.estimate`
 .4+<.^|<<algorithms-dfs, Depth First Search>>
 | `gds.dfs.mutate`
 | `gds.dfs.mutate.estimate`

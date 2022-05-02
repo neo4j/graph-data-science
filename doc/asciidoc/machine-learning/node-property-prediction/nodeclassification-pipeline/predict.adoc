@@ -160,7 +160,7 @@ YIELD requiredMemory
 [opts="header"]
 |===
 | requiredMemory
-| +"880 Bytes"+
+| +"792 Bytes"+
 |===
 --
 

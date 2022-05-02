@@ -19,11 +19,15 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.ml.core.Variable;
+import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.batch.Batch;
+import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
 
@@ -39,4 +43,15 @@ public interface Objective<DATA> {
      * @return the data
      */
     DATA modelData();
+
+    static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
+        var batchFeatures = new Matrix(batch.size(), features.featureDimension());
+        var batchFeaturesOffset = new MutableInt();
+
+        batch
+            .nodeIds()
+            .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
+
+        return new Constant<>(batchFeatures);
+    }
 }

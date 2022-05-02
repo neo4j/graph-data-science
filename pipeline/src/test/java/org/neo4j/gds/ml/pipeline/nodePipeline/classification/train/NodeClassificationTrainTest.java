@@ -104,9 +104,6 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeFeatureStep.of("b"));
 
-        pipeline.addTrainerConfig(
-            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
-        );
         LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
             .builder()
             .penalty(1 * 2.0 / 3.0 * 0.5)
@@ -115,14 +112,17 @@ class NodeClassificationTrainTest {
             .build();
         pipeline.addTrainerConfig(expectedWinner);
 
-        // Should NOT be the winning model, so give it bad hyperparams.
+        // Should NOT be the winning model, so give bad hyperparams.
         pipeline.addTrainerConfig(
-
+            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
+        );
+        pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
-                    "minSplitSize", 2,
+                    "minSplitSize", 2000,
                     "maxDepth", 1,
                     "numberOfDecisionTrees", 1,
+                    "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", 0.1
                 ),
                 TrainingMethod.RandomForest
@@ -130,9 +130,10 @@ class NodeClassificationTrainTest {
         pipeline.addTrainerConfig(
             TunableTrainerConfig.of(
                 Map.of(
-                    "minSplitSize", 2,
+                    "minSplitSize", 2000,
                     "maxDepth", 1,
                     "numberOfDecisionTrees", 1,
+                    "numberOfSamplesRatio", 0.1,
                     "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
                 ),
                 TrainingMethod.RandomForest
@@ -149,9 +150,7 @@ class NodeClassificationTrainTest {
         );
 
         var result = ncTrain.compute();
-        var model = result.model();
 
-        var customInfo = model.customInfo();
         List<ModelStats> validationScores = result.trainingStatistics().getValidationStats(metric);
 
         assertThat(validationScores).hasSize(MAX_TRIALS);
@@ -162,7 +161,7 @@ class NodeClassificationTrainTest {
                 .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
         }
 
-        var actualWinnerParams = customInfo.bestParameters();
+        var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
     }
 
@@ -226,30 +225,27 @@ class NodeClassificationTrainTest {
         );
 
         var bananasModelTrainResult = bananasTrain.compute();
-        var bananasModel = bananasModelTrainResult.model();
+        var bananasClassifier = bananasModelTrainResult.classifier();
         var arrayModelTrainResult = arrayPropertyTrain.compute();
-        var arrayPropertyModel = arrayModelTrainResult.model();
+        var arrayPropertyClassifier = arrayModelTrainResult.classifier();
 
-        assertThat(arrayPropertyModel)
+        assertThat(arrayPropertyClassifier)
             .usingRecursiveComparison()
-            .withFailMessage("The trained models are exactly the same instance!")
-            .isNotSameAs(bananasModel);
+            .withFailMessage("The trained classifiers are exactly the same instance!")
+            .isNotSameAs(bananasClassifier);
 
-        assertThat(arrayPropertyModel.data())
+        assertThat(arrayPropertyClassifier.data())
             .usingRecursiveComparison()
             .withFailMessage("Should not produce the same trained `data`!")
-            .isNotEqualTo(bananasModel.data());
+            .isNotEqualTo(bananasClassifier.data());
 
-        var bananasCustomInfo = bananasModel.customInfo();
-        var bananasValidationScore = bananasCustomInfo.metrics().get(metric);
+        var bananasMetrics = bananasModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
+        var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
 
-        var arrayPropertyCustomInfo = arrayPropertyModel.customInfo();
-        var arrayPropertyValidationScores = arrayPropertyCustomInfo.metrics().get(metric);
-
-        assertThat(arrayPropertyValidationScores)
+        assertThat(arrayPropertyMetrics)
             .usingRecursiveComparison()
-            .isNotSameAs(bananasValidationScore)
-            .isNotEqualTo(bananasValidationScore);
+            .isNotSameAs(bananasMetrics)
+            .isNotEqualTo(bananasMetrics);
     }
 
     @Test
@@ -450,9 +446,9 @@ class NodeClassificationTrainTest {
         var firstResult = algoSupplier.get().compute();
         var secondResult = algoSupplier.get().compute();
 
-        assertThat(((LogisticRegressionData) firstResult.model().data()).weights().data())
+        assertThat(((LogisticRegressionData) firstResult.classifier().data()).weights().data())
             .matches(matrix -> matrix.equals(
-                ((LogisticRegressionData) secondResult.model().data()).weights().data(),
+                ((LogisticRegressionData) secondResult.classifier().data()).weights().data(),
                 1e-10
             ));
     }

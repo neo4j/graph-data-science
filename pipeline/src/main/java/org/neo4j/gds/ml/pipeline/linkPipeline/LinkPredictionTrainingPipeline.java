@@ -35,6 +35,7 @@ import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_
 public class LinkPredictionTrainingPipeline extends TrainingPipeline<LinkFeatureStep> {
 
     public static final String PIPELINE_TYPE = "Link prediction training pipeline";
+    public static final String MODEL_TYPE = "LinkPrediction";
 
     private LinkPredictionSplitConfig splitConfig;
 

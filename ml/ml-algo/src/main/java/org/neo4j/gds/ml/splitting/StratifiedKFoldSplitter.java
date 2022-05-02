@@ -59,7 +59,7 @@ public class StratifiedKFoldSplitter {
     public static MemoryEstimation memoryEstimation(int k, ToLongFunction<GraphDimensions> idsSetSizeExtractor) {
         return MemoryEstimations.setup("", dimensions ->  {
             var idSetSize = idsSetSizeExtractor.applyAsLong(dimensions);
-            var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class);
+            var builder = MemoryEstimations.builder(StratifiedKFoldSplitter.class.getSimpleName());
             long baseBucketSize = idSetSize / k;
             for (int fold = 0; fold < k; fold++) {
                 var testSize = fold < idSetSize % k

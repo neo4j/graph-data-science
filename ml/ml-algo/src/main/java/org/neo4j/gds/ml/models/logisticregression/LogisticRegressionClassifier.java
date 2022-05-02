@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.logisticregression;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -33,6 +32,7 @@ import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 
@@ -145,7 +145,7 @@ public final class LogisticRegressionClassifier implements Classifier {
     @Override
     public Matrix predictProbabilities(Batch batch, Features features) {
         ComputationContext ctx = new ComputationContext();
-        return ctx.forward(predictionsVariable(batchFeatureMatrix(batch, features)));
+        return ctx.forward(predictionsVariable(Objective.batchFeatureMatrix(batch, features)));
     }
 
     Variable<Matrix> predictionsVariable(Constant<Matrix> batchFeatures) {
@@ -158,17 +158,6 @@ public final class LogisticRegressionClassifier implements Classifier {
         return weights.data().rows() == numberOfClasses()
             ? new Softmax(softmaxInput)
             : new ReducedSoftmax(softmaxInput);
-    }
-
-    static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
-        var batchFeatures = new Matrix(batch.size(), features.featureDimension());
-        var batchFeaturesOffset = new MutableInt();
-
-        batch
-            .nodeIds()
-            .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
-
-        return new Constant<>(batchFeatures);
     }
 
     @Override

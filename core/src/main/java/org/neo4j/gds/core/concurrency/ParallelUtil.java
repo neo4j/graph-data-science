@@ -79,7 +79,10 @@ public final class ParallelUtil {
         ForkJoinPool pool = Pools.createForkJoinPool(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException(e);
+        } catch (ExecutionException e) {
             throw new RuntimeException(e);
         } finally {
             pool.shutdown();
@@ -1228,6 +1231,7 @@ public final class ParallelUtil {
             }
         } catch (InterruptedException e) {
             error = error == null ? e : ExceptionUtil.chain(e, error);
+            Thread.currentThread().interrupt();
         } finally {
             finishRunWithConcurrency(completionService, error);
         }
@@ -1264,6 +1268,7 @@ public final class ParallelUtil {
             done = true;
         } catch (InterruptedException e) {
             error = ExceptionUtil.chain(e, error);
+            Thread.currentThread().interrupt();
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {
@@ -1292,6 +1297,7 @@ public final class ParallelUtil {
             done = true;
         } catch (InterruptedException e) {
             error = ExceptionUtil.chain(e, error);
+            Thread.currentThread().interrupt();
         } finally {
             if (!done) {
                 for (final Future<?> future : futures) {

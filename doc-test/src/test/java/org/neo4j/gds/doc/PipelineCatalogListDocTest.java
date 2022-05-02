@@ -21,8 +21,8 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCreateProc;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.pipeline.catalog.PipelineListProc;
 
 import java.util.List;

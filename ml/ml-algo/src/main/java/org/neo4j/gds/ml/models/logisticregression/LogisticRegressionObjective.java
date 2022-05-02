@@ -128,7 +128,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     ReducedCrossEntropyLoss crossEntropyLoss(Batch batch) {
         var batchLabels = batchLabelVector(batch, classifier.classIdMap());
-        var batchFeatures = LogisticRegressionClassifier.batchFeatureMatrix(batch, features);
+        var batchFeatures = Objective.batchFeatureMatrix(batch, features);
         var predictions = classifier.predictionsVariable(batchFeatures);
         return new ReducedCrossEntropyLoss(
             predictions,

@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 public class NodeRegressionTrainingPipeline extends NodePropertyTrainingPipeline {
 
     public static final String PIPELINE_TYPE = "Node regression training pipeline";
+    public static final String MODEL_TYPE = "NodeRegression";
 
     public NodeRegressionTrainingPipeline() {
         super(TrainingType.REGRESSION);

@@ -80,7 +80,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
 
     public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
         return MemoryEstimations
-            .builder(FastRP.class)
+            .builder(FastRP.class.getSimpleName())
             .fixed(
                 "propertyVectors",
                 MemoryUsage.sizeOfFloatArray(config.featureProperties().size() * config.propertyDimension())

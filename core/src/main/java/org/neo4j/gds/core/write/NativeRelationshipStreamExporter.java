@@ -108,6 +108,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                         writeQueue.put(buffer);
                         bufferRef.set(bufferPool.take());
                     } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
                         throw new RuntimeException(e);
                     }
                 }
@@ -118,7 +119,10 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                 // Add an empty buffer to signal end of writing
                 writeQueue.put(new Buffer(0));
                 consumer.get();
-            } catch (InterruptedException | ExecutionException e) {
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            } catch (ExecutionException e) {
                 throw new RuntimeException(e);
             }
 
@@ -177,6 +181,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
                     buffer.reset();
                     bufferPool.put(buffer);
                 } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
                     throw new RuntimeException(e);
                 }
             }

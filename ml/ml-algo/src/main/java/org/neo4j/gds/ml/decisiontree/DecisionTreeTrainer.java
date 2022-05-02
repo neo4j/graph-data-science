@@ -29,7 +29,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 
 public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICTION> {
 
@@ -37,6 +36,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     private final Features features;
     private final DecisionTreeTrainerConfig config;
     private final FeatureBagger featureBagger;
+    private Splitter splitter;
 
     DecisionTreeTrainer(
         Features features,
@@ -55,8 +55,8 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         int maxDepth,
         int minSplitSize,
         long numberOfTrainingSamples,
-        long numberOfBaggedFeatures,
-        long leafNodeSize
+        long leafNodeSize,
+        long sizeOfImpurityData
     ) {
         var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize, leafNodeSize);
 
@@ -71,12 +71,11 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
                 HugeLongArray.memoryEstimation(numberOfTrainingSamples / maxItemsOnStack) * maxItemsOnStack
             ));
 
-        var findBestSplitEstimation = MemoryRange.of(HugeLongArray.memoryEstimation(numberOfTrainingSamples) * 4)
-            .add(sizeOfIntArray(numberOfBaggedFeatures));
+        var splitterEstimation = Splitter.memoryEstimation(numberOfTrainingSamples, sizeOfImpurityData);
 
         return predictorEstimation
             .add(maxStackSize)
-            .add(findBestSplitEstimation);
+            .add(splitterEstimation);
     }
 
     public static MemoryRange estimateTree(
@@ -100,10 +99,21 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
+        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features);
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
-        root = splitAndPush(stack, trainSetIndices, trainSetIndices.size(), 1);
+        // Use anonymous block to make `mutableTrainSetIndices` eligible for GC as soon as possible.
+        {
+            var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
+            mutableTrainSetIndices.setAll(trainSetIndices::get);
+            var impurityData = lossFunction.groupImpurity(mutableTrainSetIndices, 0, mutableTrainSetIndices.size());
+            root = splitAndPush(
+                stack,
+                ImmutableGroup.of(mutableTrainSetIndices, 0, mutableTrainSetIndices.size(), impurityData),
+                1
+            );
+        }
 
         int maxDepth = config.maxDepth();
         int minSplitSize = config.minSplitSize();
@@ -112,27 +122,27 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
             var record = stack.pop();
             var split = record.split();
 
-            if (record.depth() >= maxDepth || split.sizes().left() < minSplitSize) {
-                record.node().setLeftChild(new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left())));
+            if (record.depth() >= maxDepth || split.groups().left().size() < minSplitSize) {
+                record
+                    .node()
+                    .setLeftChild(new TreeNode<>(toTerminal(split.groups().left())));
             } else {
                 record.node().setLeftChild(
                     splitAndPush(
                         stack,
                         split.groups().left(),
-                        split.sizes().left(),
                         record.depth() + 1
                     )
                 );
             }
 
-            if (record.depth() >= maxDepth || split.sizes().right() < minSplitSize) {
-                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right())));
+            if (record.depth() >= maxDepth || split.groups().right().size() < minSplitSize) {
+                record.node().setRightChild(new TreeNode<>(toTerminal(split.groups().right())));
             } else {
                 record.node().setRightChild(
                     splitAndPush(
                         stack,
                         split.groups().right(),
-                        split.sizes().right(),
                         record.depth() + 1
                     )
                 );
@@ -142,23 +152,25 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         return new DecisionTreePredictor<>(root);
     }
 
-    protected abstract PREDICTION toTerminal(ReadOnlyHugeLongArray group, long groupSize);
+    protected abstract PREDICTION toTerminal(Group group);
 
     private TreeNode<PREDICTION> splitAndPush(
         Deque<StackRecord<PREDICTION>> stack,
-        ReadOnlyHugeLongArray group,
-        long groupSize,
+        Group group,
         int depth
     ) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
+        assert group.size() > 0;
         assert depth >= 1;
 
-        var split = findBestSplit(group, groupSize);
-        if (split.sizes().right() == 0) {
-            return new TreeNode<>(toTerminal(split.groups().left(), split.sizes().left()));
-        } else if (split.sizes().left() == 0) {
-            return new TreeNode<>(toTerminal(split.groups().right(), split.sizes().right()));
+        if (group.size() < config.minSplitSize()) {
+            return new TreeNode<>(toTerminal(group));
+        }
+
+        var split = splitter.findBestSplit(group);
+        if (split.groups().right().size() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().left()));
+        } else if (split.groups().left().size() == 0) {
+            return new TreeNode<>(toTerminal(split.groups().right()));
         }
 
         var node = new TreeNode<PREDICTION>(split.index(), split.value());
@@ -167,99 +179,13 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         return node;
     }
 
-    private GroupSizes createSplit(
-        final int index,
-        final double value,
-        ReadOnlyHugeLongArray group,
-        final long groupSize,
-        Groups groups
-    ) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
-        assert index >= 0 && index < features.featureDimension();
-
-        long leftGroupSize = 0;
-        long rightGroupSize = 0;
-
-        final var leftGroup = groups.left();
-        final var rightGroup = groups.right();
-
-        for (int i = 0; i < groupSize; i++) {
-            var featuresIdx = group.get(i);
-            double[] featureVector = features.get(featuresIdx);
-            if (featureVector[index] < value) {
-                leftGroup.set(leftGroupSize++, featuresIdx);
-            } else {
-                rightGroup.set(rightGroupSize++, featuresIdx);
-            }
-        }
-
-        return ImmutableGroupSizes.of(leftGroupSize, rightGroupSize);
-    }
-
-    private Split findBestSplit(final ReadOnlyHugeLongArray group, final long groupSize) {
-        assert groupSize > 0;
-        assert group.size() >= groupSize;
-
-        int bestIdx = -1;
-        double bestValue = Double.MAX_VALUE;
-        double bestLoss = Double.MAX_VALUE;
-
-        var childGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize),
-            HugeLongArray.newArray(groupSize)
-        );
-        var bestChildGroups = ImmutableGroups.of(
-            HugeLongArray.newArray(groupSize),
-            HugeLongArray.newArray(groupSize)
-        );
-        var bestGroupSizes = ImmutableGroupSizes.of(-1, -1);
-
-        int[] featureBag = featureBagger.sample();
-
-        for (long j = 0; j < groupSize; j++) {
-            for (int i : featureBag) {
-                double[] featureVector = features.get(group.get(j));
-
-                var groupSizes = createSplit(i, featureVector[i], group, groupSize, childGroups);
-
-                var loss = lossFunction.splitLoss(childGroups, groupSizes);
-
-                if (loss < bestLoss) {
-                    bestIdx = i;
-                    bestValue = featureVector[i];
-                    bestLoss = loss;
-
-                    var tmpGroups = bestChildGroups;
-                    bestChildGroups = childGroups;
-                    childGroups = tmpGroups;
-
-                    bestGroupSizes = groupSizes;
-                }
-            }
-        }
-
-        return ImmutableSplit.of(
-            bestIdx,
-            bestValue,
-            ImmutableReadOnlyGroups.of(
-                ReadOnlyHugeLongArray.of(bestChildGroups.left()),
-                ReadOnlyHugeLongArray.of(bestChildGroups.right())
-            ),
-            bestGroupSizes
-        );
-
-    }
-
     @ValueClass
     interface Split {
         int index();
 
         double value();
 
-        ReadOnlyGroups groups();
-
-        GroupSizes sizes();
+        Groups groups();
     }
 
     @ValueClass
@@ -269,12 +195,5 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         Split split();
 
         int depth();
-    }
-
-    @ValueClass
-    interface ReadOnlyGroups {
-        ReadOnlyHugeLongArray left();
-
-        ReadOnlyHugeLongArray right();
     }
 }

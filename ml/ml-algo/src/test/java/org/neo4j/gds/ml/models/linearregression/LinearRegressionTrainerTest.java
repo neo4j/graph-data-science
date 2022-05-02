@@ -28,8 +28,8 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
-import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
@@ -50,7 +50,7 @@ class LinearRegressionTrainerTest {
         Features features = FeaturesFactory.wrap(List.of(
             new double[] {2, 4, 6},
             new double[] {1, 3, 5},
-            new double[] {1, 2, 3}
+            new double[] {100, 2, 3}
         ));
 
         var targets = HugeDoubleArray.of(12, 9, 6);
@@ -58,9 +58,8 @@ class LinearRegressionTrainerTest {
 
         var regressor = trainer.train(features, targets, trainSet);
 
-        // TODO update when the objective has an actual loss function
-        Vector expectedWeights = new Vector(-0.09999, -0.09999, -0.09999);
+        var expectedWeights = new Matrix(new double[]{0.05629, 0.09999, 0.09999}, 1, 3);
         softly.assertThat(regressor.data().weights().data()).matches(weights -> weights.equals(expectedWeights, 1e-5));
-        softly.assertThat(regressor.data().bias().data()).matches(weights -> weights.equals(new Scalar(-0.09999), 1e-5));
+        softly.assertThat(regressor.data().bias().data()).matches(weights -> weights.equals(new Scalar(0.09999), 1e-5));
     }
 }

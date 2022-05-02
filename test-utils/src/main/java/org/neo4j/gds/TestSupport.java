@@ -37,7 +37,8 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.extension.GdlSupportExtension;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -47,6 +48,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
@@ -73,6 +75,7 @@ import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
@@ -138,7 +141,8 @@ public final class TestSupport {
         Optional<String> name,
         Optional<Orientation> orientation,
         Optional<Aggregation> aggregation,
-        Optional<LongSupplier> idSupplier
+        Optional<LongSupplier> idSupplier,
+        Optional<NamedDatabaseId> namedDatabaseId
     ) {
         Objects.requireNonNull(gdl);
 
@@ -155,7 +159,7 @@ public final class TestSupport {
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .namedDatabaseId(GdlSupportExtension.DATABASE_ID)
+            .namedDatabaseId(namedDatabaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
             .build();
 
         return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);
@@ -240,10 +244,9 @@ public final class TestSupport {
         Supplier<MemoryEstimation> actualMemoryEstimation,
         long nodeCount,
         int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
+        MemoryRange expected
     ) {
-       assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expectedMinBytes, expectedMaxBytes);
+        assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expected);
     }
 
     public static void assertMemoryEstimation(
@@ -251,34 +254,29 @@ public final class TestSupport {
         long nodeCount,
         long relationshipCount,
         int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
+        MemoryRange expected
     ) {
-        assertMemoryEstimation(
-            actualMemoryEstimation,
-            GraphDimensions.of(nodeCount, relationshipCount),
-            concurrency,
-            expectedMinBytes,
-            expectedMaxBytes
-        );
+        var actual = actualMemoryEstimation
+            .get().estimate(GraphDimensions.of(nodeCount, relationshipCount), concurrency).memoryUsage();
+        assertMemoryRange(actual, expected.min, expected.max);
     }
 
-    public static void assertMemoryEstimation(
-        Supplier<MemoryEstimation> actualMemoryEstimation,
-        GraphDimensions dimensions,
-        int concurrency,
-        long expectedMinBytes,
-        long expectedMaxBytes
-    ) {
-        var actual = actualMemoryEstimation.get().estimate(dimensions, concurrency).memoryUsage();
-
-        SoftAssertions softly = new SoftAssertions();
-
-        softly.assertThat(actual.min).isEqualTo(expectedMinBytes);
-        softly.assertThat(actual.max).isEqualTo(expectedMaxBytes);
-
-        softly.assertAll();
+    public static void assertMemoryRange(MemoryRange actual, long expected) {
+        assertMemoryRange(actual, expected, expected);
     }
+
+    public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {
+        assertThat(actual)
+            .withFailMessage(
+                "Got (%s, %s), but expected (%s, %s)",
+                formatNumber(actual.min),
+                formatNumber(actual.max),
+                formatNumber(expectedMin),
+                formatNumber(expectedMax)
+            )
+            .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
+    }
+
 
     public static void assertTransactionTermination(Executable executable) {
         TransactionTerminatedException exception = assertThrows(
@@ -295,6 +293,61 @@ public final class TestSupport {
         List<Map<String, Object>> expected
     ) {
         assertCypherResult(db, query, emptyMap(), expected);
+    }
+
+    // should be used with YIELD bytesMin, bytesMax, nodeCount, relationshipCount
+    public static void assertCypherMemoryEstimation(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        MemoryRange expected,
+        long expectedNodeCount,
+        long expectedRelationshipCount
+    ) {
+        assertCypherMemoryEstimation(db, query, Map.of(), expected, expectedNodeCount, expectedRelationshipCount);
+    }
+
+    // should be used with YIELD bytesMin, bytesMax, nodeCount, relationshipCount
+    public static void assertCypherMemoryEstimation(
+        GraphDatabaseService db,
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        MemoryRange expected,
+        long expectedNodeCount,
+        long expectedRelationshipCount
+    ) {
+        SoftAssertions softly = new SoftAssertions();
+        QueryRunner.runQueryWithRowConsumer(
+            db,
+            query,
+            queryParameters,
+            (transaction, row) -> {
+                try {
+                    assertMemoryRange(
+                        MemoryRange.of((long) row.getNumber("bytesMin"), (long) row.getNumber("bytesMax")),
+                        expected.min, expected.max
+                    );
+                } catch (Throwable e) {
+                    softly.fail(e.getMessage());
+                }
+                var actualNodeCount = (long) row.getNumber("nodeCount");
+                var actualRelationshipCount = (long) row.getNumber("relationshipCount");
+                softly.assertThat(expectedNodeCount)
+                    .withFailMessage(() -> formatWithLocale(
+                        "Got nodeCount %s but expected %s",
+                        formatNumber(actualNodeCount),
+                        formatNumber(expectedNodeCount)
+                    ))
+                    .isEqualTo(actualNodeCount);
+                softly.assertThat(expectedRelationshipCount)
+                    .withFailMessage(() -> formatWithLocale(
+                        "Got relationshipCount %s but expected %s",
+                        formatNumber(actualRelationshipCount),
+                        formatNumber(expectedRelationshipCount)
+                    ))
+                    .isEqualTo(actualRelationshipCount);
+            }
+        );
+        softly.assertAll();
     }
 
     @SuppressWarnings("unchecked")

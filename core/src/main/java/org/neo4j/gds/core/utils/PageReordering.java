@@ -238,27 +238,28 @@ public final class PageReordering {
         // the pageShift number of lower bits are set, the higher bits are empty.
         long pageMask = (1L << pageShift) - 1;
         var pageOffsets = pageOrdering.pageOffsets();
-        var cursor = offsets.newCursor();
+        try (var cursor = offsets.newCursor()) {
 
-        var ordering = pageOrdering.reverseOrdering();
-        var length = pageOrdering.length();
+            var ordering = pageOrdering.reverseOrdering();
+            var length = pageOrdering.length();
 
-        for (int i = 0; i < length; i++) {
-            // higher bits in pageId part are set to the pageId
-            long newPageId = ((long) ordering[i]) << pageShift;
+            for (int i = 0; i < length; i++) {
+                // higher bits in pageId part are set to the pageId
+                long newPageId = ((long) ordering[i]) << pageShift;
 
-            long startIdx = pageOffsets[i];
-            long endIdx = pageOffsets[i + 1];
+                long startIdx = pageOffsets[i];
+                long endIdx = pageOffsets[i + 1];
 
-            offsets.initCursor(cursor, startIdx, endIdx);
-            while (cursor.next()) {
-                var array = cursor.array;
-                var limit = cursor.limit;
-                long baseNodeId = cursor.base;
-                for (int j = cursor.offset; j < limit; j++) {
-                    array[j] = nodeFilter.test(baseNodeId + j)
-                        ? (array[j] & pageMask) | newPageId
-                        : ZERO_DEGREE_OFFSET;
+                offsets.initCursor(cursor, startIdx, endIdx);
+                while (cursor.next()) {
+                    var array = cursor.array;
+                    var limit = cursor.limit;
+                    long baseNodeId = cursor.base;
+                    for (int j = cursor.offset; j < limit; j++) {
+                        array[j] = nodeFilter.test(baseNodeId + j)
+                            ? (array[j] & pageMask) | newPageId
+                            : ZERO_DEGREE_OFFSET;
+                    }
                 }
             }
         }

@@ -41,7 +41,7 @@ public final class RegressionTrainerFactory {
         int concurrency,
         Optional<Long> randomSeed
     ) {
-        switch (TrainingMethod.valueOf(config.methodName())) {
+        switch (config.method()) {
             case LinearRegression: {
                 return new LinearRegressionTrainer(
                     concurrency,
@@ -59,7 +59,7 @@ public final class RegressionTrainerFactory {
                 );
             }
             default:
-                throw new IllegalStateException(formatWithLocale("Method %s is not a regression method", config.methodName()));
+                throw new IllegalStateException(formatWithLocale("Method %s is not a regression method", config.method()));
         }
     }
 }

@@ -36,7 +36,7 @@ import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
-import org.neo4j.gds.ml.decisiontree.MeanSquaredError;
+import org.neo4j.gds.ml.decisiontree.SplitMeanSquaredError;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.RegressorTrainer;
 
@@ -77,12 +77,12 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
 
-        return MemoryEstimations.builder("Training", RandomForestRegressorTrainer.class)
+        return MemoryEstimations.builder("Training")
             // estimating the final forest produced
             .add(RandomForestRegressorData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
                 "Mean Squared Error Loss",
-                nodeCount -> MeanSquaredError.memoryEstimation()
+                nodeCount -> SplitMeanSquaredError.memoryEstimation()
             ).perGraphDimension(
                 "Decision tree training",
                 (dim, concurrency) ->
@@ -116,7 +116,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var lossFunction = new MeanSquaredError(targets);
+        var lossFunction = new SplitMeanSquaredError(targets);
 
         progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);
@@ -194,8 +194,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 .add(DecisionTreeRegressorTrainer.memoryEstimation(
                     maxDepth,
                     minSplitSize,
-                    usedNumberOfTrainingSamples,
-                    numberOfBaggedFeatures
+                    usedNumberOfTrainingSamples
                 ))
                 .add(bootstrappedDatasetEstimation);
         }

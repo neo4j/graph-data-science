@@ -32,8 +32,8 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.IdentityPropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.IdentityPropertyValues;
 import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.Map;

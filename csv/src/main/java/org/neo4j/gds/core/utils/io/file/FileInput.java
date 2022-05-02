@@ -48,6 +48,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class FileInput implements CompatInput {
 
@@ -189,6 +190,7 @@ public final class FileInput implements CompatInput {
         private final SCHEMA schema;
 
         HEADER header;
+        Stream<String> lineStream;
         Iterator<String> lineIterator;
         Map<String, PROPERTY_SCHEMA> propertySchemas;
 
@@ -202,7 +204,8 @@ public final class FileInput implements CompatInput {
         ) throws IOException {
             this.header = header;
             this.propertySchemas = header.schemaForIdentifier(schema);
-            this.lineIterator = Files.lines(path).iterator();
+            this.lineStream = Files.lines(path);
+            this.lineIterator = this.lineStream.iterator();
         }
 
         @Override
@@ -219,6 +222,11 @@ public final class FileInput implements CompatInput {
         }
 
         abstract void visitLine(String line, HEADER header, InputEntityVisitor visitor) throws IOException;
+
+        @Override
+        public void close() throws IOException {
+            this.lineStream.close();
+        }
     }
 
     static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {

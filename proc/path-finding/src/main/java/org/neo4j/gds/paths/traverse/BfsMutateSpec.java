@@ -34,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutateConfig, Stream<MutateResult>, BfsAlgorithmFactory<BfsMutateConfig>> {
     @Override
     public String name() {
-        return "gds.dfs.mutate";
+        return "gds.bfs.mutate";
     }
 
     @Override

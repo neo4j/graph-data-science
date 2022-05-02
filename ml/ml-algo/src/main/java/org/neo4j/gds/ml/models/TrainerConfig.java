@@ -30,18 +30,18 @@ import java.util.Map;
 public interface TrainerConfig extends ToMapConvertible {
 
     @Configuration.Ignore
-    String methodName();
+    TrainingMethod method();
 
     @Value.Derived
     @Configuration.Ignore
     default TunableTrainerConfig toTunableConfig() {
-        return TunableTrainerConfig.of(toMap(), TrainingMethod.valueOf(methodName()));
+        return TunableTrainerConfig.of(toMap(), method());
     }
 
     @Configuration.Ignore
     default Map<String, Object> toMapWithTrainerMethod() {
         var mapWithTrainerMethod = new HashMap<>(toMap());
-        mapWithTrainerMethod.put("methodName", methodName());
+        mapWithTrainerMethod.put("methodName", method().name());
 
         return mapWithTrainerMethod;
     }

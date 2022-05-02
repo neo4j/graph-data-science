@@ -50,7 +50,7 @@ public interface RandomForestRegressorData extends Regressor.RegressorData {
         LongUnaryOperator numberOfTrainingExamples,
         RandomForestTrainerConfig config
     ) {
-        return MemoryEstimations.builder("Random forest model data", RandomForestRegressorData.class)
+        return MemoryEstimations.builder("Random forest model data")
             .rangePerNode(
                 "Decision trees",
                 nodeCount ->

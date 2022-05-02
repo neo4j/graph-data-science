@@ -32,6 +32,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -66,9 +67,9 @@ class YensTest {
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
-            Arguments.of(1_000, 33_056L),
-            Arguments.of(1_000_000, 32_250_800L),
-            Arguments.of(1_000_000_000, 32_254_883_712L)
+            Arguments.of(1_000, 33_016L),
+            Arguments.of(1_000_000, 32_250_760L),
+            Arguments.of(1_000_000_000, 32_254_883_672L)
         );
     }
 
@@ -79,8 +80,7 @@ class YensTest {
             Yens::memoryEstimation,
             nodeCount,
             1,
-            expectedBytes,
-            expectedBytes
+            MemoryRange.of(expectedBytes)
         );
     }
 

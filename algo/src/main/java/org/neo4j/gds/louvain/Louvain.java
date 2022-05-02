@@ -25,7 +25,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.modularity.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.gds.beta.modularity.ModularityOptimization;
@@ -35,12 +34,11 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.OriginalIdNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.values.storable.Value;
-import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -98,7 +96,13 @@ public final class Louvain extends Algorithm<Louvain> {
             long maxCommunityId = buildDendrogram(workingGraph, ranLevels, modularityOptimization);
 
             workingGraph = summarizeGraph(workingGraph, modularityOptimization, maxCommunityId);
-            nextSeedingValues = new OriginalIdNodePropertyValues(workingGraph);
+            nextSeedingValues = new OriginalIdNodePropertyValues(workingGraph) {
+                @Override
+                public OptionalLong getMaxLongPropertyValue() {
+                    // We want to use the maxSeedCommunity with value 0 in all subsequent iterations
+                    return OptionalLong.empty();
+                }
+            };
 
             if (workingGraph.nodeCount() == oldNodeCount
                 || workingGraph.nodeCount() == 1
@@ -267,34 +271,6 @@ public final class Louvain extends Algorithm<Louvain> {
     @Override
     public void release() {
         this.rootGraph.releaseTopology();
-    }
-
-    static class OriginalIdNodePropertyValues implements LongNodePropertyValues {
-        private final Graph graph;
-
-        public OriginalIdNodePropertyValues(Graph graph) {
-            this.graph = graph;
-        }
-
-        @Override
-        public long longValue(long nodeId) {
-            return graph.toOriginalNodeId(nodeId);
-        }
-
-        @Override
-        public Value value(long nodeId) {
-            return Values.longValue(longValue(nodeId));
-        }
-
-        @Override
-        public OptionalLong getMaxLongPropertyValue() {
-            return OptionalLong.empty();
-        }
-
-        @Override
-        public long size() {
-            return graph.nodeCount();
-        }
     }
 
     static final class RelationshipCreator implements Runnable {

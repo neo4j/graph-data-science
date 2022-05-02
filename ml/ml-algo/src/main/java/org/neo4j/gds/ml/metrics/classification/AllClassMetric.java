@@ -24,12 +24,18 @@ import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public enum AllClassMetric implements ClassificationMetric {
     F1_WEIGHTED {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
+        }
+
         @Override
         public double compute(
             HugeLongArray targets,
@@ -50,6 +56,11 @@ public enum AllClassMetric implements ClassificationMetric {
     },
     F1_MACRO {
         @Override
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
+        }
+
+        @Override
         public double compute(
             HugeLongArray targets,
             HugeLongArray predictions,
@@ -67,6 +78,11 @@ public enum AllClassMetric implements ClassificationMetric {
         }
     },
     ACCURACY {
+        @Override
+        public Comparator<Double> comparator() {
+            return Comparator.naturalOrder();
+        }
+
         @Override
         public double compute(
             HugeLongArray targets,

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import org.intellij.lang.annotations.RegExp;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -48,6 +49,7 @@ public interface ClassificationMetricSpecification {
         Recall.NAME, Recall::new,
         Accuracy.NAME, Accuracy::new
     ));
+    @RegExp
     String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
     String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
     Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(

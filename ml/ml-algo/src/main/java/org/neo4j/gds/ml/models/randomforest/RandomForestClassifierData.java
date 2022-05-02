@@ -50,7 +50,7 @@ public interface RandomForestClassifierData extends Classifier.ClassifierData {
         LongUnaryOperator numberOfTrainingExamples,
         RandomForestTrainerConfig config
     ) {
-        return MemoryEstimations.builder("Random forest model data", RandomForestClassifierData.class)
+        return MemoryEstimations.builder("Random forest model data")
             .rangePerNode(
                 "Decision trees",
                 nodeCount ->

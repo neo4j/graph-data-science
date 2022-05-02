@@ -9,6 +9,7 @@ dependencies {
     implementation (
         [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
     )
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
     testImplementation platform(dep.junit5bom)
     testImplementation dep.junit5jupiter

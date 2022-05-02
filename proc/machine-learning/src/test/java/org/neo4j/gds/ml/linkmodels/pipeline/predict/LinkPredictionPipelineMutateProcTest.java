@@ -188,7 +188,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             "YIELD requiredMemory",
             Map.of("topN", 3),
             List.of(
-                Map.of("requiredMemory", "644 Bytes")
+                Map.of("requiredMemory", "548 Bytes")
             )
         );
     }

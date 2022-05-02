@@ -1,0 +1,139 @@
+[[alpha-algorithms-k-means]]
+[.alpha]
+= K-Means Clustering
+:entity: node
+:result: cluster
+:algorithm: K-Means
+
+
+[abstract]
+--
+This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-k-means-intro]]
+== Introduction
+
+K-Means clustering is an unsupervised learning algorithm that is used to solve clustering problems.
+It follows a simple procedure of classifying a given data set into a number of clusters, defined by the parameter `k`.
+The clusters are then positioned as points and all observations or data points are associated with the nearest cluster, computed, adjusted and then the process starts over using the new adjustments until a desired result is reached.
+
+For more information on this algorithm, see:
+
+* https://en.wikipedia.org/wiki/K-means_clustering
+
+
+[[algorithms-k-means-syntax]]
+== Syntax
+
+
+.K-Means syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run K-Means in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| nodeId                    | Integer   | Node ID.
+| communityId               | Integer   | The community ID.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run K-Means in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run K-Means in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::../../common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====

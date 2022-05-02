@@ -56,7 +56,7 @@ public final class NodeRegressionTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
-    public static List<Task> progressTask(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
         return List.of(
             Tasks.leaf("Shuffle and Split"),
             Tasks.iterativeFixed(
@@ -156,7 +156,7 @@ public final class NodeRegressionTrain {
             progressTracker.beginSubTask("Trial");
 
             var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.methodName(), modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
 
             var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());

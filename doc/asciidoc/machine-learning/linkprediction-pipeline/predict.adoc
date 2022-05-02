@@ -186,14 +186,14 @@ We specified `threshold` to filter out predictions with probability less than 45
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Alice"   | "Chris"   | 0.754837913923235
-| "Chris"   | "Mark"    | 0.721021519573052
-| "Alice"   | "Mark"    | 0.569989748946299
-| "Alice"   | "Karin"   | 0.565495987167982
-| "Alice"   | "Greg"    | 0.563585385718709
+| "Alice"   | "Mark"    | 0.6
+| "Karin"   | "Will"    | 0.6
+| "Karin"   | "Greg"    | 0.6
+| "Michael" | "Veselin" | 0.6
+| "Will"    | "Greg"    | 0.6
 |===
 
-We can see, that our model predicts the most likely link is between Alice and Chris.
+We can see, that our model predicts the most likely link is between Michael and Veselin.
 --
 
 

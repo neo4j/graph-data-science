@@ -22,6 +22,7 @@ package org.neo4j.gds;
 import org.assertj.core.api.HamcrestCondition;
 import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
+import org.intellij.lang.annotations.RegExp;
 import org.junit.jupiter.api.AfterEach;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -95,7 +96,7 @@ public class BaseProcTest extends BaseTest {
 
     protected void assertErrorRegex(
         @Language("Cypher") String query,
-        String regex
+        @RegExp String regex
     ) {
         assertErrorRegex(query, emptyMap(), regex);
     }
@@ -103,7 +104,7 @@ public class BaseProcTest extends BaseTest {
     private void assertErrorRegex(
         @Language("Cypher") String query,
         Map<String, Object> queryParameters,
-        String regex
+        @RegExp String regex
     ) {
         assertError(query, queryParameters, ExceptionMessageMatcher.containsMessageRegex(regex));
     }

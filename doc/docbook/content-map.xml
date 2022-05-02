@@ -171,6 +171,9 @@
             <d:tocentry linkend="alpha-algorithms-conductance">
                 <?dbhtml filename="algorithms/alpha/conductance/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="alpha-algorithms-k-means">
+                <?dbhtml filename="algorithms/alpha/kmeans/index.html"?>
+            </d:tocentry>
         </d:tocentry>
 
         <d:tocentry linkend="algorithms-similarity">
@@ -299,6 +302,10 @@
                 <d:tocentry linkend="nodeclassification-pipelines-train"><?dbhtml filename="machine-learning/node-property-prediction/nodeclassification-pipelines/training/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="nodeclassification-pipelines-predict"><?dbhtml filename="machine-learning/node-property-prediction/nodeclassification-pipelines/predict/index.html"?>
+                </d:tocentry>
+            </d:tocentry>
+            <d:tocentry linkend="noderegression-pipelines"><?dbhtml filename="machine-learning/node-property-prediction/noderegression-pipelines/index.html"?>
+                <d:tocentry linkend="noderegression-pipelines-config"><?dbhtml filename="machine-learning/node-property-prediction/noderegression-pipelines/config/index.html"?>
                 </d:tocentry>
             </d:tocentry>
         </d:tocentry>

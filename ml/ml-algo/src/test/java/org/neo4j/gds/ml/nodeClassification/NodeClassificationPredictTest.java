@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -47,6 +46,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Percentage.withPercentage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -263,18 +263,16 @@ class NodeClassificationPredictTest {
         var nodeCount = 1000;
         var concurrency = 1;
 
-        // instance overhead
-        var instance = 40L;
         // one thousand longs, plus overhead of a HugeLongArray
         var predictedClasses = 8 * 1000 + 40;
         // The predictions variable is tested elsewhere
         var predictionsVariable = LogisticRegressionClassifier.sizeOfPredictionsVariableInBytes(batchSize, featureCount, classCount, classCount);
 
-        var expected = instance + predictedClasses + predictionsVariable;
+        var expected = predictedClasses + predictionsVariable;
 
         var estimate = NodeClassificationPredict.memoryEstimation(produceProbabilities, batchSize, featureCount, classCount)
             .estimate(GraphDimensions.of(nodeCount), concurrency);
-        assertThat(estimate.memoryUsage()).isEqualTo(MemoryRange.of(expected));
+        assertMemoryRange(estimate.memoryUsage(), expected);
     }
 
     @Test

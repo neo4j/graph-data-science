@@ -62,7 +62,7 @@ public interface FiniteDifferenceTest {
 
                 assertThat(finiteDifferenceGrad)
                     .isNotNaN()
-                    .withFailMessage(FAIL_MESSAGE, finiteDifferenceGrad, autoGradient, tensorIndex)
+                    .withFailMessage(FAIL_MESSAGE, autoGradient, finiteDifferenceGrad, tensorIndex)
                     .isEqualTo(autoGradient, Offset.offset(tolerance()));
             }
         }

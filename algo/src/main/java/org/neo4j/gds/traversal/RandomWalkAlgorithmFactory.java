@@ -67,7 +67,7 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
 
         var maxMemoryUsage = sizeOfBuffer + MemoryUsage.sizeOfArray(config.walkBufferSize(), memoryUsagePerWalk);
 
-        return MemoryEstimations.builder(RandomWalk.class)
+        return MemoryEstimations.builder(RandomWalk.class.getSimpleName())
             .fixed("random walk buffer", MemoryRange.of(sizeOfBuffer, maxMemoryUsage))
             .build();
     }

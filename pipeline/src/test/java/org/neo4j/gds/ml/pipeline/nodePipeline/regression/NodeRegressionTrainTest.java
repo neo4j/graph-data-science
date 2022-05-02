@@ -118,9 +118,8 @@ class NodeRegressionTrainTest {
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        // FIXME change these with actual loss implementation
-        assertThat(bestMetricData.outerTrain()).isEqualTo(259.52916, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(2109.82749,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(209.59583, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1718.22750,  Offset.offset(1e-5));
     }
 
     @Test
@@ -156,12 +155,12 @@ class NodeRegressionTrainTest {
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(RandomForestRegressor.class);
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
         var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        assertThat(bestMetricData.outerTrain()).isEqualTo(21.36533, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1056.95979,  Offset.offset(1e-5));
+        assertThat(bestMetricData.outerTrain()).isEqualTo(104.012222, Offset.offset(1e-5));
+        assertThat(bestMetricData.test()).isEqualTo(1107.292499,  Offset.offset(1e-5));
     }
 
     @Test
@@ -200,7 +199,7 @@ class NodeRegressionTrainTest {
 
         var trainingStatistics = result.trainingStatistics();
 
-        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
+        assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
 
         for (RegressionMetrics metric : evaluationMetrics) {
             assertThat(trainingStatistics.getTrainStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
@@ -239,7 +238,7 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTasks = NodeRegressionTrain.progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTasks = NodeRegressionTrain.progressTasks(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
         var progressTask = Tasks.task("MY CONTEXT", progressTasks);
 
         var testLog = Neo4jProxy.testLog();

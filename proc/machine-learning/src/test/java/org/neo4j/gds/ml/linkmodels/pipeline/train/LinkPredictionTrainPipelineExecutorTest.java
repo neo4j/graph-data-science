@@ -56,7 +56,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
@@ -68,6 +67,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
@@ -177,7 +177,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             assertThat(actualModel.name()).isEqualTo("model");
 
-            assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrain.MODEL_TYPE);
+            assertThat(actualModel.algoType()).isEqualTo(LinkPredictionTrainingPipeline.MODEL_TYPE);
             assertThat(actualModel.trainConfig()).isEqualTo(config);
             // length of the linkFeatures
             assertThat(logisticRegressionData.weights().data().totalSize()).isEqualTo(6);
@@ -442,9 +442,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(29120, 899360)),
-            Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_288)),
-            Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_288))
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(28_824, 899_064)),
+            Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_136)),
+            Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_136))
         );
     }
 
@@ -472,9 +472,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .estimate(graphDimensions, config.concurrency())
             .memoryUsage();
 
-        assertThat(actualRange)
-            .withFailMessage("Got %d, %d", actualRange.min, actualRange.max)
-            .isEqualTo(expectedRange);
+        assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
     }
 
     @Test

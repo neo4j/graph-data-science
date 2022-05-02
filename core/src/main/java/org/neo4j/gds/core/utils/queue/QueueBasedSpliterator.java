@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.queue;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Spliterator;
@@ -30,7 +31,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 public class QueueBasedSpliterator<T> implements Spliterator<T> {
     private final BlockingQueue<T> queue;
     private final T tombstone;
-    private T entry;
+    private @Nullable T entry;
     private final TerminationFlag terminationGuard;
     private final int timeoutInSeconds;
 
@@ -57,10 +58,11 @@ public class QueueBasedSpliterator<T> implements Spliterator<T> {
         return entry == null || entry == tombstone;
     }
 
-    private T poll() {
+    private @Nullable T poll() {
         try {
             return queue.poll(timeoutInSeconds, SECONDS);
         } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             return null;
         }
     }

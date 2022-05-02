@@ -20,8 +20,8 @@
 package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterEach;
-import org.neo4j.gds.ml.nodemodels.pipeline.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCreateProc;
 import org.neo4j.gds.pipeline.catalog.PipelineExistsProc;
 
 import java.util.List;

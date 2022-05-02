@@ -23,8 +23,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.token.TokenHolders;
 
+import java.util.Set;
 import java.util.function.Consumer;
 
 public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpdater {
@@ -33,6 +35,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     private RelationshipIds relationshipIds;
     private Consumer<String> propertyRemovalCallback;
+    private Consumer<String> propertyAddedCallback;
 
     public CypherGraphStore(GraphStore graphStore) {
         super(graphStore);
@@ -45,6 +48,10 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     public void registerPropertyRemovalCallback(Consumer<String> propertyRemovalCallback) {
         this.propertyRemovalCallback = propertyRemovalCallback;
+    }
+
+    public void registerPropertyAddedCallback(Consumer<String> propertyAddedCallback) {
+        this.propertyAddedCallback = propertyAddedCallback;
     }
 
     @Override
@@ -65,7 +72,19 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     @Override
     public void removeNodeProperty(String propertyKey) {
         super.removeNodeProperty(propertyKey);
-        propertyRemovalCallback.accept(propertyKey);
+        if (propertyRemovalCallback != null) {
+            propertyRemovalCallback.accept(propertyKey);
+        }
+    }
+
+    @Override
+    public void addNodeProperty(
+        Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues
+    ) {
+        super.addNodeProperty(nodeLabels, propertyKey, propertyValues);
+        if (propertyAddedCallback != null) {
+            propertyAddedCallback.accept(propertyKey);
+        }
     }
 
     public RelationshipIds relationshipIds() {

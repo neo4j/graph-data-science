@@ -34,6 +34,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -335,10 +336,8 @@ class LouvainTest {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000L)
-            .relCountUpperBound(500_000L)
-            .build();
+        var nodeCount = 100_000L;
+        var relCount = 500_000L;
 
         LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
             .maxLevels(levels)
@@ -350,10 +349,10 @@ class LouvainTest {
 
         assertMemoryEstimation(
             () -> new LouvainFactory<>().memoryEstimation(config),
-            dimensions,
+            nodeCount,
+            relCount,
             concurrency,
-            expectedMinBytes,
-            expectedMaxBytes
+            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
         );
     }
 

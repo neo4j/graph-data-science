@@ -64,7 +64,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         var knnConfig = config.approximateConfig();
         var knnEstimation = new KnnFactory<>().memoryEstimation(knnConfig);
 
-        return MemoryEstimations.builder(ApproximateLinkPrediction.class)
+        return MemoryEstimations.builder(ApproximateLinkPrediction.class.getSimpleName())
             .add(knnEstimation)
             .build();
     }
