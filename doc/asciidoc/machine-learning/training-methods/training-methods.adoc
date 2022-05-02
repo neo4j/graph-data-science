@@ -110,7 +110,7 @@ The memory footprint of the produced prediction model might also be higher since
 A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
 
 
-===== Min split size
+==== Min split size
 
 This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
 To split a node means to continue the tree construction process to add further children below the node.
@@ -119,7 +119,7 @@ A large split size means less specialization on the training set, and thus possi
 It will likely also mean that the training will be faster as probably fewer node splits will be considered.
 
 
-===== Number of samples ratio
+==== Number of samples ratio
 
 Each decision tree in the random forest is trained using a subset of the training set.
 This subset is sampled with replacement, meaning that a feature vector of the training may be sampled several times for a single decision tree.
