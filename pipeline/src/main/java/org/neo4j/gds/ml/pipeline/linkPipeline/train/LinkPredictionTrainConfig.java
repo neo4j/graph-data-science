@@ -60,6 +60,6 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
     }
 
     static List<Metric> namesToMetrics(List<String> names) {
-        return names.stream().map(name -> Metric.parseLinkMetric((String) name)).collect(Collectors.toList());
+        return names.stream().map(name -> LinkMetric.parseLinkMetric((String) name)).collect(Collectors.toList());
     }
 }

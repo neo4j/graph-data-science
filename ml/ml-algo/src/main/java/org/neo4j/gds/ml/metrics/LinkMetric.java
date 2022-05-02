@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.metrics;
 
 import java.util.Comparator;
 
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
+
 public enum LinkMetric implements Metric {
     AUCPR {
         @Override
@@ -28,6 +30,13 @@ public enum LinkMetric implements Metric {
             return Comparator.naturalOrder();
         }
     };
+
+    public static Metric parseLinkMetric(String name) {
+        if (name.equals(OUT_OF_BAG_ERROR.name())) {
+            return OUT_OF_BAG_ERROR;
+        }
+        return valueOf(name);
+    }
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {
         var positiveCount = signedProbabilities.positiveCount();

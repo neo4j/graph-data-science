@@ -21,18 +21,9 @@ package org.neo4j.gds.ml.metrics;
 
 import java.util.Comparator;
 
-import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
-
 public interface Metric {
     String name();
 
     Comparator<Double> comparator();
-
-    static Metric parseLinkMetric(String name) {
-        if (name.equals(OUT_OF_BAG_ERROR.name())) {
-            return OUT_OF_BAG_ERROR;
-        }
-        return LinkMetric.valueOf(name);
-    }
 
 }
