@@ -102,25 +102,31 @@ public class Entropy implements ImpurityCriterion {
         updateImpurityData(label, newGroupSize, newClassCount, entropyImpurityData);
     }
 
-    private static void updateImpurityData(int label, long newGroupSize, long newClassCount, EntropyImpurityData impurityData) {
+    private static void updateImpurityData(
+        int label,
+        long newGroupSize,
+        long newClassCount,
+        EntropyImpurityData impurityData
+    ) {
         long prevClassCount = impurityData.classCounts()[label];
 
-        double newImpurity = impurityData.impurity() * LN_2;
-        if (impurityData.groupSize() > 0) {
-            newImpurity -= Math.log(impurityData.groupSize());
-            newImpurity *= impurityData.groupSize();
-        }
-        if (prevClassCount > 0) {
-            newImpurity += prevClassCount * Math.log(prevClassCount);
-        }
-        if (newClassCount > 0) {
-            newImpurity -= newClassCount * Math.log(newClassCount);
-        }
+        double newImpurity = 0;
         if (newGroupSize > 0) {
+            newImpurity = impurityData.impurity() * LN_2;
+            if (impurityData.groupSize() > 0) {
+                newImpurity -= Math.log(impurityData.groupSize());
+                newImpurity *= impurityData.groupSize();
+            }
+            if (prevClassCount > 0) {
+                newImpurity += prevClassCount * Math.log(prevClassCount);
+            }
+            if (newClassCount > 0) {
+                newImpurity -= newClassCount * Math.log(newClassCount);
+            }
             newImpurity /= newGroupSize;
             newImpurity += Math.log(newGroupSize);
+            newImpurity /= LN_2;
         }
-        newImpurity /= LN_2;
 
         impurityData.classCounts()[label] = newClassCount;
         impurityData.setGroupSize(newGroupSize);
