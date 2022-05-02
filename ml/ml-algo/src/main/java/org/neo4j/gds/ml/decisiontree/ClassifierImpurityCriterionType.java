@@ -24,20 +24,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-public enum DecisionTreeClassifierImpurityCriterion {
+public enum ClassifierImpurityCriterionType {
     GINI,
     ENTROPY;
 
     private static final List<String> VALUES = Arrays
-        .stream(DecisionTreeClassifierImpurityCriterion.values())
-        .map(DecisionTreeClassifierImpurityCriterion::name)
+        .stream(ClassifierImpurityCriterionType.values())
+        .map(ClassifierImpurityCriterionType::name)
         .collect(Collectors.toList());
 
-    public static DecisionTreeClassifierImpurityCriterion parse(Object input) {
+    public static ClassifierImpurityCriterionType parse(Object input) {
         if (input instanceof String) {
             var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
             if (VALUES.contains(inputString)) {
-                return DecisionTreeClassifierImpurityCriterion.valueOf(inputString);
+                return ClassifierImpurityCriterionType.valueOf(inputString);
             }
 
             throw new IllegalArgumentException(String.format(
@@ -46,8 +46,8 @@ public enum DecisionTreeClassifierImpurityCriterion {
                 inputString,
                 VALUES
             ));
-        } else if (input instanceof DecisionTreeClassifierImpurityCriterion) {
-            return (DecisionTreeClassifierImpurityCriterion) input;
+        } else if (input instanceof ClassifierImpurityCriterionType) {
+            return (ClassifierImpurityCriterionType) input;
         }
 
         throw new IllegalStateException(String.format(
@@ -57,7 +57,7 @@ public enum DecisionTreeClassifierImpurityCriterion {
         ));
     }
 
-    public static String toString(DecisionTreeClassifierImpurityCriterion samplerType) {
+    public static String toString(ClassifierImpurityCriterionType samplerType) {
         return samplerType.toString();
     }
 }

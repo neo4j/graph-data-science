@@ -103,7 +103,7 @@ class DecisionTreeRegressorTest {
         int maxDepth,
         int minSplitSize
     ) {
-        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,
@@ -134,7 +134,7 @@ class DecisionTreeRegressorTest {
         mutableFeatureVectors.setAll(idx -> idx);
         var featureVectors = ReadOnlyHugeLongArray.of(mutableFeatureVectors);
 
-        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,
@@ -147,7 +147,7 @@ class DecisionTreeRegressorTest {
         var decisionTreeRegressor = decisionTreeTrainer.train(featureVectors);
         assertThat(decisionTreeRegressor.predict(featureVector)).isCloseTo(4.175, Offset.offset(0.01D));
 
-        decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,
@@ -172,7 +172,7 @@ class DecisionTreeRegressorTest {
         mutableSampledVectors.set(0, 1);
         var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
 
-        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,
@@ -187,7 +187,7 @@ class DecisionTreeRegressorTest {
         mutableOtherSampledVectors.set(0, features.size() - 1);
         var otherSampledVectors = ReadOnlyHugeLongArray.of(mutableOtherSampledVectors);
 
-        decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,
@@ -212,7 +212,7 @@ class DecisionTreeRegressorTest {
         mutableSampledVectors.setAll(i -> i);
         var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
 
-        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer(
             mse,
             features,
             targets,

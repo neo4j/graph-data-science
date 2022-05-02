@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-public class SplitMeanSquaredError implements DecisionTreeLoss {
+public class SplitMeanSquaredError implements ImpurityCriterion {
 
     private final HugeDoubleArray targets;
 
@@ -93,7 +93,7 @@ public class SplitMeanSquaredError implements DecisionTreeLoss {
         mseImpurityData.setGroupSize(groupSize);
     }
 
-    static class MSEImpurityData implements DecisionTreeLoss.ImpurityData {
+    static class MSEImpurityData implements ImpurityCriterion.ImpurityData {
 
         private double impurity;
         private double sumOfSquares;

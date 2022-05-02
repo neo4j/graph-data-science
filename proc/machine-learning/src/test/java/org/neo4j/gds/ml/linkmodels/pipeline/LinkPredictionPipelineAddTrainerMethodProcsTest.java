@@ -23,7 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierImpurityCriterion;
+import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
@@ -129,7 +129,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForestClassification.name(),
                     List.of(RandomForestClassifierTrainerConfigImpl.builder()
-                        .criterion(DecisionTreeClassifierImpurityCriterion.ENTROPY)
+                        .criterion(ClassifierImpurityCriterionType.ENTROPY)
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)
                         .numberOfDecisionTrees(10)

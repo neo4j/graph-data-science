@@ -27,13 +27,13 @@ import org.neo4j.gds.ml.models.Features;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extends DecisionTreeTrainer<LOSS, Integer> {
+public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> {
 
     private final HugeLongArray allLabels;
     private final LocalIdMap classIdMap;
 
     public DecisionTreeClassifierTrainer(
-        LOSS lossFunction,
+        ImpurityCriterion impurityCriterion,
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
@@ -43,7 +43,7 @@ public class DecisionTreeClassifierTrainer<LOSS extends DecisionTreeLoss> extend
         super(
             features,
             config,
-            lossFunction,
+            impurityCriterion,
             featureBagger
         );
         this.classIdMap = classIdMap;

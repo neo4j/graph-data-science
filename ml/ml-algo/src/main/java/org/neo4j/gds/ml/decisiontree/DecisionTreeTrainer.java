@@ -30,9 +30,9 @@ import java.util.Deque;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICTION> {
+public abstract class DecisionTreeTrainer <PREDICTION extends Number> {
 
-    private final LOSS lossFunction;
+    private final ImpurityCriterion impurityCriterion;
     private final Features features;
     private final DecisionTreeTrainerConfig config;
     private final FeatureBagger featureBagger;
@@ -41,10 +41,10 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     DecisionTreeTrainer(
         Features features,
         DecisionTreeTrainerConfig config,
-        LOSS lossFunction,
+        ImpurityCriterion impurityCriterion,
         FeatureBagger featureBagger
     ) {
-        this.lossFunction = lossFunction;
+        this.impurityCriterion = impurityCriterion;
         this.features = features;
         this.config = config;
         this.featureBagger = featureBagger;
@@ -104,7 +104,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
-        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features, config.minLeafSize());
+        splitter = new Splitter(trainSetIndices.size(), impurityCriterion, featureBagger, features, config.minLeafSize());
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 
@@ -112,7 +112,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
         {
             var mutableTrainSetIndices = HugeLongArray.newArray(trainSetIndices.size());
             mutableTrainSetIndices.setAll(trainSetIndices::get);
-            var impurityData = lossFunction.groupImpurity(mutableTrainSetIndices, 0, mutableTrainSetIndices.size());
+            var impurityData = impurityCriterion.groupImpurity(mutableTrainSetIndices, 0, mutableTrainSetIndices.size());
             root = splitAndPush(
                 stack,
                 ImmutableGroup.of(mutableTrainSetIndices, 0, mutableTrainSetIndices.size(), impurityData),
@@ -194,7 +194,7 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     @ValueClass
-    interface StackRecord<PREDICTION> {
+    interface StackRecord<PREDICTION extends Number> {
         TreeNode<PREDICTION> node();
 
         Split split();

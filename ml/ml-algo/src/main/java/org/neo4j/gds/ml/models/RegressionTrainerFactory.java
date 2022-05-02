@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainer;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 
 import java.util.Optional;
 
@@ -53,7 +53,7 @@ public final class RegressionTrainerFactory {
             case RandomForestRegression: {
                 return new RandomForestRegressorTrainer(
                     concurrency,
-                    (RandomForestTrainerConfig) config,
+                    (RandomForestRegressorTrainerConfig) config,
                     randomSeed,
                     progressTracker
                 );

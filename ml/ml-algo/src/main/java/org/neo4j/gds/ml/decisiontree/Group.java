@@ -30,5 +30,5 @@ interface Group {
 
     long size();
 
-    DecisionTreeLoss.ImpurityData impurityData();
+    ImpurityCriterion.ImpurityData impurityData();
 }

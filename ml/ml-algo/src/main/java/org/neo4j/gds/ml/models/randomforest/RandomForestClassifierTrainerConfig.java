@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierImpurityCriterion;
+import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
@@ -32,10 +32,10 @@ import java.util.Map;
 public interface RandomForestClassifierTrainerConfig extends RandomForestTrainerConfig, TrainerConfig {
     RandomForestClassifierTrainerConfig DEFAULT = of(Map.of());
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierImpurityCriterion#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierImpurityCriterion#toString")
-    default DecisionTreeClassifierImpurityCriterion criterion() {
-        return DecisionTreeClassifierImpurityCriterion.GINI;
+    @Configuration.ConvertWith("org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType#toString")
+    default ClassifierImpurityCriterionType criterion() {
+        return ClassifierImpurityCriterionType.GINI;
     }
 
     @Override

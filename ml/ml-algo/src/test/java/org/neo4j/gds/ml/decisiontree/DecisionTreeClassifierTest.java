@@ -100,7 +100,7 @@ class DecisionTreeClassifierTest {
         int minSplitSize,
         boolean useGini
     ) {
-        var decisionTree = new DecisionTreeClassifierTrainer<>(
+        var decisionTree = new DecisionTreeClassifierTrainer(
             useGini ? giniIndexLoss : entropyLoss,
             features,
             allLabels,
@@ -133,7 +133,7 @@ class DecisionTreeClassifierTest {
         mutableFeatureVectors.setAll(idx -> idx);
         var featureVectors = ReadOnlyHugeLongArray.of(mutableFeatureVectors);
 
-        var decisionTree = new DecisionTreeClassifierTrainer<>(
+        var decisionTree = new DecisionTreeClassifierTrainer(
             giniIndexLoss,
             features,
             allLabels,
@@ -147,7 +147,7 @@ class DecisionTreeClassifierTest {
         var decisionTreePredict = decisionTree.train(featureVectors);
         assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42));
 
-        decisionTree = new DecisionTreeClassifierTrainer<>(
+        decisionTree = new DecisionTreeClassifierTrainer(
             giniIndexLoss,
             features,
             allLabels,
@@ -173,7 +173,7 @@ class DecisionTreeClassifierTest {
         mutableSampledVectors.set(0, 1);
         var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
 
-        var decisionTree = new DecisionTreeClassifierTrainer<>(
+        var decisionTree = new DecisionTreeClassifierTrainer(
             giniIndexLoss,
             features,
             allLabels,
@@ -189,7 +189,7 @@ class DecisionTreeClassifierTest {
         mutableOtherSampledVectors.set(0, features.size() - 1);
         var otherSampledVectors = ReadOnlyHugeLongArray.of(mutableOtherSampledVectors);
 
-        decisionTree = new DecisionTreeClassifierTrainer<>(
+        decisionTree = new DecisionTreeClassifierTrainer(
             giniIndexLoss,
             features,
             allLabels,

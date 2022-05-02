@@ -25,12 +25,12 @@ import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends DecisionTreeTrainer<LOSS, Double> {
+public class DecisionTreeRegressorTrainer extends DecisionTreeTrainer<Double> {
 
     private final HugeDoubleArray targets;
 
     public DecisionTreeRegressorTrainer(
-        LOSS lossFunction,
+        ImpurityCriterion impurityCriterion,
         Features features,
         HugeDoubleArray targets,
         DecisionTreeTrainerConfig config,
@@ -39,7 +39,7 @@ public class DecisionTreeRegressorTrainer<LOSS extends DecisionTreeLoss> extends
         super(
             features,
             config,
-            lossFunction,
+            impurityCriterion,
             featureBagger
         );
 

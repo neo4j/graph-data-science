@@ -30,12 +30,12 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.ml.decisiontree.DecisionTreeLoss;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfigImpl;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
+import org.neo4j.gds.ml.decisiontree.ImpurityCriterion;
 import org.neo4j.gds.ml.decisiontree.SplitMeanSquaredError;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.RegressorTrainer;
@@ -52,14 +52,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestRegressorTrainer implements RegressorTrainer {
 
-    private final RandomForestTrainerConfig config;
+    private final RandomForestRegressorTrainerConfig config;
     private final int concurrency;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
 
     public RandomForestRegressorTrainer(
         int concurrency,
-        RandomForestTrainerConfig config,
+        RandomForestRegressorTrainerConfig config,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker
     ) {
@@ -114,19 +114,19 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             .build();
 
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
-        var lossFunction = new SplitMeanSquaredError(targets);
+        var impurityCriterion = new SplitMeanSquaredError(targets);
 
         progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
-            new TrainDecisionTreeTask<>(
+            new TrainDecisionTreeTask(
                 decisionTreeTrainConfig,
                 config,
                 random.split(),
                 allFeatureVectors,
                 targets,
-                lossFunction,
+                impurityCriterion,
                 trainSet,
                 progressTracker,
                 numberOfTreesTrained
@@ -139,7 +139,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         return new RandomForestRegressor(decisionTrees, allFeatureVectors.featureDimension());
     }
 
-    static class TrainDecisionTreeTask<LOSS extends DecisionTreeLoss> implements Runnable {
+    static class TrainDecisionTreeTask implements Runnable {
 
         private DecisionTreePredictor<Double> trainedTree;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
@@ -147,7 +147,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         private final SplittableRandom random;
         private final Features allFeatureVectors;
         private final HugeDoubleArray targets;
-        private final LOSS lossFunction;
+        private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
         private final ProgressTracker progressTracker;
         private final AtomicInteger numberOfTreesTrained;
@@ -158,7 +158,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             SplittableRandom random,
             Features allFeatureVectors,
             HugeDoubleArray targets,
-            LOSS lossFunction,
+            ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,
             ProgressTracker progressTracker,
             AtomicInteger numberOfTreesTrained
@@ -168,7 +168,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             this.random = random;
             this.allFeatureVectors = allFeatureVectors;
             this.targets = targets;
-            this.lossFunction = lossFunction;
+            this.impurityCriterion = impurityCriterion;
             this.trainSet = trainSet;
             this.progressTracker = progressTracker;
             this.numberOfTreesTrained = numberOfTreesTrained;
@@ -207,8 +207,8 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 randomForestTrainConfig.maxFeaturesRatio(allFeatureVectors.featureDimension())
             );
 
-            var decisionTree = new DecisionTreeRegressorTrainer<>(
-                lossFunction,
+            var decisionTree = new DecisionTreeRegressorTrainer(
+                impurityCriterion,
                 allFeatureVectors,
                 targets,
                 decisionTreeTrainConfig,

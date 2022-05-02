@@ -27,24 +27,24 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public class Splitter {
 
-    private final DecisionTreeLoss lossFunction;
+    private final ImpurityCriterion impurityCriterion;
     private final Features features;
     private final FeatureBagger featureBagger;
     private final int minLeafSize;
     private final HugeLongArray sortCache;
-    private final DecisionTreeLoss.ImpurityData bestLeftImpurityDataForIdx;
-    private final DecisionTreeLoss.ImpurityData bestRightImpurityDataForIdx;
-    private final DecisionTreeLoss.ImpurityData rightImpurityData;
+    private final ImpurityCriterion.ImpurityData bestLeftImpurityDataForIdx;
+    private final ImpurityCriterion.ImpurityData bestRightImpurityDataForIdx;
+    private final ImpurityCriterion.ImpurityData rightImpurityData;
 
-    Splitter(long trainSetSize, DecisionTreeLoss lossFunction, FeatureBagger featureBagger, Features features, int minLeafSize) {
+    Splitter(long trainSetSize, ImpurityCriterion impurityCriterion, FeatureBagger featureBagger, Features features, int minLeafSize) {
         this.featureBagger = featureBagger;
-        this.lossFunction = lossFunction;
+        this.impurityCriterion = impurityCriterion;
         this.features = features;
         this.minLeafSize = minLeafSize;
         this.sortCache = HugeLongArray.newArray(trainSetSize);
-        this.bestLeftImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        this.bestRightImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        this.rightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        this.bestLeftImpurityDataForIdx = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
+        this.bestRightImpurityDataForIdx = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
+        this.rightImpurityData = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
     }
 
     static long memoryEstimation(long numberOfTrainingSamples, long sizeOfImpurityData) {
@@ -60,7 +60,7 @@ public class Splitter {
     DecisionTreeTrainer.Split findBestSplit(Group group) {
         int bestIdx = -1;
         double bestValue = Double.MAX_VALUE;
-        double bestLoss = Double.MAX_VALUE;
+        double bestImpurity = Double.MAX_VALUE;
         long bestLeftGroupSize = -1;
 
         var leftChildArray = HugeLongArray.newArray(group.size());
@@ -68,8 +68,8 @@ public class Splitter {
         var bestLeftChildArray = HugeLongArray.newArray(group.size());
         var bestRightChildArray = HugeLongArray.newArray(group.size());
 
-        var bestLeftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
-        var bestRightImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
+        var bestLeftImpurityData = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
+        var bestRightImpurityData = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
 
         rightChildArray.setAll(idx -> group.array().get(group.startIdx() + idx));
         rightChildArray.copyTo(bestRightChildArray, group.size());
@@ -77,7 +77,7 @@ public class Splitter {
         int[] featureBag = featureBagger.sample();
 
         for (int featureIdx : featureBag) {
-            double bestLossForIdx = Double.MAX_VALUE;
+            double bestImpurityForIdx = Double.MAX_VALUE;
             double bestValueForIdx = Double.MAX_VALUE;
             long bestLeftGroupSizeForIdx = -1;
 
@@ -95,36 +95,36 @@ public class Splitter {
 
                 // Since only one feature vector is moved to the right group, we can do an
                 // impurity update based on the previous impurity.
-                lossFunction.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
+                impurityCriterion.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
             }
 
-            var leftImpurityData = lossFunction.groupImpurity(leftChildArray, 0, minLeafSize - 1L);
+            var leftImpurityData = impurityCriterion.groupImpurity(leftChildArray, 0, minLeafSize - 1L);
 
-            // Continue moving feature vectors, but now actually compute loss since left group is large enough.
+            // Continue moving feature vectors, but now actually compute combined impurity since left group is large enough.
             for (long leftGroupSize = minLeafSize; leftGroupSize <= group.size() - minLeafSize; leftGroupSize++) {
                 long splittingFeatureVectorIdx = rightChildArray.get(leftGroupSize - 1);
                 leftChildArray.set(leftGroupSize - 1, splittingFeatureVectorIdx);
 
-                lossFunction.incrementalImpurity(splittingFeatureVectorIdx, leftImpurityData);
-                lossFunction.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
+                impurityCriterion.incrementalImpurity(splittingFeatureVectorIdx, leftImpurityData);
+                impurityCriterion.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
 
-                double loss = lossFunction.loss(leftImpurityData, rightImpurityData);
+                double combinedImpurity = impurityCriterion.combinedImpurity(leftImpurityData, rightImpurityData);
 
                 // We track best split for a single feature idx in order to keep using `leftChildArray` and `rightChildArray`
                 // throughout search for splits for this particular idx.
-                if (loss < bestLossForIdx) {
+                if (combinedImpurity < bestImpurityForIdx) {
                     bestValueForIdx = features.get(splittingFeatureVectorIdx)[featureIdx];
-                    bestLossForIdx = loss;
+                    bestImpurityForIdx = combinedImpurity;
                     leftImpurityData.copyTo(bestLeftImpurityDataForIdx);
                     rightImpurityData.copyTo(bestRightImpurityDataForIdx);
                     bestLeftGroupSizeForIdx = leftGroupSize;
                 }
             }
 
-            if (bestLossForIdx < bestLoss) {
+            if (bestImpurityForIdx < bestImpurity) {
                 bestIdx = featureIdx;
                 bestValue = bestValueForIdx;
-                bestLoss = bestLossForIdx;
+                bestImpurity = bestImpurityForIdx;
                 bestLeftGroupSize = bestLeftGroupSizeForIdx;
 
                 bestLeftImpurityDataForIdx.copyTo(bestLeftImpurityData);

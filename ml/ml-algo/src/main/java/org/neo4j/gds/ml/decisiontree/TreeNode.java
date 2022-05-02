@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.decisiontree;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class TreeNode<PREDICTION> {
+public class TreeNode<PREDICTION extends Number> {
     private PREDICTION prediction;
     private int featureIndex = -1;
     private double thresholdValue;

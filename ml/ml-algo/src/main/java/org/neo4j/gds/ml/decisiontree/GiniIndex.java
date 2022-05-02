@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class GiniIndex implements DecisionTreeLoss {
+public class GiniIndex implements ImpurityCriterion {
 
     private final HugeIntArray expectedMappedLabels;
     private final int numberOfClasses;
