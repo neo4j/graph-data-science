@@ -177,8 +177,8 @@ public final class NodeRegressionTrain {
 
             var candidateStats = ModelCandidateStats.of(
                 modelParams,
-                trainStatsBuilder.build(trainConfig.metrics()),
-                validationStatsBuilder.build(trainConfig.metrics())
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
             );
             trainingStatistics.addCandidateStats(candidateStats);
 

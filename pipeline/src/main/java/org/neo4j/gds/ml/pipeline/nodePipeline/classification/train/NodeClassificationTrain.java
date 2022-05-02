@@ -330,8 +330,8 @@ public final class NodeClassificationTrain {
 
             var candidateStats = ModelCandidateStats.of(
                 modelParams,
-                trainStatsBuilder.build(metrics),
-                validationStatsBuilder.build(metrics)
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
             );
             trainingStatistics.addCandidateStats(candidateStats);
 

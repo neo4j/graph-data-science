@@ -251,8 +251,8 @@ public final class LinkPredictionTrain {
             // insert the candidates' metrics into trainStats and validationStats
             var candidateStats = ModelCandidateStats.of(
                 modelParams,
-                trainStatsBuilder.build(config.metrics()),
-                validationStatsBuilder.build(config.metrics())
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
             );
             trainingStatistics.addCandidateStats(candidateStats);
 

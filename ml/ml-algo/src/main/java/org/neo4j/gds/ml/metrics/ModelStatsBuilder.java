@@ -56,9 +56,8 @@ public class ModelStatsBuilder {
         );
     }
 
-    public Map<Metric, ModelStats> build(List<? extends Metric> metrics) {
-        return metrics.stream()
-            .filter(sum::containsKey)
+    public Map<Metric, ModelStats> build() {
+        return sum.keySet().stream()
             .collect(
             Collectors.toMap(Function.identity(), this::build)
         );
