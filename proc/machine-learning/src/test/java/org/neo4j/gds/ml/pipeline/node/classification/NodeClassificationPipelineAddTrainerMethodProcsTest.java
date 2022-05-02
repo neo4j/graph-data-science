@@ -58,11 +58,11 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForestClassification.name(), List.of(),
-                    TrainingMethod.LogisticRegression.name(), List.of(Map.of(
+                    TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.LogisticRegression.toString(), List.of(Map.of(
                             "maxEpochs", 100,
                             "minEpochs", 42,
-                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "methodName", TrainingMethod.LogisticRegression.toString(),
                             "penalty", 0.0,
                             "patience", 1,
                             "batchSize", 100,
@@ -85,7 +85,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForestClassification.name(),
+                    TrainingMethod.RandomForestClassification.toString(),
                     List.of(RandomForestClassifierTrainerConfigImpl.builder()
                         .maxDepth(42)
                         .maxFeaturesRatio(0.5)
@@ -93,7 +93,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         .minSplitSize(2)
                         .build()
                         .toMapWithTrainerMethod()),
-                    TrainingMethod.LogisticRegression.name(), List.of()
+                    TrainingMethod.LogisticRegression.toString(), List.of()
                 )
             ))
         );
@@ -112,14 +112,14 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "nodePropertySteps", List.of(),
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForestClassification.name(), List.of(),
-                    TrainingMethod.LogisticRegression.name(), List.of(
+                    TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.LogisticRegression.toString(), List.of(
                         Map.of(
                             "maxEpochs", 100,
                             "minEpochs", 42,
                             "penalty", 0.0,
                             "patience", 1,
-                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "methodName", TrainingMethod.LogisticRegression.toString(),
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001
@@ -129,7 +129,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                             "minEpochs", 4,
                             "penalty", 0.0,
                             "patience", 1,
-                            "methodName", TrainingMethod.LogisticRegression.name(),
+                            "methodName", TrainingMethod.LogisticRegression.toString(),
                             "batchSize", 100,
                             "learningRate", 0.001,
                             "tolerance", 0.001

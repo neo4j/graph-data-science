@@ -167,8 +167,8 @@ class NodeRegressionTrainingPipelineTest {
                 ),
                 "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
                 "trainingParameterSpace", Map.of(
-                    TrainingMethod.LinearRegression.name(), List.of(),
-                    TrainingMethod.RandomForestRegression.name(), List.of()
+                    TrainingMethod.LinearRegression.toString(), List.of(),
+                    TrainingMethod.RandomForestRegression.toString(), List.of()
                 ),
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
             ));
@@ -203,11 +203,11 @@ class NodeRegressionTrainingPipelineTest {
                 ),
                 "splitConfig", splitConfig.toMap(),
                 "trainingParameterSpace", Map.of(
-                    TrainingMethod.LinearRegression.name(), candidates.stream()
+                    TrainingMethod.LinearRegression.toString(), candidates.stream()
                         .map(TrainerConfig::toTunableConfig)
                         .map(TunableTrainerConfig::toMap)
                         .collect(Collectors.toList()),
-                    TrainingMethod.RandomForestRegression.name(), List.of()
+                    TrainingMethod.RandomForestRegression.toString(), List.of()
                 ),
                 "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap()
             ));

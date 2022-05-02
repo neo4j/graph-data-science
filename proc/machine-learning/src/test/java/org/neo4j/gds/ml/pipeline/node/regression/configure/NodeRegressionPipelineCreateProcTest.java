@@ -48,8 +48,8 @@ class NodeRegressionPipelineCreateProcTest extends BaseProcTest {
             "splitConfig", NodePropertyPredictionSplitConfig.DEFAULT_CONFIG.toMap(),
             "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
             "parameterSpace", Map.of(
-                TrainingMethod.LinearRegression.name(), List.of(),
-                TrainingMethod.RandomForestRegression.name(), List.of()
+                TrainingMethod.LinearRegression.toString(), List.of(),
+                TrainingMethod.RandomForestRegression.toString(), List.of()
             )
         )));
 

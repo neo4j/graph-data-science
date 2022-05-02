@@ -106,7 +106,7 @@ class TunableTrainerConfigTest {
         assertThat(config.toMap()).isEqualTo(Map.of(
             "criterion", "GINI",
             "maxDepth", 5,
-            "methodName", "RandomForestClassification",
+            "methodName", "RandomForest",
             "minSplitSize", 2,
             "minLeafSize", 1,
             "numberOfDecisionTrees", 100,
@@ -199,7 +199,7 @@ class TunableTrainerConfigTest {
         assertThat(config.toMap()).isEqualTo(Map.of(
             "criterion", "entropy",
             "maxDepth", Integer.MAX_VALUE,
-            "methodName", "RandomForestClassification",
+            "methodName", "RandomForest",
             "minSplitSize", 2,
             "minLeafSize", 1,
             "numberOfDecisionTrees", 100,

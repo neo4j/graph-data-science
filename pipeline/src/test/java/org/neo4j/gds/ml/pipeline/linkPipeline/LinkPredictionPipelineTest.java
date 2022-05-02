@@ -175,8 +175,8 @@ class LinkPredictionPipelineTest {
                 )
                 .returns(
                     Map.of(
-                        TrainingMethod.LogisticRegression.name(), List.of(),
-                        TrainingMethod.RandomForestClassification.name(), List.of()
+                        TrainingMethod.LogisticRegression.toString(), List.of(),
+                        TrainingMethod.RandomForestClassification.toString(), List.of()
                     ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 ).returns(
@@ -234,14 +234,14 @@ class LinkPredictionPipelineTest {
                 )
                 .returns(
                     Map.of(
-                        TrainingMethod.LogisticRegression.name(),
+                        TrainingMethod.LogisticRegression.toString(),
                         pipeline
                             .trainingParameterSpace()
                             .get(TrainingMethod.LogisticRegression)
                             .stream()
                             .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList()),
-                        TrainingMethod.RandomForestClassification.name(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification)
+                        TrainingMethod.RandomForestClassification.toString(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification)
                             .stream()
                             .map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList())

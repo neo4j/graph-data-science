@@ -44,11 +44,21 @@ public enum TrainingMethod {
         public TrainerConfig createConfig(Map<String, Object> configMap) {
             return RandomForestClassifierTrainerConfig.of(configMap);
         }
+
+        @Override
+        public String toString() {
+            return "RandomForest";
+        }
     },
     RandomForestRegression {
         @Override
         public TrainerConfig createConfig(Map<String, Object> configMap) {
             return RandomForestRegressorTrainerConfig.of(configMap);
+        }
+
+        @Override
+        public String toString() {
+            return "RandomForest";
         }
     };
 

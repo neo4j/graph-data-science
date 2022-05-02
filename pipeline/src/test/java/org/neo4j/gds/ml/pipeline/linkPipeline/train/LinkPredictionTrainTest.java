@@ -417,7 +417,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Extract train features :: Finished",
                 "MY TEST TASK :: Select best model :: Start",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Start",
-                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForestClassification, Parameters: {criterion=GINI, numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2, minLeafSize=1}",
+                "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Method: RandomForest, Parameters: {criterion=GINI, numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2147483647, minSplitSize=2, minLeafSize=1}",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 50%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 100%",
                 "MY TEST TASK :: Select best model :: Trial 1 of 1 :: Main validation metric (AUCPR): 0.7684",

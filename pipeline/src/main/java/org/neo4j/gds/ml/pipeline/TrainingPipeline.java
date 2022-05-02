@@ -47,7 +47,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
     public static Map<String, List<Map<String, Object>>> toMapParameterSpace(Map<TrainingMethod, List<TunableTrainerConfig>> parameterSpace) {
         return parameterSpace.entrySet().stream()
             .collect(Collectors.toMap(
-                entry -> entry.getKey().name(),
+                entry -> entry.getKey().toString(),
                 entry -> entry.getValue().stream().map(TunableTrainerConfig::toMap).collect(Collectors.toList())
             ));
     }

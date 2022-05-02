@@ -166,7 +166,7 @@ class NodeClassificationTrainingPipelineTest {
                     pipelineMap -> pipelineMap.get("splitConfig")
                 )
                 .returns(
-                    Map.of(TrainingMethod.LogisticRegression.name(), List.of(), TrainingMethod.RandomForestClassification.name(), List.of()),
+                    Map.of(TrainingMethod.LogisticRegression.toString(), List.of(), TrainingMethod.RandomForestClassification.toString(), List.of()),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 )
                 .returns(

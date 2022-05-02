@@ -41,7 +41,7 @@ public interface TrainerConfig extends ToMapConvertible {
     @Configuration.Ignore
     default Map<String, Object> toMapWithTrainerMethod() {
         var mapWithTrainerMethod = new HashMap<>(toMap());
-        mapWithTrainerMethod.put("methodName", method().name());
+        mapWithTrainerMethod.put("methodName", method().toString());
 
         return mapWithTrainerMethod;
     }
