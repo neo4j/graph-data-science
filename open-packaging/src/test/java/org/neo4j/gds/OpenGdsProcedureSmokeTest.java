@@ -94,10 +94,12 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.pipeline.linkPrediction.train",
         "gds.beta.pipeline.linkPrediction.train.estimate",
 
+        "gds.alpha.pipeline.nodeRegression.addLinearRegression",
+        "gds.alpha.pipeline.nodeRegression.addNodeProperty",
+        "gds.alpha.pipeline.nodeRegression.addRandomForest",
         "gds.alpha.pipeline.nodeRegression.create",
         "gds.alpha.pipeline.nodeRegression.configureSplit",
-        "gds.alpha.pipeline.nodeRegression.addLinearRegression",
-        "gds.alpha.pipeline.nodeRegression.addRandomForest",
+        "gds.alpha.pipeline.nodeRegression.selectFeatures",
 
         "gds.beta.pipeline.nodeClassification.selectFeatures",
         "gds.beta.pipeline.nodeClassification.addNodeProperty",
@@ -449,7 +451,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 307;
+        int expectedCount = 309;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

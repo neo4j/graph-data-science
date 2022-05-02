@@ -6,6 +6,8 @@ This page explains how to create and configure a node regression pipeline.
 It consists of the following sections:
 
 * <<noderegression-creating-a-pipeline, Creating the pipeline>>
+* <<noderegression-pipelines-adding-node-properties, Adding node properties>>
+* <<noderegression-pipelines-adding-features, Adding features>>
 * <<noderegression-pipelines-configure-splits, Configuring the node splits>>
 * <<noderegression-pipelines-adding-model-candidates, Adding model candidates>>
 
@@ -71,6 +73,141 @@ CALL gds.alpha.pipeline.nodeRegression.create('pipe')
 --
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+
+
+[[noderegression-pipelines-adding-node-properties]]
+== Adding node properties
+
+A node regression pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
+Such steps producing node properties can be chained one after another and created properties can later be used as <<noderegression-pipelines-adding-features, features>>.
+// FIXME insert link to training + prediction
+Moreover, the node property steps that are added to the training pipeline will be executed both when training a model and when the regression pipeline is applied for regression.
+
+The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
+
+For example, <<ml-preprocessing, pre-processing algorithms>> can be used as node property steps.
+
+
+=== Syntax
+
+[.pipeline-add-node-property-syntax]
+--
+.Add node property syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addNodeProperty(
+  pipelineName: String,
+  procedureName: String,
+  procedureConfiguration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| pipelineName              | String  | The name of the pipeline.
+| procedureName             | String  | The name of the procedure to be added to the pipeline.
+| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+|===
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('pipe', 'alpha.scaleProperties', {
+  nodeProperties: 'sizePerStory',
+  scaler: 'L1Norm',
+  mutateProperty:'scaledSizes'
+})
+YIELD name, nodePropertySteps
+----
+
+.Results
+[opts="header",cols="1,9"]
+|===
+| name     | nodePropertySteps
+| "pipe"   | [{name=gds.alpha.scaleProperties.mutate, config={scaler=L1Norm, mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
+|===
+
+The `scaledSizes` property can be later used as a feature.
+--
+
+
+[[noderegression-pipelines-adding-features]]
+== Adding features
+
+A Node Regression Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
+When executing the pipeline, the selected `nodeProperties` must be either present in the input graph, or created by a previous node property step.
+For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
+
+
+=== Syntax
+
+[.pipeline-add-feature-syntax]
+--
+.Adding a feature to a pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.selectFeatures(
+  pipelineName: String,
+  nodeProperties: List or String
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type            | Description
+| pipelineName           | String          | The name of the pipeline.
+| nodeProperties         | List or String  | Configuration for splitting the relationships.
+|===
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will select features for the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
+YIELD name, featureProperties
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name     | featureProperties
+| "pipe"   | [scaledSizes, sizePerStory]
+|===
+--
+
 
 // TODO: how much can we share this part?
 [[noderegression-pipelines-configure-splits]]
