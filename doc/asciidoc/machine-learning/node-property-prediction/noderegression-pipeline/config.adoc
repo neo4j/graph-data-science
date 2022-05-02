@@ -454,3 +454,77 @@ Each specified model candidate will be tried out during the model selection in t
 These are somewhat naive examples of how to add and configure model candidates.
 Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
 ====
+
+
+[[noderegression-pipelines-configure-auto-tuning]]
+== Configuring Auto-tuning
+
+In order to find good models, the pipeline supports automatically tuning the parameters of the training algorithm.
+Optionally, the procedure described below can be used to configure the auto-tuning behavior.
+Otherwise, default auto-tuning configuration is used.
+Currently, it is only possible to configure the maximum number trials of hyper-parameter settings which are evaluated.
+
+
+=== Syntax
+
+[.pipeline-configure-auto-tuning-syntax]
+--
+.Configuring auto-tuning syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the created pipeline.
+| configuration   | Map     | The configuration for auto-tuning.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name            | Type    | Default      | Description
+| maxTrials       | Integer | {max-trials} | The value of `maxTrials` determines the maximum allowed model candidates that should be evaluated and compared when training the pipeline. If no ranges are present in the parameter space, `maxTrials` is ignored and the each model candidate in the parameter space is evaluated.
+|===
+
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will configure the maximum trials for the auto-tuning:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning('pipe', {
+  maxTrials: 100
+})
+YIELD autoTuningConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| autoTuningConfig
+| {maxTrials=100}
+|===
+
+// FIXME insert link to training
+We now reconfigured the auto-tuning to try out at most 100 model candidates during training.
+--

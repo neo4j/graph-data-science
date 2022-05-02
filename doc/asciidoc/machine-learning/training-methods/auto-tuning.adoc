@@ -20,8 +20,7 @@ If any model candidate hyper-parameter is specified as a range, auto-tuning is a
 The configurations with only fixed values are evaluated first, and subsequently the remaining configurations with ranges are repeatedly selected and evaluated.
 For configurations that have at least one range, fixed values from the ranges are selected before the evaluation.
 Each such evaluation is called a trial.
-// FIXME add this when we have nodeRegression.configureAutoTuning
-In the case at least one range is present, the number of trials is the value of the `maxTrials` configuration parameter of <<nodeclassification-pipelines-configure-auto-tuning,`gds.alpha.pipeline.nodeClassification.configureAutoTuning`>>, and <<linkprediction-configure-auto-tuning,`gds.alpha.pipeline.linkPrediction.configureAutoTuning`>> respectively.
+In the case at least one range is present, the number of trials is the value of the `maxTrials` configuration parameter of <<nodeclassification-pipelines-configure-auto-tuning,`gds.alpha.pipeline.nodeClassification.configureAutoTuning`>>, <<noderegression-pipelines-configure-auto-tuning,`gds.alpha.pipeline.noderegression.configureAutoTuning`>>, and <<linkprediction-configure-auto-tuning,`gds.alpha.pipeline.linkPrediction.configureAutoTuning`>> respectively.
 If no range is present in any model configuration, all of the configurations are tried, regardless of `maxTrials`.
 Once the all the trials have been completed, the best model candidate configuration is selected as the winner.
 
