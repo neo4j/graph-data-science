@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class NodeFilteredGraphIntersectTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 87)
     public static final String GRAPH =
         "(:A),(:A),(:A),(:A)," +
         "(a:B),(b:B),(c:B)," +
