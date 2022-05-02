@@ -430,13 +430,13 @@ public final class NodeClassificationTrain {
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
-            metrics,
             classIdMap,
             terminationFlag,
             customProgressTracker,
             config.concurrency(),
             config.randomSeed(),
-            false
+            false,
+            metrics
         );
 
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));

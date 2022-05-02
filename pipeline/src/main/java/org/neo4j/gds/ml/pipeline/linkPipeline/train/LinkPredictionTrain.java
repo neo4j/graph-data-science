@@ -185,13 +185,13 @@ public final class LinkPredictionTrain {
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
-            metrics,
             classIdMap,
             terminationFlag,
             customProgressTracker,
             config.concurrency(),
             config.randomSeed(),
-            true
+            true,
+            metrics
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 

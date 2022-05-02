@@ -42,13 +42,13 @@ public final class ClassifierTrainerFactory {
 
     public static ClassifierTrainer create(
         TrainerConfig config,
-        List<? extends Metric> metrics,
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         int concurrency,
         Optional<Long> randomSeed,
-        boolean reduceClassCount
+        boolean reduceClassCount,
+        List<? extends Metric> metrics
     ) {
         switch (config.method()) {
             case LogisticRegression: {
