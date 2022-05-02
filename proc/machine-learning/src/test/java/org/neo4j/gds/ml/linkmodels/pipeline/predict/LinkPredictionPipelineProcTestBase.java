@@ -35,7 +35,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
@@ -118,7 +118,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
             LinkPredictionModelInfo.of(
                 Map.of(),
                 Map.of(),
-                CandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
                 pipeline
             )
         ));

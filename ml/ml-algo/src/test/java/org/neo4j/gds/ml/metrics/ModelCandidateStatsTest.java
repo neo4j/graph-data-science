@@ -29,10 +29,10 @@ import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQUARED_ERROR;
 
-class CandidateStatsTest {
+class ModelCandidateStatsTest {
     @Test
     void testRender() {
-        var candidateStats = CandidateStats.of(
+        var candidateStats = ModelCandidateStats.of(
             LogisticRegressionTrainConfig.DEFAULT,
             Map.of(OUT_OF_BAG_ERROR, ModelStats.of(
                 0.33,

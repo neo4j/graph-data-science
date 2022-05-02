@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
@@ -34,7 +34,7 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
 
     Map<Metric, Double> testMetrics();
     Map<Metric, Double> outerTrainMetrics();
-    CandidateStats bestCandidate();
+    ModelCandidateStats bestCandidate();
 
     NodePropertyPredictPipeline pipeline();
 

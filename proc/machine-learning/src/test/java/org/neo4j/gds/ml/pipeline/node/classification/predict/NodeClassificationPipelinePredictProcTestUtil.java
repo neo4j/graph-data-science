@@ -29,7 +29,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
@@ -115,7 +115,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestCandidate(CandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()))
+                .bestCandidate(ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()))
                 .testMetrics(Map.of())
                 .outerTrainMetrics(Map.of())
                 .pipeline(pipeline)

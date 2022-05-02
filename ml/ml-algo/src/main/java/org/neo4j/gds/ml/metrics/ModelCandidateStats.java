@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
-public interface CandidateStats extends ToMapConvertible {
+public interface ModelCandidateStats extends ToMapConvertible {
     TrainerConfig trainerConfig();
     Map<Metric, ModelStats> trainingStats();
     Map<Metric, ModelStats> validationStats();
@@ -96,11 +96,11 @@ public interface CandidateStats extends ToMapConvertible {
             .collect(Collectors.toList());
     }
 
-    static CandidateStats of(
+    static ModelCandidateStats of(
         TrainerConfig trainerConfig,
         Map<Metric, ModelStats> trainStats,
         Map<Metric, ModelStats> validationStats
     ) {
-        return ImmutableCandidateStats.of(trainerConfig, trainStats, validationStats);
+        return ImmutableModelCandidateStats.of(trainerConfig, trainStats, validationStats);
     }
 }

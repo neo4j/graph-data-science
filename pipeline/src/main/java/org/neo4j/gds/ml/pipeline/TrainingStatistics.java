@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.CandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
@@ -33,13 +33,13 @@ import java.util.stream.Collectors;
 
 public final class TrainingStatistics {
 
-    List<CandidateStats> candidateStats;
+    List<ModelCandidateStats> modelCandidateStats;
     private final List<Metric> metrics;
     private final Map<Metric, Double> testScores;
     private final Map<Metric, Double> outerTrainScores;
 
     public TrainingStatistics(List<Metric> metrics) {
-        this.candidateStats = new ArrayList<>();
+        this.modelCandidateStats = new ArrayList<>();
         this.metrics = metrics;
         this.testScores = new HashMap<>();
         this.outerTrainScores = new HashMap<>();
@@ -47,12 +47,12 @@ public final class TrainingStatistics {
 
     @TestOnly
     public List<ModelStats> getTrainStats(Metric metric) {
-        return candidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
+        return modelCandidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
     }
 
     @TestOnly
     public List<ModelStats> getValidationStats(Metric metric) {
-        return candidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
+        return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
     }
 
     /**
@@ -64,20 +64,20 @@ public final class TrainingStatistics {
         return Map.of(
             "bestParameters", bestParameters().toMap(),
             "bestTrial", getBestTrialIdx() + 1,
-            "modelCandidates", candidateStats.stream().map(CandidateStats::toMap).collect(Collectors.toList())
+            "modelCandidates", modelCandidateStats.stream().map(ModelCandidateStats::toMap).collect(Collectors.toList())
         );
     }
 
     public double getMainMetric(int trial) {
-        return candidateStats.get(trial).validationStats().get(evaluationMetric()).avg();
+        return modelCandidateStats.get(trial).validationStats().get(evaluationMetric()).avg();
     }
 
     public Map<Metric, Double> validationMetricsAvg(int trial) {
-        return extractAverage(candidateStats.get(trial).validationStats());
+        return extractAverage(modelCandidateStats.get(trial).validationStats());
     }
 
     public Map<Metric, Double> trainMetricsAvg(int trial) {
-        return extractAverage(candidateStats.get(trial).trainingStats());
+        return extractAverage(modelCandidateStats.get(trial).trainingStats());
     }
 
     private Map<Metric, Double> extractAverage(Map<Metric, ModelStats> statsMap) {
@@ -92,8 +92,8 @@ public final class TrainingStatistics {
         return metrics.get(0);
     }
 
-    public void addCandidateStats(CandidateStats statistics) {
-        candidateStats.add(statistics);
+    public void addCandidateStats(ModelCandidateStats statistics) {
+        modelCandidateStats.add(statistics);
     }
 
     public void addTestScore(Metric metric, double score) {
@@ -113,18 +113,18 @@ public final class TrainingStatistics {
     }
 
     public int getBestTrialIdx() {
-        return candidateStats
+        return modelCandidateStats
             .stream()
             .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
             .collect(Collectors.toList())
             .indexOf(getBestTrialScore());
     }
-    public CandidateStats bestCandidate() {
-        return candidateStats.get(getBestTrialIdx());
+    public ModelCandidateStats bestCandidate() {
+        return modelCandidateStats.get(getBestTrialIdx());
     }
 
     public double getBestTrialScore() {
-        return candidateStats
+        return modelCandidateStats
             .stream()
             .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
             .max(evaluationMetric().comparator())

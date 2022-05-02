@@ -47,7 +47,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
@@ -427,7 +427,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .build(),
             NodeClassificationPipelineModelInfo.builder()
                 .classes(modelData.classIdMap().originalIdsList())
-                .bestCandidate(CandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()))
+                .bestCandidate(ModelCandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()))
                 .testMetrics(Map.of())
                 .outerTrainMetrics(Map.of())
                 .pipeline(NodePropertyPredictPipeline.EMPTY)

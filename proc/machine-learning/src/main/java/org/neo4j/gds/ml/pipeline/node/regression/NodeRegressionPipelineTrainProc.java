@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
-import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineExecutor.NodeRegressionTrainPipelineResult;
 
 @GdsCallable(name = "gds.alpha.pipeline.nodeRegression.train", description = "Trains a node regression model based on a pipeline", executionMode = TRAIN)

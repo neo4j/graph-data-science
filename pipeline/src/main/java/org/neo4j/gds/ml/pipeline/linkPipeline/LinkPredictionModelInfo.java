@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.Map;
@@ -31,7 +31,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     Map<Metric, Double> testMetrics();
     Map<Metric, Double> outerTrainMetrics();
-    CandidateStats bestCandidate();
+    ModelCandidateStats bestCandidate();
 
     LinkPredictionPredictPipeline pipeline();
 
@@ -47,7 +47,7 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
     static LinkPredictionModelInfo of(
         Map<Metric, Double> testMetrics,
         Map<Metric, Double> outerTrainMetrics,
-        CandidateStats bestCandidate,
+        ModelCandidateStats bestCandidate,
         LinkPredictionPredictPipeline pipeline
     ) {
         return ImmutableLinkPredictionModelInfo.of(testMetrics, outerTrainMetrics, bestCandidate, pipeline);

@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
@@ -328,7 +328,7 @@ public final class NodeClassificationTrain {
                 progressTracker.logProgress();
             }
 
-            var candidateStats = CandidateStats.of(
+            var candidateStats = ModelCandidateStats.of(
                 modelParams,
                 trainStatsBuilder.build(metrics),
                 validationStatsBuilder.build(metrics)

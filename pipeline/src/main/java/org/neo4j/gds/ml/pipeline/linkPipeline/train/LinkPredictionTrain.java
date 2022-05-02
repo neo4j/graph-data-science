@@ -35,7 +35,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -249,7 +249,7 @@ public final class LinkPredictionTrain {
             }
 
             // insert the candidates' metrics into trainStats and validationStats
-            var candidateStats = CandidateStats.of(
+            var candidateStats = ModelCandidateStats.of(
                 modelParams,
                 trainStatsBuilder.build(config.metrics()),
                 validationStatsBuilder.build(config.metrics())

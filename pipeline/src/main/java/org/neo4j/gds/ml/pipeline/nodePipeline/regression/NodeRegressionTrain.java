@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.metrics.CandidateStats;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -175,7 +175,7 @@ public final class NodeRegressionTrain {
                 progressTracker.logProgress();
             }
 
-            var candidateStats = CandidateStats.of(
+            var candidateStats = ModelCandidateStats.of(
                 modelParams,
                 trainStatsBuilder.build(trainConfig.metrics()),
                 validationStatsBuilder.build(trainConfig.metrics())
