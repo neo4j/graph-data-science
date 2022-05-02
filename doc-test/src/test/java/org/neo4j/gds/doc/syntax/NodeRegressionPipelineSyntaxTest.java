@@ -27,7 +27,9 @@ class NodeRegressionPipelineSyntaxTest extends SyntaxTestBase {
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT)
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT),
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_LR_MODEL),
+            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_RF_MODEL)
         );
     }
 

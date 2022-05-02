@@ -1,0 +1,21 @@
+[[machine-learning-training-methods-linear-regression]]
+[.beta]
+= Linear regression
+
+Linear regression is a fundamental supervised machine learning regression method.
+This trains a model by minimizing a loss function which depends on a weight matrix and on the training data.
+The loss can be minimized for example using gradient descent.
+In GDS we use the Adam optimizer which is a gradient descent type algorithm.
+
+The weights are in the form of a feature-sized vector `w` and a bias `b`.
+The loss function is then defined as:
+
+`MSE(wx + b)`
+
+where `MSE` is the https://en.wikipedia.org/wiki/Mean_squared_error#Predictor[mean square error].
+
+To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)[regularization] term to the loss.
+In GDS, this we provide the option of adding `l2` regularization.
+
+
+include::gradient-descent-config-tuning.adoc[leveloffset =+ 1]

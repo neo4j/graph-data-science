@@ -7,6 +7,7 @@ It consists of the following sections:
 
 * <<noderegression-creating-a-pipeline, Creating the pipeline>>
 * <<noderegression-pipelines-configure-splits, Configuring the node splits>>
+* <<noderegression-pipelines-adding-model-candidates, Adding model candidates>>
 
 
 [[noderegression-creating-a-pipeline]]
@@ -169,3 +170,150 @@ YIELD splitConfig
 // TODO: link to training section here
 We now reconfigured the splitting of the pipeline, which will be applied during training.
 --
+
+// TODO try share this part with the NC pipeline
+[[noderegression-pipelines-adding-model-candidates]]
+== Adding model candidates
+
+A pipeline contains a collection of configurations for model candidates which is initially empty.
+This collection is called the _parameter space_.
+Each model candidate configuration contains either fixed values or ranges for training parameters.
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see <<ml-auto-tuning>>.
+One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
+
+* `gds.alpha.pipeline.nodeRegression.addLogisticRegression`
+* `gds.alpha.pipeline.nodeRegression.addRandomForest`
+
+For information about the available training methods in GDS, logistic regression and random forest, see <<ml-training-methods>>.
+
+// FIXME: add back link to NR train section
+In Training the pipeline, we explain further how the configured model candidates are trained, evaluated and compared.
+
+The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
+[NOTE]
+====
+At least one model candidate must be added to the pipeline before training it.
+====
+
+
+=== Syntax
+
+[.tabbed-example, caption = ]
+====
+[.include-with-linear-regression]
+======
+[.pipeline-add-lr-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The logistic regression config for a potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+include::../../training-methods/linearRegressionConfig.adoc[]
+
+include::../pipelineInfoResult.adoc[]
+--
+======
+
+[.include-with-random-forest]
+======
+
+[.pipeline-add-rf-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeClassification.addRandomForest(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+include::../../training-methods/randomForestConfig.adoc[]
+
+include::../pipelineInfoResult.adoc[]
+--
+======
+====
+
+
+=== Example
+
+We can add multiple model candidates to our pipeline.
+
+[source, cypher, role=noplay query-example, no-result=true, group=nr]
+.The following will add a linear regression model with default configuration:
+--
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('pipe')
+YIELD parameterSpace
+--
+
+[source, cypher, role=noplay query-example, no-result=true, group=nr]
+.The following will add a random forest model:
+--
+CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+YIELD parameterSpace
+--
+
+[role=query-example,group=nr]
+--
+.The following will add a linear regression model with a range parameter:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
+YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LinearRegression AS linearRegressionSpace
+----
+
+.Results
+[opts="header",cols="1, 1"]
+|===
+| randomForestSpace | linearRegressionSpace
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LinearRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LinearRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+|===
+--
+
+//FIXME add link to training section
+The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+Each specified model candidate will be tried out during the model selection in trainin.
+
+[NOTE]
+====
+These are somewhat naive examples of how to add and configure model candidates.
+Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
+====

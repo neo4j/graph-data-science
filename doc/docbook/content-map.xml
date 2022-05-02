@@ -358,6 +358,8 @@
             </d:tocentry>
             <d:tocentry linkend="machine-learning-training-methods-random-forest"><?dbhtml filename="machine-learning/training-methods/random-forest/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="machine-learning-training-methods-linear-regression"><?dbhtml filename="machine-learning/training-methods/linear-regression/index.html"?>
+            </d:tocentry>
         </d:tocentry>
         <d:tocentry linkend="ml-auto-tuning"><?dbhtml filename="machine-learning/auto-tuning/index.html"?>
         </d:tocentry>
