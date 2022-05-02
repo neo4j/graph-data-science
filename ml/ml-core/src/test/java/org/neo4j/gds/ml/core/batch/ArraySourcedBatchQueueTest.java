@@ -25,11 +25,12 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class HugeBatchQueueTest {
+class ArraySourcedBatchQueueTest {
+
     @Test
     void test() {
         HugeLongArray data = HugeLongArray.of(3, 6, 2, 3, 6, 2, 76, 3, 2, 6, 7, 42, 43);
-        var hugeBatchQueue = new HugeBatchQueue(ReadOnlyHugeLongArray.of(data), 5);
+        var hugeBatchQueue = new ArraySourcedBatchQueue(ReadOnlyHugeLongArray.of(data), 5);
         var b1 = hugeBatchQueue.pop();
         assertThat(b1).isPresent();
         assertThat(b1.get().nodeIds()).containsExactly(3L, 6L, 2L, 3L, 6L);

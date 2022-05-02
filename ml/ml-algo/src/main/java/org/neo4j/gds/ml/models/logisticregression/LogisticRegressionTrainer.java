@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.batch.HugeBatchQueue;
+import org.neo4j.gds.ml.core.batch.ArraySourcedBatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -105,7 +105,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         var classifier = LogisticRegressionClassifier.from(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
-        Supplier<BatchQueue> queueSupplier = () -> new HugeBatchQueue(trainSet, trainConfig.batchSize());
+        Supplier<BatchQueue> queueSupplier = () -> new ArraySourcedBatchQueue(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);
 
