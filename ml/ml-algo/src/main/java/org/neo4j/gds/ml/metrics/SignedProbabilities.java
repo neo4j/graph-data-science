@@ -93,7 +93,7 @@ public final class SignedProbabilities {
     ) {
         progressTracker.setVolume(features.size());
 
-        var signedProbabilities = SignedProbabilities.create(features.size());
+        var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
         int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
         evaluationQueue.parallelConsume(concurrency, thread -> batch -> {

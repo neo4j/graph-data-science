@@ -23,10 +23,23 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 class BatchQueueTest {
+
+    @Test
+    void totalSize() {
+        long totalSize = 100_001_001L;
+        BatchQueue batchQueue = new BatchQueue(totalSize);
+        assertThat(batchQueue.totalSize()).isEqualTo(totalSize);
+        var counter = new AtomicLong(0);
+        batchQueue.parallelConsume(batch -> counter.getAndAdd(batch.size()), 4, TerminationFlag.RUNNING_TRUE);
+        assertThat(counter.get()).isEqualTo(totalSize);
+    }
+
     @Test
     void shouldHandleVeryLargeBatches() {
         BatchQueue batchQueue = new BatchQueue(5L * Integer.MAX_VALUE, 1, 4);

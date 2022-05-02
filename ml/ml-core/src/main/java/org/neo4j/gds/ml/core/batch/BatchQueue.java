@@ -32,24 +32,22 @@ import java.util.stream.IntStream;
 
 public class BatchQueue {
     public static final int DEFAULT_BATCH_SIZE = 100;
-    protected final long nodeCount;
+    protected final long totalSize;
     protected final int batchSize;
     long currentBatch;
 
-    public BatchQueue(long nodeCount) {
-        this(nodeCount, DEFAULT_BATCH_SIZE);
+    public BatchQueue(long totalSize) {
+        this(totalSize, DEFAULT_BATCH_SIZE);
     }
 
-    public BatchQueue(long nodeCount, int batchSize) {
-        this.nodeCount = nodeCount;
+    public BatchQueue(long totalSize, int batchSize) {
+        this.totalSize = totalSize;
         this.batchSize = batchSize;
         this.currentBatch = 0;
     }
 
-    public BatchQueue(long nodeCount, int minBatchSize, int concurrency) {
-        this(nodeCount,
-            computeBatchSize(nodeCount, minBatchSize, concurrency)
-        );
+    public BatchQueue(long totalSize, int minBatchSize, int concurrency) {
+        this(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
     }
 
     public static int computeBatchSize(long nodeCount, int minBatchSize, int concurrency) {
@@ -60,12 +58,16 @@ public class BatchQueue {
     }
 
     synchronized Optional<Batch> pop() {
-        if (currentBatch * batchSize >= nodeCount) {
+        if (currentBatch * batchSize >= totalSize) {
             return Optional.empty();
         }
-        var batch = new LazyBatch(currentBatch * batchSize, batchSize, nodeCount);
+        var batch = new LazyBatch(currentBatch * batchSize, batchSize, totalSize);
         currentBatch += 1;
         return Optional.of(batch);
+    }
+
+    public long totalSize() {
+        return totalSize;
     }
 
     public void parallelConsume(Consumer<Batch> consumer, int concurrency, TerminationFlag terminationFlag) {
@@ -82,7 +84,7 @@ public class BatchQueue {
     public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier, TerminationFlag terminationFlag) {
         var consumers = IntStream
             .range(0, concurrency)
-            .mapToObj(consumerSupplier::apply)
+            .mapToObj(consumerSupplier)
             .collect(Collectors.toList());
 
         parallelConsume(concurrency, consumers, terminationFlag);
