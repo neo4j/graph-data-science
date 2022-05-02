@@ -32,8 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
-import org.neo4j.gds.ml.core.batch.ConsecutiveBatchQueue;
-import org.neo4j.gds.ml.core.batch.ArraySourcedBatchQueue;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -283,7 +282,7 @@ public final class LinkPredictionTrain {
             testData.features(),
             testData.labels(),
             classifier,
-            new ConsecutiveBatchQueue(testData.size()),
+            BatchQueue.consecutive(testData.size()),
             config.concurrency(),
             terminationFlag,
             progressTracker
@@ -321,7 +320,7 @@ public final class LinkPredictionTrain {
             trainData.features(),
             trainData.labels(),
             classifier,
-            new ArraySourcedBatchQueue(evaluationSet),
+            BatchQueue.fromArray(evaluationSet),
             config.concurrency(),
             terminationFlag,
             progressTracker

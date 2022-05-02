@@ -33,7 +33,7 @@ class ConsecutiveBatchQueueTest {
     @Test
     void totalSize() {
         long totalSize = 100_001_001L;
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(totalSize);
+        var batchQueue = BatchQueue.consecutive(totalSize);
         assertThat(batchQueue.totalSize()).isEqualTo(totalSize);
         var counter = new AtomicLong(0);
         batchQueue.parallelConsume(batch -> counter.getAndAdd(batch.size()), 4, TerminationFlag.RUNNING_TRUE);
@@ -42,7 +42,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldHandleVeryLargeBatches() {
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(5L * Integer.MAX_VALUE, 1, 4);
+        var batchQueue = BatchQueue.consecutive(5L * Integer.MAX_VALUE, 1, 4);
         assertThat(batchQueue.pop().orElseThrow().size()).isEqualTo(Integer.MAX_VALUE);
         for (int i = 0; i < 4; i++) {
             assertThat(batchQueue.pop()).isPresent();
@@ -52,7 +52,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldRespectMinBatchSize() {
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(100, 100, 4);
+        var batchQueue = BatchQueue.consecutive(100, 100, 4);
         int actualSize = batchQueue.pop().orElseThrow().size();
         assertThat(actualSize).isEqualTo(100);
         assertThat(batchQueue.pop()).isEmpty();
@@ -60,7 +60,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldNotGiveBatchLargerThanNodeCount() {
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(100, 200, 4);
+        var batchQueue = BatchQueue.consecutive(100, 200, 4);
         int actualSize = batchQueue.pop().orElseThrow().size();
         assertThat(actualSize).isEqualTo(100);
         assertThat(batchQueue.pop()).isEmpty();
@@ -68,7 +68,7 @@ class ConsecutiveBatchQueueTest {
 
     @Test
     void shouldDivideNodesAlmostEqually() {
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(101, 1, 4);
+        var batchQueue = BatchQueue.consecutive(101, 1, 4);
         for (int i = 0; i < 3; i++) {
             assertThat(batchQueue.pop().orElseThrow().size()).isEqualTo(26);
         }
@@ -79,7 +79,7 @@ class ConsecutiveBatchQueueTest {
     @Test
     void checkTerminationFlag() {
         TerminationFlag flag = () -> false;
-        ConsecutiveBatchQueue batchQueue = new ConsecutiveBatchQueue(101, 1, 4);
+        var batchQueue = BatchQueue.consecutive(101, 1, 4);
 
         assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::nodeIds, 4, flag))
             .isInstanceOf(TransactionTerminatedException.class)

@@ -21,17 +21,10 @@ package org.neo4j.gds.ml.core.batch;
 
 import java.util.Optional;
 
-public class ConsecutiveBatchQueue extends BatchQueue {
+class ConsecutiveBatchQueue extends BatchQueue {
 
-    public ConsecutiveBatchQueue(long totalSize, int batchSize) {
+    ConsecutiveBatchQueue(long totalSize, int batchSize) {
         super(totalSize, batchSize);
-    }
-    public ConsecutiveBatchQueue(long totalSize) {
-        super(totalSize, DEFAULT_BATCH_SIZE);
-    }
-
-    public ConsecutiveBatchQueue(long totalSize, int minBatchSize, int concurrency) {
-        super(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
     }
 
     @Override

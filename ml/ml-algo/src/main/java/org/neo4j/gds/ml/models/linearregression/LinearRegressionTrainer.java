@@ -23,7 +23,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.ArraySourcedBatchQueue;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.Features;
@@ -53,7 +52,7 @@ public final class LinearRegressionTrainer implements RegressorTrainer {
     @Override
     public LinearRegressor train(Features features, HugeDoubleArray targets, ReadOnlyHugeLongArray trainSet) {
         var objective = new LinearRegressionObjective(features, targets, trainConfig.penalty());
-        Supplier<BatchQueue> queueSupplier = () -> new ArraySourcedBatchQueue(trainSet, trainConfig.batchSize());
+        Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 
         var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
         training.train(objective, queueSupplier, concurrency);

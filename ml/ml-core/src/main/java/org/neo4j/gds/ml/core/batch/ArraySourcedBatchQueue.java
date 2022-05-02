@@ -24,15 +24,10 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import java.util.ArrayList;
 import java.util.Optional;
 
-public class ArraySourcedBatchQueue extends BatchQueue {
+class ArraySourcedBatchQueue extends BatchQueue {
     private final ReadOnlyHugeLongArray data;
 
-    public ArraySourcedBatchQueue(ReadOnlyHugeLongArray data) {
-        super(data.size(), DEFAULT_BATCH_SIZE);
-        this.data = data;
-    }
-
-    public ArraySourcedBatchQueue(ReadOnlyHugeLongArray data, int batchSize) {
+    ArraySourcedBatchQueue(ReadOnlyHugeLongArray data, int batchSize) {
         super(data.size(), batchSize);
         this.data = data;
     }

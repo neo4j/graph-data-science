@@ -96,7 +96,7 @@ public final class SignedProbabilities {
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
         int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
-        evaluationQueue.parallelConsume(concurrency, thread -> batch -> {
+        evaluationQueue.parallelConsume(concurrency, __ -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
                 for (Long relationshipIdx : batch.nodeIds()) {

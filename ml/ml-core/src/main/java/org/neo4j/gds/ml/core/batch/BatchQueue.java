@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.batch;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,12 +45,34 @@ public abstract class BatchQueue {
         this.currentBatch = 0;
     }
 
-    public static int computeBatchSize(long nodeCount, int minBatchSize, int concurrency) {
+    public static int computeBatchSize(long totalSize, int minBatchSize, int concurrency) {
         return Math.toIntExact(Math.min(
             Integer.MAX_VALUE,
-            ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize)
+            ParallelUtil.adjustedBatchSize(totalSize, concurrency, minBatchSize)
         ));
     }
+
+    public static BatchQueue consecutive(long totalSize) {
+        return consecutive(totalSize, DEFAULT_BATCH_SIZE);
+    }
+
+    public static BatchQueue consecutive(long totalSize, int minBatchSize, int concurrency) {
+        return consecutive(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
+    }
+
+    public static BatchQueue consecutive(long totalSize, int batchSize) {
+        return new ConsecutiveBatchQueue(totalSize, batchSize);
+    }
+
+    public static BatchQueue fromArray(ReadOnlyHugeLongArray data) {
+        return fromArray(data, DEFAULT_BATCH_SIZE);
+    }
+
+    public static BatchQueue fromArray(ReadOnlyHugeLongArray data, int batchSize) {
+        return new ArraySourcedBatchQueue(data, batchSize);
+    }
+
+
 
     abstract Optional<Batch> pop();
 

@@ -24,7 +24,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.batch.ConsecutiveBatchQueue;
+import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
@@ -72,8 +72,8 @@ public class ParallelNodeClassifier {
             predictedClasses,
             progressTracker
         );
-        var batchQueue = new ConsecutiveBatchQueue(evaluationSetSize, batchSize, concurrency);
-        batchQueue.parallelConsume(consumer, concurrency, terminationFlag);
+        BatchQueue.consecutive(evaluationSetSize, batchSize, concurrency)
+            .parallelConsume(consumer, concurrency, terminationFlag);
 
         return predictedClasses;
     }
