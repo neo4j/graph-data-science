@@ -42,6 +42,7 @@ import org.neo4j.gds.ml.decisiontree.Entropy;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.decisiontree.ImpurityCriterion;
+import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
@@ -160,7 +161,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
 
-        outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
+        outOfBagError = maybePredictions.map(predictions -> OutOfBagError.evaluate(
             trainSet,
             classIdMap,
             allLabels,
@@ -277,7 +278,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             trainedTree = decisionTree.train(bootstrappedDataset.allVectorsIndices());
 
-            maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
+            maybePredictions.ifPresent(predictionsCache -> OutOfBagError.addPredictionsForTree(
                 trainedTree,
                 classIdMap,
                 allFeatureVectors,

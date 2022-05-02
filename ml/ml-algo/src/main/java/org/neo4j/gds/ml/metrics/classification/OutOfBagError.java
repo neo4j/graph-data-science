@@ -19,15 +19,120 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.models.Features;
 
 import java.util.Comparator;
+import java.util.Optional;
+import java.util.concurrent.atomic.LongAdder;
 
 public final class OutOfBagError implements Metric {
     private OutOfBagError() {
     }
 
     public static final OutOfBagError OUT_OF_BAG_ERROR = new OutOfBagError();
+
+    public static void addPredictionsForTree(
+        DecisionTreePredictor<Integer> decisionTree,
+        LocalIdMap classMapping,
+        final Features allFeatureVectors,
+        ReadOnlyHugeLongArray trainSet,
+        final BitSet sampledTrainSet,
+        HugeAtomicLongArray predictions
+    ) {
+        var numClasses = classMapping.size();
+
+        for (long trainSetIdx = 0; trainSetIdx < trainSet.size(); trainSetIdx++) {
+            if (sampledTrainSet.get(trainSetIdx)) continue;
+
+            double[] featureVector = allFeatureVectors.get(trainSet.get(trainSetIdx));
+            Integer prediction = decisionTree.predict(featureVector);
+            predictions.getAndAdd(trainSetIdx * numClasses + prediction, 1);
+        }
+    }
+
+    public static double evaluate(
+        ReadOnlyHugeLongArray trainSet,
+        LocalIdMap classMapping,
+        HugeLongArray expectedLabels,
+        int concurrency,
+        HugeAtomicLongArray predictions
+    ) {
+        var totalMistakes = new LongAdder();
+        var totalOutOfAnyBagVectors = new LongAdder();
+
+        var tasks = PartitionUtils.rangePartition(concurrency, trainSet.size(), partition ->
+                accumulationTask(
+                    partition,
+                    classMapping,
+                    trainSet,
+                    predictions,
+                    expectedLabels,
+                    totalMistakes,
+                    totalOutOfAnyBagVectors
+                ),
+            Optional.empty()
+        );
+
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+    }
+
+    private static Runnable accumulationTask(
+        Partition partition,
+        LocalIdMap classMapping,
+        ReadOnlyHugeLongArray trainSet,
+        HugeAtomicLongArray predictions,
+        HugeLongArray expectedLabels,
+        LongAdder totalMistakes,
+        LongAdder totalOutOfAnyBagVectors
+    ) {
+
+        return () -> {
+            int numClasses = classMapping.size();
+            long numMistakes = 0;
+            long numOutOfAnyBagVectors = 0;
+            final long startOffset = partition.startNode();
+            final long endOffset = startOffset + partition.nodeCount();
+
+            for (long i = startOffset; i < endOffset; i++) {
+                final long innerOffset = i * numClasses;
+                long max = 0;
+                int maxClassIdx = 0;
+
+                for (int j = 0; j < numClasses; j++) {
+                    var numPredictions = predictions.get(innerOffset + j);
+
+                    if (numPredictions <= max) continue;
+
+                    max = numPredictions;
+                    maxClassIdx = j;
+                }
+
+                if (max == 0) continue;
+
+                // The ith feature vector was in at least one out-of-bag dataset.
+                numOutOfAnyBagVectors++;
+                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(trainSet.get(i))) {
+                    numMistakes++;
+                }
+            }
+
+            totalMistakes.add(numMistakes);
+            totalOutOfAnyBagVectors.add(numOutOfAnyBagVectors);
+        };
+    }
 
     @Override
     public String name() {
