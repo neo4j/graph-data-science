@@ -106,6 +106,7 @@
 **** xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict/index.adoc[]
 *** xref:machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[]
 **** xref:machine-learning/node-property-prediction/noderegression-pipelines/config/index.adoc[]
+**** xref:machine-learning/node-property-prediction/noderegression-pipelines/training/index.adoc[]
 ** xref:machine-learning/linkprediction-pipelines/index.adoc[]
 *** xref:machine-learning/linkprediction-pipelines/config/index.adoc[]
 *** xref:machine-learning/linkprediction-pipelines/training/index.adoc[]

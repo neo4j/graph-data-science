@@ -24,5 +24,8 @@ A training pipeline is a sequence of two phases:
 This segment is divided into the following pages:
 
 * <<noderegression-pipelines-config, Configuring the pipeline>>
+* <<noderegression-pipelines-train, Training the pipeline>>
 
 include::config.adoc[leveloffset =+ 1]
+
+include::training.adoc[leveloffset =+ 1]

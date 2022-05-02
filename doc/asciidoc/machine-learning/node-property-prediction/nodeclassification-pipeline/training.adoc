@@ -159,7 +159,7 @@ We will do this on a small graph of a handful of nodes representing houses.
 This is an example of Multi-class classification, the `class` node property distinct values determine the number of classes, in this case three (0, 1 and 2).
 The example graph looks like this:
 
-image::example-graphs/node_classification.svg[align="center"]
+image::example-graphs/node_property_pipeline_graph.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
 [source, cypher, role=noplay setup-query, group=nc]
