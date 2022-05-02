@@ -190,7 +190,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         var metricSpecification = ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR");
 
-        var modelCandidate = RandomForestTrainerConfig.DEFAULT;
+        var modelCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
         pipeline.addTrainerConfig(modelCandidate);
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
@@ -321,7 +321,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             ),
             Arguments.of(
                 List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(91_178, 207_950)
+                MemoryRange.of(91_186, 207_958)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),

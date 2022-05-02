@@ -48,7 +48,7 @@ import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -201,7 +201,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .testFraction(0.5)
             .build());
 
-        pipeline.addTrainerConfig(RandomForestTrainerConfig.DEFAULT);
+        pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
