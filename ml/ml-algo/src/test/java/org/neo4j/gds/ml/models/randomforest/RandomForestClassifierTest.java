@@ -293,7 +293,7 @@ class RandomForestClassifierTest {
         long expectedMin,
         long expectedMax
     ) {
-        var config = RandomForestTrainerConfigImpl.builder()
+        var config = RandomForestClassifierTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
             .maxFeaturesRatio(maxFeaturesRatio)

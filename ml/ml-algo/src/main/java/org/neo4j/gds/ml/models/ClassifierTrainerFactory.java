@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
 
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
@@ -94,7 +93,7 @@ public final class ClassifierTrainerFactory {
                     numberOfTrainingExamples,
                     numberOfClasses,
                     featureDimension,
-                   (RandomForestTrainerConfig) config
+                   (RandomForestClassifierTrainerConfig) config
                 );
             }
             default:

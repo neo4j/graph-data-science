@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
@@ -87,7 +88,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         LongUnaryOperator numberOfTrainingSamples,
         int numberOfClasses,
         MemoryRange featureDimension,
-        RandomForestTrainerConfig config
+        RandomForestClassifierTrainerConfig config
     ) {
         // Since we don't expose Out-of-bag-error (yet) we do not take it into account here either.
 
@@ -98,8 +99,10 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             // estimating the final forest produced
             .add(RandomForestClassifierData.memoryEstimation(numberOfTrainingSamples, config))
             .rangePerNode(
-                "GiniIndex Loss",
-                nodeCount -> GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
+                "Impurity computation data",
+                nodeCount -> config.criterion() == ClassifierImpurityCriterionType.GINI
+                    ? GiniIndex.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
+                    : Entropy.memoryEstimation(numberOfTrainingSamples.applyAsLong(nodeCount))
             ).perGraphDimension(
                 "Decision tree training",
                 (dim, concurrency) ->
@@ -175,7 +178,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     }
 
     private ImpurityCriterion initializeImpurityCriterion(HugeLongArray allLabels) {
-        switch(config.criterion()) {
+        switch (config.criterion()) {
             case GINI:
                 return GiniIndex.fromOriginalLabels(allLabels, classIdMap);
             case ENTROPY:

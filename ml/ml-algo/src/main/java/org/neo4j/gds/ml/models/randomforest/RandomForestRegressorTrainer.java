@@ -72,7 +72,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
     public static MemoryEstimation memoryEstimation(
         LongUnaryOperator numberOfTrainingSamples,
         MemoryRange featureDimension,
-        RandomForestTrainerConfig config
+        RandomForestRegressorTrainerConfig config
     ) {
         int minNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.min) * featureDimension.min);
         int maxNumberOfBaggedFeatures = (int) Math.ceil(config.maxFeaturesRatio((int) featureDimension.max) * featureDimension.max);
