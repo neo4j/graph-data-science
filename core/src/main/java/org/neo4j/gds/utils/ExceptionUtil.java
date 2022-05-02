@@ -19,11 +19,17 @@
  */
 package org.neo4j.gds.utils;
 
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -54,7 +60,8 @@ public final class ExceptionUtil {
      *
      * Copied from {@code org.neo4j.helpers.Exceptions#chain(Throwable, Throwable)} due to deprecation.
      */
-    public static <T extends Throwable> T chain(T initial, T current) {
+    @Contract("null, _ -> param2; !null, _ -> !null")
+    public static <T extends Throwable> @Nullable T chain(@Nullable T initial, @Nullable T current) {
         if (initial == null) {
             return current;
         }
@@ -63,6 +70,70 @@ public final class ExceptionUtil {
             initial.addSuppressed(current);
         }
         return initial;
+    }
+
+    public static final CheckedConsumer<Exception, Exception> RETHROW_CHECKED = e -> {
+        throw e;
+    };
+
+    public static final CheckedConsumer<Exception, RuntimeException> RETHROW_UNCHECKED = e -> {
+        ExceptionUtil.throwIfUnchecked(e);
+        throw new RuntimeException(e);
+    };
+
+    public static void closeAll(Stream<? extends AutoCloseable> closeables) throws Exception {
+        closeAll(closeables.iterator());
+    }
+
+    public static void closeAll(AutoCloseable... closeables) throws Exception {
+        closeAll(Arrays.asList(closeables));
+    }
+
+    public static void closeAll(Iterable<? extends AutoCloseable> closeables) throws Exception {
+        closeAll(closeables.iterator());
+    }
+
+    public static void closeAll(Iterator<? extends AutoCloseable> closeables) throws Exception {
+        closeAll(RETHROW_CHECKED, closeables);
+    }
+
+    public static <E extends Exception> void closeAll(
+        CheckedConsumer<Exception, E> handler,
+        Stream<? extends AutoCloseable> closeables
+    ) throws E {
+        closeAll(handler, closeables.iterator());
+    }
+
+    public static <E extends Exception> void closeAll(
+        CheckedConsumer<Exception, E> handler,
+        AutoCloseable... closeables
+    ) throws E {
+        closeAll(handler, Arrays.asList(closeables));
+    }
+
+    public static <E extends Exception> void closeAll(
+        CheckedConsumer<Exception, E> handler,
+        Iterable<? extends AutoCloseable> closeables
+    ) throws E {
+        closeAll(handler, closeables.iterator());
+    }
+
+    public static <E extends Exception> void closeAll(
+        CheckedConsumer<Exception, E> handler,
+        Iterator<? extends AutoCloseable> closeables
+    ) throws E {
+        Exception error = null;
+        while (closeables.hasNext()) {
+            var closeable = closeables.next();
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                error = chain(error, e);
+            }
+        }
+        if (error != null) {
+            handler.checkedAccept(error);
+        }
     }
 
     /**
