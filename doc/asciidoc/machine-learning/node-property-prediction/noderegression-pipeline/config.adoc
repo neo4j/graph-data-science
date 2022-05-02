@@ -209,7 +209,6 @@ YIELD name, featureProperties
 --
 
 
-// TODO: how much can we share this part?
 [[noderegression-pipelines-configure-splits]]
 == Configuring the node splits
 :pipeline-type: Regression
@@ -245,13 +244,7 @@ YIELD
 | configuration   | Map     | Configuration for splitting the relationships.
 |===
 
-.Configuration
-[opts="header",cols="1,1,1,4"]
-|===
-| Name               | Type    | Default | Description
-| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<nodeclassification-pipelines-train,model selection>>.
-| testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
-|===
+include::../nodeSplit-config.adoc[]
 
 include::../pipelineInfoResult.adoc[]
 --
@@ -282,7 +275,6 @@ YIELD splitConfig
 We now reconfigured the splitting of the pipeline, which will be applied during training.
 --
 
-// TODO try share this part with the NC pipeline
 [[noderegression-pipelines-adding-model-candidates]]
 == Adding model candidates
 
@@ -421,7 +413,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LinearRe
 
 //FIXME add link to training section
 The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
-Each specified model candidate will be tried out during the model selection in trainin.
+Each specified model candidate will be tried out during the model selection in training.
 
 [NOTE]
 ====

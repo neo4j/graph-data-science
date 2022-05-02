@@ -246,13 +246,7 @@ YIELD
 | configuration   | Map     | Configuration for splitting the relationships.
 |===
 
-.Configuration
-[opts="header",cols="1,1,1,4"]
-|===
-| Name               | Type    | Default | Description
-| validationFolds    | Integer | 3       | Number of divisions of the training graph used during <<nodeclassification-pipelines-train,model selection>>.
-| testFraction       | Double  | 0.3     | Fraction of the graph reserved for testing. Must be in the range (0, 1). The fraction used for the training is `1 - testFraction`.
-|===
+include::../nodeSplit-config.adoc[]
 
 include::../pipelineInfoResult.adoc[]
 --
