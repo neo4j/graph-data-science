@@ -31,7 +31,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import java.util.List;
@@ -120,7 +120,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
                 .classes(trainResult.classifier().classIdMap().originalIdsList())
                 .bestParameters(trainResult.trainingStatistics().bestParameters())
                 .metrics(trainResult.trainingStatistics().metricsForWinningModel())
-                .pipeline(NodeClassificationPredictPipeline.from(pipeline))
+                .pipeline(NodePropertyPredictPipeline.from(pipeline))
                 .build()
         );
 

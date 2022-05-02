@@ -31,14 +31,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class NodeClassificationPredictPipeline implements Pipeline<NodeFeatureStep> {
-    public static final NodeClassificationPredictPipeline EMPTY = new NodeClassificationPredictPipeline(List.of(), List.of());
+public final class NodePropertyPredictPipeline implements Pipeline<NodeFeatureStep> {
+    public static final NodePropertyPredictPipeline EMPTY = new NodePropertyPredictPipeline(List.of(), List.of());
 
     private final List<ExecutableNodePropertyStep> nodePropertySteps;
     private final List<NodeFeatureStep> featureSteps;
 
 
-    private NodeClassificationPredictPipeline(
+    private NodePropertyPredictPipeline(
         List<ExecutableNodePropertyStep> nodePropertySteps,
         List<NodeFeatureStep> featureSteps
     ) {
@@ -46,18 +46,18 @@ public final class NodeClassificationPredictPipeline implements Pipeline<NodeFea
         this.featureSteps = featureSteps;
     }
 
-    public static NodeClassificationPredictPipeline from(Pipeline<NodeFeatureStep> pipeline) {
-        return new NodeClassificationPredictPipeline(
+    public static NodePropertyPredictPipeline from(Pipeline<NodeFeatureStep> pipeline) {
+        return new NodePropertyPredictPipeline(
             List.copyOf(pipeline.nodePropertySteps()),
             List.copyOf(pipeline.featureSteps())
         );
     }
 
-    public static NodeClassificationPredictPipeline from(
+    public static NodePropertyPredictPipeline from(
         Stream<NodePropertyStep> nodePropertySteps,
         Stream<NodeFeatureStep> featureSteps
     ) {
-        return new NodeClassificationPredictPipeline(
+        return new NodePropertyPredictPipeline(
             nodePropertySteps.collect(Collectors.toList()),
             featureSteps.collect(Collectors.toList())
         );

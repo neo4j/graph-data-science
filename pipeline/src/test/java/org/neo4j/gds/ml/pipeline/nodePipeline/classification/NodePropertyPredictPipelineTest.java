@@ -23,14 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodeClassificationPredictPipelineTest {
+class NodePropertyPredictPipelineTest {
 
     @Test
     void copiesTheListFromTrainPipeline() {
@@ -44,7 +44,7 @@ class NodeClassificationPredictPipelineTest {
 
         trainPipeline.addFeatureStep(NodeFeatureStep.of("a"));
 
-        var predictPipeline = NodeClassificationPredictPipeline.from(trainPipeline);
+        var predictPipeline = NodePropertyPredictPipeline.from(trainPipeline);
 
         assertThat(predictPipeline.nodePropertySteps())
             .isNotSameAs(trainPipeline.nodePropertySteps())
