@@ -107,6 +107,7 @@ class TunableTrainerConfigTest {
             "maxDepth", 5,
             "methodName", "RandomForest",
             "minSplitSize", 2,
+            "minLeafSize", 1,
             "numberOfDecisionTrees", 100,
             "numberOfSamplesRatio", 1.0
         ));

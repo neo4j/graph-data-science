@@ -29,10 +29,10 @@ Having a too small number of trees could mean that the model will overfit to som
 A larger number of trees will in general mean that the training takes longer, and the memory consumption will be higher.
 
 
-=== Max feature ratio
+=== Max features ratio
 
 For each node split in a decision tree, a set of features of the feature vectors are considered.
-The number of such features considered is the `maxFeatureRatio` multiplied by the total number of features.
+The number of such features considered is the `maxFeaturesRatio` multiplied by the total number of features.
 If the number of features to be considered are fewer than the total number of features, a subset of all features are sampled (without replacement).
 This is sometimes referred to as _feature bagging_.
 
@@ -51,13 +51,21 @@ The memory footprint of the produced prediction model might also be higher since
 A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
 
 
+==== Min leaf size
+
+This parameter sets the minimum number of training samples required to be present in a leaf node of a decision tree.
+
+A large leaf size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
+It will likely also mean that the training and prediction will be faster, since probably the trees will contain fewer nodes.
+
+
 ==== Min split size
 
 This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
 To split a node means to continue the tree construction process to add further children below the node.
 
 A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
-It will likely also mean that the training will be faster as probably fewer node splits will be considered.
+It will likely also mean that the training and prediction will be faster, since probably fewer node splits will be considered, and thus the trees will contain fewer nodes.
 
 
 ==== Number of samples ratio

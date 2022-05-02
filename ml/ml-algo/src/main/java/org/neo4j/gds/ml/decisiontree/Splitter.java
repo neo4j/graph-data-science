@@ -30,15 +30,17 @@ public class Splitter {
     private final DecisionTreeLoss lossFunction;
     private final Features features;
     private final FeatureBagger featureBagger;
+    private final int minLeafSize;
     private final HugeLongArray sortCache;
     private final DecisionTreeLoss.ImpurityData bestLeftImpurityDataForIdx;
     private final DecisionTreeLoss.ImpurityData bestRightImpurityDataForIdx;
     private final DecisionTreeLoss.ImpurityData rightImpurityData;
 
-    Splitter(long trainSetSize, DecisionTreeLoss lossFunction, FeatureBagger featureBagger, Features features) {
+    Splitter(long trainSetSize, DecisionTreeLoss lossFunction, FeatureBagger featureBagger, Features features, int minLeafSize) {
         this.featureBagger = featureBagger;
         this.lossFunction = lossFunction;
         this.features = features;
+        this.minLeafSize = minLeafSize;
         this.sortCache = HugeLongArray.newArray(trainSetSize);
         this.bestLeftImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
         this.bestRightImpurityDataForIdx = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
@@ -83,19 +85,29 @@ public class Splitter {
             // by each index in the ordered group.
             HugeSerialIndirectMergeSort.sort(rightChildArray, group.size(), (long l) -> features.get(l)[featureIdx], sortCache);
 
-            var leftImpurityData = lossFunction.groupImpurity(HugeLongArray.of(), 0, 0);
             group.impurityData().copyTo(rightImpurityData);
 
-            for (long leftGroupSize = 1; leftGroupSize < group.size(); leftGroupSize++) {
+            for (long leftGroupSize = 1; leftGroupSize < minLeafSize; leftGroupSize++) {
                 // At each step we move one feature vector to the left child from the right child. Since `rightChildArray` is
                 // ordered by current feature, this simply entails copying the `leftGroupSize - 1`th entry from right to left.
                 long splittingFeatureVectorIdx = rightChildArray.get(leftGroupSize - 1);
                 leftChildArray.set(leftGroupSize - 1, splittingFeatureVectorIdx);
 
-                // Since only one feature vector is moved to and from the left and right groups respectively, we can do an
+                // Since only one feature vector is moved to the right group, we can do an
                 // impurity update based on the previous impurity.
+                lossFunction.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
+            }
+
+            var leftImpurityData = lossFunction.groupImpurity(leftChildArray, 0, minLeafSize - 1L);
+
+            // Continue moving feature vectors, but now actually compute loss since left group is large enough.
+            for (long leftGroupSize = minLeafSize; leftGroupSize <= group.size() - minLeafSize; leftGroupSize++) {
+                long splittingFeatureVectorIdx = rightChildArray.get(leftGroupSize - 1);
+                leftChildArray.set(leftGroupSize - 1, splittingFeatureVectorIdx);
+
                 lossFunction.incrementalImpurity(splittingFeatureVectorIdx, leftImpurityData);
                 lossFunction.decrementalImpurity(splittingFeatureVectorIdx, rightImpurityData);
+
                 double loss = lossFunction.loss(leftImpurityData, rightImpurityData);
 
                 // We track best split for a single feature idx in order to keep using `leftChildArray` and `rightChildArray`

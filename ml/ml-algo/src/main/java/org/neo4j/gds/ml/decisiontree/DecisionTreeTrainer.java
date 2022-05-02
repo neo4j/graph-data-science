@@ -52,16 +52,19 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
 
     // Does not include the class itself as it will be inherited anyway.
     public static MemoryRange estimateTree(
-        int maxDepth,
-        int minSplitSize,
+        DecisionTreeTrainerConfig config,
         long numberOfTrainingSamples,
-        long leafNodeSize,
+        long leafNodeSizeInBytes,
         long sizeOfImpurityData
     ) {
-        var predictorEstimation = estimateTree(maxDepth, numberOfTrainingSamples, minSplitSize, leafNodeSize);
+        var predictorEstimation = estimateTree(
+            config,
+            numberOfTrainingSamples,
+            leafNodeSizeInBytes
+        );
 
-        // The actual depth of the produced tree is capped by the number of samples to populate the leaves.
-        long normalizedMaxDepth = Math.min(maxDepth, Math.max(1, numberOfTrainingSamples - minSplitSize + 2));
+        // The actual depth of the produced tree is capped by the number of samples that populate the leaves.
+        long normalizedMaxDepth = Math.min(config.maxDepth(), Math.max(1, numberOfTrainingSamples - config.minSplitSize() + 2));
         // Stack implies DFS, so will at most have 2 * normalizedMaxDepth entries for a binary tree.
         long maxItemsOnStack = 2L * normalizedMaxDepth;
         var maxStackSize = MemoryRange.of(sizeOfInstance(ArrayDeque.class))
@@ -79,27 +82,29 @@ public abstract class DecisionTreeTrainer<LOSS extends DecisionTreeLoss, PREDICT
     }
 
     public static MemoryRange estimateTree(
-        int maxDepth,
+        DecisionTreeTrainerConfig config,
         long numberOfTrainingSamples,
-        int minSplitSize,
-        long leafNodeSize
+        long leafNodeSizeInBytes
     ) {
         long maxNumLeafNodes = (long) Math.ceil(
             Math.min(
-                Math.pow(2.0, maxDepth),
-                // The parent of any leaf node must have had at least minSplitSize samples.
-                // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
-                2 * Math.ceil((double) numberOfTrainingSamples / minSplitSize)
+                Math.pow(2.0, config.maxDepth()),
+                Math.min(
+                    (double) numberOfTrainingSamples / config.minLeafSize(),
+                    // The parent of any leaf node must have had at least minSplitSize samples.
+                    // The number of parents of leaves is therefore limited by numberOfTrainingSamples / minSplitSize.
+                    2.0 * numberOfTrainingSamples / config.minSplitSize()
+                )
             )
         );
         return MemoryRange.of(sizeOfInstance(DecisionTreePredictor.class))
             // Minimum size of tree depends on class distribution.
-            .add(MemoryRange.of(1, maxNumLeafNodes).times(leafNodeSize))
+            .add(MemoryRange.of(1, maxNumLeafNodes).times(leafNodeSizeInBytes))
             .add(MemoryRange.of(0, maxNumLeafNodes - 1).times(TreeNode.splitMemoryEstimation()));
     }
 
     public DecisionTreePredictor<PREDICTION> train(ReadOnlyHugeLongArray trainSetIndices) {
-        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features);
+        splitter = new Splitter(trainSetIndices.size(), lossFunction, featureBagger, features, config.minLeafSize());
         var stack = new ArrayDeque<StackRecord<PREDICTION>>();
         TreeNode<PREDICTION> root;
 

@@ -199,16 +199,44 @@ class DecisionTreeRegressorTest {
         assertThat(decisionTreeRegressor.predict(featureVector)).isEqualTo(4.5);
     }
 
+    @Test
+    void considersMinLeafSize() {
+        var featureVector = new double[]{8.0, 0.0};
+
+        var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
+            .minLeafSize(5)
+            .minSplitSize(6)
+            .build();
+
+        var mutableSampledVectors = HugeLongArray.newArray(NUM_SAMPLES);
+        mutableSampledVectors.setAll(i -> i);
+        var sampledVectors = ReadOnlyHugeLongArray.of(mutableSampledVectors);
+
+        var decisionTreeTrainer = new DecisionTreeRegressorTrainer<>(
+            mse,
+            features,
+            targets,
+            decisionTreeTrainConfig,
+            new FeatureBagger(new SplittableRandom(5677377167946646799L), featureVector.length, 1)
+        );
+
+        var decisionTreeRegressor = decisionTreeTrainer.train(sampledVectors);
+        assertThat(decisionTreeRegressor.predict(featureVector)).isEqualTo((0.15 + 4.1 + 4.0 + 4.7 + 3.9) / 5);
+    }
+
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
-        "  6,  1_000,  40_696,    55_960",
-        "  6, 10_000, 400_696,   487_960",
+        "  6,  1_000,  40_704,    55_968",
+        "  6, 10_000, 400_704,   487_968",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 400_696, 1_523_128",
+        " 20, 10_000, 400_704, 1_523_136",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
-        var range = DecisionTreeRegressorTrainer.memoryEstimation(maxDepth, 2, numberOfTrainingSamples);
+        var config = DecisionTreeTrainerConfigImpl.builder()
+            .maxDepth(maxDepth)
+            .build();
+        var range = DecisionTreeRegressorTrainer.memoryEstimation(config, numberOfTrainingSamples);
 
         assertThat(range.min).isEqualTo(expectedMin);
         assertThat(range.max).isEqualTo(expectedMax);

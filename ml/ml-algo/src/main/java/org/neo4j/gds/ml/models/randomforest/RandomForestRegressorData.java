@@ -57,9 +57,8 @@ public interface RandomForestRegressorData extends Regressor.RegressorData {
                     MemoryRange.of(sizeOfInstance(ObjectArrayList.class))
                         .add(DecisionTreeTrainer
                             .estimateTree(
-                                config.maxDepth(),
+                                config,
                                 numberOfTrainingExamples.applyAsLong(nodeCount),
-                                config.minSplitSize(),
                                 TreeNode.leafMemoryEstimation(Double.class)
                             )
                             .times(config.numberOfDecisionTrees())

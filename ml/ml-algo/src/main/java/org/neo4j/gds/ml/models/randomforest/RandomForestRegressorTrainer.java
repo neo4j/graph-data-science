@@ -87,15 +87,13 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 "Decision tree training",
                 (dim, concurrency) ->
                     TrainDecisionTreeTask.memoryEstimation(
-                        config.maxDepth(),
-                        config.minSplitSize(),
+                        config,
                         numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
                         minNumberOfBaggedFeatures,
                         config.numberOfSamplesRatio()
                     ).union(
                         TrainDecisionTreeTask.memoryEstimation(
-                            config.maxDepth(),
-                            config.minSplitSize(),
+                            config,
                             numberOfTrainingSamples.applyAsLong(dim.nodeCount()),
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
@@ -177,8 +175,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         }
 
         public static MemoryRange memoryEstimation(
-            int maxDepth,
-            int minSplitSize,
+            DecisionTreeTrainerConfig config,
             long numberOfTrainingSamples,
             int numberOfBaggedFeatures,
             double numberOfSamplesRatio
@@ -192,8 +189,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))
                 .add(DecisionTreeRegressorTrainer.memoryEstimation(
-                    maxDepth,
-                    minSplitSize,
+                    config,
                     usedNumberOfTrainingSamples
                 ))
                 .add(bootstrappedDatasetEstimation);
