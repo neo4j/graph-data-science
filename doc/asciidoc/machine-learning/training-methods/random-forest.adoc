@@ -97,11 +97,9 @@ For random forest classification in GDS, there are two options, specified via th
 
 * Gini impurity:
 ** A measure of how often a randomly chosen element from the set would be incorrectly labeled if it was randomly labeled according to the distribution of labels in the set
-** Used by the CART decision tree algorithm
 ** Selected to use via the string `"GINI"`
 * Entropy:
 ** An information theoretic measure of the amount of uncertainty in a set
-** Used by the ID3, C4.5 and C5.0 decision tree algorithms
 ** Selected to use via the string `"ENTROPY"`
 
 It's hard to say apriori which criterion is best for a particular problem, but in general using Gini impurity will imply faster training since using Entropy requires computing logarithms.
