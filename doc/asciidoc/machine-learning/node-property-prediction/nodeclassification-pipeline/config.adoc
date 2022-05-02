@@ -399,7 +399,7 @@ YIELD
 | config          | Map         | The random forest config for a potential model. The allowed parameters for a model are defined in the next table.
 |===
 
-include::../../training-methods//randomForestConfig.adoc[]
+include::../../training-methods//random-forest-classification-config.adoc[]
 
 include::../pipelineInfoResult.adoc[]
 --
