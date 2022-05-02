@@ -57,7 +57,7 @@ public enum ClassifierImpurityCriterionType {
         ));
     }
 
-    public static String toString(ClassifierImpurityCriterionType samplerType) {
-        return samplerType.toString();
+    public static String toString(ClassifierImpurityCriterionType criterionType) {
+        return criterionType.toString();
     }
 }
