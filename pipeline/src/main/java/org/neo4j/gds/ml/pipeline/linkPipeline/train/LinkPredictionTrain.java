@@ -135,7 +135,7 @@ public final class LinkPredictionTrain {
 
         progressTracker.beginSubTask("Select best model");
 
-        var trainingStatistics = new TrainingStatistics(List.copyOf(config.linkMetrics()));
+        var trainingStatistics = new TrainingStatistics(List.copyOf(config.metrics()));
 
         modelSelect(trainData, trainRelationshipIds, trainingStatistics);
         progressTracker.endSubTask("Select best model");
@@ -146,7 +146,7 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
-            config.linkMetrics(),
+            config.metrics(),
             progressTracker
         );
         progressTracker.endSubTask("Train best model");
@@ -224,7 +224,7 @@ public final class LinkPredictionTrain {
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
-                    config.linkMetrics(),
+                    config.metrics(),
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -251,8 +251,8 @@ public final class LinkPredictionTrain {
             // insert the candidates' metrics into trainStats and validationStats
             var candidateStats = CandidateStats.of(
                 modelParams,
-                trainStatsBuilder.build(config.linkMetrics()),
-                validationStatsBuilder.build(config.linkMetrics())
+                trainStatsBuilder.build(config.metrics()),
+                validationStatsBuilder.build(config.metrics())
             );
             trainingStatistics.addCandidateStats(candidateStats);
 
@@ -311,9 +311,7 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.linkMetrics().stream()
-            .filter(metric -> metric instanceof LinkMetric)
-            .map(metric -> (LinkMetric) metric)
+        config.linkMetrics()
             .forEach(metric -> {
                 double score = metric.compute(signedProbabilities, config.negativeClassWeight());
                 trainingStatistics.addTestScore(metric, score);

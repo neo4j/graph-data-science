@@ -40,6 +40,11 @@ public final class OutOfBagError implements Metric {
     private OutOfBagError() {
     }
 
+    @Override
+    public boolean isModelSpecific() {
+        return true;
+    }
+
     public static final OutOfBagError OUT_OF_BAG_ERROR = new OutOfBagError();
 
     public static void addPredictionsForTree(

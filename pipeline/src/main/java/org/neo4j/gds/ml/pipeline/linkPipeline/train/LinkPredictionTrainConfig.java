@@ -45,21 +45,30 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
 
     String pipeline();
 
-    // ConvertWith + default doesnt work (yet)
-    default List<String> metrics() {
-        return List.of(LinkMetric.AUCPR.name());
+    @Configuration.ConvertWith("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#metricsToNames")
+    default List<Metric> metrics() {
+        return List.of(LinkMetric.AUCPR);
     }
 
     @Configuration.Ignore
-    default List<Metric> linkMetrics() {
-        return namesToMetrics(metrics());
+    default List<LinkMetric> linkMetrics() {
+        return metrics()
+            .stream()
+            .filter(metric -> !metric.isModelSpecific())
+            .map(metric -> (LinkMetric) metric)
+            .collect(Collectors.toList());
     }
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
         return new LinkPredictionTrainConfigImpl(username, config);
     }
 
-    static List<Metric> namesToMetrics(List<String> names) {
-        return names.stream().map(name -> LinkMetric.parseLinkMetric((String) name)).collect(Collectors.toList());
+    static List<Metric> namesToMetrics(List<?> names) {
+        return names.stream().map(LinkMetric::parseLinkMetric).collect(Collectors.toList());
+    }
+
+    static List<String> metricsToNames(List<Metric> metrics) {
+        return metrics.stream().map(Metric::name).collect(Collectors.toList());
     }
 }

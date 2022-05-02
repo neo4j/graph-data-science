@@ -26,4 +26,7 @@ public interface Metric {
 
     Comparator<Double> comparator();
 
+    default boolean isModelSpecific() {
+        return false;
+    }
 }

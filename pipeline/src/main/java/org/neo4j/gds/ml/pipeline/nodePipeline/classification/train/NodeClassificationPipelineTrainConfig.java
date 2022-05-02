@@ -25,6 +25,7 @@ import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -51,6 +52,14 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
         return metrics()
             .stream()
             .flatMap(spec -> spec.createMetrics(classes))
+            .collect(Collectors.toList());
+    }
+
+    static List<ClassificationMetric> classificationMetrics(List<Metric> metrics) {
+        return metrics
+            .stream()
+            .filter(metric -> !metric.isModelSpecific())
+            .map(metric -> (ClassificationMetric) metric)
             .collect(Collectors.toList());
     }
 

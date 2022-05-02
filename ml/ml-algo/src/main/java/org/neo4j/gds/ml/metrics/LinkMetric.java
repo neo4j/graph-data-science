@@ -31,11 +31,19 @@ public enum LinkMetric implements Metric {
         }
     };
 
-    public static Metric parseLinkMetric(String name) {
-        if (name.equals(OUT_OF_BAG_ERROR.name())) {
-            return OUT_OF_BAG_ERROR;
+    public static Metric parseLinkMetric(Object nameOrMetric) {
+        if (nameOrMetric instanceof Metric) {
+            return (Metric) nameOrMetric;
         }
-        return valueOf(name);
+        if (nameOrMetric instanceof String) {
+            var name = (String) nameOrMetric;
+            if (name.equals(OUT_OF_BAG_ERROR.name())) {
+                return OUT_OF_BAG_ERROR;
+            }
+            return valueOf(name);
+
+        }
+        throw new IllegalArgumentException("Metrics must be strings");
     }
 
     public double compute(SignedProbabilities signedProbabilities, double negativeClassWeight) {

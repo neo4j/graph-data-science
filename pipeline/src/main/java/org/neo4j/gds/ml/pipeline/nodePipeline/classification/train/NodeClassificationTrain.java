@@ -70,6 +70,7 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain {
@@ -80,6 +81,7 @@ public final class NodeClassificationTrain {
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
     private final List<Metric> metrics;
+    private final List<ClassificationMetric> classificationMetrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -222,6 +224,7 @@ public final class NodeClassificationTrain {
         HugeLongArray labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
+        var classificationMetrics = classificationMetrics(metrics);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
@@ -238,6 +241,7 @@ public final class NodeClassificationTrain {
             labels,
             classIdMap,
             metrics,
+            classificationMetrics,
             classCounts,
             progressTracker,
             terminationFlag
@@ -251,10 +255,12 @@ public final class NodeClassificationTrain {
         HugeLongArray labels,
         LocalIdMap classIdMap,
         List<Metric> metrics,
+        List<ClassificationMetric> classificationMetrics,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
+        this.classificationMetrics = classificationMetrics;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.pipeline = pipeline;
@@ -380,11 +386,7 @@ public final class NodeClassificationTrain {
             terminationFlag,
             customProgressTracker
         );
-        metrics
-            .stream()
-            .filter(metric -> metric instanceof ClassificationMetric)
-            .map(metric -> (ClassificationMetric) metric)
-            .forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
+        classificationMetrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
     private void evaluateBestModel(
