@@ -25,7 +25,7 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @ValueClass
 public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
 
-    NodeClassificationPredictPipeline pipeline();
+    NodePropertyPredictPipeline pipeline();
 
     /**
      * The distinct values of the target property which represent the

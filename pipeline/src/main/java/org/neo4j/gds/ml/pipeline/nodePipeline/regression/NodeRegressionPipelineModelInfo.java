@@ -25,6 +25,7 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,12 +42,15 @@ public interface NodeRegressionPipelineModelInfo extends ToMapConvertible {
 
     Map<Metric, BestMetricData> metrics();
 
+    NodePropertyPredictPipeline pipeline();
+
     @Override
     @Value.Auxiliary
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
+            "pipeline", pipeline().toMap(),
             "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
                 entry -> entry.getKey().toString(),
                 entry -> entry.getValue().toMap()

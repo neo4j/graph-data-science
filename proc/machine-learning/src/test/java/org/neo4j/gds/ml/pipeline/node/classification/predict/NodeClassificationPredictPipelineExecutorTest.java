@@ -54,8 +54,8 @@ import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodeClassificationPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -134,7 +134,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = NodeClassificationPredictPipeline.from(
+            var pipeline = NodePropertyPredictPipeline.from(
                 Stream.of(),
                 Stream.of(
                     NodeFeatureStep.of("a"),
@@ -185,7 +185,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = NodeClassificationPredictPipeline.from(
+            var pipeline = NodePropertyPredictPipeline.from(
                 Stream.of(),
                 Stream.of(
                     NodeFeatureStep.of("a"),
@@ -237,7 +237,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = NodeClassificationPredictPipeline.from(
+            var pipeline = NodePropertyPredictPipeline.from(
                 Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
@@ -291,7 +291,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                     .withEntry("graphName", GRAPH_NAME)
             );
 
-            var pipeline = NodeClassificationPredictPipeline.from(
+            var pipeline = NodePropertyPredictPipeline.from(
                 Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                     "degree",
                     Map.of("mutateProperty", "degree")
@@ -454,7 +454,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .classes(modelData.classIdMap().originalIdsList())
                 .bestParameters(RandomForestClassifierTrainerConfigImpl.builder().build())
                 .metrics(Map.of())
-                .pipeline(NodeClassificationPredictPipeline.EMPTY)
+                .pipeline(NodePropertyPredictPipeline.EMPTY)
                 .build()
         );
 

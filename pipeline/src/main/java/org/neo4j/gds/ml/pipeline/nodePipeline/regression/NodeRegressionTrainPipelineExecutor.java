@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -109,6 +110,7 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
             NodeRegressionPipelineModelInfo.builder()
                 .bestParameters(trainResult.trainingStatistics().bestParameters())
                 .metrics(trainResult.trainingStatistics().metricsForWinningModel())
+                .pipeline(NodePropertyPredictPipeline.from(pipeline))
                 .build()
         );
 
@@ -116,7 +118,7 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
     }
 
     @ValueClass
-    interface NodeRegressionTrainPipelineResult {
+    public interface NodeRegressionTrainPipelineResult {
         Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model();
         TrainingStatistics trainingStatistics();
     }
