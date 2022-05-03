@@ -84,11 +84,10 @@ public final class EmbeddingUtils {
             throw new IllegalStateException("Expected a weighted graph");
         }
 
-        ThreadLocal<Graph> concurrentGraph = ThreadLocal.withInitial(graph::concurrentCopy);
         var tasks = PartitionUtils.degreePartition(
             graph,
             concurrency,
-            partition -> new RelationshipValidator(concurrentGraph, partition, validator, errorDetails),
+            partition -> new RelationshipValidator(graph, partition, validator, errorDetails),
             Optional.empty()
         );
 
@@ -97,18 +96,18 @@ public final class EmbeddingUtils {
 
     private static class RelationshipValidator implements Runnable {
 
-        private final ThreadLocal<Graph> concurrentGraph;
+        private final Graph graph;
         private final Partition partition;
         private final DoublePredicate validator;
-        private String errorDetails;
+        private final String errorDetails;
 
         RelationshipValidator(
-            ThreadLocal<Graph> concurrentGraph,
+            Graph graph,
             Partition partition,
             DoublePredicate validator,
             String errorDetails
         ) {
-            this.concurrentGraph = concurrentGraph;
+            this.graph = graph;
             this.partition = partition;
             this.validator = validator;
             this.errorDetails = errorDetails;
@@ -116,27 +115,25 @@ public final class EmbeddingUtils {
 
         @Override
         public void run() {
-            var partitionLocalGraph = concurrentGraph.get();
-            partition.consume(nodeId -> {
-                partitionLocalGraph.forEachRelationship(
-                    nodeId,
-                    Double.NaN,
-                    (sourceNodeId, targetNodeId, property) -> {
-                        if (!validator.test(property)) {
-                            throw new RuntimeException(
-                                formatWithLocale(
-                                    "Found an invalid relationship weight between nodes `%d` and `%d` with the property value of `%f`. %s",
-                                    partitionLocalGraph.toOriginalNodeId(sourceNodeId),
-                                    partitionLocalGraph.toOriginalNodeId(targetNodeId),
-                                    property,
-                                    errorDetails
-                                )
-                            );
-                        }
-                        return true;
+            var partitionLocalGraph = graph.concurrentCopy();
+            partition.consume(nodeId -> partitionLocalGraph.forEachRelationship(
+                nodeId,
+                Double.NaN,
+                (sourceNodeId, targetNodeId, property) -> {
+                    if (!validator.test(property)) {
+                        throw new RuntimeException(
+                            formatWithLocale(
+                                "Found an invalid relationship weight between nodes `%d` and `%d` with the property value of `%f`. %s",
+                                partitionLocalGraph.toOriginalNodeId(sourceNodeId),
+                                partitionLocalGraph.toOriginalNodeId(targetNodeId),
+                                property,
+                                errorDetails
+                            )
+                        );
                     }
-                );
-            });
+                    return true;
+                }
+            ));
 
         }
     }
