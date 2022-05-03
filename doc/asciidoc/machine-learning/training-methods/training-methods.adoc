@@ -6,21 +6,30 @@
 This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
 --
 
-<<nodeclassification-pipelines, Node Classification Pipelines>> and <<linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
+<<nodeclassification-pipelines, Node Classification Pipelines>>, <<noderegression-pipelines, Node Regression Pipelines>>, and <<linkprediction-pipelines, Link Prediction Pipelines>> are trained using supervised machine learning methods.
 These methods have several hyperparameters that one can set to influence the training.
 The objective of this page is to give a brief overview of the methods, as well as advice on how to tune their hyperparameters.
 
-For instructions on how to add model candidates, see the sections <<nodeclassification-pipelines-adding-model-candidates, Adding model candidates (Node Classification)>> and <<linkprediction-adding-model-candidates, Adding model candidates (Link Prediction)>>.
+For instructions on how to add model candidates, see the sections <<nodeclassification-pipelines-adding-model-candidates, Adding model candidates (Node Classification)>>, <<noderegression-pipelines-adding-model-candidates, Adding model candidates (Node Regression)>>, and <<linkprediction-adding-model-candidates, Adding model candidates (Link Prediction)>>.
 During training, <<ml-auto-tuning, auto-tuning>> is carried out to select a best candidate and the best values for its hyper-parameters.
 
 The training methods currently support in the Neo4j Graph Data Science library are:
 
+**Classification**
+
 * Beta
 ** <<machine-learning-training-methods-logistic-regression>>
-
 * Alpha
 ** <<machine-learning-training-methods-random-forest>>
 
+**Regression**
+
+* Alpha
+** <<machine-learning-training-methods-random-forest>>
+** <<machine-learning-training-methods-linear-regression>>
+
 include::logistic-regression.adoc[leveloffset=+1]
+
+include::linear-regression.adoc[leveloffset=+1]
 
 include::random-forest.adoc[leveloffset=+1]

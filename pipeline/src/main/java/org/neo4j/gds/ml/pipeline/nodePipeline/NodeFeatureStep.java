@@ -26,6 +26,7 @@ import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class NodeFeatureStep implements ToMapConvertible, FeatureStep {
 
@@ -62,5 +63,18 @@ public class NodeFeatureStep implements ToMapConvertible, FeatureStep {
     @Override
     public Map<String, Object> toMap() {
         return Map.of(name(), nodeProperty);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NodeFeatureStep that = (NodeFeatureStep) o;
+        return Objects.equals(nodeProperty, that.nodeProperty);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nodeProperty);
     }
 }

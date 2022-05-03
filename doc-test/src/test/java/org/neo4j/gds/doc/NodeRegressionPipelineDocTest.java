@@ -21,6 +21,10 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineAddStepProcs;
+import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineAddTrainerMethodProcs;
+import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureAutoTuningProc;
+import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineCreateProc;
 
 import java.util.List;
@@ -35,7 +39,11 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
     @Override
     protected List<Class<?>> procedures() {
         return List.of(
-            NodeRegressionPipelineCreateProc.class
+            NodeRegressionPipelineCreateProc.class,
+            NodeRegressionPipelineConfigureSplitProc.class,
+            NodeRegressionPipelineAddTrainerMethodProcs.class,
+            NodeRegressionPipelineAddStepProcs.class,
+            NodeRegressionPipelineConfigureAutoTuningProc.class
         );
     }
 

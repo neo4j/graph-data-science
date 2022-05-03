@@ -1,11 +1,14 @@
 [[noderegression-pipelines-config]]
 = Configuring the pipeline
-:max-trials: 10
 
 This page explains how to create and configure a node regression pipeline.
 It consists of the following sections:
 
 * <<noderegression-creating-a-pipeline, Creating the pipeline>>
+* <<noderegression-pipelines-adding-node-properties, Adding node properties>>
+* <<noderegression-pipelines-adding-features, Adding features>>
+* <<noderegression-pipelines-configure-splits, Configuring the node splits>>
+* <<noderegression-pipelines-adding-model-candidates, Adding model candidates>>
 
 
 [[noderegression-creating-a-pipeline]]
@@ -26,8 +29,7 @@ The latter is a model which is stored in the catalog with type `NodeRegression`.
 ----
 CALL gds.alpha.pipeline.nodeRegression.create(
   pipelineName: String
-)
-YIELD
+) YIELD
   name: String,
   nodePropertySteps: List of Map,
   featureProperties: List of String,
@@ -63,9 +65,413 @@ CALL gds.alpha.pipeline.nodeRegression.create('pipe')
 | name     | nodePropertySteps | featureProperties | splitConfig | autoTuningConfig | parameterSpace
 | "pipe"   | []                | []
 | {testFraction=0.3, validationFolds=3}
-| {maxTrials={max-trials}}
+| {maxTrials=10}
 | {RandomForest=[], LinearRegression=[]}
 |===
 --
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+
+
+[[noderegression-pipelines-adding-node-properties]]
+== Adding node properties
+
+A node regression pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
+Such steps producing node properties can be chained one after another and created properties can later be used as <<noderegression-pipelines-adding-features, features>>.
+// FIXME insert link to training + prediction
+Moreover, the node property steps that are added to the training pipeline will be executed both when training a model and when the regression pipeline is applied for regression.
+
+The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
+
+For example, <<ml-preprocessing, pre-processing algorithms>> can be used as node property steps.
+
+
+=== Syntax
+
+[.pipeline-add-node-property-syntax]
+--
+.Add node property syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addNodeProperty(
+  pipelineName: String,
+  procedureName: String,
+  procedureConfiguration: Map
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| pipelineName              | String  | The name of the pipeline.
+| procedureName             | String  | The name of the procedure to be added to the pipeline.
+| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+|===
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('pipe', 'alpha.scaleProperties', {
+  nodeProperties: 'sizePerStory',
+  scaler: 'L1Norm',
+  mutateProperty:'scaledSizes'
+}) YIELD name, nodePropertySteps
+----
+
+.Results
+[opts="header",cols="1,9"]
+|===
+| name     | nodePropertySteps
+| "pipe"   | [{name=gds.alpha.scaleProperties.mutate, config={scaler=L1Norm, mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
+|===
+
+The `scaledSizes` property can be later used as a feature.
+--
+
+
+[[noderegression-pipelines-adding-features]]
+== Adding features
+
+A Node Regression Pipeline allows you to select a subset of the available node properties to be used as features for the machine learning model.
+When executing the pipeline, the selected `nodeProperties` must be either present in the input graph, or created by a previous node property step.
+For example, the `scaledSizes` property could be created by the previous example, and we expect `sizePerStory` to already be present in the in-memory graph used as input, at train and predict time.
+
+
+=== Syntax
+
+[.pipeline-add-feature-syntax]
+--
+.Adding a feature to a pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.selectFeatures(
+  pipelineName: String,
+  featureProperties: List or String
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type            | Description
+| pipelineName           | String          | The name of the pipeline.
+| featureProperties      | List or String  | Node properties to use as model features.
+|===
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will select two feature properties for the pipeline.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
+YIELD name, featureProperties
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| name     | featureProperties
+| "pipe"   | [scaledSizes, sizePerStory]
+|===
+--
+
+
+[[noderegression-pipelines-configure-splits]]
+== Configuring the node splits
+:pipeline-type: Regression
+:parameterspace-link: noderegression-pipelines-adding-model-candidates
+
+include::../nodeSplit-intro.adoc[]
+
+=== Syntax
+
+[.pipeline-configure-split-syntax]
+--
+.Configure the node split syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureSplit(
+  pipelineName: String,
+  configuration: Map
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+include::../nodeSplit-config.adoc[]
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will configure the splitting of the graph for the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureSplit('pipe', {
+  testFraction: 0.2,
+  validationFolds: 5
+}) YIELD splitConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| splitConfig
+| {testFraction=0.2, validationFolds=5}
+|===
+
+// TODO: link to training section here
+We now reconfigured the splitting of the graph for the pipeline, which will be applied during training.
+--
+
+[[noderegression-pipelines-adding-model-candidates]]
+== Adding model candidates
+
+A pipeline contains a collection of configurations for model candidates which is initially empty.
+This collection is called the _parameter space_.
+Each model candidate configuration contains either fixed values or ranges for training parameters.
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see <<ml-auto-tuning>>.
+One or more model configurations must be added to the parameter space of the training pipeline, using one of the following procedures:
+
+* `gds.alpha.pipeline.nodeRegression.addLinearRegression`
+* `gds.alpha.pipeline.nodeRegression.addRandomForest`
+
+For detailed information about the available training methods in GDS, see <<ml-training-methods>>.
+
+// FIXME: add back link to NR train section
+In Training the pipeline, we explain further how the configured model candidates are trained, evaluated and compared.
+
+The parameter space of a pipeline can be inspected using `gds.beta.model.list` and yielding `parameterSpace`.
+
+[NOTE]
+====
+At least one model candidate must be added to the pipeline before it can be trained.
+====
+
+
+=== Syntax
+
+[.tabbed-example, caption = ]
+====
+[.include-with-linear-regression]
+======
+[.pipeline-add-lr-syntax]
+--
+.Adding a linear regression model candidate
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression(
+  pipelineName: String,
+  configuration: Map
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| configuration   | Map         | The linear regression configuration for a candidate model. Supported parameters for model candidates are defined in the next table.
+|===
+
+include::../../training-methods/linearRegressionConfig.adoc[]
+
+include::../pipelineInfoResult.adoc[]
+--
+======
+
+[.include-with-random-forest]
+======
+
+[.pipeline-add-rf-syntax]
+--
+.Adding a random forest model candidate
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addRandomForest(
+  pipelineName: String,
+  configuration: Map
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| configuration   | Map         | The random forest configuration for a candidate model. Supported parameters for model candidates are defined in the next table.
+|===
+
+include::../../training-methods/randomForestConfig.adoc[]
+
+include::../pipelineInfoResult.adoc[]
+--
+======
+====
+
+
+=== Example
+
+We can add multiple model candidates to our pipeline.
+
+[source, cypher, role=noplay query-example, no-result=true, group=nr]
+.The following will add a linear regression model candidate with default configuration:
+--
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('pipe')
+YIELD parameterSpace
+--
+
+[source, cypher, role=noplay query-example, no-result=true, group=nr]
+.The following will add a random forest model candidate:
+--
+CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+YIELD parameterSpace
+--
+
+[role=query-example,group=nr]
+--
+.The following will add a linear regression model candidate with a range parameter:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
+YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LinearRegression AS linearRegressionSpace
+----
+
+.Results
+[opts="header",cols="1, 1"]
+|===
+| randomForestSpace | linearRegressionSpace
+| [{maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LinearRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LinearRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+|===
+--
+
+//FIXME add link to training section
+The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+Each specified model candidate will be tried out during the model selection in training.
+
+[NOTE]
+====
+These are somewhat naive examples of how to add and configure model candidates.
+Please see <<ml-training-methods>> for more information on how to tune the configuration parameters of each method.
+====
+
+
+[[noderegression-pipelines-configure-auto-tuning]]
+== Configuring Auto-tuning
+
+In order to find good models, the pipeline supports automatically tuning the parameters of the training algorithm.
+Optionally, the procedure described below can be used to configure the auto-tuning behavior.
+Otherwise, default auto-tuning configuration is used.
+Currently, it is only possible to configure the maximum number of trials of hyper-parameter settings which are evaluated.
+
+
+=== Syntax
+
+[.pipeline-configure-auto-tuning-syntax]
+--
+.Configuring auto-tuning syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning(
+  pipelineName: String,
+  configuration: Map
+) YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the created pipeline.
+| configuration   | Map     | The configuration for auto-tuning.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name            | Type    | Default      | Description
+| maxTrials       | Integer | 10           | The value of `maxTrials` determines the maximum allowed model candidates that should be evaluated and compared when training the pipeline. If no ranges are present in the parameter space, `maxTrials` is ignored and the each model candidate in the parameter space is evaluated.
+|===
+
+
+include::../pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=nr]
+--
+.The following will configure the maximum trials for the auto-tuning:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning('pipe', {
+  maxTrials: 100
+}) YIELD autoTuningConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| autoTuningConfig
+| {maxTrials=100}
+|===
+
+// FIXME insert link to training
+We explicitly configured the auto-tuning to try out at most 100 model candidates during training.
+--

@@ -33,12 +33,14 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.ResourceIterator;
 import org.neo4j.graphdb.Result;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -92,6 +94,20 @@ public class BaseProcTest extends BaseTest {
         String messageSubstring
     ) {
         assertError(query, queryParameters, ExceptionMessageMatcher.containsMessage(messageSubstring));
+    }
+
+    protected void assertError(
+        @Language("Cypher") String query,
+        Map<String, Object> queryParameters,
+        List<String> messageSubstrings
+    ) {
+        assertError(
+            query,
+            queryParameters,
+            allOf(messageSubstrings.stream()
+                .map(ExceptionMessageMatcher::containsMessage)
+                .collect(Collectors.toList()))
+        );
     }
 
     protected void assertErrorRegex(

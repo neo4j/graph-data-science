@@ -41,6 +41,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
@@ -115,5 +116,21 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     @Override
     public Map<String, Object> toMap() {
         return Map.of("name", procName(), "config", config);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        NodePropertyStep that = (NodePropertyStep) o;
+        return Objects.equals(callableDefinition, that.callableDefinition) && Objects.equals(
+            config,
+            that.config
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(callableDefinition, config);
     }
 }
