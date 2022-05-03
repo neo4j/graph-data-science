@@ -24,17 +24,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
-
-import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 
 public final class ClassifierTrainerFactory {
 
@@ -48,7 +45,7 @@ public final class ClassifierTrainerFactory {
         int concurrency,
         Optional<Long> randomSeed,
         boolean reduceClassCount,
-        List<? extends Metric> metrics
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         switch (config.method()) {
             case LogisticRegression: {
@@ -66,10 +63,10 @@ public final class ClassifierTrainerFactory {
                     concurrency,
                     classIdMap,
                     (RandomForestClassifierTrainerConfig) config,
-                    metrics.contains(OUT_OF_BAG_ERROR),
                     randomSeed,
                     progressTracker,
-                    terminationFlag
+                    terminationFlag,
+                    metricsHandler
                 );
             }
             default:

@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
@@ -41,10 +40,9 @@ public class RandomForestClassifier implements Classifier {
     public RandomForestClassifier(
         List<DecisionTreePredictor<Integer>> decisionTrees,
         LocalIdMap classMapping,
-        int featureDimension,
-        Optional<Double> outOfBagError
+        int featureDimension
     ) {
-        this(ImmutableRandomForestClassifierData.of(classMapping, featureDimension, decisionTrees, outOfBagError));
+        this(ImmutableRandomForestClassifierData.of(classMapping, featureDimension, decisionTrees));
     }
 
     public RandomForestClassifier(RandomForestClassifierData data) {

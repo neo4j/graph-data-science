@@ -35,20 +35,18 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ImmutableModelStats;
-import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
@@ -63,7 +61,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkFeaturesAndLabelsExtractor.extractFeaturesAndLabels;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -147,8 +144,8 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
-            config.metrics(),
-            progressTracker
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
         );
         progressTracker.endSubTask("Train best model");
 
@@ -181,8 +178,8 @@ public final class LinkPredictionTrain {
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        List<? extends Metric> metrics,
-        ProgressTracker customProgressTracker
+        ProgressTracker customProgressTracker,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
@@ -192,7 +189,7 @@ public final class LinkPredictionTrain {
             config.concurrency(),
             config.randomSeed(),
             true,
-            metrics
+            metricsHandler
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
@@ -216,6 +213,7 @@ public final class LinkPredictionTrain {
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
             var validationStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
+            var metricsHandler = ModelSpecificMetricsHandler.of(config.metrics(), validationStatsBuilder);
             for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = relSplit.trainSet();
@@ -225,8 +223,8 @@ public final class LinkPredictionTrain {
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
-                    config.metrics(),
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    metricsHandler
                 );
 
                 // evaluate each model candidate on the train and validation sets
@@ -244,7 +242,6 @@ public final class LinkPredictionTrain {
                     validationStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
                 );
-                registerSpecificMetrics(classifier, validationStatsBuilder::update);
 
                 progressTracker.logProgress();
             }
@@ -281,13 +278,6 @@ public final class LinkPredictionTrain {
             bestTrial,
             bestTrialScore
         ));
-    }
-
-    private void registerSpecificMetrics(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
-        if (!config.linkMetrics().contains(OUT_OF_BAG_ERROR)) return;
-        if (classifier.data().trainerMethod() != TrainingMethod.RandomForest) return;
-        var data = (RandomForestClassifierData) classifier.data();
-        data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
     }
 
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {
@@ -351,16 +341,12 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.linkMetrics()
-            .stream()
-            .filter(metric -> metric instanceof LinkMetric)
-            .map(metric -> (LinkMetric) metric)
-            .forEach(metric ->
-                scoreConsumer.accept(
-                    metric,
-                    metric.compute(signedProbabilities, config.negativeClassWeight())
-                )
-            );
+        config.linkMetrics().forEach(metric ->
+            scoreConsumer.accept(
+                metric,
+                metric.compute(signedProbabilities, config.negativeClassWeight())
+            )
+        );
     }
 
     public static MemoryEstimation estimate(

@@ -32,14 +32,17 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 
 class RandomForestClassifierTest {
     private static final long NUM_SAMPLES = 10;
@@ -109,10 +112,10 @@ class RandomForestClassifierTest {
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(1)
                 .build(),
-            false,
             Optional.of(42L),
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ModelSpecificMetricsHandler.NOOP
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -140,10 +143,10 @@ class RandomForestClassifierTest {
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            false,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ModelSpecificMetricsHandler.NOOP
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -172,10 +175,10 @@ class RandomForestClassifierTest {
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            false,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ModelSpecificMetricsHandler.NOOP
         );
 
         var randomForestPredictor = randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -203,10 +206,10 @@ class RandomForestClassifierTest {
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(20)
                 .build(),
-            true,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ModelSpecificMetricsHandler.ignoringResult(List.of(OUT_OF_BAG_ERROR))
         );
 
         randomForestTrainer.train(allFeatureVectors, allLabels, trainSet);
@@ -228,10 +231,10 @@ class RandomForestClassifierTest {
                 .maxFeaturesRatio(1.0D)
                 .numberOfDecisionTrees(5)
                 .build(),
-            false,
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            TerminationFlag.RUNNING_TRUE,
+            ModelSpecificMetricsHandler.NOOP
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);

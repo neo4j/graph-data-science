@@ -32,8 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
@@ -47,7 +48,6 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.PipelineCompanion;
@@ -68,7 +68,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -315,16 +314,16 @@ public final class NodeClassificationTrain {
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
+            var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
 
-                var classifier = trainModel(trainSet, modelParams, metrics, ProgressTracker.NULL_TRACKER);
+                var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER, metricsHandler);
 
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
-                registerSpecificMetricScores(classifier, validationStatsBuilder::update);
                 progressTracker.logProgress();
             }
 
@@ -363,13 +362,6 @@ public final class NodeClassificationTrain {
         progressTracker.endSubTask("Select best model");
     }
 
-    private void registerSpecificMetricScores(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
-        if (!metrics.contains(OUT_OF_BAG_ERROR)) return;
-        if (classifier.data().trainerMethod() != TrainingMethod.RandomForest) return;
-        var data = (RandomForestClassifierData) classifier.data();
-        data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
-    }
-
     private void registerMetricScores(
         HugeLongArray evaluationSet,
         Classifier classifier,
@@ -386,6 +378,7 @@ public final class NodeClassificationTrain {
             terminationFlag,
             customProgressTracker
         );
+        // currently no specific metrics are evaluated on test
         classificationMetrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
@@ -394,7 +387,12 @@ public final class NodeClassificationTrain {
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), metrics, progressTracker);
+        var bestClassifier = trainModel(
+            outerSplit.trainSet(),
+            trainingStatistics.bestParameters(),
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
+        );
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask(
@@ -402,9 +400,7 @@ public final class NodeClassificationTrain {
             outerSplit.testSet().size() + outerSplit.trainSet().size()
         );
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore, progressTracker);
-        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore,
-            progressTracker
-        );
+        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore, progressTracker);
         progressTracker.endSubTask("Evaluate on test data");
 
         var testMetrics = trainingStatistics.winningModelTestMetrics();
@@ -413,7 +409,12 @@ public final class NodeClassificationTrain {
 
     private Classifier retrainBestModel(HugeLongArray trainSet, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedClassifier = trainModel(trainSet, trainingStatistics.bestParameters(), metrics, progressTracker);
+        var retrainedClassifier = trainModel(
+            trainSet,
+            trainingStatistics.bestParameters(),
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP
+        );
         progressTracker.endSubTask("Retrain best model");
 
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
@@ -425,8 +426,8 @@ public final class NodeClassificationTrain {
     private Classifier trainModel(
         HugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        List<? extends Metric> metrics,
-        ProgressTracker customProgressTracker
+        ProgressTracker customProgressTracker,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
@@ -436,7 +437,7 @@ public final class NodeClassificationTrain {
             config.concurrency(),
             config.randomSeed(),
             false,
-            metrics
+            metricsHandler
         );
 
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));

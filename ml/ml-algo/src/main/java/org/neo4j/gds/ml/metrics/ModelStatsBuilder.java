@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.metrics;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
