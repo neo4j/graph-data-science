@@ -126,15 +126,7 @@ The structure of `modelInfo` is:
                 max: Float,
                 min: Float,
                 params: Map
-            },
-            {
-                avg: Float,
-                max: Float,
-                min: Float,
-                params: Map
-            },
-            ...
-            ]
+            }
         }
     }
 }
