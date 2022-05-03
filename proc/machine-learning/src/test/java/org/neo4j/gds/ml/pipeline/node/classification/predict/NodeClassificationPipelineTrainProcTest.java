@@ -275,11 +275,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
-            "CALL gds.beta.pipeline.nodeClassification.addNodeProperty($pipeline, 'pageRank', {mutateProperty: 'pr'})",
-            pipe
-        );
-        runQuery(
-            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar', 'pr'])",
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['scalar'])",
             pipe
         );
         runQuery(
