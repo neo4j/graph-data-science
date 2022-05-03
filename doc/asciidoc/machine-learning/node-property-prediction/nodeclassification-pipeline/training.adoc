@@ -14,7 +14,7 @@ More precisely, the training proceeds as follows:
 These graphs are internally managed and exist only for the duration of the training.
 . Split the nodes in the train graph using stratified k-fold cross-validation.
 The number of folds `k` can be configured as described in <<nodeclassification-pipelines-configure-splits, Configuring the node splits>>.
-. Each model candidate defined in the <<nodeclassification-pipelines-adding-model-candidates,parameter space>> is trained on each train set and evaluated on the respective validation set for every fold. The training process uses a logistic regression algorithm, and the evaluation uses the specified <<nodeclassification-pipeline-metrics,metric>>.
+. Each model candidate defined in the <<nodeclassification-pipelines-adding-model-candidates,parameter space>> is trained on each train set and evaluated on the respective validation set for every fold. The evaluation uses the specified primary <<nodeclassification-pipeline-metrics,metric>>.
 . Choose the best performing model according to the highest average score for the primary metric.
 . Retrain the winning model on the entire train graph.
 . Evaluate the performance of the winning model on the whole train graph as well as the test graph.
