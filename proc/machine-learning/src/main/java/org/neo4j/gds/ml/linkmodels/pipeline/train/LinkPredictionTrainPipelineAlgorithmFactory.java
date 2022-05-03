@@ -51,7 +51,7 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             LinkPredictionTrainingPipeline.class
         );
 
-        validateMainMetric(pipeline, trainConfig.metrics().get(0).name());
+        validateMainMetric(pipeline, trainConfig.mainMetric().name());
 
         return new LinkPredictionTrainPipelineExecutor(
             pipeline,

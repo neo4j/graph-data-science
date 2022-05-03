@@ -51,6 +51,12 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
         return List.of(LinkMetric.AUCPR);
     }
 
+
+    @Configuration.Ignore
+    default Metric mainMetric() {
+        return metrics().get(0);
+    }
+
     @Configuration.Ignore
     default List<LinkMetric> linkMetrics() {
         return metrics()
