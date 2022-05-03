@@ -78,8 +78,8 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 
 A node regression pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
 Such steps producing node properties can be chained one after another and created properties can later be used as <<noderegression-pipelines-adding-features, features>>.
-// FIXME insert link to training + prediction
-Moreover, the node property steps that are added to the training pipeline will be executed both when training a model and when the regression pipeline is applied for regression.
+// FIXME insert link to prediction
+Moreover, the node property steps that are added to the training pipeline will be executed both when <<noderegression-pipelines-train,training>> a model and when the regression pipeline is applied for regression.
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
@@ -274,8 +274,7 @@ One or more model configurations must be added to the parameter space of the tra
 
 For detailed information about the available training methods in GDS, see <<ml-training-methods>>.
 
-// FIXME: add back link to NR train section
-In Training the pipeline, we explain further how the configured model candidates are trained, evaluated and compared.
+In <<noderegression-pipelines-train, Training the pipeline>>, we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and yielding `parameterSpace`.
 
@@ -394,9 +393,8 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LinearRe
 |===
 --
 
-//FIXME add link to training section
 The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
-Each specified model candidate will be tried out during the model selection in training.
+Each specified model candidate will be tried out during the model selection in <<noderegression-pipelines-train, training>>.
 
 [NOTE]
 ====
@@ -472,6 +470,5 @@ CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning('pipe', {
 | {maxTrials=100}
 |===
 
-// FIXME insert link to training
-We explicitly configured the auto-tuning to try out at most 100 model candidates during training.
+We explicitly configured the auto-tuning to try out at most 100 model candidates during <<noderegression-pipelines-train,training>>.
 --

@@ -197,7 +197,7 @@ CALL gds.alpha.pipeline.nodeRegression.train('myGraph', {
   randomSeed: 42,
   concurrency: 1,
   metrics: ['MEAN_SQUARED_ERROR']
-}) YIELD modelInfo, modelSelection
+}) YIELD modelInfo
 RETURN
   modelInfo.bestParameters AS winningModel,
   modelInfo.metrics.MEAN_SQUARED_ERROR.train.avg AS avgTrainScore,
