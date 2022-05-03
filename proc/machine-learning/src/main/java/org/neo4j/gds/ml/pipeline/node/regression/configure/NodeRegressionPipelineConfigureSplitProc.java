@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeRegressionPipelineConfigureSplitProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.configureSplit", mode = READ)
-    @Description("Configures the split of the node regression training pipeline.")
+    @Description("Configures the graph splitting of a node regression pipeline.")
     public Stream<NodePipelineInfoResult> configureSplit(
         @Name("pipelineName") String pipelineName,
         @Name("configuration") Map<String, Object> configMap

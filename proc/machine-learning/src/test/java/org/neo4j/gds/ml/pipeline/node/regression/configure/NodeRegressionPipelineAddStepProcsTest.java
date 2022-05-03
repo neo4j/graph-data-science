@@ -23,13 +23,16 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig.DEFAULT_CONFIG;
 
 class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseProcTest {
@@ -50,6 +53,12 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
 
     @Test
     void shouldAddNodePropertyStep() {
+        var pipeline = PipelineCatalog.get(getUsername(), "myPipeline");
+
+        assertThat(pipeline.nodePropertySteps()).isEmpty();
+
+        Map<String, Object> expectedConfig = Map.of("mutateProperty", "pr");
+        String expectedTaskName = "gds.pageRank.mutate";
         assertCypherResult(
             "CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('myPipeline', 'pageRank', {mutateProperty: 'pr'})",
             List.of(Map.of(
@@ -57,18 +66,24 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
                     "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
                     "splitConfig", DEFAULT_CONFIG.toMap(),
                     "nodePropertySteps", List.of(Map.of(
-                        "name", "gds.pageRank.mutate",
-                        "config", Map.of("mutateProperty", "pr")
+                        "name", expectedTaskName,
+                        "config", expectedConfig
                     )),
                     "featureProperties", List.of(),
                     "parameterSpace", DEFAULT_PARAMETERSPACE
                 )
             )
         );
+
+        assertThat(pipeline.nodePropertySteps())
+            .hasSize(1)
+            .contains(NodePropertyStepFactory.createNodePropertyStep(expectedTaskName, expectedConfig));
     }
 
     @Test
     void shouldSelectFeatures() {
+        var pipeline = PipelineCatalog.getTyped(getUsername(), "myPipeline", NodeRegressionTrainingPipeline.class);
+
         runQuery("CALL gds.alpha.pipeline.nodeRegression.selectFeatures('myPipeline', 'test')");
 
         assertCypherResult(
@@ -82,6 +97,12 @@ class NodeRegressionPipelineAddStepProcsTest extends NodeRegressionPipelineBaseP
                     "parameterSpace", DEFAULT_PARAMETERSPACE
                 )
             )
+        );
+
+        assertThat(pipeline.featureSteps()).containsExactlyInAnyOrder(
+            NodeFeatureStep.of("test"),
+            NodeFeatureStep.of("pr"),
+            NodeFeatureStep.of("pr2")
         );
     }
 

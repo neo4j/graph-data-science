@@ -40,33 +40,33 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addLinearRegression", mode = READ)
-    @Description("Add a linear regression configuration to the parameter space of the node regression train pipeline.")
+    @Description("Add a linear regression model candidate to a node regression pipeline.")
     public Stream<NodePipelineInfoResult> addLogisticRegression(
         @Name("pipelineName") String pipelineName,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
 
         var allowedKeys = LinearRegressionTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, configuration.keySet());
 
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(config, TrainingMethod.LinearRegression));
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.LinearRegression));
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.addRandomForest", mode = READ)
-    @Description("Add a random forest configuration to the parameter space of the node regression train pipeline.")
+    @Description("Add a random forest model candidate to a node regression pipeline.")
     public Stream<NodePipelineInfoResult> addRandomForest(
         @Name("pipelineName") String pipelineName,
-        @Name(value = "config") Map<String, Object> randomForestConfig
+        @Name(value = "configuration") Map<String, Object> configuration
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
 
         var allowedKeys = RandomForestTrainerConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, randomForestConfig.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, configuration.keySet());
 
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(randomForestConfig, TrainingMethod.RandomForest));
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForest));
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }

@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeRegressionPipelineConfigureAutoTuningProc extends BaseProc {
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.configureAutoTuning", mode = READ)
-    @Description("Configures the auto-tuning of the node regression pipeline.")
+    @Description("Configures the auto-tuning of a node regression pipeline.")
     public Stream<NodePipelineInfoResult> configureAutoTuning(@Name("pipelineName") String pipelineName, @Name("configuration") Map<String, Object> configMap) {
         PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
         return PipelineCompanion.configureAutoTuning(
