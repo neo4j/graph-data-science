@@ -20,18 +20,13 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -88,19 +83,4 @@ public final class PipelineCompanion {
         }
     }
 
-    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
-        int fudgedNumberOfClasses = 1000;
-        return memoryEstimationStatsMap(numberOfMetricsSpecifications, numberOfModelCandidates, fudgedNumberOfClasses);
-    }
-
-    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
-        var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
-        var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
-        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
-        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
-        return MemoryEstimations.builder("StatsMap")
-            .fixed("array list", sizeOfInstance(ArrayList.class))
-            .fixed("model stats", sizeOfAllModelStatsInBytes)
-            .build();
-    }
 }

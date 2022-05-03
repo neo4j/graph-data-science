@@ -24,19 +24,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
@@ -275,6 +278,31 @@ class TrainingStatisticsTest {
                     "parameters", secondCandidate.toMapWithTrainerMethod()
                 )
             );
+    }
+
+    @Test
+    void shouldEstimateTheSameRegardlessOfNodeCount() {
+        var estimator = TrainingStatistics.memoryEstimationStatsMap(2, 5);
+        var oneThousandNodes = estimator.estimate(GraphDimensions.of(1_000), 1).memoryUsage();
+        var oneMillionNodes = estimator.estimate(GraphDimensions.of(1_000_000), 1).memoryUsage();
+        var oneBillionNodes = estimator.estimate(GraphDimensions.of(1_000_000_000), 1).memoryUsage();
+        assertThat(oneThousandNodes).isEqualTo(oneMillionNodes).isEqualTo(oneBillionNodes);
+    }
+
+    @Test
+    void estimationShouldScaleWithMetricsAndParamsCounts() {
+        var overheadForOneStatsMap = sizeOfInstance(ArrayList.class);
+        var dimensions = GraphDimensions.of(1000);
+
+        var _1_05 = TrainingStatistics.memoryEstimationStatsMap(1, 5).estimate(dimensions, 1).memoryUsage();
+        var _4_05 = TrainingStatistics.memoryEstimationStatsMap(4, 5).estimate(dimensions, 1).memoryUsage();
+        var _1_10 = TrainingStatistics.memoryEstimationStatsMap(1, 10).estimate(dimensions, 1).memoryUsage();
+        var _4_10 = TrainingStatistics.memoryEstimationStatsMap(4, 10).estimate(dimensions, 1).memoryUsage();
+
+        assertThat(_4_05.max).isEqualTo(4 * _1_05.max - 3 * overheadForOneStatsMap);
+        assertThat(_4_10.max).isEqualTo(4 * _1_10.max - 3 * overheadForOneStatsMap);
+        assertThat(_1_10.max).isEqualTo(2 * _1_05.max - overheadForOneStatsMap);
+        assertThat(_4_10.max).isEqualTo(2 * _4_05.max - overheadForOneStatsMap);
     }
 
     private static final class TestTrainerConfig implements TrainerConfig {

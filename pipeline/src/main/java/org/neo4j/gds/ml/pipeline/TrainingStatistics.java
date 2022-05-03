@@ -20,9 +20,12 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public final class TrainingStatistics {
 
@@ -133,5 +138,21 @@ public final class TrainingStatistics {
 
     public TrainerConfig bestParameters() {
         return bestCandidate().trainerConfig();
+    }
+
+    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
+        int fudgedNumberOfClasses = 1000;
+        return memoryEstimationStatsMap(numberOfMetricsSpecifications, numberOfModelCandidates, fudgedNumberOfClasses);
+    }
+
+    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
+        var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
+        var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
+        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
+        return MemoryEstimations.builder("StatsMap")
+            .fixed("array list", sizeOfInstance(ArrayList.class))
+            .fixed("model stats", sizeOfAllModelStatsInBytes)
+            .build();
     }
 }

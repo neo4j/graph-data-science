@@ -50,7 +50,6 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
-import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -128,11 +127,11 @@ public final class NodeClassificationTrain {
             )
             .add(
                 "stats map train",
-                PipelineCompanion.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add(
                 "stats map validation",
-                PipelineCompanion.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
