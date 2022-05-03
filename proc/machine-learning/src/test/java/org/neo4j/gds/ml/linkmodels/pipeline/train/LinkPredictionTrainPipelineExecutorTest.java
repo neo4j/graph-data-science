@@ -184,7 +184,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))
                 );
 
-            assertThat(customInfo.bestCandidate().trainerConfig())
+            assertThat(customInfo.bestParameters())
                 .usingRecursiveComparison()
                 .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
         });
