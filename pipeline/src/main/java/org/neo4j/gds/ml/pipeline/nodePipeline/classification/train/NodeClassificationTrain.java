@@ -365,7 +365,7 @@ public final class NodeClassificationTrain {
 
     private void registerSpecificMetricScores(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
         if (!metrics.contains(OUT_OF_BAG_ERROR)) return;
-        if (!(classifier.data() instanceof RandomForestClassifierData)) return;
+        if (classifier.data().trainerMethod() != TrainingMethod.RandomForest) return;
         var data = (RandomForestClassifierData) classifier.data();
         data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
     }

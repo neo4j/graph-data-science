@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
@@ -243,7 +244,7 @@ public final class LinkPredictionTrain {
                     validationStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
                 );
-                computeSpecificMetrics(classifier, validationStatsBuilder::update);
+                registerSpecificMetrics(classifier, validationStatsBuilder::update);
 
                 progressTracker.logProgress();
             }
@@ -282,9 +283,9 @@ public final class LinkPredictionTrain {
         ));
     }
 
-    private void computeSpecificMetrics(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
+    private void registerSpecificMetrics(Classifier classifier, BiConsumer<Metric, Double> scoreConsumer) {
         if (!config.linkMetrics().contains(OUT_OF_BAG_ERROR)) return;
-        if (!(classifier.data() instanceof RandomForestClassifierData)) return;
+        if (classifier.data().trainerMethod() != TrainingMethod.RandomForest) return;
         var data = (RandomForestClassifierData) classifier.data();
         data.outOfBagError().ifPresent(oobError -> scoreConsumer.accept(OUT_OF_BAG_ERROR, oobError));
     }
