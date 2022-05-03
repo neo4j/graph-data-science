@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -26,7 +27,6 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 /**
@@ -72,10 +72,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
         var positiveSamples = (long) (graph.relationshipCount() * holdoutFraction) / 2;
-        var positiveSamplesRemaining = new AtomicLong(positiveSamples);
+        var positiveSamplesRemaining = new MutableLong(positiveSamples);
         var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction) / 2;
-        var negativeSamplesRemaining = new AtomicLong(negativeSamples);
-        var edgesRemaining = new AtomicLong(graph.relationshipCount());
+        var negativeSamplesRemaining = new MutableLong(negativeSamples);
+        var edgesRemaining = new MutableLong(graph.relationshipCount());
 
         graph.forEachNode(nodeId -> {
             positiveSampling(
@@ -104,8 +104,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
-        AtomicLong positiveSamplesRemaining,
-        AtomicLong edgesRemaining,
+        MutableLong positiveSamplesRemaining,
+        MutableLong edgesRemaining,
         long nodeId
     ) {
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
@@ -115,7 +115,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             if (source < target) {
                 // we handle also reverse edge here
                 // the effect of self-loops are disregarded
-                if (sample((double) 2 * positiveSamplesRemaining.get() / edgesRemaining.get())) {
+                if (sample(2 * positiveSamplesRemaining.doubleValue() / edgesRemaining.doubleValue())) {
                     positiveSamplesRemaining.decrementAndGet();
                     if (sample(0.5)) {
                         selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);

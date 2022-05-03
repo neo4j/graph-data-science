@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -33,7 +34,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class EdgeSplitter {
 
@@ -42,11 +42,13 @@ public abstract class EdgeSplitter {
     public static final String RELATIONSHIP_PROPERTY = "label";
     private static final int MAX_RETRIES = 20;
 
-    private final ThreadLocal<Random> rng;
+    private final Random rng;
     final double negativeSamplingRatio;
 
     EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
-        this.rng = ThreadLocal.withInitial(() -> maybeSeed.map(Random::new).orElseGet(Random::new));
+        this.rng = new Random();
+        maybeSeed.ifPresent(rng::setSeed);
+
         this.negativeSamplingRatio = negativeSamplingRatio;
     }
 
@@ -57,11 +59,11 @@ public abstract class EdgeSplitter {
     );
 
     protected boolean sample(double probability) {
-        return rng.get().nextDouble() < probability;
+        return rng.nextDouble() < probability;
     }
 
     private long randomNodeId(Graph graph) {
-        return Math.abs(rng.get().nextLong() % graph.nodeCount());
+        return Math.abs(rng.nextLong() % graph.nodeCount());
     }
 
     protected long samplesPerNode(long maxSamples, double remainingSamples, long remainingNodes) {
@@ -79,7 +81,7 @@ public abstract class EdgeSplitter {
         return newRelationshipsBuilder(graph, orientation, false);
     }
 
-    private RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, boolean loadRelationshipProperty) {
+    private static RelationshipsBuilder newRelationshipsBuilder(Graph graph, Orientation orientation, boolean loadRelationshipProperty) {
         return GraphFactory.initRelationshipsBuilder()
             .aggregation(Aggregation.SINGLE)
             .nodes(graph)
@@ -97,13 +99,13 @@ public abstract class EdgeSplitter {
         Graph graph,
         Graph masterGraph,
         RelationshipsBuilder selectedRelsBuilder,
-        AtomicLong negativeSamplesRemaining,
+        MutableLong negativeSamplesRemaining,
         long nodeId
     ) {
         var masterDegree = masterGraph.degree(nodeId);
         var negativeEdgeCount = samplesPerNode(
             (masterGraph.nodeCount() - 1) - masterDegree,
-            (double) negativeSamplesRemaining.get(),
+            negativeSamplesRemaining.doubleValue(),
             graph.nodeCount() - nodeId
         );
 
@@ -138,7 +140,7 @@ public abstract class EdgeSplitter {
         Relationships remainingRels();
         Relationships selectedRels();
 
-        static DirectedEdgeSplitter.SplitResult of(Relationships remainingRels, Relationships selectedRels) {
+        static EdgeSplitter.SplitResult of(Relationships remainingRels, Relationships selectedRels) {
             return ImmutableSplitResult.of(remainingRels, selectedRels);
         }
     }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -26,7 +27,6 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
 
@@ -56,9 +56,9 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
         int positiveSamples = (int) (graph.relationshipCount() * holdoutFraction);
-        var positiveSamplesRemaining = new AtomicLong(positiveSamples);
+        var positiveSamplesRemaining = new MutableLong(positiveSamples);
         var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction);
-        var negativeSamplesRemaining = new AtomicLong(negativeSamples);
+        var negativeSamplesRemaining = new MutableLong(negativeSamples);
 
         graph.forEachNode(nodeId -> {
             positiveSampling(
@@ -86,21 +86,21 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         Graph graph,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
-        AtomicLong positiveSamplesRemaining,
+        MutableLong positiveSamplesRemaining,
         long nodeId
     ) {
         var degree = graph.degree(nodeId);
 
         var relsToSelectFromThisNode = samplesPerNode(
             degree,
-            positiveSamplesRemaining.get(),
+            positiveSamplesRemaining.doubleValue(),
             graph.nodeCount() - nodeId
         );
-        var localSelectedRemaining = new AtomicLong(relsToSelectFromThisNode);
-        var targetsRemaining = new AtomicLong(degree);
+        var localSelectedRemaining = new MutableLong(relsToSelectFromThisNode);
+        var targetsRemaining = new MutableLong(degree);
 
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
-            double localSelectedDouble = localSelectedRemaining.get();
+            double localSelectedDouble = localSelectedRemaining.doubleValue();
             var isSelected = sample(localSelectedDouble / targetsRemaining.getAndDecrement());
             if (relsToSelectFromThisNode > 0 && localSelectedDouble > 0 && isSelected) {
                 positiveSamplesRemaining.decrementAndGet();
