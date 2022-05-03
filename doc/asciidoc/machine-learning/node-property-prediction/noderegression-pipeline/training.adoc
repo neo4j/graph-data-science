@@ -32,10 +32,9 @@ NOTE: A step can only use node properties that are already present in the input 
 
 The Node Regression model in the Neo4j GDS library supports the following evaluation metrics:
 
-* Global metrics
-** `MEAN_SQUARED_ERROR`
-** `ROOT_MEAN_SQUARED_ERROR`
-** `MEAN_ABSOLUTE_ERROR`
+* `MEAN_SQUARED_ERROR`
+* `ROOT_MEAN_SQUARED_ERROR`
+* `MEAN_ABSOLUTE_ERROR`
 
 More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
 
