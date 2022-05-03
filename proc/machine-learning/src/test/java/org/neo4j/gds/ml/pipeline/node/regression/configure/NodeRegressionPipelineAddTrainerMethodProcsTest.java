@@ -23,7 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 
@@ -55,7 +55,7 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
             "CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('myPipe', {maxEpochs: 5}) YIELD parameterSpace",
             List.of(Map.of(
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(),
+                    TrainingMethod.RandomForestRegression.name(), List.of(),
                     TrainingMethod.LinearRegression.name(), List.of(expectedTrainConfig.toMapWithTrainerMethod())
                 )))
         );
@@ -72,9 +72,9 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
         var pipeline = new NodeRegressionTrainingPipeline();
         PipelineCatalog.set(getUsername(), "myPipe", pipeline);
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)).isEmpty();
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestRegression)).isEmpty();
 
-        var expectedTrainConfig = RandomForestTrainerConfigImpl
+        var expectedTrainConfig = RandomForestRegressorTrainerConfigImpl
             .builder()
             .numberOfDecisionTrees(5)
             .build();
@@ -83,16 +83,16 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
             "CALL gds.alpha.pipeline.nodeRegression.addRandomForest('myPipe', {numberOfDecisionTrees: 5}) YIELD parameterSpace",
             List.of(Map.of(
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForest.name(), List.of(expectedTrainConfig.toMapWithTrainerMethod()),
+                    TrainingMethod.RandomForestRegression.name(), List.of(expectedTrainConfig.toMapWithTrainerMethod()),
                     TrainingMethod.LinearRegression.name(), List.of()
                 )))
             );
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)).hasSize(1);
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestRegression)).hasSize(1);
 
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('myPipe', {numberOfDecisionTrees: {range: [10, 100]}})");
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)).hasSize(2);
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestRegression)).hasSize(2);
     }
 
     @Test
@@ -100,13 +100,13 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
         var pipeline = new NodeRegressionTrainingPipeline();
         PipelineCatalog.set(getUsername(), "myPipe", pipeline);
 
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)).isEmpty();
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestRegression)).isEmpty();
 
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('myPipe', {numberOfDecisionTrees: 5})");
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('myPipe', {numberOfDecisionTrees: {range: [10, 100]}})");
         runQuery("CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('myPipe', {maxEpochs: 42})");
 
         assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.LinearRegression)).hasSize(1);
-        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForest)).hasSize(2);
+        assertThat(pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestRegression)).hasSize(2);
     }
 }

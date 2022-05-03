@@ -24,7 +24,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
-import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
@@ -63,10 +63,10 @@ public class NodeRegressionPipelineAddTrainerMethodProcs extends BaseProc {
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeRegressionTrainingPipeline.class);
 
-        var allowedKeys = RandomForestTrainerConfig.DEFAULT.configKeys();
+        var allowedKeys = RandomForestRegressorTrainerConfig.DEFAULT.configKeys();
         ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, configuration.keySet());
 
-        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForest));
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(configuration, TrainingMethod.RandomForestRegression));
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }
