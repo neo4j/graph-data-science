@@ -162,7 +162,7 @@ For example, the `scaledSizes` property could be created by the previous example
 ----
 CALL gds.alpha.pipeline.nodeRegression.selectFeatures(
   pipelineName: String,
-  nodeProperties: List or String
+  featureProperties: List or String
 ) YIELD
   name: String,
   nodePropertySteps: List of Map,
@@ -177,7 +177,7 @@ CALL gds.alpha.pipeline.nodeRegression.selectFeatures(
 |===
 | Name                   | Type            | Description
 | pipelineName           | String          | The name of the pipeline.
-| nodeProperties         | List or String  | Node properties to use as model features.
+| featureProperties      | List or String  | Node properties to use as model features.
 |===
 
 include::../pipelineInfoResult.adoc[]
