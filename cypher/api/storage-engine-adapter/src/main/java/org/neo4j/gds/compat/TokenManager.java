@@ -61,32 +61,15 @@ class TokenManager implements CypherGraphStore.StateVisitor {
 
     @Override
     public void nodePropertyAdded(String propertyKey) {
-        addProperty(propertyKey);
-    }
-
-    @Override
-    public void nodeLabelAdded(String nodeLabel) {
-        addNodeLabel(nodeLabel);
-    }
-
-    @Override
-    public void relationshipTypeAdded(String relationshipType) {
-        addRelationshipType(relationshipType);
-    }
-
-    public TokenHolders tokenHolders() {
-        return this.tokenHolders;
-    }
-
-    private void addProperty(String propertyName) {
         try {
-            tokenHolders.propertyKeyTokens().getOrCreateId(propertyName);
+            tokenHolders.propertyKeyTokens().getOrCreateId(propertyKey);
         } catch (KernelException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private void addNodeLabel(String nodeLabel) {
+    @Override
+    public void nodeLabelAdded(String nodeLabel) {
         try {
             tokenHolders.labelTokens().getOrCreateId(nodeLabel);
         } catch (KernelException e) {
@@ -94,12 +77,17 @@ class TokenManager implements CypherGraphStore.StateVisitor {
         }
     }
 
-    private void addRelationshipType(String relationshipType) {
+    @Override
+    public void relationshipTypeAdded(String relationshipType) {
         try {
             tokenHolders.relationshipTypeTokens().getOrCreateId(relationshipType);
         } catch (KernelException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public TokenHolders tokenHolders() {
+        return this.tokenHolders;
     }
 
     private void initializeTokensFromGraphStore() {
