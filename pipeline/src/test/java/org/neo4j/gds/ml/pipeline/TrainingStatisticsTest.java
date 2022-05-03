@@ -255,7 +255,7 @@ class TrainingStatisticsTest {
 
         var mapResult = selectResult.toMap();
         assertThat(mapResult)
-            .containsEntry("bestParameters", secondCandidate.toMap())
+            .containsEntry("bestParameters", secondCandidate.toMapWithTrainerMethod())
             .containsKey("modelCandidates");
         assertThat((List) mapResult.get("modelCandidates"))
             .containsExactlyInAnyOrder(
