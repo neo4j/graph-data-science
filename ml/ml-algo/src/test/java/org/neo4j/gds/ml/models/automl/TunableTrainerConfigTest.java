@@ -219,7 +219,7 @@ class TunableTrainerConfigTest {
     void failsOnRangeForNonNumericParam() {
         var userInput = Map.<String, Object>of("criterion", Map.of("range", List.of(1)));
         assertThatThrownBy(() -> TunableTrainerConfig.of(userInput, TrainingMethod.RandomForestClassification))
-            .hasMessage("Ranges of the form {range: {min, max}} should not be provided for non-numeric parameters. Invalid parameters: [`criterion={range=[1]}` (`criterion` is of type String)]")
+            .hasMessage("The following parameters have been given the wrong type: [`criterion={range=[1]}` (`criterion` is of type String)]")
             .isInstanceOf(IllegalArgumentException.class);
     }
 

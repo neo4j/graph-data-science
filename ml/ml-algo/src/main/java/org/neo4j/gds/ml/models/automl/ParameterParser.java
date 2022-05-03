@@ -86,8 +86,7 @@ final class ParameterParser {
         });
         if (!incorrectParameters.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Ranges of the form {range: {min, max}} should not be provided for non-numeric parameters. " +
-                "Invalid parameters: [%s]",
+                "The following parameters have been given the wrong type: [%s]",
                 incorrectParameters
                     .entrySet()
                     .stream()
