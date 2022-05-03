@@ -1,3 +1,11 @@
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the pipeline.
+| configuration   | Map     | Configuration for splitting the graph.
+|===
+
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===

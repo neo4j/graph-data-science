@@ -1,10 +1,11 @@
 = Tuning the hyperparameters
 
 The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
-These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
+These parameters give ways to limit a computational budget. 
+In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
 It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
 
-When faced with a heavy training task, a strategy to perform hyperparameter optimization faster, is to initially use lower values for the budget related parameters while exploring better ranges for other general or algorithm specific parameters.
+When faced with a heavy training task, a strategy to perform hyperparameter optimization faster is to initially use lower values for the budget-related parameters while exploring better ranges for other general or algorithm-specific parameters.
 
 More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
 Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.

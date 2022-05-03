@@ -184,7 +184,7 @@ YIELD
 |===
 | Name                   | Type            | Description
 | pipelineName           | String          | The name of the pipeline.
-| nodeProperties         | List or String  | Configuration for splitting the relationships.
+| nodeProperties         | List or String  | Node properties to use as model features.
 |===
 
 include::../pipelineInfoResult.adoc[]
@@ -237,14 +237,6 @@ YIELD
   autoTuningConfig: Map,
   parameterSpace: List of Map
 ----
-
-.Parameters
-[opts="header",cols="1,1,4"]
-|===
-| Name            | Type    | Description
-| pipelineName    | String  | The name of the pipeline.
-| configuration   | Map     | Configuration for splitting the relationships.
-|===
 
 include::../nodeSplit-config.adoc[]
 
