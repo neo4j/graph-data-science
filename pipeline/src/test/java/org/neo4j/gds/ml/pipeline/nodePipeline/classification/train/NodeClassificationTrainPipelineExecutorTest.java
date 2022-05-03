@@ -154,20 +154,19 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
             assertThat(model.name()).isEqualTo("model");
             assertThat(model.stored()).isFalse();
-            assertThat(model.customInfo().bestCandidate().trainerConfig().toMap()).isEqualTo(modelCandidate.toMap());
-            assertThat(model.customInfo().outerTrainMetrics().keySet()).containsExactly(metric);
-            assertThat(model.customInfo().testMetrics().keySet()).containsExactly(metric);
-            assertThat(model.customInfo().bestCandidate().trainingStats().keySet()).containsExactly(metric);
-            assertThat(model.customInfo().bestCandidate().validationStats().keySet()).containsExactly(metric);
+            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
+            assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
+                .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            var testScore = customInfo.testMetrics().get(metric);
+            var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
             assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
-            var outerTrainScore = customInfo.outerTrainMetrics().get(metric);
+            var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
             assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
-            var validationStats = customInfo.bestCandidate().validationStats().get(metric).toMap();
-            var trainStats = customInfo.bestCandidate().trainingStats().get(metric).toMap();
+            var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
+            var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
             assertThat(validationStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)

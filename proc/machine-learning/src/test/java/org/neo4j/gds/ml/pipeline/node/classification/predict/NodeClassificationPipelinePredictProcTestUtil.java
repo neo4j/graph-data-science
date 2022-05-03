@@ -113,13 +113,13 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
                 .targetProperty("foo")
                 .build(),
-            NodeClassificationPipelineModelInfo.builder()
-                .classes(modelData.classIdMap().originalIdsList())
-                .bestCandidate(ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()))
-                .testMetrics(Map.of())
-                .outerTrainMetrics(Map.of())
-                .pipeline(pipeline)
-                .build()
+            NodeClassificationPipelineModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                pipeline,
+                modelData.classIdMap().originalIdsList()
+            )
         );
     }
 

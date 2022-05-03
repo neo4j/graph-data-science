@@ -425,13 +425,13 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .pipeline("DUMMY")
                 .targetProperty("foo")
                 .build(),
-            NodeClassificationPipelineModelInfo.builder()
-                .classes(modelData.classIdMap().originalIdsList())
-                .bestCandidate(ModelCandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()))
-                .testMetrics(Map.of())
-                .outerTrainMetrics(Map.of())
-                .pipeline(NodePropertyPredictPipeline.EMPTY)
-                .build()
+            NodeClassificationPipelineModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()),
+                NodePropertyPredictPipeline.EMPTY,
+                modelData.classIdMap().originalIdsList()
+            )
         );
 
         var config = new NodeClassificationPredictPipelineBaseConfigImpl.Builder()

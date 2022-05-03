@@ -22,8 +22,9 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.List;
@@ -32,9 +33,8 @@ import java.util.Map;
 @ValueClass
 public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
 
-    Map<Metric, Double> testMetrics();
-    Map<Metric, Double> outerTrainMetrics();
-    ModelCandidateStats bestCandidate();
+    TrainerConfig bestParameters();
+    Map<String, Object> metrics();
 
     NodePropertyPredictPipeline pipeline();
 
@@ -50,14 +50,21 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(
-            "bestParameters", bestCandidate().trainerConfig().toMapWithTrainerMethod(),
+            "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "classes", classes(),
-            "metrics", bestCandidate().renderMetrics(testMetrics(), outerTrainMetrics()),
+            "metrics", metrics(),
             "pipeline", pipeline().toMap()
         );
     }
 
-    static ImmutableNodeClassificationPipelineModelInfo.Builder builder() {
-        return ImmutableNodeClassificationPipelineModelInfo.builder();
+    static NodeClassificationPipelineModelInfo of(
+        Map<Metric, Double> testMetrics,
+        Map<Metric, Double> outerTrainMetrics,
+        ModelCandidateStats bestCandidate,
+        NodePropertyPredictPipeline pipeline,
+        List<Long> classes
+    ) {
+        var metrics = bestCandidate.renderMetrics(testMetrics, outerTrainMetrics);
+        return ImmutableNodeClassificationPipelineModelInfo.of(bestCandidate.trainerConfig(), metrics, pipeline, classes);
     }
 }
