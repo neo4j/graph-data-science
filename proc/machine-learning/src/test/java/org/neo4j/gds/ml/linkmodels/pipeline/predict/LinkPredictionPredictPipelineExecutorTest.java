@@ -308,10 +308,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionPredictPipelineAlgorithmFactory<>(
-                    caller.executionContext(),
-                    modelCatalog
-                ).progressTask(graphStore, config),
+                LinkPredictionPredictPipelineExecutor.progressTask(
+                    "Link Prediction Predict Pipeline",
+                    pipeline,
+                    graphStore,
+                    config
+                ),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

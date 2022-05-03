@@ -27,6 +27,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
@@ -38,6 +40,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -76,6 +79,21 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             executionContext,
             progressTracker
         );
+    }
+
+    public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline) {
+        return Tasks.task(taskName, new ArrayList<>() {{
+            add(Tasks.leaf("Split relationships"));
+            add(Tasks.iterativeFixed(
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
+                pipeline.nodePropertySteps().size()
+            ));
+            addAll(LinkPredictionTrain.progressTasks(
+                pipeline.splitConfig().validationFolds(),
+                pipeline.numberOfModelSelectionTrials()
+            ));
+        }});
     }
 
     public static MemoryEstimation estimate(ModelCatalog modelCatalog, LinkPredictionTrainingPipeline pipeline, LinkPredictionTrainConfig configuration) {

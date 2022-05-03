@@ -25,12 +25,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.ClassifierFactory;
-import org.neo4j.gds.similarity.knn.KnnFactory;
-
-import java.util.List;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
 
@@ -46,21 +42,11 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
 
     @Override
     public Task progressTask(GraphStore graphStore, CONFIG config) {
-        var trainingPipeline = getTrainedLPPipelineModel(modelCatalog, config.modelName(), config.username())
+        var pipeline = getTrainedLPPipelineModel(modelCatalog, config.modelName(), config.username())
             .customInfo()
             .pipeline();
 
-        return Tasks.task(
-            taskName(),
-            Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
-                trainingPipeline.nodePropertySteps().size()
-            ),
-        config.isApproximateStrategy()
-            ? Tasks.task("Approximate link prediction", KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig()))
-            : Tasks.leaf("Exhaustive link prediction", graphStore.nodeCount())
-        );
+        return LinkPredictionPredictPipelineExecutor.progressTask(taskName(), pipeline, graphStore, config);
     }
 
     @Override
@@ -79,10 +65,9 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.modelName(),
             configuration.username()
         );
-        var pipeline = model.customInfo().pipeline();
 
         return new LinkPredictionPredictPipelineExecutor(
-            pipeline,
+            model.customInfo().pipeline(),
             ClassifierFactory.create(model.data()),
             configuration,
             executionContext,

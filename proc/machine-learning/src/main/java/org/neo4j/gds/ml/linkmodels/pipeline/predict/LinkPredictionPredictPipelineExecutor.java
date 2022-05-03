@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
@@ -35,6 +37,7 @@ import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 
 import java.util.List;
 import java.util.Map;
@@ -83,6 +86,28 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, pipeline.featureSteps());
         var linkPrediction = getLinkPredictionStrategy(graph, config.isApproximateStrategy(), linkFeatureExtractor);
         return linkPrediction.compute();
+    }
+
+    public static Task progressTask(
+        String taskName,
+        LinkPredictionPredictPipeline pipeline,
+        GraphStore graphStore,
+        LinkPredictionPredictPipelineBaseConfig config
+    ) {
+        return Tasks.task(
+            taskName,
+            Tasks.iterativeFixed(
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
+                pipeline.nodePropertySteps().size()
+            ),
+            config.isApproximateStrategy()
+                ? Tasks.task(
+                "Approximate link prediction",
+                KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig())
+            )
+                : Tasks.leaf("Exhaustive link prediction", graphStore.nodeCount())
+        );
     }
 
     public static MemoryEstimation estimate(

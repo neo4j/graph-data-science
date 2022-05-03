@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
 import org.assertj.core.data.Percentage;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -50,7 +49,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
@@ -130,11 +128,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
-    }
-
-    @AfterEach
-    void tearDown() {
-        PipelineCatalog.removeAll();
     }
 
     @Test
@@ -343,12 +336,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .randomSeed(1337L)
             .build();
 
-        PipelineCatalog.set(getUsername(), "DUMMY", pipeline);
-
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new LinkPredictionTrainPipelineAlgorithmFactory(caller.executionContext()).progressTask(graphStore, config),
+                LinkPredictionTrainPipelineExecutor.progressTask("Link Prediction Train Pipeline", pipeline),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

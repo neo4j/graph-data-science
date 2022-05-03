@@ -25,20 +25,15 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<LinkPredictionTrainPipelineExecutor, LinkPredictionTrainConfig> {
     private final ExecutionContext executionContext;
 
-    public LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
+    LinkPredictionTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
 
@@ -71,23 +66,13 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     @Override
     public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
-        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class);
-        var tasks = new ArrayList<Task>() {{
-            add(Tasks.leaf("Split relationships"));
-            add(Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
-                pipeline.nodePropertySteps().size()
-            ));
-            addAll(LinkPredictionTrain.progressTasks(
-                pipeline.splitConfig().validationFolds(),
-                pipeline.numberOfModelSelectionTrials()
-            ));
-        }};
-
-        return Tasks.task(taskName(), tasks);
+        return LinkPredictionTrainPipelineExecutor.progressTask(
+            taskName(),
+            PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class)
+        );
     }
 
+    @Override
     public MemoryEstimation memoryEstimation(LinkPredictionTrainConfig configuration) {
         var pipeline = PipelineCatalog.getTyped(
             configuration.username(),
