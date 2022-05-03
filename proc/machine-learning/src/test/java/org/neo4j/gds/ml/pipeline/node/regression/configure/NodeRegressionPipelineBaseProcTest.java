@@ -30,8 +30,8 @@ import java.util.Map;
 abstract class NodeRegressionPipelineBaseProcTest extends BaseProcTest {
 
     static final Map<String, List<Object>> DEFAULT_PARAMETERSPACE = Map.of(
-        TrainingMethod.LinearRegression.name(), List.of(),
-        TrainingMethod.RandomForestRegression.name(), List.of()
+        TrainingMethod.LinearRegression.toString(), List.of(),
+        TrainingMethod.RandomForestRegression.toString(), List.of()
     );
 
     @AfterEach

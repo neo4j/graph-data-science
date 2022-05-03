@@ -55,8 +55,8 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
             "CALL gds.alpha.pipeline.nodeRegression.addLinearRegression('myPipe', {maxEpochs: 5}) YIELD parameterSpace",
             List.of(Map.of(
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForestRegression.name(), List.of(),
-                    TrainingMethod.LinearRegression.name(), List.of(expectedTrainConfig.toMapWithTrainerMethod())
+                    TrainingMethod.RandomForestRegression.toString(), List.of(),
+                    TrainingMethod.LinearRegression.toString(), List.of(expectedTrainConfig.toMapWithTrainerMethod())
                 )))
         );
 
@@ -83,8 +83,8 @@ class NodeRegressionPipelineAddTrainerMethodProcsTest extends NodeRegressionPipe
             "CALL gds.alpha.pipeline.nodeRegression.addRandomForest('myPipe', {numberOfDecisionTrees: 5}) YIELD parameterSpace",
             List.of(Map.of(
                 "parameterSpace", Map.of(
-                    TrainingMethod.RandomForestRegression.name(), List.of(expectedTrainConfig.toMapWithTrainerMethod()),
-                    TrainingMethod.LinearRegression.name(), List.of()
+                    TrainingMethod.RandomForestRegression.toString(), List.of(expectedTrainConfig.toMapWithTrainerMethod()),
+                    TrainingMethod.LinearRegression.toString(), List.of()
                 )))
             );
 
