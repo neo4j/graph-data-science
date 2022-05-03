@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,8 +46,8 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class PartitionUtilsTest {
 
@@ -96,6 +97,61 @@ class PartitionUtilsTest {
             tasks.stream().anyMatch((t) -> t.start == 128 && t.nodeCount == 72),
             formatWithLocale("Expected task with start %d and nodeCount %d, but found %s", 128, 72, tasks)
         );
+    }
+
+    @Test
+    void testAlignmentWithMaxSize() {
+        long alignTo = 42;
+        long maxSize = 100;
+        long nodeCount = 400;
+        int concurrency = 3;
+
+        List<Partition> partitions = PartitionUtils.numberAlignedPartitioningWithMaxSize(
+            concurrency,
+            nodeCount,
+            alignTo,
+            maxSize
+        );
+
+        List<TestTask> tasks = partitions
+            .stream()
+            .map(partition -> new TestTask(partition.startNode(), partition.nodeCount()))
+            .collect(Collectors.toList());
+
+        assertTaskRangesWithMaxSize(tasks);
+    }
+
+    @Test
+    void testAlignmentWithMaxSizeWithTaskSupplier() {
+        long alignTo = 42;
+        long maxSize = 100;
+        long nodeCount = 400;
+        int concurrency = 3;
+
+        var tasks = PartitionUtils.numberAlignedPartitioningWithMaxSize(
+            concurrency,
+            nodeCount,
+            alignTo,
+            maxSize,
+            partition -> new TestTask(partition.startNode(), partition.nodeCount())
+        );
+
+        assertTaskRangesWithMaxSize(tasks);
+    }
+
+    private void assertTaskRangesWithMaxSize(List<TestTask> tasks) {
+        assertThat(tasks)
+            .hasSize(5)
+            .usingElementComparator(Comparator
+                .<TestTask>comparingLong(task -> task.start)
+                .thenComparingLong(task -> task.nodeCount))
+            .containsExactlyInAnyOrder(
+                new TestTask(0, 84),
+                new TestTask(84, 84),
+                new TestTask(168, 84),
+                new TestTask(252, 84),
+                new TestTask(336, 64)
+            );
     }
 
     //@formatter:off

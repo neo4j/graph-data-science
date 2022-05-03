@@ -36,7 +36,7 @@ class PropertyProducerTest {
             .returns(ValueType.DOUBLE, PropertyProducer::propertyType)
             .satisfies(p -> {
                 double[] value = {0};
-                p.setProperty(value, 0, new Random());
+                p.setProperty(0, value, 0, new Random());
                 assertThat(value[0]).isEqualTo(0x13p37);
             });
     }
@@ -55,7 +55,7 @@ class PropertyProducerTest {
 
                 random.setSeed(42L);
                 double[] value = {0};
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 assertThat(value[0]).isEqualTo(expected);
             });
     }
@@ -77,7 +77,7 @@ class PropertyProducerTest {
 
                 random.setSeed(42L);
                 float[][] value = {null};
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 assertThat(value[0]).containsExactly(expected);
             });
     }
@@ -94,12 +94,12 @@ class PropertyProducerTest {
 
                 var seedProducingPositiveNumber = 4096L;
                 random.setSeed(seedProducingPositiveNumber);
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 assertThat(value[0]).isEqualTo(6);
 
                 var seedProducingNegativeNumber = 1;
                 random.setSeed(seedProducingNegativeNumber);
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 assertThat(value[0]).isEqualTo(6);
             });
     }
@@ -117,7 +117,7 @@ class PropertyProducerTest {
             .satisfies(p -> {
                 var random = new Random();
                 long[][] value = {{}};
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 var actual = value[0];
                 assertThat(actual.length).isEqualTo(length);
                 for (long l : actual) {
@@ -136,7 +136,7 @@ class PropertyProducerTest {
             .satisfies(p -> {
                 var random = new Random();
                 double[][] value = {{}};
-                p.setProperty(value, 0, random);
+                p.setProperty(0, value, 0, random);
                 var actual = value[0];
                 assertThat(actual.length).isEqualTo(7);
                 for (double l : actual) {

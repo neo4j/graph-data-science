@@ -38,6 +38,10 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         return new RandomEmbeddingProducer(propertyName, embeddingSize, min, max);
     }
 
+    static PropertyProducer<long[]> nodeIdAsLong(String propertyName) {
+        return new NodeIdProducer(propertyName);
+    }
+
     static PropertyProducer<long[]> randomLong(String propertyName, long min, long max) {
         return new RandomLongProducer(propertyName, min, max);
     }
@@ -54,7 +58,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
 
     ValueType propertyType();
 
-    void setProperty(PROPERTY_SLICE slice, int index, Random random);
+    void setProperty(long nodeId, PROPERTY_SLICE slice, int index, Random random);
 
     class FixedDoubleProducer implements PropertyProducer<double[]> {
         private final String propertyName;
@@ -76,7 +80,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, Random random) {
+        public void setProperty(long nodeId, double[] doubles, int index, Random random) {
             doubles[index] = value;
         }
 
@@ -129,7 +133,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, Random random) {
+        public void setProperty(long nodeId, double[] doubles, int index, Random random) {
             doubles[index] = min + (random.nextDouble() * (max - min));
         }
 
@@ -186,7 +190,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(float[][] embeddings, int index, Random random) {
+        public void setProperty(long nodeId, float[][] embeddings, int index, Random random) {
             var nodeEmbeddings = new float[embeddingSize];
             for (int i = 0; i < embeddingSize; i++) {
                 nodeEmbeddings[i] = min + (random.nextFloat() * (max - min));
@@ -221,6 +225,29 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
     }
 
+    class NodeIdProducer implements PropertyProducer<long[]> {
+        private final String propertyName;
+
+        NodeIdProducer(String propertyName) {
+            this.propertyName = propertyName;
+        }
+
+        @Override
+        public String getPropertyName() {
+            return propertyName;
+        }
+
+        @Override
+        public ValueType propertyType() {
+            return ValueType.LONG;
+        }
+
+        @Override
+        public void setProperty(long nodeId, long[] longs, int index, Random random) {
+            longs[index] = nodeId;
+        }
+    }
+
     class RandomLongProducer implements PropertyProducer<long[]> {
 
         private final String propertyName;
@@ -248,7 +275,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(long[] longs, int index, Random random) {
+        public void setProperty(long nodeId, long[] longs, int index, Random random) {
             var modulo = random.nextLong() % (max - min);
             if (modulo >= 0) {
                 longs[index] = modulo + min;
@@ -287,14 +314,14 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(long[][] longs, int index, Random random) {
+        public void setProperty(long nodeId, long[][] longs, int index, Random random) {
             var value = new long[length];
             for (int i = 0; i < length; i++) {
                 var modulo = random.nextLong() % (max - min);
                 if (modulo >= 0) {
                     value[i] = modulo + min;
                 } else {
-                    value[i]  = modulo + max;
+                    value[i] = modulo + max;
                 }
             }
             longs[index] = value;
@@ -329,7 +356,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[][] embeddings, int index, Random random) {
+        public void setProperty(long nodeId, double[][] embeddings, int index, Random random) {
             var value = new double[length];
             for (int i = 0; i < length; i++) {
                 value[i] = min + (random.nextDouble() * (max - min));
@@ -376,7 +403,7 @@ public interface PropertyProducer<PROPERTY_SLICE> {
         }
 
         @Override
-        public void setProperty(double[] doubles, int index, Random random) {
+        public void setProperty(long nodeId, double[] doubles, int index, Random random) {
         }
     }
 }

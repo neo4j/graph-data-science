@@ -586,18 +586,7 @@ public class CSRGraphStore implements GraphStore {
             properties.values().forEach(prop -> closeables.add(prop.values().propertiesList()))
         );
 
-        var errorWhileClosing = closeables.build().distinct().flatMap(closeable -> {
-            try {
-                closeable.close();
-                return Stream.empty();
-            } catch (Exception e) {
-                return Stream.of(e);
-            }
-        }).reduce(null, ExceptionUtil::chain);
-        if (errorWhileClosing != null) {
-            ExceptionUtil.throwIfUnchecked(errorWhileClosing);
-            throw new RuntimeException(errorWhileClosing);
-        }
+        ExceptionUtil.closeAll(ExceptionUtil.RETHROW_UNCHECKED, closeables.build().distinct());
     }
 
     @Override

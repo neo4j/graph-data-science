@@ -192,7 +192,7 @@ public final class RandomGraphGenerator {
                     }
                 }
                 assert (targetId < nodeCount);
-                relationshipPropertyProducer.setProperty(property, 0, random);
+                relationshipPropertyProducer.setProperty(nodeId, property, 0, random);
                 // For POWER_LAW, we generate a normal distributed out-degree value
                 // and connect to nodes where the target is power-law-distributed.
                 // In order to have the out degree follow a power-law distribution,
@@ -334,8 +334,9 @@ public final class RandomGraphGenerator {
     ) {
         var cursor = values.initCursor(values.newCursor());
         while (nodes.hasNext()) {
-            var i = seek(nodes.next(), cursor);
-            propertyProducer.setProperty(cursor.array, i, random);
+            var nodeId = nodes.next();
+            var i = seek(nodeId, cursor);
+            propertyProducer.setProperty(nodeId, cursor.array, i, random);
         }
         return toProperties.apply(values);
     }

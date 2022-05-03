@@ -33,6 +33,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class PartitionUtils {
 
     private PartitionUtils() {}
@@ -60,16 +62,7 @@ public final class PartitionUtils {
         long nodeCount,
         long alignTo
     ) {
-        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
-        final long remainder = initialBatchSize % alignTo;
-        final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
-        List<Partition> partitions = new ArrayList<>(concurrency);
-        for (long i = 0; i < nodeCount; i += adjustedBatchSize) {
-            long actualBatchSize = i + adjustedBatchSize < nodeCount ? adjustedBatchSize : nodeCount - i;
-            partitions.add(Partition.of(i, actualBatchSize));
-        }
-
-        return partitions;
+        return numberAlignedPartitioning(concurrency, nodeCount, alignTo, Function.identity());
     }
 
     public static <TASK> List<TASK> numberAlignedPartitioning(
@@ -78,9 +71,47 @@ public final class PartitionUtils {
         long alignTo,
         Function<Partition, TASK> taskCreator
     ) {
+        return numberAlignedPartitioningWithMaxSize(concurrency, nodeCount, alignTo, Long.MAX_VALUE, taskCreator);
+    }
+
+    public static List<Partition> numberAlignedPartitioningWithMaxSize(
+        int concurrency,
+        long nodeCount,
+        long alignTo,
+        long maxPartitionSize
+    ) {
+        return numberAlignedPartitioningWithMaxSize(
+            concurrency,
+            nodeCount,
+            alignTo,
+            maxPartitionSize,
+            Function.identity()
+        );
+    }
+
+    public static <TASK> List<TASK> numberAlignedPartitioningWithMaxSize(
+        int concurrency,
+        long nodeCount,
+        long alignTo,
+        long maxPartitionSize,
+        Function<Partition, TASK> taskCreator
+    ) {
+        if (maxPartitionSize < alignTo) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Maximum size of a partition must be at least as much as its desired alignment but got align=%d and maxPartitionSize=%d",
+                alignTo,
+                maxPartitionSize
+            ));
+        }
+
         final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
         final long remainder = initialBatchSize % alignTo;
-        final long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
+        long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
+        if (adjustedBatchSize > maxPartitionSize) {
+            long overflow = maxPartitionSize % alignTo;
+            adjustedBatchSize = maxPartitionSize - overflow;
+        }
+
         return tasks(nodeCount, adjustedBatchSize, taskCreator);
     }
 

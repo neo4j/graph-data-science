@@ -157,7 +157,7 @@ public final class ParallelUtil {
 
     /**
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *     but no smaller than {@link #DEFAULT_BATCH_SIZE}.
+     *     but no smaller than {@code minBatchSize}.
      * @see #adjustedBatchSize(int, int, int)
      */
     public static long adjustedBatchSize(
