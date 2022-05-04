@@ -64,7 +64,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         this.modelData = modelData;
     }
 
-    public static Task progressTask(String taskName, NodeClassificationPredictPipeline pipeline, GraphStore graphStore) {
+    public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
             Tasks.iterativeFixed(
