@@ -147,15 +147,18 @@ public class GraphSageModelTrainer {
 
         double previousLoss = Double.MAX_VALUE;
         boolean converged = false;
-        var epochLosses = new ArrayList<Double>();
+        var iterationLossesPerEpoch = new ArrayList<List<Double>>();
 
         progressTracker.beginSubTask("Train model");
 
         for (int epoch = 1; epoch <= epochs; epoch++) {
             progressTracker.beginSubTask("Epoch");
 
-            double newLoss = trainEpoch(batchTasks, weights);
-            epochLosses.add(newLoss);
+
+            var iterationLosses = trainEpoch(batchTasks, weights);
+            iterationLossesPerEpoch.add(iterationLosses);
+            var newLoss = iterationLosses.get(iterationLosses.size() - 1);
+
             progressTracker.endSubTask("Epoch");
             if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
                 converged = true;
@@ -166,7 +169,7 @@ public class GraphSageModelTrainer {
 
         progressTracker.endSubTask("Train model");
 
-        return ModelTrainResult.of(epochLosses, converged, layers);
+        return ModelTrainResult.of(iterationLossesPerEpoch, converged, layers);
     }
 
     private BatchTask createBatchTask(
@@ -200,17 +203,18 @@ public class GraphSageModelTrainer {
         return new BatchTask(lossFunction, weights, tolerance, progressTracker);
     }
 
-    private double trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
+    private List<Double> trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
         var updater = new AdamOptimizer(weights, learningRate);
 
-        double totalLoss = Double.NaN;
         int iteration = 1;
+        var iterationLosses = new ArrayList<Double>();
         for (;iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
             // run forward + maybe backward for each Batch
             ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
-            totalLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
+            var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
+            iterationLosses.add(avgLoss);
 
             var converged = batchTasks.stream().allMatch(task -> task.converged);
             if (converged) {
@@ -227,12 +231,11 @@ public class GraphSageModelTrainer {
 
             updater.update(meanGradients);
 
-            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", totalLoss));
-
+            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
             progressTracker.endSubTask("Iteration");
         }
 
-        return totalLoss;
+        return iterationLosses;
     }
 
     static class BatchTask implements Runnable {
@@ -359,14 +362,27 @@ public class GraphSageModelTrainer {
             return ImmutableGraphSageTrainMetrics.of(List.of(), false);
         }
 
-        List<Double> epochLosses();
+        @Value.Derived
+        default List<Double> epochLosses() {
+            return iterationLossPerEpoch().stream()
+                .map(iterationLosses -> iterationLosses.get(iterationLosses.size() - 1))
+                .collect(Collectors.toList());
+        }
+
+        List<List<Double>> iterationLossPerEpoch();
+
         boolean didConverge();
 
         @Value.Derived
         default int ranEpochs() {
-            return epochLosses().isEmpty()
+            return iterationLossPerEpoch().isEmpty()
                 ? 0
-                : epochLosses().size();
+                : iterationLossPerEpoch().size();
+        }
+
+        @Value.Derived
+        default List<Integer> ranIterationsPerEpoch() {
+            return iterationLossPerEpoch().stream().map(List::size).collect(Collectors.toList());
         }
 
         @Override
@@ -376,8 +392,10 @@ public class GraphSageModelTrainer {
             return Map.of(
                 "metrics", Map.of(
                     "epochLosses", epochLosses(),
+                    "iterationLossesPerEpoch", iterationLossPerEpoch(),
                     "didConverge", didConverge(),
-                    "ranEpochs", ranEpochs()
+                    "ranEpochs", ranEpochs(),
+                    "ranIterationsPerEpoch", ranIterationsPerEpoch()
             ));
         }
     }
@@ -390,13 +408,13 @@ public class GraphSageModelTrainer {
         Layer[] layers();
 
         static ModelTrainResult of(
-            List<Double> epochLosses,
+            List<List<Double>> iterationLossesPerEpoch,
             boolean converged,
             Layer[] layers
         ) {
             return ImmutableModelTrainResult.builder()
                 .layers(layers)
-                .metrics(ImmutableGraphSageTrainMetrics.of(epochLosses, converged))
+                .metrics(ImmutableGraphSageTrainMetrics.of(iterationLossesPerEpoch, converged))
                 .build();
         }
     }

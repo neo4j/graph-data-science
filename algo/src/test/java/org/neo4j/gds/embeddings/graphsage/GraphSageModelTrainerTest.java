@@ -219,6 +219,7 @@ class GraphSageModelTrainerTest {
         var metrics = trainResult.metrics();
         assertThat(metrics.didConverge()).isFalse();
         assertThat(metrics.ranEpochs()).isEqualTo(10);
+        assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
 
         var metricsMap =  metrics.toMap().get("metrics");
         assertThat(metricsMap).isInstanceOf(Map.class);
@@ -266,6 +267,7 @@ class GraphSageModelTrainerTest {
         var metrics = trainResult.metrics();
         assertThat(metrics.didConverge()).isFalse();
         assertThat(metrics.ranEpochs()).isEqualTo(10);
+        assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
 
         var metricsMap =  metrics.toMap().get("metrics");
         assertThat(metricsMap).isInstanceOf(Map.class);
@@ -301,6 +303,7 @@ class GraphSageModelTrainerTest {
         var trainMetrics = trainResult.metrics();
         assertThat(trainMetrics.didConverge()).isTrue();
         assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
+        assertThat(trainMetrics.ranIterationsPerEpoch()).containsExactly(2);
     }
 
     @ParameterizedTest
