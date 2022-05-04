@@ -91,7 +91,11 @@ public final class OutOfBagError implements Metric {
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+        if (totalOutOfAnyBagVectors.longValue() == 0L) {
+            return 0;
+        } else {
+            return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+        }
     }
 
     private static Runnable accumulationTask(

@@ -377,7 +377,29 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
             "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
             " then only RandomForest model candidates are allowed." +
-            " Training methods used are: ['LogisticRegression', 'RandomForest']"
+            " Training methods used are: ['LogisticRegression'']"
+        );
+    }
+
+    @Test
+    void canUseOOBAsMainMetricWithRF() {
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {trainFraction: 0.45, testFraction: 0.45})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr', relationshipWeightProperty: 'weight'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'L2', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {})");
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'AUCPR']," +
+            "       randomSeed: 1" +
+            "}) YIELD modelInfo" +
+            " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR.validation.min AS min_oob",
+            Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
+            List.of(Map.of("min_oob", 0.5))
         );
     }
 

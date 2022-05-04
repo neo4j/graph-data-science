@@ -163,7 +163,6 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         );
 
         var modelInfoCheck = new Condition<>(m -> {
-
             var modelInfo = assertThat(m).asInstanceOf(soMap)
                 .containsEntry("modelName", MODEL_NAME)
                 .containsEntry("modelType", "NodeClassification")
@@ -267,7 +266,6 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
 
     @Test
     void cannotUseOOBAsMainMetricWithLR() {
-
         var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
 
         runQuery(
@@ -299,6 +297,44 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
             " then only RandomForest model candidates are allowed." +
             " Training methods used are: ['LogisticRegression', 'RandomForest']"
+        );
+    }
+
+    @Test
+    void useOOBAsMainMetricWithRF() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['scalar'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        assertCypherResult(
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 't'," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'F1(class=1)']," +
+            "       randomSeed: 1" +
+            "}) YIELD modelInfo" +
+            " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR AS OOB",
+            Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
+            List.of(Map.of("OOB", Map.of("validation", Map.of(
+                        "avg", 1.0,
+                        "min", 1.0,
+                        "max", 1.0
+                    )
+                )
+            ))
+
         );
     }
 }
