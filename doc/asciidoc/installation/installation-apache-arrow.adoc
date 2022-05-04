@@ -1,2 +1,100 @@
+[.enterprise-edition]
 [[installation-apache-arrow]]
 = Apache Arrow
+
+[abstract]
+--
+This chapter explains how to set up Apache Arrow Flight in the Neo4j Graph Data Science library.
+--
+
+include::../management-ops/alpha-note.adoc[]
+
+include::../common-usage/not-on-aurads-note.adoc[]
+
+GDS supports importing graphs and exporting properties via https://arrow.apache.org/[Apache Arrow Flight].
+This chapter is dedicated to configuring the Arrow Flight Server as part of the Neo4j and GDS installation.
+For using Arrow Flight with an Arrow client, please refer to our documentation for <<graph-project-apache-arrow, projecting graphs>> and <<graph-catalog-apache-arrow-ops, streaming properties>>.
+
+Arrow is bundled with GDS Enterprise edition which must be <<neo4j-server, installed>>.
+
+
+== Installation
+
+On a standalone Neo4j Server, Arrow needs to be explicitly enabled and configured.
+The Flight Server is disabled by default, to enable it, add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
+
+----
+gds.arrow.enabled=true
+----
+
+The following additional settings are available:
+
+[[table-arrow-settings]]
+[opts=header,cols="2m,1m,1,1"]
+|===
+| Name                          | Default           | Optional  | Description
+| gds.arrow.listen_address      | localhost:8491    | Yes       | Address the GDS Arrow Flight Server should bind to.
+| gds.arrow.abortion_timeout    | 10                | Yes       | The maximum time in minutes to wait for the next command before aborting the import process.
+| gds.arrow.batch_size          | 10000             | Yes       | The batch size used for arrow property export.
+|===
+
+Note, that any change to the configuration requires a database restart.
+
+
+== Authentication
+
+Client connections to the Arrow Flight server are authenticated using the https://neo4j.com/docs/operations-manual/current/authentication-authorization/introduction/[Neo4j native auth provider].
+Any authenticated user can perform all available Arrow operations, i.e., graph projection and property streaming.
+There are no dedicated roles to configure.
+
+To enable authentication, use the following DBMS setting:
+
+----
+dbms.security.auth_enabled=true
+----
+
+
+== Encryption
+
+Communication between client and server can optionally be encrypted.
+The Arrow Flight server is re-using the https://neo4j.com/docs/operations-manual/current/security/ssl-framework/[Neo4j native SSL framework].
+In terms of https://neo4j.com/docs/operations-manual/current/security/ssl-framework/#ssl-configuration[configuration scope], the Arrow Server supports `https` and `bolt`.
+If both scopes are configured, the Arrow Server prioritizes the `https` scope.
+
+To enable encryption for `https`, use the following DBMS settings:
+
+----
+dbms.ssl.policy.https.enabled=true
+dbms.ssl.polict.https.private_key=private.key
+dbms.ssl.polict.https.public_certificate=public.crt
+----
+
+
+== Monitoring
+
+To return details about the status of the GDS Flight server, GDS provides the `gds.debug.arrow` procedure.
+
+======
+.Run the debug procedure.
+[source, cypher, role=noplay]
+----
+CALL gds.debug.arrow()
+YIELD
+  running: Boolean,
+  enabled: Boolean,
+  listenAddress: String,
+  batchSize: Integer,
+  abortionTimeout: Integer
+----
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name              | Type      | Description
+| running           | Boolean   | True, if the Arrow Flight Server is currently running.
+| enabled           | Boolean   | True, if the corresponding setting is enabled.
+| listenAddress     | String    | Address (host and port) the Arrow Flight Server is bound to.
+| batchSize         | Integer   | The batch size used for arrow property export.
+| abortionTimeout   | Integer   | The maximum time in minutes to wait for the next command before aborting the import process.
+|===
+======
