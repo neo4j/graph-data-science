@@ -35,17 +35,17 @@ import java.util.SplittableRandom;
  *   new[v] ←− ρK items in B[v] with a true flag
  *   Mark sampled items in B[v] as false;
  */
-final class SplitOldAndNewNeighbors implements BiLongConsumer {
+final class FilteredSplitOldAndNewNeighbors implements BiLongConsumer {
     private final SplittableRandom random;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final HugeObjectArray<FilteredNeighborList> neighbors;
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
     private final HugeObjectArray<LongArrayList> allNewNeighbors;
     private final int sampledK;
     private final ProgressTracker progressTracker;
 
-    SplitOldAndNewNeighbors(
+    FilteredSplitOldAndNewNeighbors(
         SplittableRandom random,
-        HugeObjectArray<NeighborList> neighbors,
+        HugeObjectArray<FilteredNeighborList> neighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         int sampledK,
@@ -80,13 +80,13 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
                 // incremental search, if we're already done with this node,
                 // sort neighbor to old neighbors
                 // we use the sign bit to keep track of the checked state of a node
-                if (NeighborList.isChecked(neighborElement)) {
+                if (FilteredNeighborList.isChecked(neighborElement)) {
                     if (oldNeighbors == null) {
                         oldNeighbors = new LongArrayList();
                         allOldNeighbors.set(nodeId, oldNeighbors);
                     }
                     // unset the checked bit
-                    var neighborNode = NeighborList.clearCheckedFlag(neighborElement);
+                    var neighborNode = FilteredNeighborList.clearCheckedFlag(neighborElement);
                     oldNeighbors.add(neighborNode);
                 } else {
                     // always start with the first `sampledK` elements

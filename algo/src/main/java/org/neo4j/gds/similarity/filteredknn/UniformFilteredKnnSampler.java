@@ -27,19 +27,19 @@ import java.util.function.LongPredicate;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
-class UniformKnnSampler implements KnnSampler {
+class UniformFilteredKnnSampler implements FilteredKnnSampler {
 
     private final LongUniformSamplerFromRange uniformSamplerFromRange;
     private final long exclusiveMax;
 
-    UniformKnnSampler(SplittableRandom random, long exclusiveMax) {
+    UniformFilteredKnnSampler(SplittableRandom random, long exclusiveMax) {
         this.uniformSamplerFromRange = new LongUniformSamplerFromRange(random);
         this.exclusiveMax = exclusiveMax;
     }
 
     public static MemoryRange memoryEstimation(long boundedK) {
         return LongUniformSamplerFromRange.memoryEstimation(boundedK)
-            .add(MemoryRange.of(sizeOfInstance(UniformKnnSampler.class)));
+            .add(MemoryRange.of(sizeOfInstance(UniformFilteredKnnSampler.class)));
     }
 
     @Override

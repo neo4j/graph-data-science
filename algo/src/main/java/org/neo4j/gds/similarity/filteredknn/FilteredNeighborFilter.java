@@ -19,18 +19,9 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import net.jqwik.api.Arbitraries;
-import net.jqwik.api.Arbitrary;
-import net.jqwik.api.Provide;
-import org.eclipse.collections.api.tuple.primitive.IntIntPair;
-import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
+public interface FilteredNeighborFilter {
 
-class RandomNodeCountAndKValues {
+    boolean excludeNodePair(long firstNodeId, long secondNodeId);
 
-    @Provide("n and k")
-    final Arbitrary<IntIntPair> nAndK() {
-        return Arbitraries.integers().between(2, 100).flatMap(n ->
-            Arbitraries.integers().between(1, n - 1).map(k ->
-                PrimitiveTuples.pair((int) n, (int) k)));
-    }
+    long lowerBoundOfPotentialNeighbours(long node);
 }

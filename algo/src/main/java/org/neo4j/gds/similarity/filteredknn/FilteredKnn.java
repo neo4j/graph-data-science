@@ -49,20 +49,20 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private final Graph graph;
     private final FilteredKnnBaseConfig config;
-    private final NeighborFilterFactory neighborFilterFactory;
-    private final KnnContext context;
+    private final FilteredNeighborFilterFactory neighborFilterFactory;
+    private final FilteredKnnContext context;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
 
     private long nodePairsConsidered;
 
-    public static FilteredKnn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+    public static FilteredKnn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, FilteredKnnContext context) {
         return new FilteredKnn(
             context.progressTracker(),
             graph,
             config,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
-            new KnnNeighborFilterFactory(graph.nodeCount()),
+            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
             context,
             getSplittableRandom(config.randomSeed())
         );
@@ -72,8 +72,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         Graph graph,
         FilteredKnnBaseConfig config,
         SimilarityComputer similarityComputer,
-        NeighborFilterFactory neighborFilterFactory,
-        KnnContext context
+        FilteredNeighborFilterFactory neighborFilterFactory,
+        FilteredKnnContext context
     ) {
         SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
         return new FilteredKnn(
@@ -97,8 +97,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         Graph graph,
         FilteredKnnBaseConfig config,
         SimilarityComputer similarityComputer,
-        NeighborFilterFactory neighborFilterFactory,
-        KnnContext context,
+        FilteredNeighborFilterFactory neighborFilterFactory,
+        FilteredKnnContext context,
         SplittableRandom splittableRandom
     ) {
         super(progressTracker);
@@ -114,14 +114,14 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         return graph.nodeCount();
     }
 
-    public KnnContext context() {
+    public FilteredKnnContext context() {
         return context;
     }
 
     @Override
     public Result compute() {
         this.progressTracker.beginSubTask();
-        HugeObjectArray<NeighborList> neighbors;
+        HugeObjectArray<FilteredNeighborList> neighbors;
         try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
             try (var ignored2 = ProgressTimer.start(this::logInitTime)) {
                 this.progressTracker.beginSubTask();
@@ -175,7 +175,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     public void release() {
 
     }
-    private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
+    private @Nullable HugeObjectArray<FilteredNeighborList> initializeRandomNeighbors() {
         var k = this.config.topK();
         // (int) is safe since it is at most k, which is an int
         var boundedK = (int) Math.min(graph.nodeCount() - 1, k);
@@ -186,14 +186,14 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             return null;
         }
 
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
+        var neighbors = HugeObjectArray.newArray(FilteredNeighborList.class, graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             config.concurrency(),
             graph.nodeCount(),
             partition -> {
                 var localRandom = splittableRandom.split();
-                return new GenerateRandomNeighbors(
+                return new FilteredGenerateRandomNeighbors(
                     initializeSampler(localRandom),
                     localRandom,
                     this.similarityComputer,
@@ -210,18 +210,18 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
 
         ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, context.executor());
 
-        this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
+        this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(FilteredGenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
     }
 
-    private KnnSampler initializeSampler(SplittableRandom random) {
+    private FilteredKnnSampler initializeSampler(SplittableRandom random) {
         switch(config.initialSampler()) {
             case UNIFORM: {
-                return new UniformKnnSampler(random, graph.nodeCount());
+                return new UniformFilteredKnnSampler(random, graph.nodeCount());
             }
             case RANDOMWALK: {
-                return new RandomWalkKnnSampler(
+                return new RandomWalkFilteredKnnSampler(
                     graph.concurrentCopy(),
                     random,
                     config.randomSeed(),
@@ -229,17 +229,17 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                 );
             }
             default:
-                throw new IllegalStateException("Invalid KnnSampler");
+                throw new IllegalStateException("Invalid FilteredKnnSampler");
         }
     }
 
-    private long iteration(HugeObjectArray<NeighborList> neighbors) {
+    private long iteration(HugeObjectArray<FilteredNeighborList> neighbors) {
         // this is a sanity check
         // we check for this before any iteration and return
         // and just make sure that this invariant holds on every iteration
         var nodeCount = graph.nodeCount();
         if (nodeCount < 2 || this.config.topK() == 0) {
-            return NeighborList.NOT_INSERTED;
+            return FilteredNeighborList.NOT_INSERTED;
         }
 
         var concurrency = this.config.concurrency();
@@ -252,7 +252,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executor, new SplitOldAndNewNeighbors(
+        ParallelUtil.readParallel(concurrency, nodeCount, executor, new FilteredSplitOldAndNewNeighbors(
             this.splittableRandom,
             neighbors,
             allOldNeighbors,
@@ -354,8 +354,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private static final class JoinNeighbors implements Runnable {
         private final SplittableRandom random;
         private final SimilarityComputer computer;
-        private final NeighborFilter neighborFilter;
-        private final HugeObjectArray<NeighborList> neighbors;
+        private final FilteredNeighborFilter neighborFilter;
+        private final HugeObjectArray<FilteredNeighborList> neighbors;
         private final HugeObjectArray<LongArrayList> allOldNeighbors;
         private final HugeObjectArray<LongArrayList> allNewNeighbors;
         private final HugeObjectArray<LongArrayList> allReverseOldNeighbors;
@@ -373,8 +373,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         private JoinNeighbors(
             SplittableRandom random,
             SimilarityComputer computer,
-            NeighborFilter neighborFilter,
-            HugeObjectArray<NeighborList> neighbors,
+            FilteredNeighborFilter neighborFilter,
+            HugeObjectArray<FilteredNeighborList> neighbors,
             HugeObjectArray<LongArrayList> allOldNeighbors,
             HugeObjectArray<LongArrayList> allNewNeighbors,
             HugeObjectArray<LongArrayList> allReverseOldNeighbors,
@@ -478,7 +478,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             long n,
             int k,
             int sampledK,
-            HugeObjectArray<NeighborList> allNeighbors,
+            HugeObjectArray<FilteredNeighborList> allNeighbors,
             HugeObjectArray<LongArrayList> allReverseNewNeighbors,
             long nodeId,
             LongArrayList oldNeighbors,
@@ -531,7 +531,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             SimilarityComputer computer,
             long n,
             int k,
-            HugeObjectArray<NeighborList> allNeighbors,
+            HugeObjectArray<FilteredNeighborList> allNeighbors,
             long nodeId,
             int randomJoins
         ) {
@@ -548,7 +548,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         private long join(
             SplittableRandom splittableRandom,
             SimilarityComputer computer,
-            HugeObjectArray<NeighborList> allNeighbors,
+            HugeObjectArray<FilteredNeighborList> allNeighbors,
             long n,
             int k,
             long base,
@@ -595,7 +595,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
 
     @ValueClass
     public abstract static class Result {
-        abstract HugeObjectArray<NeighborList> neighborList();
+        abstract HugeObjectArray<FilteredNeighborList> neighborList();
 
         public abstract int ranIterations();
 
@@ -606,7 +606,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         public abstract List<Long> sourceNodeFilter();
 
         public LongStream neighborsOf(long nodeId) {
-            return neighborList().get(nodeId).elements().map(NeighborList::clearCheckedFlag);
+            return neighborList().get(nodeId).elements().map(FilteredNeighborList::clearCheckedFlag);
         }
 
         // http://www.flatmapthatshit.com/
@@ -637,7 +637,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private static final class EmptyResult extends Result {
 
         @Override
-        HugeObjectArray<NeighborList> neighborList() {
+        HugeObjectArray<FilteredNeighborList> neighborList() {
             return HugeObjectArray.of();
         }
 

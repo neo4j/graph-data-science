@@ -57,7 +57,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
         return FilteredKnn.createWithDefaults(
             graph,
             configuration,
-            ImmutableKnnContext
+            ImmutableFilteredKnnContext
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(Pools.DEFAULT)
@@ -82,7 +82,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
                     .builder(FilteredKnn.class)
                     .add(
                         "top-k-neighbors-list",
-                        HugeObjectArray.memoryEstimation(NeighborList.memoryEstimation(boundedK))
+                        HugeObjectArray.memoryEstimation(FilteredNeighborList.memoryEstimation(boundedK))
                     )
                     .add("old-neighbors", tempListEstimation)
                     .add("new-neighbors", tempListEstimation)
@@ -106,13 +106,13 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
     static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
         switch(samplerType) {
             case UNIFORM: {
-                return UniformKnnSampler.memoryEstimation(boundedK);
+                return UniformFilteredKnnSampler.memoryEstimation(boundedK);
             }
             case RANDOMWALK: {
-                return RandomWalkKnnSampler.memoryEstimation(boundedK);
+                return RandomWalkFilteredKnnSampler.memoryEstimation(boundedK);
             }
             default:
-                throw new IllegalStateException("Invalid KnnSampler");
+                throw new IllegalStateException("Invalid FilteredKnnSampler");
         }
     }
 

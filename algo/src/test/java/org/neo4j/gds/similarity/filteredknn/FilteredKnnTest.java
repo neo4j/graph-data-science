@@ -110,7 +110,7 @@ class FilteredKnnTest {
             .randomSeed(19L)
             .topK(1)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
@@ -133,7 +133,7 @@ class FilteredKnnTest {
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
@@ -174,7 +174,7 @@ class FilteredKnnTest {
             .randomSeed(19L)
             .topK(1)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
         var result = knn.compute();
@@ -211,7 +211,7 @@ class FilteredKnnTest {
             .randomSeed(19L)
             .topK(2)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(multPropMissingGraph, knnConfig, knnContext);
         var result = knn.compute();
@@ -246,7 +246,7 @@ class FilteredKnnTest {
             .similarityCutoff(0.14)
             .topK(2)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(simThresholdGraph, knnConfig, knnContext);
         var result = knn.compute();
@@ -277,12 +277,12 @@ class FilteredKnnTest {
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(2)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
         var knn = FilteredKnn.create(
             graph,
             knnConfig,
             SimilarityComputer.ofProperty(graph, "knn", nodeProperties),
-            new KnnNeighborFilterFactory(graph.nodeCount()),
+            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
             knnContext
         );
         var result = knn.compute();
@@ -314,8 +314,8 @@ class FilteredKnnTest {
                 .randomSeed(42L)
                 .build(),
             SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties),
-            new KnnNeighborFilterFactory(graph.nodeCount()),
-            ImmutableKnnContext.builder().build()
+            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
+            ImmutableFilteredKnnContext.builder().build()
         );
 
         var result = knn.compute();
@@ -409,7 +409,7 @@ class FilteredKnnTest {
             .nodeProperties(List.of(new KnnNodePropertySpec("weight")))
             .topK(1)
             .build();
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         var knn = FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
 
@@ -472,7 +472,7 @@ class FilteredKnnTest {
             )
         );
         var knnConfig = new FilteredKnnBaseConfigImpl(userInput);
-        var knnContext = ImmutableKnnContext.builder().build();
+        var knnContext = ImmutableFilteredKnnContext.builder().build();
 
         // Initializing KNN will cause the default metric to be resolved
         FilteredKnn.createWithDefaults(graph, knnConfig, knnContext);
@@ -519,7 +519,7 @@ class FilteredKnnTest {
                 .randomSeed(42L)
                 .concurrency(1)
                 .build();
-            var knnContext = KnnContext.empty();
+            var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
@@ -546,7 +546,7 @@ class FilteredKnnTest {
                 .maxIterations(5)
                 .build();
 
-            var knnContext = KnnContext.empty();
+            var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
@@ -598,7 +598,7 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .initialSampler(KnnSampler.SamplerType.RANDOMWALK)
                 .build();
-            var knnContext = KnnContext.empty();
+            var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
@@ -644,7 +644,7 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .sourceNodeFilter(List.of(filteredSourceNode))
                 .build();
-            var knnContext = KnnContext.empty();
+            var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
@@ -666,7 +666,7 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .sourceNodeFilter(List.of(filteredNode1, filteredNode2))
                 .build();
-            var knnContext = KnnContext.empty();
+            var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 

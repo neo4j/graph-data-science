@@ -26,6 +26,7 @@ import net.jqwik.api.Property;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.knn.RandomNodeCountAndKValues;
 
 import java.util.SplittableRandom;
 import java.util.stream.LongStream;
@@ -33,7 +34,7 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
+class FilteredSplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
 
     @Property(tries = 50)
     void name(
@@ -44,13 +45,13 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
         int sampledK = k / 2;
 
         var allNeighbors = HugeObjectArray.newArray(
-            NeighborList.class,
+            FilteredNeighborList.class,
             nodeCount
         );
 
         SplittableRandom rng = new SplittableRandom();
         allNeighbors.setAll(nodeId -> {
-            var neighbors = new NeighborList(k);
+            var neighbors = new FilteredNeighborList(k);
             LongStream.concat(
                 LongStream.range(nodeId + 1, nodeCount),
                 LongStream.range(0, nodeId)
@@ -75,7 +76,7 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
             nodeCount
         );
 
-        var splitNeighbors = new SplitOldAndNewNeighbors(
+        var splitNeighbors = new FilteredSplitOldAndNewNeighbors(
             new SplittableRandom(),
             allNeighbors,
             allOldNeighbors,

@@ -28,6 +28,7 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.similarity.knn.RandomNodeCountAndKValues;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityMetric;
 
@@ -36,7 +37,7 @@ import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
+class FilteredGenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
 
     @Property(tries = 50)
     void neighborsForKEqualsNMinus1startWithEachOtherAsNeighbors(
@@ -47,7 +48,7 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
         var idMap = new DirectIdMap(nodeCount);
 
             var allNeighbors = HugeObjectArray.newArray(
-            NeighborList.class,
+            FilteredNeighborList.class,
             nodeCount
         );
 
@@ -71,11 +72,11 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
         );
 
         var random = new SplittableRandom();
-        var generateRandomNeighbors = new GenerateRandomNeighbors(
-            new UniformKnnSampler(random, nodeCount),
+        var generateRandomNeighbors = new FilteredGenerateRandomNeighbors(
+            new UniformFilteredKnnSampler(random, nodeCount),
             random,
             similarityComputer,
-            new KnnNeighborFilter(nodeCount),
+            new FilteredKnnNeighborFilter(nodeCount),
             allNeighbors,
             k,
             k,

@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-public interface NeighborFilter {
-
-    boolean excludeNodePair(long firstNodeId, long secondNodeId);
-
-    long lowerBoundOfPotentialNeighbours(long node);
+public interface FilteredNeighborFilterFactory {
+    FilteredNeighborFilter create();
 }

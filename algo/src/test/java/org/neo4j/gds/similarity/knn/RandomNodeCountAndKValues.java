@@ -23,7 +23,7 @@ import net.jqwik.api.Provide;
 import org.eclipse.collections.api.tuple.primitive.IntIntPair;
 import org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples;
 
-class RandomNodeCountAndKValues {
+public class RandomNodeCountAndKValues {
 
     @Provide("n and k")
     final Arbitrary<IntIntPair> nAndK() {

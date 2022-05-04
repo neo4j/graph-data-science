@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import java.util.Arrays;
 
-final class NeighborSort {
+final class FilteredNeighborSort {
 
     private static final int RADIX = 8;
     private static final int HIST_SIZE = 1 << RADIX;
@@ -81,5 +81,5 @@ final class NeighborSort {
         }
     }
 
-    private NeighborSort() {}
+    private FilteredNeighborSort() {}
 }

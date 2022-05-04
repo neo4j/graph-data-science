@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-public class KnnNeighborFilterFactory implements NeighborFilterFactory {
+public class FilteredKnnNeighborFilterFactory implements FilteredNeighborFilterFactory {
 
     private final long nodeCount;
 
-    public KnnNeighborFilterFactory(long nodeCount) {
+    public FilteredKnnNeighborFilterFactory(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 
     @Override
-    public NeighborFilter create() {
-        return new KnnNeighborFilter(nodeCount);
+    public FilteredNeighborFilter create() {
+        return new FilteredKnnNeighborFilter(nodeCount);
     }
 }

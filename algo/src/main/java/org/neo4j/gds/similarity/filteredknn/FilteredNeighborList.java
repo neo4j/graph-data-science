@@ -30,10 +30,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-class NeighborList {
+class FilteredNeighborList {
 
     static MemoryEstimation memoryEstimation(int capacity) {
-        return MemoryEstimations.builder(NeighborList.class)
+        return MemoryEstimations.builder(FilteredNeighborList.class)
             .fixed("elements", sizeOfLongArray(2L * capacity))
             .build();
     }
@@ -90,7 +90,7 @@ class NeighborList {
     // every item occupies two entries in the array, [ doubleToLongBits(priority), element ]
     private final long[] priorityElementPairs;
 
-    NeighborList(int elementCapacity) {
+    FilteredNeighborList(int elementCapacity) {
         if (elementCapacity <= 0) {
             throw new IllegalArgumentException("Bound cannot be smaller than or equal to 0");
         }

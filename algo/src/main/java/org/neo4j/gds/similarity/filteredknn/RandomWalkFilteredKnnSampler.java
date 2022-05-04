@@ -34,7 +34,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongHashSet;
 
-class RandomWalkKnnSampler implements KnnSampler {
+class RandomWalkFilteredKnnSampler implements FilteredKnnSampler {
 
     // Extend the walks a bit to compensate for possibly sampling duplicate nodes in the walks.
     private static final int WALK_LENGTH_MULTIPLIER = 3;
@@ -44,7 +44,7 @@ class RandomWalkKnnSampler implements KnnSampler {
     private final long exclusiveMax;
     private final LongHashSet sampledValuesCache;
 
-    RandomWalkKnnSampler(
+    RandomWalkFilteredKnnSampler(
         Graph graph,
         SplittableRandom random,
         // Since RandomWalk seeds per node the RandomWalkSampler can't take a SplittableRandom.
@@ -71,7 +71,7 @@ class RandomWalkKnnSampler implements KnnSampler {
     public static MemoryRange memoryEstimation(long boundedK) {
         var baseEstimation = RandomWalkSampler.memoryEstimation(boundedK * WALK_LENGTH_MULTIPLIER)
             .add(MemoryRange.of(
-                sizeOfInstance(RandomWalkKnnSampler.class) +
+                sizeOfInstance(RandomWalkFilteredKnnSampler.class) +
                 sizeOfLongArray(boundedK) +
                 sizeOfLongHashSet(boundedK)
             ));

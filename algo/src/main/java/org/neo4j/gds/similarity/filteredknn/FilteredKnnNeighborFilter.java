@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+public class FilteredKnnNeighborFilter implements FilteredNeighborFilter {
+    private final long nodeCount;
 
-import java.util.concurrent.ExecutorService;
-
-@ValueClass
-public interface KnnContext {
-
-    @Value.Default
-    default ExecutorService executor() {
-        return Pools.DEFAULT;
+    public FilteredKnnNeighborFilter(long nodeCount) {
+        this.nodeCount = nodeCount;
     }
 
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
+    @Override
+    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
+        return firstNodeId == secondNodeId;
     }
 
-    static KnnContext empty() {
-        return ImmutableKnnContext.builder().build();
+    @Override
+    public long lowerBoundOfPotentialNeighbours(long node) {
+        // excluding the node itself
+        return nodeCount - 1;
     }
 }

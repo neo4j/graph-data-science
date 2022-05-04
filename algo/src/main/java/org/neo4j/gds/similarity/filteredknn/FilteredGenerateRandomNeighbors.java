@@ -29,24 +29,24 @@ import java.util.SplittableRandom;
 /**
  * Initial step in KNN calculation.
  */
-final class GenerateRandomNeighbors implements Runnable {
-    private final KnnSampler sampler;
+final class FilteredGenerateRandomNeighbors implements Runnable {
+    private final FilteredKnnSampler sampler;
     private final SplittableRandom random;
     private final SimilarityComputer computer;
-    private final NeighborFilter neighborFilter;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final FilteredNeighborFilter neighborFilter;
+    private final HugeObjectArray<FilteredNeighborList> neighbors;
     private final int k;
     private final int boundedK;
     private final ProgressTracker progressTracker;
     private final Partition partition;
     private long neighborsFound;
 
-    GenerateRandomNeighbors(
-        KnnSampler sampler,
+    FilteredGenerateRandomNeighbors(
+        FilteredKnnSampler sampler,
         SplittableRandom random,
         SimilarityComputer computer,
-        NeighborFilter neighborFilter,
-        HugeObjectArray<NeighborList> neighbors,
+        FilteredNeighborFilter neighborFilter,
+        HugeObjectArray<FilteredNeighborList> neighbors,
         int k,
         int boundedK,
         Partition partition,
@@ -80,7 +80,7 @@ final class GenerateRandomNeighbors implements Runnable {
                 l -> neighborFilter.excludeNodePair(nodeId, l)
             );
 
-            var neighbors = new NeighborList(k);
+            var neighbors = new FilteredNeighborList(k);
             for (long candidate : chosen) {
                 neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng, 0.0);
             }

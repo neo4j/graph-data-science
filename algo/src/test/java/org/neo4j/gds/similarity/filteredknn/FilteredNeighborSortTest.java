@@ -23,12 +23,12 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-class NeighborSortTest {
+class FilteredNeighborSortTest {
 
     @Test
     void testSortBySource() {
         long[] data = testData();
-        NeighborSort.radixSort(data, NeighborSort.newCopy(data), NeighborSort.newHistogram(0), data.length);
+        FilteredNeighborSort.radixSort(data, FilteredNeighborSort.newCopy(data), FilteredNeighborSort.newHistogram(0), data.length);
         assertArrayEquals(expectedBySource(), data);
     }
 
