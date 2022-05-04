@@ -19,43 +19,43 @@
  */
 package org.neo4j.gds.ml.metrics;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-@ValueClass
-public interface ModelSpecificMetricsHandler {
-    ModelSpecificMetricsHandler NOOP = ImmutableModelSpecificMetricsHandler.of(List.of(), (metric, score) -> {});
+public final class ModelSpecificMetricsHandler {
+    public static final ModelSpecificMetricsHandler NOOP = new ModelSpecificMetricsHandler(List.of(), (metric, score) -> {});
+    private final List<Metric> metrics;
 
-    List<Metric> metrics();
-    BiConsumer<Metric, Double> metricConsumer();
+    private final BiConsumer<Metric, Double> metricConsumer;
 
-    @Value.Derived
-    default boolean isRequested(Metric metric) {
-        return metrics().contains(metric);
+    private ModelSpecificMetricsHandler(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
+        this.metrics = metrics;
+        this.metricConsumer = metricConsumer;
     }
 
-    @Value.Derived
-    default void handle(Metric metric, double score) {
-        if (!isRequested(metric)) {
-            throw new IllegalStateException("Should not handle a metric which is not requested");
-        }
-        metricConsumer().accept(metric, score);
-    }
-
-    @TestOnly
-    static ModelSpecificMetricsHandler ignoringResult(List<Metric> metrics) {
-        return ImmutableModelSpecificMetricsHandler.of(metrics, (a,b) -> {});
-    }
-
-    static ModelSpecificMetricsHandler of(List<Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
-        return ImmutableModelSpecificMetricsHandler.of(
+    public static ModelSpecificMetricsHandler of(List<Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
+        return new ModelSpecificMetricsHandler(
             metrics.stream().filter(Metric::isModelSpecific).collect(Collectors.toList()),
             modelStatsBuilder::update
         );
+    }
+
+    public boolean isRequested(Metric metric) {
+        return metrics.contains(metric);
+    }
+
+    public void handle(Metric metric, double score) {
+        if (!isRequested(metric)) {
+            throw new IllegalStateException("Should not handle a metric which is not requested");
+        }
+        metricConsumer.accept(metric, score);
+    }
+
+    @TestOnly
+    public static ModelSpecificMetricsHandler ignoringResult(List<Metric> metrics) {
+        return new ModelSpecificMetricsHandler(metrics, (a,b) -> {});
     }
 }
