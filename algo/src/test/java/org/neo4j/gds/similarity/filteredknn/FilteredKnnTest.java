@@ -648,12 +648,32 @@ class FilteredKnnTest {
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
             var result = knn.compute();
 
-            result.streamSimilarityResult().forEach(
-                r -> System.out.printf("%d,%d: %f%n", r.node1, r.node2, r.similarity)
-            );
-
+            // the number of neighbors for the filtered node is the same as the total result size
             assertThat(result.neighborsOf(filteredSourceNode).count())
                 .isEqualTo(result.totalSimilarityPairs());
+        }
+
+        @Test
+        void shouldOnlyProduceResultsForMultipleFilteredSourceNode() {
+            var filteredNode1 = idFunction.of("a");
+            var filteredNode2 = idFunction.of("b");
+            var config = ImmutableFilteredKnnBaseConfig.builder()
+                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
+                .topK(3)
+                .randomJoins(0)
+                .maxIterations(1)
+                .randomSeed(20L)
+                .concurrency(1)
+                .sourceNodeFilter(List.of(filteredNode1, filteredNode2))
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
+            var result = knn.compute();
+
+            // the number of neighbors for the filtered nodes is the same as the total result size
+            var neighborCountForFilteredNodes = result.neighborsOf(filteredNode1).count() + result.neighborsOf(filteredNode2).count();
+            var totalNeighborCount = result.totalSimilarityPairs();
+            assertThat(neighborCountForFilteredNodes).isEqualTo(totalNeighborCount);
         }
 
     }
