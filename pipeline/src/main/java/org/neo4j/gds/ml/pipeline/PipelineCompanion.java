@@ -20,7 +20,8 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -66,18 +67,18 @@ public final class PipelineCompanion {
     }
 
     public static void validateMainMetric(TrainingPipeline<?> pipeline, String mainMetric) {
-        if (mainMetric.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
+        if (mainMetric.equals(OUT_OF_BAG_ERROR.name())) {
             var nonRFMethods = pipeline.trainingParameterSpace().entrySet().stream()
-                .filter(entry -> !entry.getValue().isEmpty())
+                .filter(entry -> entry.getKey() != TrainingMethod.RandomForestClassification && !entry.getValue().isEmpty() )
                 .map(Map.Entry::getKey)
-                .map(method -> "`" + method.toString() + "`")
-                .collect(Collectors.toList());
+                .map(Enum::toString)
+                .collect(Collectors.toSet());
             if (!nonRFMethods.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "If %s is used as the main metric (the first one), then only RandomForest model candidates are allowed." +
-                    " Training methods used are: [%s].",
-                    ((Metric) OUT_OF_BAG_ERROR).name(),
-                    String.join(", ", nonRFMethods)
+                    " Training methods used are: %s.",
+                    OUT_OF_BAG_ERROR.name(),
+                    StringJoining.join(nonRFMethods)
                 ));
             }
         }
