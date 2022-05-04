@@ -33,7 +33,7 @@ The following optional settings can be used to control transaction size.
 
 [opts="header"]
 |===
-| Property                  | Default Value
+| Property                  | Default
 | `gds.cluster.tx.min.size` | 10000
 | `gds.cluster.tx.max.size` | 100000
 |===

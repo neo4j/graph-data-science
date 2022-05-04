@@ -295,7 +295,7 @@ This is equivalent to all the other algorithms within the GDS library.
 .Pregel Configuration
 [opts="header",cols="1,1,1,6"]
 |===
-| Name                                                                             | Type      | Default Value | Description
+| Name                                                                             | Type      | Default       | Description
 | <<common-configuration-max-iterations,maxIterations>>                            | Integer   | -             | Maximum number of supersteps after which the computation will terminate.
 | isAsynchronous                                                                   | Boolean   | false         | Flag indicating if messages can be sent and received in the same superstep.
 | partitioning                                                                     | String    | "range"       | Selects the partitioning of the input graph, can be either "range", "degree" or "auto".
@@ -408,7 +408,7 @@ The annotation provides a number of configuration options for the code generatio
 .Configuration
 [opts="header",cols="1,1,1,6"]
 |===
-| Name                      | Type      | Default Value                     | Description
+| Name                      | Type      | Default                           | Description
 | name                      | String    | -                                 | The prefix of the generated procedure name. It is appended by the mode.
 | modes                     | List      | `[STREAM, WRITE, MUTATE, STATS]`  | A procedure is generated for each of the specified modes.
 | description               | String    | `""`                              | Procedure description that is printed in `dbms.listProcedures()`.
