@@ -246,7 +246,7 @@ YIELD requiredMemory
 [opts="header"]
 |===
 | requiredMemory
-| +"[8686 KiB ... 8760 KiB]"+
+| +"[1264 KiB ... 1338 KiB]"+
 |===
 --
 
@@ -278,14 +278,14 @@ RETURN
   modelInfo.metrics.F1_WEIGHTED.train.avg AS avgTrainScore,
   modelInfo.metrics.F1_WEIGHTED.outerTrain AS outerTrainScore,
   modelInfo.metrics.F1_WEIGHTED.test AS testScore,
-  modelSelectionStats.bestTrial as bestTrial
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.F1_WEIGHTED.validation.avg] AS validationScores
 ----
 
 .Results
-[opts="header", cols="8, 2, 2, 2, 2"]
+[opts="header", cols="8, 2, 2, 2, 8"]
 |===
-| winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | bestTrial
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | 1
+| winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | [0.4909090835454547, 0.07272727163636365, 0.4909090835454547, 0.4909090835454547, 0.4909090835454547]
 |===
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
