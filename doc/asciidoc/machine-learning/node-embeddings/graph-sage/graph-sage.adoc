@@ -278,7 +278,7 @@ RETURN
 .Results
 |===
 | modelName           | didConverge | ranEpochs | epochLosses
-| "exampleTrainModel" | false       | 1         | [186.04946807210226]
+| "exampleTrainModel" | true        | 1         | [186.04946807210226]
 |===
 --
 

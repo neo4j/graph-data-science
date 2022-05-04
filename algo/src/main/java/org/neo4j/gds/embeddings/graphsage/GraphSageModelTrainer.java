@@ -145,26 +145,17 @@ public class GraphSageModelTrainer {
 
         progressTracker.endSubTask("Prepare batches");
 
-        double previousLoss = Double.MAX_VALUE;
         boolean converged = false;
         var iterationLossesPerEpoch = new ArrayList<List<Double>>();
 
         progressTracker.beginSubTask("Train model");
 
-        for (int epoch = 1; epoch <= epochs; epoch++) {
+        for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-
-
-            var iterationLosses = trainEpoch(batchTasks, weights);
-            iterationLossesPerEpoch.add(iterationLosses);
-            var newLoss = iterationLosses.get(iterationLosses.size() - 1);
-
+            var epochResult = trainEpoch(batchTasks, weights);
+            iterationLossesPerEpoch.add(epochResult.losses());
+            converged = epochResult.converged();
             progressTracker.endSubTask("Epoch");
-            if (Math.abs((newLoss - previousLoss) / previousLoss) < tolerance) {
-                converged = true;
-                break;
-            }
-            previousLoss = newLoss;
         }
 
         progressTracker.endSubTask("Train model");
@@ -203,11 +194,13 @@ public class GraphSageModelTrainer {
         return new BatchTask(lossFunction, weights, tolerance, progressTracker);
     }
 
-    private List<Double> trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
+    private EpochResult trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
         var updater = new AdamOptimizer(weights, learningRate);
 
         int iteration = 1;
         var iterationLosses = new ArrayList<Double>();
+        var converged = false;
+
         for (;iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
@@ -216,7 +209,7 @@ public class GraphSageModelTrainer {
             var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
             iterationLosses.add(avgLoss);
 
-            var converged = batchTasks.stream().allMatch(task -> task.converged);
+            converged = batchTasks.stream().allMatch(task -> task.converged);
             if (converged) {
                 progressTracker.endSubTask();
                 break;
@@ -235,7 +228,14 @@ public class GraphSageModelTrainer {
             progressTracker.endSubTask("Iteration");
         }
 
-        return iterationLosses;
+        return ImmutableEpochResult.of(converged, iterationLosses);
+    }
+
+    @ValueClass
+    interface EpochResult {
+        boolean converged();
+
+        List<Double> losses();
     }
 
     static class BatchTask implements Runnable {
