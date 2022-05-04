@@ -26,6 +26,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
@@ -34,6 +36,7 @@ import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,6 +58,24 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         ProgressTracker progressTracker
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
+    }
+
+    public static Task progressTask(String taskName, NodeClassificationTrainingPipeline pipeline) {
+        return Tasks.task(
+            taskName,
+            new ArrayList<>() {{
+                add(Tasks.iterativeFixed(
+                    "Execute node property steps",
+                    () -> List.of(Tasks.leaf("Step")),
+                    pipeline.nodePropertySteps().size()
+                ));
+                addAll(NodeClassificationTrain.progressTasks(
+                    pipeline.splitConfig().validationFolds(),
+                    pipeline.numberOfModelSelectionTrials()
+                ));
+
+            }}
+        );
     }
 
     public static MemoryEstimation estimate(

@@ -26,6 +26,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -60,6 +62,18 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
+    }
+
+    public static Task progressTask(String taskName, NodeClassificationPredictPipeline pipeline, GraphStore graphStore) {
+        return Tasks.task(
+            taskName,
+            Tasks.iterativeFixed(
+                "Execute node property steps",
+                () -> List.of(Tasks.leaf("Step")),
+                pipeline.nodePropertySteps().size()
+            ),
+            Tasks.leaf("Node classification predict", graphStore.getUnion().nodeCount())
+        );
     }
 
     public static MemoryEstimation estimate(

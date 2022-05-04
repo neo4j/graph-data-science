@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.assertj.core.util.DoubleComparator;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,7 +48,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -106,14 +104,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
     }
 
-    @AfterEach
-    void tearDown() {
-        PipelineCatalog.removeAll();
-    }
-
     @Test
     void trainsAModel() {
-        var pipeline = insertPipelineIntoCatalog();
+        var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "testProc",
             Map.of("mutateProperty", "pr")
@@ -182,7 +175,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldLogProgress() {
-        var pipeline = insertPipelineIntoCatalog();
+        var pipeline = new NodeClassificationTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("array"));
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
@@ -205,10 +198,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationTrainPipelineAlgorithmFactory(caller.executionContext()).progressTask(
-                    graphStore,
-                    config
-                ),
+                NodeClassificationTrainPipelineExecutor.progressTask("Node Classification Train Pipeline", pipeline),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
@@ -245,8 +235,8 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void failsOnInvalidTargetProperty() {
-        var pipeline = insertPipelineIntoCatalog();
-        pipeline.featureProperties().addAll(List.of("array"));
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.featureProperties().add("array");
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .username(getUsername())
@@ -313,7 +303,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("trainerMethodConfigs")
     void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
-        var pipeline = insertPipelineIntoCatalog();
+        var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
             "testProc",
             Map.of("mutateProperty", "pr")
@@ -355,7 +345,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void failEstimateOnEmptyParameterSpace() {
-        var pipeline = insertPipelineIntoCatalog();
+        var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.featureProperties().addAll(List.of("array", "scalar"));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
@@ -373,12 +363,6 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
         assertThatThrownBy(() -> NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog()))
             .hasMessage("Need at least one model candidate for training.");
-    }
-
-    private NodeClassificationTrainingPipeline insertPipelineIntoCatalog() {
-        var info = new NodeClassificationTrainingPipeline();
-        PipelineCatalog.set(getUsername(), PIPELINE_NAME, info);
-        return info;
     }
 
     private NodeClassificationPipelineTrainConfig createConfig(

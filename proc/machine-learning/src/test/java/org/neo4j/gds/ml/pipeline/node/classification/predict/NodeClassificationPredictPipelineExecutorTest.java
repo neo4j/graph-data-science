@@ -49,7 +49,6 @@ import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -311,34 +310,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var bias = new double[]{3.0, 0.0};
             var modelData = createModeldata(weights, bias);
 
-            modelCatalog.set(Model.of(
-                getUsername(),
-                "model",
-                NodeClassificationTrainingPipeline.MODEL_TYPE,
-                GraphSchema.empty(),
-                modelData,
-                NodeClassificationPipelineTrainConfigImpl.builder()
-                    .username(getUsername())
-                    .modelName("model")
-                    .pipeline("DUMMY")
-                    .graphName(GRAPH_NAME)
-                    .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
-                    .targetProperty("foo")
-                    .build(),
-                NodeClassificationPipelineModelInfo.builder()
-                    .classes(modelData.classIdMap().originalIdsList())
-                    .bestParameters(LogisticRegressionTrainConfig.DEFAULT)
-                    .metrics(Map.of())
-                    .pipeline(pipeline)
-                    .build()
-            ));
-
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                new NodeClassificationPredictPipelineAlgorithmFactory<>(
-                    caller.executionContext(),
-                    modelCatalog
-                ).progressTask(graphStore, config),
+                NodeClassificationPredictPipelineExecutor.progressTask("Node Classification Predict Pipeline", pipeline, graphStore),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

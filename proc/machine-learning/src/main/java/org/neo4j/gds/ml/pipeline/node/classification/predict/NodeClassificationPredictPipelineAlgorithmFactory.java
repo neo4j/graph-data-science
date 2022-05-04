@@ -27,13 +27,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
-
-import java.util.List;
 
 public class NodeClassificationPredictPipelineAlgorithmFactory
     <CONFIG extends NodeClassificationPredictPipelineBaseConfig>
@@ -58,15 +55,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         ).customInfo()
             .pipeline();
 
-        return Tasks.task(
-            taskName(),
-            Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
-                trainingPipeline.nodePropertySteps().size()
-            ),
-            Tasks.leaf("Node classification predict", graphStore.getUnion().nodeCount())
-        );
+        return NodeClassificationPredictPipelineExecutor.progressTask(taskName(), trainingPipeline, graphStore);
     }
 
     @Override

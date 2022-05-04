@@ -25,13 +25,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
 
@@ -87,22 +83,9 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
-        var pipeline = PipelineCatalog.getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class);
-
-        return Tasks.task(
+        return NodeClassificationTrainPipelineExecutor.progressTask(
             taskName(),
-            new ArrayList<>() {{
-                add(Tasks.iterativeFixed(
-                    "Execute node property steps",
-                    () -> List.of(Tasks.leaf("Step")),
-                    pipeline.nodePropertySteps().size()
-                ));
-                addAll(NodeClassificationTrain.progressTasks(
-                    pipeline.splitConfig().validationFolds(),
-                    pipeline.numberOfModelSelectionTrials()
-                ));
-
-            }}
+            PipelineCatalog .getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class)
         );
     }
 }
