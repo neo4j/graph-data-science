@@ -296,7 +296,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
             "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
             " then only RandomForest model candidates are allowed." +
-            " Training methods used are: ['LogisticRegression', 'RandomForest']"
+            " Incompatible training methods used are: ['LogisticRegression']"
         );
     }
 

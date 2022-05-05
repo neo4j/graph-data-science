@@ -76,7 +76,7 @@ public final class PipelineCompanion {
             if (!nonRFMethods.isEmpty()) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "If %s is used as the main metric (the first one), then only RandomForest model candidates are allowed." +
-                    " Training methods used are: %s.",
+                    " Incompatible training methods used are: %s.",
                     OUT_OF_BAG_ERROR.name(),
                     StringJoining.join(nonRFMethods)
                 ));
