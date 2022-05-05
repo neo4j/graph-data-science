@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -41,7 +42,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -58,6 +59,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -65,6 +67,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
@@ -122,22 +126,22 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(53_368, 1_727_208)
+                MemoryRange.of(53_336, 1_727_176)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(142_264, 5_324_504)
+                MemoryRange.of(142_232, 5_324_472)
             ),
             Arguments.of(
                 "Higher train-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
-                MemoryRange.of(186_296, 6_132_936)
+                MemoryRange.of(186_264, 6_132_904)
             ),
             Arguments.of(
                 "Higher validation folds",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
-                MemoryRange.of(212_456, 6_159_096)
+                MemoryRange.of(212_424, 6_159_064)
             )
         );
     }
@@ -153,17 +157,17 @@ class LinkPredictionTrainTest {
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                List.of(llrConfigs.get(0)), MemoryRange.of(35_816, 1_121_656)
+                List.of(llrConfigs.get(0)), MemoryRange.of(35_784, 1_121_624)
             ),
             Arguments.of(
                 "LLR batchSize 100",
                 List.of(llrConfigs.get(1)),
-                MemoryRange.of(54_888, 1_728_728)
+                MemoryRange.of(54_856, 1_728_696)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
                 llrConfigs,
-                MemoryRange.of(54_984, 1_728_824)
+                MemoryRange.of(54_936, 1_728_776)
             ),
             Arguments.of(
                 "RF",
@@ -176,7 +180,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(66_928, 899_408)
+                MemoryRange.of(66_896, 899_376)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -184,7 +188,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(74_024, 2_738_872)
+                MemoryRange.of(73_976, 2_738_824)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -195,7 +199,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(74_024, 2_738_872)
+                MemoryRange.of(73_976, 2_738_824)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -206,7 +210,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(12_828_680, 405_698_920)
+                MemoryRange.of(12_828_632, 405_698_872)
             )
         );
     }
@@ -219,7 +223,7 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        assertThat(result.trainingStatistics().getTrainStats(LinkMetric.AUCPR).size()).isEqualTo(MAX_TRIALS);
+        assertThat(result.trainingStatistics().getTrainStats(AUCPR).size()).isEqualTo(MAX_TRIALS);
 
         var trainedClassifier = result.classifier();
 
@@ -227,7 +231,7 @@ class LinkPredictionTrainTest {
             .extracting(llrData -> llrData.weights().data().totalSize())
             .isEqualTo(6);
 
-        assertThat(result.trainingStatistics().getValidationStats(LinkMetric.AUCPR))
+        assertThat(result.trainingStatistics().getValidationStats(AUCPR))
             .satisfies(scores ->
                 assertThat(scores.get(0).avg()).isNotCloseTo(scores.get(1).avg(), Percentage.withPercentage(0.2))
             );
@@ -235,6 +239,41 @@ class LinkPredictionTrainTest {
         assertThat(result.trainingStatistics().bestParameters())
             .usingRecursiveComparison()
             .isEqualTo(LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "patience", 5, "tolerance", 0.00001)));
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {
+        String modelName = "model";
+
+        LinkPredictionTrainConfig trainConfig = trainingConfig(
+            modelName,
+            includeOOB ? List.of(AUCPR, OUT_OF_BAG_ERROR) : List.of(AUCPR)
+        );
+
+        var result = runLinkPrediction(trainConfig);
+
+        var trainingStatistics = result.trainingStatistics().toMap();
+        var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
+
+        var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
+        assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
+
+        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(0, 10);
+
+        var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
+        assertThat(candidateStats.size()).isEqualTo(10);
+        for (int i = 0; i < candidateStats.size(); i++) {
+            var candidateMap = (Map) candidateStats.get(i);
+            assertThat(candidateMap).containsKey("parameters");
+            assertThat((Map) candidateMap.get("metrics")).containsKey("AUCPR");
+            if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).containsKey("OUT_OF_BAG_ERROR");
+            }
+            if (!includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).doesNotContainKey("OUT_OF_BAG_ERROR");
+            }
+        }
     }
 
     @Test
@@ -258,11 +297,11 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10, 2_968, 77_448",
-        "  10,  100, 18_776, 575_416",
-        "  10, 1000, 54_888, 1_728_728",
+        "  10,   10, 2_936, 77_416",
+        "  10,  100, 18_744, 575_384",
+        "  10, 1000, 54_856, 1_728_696",
         // nodeCount has no effect on the estimation
-        "1000, 1000, 54_888, 1_728_728"
+        "1000, 1000, 54_856, 1_728_696"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -336,9 +375,9 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  1,  40_856, 1_279_576",
-        "  2,  54_536, 1_712_696",
-        "  4,  54_888, 1_728_728",
+        "  1,  40_824, 1_279_544",
+        "  2,  54_504, 1_712_664",
+        "  4,  54_856, 1_728_696",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -683,11 +722,16 @@ class LinkPredictionTrainTest {
     }
 
     private LinkPredictionTrainConfig trainingConfig(String modelName) {
+        return trainingConfig(modelName, List.of(AUCPR));
+    }
+
+    private LinkPredictionTrainConfig trainingConfig(String modelName, List<Metric> metrics) {
         return LinkPredictionTrainConfigImpl.builder()
             .username("DUMMY")
             .modelName(modelName)
             .graphName("g")
             .pipeline("DUMMY")
+            .metrics(metrics.stream().map(Metric::name).collect(Collectors.toList()))
             .negativeClassWeight(1)
             .randomSeed(1337L)
             .build();

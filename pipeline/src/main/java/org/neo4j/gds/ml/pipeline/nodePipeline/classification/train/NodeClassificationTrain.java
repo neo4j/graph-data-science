@@ -33,8 +33,9 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
@@ -67,6 +68,7 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain {
@@ -76,7 +78,8 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeLongArray targets;
     private final LocalIdMap classIdMap;
-    private final List<ClassificationMetric> metrics;
+    private final List<Metric> metrics;
+    private final List<ClassificationMetric> classificationMetrics;
     private final Multiset<Long> classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -124,11 +127,11 @@ public final class NodeClassificationTrain {
             )
             .add(
                 "stats map train",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add(
                 "stats map validation",
-                StatsMap.memoryEstimation(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
+                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
             )
             .add("max of model selection and best model evaluation", modelTrainingEstimation);
 
@@ -219,6 +222,7 @@ public final class NodeClassificationTrain {
         HugeLongArray labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
+        var classificationMetrics = classificationMetrics(metrics);
 
         Features features;
         if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
@@ -235,6 +239,7 @@ public final class NodeClassificationTrain {
             labels,
             classIdMap,
             metrics,
+            classificationMetrics,
             classCounts,
             progressTracker,
             terminationFlag
@@ -247,11 +252,13 @@ public final class NodeClassificationTrain {
         Features features,
         HugeLongArray labels,
         LocalIdMap classIdMap,
-        List<ClassificationMetric> metrics,
+        List<Metric> metrics,
+        List<ClassificationMetric> classificationMetrics,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
+        this.classificationMetrics = classificationMetrics;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.pipeline = pipeline;
@@ -304,28 +311,31 @@ public final class NodeClassificationTrain {
             progressTracker.beginSubTask("Trial");
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+            var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
+            var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 var trainSet = nodeSplit.trainSet();
                 var validationSet = nodeSplit.testSet();
 
-                var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
+                var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER, metricsHandler);
 
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 progressTracker.logProgress();
             }
 
-            metrics.forEach(metric -> {
-                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
-            });
+            var candidateStats = ModelCandidateStats.of(
+                modelParams,
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
+            );
+            trainingStatistics.addCandidateStats(candidateStats);
 
-            var validationStats = trainingStatistics.findModelValidationAvg(trial);
-            var trainStats = trainingStatistics.findModelTrainAvg(trial);
-            double mainMetric = trainingStatistics.getMainValidationMetric(trial);
+            var validationStats = trainingStatistics.validationMetricsAvg(trial);
+            var trainStats = trainingStatistics.trainMetricsAvg(trial);
+            double mainMetric = trainingStatistics.getMainMetric(trial);
 
             progressTracker.logMessage(formatWithLocale(
                 "Main validation metric (%s): %.4f",
@@ -367,7 +377,8 @@ public final class NodeClassificationTrain {
             terminationFlag,
             customProgressTracker
         );
-        metrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
+        // currently no specific metrics are evaluated on test
+        classificationMetrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
     }
 
     private void evaluateBestModel(
@@ -375,7 +386,12 @@ public final class NodeClassificationTrain {
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestClassifier = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        var bestClassifier = trainModel(
+            outerSplit.trainSet(),
+            trainingStatistics.bestParameters(),
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
+        );
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask(
@@ -383,9 +399,7 @@ public final class NodeClassificationTrain {
             outerSplit.testSet().size() + outerSplit.trainSet().size()
         );
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore, progressTracker);
-        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore,
-            progressTracker
-        );
+        registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore, progressTracker);
         progressTracker.endSubTask("Evaluate on test data");
 
         var testMetrics = trainingStatistics.winningModelTestMetrics();
@@ -394,7 +408,12 @@ public final class NodeClassificationTrain {
 
     private Classifier retrainBestModel(HugeLongArray trainSet, TrainingStatistics trainingStatistics) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedClassifier = trainModel(trainSet, trainingStatistics.bestParameters(), progressTracker);
+        var retrainedClassifier = trainModel(
+            trainSet,
+            trainingStatistics.bestParameters(),
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP
+        );
         progressTracker.endSubTask("Retrain best model");
 
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
@@ -406,7 +425,8 @@ public final class NodeClassificationTrain {
     private Classifier trainModel(
         HugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        ProgressTracker customProgressTracker
+        ProgressTracker customProgressTracker,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
@@ -415,7 +435,8 @@ public final class NodeClassificationTrain {
             customProgressTracker,
             config.concurrency(),
             config.randomSeed(),
-            false
+            false,
+            metricsHandler
         );
 
         return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));

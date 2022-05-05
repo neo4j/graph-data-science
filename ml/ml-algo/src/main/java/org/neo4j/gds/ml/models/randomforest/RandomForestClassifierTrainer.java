@@ -42,6 +42,8 @@ import org.neo4j.gds.ml.decisiontree.Entropy;
 import org.neo4j.gds.ml.decisiontree.FeatureBagger;
 import org.neo4j.gds.ml.decisiontree.GiniIndex;
 import org.neo4j.gds.ml.decisiontree.ImpurityCriterion;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
+import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
@@ -53,6 +55,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestClassifierTrainer implements ClassifierTrainer {
@@ -60,28 +63,28 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private final LocalIdMap classIdMap;
     private final RandomForestClassifierTrainerConfig config;
     private final int concurrency;
-    private final boolean computeOutOfBagError;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private Optional<Double> outOfBagError = Optional.empty();
+    private final ModelSpecificMetricsHandler metricsHandler;
 
     public RandomForestClassifierTrainer(
         int concurrency,
         LocalIdMap classIdMap,
         RandomForestClassifierTrainerConfig config,
-        boolean computeOutOfBagError,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         this.classIdMap = classIdMap;
         this.config = config;
         this.concurrency = concurrency;
-        this.computeOutOfBagError = computeOutOfBagError;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.metricsHandler = metricsHandler;
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -130,7 +133,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         HugeLongArray allLabels,
         ReadOnlyHugeLongArray trainSet
     ) {
-        Optional<HugeAtomicLongArray> maybePredictions = computeOutOfBagError
+        Optional<HugeAtomicLongArray> maybePredictions = metricsHandler.isRequested(OUT_OF_BAG_ERROR)
             ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
             : Optional.empty();
 
@@ -160,13 +163,17 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ).collect(Collectors.toList());
         ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
 
-        outOfBagError = maybePredictions.map(predictions -> OutOfBagErrorMetric.evaluate(
-            trainSet,
-            classIdMap,
-            allLabels,
-            concurrency,
-            predictions
-        ));
+        maybePredictions.ifPresent(predictions ->
+        {
+            outOfBagError = Optional.of(OutOfBagError.evaluate(
+                trainSet,
+                classIdMap,
+                allLabels,
+                concurrency,
+                predictions
+            ));
+            metricsHandler.handle(OUT_OF_BAG_ERROR, outOfBagError());
+        });
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
@@ -277,7 +284,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             trainedTree = decisionTree.train(bootstrappedDataset.allVectorsIndices());
 
-            maybePredictions.ifPresent(predictionsCache -> OutOfBagErrorMetric.addPredictionsForTree(
+            maybePredictions.ifPresent(predictionsCache -> OutOfBagError.addPredictionsForTree(
                 trainedTree,
                 classIdMap,
                 allFeatureVectors,

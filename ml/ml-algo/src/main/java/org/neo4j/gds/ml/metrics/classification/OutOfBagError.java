@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.models.randomforest;
+package org.neo4j.gds.ml.metrics.classification;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -29,16 +29,25 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.Features;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
-public final class OutOfBagErrorMetric {
+public final class OutOfBagError implements Metric {
+    private OutOfBagError() {
+    }
 
-    private OutOfBagErrorMetric() {}
+    @Override
+    public boolean isModelSpecific() {
+        return true;
+    }
 
-    static void addPredictionsForTree(
+    public static final OutOfBagError OUT_OF_BAG_ERROR = new OutOfBagError();
+
+    public static void addPredictionsForTree(
         DecisionTreePredictor<Integer> decisionTree,
         LocalIdMap classMapping,
         final Features allFeatureVectors,
@@ -82,7 +91,11 @@ public final class OutOfBagErrorMetric {
 
         ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
-        return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+        if (totalOutOfAnyBagVectors.longValue() == 0L) {
+            return 0;
+        } else {
+            return totalMistakes.doubleValue() / totalOutOfAnyBagVectors.doubleValue();
+        }
     }
 
     private static Runnable accumulationTask(
@@ -128,5 +141,20 @@ public final class OutOfBagErrorMetric {
             totalMistakes.add(numMistakes);
             totalOutOfAnyBagVectors.add(numOutOfAnyBagVectors);
         };
+    }
+
+    @Override
+    public String name() {
+        return "OUT_OF_BAG_ERROR";
+    }
+
+    @Override
+    public String toString() {
+        return name();
+    }
+
+    @Override
+    public Comparator<Double> comparator() {
+        return Comparator.naturalOrder();
     }
 }

@@ -20,10 +20,11 @@
 package org.neo4j.gds.ml.metrics;
 
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
@@ -31,11 +32,9 @@ public class ModelStatsBuilder {
     private final Map<Metric, Double> min;
     private final Map<Metric, Double> max;
     private final Map<Metric, Double> sum;
-    private final TrainerConfig modelParams;
     private final int numberOfSplits;
 
-    public ModelStatsBuilder(TrainerConfig modelParams, int numberOfSplits) {
-        this.modelParams = modelParams;
+    public ModelStatsBuilder(int numberOfSplits) {
         this.numberOfSplits = numberOfSplits;
         this.min = new HashMap<>();
         this.max = new HashMap<>();
@@ -49,11 +48,17 @@ public class ModelStatsBuilder {
     }
 
     public ModelStats build(Metric metric) {
-        return ImmutableModelStats.of(
-            modelParams,
+        return ModelStats.of(
             sum.get(metric) / numberOfSplits,
             min.get(metric),
             max.get(metric)
+        );
+    }
+
+    public Map<Metric, ModelStats> build() {
+        return sum.keySet().stream()
+            .collect(
+            Collectors.toMap(Function.identity(), this::build)
         );
     }
 

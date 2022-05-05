@@ -45,7 +45,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateAccuracyMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy")).get(0);
-        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.asString()).isEqualTo("ACCURACY");
         assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
@@ -54,7 +54,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
-        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
         assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
     }
@@ -62,15 +62,25 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1MacroMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_maCRo")).get(0);
-        ClassificationMetric metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
     }
 
     @Test
+    void shouldCreateOOBEMetric() {
+        var metricSpecification = ClassificationMetricSpecification.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
+        assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
+        assertThat(metric.name()).isEqualTo("OUT_OF_BAG_ERROR");
+        assertThat(metricSpecification.asString()).isEqualTo("OUT_OF_BAG_ERROR");
+    }
+
+    @Test
     void shouldParseSyntacticSugar() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
-        List<ClassificationMetric> metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
+        var metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
         assertThat(metrics.get(0).name()).isEqualTo("F1(class=42)");

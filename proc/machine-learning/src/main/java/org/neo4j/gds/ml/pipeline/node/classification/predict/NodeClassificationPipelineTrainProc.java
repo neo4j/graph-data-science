@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
-import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor.NodeClassificationTrainPipelineResult;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)

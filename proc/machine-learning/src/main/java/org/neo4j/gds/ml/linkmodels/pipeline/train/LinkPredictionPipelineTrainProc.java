@@ -26,7 +26,7 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
-import org.neo4j.gds.ml.PipelineCompanion;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;

@@ -47,10 +47,11 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
-import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
@@ -424,12 +425,13 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .pipeline("DUMMY")
                 .targetProperty("foo")
                 .build(),
-            NodeClassificationPipelineModelInfo.builder()
-                .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(RandomForestClassifierTrainerConfigImpl.builder().build())
-                .metrics(Map.of())
-                .pipeline(NodePropertyPredictPipeline.EMPTY)
-                .build()
+            NodeClassificationPipelineModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()),
+                NodePropertyPredictPipeline.EMPTY,
+                modelData.classIdMap().originalIdsList()
+            )
         );
 
         var config = new NodeClassificationPredictPipelineBaseConfigImpl.Builder()

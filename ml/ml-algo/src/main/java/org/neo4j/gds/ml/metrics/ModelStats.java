@@ -21,48 +21,31 @@ package org.neo4j.gds.ml.metrics;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.models.TrainerConfig;
 
-import java.util.Comparator;
 import java.util.Map;
 
+/**
+ * Statistics of the metric of the model candidate over (inner) folds
+ */
 @ValueClass
 public interface ModelStats {
-    Comparator<ModelStats> COMPARE_AVERAGE = Comparator.comparingDouble(ModelStats::avg);
 
-    /**
-     * The input params representing a model candidate
-     * @return
-     */
-    TrainerConfig params();
-
-    /**
-     * The average of the metric of the model candidate over (inner) folds
-     * @return
-     */
     double avg();
-    /**
-     * The minimum of the metric of the model candidate over (inner) folds
-     * @return
-     */
-    double min();
-    /**
-     * The maximum of the metric of the model candidate over (inner) folds
-     * @return
-     */
-    double max();
 
-    static ModelStats of(TrainerConfig params, double avg, double min, double max) {
-        return ImmutableModelStats.of(params, avg, min, max);
-    }
+    double min();
+
+    double max();
 
     @Value.Derived
     default Map<String, Object> toMap() {
         return Map.of(
             "avg", avg(),
             "min", min(),
-            "max", max(),
-            "params", params().toMap()
+            "max", max()
         );
+    }
+
+    static ModelStats of(double avg, double min, double max) {
+        return ImmutableModelStats.of(avg, min, max);
     }
 }

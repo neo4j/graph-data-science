@@ -35,6 +35,7 @@ The Node Classification model in the Neo4j GDS library supports the following ev
 ** `F1_WEIGHTED`
 ** `F1_MACRO`
 ** `ACCURACY`
+** `OUT_OF_BAG_ERROR` (only for RandomForest and only gives validation score)
 
 * Per-class metrics
 ** `F1(class=<number>)` or `F1(class=*)`
@@ -47,6 +48,10 @@ When using a per-class metric, the reported metrics contain keys like for exampl
 
 More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
 The primary metric may not be a `*` expansion due to the ambiguity of which of the expanded metrics should be the `primary` one.
+
+The `OUT_OF_BAG_METRIC` is computed only for RandomForest models and is evaluated as the accuracy of each decision tree on the part of the training set that the tree did not use for training.
+The accuracies of the individual trees are averaged to yield the `OUT_OF_BAG_METRIC`.
+The proportion of training set which is used by each tree is controlled by the training parameters `numberOfSamplesRatio`.
 
 == Syntax
 
@@ -94,14 +99,25 @@ include::../../../algorithms/common-configuration/common-parameters-named-graph.
 The `modelInfo` can also be retrieved at a later time by using the <<catalog-model-list, Model List Procedure>>.
 The `modelInfo` return field has the following algorithm-specific subfields:
 
-.Model info fields
+.Fields of modelSelectionStats
 [opts="header",cols="1,1,6"]
 |===
-| Name                    | Type            | Description
+| Name                    | Type          | Description
+| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
+| modelCandidates         | List          | List of maps, where each map contains information about one model candidate. This information includes the candidates parameters, training statistics and validation statistics.
+| bestTrial               | Integer       | The trial that produced the best model. The first trial has number 1.
+|===
+
+.Fields of modelInfo
+[opts="header",cols="1,1,6"]
+|===
+| Name                    | Type          | Description
+| modelName               | String        | The name of the trained model.
+| modelType               | String        | The type of the trained model.
 | classes                 | List of Integer | Sorted list of class ids which are the distinct values of `targetProperty` over the entire graph.
-| bestParameters          | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
-| metrics                 | Map             | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
-| trainingPipeline        | Map             | The pipeline used for the training.
+| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics                 | Map           | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| trainingPipeline        | Map           | The pipeline used for the training.
 |===
 
 The structure of `modelInfo` is:
@@ -149,6 +165,12 @@ The structure of `modelInfo` is:
 <8> The `train` entry summarizes the metric results over the `train` set.
 <9> The `validation` entry summarizes the metric results over the `validation` set.
 --
+
+[Note]
+====
+In <6>-<8>, if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
+The `OUT_OF_BAG_ERROR` is only reported in <9> as validation metric and only if the model is RandomForest.
+====
 
 [[nodeclassification-pipelines-examples-train]]
 == Example
@@ -224,7 +246,7 @@ YIELD requiredMemory
 [opts="header"]
 |===
 | requiredMemory
-| +"[10249 KiB ... 10322 KiB]"+
+| +"[1264 KiB ... 1338 KiB]"+
 |===
 --
 
@@ -249,20 +271,21 @@ CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   targetProperty: 'class',
   randomSeed: 42,
   concurrency:1,
-  metrics: ['F1_WEIGHTED']
-}) YIELD modelInfo
+  metrics: ['F1_WEIGHTED', 'OUT_OF_BAG_ERROR']
+}) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
   modelInfo.metrics.F1_WEIGHTED.train.avg AS avgTrainScore,
   modelInfo.metrics.F1_WEIGHTED.outerTrain AS outerTrainScore,
-  modelInfo.metrics.F1_WEIGHTED.test AS testScore
+  modelInfo.metrics.F1_WEIGHTED.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.F1_WEIGHTED.validation.avg] AS validationScores
 ----
 
 .Results
-[opts="header", cols="6, 2, 2, 2"]
+[opts="header", cols="8, 2, 2, 2, 8"]
 |===
-| winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
-| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985
+| winningModel                                                                                                                                | avgTrainScore  | outerTrainScore    | testScore   | validationScores
+| {maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.999999989939394 | 0.9999999912121211 | 0.999999985 | [0.4909090835454547, 0.07272727163636365, 0.4909090835454547, 0.4909090835454547, 0.4909090835454547]
 |===
 
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.

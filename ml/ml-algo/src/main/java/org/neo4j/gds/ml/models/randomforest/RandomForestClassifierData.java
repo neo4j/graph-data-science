@@ -46,7 +46,7 @@ public interface RandomForestClassifierData extends Classifier.ClassifierData {
         return TrainingMethod.RandomForestClassification;
     }
 
-    public static MemoryEstimation memoryEstimation(
+    static MemoryEstimation memoryEstimation(
         LongUnaryOperator numberOfTrainingExamples,
         RandomForestTrainerConfig config
     ) {

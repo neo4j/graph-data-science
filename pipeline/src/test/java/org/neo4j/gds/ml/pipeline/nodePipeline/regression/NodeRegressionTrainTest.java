@@ -116,10 +116,13 @@ class NodeRegressionTrainTest {
         assertThat(result.regressor()).isInstanceOf(LinearRegressor.class);
         assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate1.toMap());
 
-        var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
-
-        assertThat(bestMetricData.outerTrain()).isEqualTo(209.59583, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1718.22750,  Offset.offset(1e-5));
+        assertThat(trainingStatistics
+            .winningModelOuterTrainMetrics()
+            .get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(209.59583, Offset.offset(1e-5));
+        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(
+            1718.22750,
+            Offset.offset(1e-5)
+        );
     }
 
     @Test
@@ -157,10 +160,10 @@ class NodeRegressionTrainTest {
         assertThat(result.regressor()).isInstanceOf(RandomForestRegressor.class);
         assertThat(trainingStatistics.bestParameters().toMap()).isEqualTo(candidate2.toMap());
 
-        var bestMetricData = trainingStatistics.metricsForWinningModel().get(RegressionMetrics.MEAN_SQUARED_ERROR);
 
-        assertThat(bestMetricData.outerTrain()).isEqualTo(104.012222, Offset.offset(1e-5));
-        assertThat(bestMetricData.test()).isEqualTo(1107.292499,  Offset.offset(1e-5));
+
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(104.012222, Offset.offset(1e-5));
+        assertThat(trainingStatistics.winningModelTestMetrics().get(RegressionMetrics.MEAN_SQUARED_ERROR)).isEqualTo(1107.292499, Offset.offset(1e-5));
     }
 
     @Test
@@ -205,9 +208,8 @@ class NodeRegressionTrainTest {
             assertThat(trainingStatistics.getTrainStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
             assertThat(trainingStatistics.getValidationStats(metric)).hasSize(pipeline.numberOfModelSelectionTrials());
 
-            var bestMetricData = trainingStatistics.metricsForWinningModel().get(metric);
-            assertThat(bestMetricData.outerTrain()).isPositive();
-            assertThat(bestMetricData.test()).isPositive();
+            assertThat(trainingStatistics.winningModelOuterTrainMetrics().get(metric)).isPositive();
+            assertThat(trainingStatistics.winningModelTestMetrics().get(metric)).isPositive();
         }
     }
 

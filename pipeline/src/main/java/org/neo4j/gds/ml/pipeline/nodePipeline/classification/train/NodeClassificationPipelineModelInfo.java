@@ -22,17 +22,19 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @ValueClass
 public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
+
+    TrainerConfig bestParameters();
+    Map<String, Object> metrics();
 
     NodePropertyPredictPipeline pipeline();
 
@@ -43,15 +45,6 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
      */
     List<Long> classes();
 
-    /**
-     * The parameters that yielded the best fold-averaged validation score
-     * for the selection metric.
-     * @return
-     */
-    TrainerConfig bestParameters();
-
-    Map<Metric, BestMetricData> metrics();
-
     @Override
     @Value.Auxiliary
     @Value.Derived
@@ -59,15 +52,19 @@ public interface NodeClassificationPipelineModelInfo extends ToMapConvertible {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
             "classes", classes(),
-            "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().toString(),
-                entry -> entry.getValue().toMap()
-            )),
+            "metrics", metrics(),
             "pipeline", pipeline().toMap()
         );
     }
 
-    static ImmutableNodeClassificationPipelineModelInfo.Builder builder() {
-        return ImmutableNodeClassificationPipelineModelInfo.builder();
+    static NodeClassificationPipelineModelInfo of(
+        Map<Metric, Double> testMetrics,
+        Map<Metric, Double> outerTrainMetrics,
+        ModelCandidateStats bestCandidate,
+        NodePropertyPredictPipeline pipeline,
+        List<Long> classes
+    ) {
+        var metrics = bestCandidate.renderMetrics(testMetrics, outerTrainMetrics);
+        return ImmutableNodeClassificationPipelineModelInfo.of(bestCandidate.trainerConfig(), metrics, pipeline, classes);
     }
 }

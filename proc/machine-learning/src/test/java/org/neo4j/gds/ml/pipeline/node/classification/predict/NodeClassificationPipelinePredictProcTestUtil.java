@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
@@ -112,12 +113,13 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
                 .targetProperty("foo")
                 .build(),
-            NodeClassificationPipelineModelInfo.builder()
-                .classes(modelData.classIdMap().originalIdsList())
-                .bestParameters(LogisticRegressionTrainConfig.DEFAULT)
-                .metrics(Map.of())
-                .pipeline(pipeline)
-                .build()
+            NodeClassificationPipelineModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                pipeline,
+                modelData.classIdMap().originalIdsList()
+            )
         );
     }
 

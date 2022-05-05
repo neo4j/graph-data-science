@@ -25,9 +25,11 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.LinkMetric;
+import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -43,13 +45,36 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
 
     String pipeline();
 
-    @Configuration.Ignore
-    @Value.Default
-    default List<LinkMetric> metrics() {
+    @Configuration.ConvertWith("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
+    @Configuration.ToMapValue("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#metricsToNames")
+    default List<Metric> metrics() {
         return List.of(LinkMetric.AUCPR);
+    }
+
+
+    @Configuration.Ignore
+    default Metric mainMetric() {
+        return metrics().get(0);
+    }
+
+    @Configuration.Ignore
+    default List<LinkMetric> linkMetrics() {
+        return metrics()
+            .stream()
+            .filter(metric -> !metric.isModelSpecific())
+            .map(metric -> (LinkMetric) metric)
+            .collect(Collectors.toList());
     }
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
         return new LinkPredictionTrainConfigImpl(username, config);
+    }
+
+    static List<Metric> namesToMetrics(List<?> names) {
+        return names.stream().map(LinkMetric::parseLinkMetric).collect(Collectors.toList());
+    }
+
+    static List<String> metricsToNames(List<Metric> metrics) {
+        return metrics.stream().map(Metric::name).collect(Collectors.toList());
     }
 }

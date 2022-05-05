@@ -48,6 +48,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -303,7 +304,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .graphName(GRAPH_NAME)
                     .negativeClassWeight(1.0)
                     .build(),
-                LinkPredictionModelInfo.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), pipeline)
+                LinkPredictionModelInfo.of(
+                    Map.of(),
+                    Map.of(),
+                    ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                    pipeline
+                )
             ));
 
             var log = Neo4jProxy.testLog();

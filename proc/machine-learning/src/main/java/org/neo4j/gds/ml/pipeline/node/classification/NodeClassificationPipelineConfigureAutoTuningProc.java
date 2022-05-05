@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node.classification;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.ml.PipelineCompanion;
+import org.neo4j.gds.ml.pipeline.PipelineCompanion;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;

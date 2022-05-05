@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -154,22 +155,70 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(model.name()).isEqualTo("model");
             assertThat(model.stored()).isFalse();
             assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
-            assertThat(model.customInfo().metrics()).containsOnlyKeys(metric);
+            assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
+            assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
+                .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
 
             // using explicit type intentionally :)
             NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            assertThat(customInfo.metrics().get(metric).validation().toMap())
+            var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
+            assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
+            var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
+            assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
+            var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
+            var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
+            assertThat(validationStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
 
-            assertThat(customInfo.metrics().get(metric).train().toMap())
+            assertThat(trainStats)
                 .usingRecursiveComparison()
                 .withComparatorForType(new DoubleComparator(1e-5), Double.class)
                 .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
 
             assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
             assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
+        });
+    }
+
+    @Test
+    void runWithOnlyOOBError() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+
+        var metricSpecification = ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR");
+
+        var modelCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
+        pipeline.addTrainerConfig(modelCandidate);
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            var actualModel = ncPipeTrain.compute().model();
+            assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
+                Map.of("OUT_OF_BAG_ERROR", Map.of("validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666)))
+            );
+            assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
         });
     }
 
@@ -267,15 +316,15 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(795_232, 827_192)
+                MemoryRange.of(779_232, 811_192)
             ),
             Arguments.of(
                 List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(107_186, 223_958)
+                MemoryRange.of(91_186, 207_958)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(892_200, 959_440)
+                MemoryRange.of(860_200, 927_440)
             ),
             Arguments.of(
                 List.of(
@@ -285,7 +334,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(892_200, 959_440)
+                MemoryRange.of(860_200, 927_440)
             ),
             Arguments.of(
                 List.of(
@@ -295,7 +344,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(430_062_600, 430_129_840)
+                MemoryRange.of(430_030_600, 430_097_840)
             )
         );
     }

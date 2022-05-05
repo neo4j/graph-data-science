@@ -137,12 +137,13 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
             schemaBeforeSteps,
             trainResult.classifier().data(),
             config,
-            NodeClassificationPipelineModelInfo.builder()
-                .classes(trainResult.classifier().classIdMap().originalIdsList())
-                .bestParameters(trainResult.trainingStatistics().bestParameters())
-                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
-                .pipeline(NodePropertyPredictPipeline.from(pipeline))
-                .build()
+            NodeClassificationPipelineModelInfo.of(
+                trainResult.trainingStatistics().winningModelTestMetrics(),
+                trainResult.trainingStatistics().winningModelOuterTrainMetrics(),
+                trainResult.trainingStatistics().bestCandidate(),
+                NodePropertyPredictPipeline.from(pipeline),
+                trainResult.classifier().classIdMap().originalIdsList()
+            )
         );
 
         return ImmutableNodeClassificationTrainPipelineResult.of(catalogModel, trainResult.trainingStatistics());

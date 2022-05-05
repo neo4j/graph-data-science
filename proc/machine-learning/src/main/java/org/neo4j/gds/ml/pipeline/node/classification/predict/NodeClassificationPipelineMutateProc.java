@@ -46,7 +46,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.ml.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 

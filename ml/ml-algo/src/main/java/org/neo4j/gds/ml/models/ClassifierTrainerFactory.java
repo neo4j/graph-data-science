@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
@@ -43,7 +44,8 @@ public final class ClassifierTrainerFactory {
         ProgressTracker progressTracker,
         int concurrency,
         Optional<Long> randomSeed,
-        boolean reduceClassCount
+        boolean reduceClassCount,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         switch (config.method()) {
             case LogisticRegression: {
@@ -61,10 +63,10 @@ public final class ClassifierTrainerFactory {
                     concurrency,
                     classIdMap,
                     (RandomForestClassifierTrainerConfig) config,
-                    false,
                     randomSeed,
                     progressTracker,
-                    terminationFlag
+                    terminationFlag,
+                    metricsHandler
                 );
             }
             default:

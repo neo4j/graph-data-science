@@ -17,16 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml;
+package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
-import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.TrainingPipeline;
+import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineCompanion {
 
@@ -62,4 +65,23 @@ public final class PipelineCompanion {
 
         return Stream.of(factory.apply(pipeline));
     }
+
+    public static void validateMainMetric(TrainingPipeline<?> pipeline, String mainMetric) {
+        if (mainMetric.equals(OUT_OF_BAG_ERROR.name())) {
+            var nonRFMethods = pipeline.trainingParameterSpace().entrySet().stream()
+                .filter(entry -> entry.getKey() != TrainingMethod.RandomForestClassification && !entry.getValue().isEmpty() )
+                .map(Map.Entry::getKey)
+                .map(Enum::toString)
+                .collect(Collectors.toSet());
+            if (!nonRFMethods.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "If %s is used as the main metric (the first one), then only RandomForest model candidates are allowed." +
+                    " Incompatible training methods used are: %s.",
+                    OUT_OF_BAG_ERROR.name(),
+                    StringJoining.join(nonRFMethods)
+                ));
+            }
+        }
+    }
+
 }

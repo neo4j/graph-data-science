@@ -31,14 +31,16 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.ReadOnlyHugeLongIdentityArray;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.metrics.BestMetricData;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.SignedProbabilities;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
@@ -111,6 +113,11 @@ public final class LinkPredictionTrain {
         );
     }
 
+    @Deprecated
+    public static long estimateMemory() {
+        return MemoryUsage.sizeOfInstance(ImmutableModelStats.class) * 2 + Double.BYTES * 2;
+    }
+
     public LinkPredictionTrainResult compute() {
         progressTracker.beginSubTask("Extract train features");
         var trainData = extractFeaturesAndLabels(
@@ -136,7 +143,8 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
-            progressTracker
+            progressTracker,
+            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
         );
         progressTracker.endSubTask("Train best model");
 
@@ -169,7 +177,8 @@ public final class LinkPredictionTrain {
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        ProgressTracker customProgressTracker
+        ProgressTracker customProgressTracker,
+        ModelSpecificMetricsHandler metricsHandler
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
@@ -178,7 +187,8 @@ public final class LinkPredictionTrain {
             customProgressTracker,
             config.concurrency(),
             config.randomSeed(),
-            true
+            true,
+            metricsHandler
         ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
@@ -200,11 +210,9 @@ public final class LinkPredictionTrain {
             progressTracker.beginSubTask();
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, pipeline.splitConfig().validationFolds());
-            var validationStatsBuilder = new ModelStatsBuilder(
-                modelParams,
-                pipeline.splitConfig().validationFolds()
-            );
+            var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
+            var validationStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
+            var metricsHandler = ModelSpecificMetricsHandler.of(config.metrics(), validationStatsBuilder);
             for (TrainingExamplesSplit relSplit : validationSplits) {
                 // train each model candidate on the train sets
                 var trainSet = relSplit.trainSet();
@@ -214,7 +222,8 @@ public final class LinkPredictionTrain {
                     trainData,
                     ReadOnlyHugeLongArray.of(trainSet),
                     modelParams,
-                    ProgressTracker.NULL_TRACKER
+                    ProgressTracker.NULL_TRACKER,
+                    metricsHandler
                 );
 
                 // evaluate each model candidate on the train and validation sets
@@ -232,17 +241,21 @@ public final class LinkPredictionTrain {
                     validationStatsBuilder::update,
                     ProgressTracker.NULL_TRACKER
                 );
+
                 progressTracker.logProgress();
             }
 
             // insert the candidates' metrics into trainStats and validationStats
-            config.metrics().forEach(metric -> {
-                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
-            });
-            var validationStats = trainingStatistics.findModelValidationAvg(trial);
-            var trainStats = trainingStatistics.findModelTrainAvg(trial);
-            double mainMetric = trainingStatistics.getMainValidationMetric(trial);
+            var candidateStats = ModelCandidateStats.of(
+                modelParams,
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
+            );
+            trainingStatistics.addCandidateStats(candidateStats);
+
+            var validationStats = trainingStatistics.validationMetricsAvg(trial);
+            var trainStats = trainingStatistics.trainMetricsAvg(trial);
+            double mainMetric = trainingStatistics.getMainMetric(trial);
 
             progressTracker.logMessage(formatWithLocale(
                 "Main validation metric (%s): %.4f",
@@ -288,10 +301,11 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.metrics().forEach(metric -> {
-            double score = metric.compute(signedProbabilities, config.negativeClassWeight());
-            trainingStatistics.addTestScore(metric, score);
-        });
+        config.linkMetrics()
+            .forEach(metric -> {
+                double score = metric.compute(signedProbabilities, config.negativeClassWeight());
+                trainingStatistics.addTestScore(metric, score);
+            });
         progressTracker.endSubTask("Compute test metrics");
     }
 
@@ -326,7 +340,7 @@ public final class LinkPredictionTrain {
             progressTracker
         );
 
-        config.metrics().forEach(metric ->
+        config.linkMetrics().forEach(metric ->
             scoreConsumer.accept(
                 metric,
                 metric.compute(signedProbabilities, config.negativeClassWeight())
@@ -348,7 +362,7 @@ public final class LinkPredictionTrain {
 
         var fudgedLinkFeatureDim = MemoryRange.of(10, 500);
 
-        int numberOfMetrics = trainConfig.metrics().size();
+        int numberOfMetrics = trainConfig.linkMetrics().size();
         return builder
             // After the training, the training features and labels are no longer accessed.
             // As the lifetimes of training and test data is non-overlapping, we assume the max is sufficient.
@@ -367,9 +381,9 @@ public final class LinkPredictionTrain {
             .add(estimateTrainingAndEvaluation(pipeline, fudgedLinkFeatureDim, numberOfMetrics))
             // we do not consider the training of the best model on the outer train set as the memory estimation is at most the maximum of the model training during the model selection
             // this assumes the training is independent of the relationship set size
-            .add("Outer train stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-            .add("Test stats map", StatsMap.memoryEstimation(numberOfMetrics, 1, 1))
-            .fixed("Best model stats", numberOfMetrics * BestMetricData.estimateMemory())
+            .add("Outer train stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
+            .add("Test stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
+            .fixed("Best model stats", numberOfMetrics * estimateMemory())
             .build();
     }
 
@@ -408,11 +422,11 @@ public final class LinkPredictionTrain {
             .add(maxEstimationOverModelCandidates)
             .add(
                 "Inner train stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
+                TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .add(
                 "Validation stats map",
-                StatsMap.memoryEstimation(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
+                TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, pipeline.numberOfModelSelectionTrials(), 1)
             )
             .build();
     }

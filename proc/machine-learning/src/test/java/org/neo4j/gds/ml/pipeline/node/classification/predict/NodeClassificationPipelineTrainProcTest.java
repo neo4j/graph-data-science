@@ -87,11 +87,11 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 GRAPH_NAME,
-                MemoryRange.of(903_280, 935_240)
+                MemoryRange.of(887_280, 919_240)
             ),
             Arguments.of(
                 Map.of("nodeProjection", "*", "relationshipProjection", "*"),
-                MemoryRange.of(1_198_672, 1_230_632)
+                MemoryRange.of(1_182_672, 1_214_632)
             )
         );
     }
@@ -145,6 +145,10 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             pipe
         );
         runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        runQuery(
             "CALL gds.beta.pipeline.nodeClassification.configureSplit($pipeline, {testFraction: 0.3, validationFolds: 2})",
             pipe
         );
@@ -159,14 +163,13 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
         );
 
         var modelInfoCheck = new Condition<>(m -> {
-
             var modelInfo = assertThat(m).asInstanceOf(soMap)
                 .containsEntry("modelName", MODEL_NAME)
                 .containsEntry("modelType", "NodeClassification")
                 .containsKey("bestParameters")
                 .containsEntry("classes", List.of(0L, 1L));
 
-            var metrics = modelInfo
+            modelInfo
                 .extractingByKey("metrics", soMap)
                 .extractingByKey("F1_class_1", soMap)
                 .usingRecursiveComparison()
@@ -197,9 +200,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
 
         var modelSelectionStatsCheck = new Condition<>(mss -> {
             assertThat(mss).asInstanceOf(soMap)
-                .containsKey("bestParameters")
-                .containsKey("trainStats")
-                .containsKey("validationStats");
+                .containsKeys("bestParameters", "modelCandidates");
             return true;
         }, "a model selection statistics map");
 
@@ -209,7 +210,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "       pipeline: $pipeline," +
             "       modelName: $modelName," +
             "       targetProperty: 't'," +
-            "       metrics: ['F1(class=1)']," +
+            "       metrics: ['F1(class=1)', 'OUT_OF_BAG_ERROR']," +
             "       randomSeed: 1" +
             "})",
             params,
@@ -222,7 +223,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasEntry("modelName", MODEL_NAME),
                         aMapWithSize(11)
                     ),
-                    "modelSelectionStats",modelSelectionStatsCheck
+                    "modelSelectionStats", modelSelectionStatsCheck
                 )
             )
         );
@@ -260,6 +261,80 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             expected,
             9,
             7
+        );
+    }
+
+    @Test
+    void cannotUseOOBAsMainMetricWithLR() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['scalar'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline, {penalty: 1000, maxEpochs: 1})",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        assertError(
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 't'," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'F1(class=1)']," +
+            "       randomSeed: 1" +
+            "})",
+            Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
+            "If OUT_OF_BAG_ERROR is used as the main metric (the first one)," +
+            " then only RandomForest model candidates are allowed." +
+            " Incompatible training methods used are: ['LogisticRegression']"
+        );
+    }
+
+    @Test
+    void useOOBAsMainMetricWithRF() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['scalar'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeClassification.addRandomForest($pipeline, {numberOfDecisionTrees: 1})",
+            pipe
+        );
+        assertCypherResult(
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 't'," +
+            "       metrics: ['OUT_OF_BAG_ERROR', 'F1(class=1)']," +
+            "       randomSeed: 1" +
+            "}) YIELD modelInfo" +
+            " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR AS OOB",
+            Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
+            List.of(Map.of("OOB", Map.of("validation", Map.of(
+                        "avg", 1.0,
+                        "min", 1.0,
+                        "max", 1.0
+                    )
+                )
+            ))
+
         );
     }
 }

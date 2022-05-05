@@ -25,4 +25,8 @@ public interface Metric {
     String name();
 
     Comparator<Double> comparator();
+
+    default boolean isModelSpecific() {
+        return false;
+    }
 }

@@ -21,19 +21,17 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.ml.metrics.BestMetricData;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @ValueClass
 public interface LinkPredictionModelInfo extends ToMapConvertible {
 
     TrainerConfig bestParameters();
-
-    Map<Metric, BestMetricData> metrics();
+    Map<String, Object> metrics();
 
     LinkPredictionPredictPipeline pipeline();
 
@@ -41,19 +39,18 @@ public interface LinkPredictionModelInfo extends ToMapConvertible {
     default Map<String, Object> toMap() {
         return Map.of(
             "bestParameters", bestParameters().toMapWithTrainerMethod(),
-            "metrics", metrics().entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().name(),
-                entry -> entry.getValue().toMap()
-            )),
+            "metrics", metrics(),
             "pipeline", pipeline().toMap()
         );
     }
 
     static LinkPredictionModelInfo of(
-        TrainerConfig bestParameters,
-        Map<Metric, BestMetricData> metrics,
+        Map<Metric, Double> testMetrics,
+        Map<Metric, Double> outerTrainMetrics,
+        ModelCandidateStats bestCandidate,
         LinkPredictionPredictPipeline pipeline
     ) {
-        return ImmutableLinkPredictionModelInfo.of(bestParameters, metrics, pipeline);
+        var metrics = bestCandidate.renderMetrics(testMetrics, outerTrainMetrics);
+        return ImmutableLinkPredictionModelInfo.of(bestCandidate.trainerConfig(), metrics, pipeline);
     }
 }

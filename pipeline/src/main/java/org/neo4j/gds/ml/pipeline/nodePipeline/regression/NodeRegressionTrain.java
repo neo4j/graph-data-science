@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
@@ -158,8 +159,8 @@ public final class NodeRegressionTrain {
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
 
-            var validationStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(modelParams, nodeSplits.size());
+            var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
+            var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
 
             for (TrainingExamplesSplit nodeSplit : nodeSplits) {
                 var trainSet = nodeSplit.trainSet();
@@ -174,10 +175,12 @@ public final class NodeRegressionTrain {
                 progressTracker.logProgress();
             }
 
-            trainConfig.metrics().forEach(metric -> {
-                trainingStatistics.addValidationStats(metric, validationStatsBuilder.build(metric));
-                trainingStatistics.addTrainStats(metric, trainStatsBuilder.build(metric));
-            });
+            var candidateStats = ModelCandidateStats.of(
+                modelParams,
+                trainStatsBuilder.build(),
+                validationStatsBuilder.build()
+            );
+            trainingStatistics.addCandidateStats(candidateStats);
 
             progressTracker.endSubTask("Trial");
         }

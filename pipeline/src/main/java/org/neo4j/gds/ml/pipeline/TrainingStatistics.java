@@ -20,52 +20,44 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.ml.metrics.BestMetricData;
-import org.neo4j.gds.ml.metrics.BestModelStats;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.ml.metrics.ImmutableModelStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.metrics.StatsMap;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public final class TrainingStatistics {
 
-    private final StatsMap trainStats;
-    private final StatsMap validationStats;
+    List<ModelCandidateStats> modelCandidateStats;
     private final List<Metric> metrics;
     private final Map<Metric, Double> testScores;
     private final Map<Metric, Double> outerTrainScores;
 
     public TrainingStatistics(List<Metric> metrics) {
-        this.trainStats = StatsMap.create(metrics);
-        this.validationStats = StatsMap.create(metrics);
+        this.modelCandidateStats = new ArrayList<>();
         this.metrics = metrics;
         this.testScores = new HashMap<>();
         this.outerTrainScores = new HashMap<>();
     }
 
-    public TrainerConfig bestParameters() {
-        var modelStats = validationStats.getMetricStats(evaluationMetric());
-
-        return Collections
-            .max(modelStats, (a, b) -> evaluationMetric().comparator().compare(a.avg(), b.avg()))
-            .params();
-    }
-
     @TestOnly
     public List<ModelStats> getTrainStats(Metric metric) {
-        return trainStats.getMetricStats(metric);
+        return modelCandidateStats.stream().map(stats -> stats.trainingStats().get(metric)).collect(Collectors.toList());
     }
 
     @TestOnly
     public List<ModelStats> getValidationStats(Metric metric) {
-        return validationStats.getMetricStats(metric);
+        return modelCandidateStats.stream().map(stats -> stats.validationStats().get(metric)).collect(Collectors.toList());
     }
 
     /**
@@ -75,54 +67,29 @@ public final class TrainingStatistics {
      */
     public Map<String, Object> toMap() {
         return Map.of(
-            "bestParameters", bestParameters().toMap(),
-            "trainStats", trainStats.toMap(),
-            "validationStats", validationStats.toMap()
+            "bestParameters", bestParameters().toMapWithTrainerMethod(),
+            "bestTrial", getBestTrialIdx() + 1,
+            "modelCandidates", modelCandidateStats.stream().map(ModelCandidateStats::toMap).collect(Collectors.toList())
         );
     }
 
-    public Map<Metric, BestMetricData> metricsForWinningModel() {
-        TrainerConfig bestParameters = bestParameters();
-
-        return metrics.stream().collect(Collectors.toMap(
-            Function.identity(),
-            metric -> BestMetricData.of(
-                findBestModelStats(trainStats.getMetricStats(metric), bestParameters),
-                findBestModelStats(validationStats.getMetricStats(metric), bestParameters),
-                outerTrainScores.get(metric),
-                testScores.get(metric)
-            )
-        ));
+    public double getMainMetric(int trial) {
+        return modelCandidateStats.get(trial).validationStats().get(evaluationMetric()).avg();
     }
 
-    private static BestModelStats findBestModelStats(
-        List<ModelStats> metricStatsForModels,
-        TrainerConfig bestParameters
-    ) {
-        return metricStatsForModels.stream()
-            .filter(metricStatsForModel -> metricStatsForModel.params() == bestParameters)
-            .findFirst()
-            .map(BestModelStats::of)
-            .orElseThrow();
+    public Map<Metric, Double> validationMetricsAvg(int trial) {
+        return extractAverage(modelCandidateStats.get(trial).validationStats());
     }
 
-    public double getMainValidationMetric(int trial) {
-        return findModelValidationAvg(trial).get(evaluationMetric());
+    public Map<Metric, Double> trainMetricsAvg(int trial) {
+        return extractAverage(modelCandidateStats.get(trial).trainingStats());
     }
 
-    public Map<Metric, Double> findModelValidationAvg(int trial) {
-        return findModelAvg(trial, validationStats);
-    }
-
-    public Map<Metric, Double> findModelTrainAvg(int trial) {
-        return findModelAvg(trial, trainStats);
-    }
-
-    private Map<Metric, Double> findModelAvg(int trial, StatsMap statsMap) {
-        return metrics.stream()
+    private Map<Metric, Double> extractAverage(Map<Metric, ModelStats> statsMap) {
+        return statsMap.entrySet().stream()
             .collect(Collectors.toMap(
-                metric -> metric,
-                metric -> statsMap.getMetricStats(metric).get(trial).avg()
+                Map.Entry::getKey,
+                entry -> entry.getValue().avg()
             ));
     }
 
@@ -130,12 +97,8 @@ public final class TrainingStatistics {
         return metrics.get(0);
     }
 
-    public void addValidationStats(Metric metric, ModelStats stats) {
-        validationStats.add(metric, stats);
-    }
-
-    public void addTrainStats(Metric metric, ModelStats stats) {
-        trainStats.add(metric, stats);
+    public void addCandidateStats(ModelCandidateStats statistics) {
+        modelCandidateStats.add(statistics);
     }
 
     public void addTestScore(Metric metric, double score) {
@@ -154,19 +117,42 @@ public final class TrainingStatistics {
         return outerTrainScores;
     }
 
-    public double getBestTrialScore() {
-        return validationStats.getMetricStats(evaluationMetric())
-            .stream()
-            .mapToDouble(ModelStats::avg)
-            .max()
-            .getAsDouble();
-    }
-
     public int getBestTrialIdx() {
-        return validationStats.getMetricStats(evaluationMetric())
+        return modelCandidateStats
             .stream()
-            .map(ModelStats::avg)
+            .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
             .collect(Collectors.toList())
             .indexOf(getBestTrialScore());
+    }
+    public ModelCandidateStats bestCandidate() {
+        return modelCandidateStats.get(getBestTrialIdx());
+    }
+
+    public double getBestTrialScore() {
+        return modelCandidateStats
+            .stream()
+            .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
+            .max(evaluationMetric().comparator())
+            .get();
+    }
+
+    public TrainerConfig bestParameters() {
+        return bestCandidate().trainerConfig();
+    }
+
+    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates) {
+        int fudgedNumberOfClasses = 1000;
+        return memoryEstimationStatsMap(numberOfMetricsSpecifications, numberOfModelCandidates, fudgedNumberOfClasses);
+    }
+
+    public static MemoryEstimation memoryEstimationStatsMap(int numberOfMetricsSpecifications, int numberOfModelCandidates, int numberOfClasses) {
+        var numberOfMetrics = numberOfMetricsSpecifications * numberOfClasses;
+        var numberOfModelStats = numberOfMetrics * numberOfModelCandidates;
+        var sizeOfOneModelStatsInBytes = sizeOfInstance(ImmutableModelStats.class);
+        var sizeOfAllModelStatsInBytes = sizeOfOneModelStatsInBytes * numberOfModelStats;
+        return MemoryEstimations.builder("StatsMap")
+            .fixed("array list", sizeOfInstance(ArrayList.class))
+            .fixed("model stats", sizeOfAllModelStatsInBytes)
+            .build();
     }
 }

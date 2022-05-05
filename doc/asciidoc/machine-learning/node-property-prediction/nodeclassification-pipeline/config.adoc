@@ -471,7 +471,7 @@ include::../pipelineInfoResult.adoc[]
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.nodeClassification.configureAutoTuning('pipe', {
-  maxTrials: 100
+  maxTrials: 5
 })
 YIELD autoTuningConfig
 ----
@@ -480,7 +480,7 @@ YIELD autoTuningConfig
 [opts="header",cols="1"]
 |===
 | autoTuningConfig
-| {maxTrials=100}
+| {maxTrials=5}
 |===
 
 We now reconfigured the auto-tuning to try out at most 100 model candidates during <<nodeclassification-pipelines-train, training>>.

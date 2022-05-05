@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.metrics.ModelStats;
 import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -53,6 +52,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -151,18 +151,112 @@ class NodeClassificationTrainTest {
 
         var result = ncTrain.compute();
 
-        List<ModelStats> validationScores = result.trainingStatistics().getValidationStats(metric);
+        var validationStats = result.trainingStatistics().getValidationStats(metric);
 
-        assertThat(validationScores).hasSize(MAX_TRIALS);
+        assertThat(validationStats).hasSize(MAX_TRIALS);
 
-        double model1Score = validationScores.get(0).avg();
+        double model1Score = validationStats.get(0).avg();
         for (int i = 1; i < MAX_TRIALS; i++) {
             assertThat(model1Score)
-                .isNotCloseTo(validationScores.get(i).avg(), Percentage.withPercentage(0.2));
+                .isNotCloseTo(validationStats.get(i).avg(), Percentage.withPercentage(0.2));
         }
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {
+
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeFeatureStep.of("a"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("b"));
+
+        pipeline.addTrainerConfig(
+            LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
+        );
+
+        LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
+            .builder()
+            .penalty(1 * 2.0 / 3.0 * 0.5)
+            .maxEpochs(10000)
+            .tolerance(1e-5)
+            .build();
+        pipeline.addTrainerConfig(expectedWinner);
+
+        // Should NOT be the winning model, so give it bad hyperparams.
+        pipeline.addTrainerConfig(
+
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", 0.1
+                ),
+                TrainingMethod.RandomForestClassification
+            ));
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                ),
+                TrainingMethod.RandomForestClassification
+            ));
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
+            .modelName("anyThing")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .metrics(
+                includeOOB
+                    ? List.of(
+                    ClassificationMetricSpecification.parse("F1_WEIGHTED"),
+                    ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR"))
+                    : List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED"))
+            )
+            .build();
+
+        var ncTrain = NodeClassificationTrain.create(
+            graph,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var result = ncTrain.compute();
+
+        var trainingStatistics = result.trainingStatistics().toMap();
+        var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
+
+        var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
+        assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
+
+        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(0, 10);
+
+        var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
+        assertThat(candidateStats.size()).isEqualTo(10);
+        for (int i = 0; i < candidateStats.size(); i++) {
+            var candidateMap = (Map) candidateStats.get(i);
+            assertThat(candidateMap).containsKey("parameters");
+            assertThat((Map) candidateMap.get("metrics")).containsKey("F1_WEIGHTED");
+            if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).containsKey("OUT_OF_BAG_ERROR");
+            }
+            if (!includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
+                assertThat((Map) candidateMap.get("metrics")).doesNotContainKey("OUT_OF_BAG_ERROR");
+            }
+        }
     }
 
     @ParameterizedTest
@@ -239,8 +333,8 @@ class NodeClassificationTrainTest {
             .withFailMessage("Should not produce the same trained `data`!")
             .isNotEqualTo(bananasClassifier.data());
 
-        var bananasMetrics = bananasModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
-        var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().metricsForWinningModel().get(metric);
+        var bananasMetrics = bananasModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
+        var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
 
         assertThat(arrayPropertyMetrics)
             .usingRecursiveComparison()

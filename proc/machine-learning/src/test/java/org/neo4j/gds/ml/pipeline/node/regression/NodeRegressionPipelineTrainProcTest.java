@@ -163,9 +163,7 @@ class NodeRegressionPipelineTrainProcTest extends BaseProcTest {
 
         var modelSelectionStatsCheck = new Condition<>(mss -> {
             assertThat(mss).asInstanceOf(stringObjectMapType)
-                .containsKey("bestParameters")
-                .containsKey("trainStats")
-                .containsKey("validationStats");
+                .containsKeys("bestParameters", "modelCandidates");
             return true;
         }, "a model selection statistics map");
 

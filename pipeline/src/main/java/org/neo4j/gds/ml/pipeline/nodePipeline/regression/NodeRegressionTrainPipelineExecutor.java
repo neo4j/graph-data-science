@@ -107,11 +107,13 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
             schemaBeforeSteps,
             trainResult.regressor().data(),
             config,
-            NodeRegressionPipelineModelInfo.builder()
-                .bestParameters(trainResult.trainingStatistics().bestParameters())
-                .metrics(trainResult.trainingStatistics().metricsForWinningModel())
-                .pipeline(NodePropertyPredictPipeline.from(pipeline))
-                .build()
+
+            NodeRegressionPipelineModelInfo.of(
+                trainResult.trainingStatistics().winningModelTestMetrics(),
+                trainResult.trainingStatistics().winningModelOuterTrainMetrics(),
+                trainResult.trainingStatistics().bestCandidate(),
+                NodePropertyPredictPipeline.from(pipeline)
+            )
         );
 
         return ImmutableNodeRegressionTrainPipelineResult.of(catalogModel, trainResult.trainingStatistics());
