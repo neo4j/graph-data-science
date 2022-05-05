@@ -4,7 +4,7 @@
 
 [abstract]
 --
-This chapter explains how to set up Apache Arrow Flight in the Neo4j Graph Data Science library.
+This chapter explains how to set up Apache Arrow™ in the Neo4j Graph Data Science library.
 --
 
 include::../management-ops/alpha-note.adoc[]

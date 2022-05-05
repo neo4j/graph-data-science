@@ -1,2 +1,158 @@
+[.enterprise-edition]
 [[graph-catalog-apache-arrow-ops]]
 = Apache Arrow operations
+
+[abstract]
+--
+This chapter explains how to export data using Apache Arrow™ in the Graph Data Science library.
+--
+
+include::../../management-ops/alpha-note.adoc[]
+
+include::../../common-usage/not-on-aurads-note.adoc[]
+
+The graphs in the Neo4j Graph Data Science Library support properties for nodes and relationships.
+One way to export those properties is using Cypher procedures.
+Those are documented in <<graph-catalog-node-ops>> and <<graph-catalog-relationship-ops>>.
+Similar to the procedures, GDS also supports exporting properties via Arrow Flight.
+
+In this chapter, we assume that a Flight server has been set up and configured.
+To learn more about the installation, please refer to the <<installation-apache-arrow, installation chapter>>.
+
+
+== Arrow Ticket format
+
+Flight streams to read properties from an in-memory graph are initiated by the Arrow client by calling the `GET` function and providing a Flight ticket.
+The general idea is to mirror the behaviour of the procedures for streaming properties from the in-memory graph.
+To identify the graph and the procedure that we want to mirror, the ticket must contain the following keys:
+
+[[arrow-property-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name              | Type      | Description
+| graph_name        | String    | The name of the graph in the graph catalog.
+| database_name     | String    | The database the graph is associated with.
+| procedure_name    | String    | The mirrored property stream procedure.
+| configuration     | Map       | The procedure specific configuration.
+|===
+
+
+== Stream a single node property
+
+To stream a single node property, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.graph.streamNodeProperty",
+    configuration: {
+        node_labels: ["*"],
+        node_property: "foo"
+    }
+}
+----
+
+The `procedure_name` indicates that we mirror the behaviour of the existing <<catalog-graph-stream-single-node-property-example, procedure>>.
+The specific configuration needs to include the following keys:
+
+[[arrow-node-property-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name              | Type                      | Description
+| node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
+| node_property     | String                    | The node property in the graph to stream.
+|===
+
+The schema of the result records is identical to the corresponding procedure:
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name           | Type                                                 | Description
+|nodeId          | Integer                                              | The id of the node.
+.^|propertyValue    a|
+* Integer
+* Float
+* List of Integer
+* List of Float  .^| The stored property value.
+|===
+
+
+== Stream multiple node properties
+
+To stream multiple node properties, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.graph.streamNodeProperties",
+    configuration: {
+        node_labels: ["*"],
+        node_properties: ["foo", "bar", "baz"]
+    }
+}
+----
+
+The `procedure_name` indicates that we mirror the behaviour of the existing <<catalog-graph-stream-node-properties-example, procedure>>.
+The specific configuration needs to include the following keys:
+
+[[arrow-node-properties-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name              | Type                      | Description
+| node_labels       | String or List of Strings | Stream only properties for nodes with the given labels.
+| node_properties   | String or List of Strings | The node properties in the graph to stream.
+|===
+
+Note, that the schema of the result records is not identical to the corresponding procedure.
+Instead of separate column containing the property key, every property is returned in its own column.
+As a result, there is only one row per node which includes all its property values.
+
+For example, given the node `(a { foo: 42, bar: 1337, baz: [1,3,3,7] })` and assuming node id `0` for `a`, the resulting record schema is as follows:
+
+[opts=header,cols="1,1,1,1"]
+|===
+| nodeId    | foo   | bar   | baz
+| 0         | 42    | 1337  | [1,3,3,7]
+|===
+
+
+== Stream a single relationship property
+
+To stream a single relationship property, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.graph.streamRelationshipProperty",
+    configuration: {
+        relationship_types: "REL",
+        relationship_property: "foo"
+    }
+}
+----
+
+The `procedure_name` indicates that we mirror the behaviour of the existing <<catalog-graph-stream-single-relationship-property-example, procedure>>.
+The specific configuration needs to include the following keys:
+
+[[arrow-relationship-property-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name                  | Type                      | Description
+| relationship_types    | String or List of Strings | Stream only properties for relationships with the given type.
+| relationship_property | String                    | The relationship property in the graph to stream.
+|===
+
+The schema of the result records is identical to the corresponding procedure:
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+|Name           | Type      | Description
+|sourceId       | Integer   | The source node id of the relationship.
+|targetId       | Integer   | The target node id of the relationship.
+|propertyValue  | Float     | The stored property value.
+|===
