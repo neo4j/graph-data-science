@@ -1,0 +1,61 @@
+[.enterprise-edition]
+[[catalog-model-publish]]
+= Publishing models
+
+[.alpha-symbol]
+[.tier-note]
+Publishing models is an alpha tier feature.
+
+By default, a trained model is visible to the user that created it.
+Making a model accessible to other users can be achieved by publishing it.
+
+== Syntax
+
+[.model-publish-syntax]
+--
+.Publish a model from the catalog:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.model.publish(modelName: String)
+YIELD
+    modelInfo: Map,
+    trainConfig: Map,
+    graphSchema: Map,
+    loaded: Boolean,
+    stored: Boolean,
+    creationTime: DateTime,
+    shared: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | no       | The name of a model stored in the catalog.
+|===
+
+include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
+--
+
+== Examples
+
+[role=query-example]
+--
+.Publishing trained model:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.model.publish('my-model')
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, shared
+----
+
+.Results
+[opts="header"]
+|===
+| modelName          | shared
+| "my-model_public"  | true
+|===
+--
+
+We can see that the model is now shared. 
+The shared model has the `_public` suffix.

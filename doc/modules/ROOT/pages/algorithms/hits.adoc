@@ -1,0 +1,273 @@
+
+[[algorithms-hits]]
+[.alpha]
+= HITS
+:description: This section describes the HITS algorithm in the Neo4j Graph Data Science library.
+:entity: pregel
+:result: authority and hub scores
+:algorithm: HITS
+
+[abstract]
+--
+This section describes the HITS algorithm in the Neo4j Graph Data Science library.
+--
+
+[[algorithms-hits-intro]]
+== Introduction
+
+The Hyperlink-Induced Topic Search (HITS) is a link analysis algorithm that rates nodes based on two scores, a `hub` score and an `authority` score.
+The `authority` score estimates the importance of the node within the network.
+The `hub` score estimates the value of its relationships to other nodes.
+The GDS implementation is based on the http://www.cs.cornell.edu/home/kleinber/auth.pdf[Authoritative Sources in a Hyperlinked Environment] publication by Jon M. Kleinberg.
+
+[[algorithms-hits-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.HITS syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run HITS in stream mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.hits.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  values: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name         | Type       | Description
+| nodeId       | Integer    | Node ID.
+| values       | Map        | A map containing the `auth` and `hub` keys.
+|===
+
+======
+
+[.include-with-stats]
+======
+
+.Run HITS in stats mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.hits.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | Number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run HITS in mutate mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.hits.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run HITS in write mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.hits.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  ranIterations: Integer,
+  didConverge: Boolean,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/alpha/hits/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| ranIterations          | Integer   | The number of iterations run.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | The number of properties that were written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+[[algorithms-hits-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: hits.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query, indent=0]
+----
+CREATE
+  (a:Website {name: 'A'}),
+  (b:Website {name: 'B'}),
+  (c:Website {name: 'C'}),
+  (d:Website {name: 'D'}),
+  (e:Website {name: 'E'}),
+  (f:Website {name: 'F'}),
+  (g:Website {name: 'G'}),
+  (h:Website {name: 'H'}),
+  (i:Website {name: 'I'}),
+
+  (a)-[:LINK]->(b),
+  (a)-[:LINK]->(c),
+  (a)-[:LINK]->(d),
+  (b)-[:LINK]->(c),
+  (b)-[:LINK]->(d),
+  (c)-[:LINK]->(d),
+
+  (e)-[:LINK]->(b),
+  (e)-[:LINK]->(d),
+  (e)-[:LINK]->(f),
+  (e)-[:LINK]->(h),
+
+  (f)-[:LINK]->(g),
+  (f)-[:LINK]->(i),
+  (f)-[:LINK]->(h),
+  (g)-[:LINK]->(h),
+  (g)-[:LINK]->(i),
+  (h)-[:LINK]->(i);
+----
+
+In the example, we will use the HITS algorithm to calculate the authority and hub scores.
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query, indent=0]
+----
+CALL gds.graph.project(
+  'myGraph',
+  'Website',
+  'LINK'
+);
+----
+
+In the following examples we will demonstrate using the HITS algorithm on this graph.
+
+[[algorithms-hits-examples-stream]]
+=== Stream
+
+In the `stream` execution mode, the algorithm returns the {result} for each node.
+This allows us to inspect the results directly or post-process them in Cypher without any side effects.
+
+For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+
+[role=query-example]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.alpha.hits.stream('myGraph', {hitsIterations: 20})
+YIELD nodeId, values
+RETURN gds.util.asNode(nodeId).name AS Name, values.auth AS auth, values.hub as hub
+ORDER BY Name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| Name  | auth                | hub
+| "A"   | 0.0                 | 0.5147630377521207
+| "B"   | 0.42644630743935796 | 0.3573686670593437
+| "C"   | 0.3218729455718005  | 0.23857061715828276
+| "D"   | 0.6463862608483191  | 0.0
+| "E"   | 0.0                 | 0.640681017095129
+| "F"   | 0.23646490227616518 | 0.2763222153580397
+| "G"   | 0.10200264424057169 | 0.23867470447760597
+| "H"   | 0.426571816146601   | 0.0812340105698113
+| "I"   | 0.22009646020698218 | 0.0
+|===
+--

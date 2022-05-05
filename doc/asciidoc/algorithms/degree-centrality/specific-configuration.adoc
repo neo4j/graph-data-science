@@ -1,9 +1,0 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                                                                             | Type          | Default         | Optional  | Description
-| orientation                                                                      | String        | NATURAL         | yes       | The orientation used to compute node degrees. Supported orientations are `NATURAL`, `REVERSE` and `UNDIRECTED`.
-| <<common-configuration-relationship-weight-property, relationshipWeightProperty>> | String        | null            | yes       |
-Name of the relationship property to use for weighted degree computation. If unspecified, the algorithm runs unweighted.
-|===
-

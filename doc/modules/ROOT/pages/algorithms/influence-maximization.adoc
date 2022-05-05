@@ -1,0 +1,16 @@
+[[algorithms-influence-maximization]]
+= Influence Maximization
+:description: This chapter provides explanations and examples for each of the influence maximization algorithms in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This chapter provides explanations and examples for each of the influence maximization algorithms in the Neo4j Graph Data Science library.
+--
+
+The objective of influence maximization is to find a small subset of k nodes from a network in order to achieve maximization to the total number of nodes influenced by these k nodes.
+The Neo4j GDS library includes the following alpha influence maximization algorithms:
+
+* Alpha
+** xref::algorithms/influence-maximization/greedy.adoc[Greedy]
+** xref::algorithms/influence-maximization/celf.adoc[CELF]
+

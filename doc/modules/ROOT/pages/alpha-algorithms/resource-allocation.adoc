@@ -1,0 +1,102 @@
+[[alpha-algorithms-linkprediction-resource-allocation]]
+[.alpha]
+= Resource Allocation
+:description: This section describes the Resource Allocation algorithm in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This section describes the Resource Allocation algorithm in the Neo4j Graph Data Science library.
+--
+
+link:https://arxiv.org/pdf/0901.0553.pdf[Resource Allocation] is a measure used to compute the closeness of nodes based on their shared neighbors.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+[[algorithms-linkprediction-resource-allocation-context]]
+== History and explanation
+
+The Resource Allocation  algorithm was introduced in 2009 by Tao Zhou, Linyuan Lü, and Yi-Cheng Zhang as part of a study to predict links in various networks.
+It is computed using the following formula:
+
+image::resource-allocation.svg[role="middle"]
+
+where `N(u)` is the set of nodes adjacent to `u`.
+
+A value of 0 indicates that two nodes are not close, while higher values indicate nodes are closer.
+
+The library contains a function to calculate closeness between two nodes.
+
+[[algorithms-linkprediction-resource-allocation-syntax]]
+== Syntax
+
+.The following will run the algorithm and return the result:
+[source, cypher, role=noplay, indent=0]
+----
+RETURN gds.alpha.linkprediction.resourceAllocation(node1:Node, node2:Node, {
+    relationshipQuery:String,
+    direction:String
+})
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                   | Type    | Default        | Optional | Description
+| `node1`                | Node    | null           | no       | A node
+| `node2`                | Node    | null           | no       | Another node
+| `relationshipQuery`    | String  | null           | yes      | The relationship type to use to compute similarity between `node1` and `node2`
+| `direction`            | String  | BOTH           | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
+|===
+
+[[algorithms-linkprediction-resource-allocation-sample]]
+== Resource Allocation algorithm sample
+
+.The following will create a sample graph:
+[source, cypher, role=noplay, indent=0]
+----
+CREATE
+ (zhen:Person {name: 'Zhen'}),
+ (praveena:Person {name: 'Praveena'}),
+ (michael:Person {name: 'Michael'}),
+ (arya:Person {name: 'Arya'}),
+ (karin:Person {name: 'Karin'}),
+
+ (zhen)-[:FRIENDS]->(arya),
+ (zhen)-[:FRIENDS]->(praveena),
+ (praveena)-[:WORKS_WITH]->(karin),
+ (praveena)-[:FRIENDS]->(michael),
+ (michael)-[:WORKS_WITH]->(karin),
+ (arya)-[:FRIENDS]->(karin)
+----
+
+.The following will return the Resource Allocation score for Michael and Karin:
+[source, cypher, role=noplay, indent=0]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 0.3333333333333333
+|===
+
+We can also compute the score of a pair of nodes based on a specific relationship type.
+
+.The following will return the Resource Allocation score for Michael and Karin based only on the `FRIENDS` relationships:
+[source, cypher, role=noplay, indent=0]
+----
+ MATCH (p1:Person {name: 'Michael'})
+ MATCH (p2:Person {name: 'Karin'})
+ RETURN gds.alpha.linkprediction.resourceAllocation(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 0.0
+|===

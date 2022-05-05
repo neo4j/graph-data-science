@@ -1,0 +1,124 @@
+[[ml-training-methods]]
+= Training methods
+:description: This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
+--
+
+xref::machine-learning/nodeclassification-pipelines.adoc[Node Classification Pipelines] and xref::machine-learning/linkprediction-pipelines.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
+Currently, GDS supports two such methods, namely xref::machine-learning/training-methods.adoc#machine-learning-training-methods-logistic-regression[Logistic regression] and xref::machine-learning/training-methods.adoc#machine-learning-training-methods-random-forest[Random forest].
+Each of these methods have several hyperparameters that one can set to influence the training.
+The objective of this page is to give a brief overview of logistic regression and random forest, as well as advice on how to tune their hyperparameters.
+
+Configuring and training model candidates using these methods is supported for xref::machine-learning/nodeclassification-pipelines.adoc#nodeclassification-pipelines-configure-model-parameters[Node Classification] and xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-model-parameters[Link Prediction] pipelines.
+
+[[machine-learning-training-methods-logistic-regression]]
+[.beta]
+== Logistic regression
+
+Logistic regression is a fundamental supervised machine learning classification method.
+This trains a model by minimizing a loss function which depends on a weight matrix and on the training data.
+The loss can be minimized for example using gradient descent.
+In GDS we use the Adam optimizer which is a gradient descent type algorithm.
+
+The weights are in the form of a `[c,d]` sized matrix `W` and a bias vector `b` of length `c`, where `d` is the feature dimension and `c` is equal to the number of classes.
+The loss function is then defined as:
+
+`CE(softmax(Wx + b))`
+
+where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss_function_and_logistic_regression[cross entropy loss], `softmax` is the https://en.wikipedia.org/wiki/Softmax_function[softmax function], and `x` is a feature vector training sample of length `d`.
+
+To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)[regularization] term to the loss.
+In GDS, this we provide the option of adding `l2` regularization.
+
+=== Tuning the hyperparameters
+
+The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
+These parameters give ways to limit a computational budget. In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
+It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
+
+When faced with a heavy training task, a strategy to perform hyperparameter optimization faster, is to initially use lower values for the budget related parameters while exploring better ranges for other general or algorithm specific parameters.
+
+More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
+Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.
+
+As for `patience` and `tolerance`, the former is the maximum number of consecutive epochs that do not improve the training loss at least by a `tolerance` fraction of the current loss.
+After `patience` such unproductive epochs, the training is terminated.
+In our experience, reasonable values for `patience` are in the range `1` to `3`.
+
+It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
+
+The training algorithm applied to the above algorithms is gradient descent.
+The gradients are computed concurrently on batches of `batchSize` samples using `concurrency` many threads.
+At the end of an epoch the gradients are summed and scaled before updating the weights.
+Therefore `batchSize` and `concurrency` do not affect model quality, but are very useful to tune for training speed.
+
+[[machine-learning-training-methods-random-forest]]
+[.alpha]
+== Random forest
+
+Random forest is a popular supervised machine learning method for classification (and regression) that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
+To train the random forest is to train each of its decision trees independently.
+Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.
+
+Random forest predictions are made by simply taking the majority votes of its decision trees.
+The idea is that the difference in how each decision tree is trained will help avoid overfitting which is not uncommon when just training a single decision tree on the entire training set.
+
+The approach of combining several predictors (in this case decision trees) is also known as _ensemble learning_, and using different parts of the training set for each predictor is often referred to as _bootstrap aggregating_ or _bagging_.
+
+The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
+
+=== Tuning the hyperparameters
+
+In order to balance matters such as bias vs variance of the model, and speed vs memory consumption of the training, GDS exposes several hyperparameters that one can tune.
+Each of these are described below.
+
+==== Number of decision trees
+
+This parameter sets the number of decision trees that will be part of the random forest.
+
+Having a too small number of trees could mean that the model will overfit to some parts of the dataset.
+
+A larger number of trees will in general mean that the training takes longer, and the memory consumption will be higher.
+
+==== Max features ratio
+
+For each node split in a decision tree, a set of features of the feature vectors are considered.
+The number of such features considered is the `maxFeaturesRatio` multiplied by the total number of features.
+If the number of features to be considered are fewer than the total number of features, a subset of all features are sampled (without replacement).
+This is sometimes referred to as _feature bagging_.
+
+A high (close to 1.0) max features ratio means that the training will take longer as there are more options for how to split nodes in the decision trees.
+It will also mean that each decision tree will be better at predictions over the training set.
+While this is positive in some sense, it might also mean that each decision tree will overfit on the training set.
+
+==== Max depth
+
+This parameter sets the maximum depth of the decision trees in the random forest.
+
+A high maximum depth means that the training might take longer, as more node splits might need to be considered.
+The memory footprint of the produced prediction model might also be higher since the trees simply may be larger (deeper).
+
+A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
+
+==== Min split size
+
+This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
+To split a node means to continue the tree construction process to add further children below the node.
+
+A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
+It will likely also mean that the training will be faster as probably fewer node splits will be considered.
+
+==== Number of samples ratio
+
+Each decision tree in the random forest is trained using a subset of the training set.
+This subset is sampled with replacement, meaning that a feature vector of the training may be sampled several times for a single decision tree.
+The number of training samples for each decision tree is the `numberOfSamplesRatio` multiplied by the total number of samples in the training set.
+
+A high ratio will likely imply better generalization for each decision tree, but not necessarily so for the random forest overall.
+Training will also take longer as more feature vectors will need to be considered in each node split of each decision tree.
+
+The special value of 0.0 is used to indicate no sampling.
+In this case all feature vectors of the training set will be used for training by every decision tree in the random forest.

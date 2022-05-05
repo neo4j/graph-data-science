@@ -1,8 +1,0 @@
-.Syntax composition:
-[source, python]
-----
-result = gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
-  G: Graph,
-  **configuration: dict[str, any]
-)
-----

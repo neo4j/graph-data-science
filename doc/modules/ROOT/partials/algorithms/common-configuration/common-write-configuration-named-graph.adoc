@@ -1,0 +1,31 @@
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="2,1,1m,1,4"]
+|===
+| Name                                                          | Type        | Default                | Optional | Description
+
+ifeval::["{modelType}" != ""]
+| modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
+endif::[]
+
+| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
+| xref::common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]   | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
+
+ifeval::["{entity}" == "node"]
+| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
+endif::[]
+
+ifeval::["{entity}" == "relationship"]
+| writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
+| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
+endif::[]
+
+ifeval::["{entity}" == "source-target-pair"]
+| writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
+endif::[]
+
+ifeval::["{entity}" == "pregel"]
+| writeProperty                                                | String      | ""                      | yes      | The prefix used for all public properties in the PregelSchema.
+endif::[]
+|===

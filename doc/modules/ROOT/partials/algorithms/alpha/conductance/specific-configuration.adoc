@@ -1,0 +1,6 @@
+.Algorithm specific configuration
+[opts="header",cols="2,1,1m,1,5"]
+|===
+| Name              | Type   | Default | Optional | Description
+| communityProperty | String | n/a     | no       | The node property that holds the community ID as an integer for each node. Note that only non-negative community IDs are considered valid and will have their conductance computed.
+|===

@@ -1,0 +1,509 @@
+[[algorithms-label-propagation]]
+= Label Propagation
+:description: This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: community ID
+:algorithm: Label Propagation
+
+[abstract]
+--
+This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library.
+--
+
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+[[algorithms-label-propagation-intro]]
+== Introduction
+
+The Label Propagation algorithm (LPA) is a fast algorithm for finding communities in a graph.
+It detects these communities using network structure alone as its guide, and doesn't require a pre-defined objective function or prior information about the communities.
+
+LPA works by propagating labels throughout the network and forming communities based on this process of label propagation.
+
+The intuition behind the algorithm is that a single label can quickly become dominant in a densely connected group of nodes, but will have trouble crossing a sparsely connected region.
+Labels will get trapped inside a densely connected group of nodes, and those nodes that end up with the same label when the algorithms finish can be considered part of the same community.
+
+The algorithm works as follows:
+
+* Every node is initialized with a unique community label (an identifier).
+* These labels propagate through the network.
+// TODO: Rethink the below sentence
+* At every iteration of propagation, each node updates its label to the one that the maximum numbers of its neighbours belongs to.
+Ties are broken arbitrarily but deterministically.
+* LPA reaches convergence when each node has the majority label of its neighbours.
+* LPA stops if either convergence, or the user-defined maximum number of iterations is achieved.
+
+As labels propagate, densely connected groups of nodes quickly reach a consensus on a unique label.
+At the end of the propagation only a few labels will remain - most will have disappeared.
+Nodes that have the same community label at convergence are said to belong to the same community.
+
+One interesting feature of LPA is that nodes can be assigned preliminary labels to narrow down the range of solutions generated.
+This means that it can be used as semi-supervised way of finding communities where we hand-pick some initial communities.
+
+For more information on this algorithm, see:
+
+* https://arxiv.org/pdf/0709.2938.pdf["Near linear time algorithm to detect community structures in large-scale networks"^]
+* Use cases:
+** https://dl.acm.org/citation.cfm?id=2140465[Twitter polarity classification with label propagation over lexical links and the follower graph]
+** https://www.nature.com/articles/srep12339[Label Propagation Prediction of Drug-Drug Interactions Based on Clinical Side Effects]
+** https://www.uni-ulm.de/fileadmin/website_uni_ulm/iui.iwsds2017/papers/IWSDS2017_paper_12.pdf["Feature Inference Based on Label Propagation on Wikidata Graph for DST"]
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+====
+
+[[algorithms-label-propagation-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Label Propagation syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+
+.Run Label Propagation in stream mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+    nodeId: Integer,
+    communityId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID.
+| communityId | Integer | Community ID.
+|===
+
+======
+
+[.include-with-stats]
+======
+
+.Run Label Propagation in stats mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityCount: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-mutate]
+======
+
+.Run Label Propagation in mutate mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| mutateMillis          | Integer | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten | Integer | The number of node properties written.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+[.include-with-write]
+======
+
+.Run Label Propagation in write mode on a named graph.
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  communityCount: Integer,
+  ranIterations: Integer,
+  didConverge: Boolean,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/label-propagation/specific-configuration-write.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type    | Description
+| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
+| computeMillis         | Integer | Milliseconds for running the algorithm.
+| writeMillis           | Integer | Milliseconds for writing result data back.
+| postProcessingMillis  | Integer | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten | Integer | The number of node properties written.
+| communityCount        | Integer | The number of communities found.
+| ranIterations         | Integer | The number of iterations that were executed.
+| didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
+| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| configuration         | Map     | The configuration used for running the algorithm.
+|===
+
+======
+
+====
+
+[[algorithms-label-propagation-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: label-propagation-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query, indent=0]
+----
+CREATE
+  (alice:User {name: 'Alice', seed_label: 52}),
+  (bridget:User {name: 'Bridget', seed_label: 21}),
+  (charles:User {name: 'Charles', seed_label: 43}),
+  (doug:User {name: 'Doug', seed_label: 21}),
+  (mark:User {name: 'Mark', seed_label: 19}),
+  (michael:User {name: 'Michael', seed_label: 52}),
+
+  (alice)-[:FOLLOW {weight: 1}]->(bridget),
+  (alice)-[:FOLLOW {weight: 10}]->(charles),
+  (mark)-[:FOLLOW {weight: 1}]->(doug),
+  (bridget)-[:FOLLOW {weight: 1}]->(michael),
+  (doug)-[:FOLLOW {weight: 1}]->(mark),
+  (michael)-[:FOLLOW {weight: 1}]->(alice),
+  (alice)-[:FOLLOW {weight: 1}]->(michael),
+  (bridget)-[:FOLLOW {weight: 1}]->(alice),
+  (michael)-[:FOLLOW {weight: 1}]->(bridget),
+  (charles)-[:FOLLOW {weight: 1}]->(doug)
+----
+
+This graph represents six users, some of whom follow each other.
+Besides a `name` property, each user also has a `seed_label` property.
+The `seed_label` property represents a value in the graph used to seed the node with a label.
+For example, this can be a result from a previous run of the Label Propagation algorithm.
+In addition, each relationship has a weight property.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query, indent=0]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    'FOLLOW',
+    {
+        nodeProperties: 'seed_label',
+        relationshipProperties: 'weight'
+    }
+)
+----
+
+In the following examples we will demonstrate using the Label Propagation algorithm on this graph.
+
+[[algorithms-label-propagation-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.write.estimate('myGraph', { writeProperty: 'community' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin  | bytesMax  | requiredMemory
+| 6         | 10                | 1608      | 1608      | "1608 Bytes"
+|===
+--
+
+[[algorithms-label-propagation-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to see the nodes that belong to the same communities displayed next to each other.
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stream('myGraph')
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name    | Community
+| "Alice"   | 1
+| "Bridget" | 1
+| "Michael" | 1
+| "Charles" | 4
+| "Doug"    | 4
+| "Mark"    | 4
+|===
+--
+
+In the above example we can see that our graph has two communities each containing three nodes.
+The default behaviour of the algorithm is to run `unweighted`, e.g. without using `node` or `relationship` weights.
+The `weighted` option will be demonstrated in xref::algorithms/label-propagation.adoc#algorithms-label-propagation-examples-weighted[Weighted]
+
+[[algorithms-label-propagation-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-label-propagation-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+.The following will run the algorithm in `stats` mode:
+[role=query-example]
+--
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stats('myGraph')
+YIELD communityCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | ranIterations | didConverge
+| 2              | 3             | true
+|===
+--
+
+As we can see from the example above the algorithm finds two communities and converges in three iterations.
+Note that we ran the algorithm `unweighted`.
+
+[[algorithms-label-propagation-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.mutate('myGraph', { mutateProperty: 'community' })
+YIELD communityCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | ranIterations | didConverge
+| 2              | 3             | true
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `community` which stores the community ID for each node.
+To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+
+[[algorithms-label-propagation-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.write('myGraph', { writeProperty: 'community' })
+YIELD communityCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | ranIterations | didConverge
+| 2              | 3             | true
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, each of the six nodes now has a new property `community` in the Neo4j database, containing the community ID for that node.
+
+[[algorithms-label-propagation-examples-weighted]]
+=== Weighted
+
+The Label Propagation algorithm can also be configured to use node and/or relationship weights into account.
+By specifying a node weight via the `nodeWeightProperty` key, we can control the influence of a nodes community onto its neighbors.
+During the computation of the weight of a specific community, the node property will be multiplied by the weight of that nodes relationships.
+
+When we projected `myGraph`, we also projected the relationship property `weight`.
+In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
+
+[role=query-example]
+--
+.The following will run the algorithm on a graph with weighted relationships and stream results:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stream('myGraph', { relationshipWeightProperty: 'weight' })
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name      | Community
+| "Bridget" | 2
+| "Michael" | 2
+| "Alice"   | 4
+| "Charles" | 4
+| "Doug"    | 4
+| "Mark"    | 4
+|===
+--
+
+Compared to the xref::algorithms/label-propagation.adoc#algorithms-label-propagation-examples-stream[unweighted run] of the algorithm we still have two communities, but they contain two and four nodes respectively.
+Using the weighted relationships, the nodes `Alice` and `Charles` are now in the same community as there is a strong link between them.
+
+NOTE: We have used the `stream` mode to demonstrate running the algorithm using weights, the configuration parameters are available for all the modes of the algorithm.
+
+[[algorithms-label-propagation-examples-seeding]]
+=== Seeded communities
+
+At the beginning of the algorithm computation, every node is initialized with a unique label, and the labels propagate through the network.
+
+An initial set of labels can be provided by setting the `seedProperty` configuration parameter.
+When we projected `myGraph`, we also projected the node property `seed_label`.
+We can use this node property as `seedProperty`.
+
+The algorithm first checks if there is a seed label assigned to the node.
+If no seed label is present, the algorithm assigns new unique label to the node.
+Using this preliminary set of labels, it then sequentially updates each node's label to a new one, which is the most frequent label among its neighbors at every iteration of label propagation.
+
+WARNING: The `consecutiveIds` configuration option cannot be used in combination with `seedProperty` in order to retain the seeding values.
+
+[role=query-example]
+--
+.The following will run the algorithm with pre-defined labels:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.labelPropagation.stream('myGraph', { seedProperty: 'seed_label' })
+YIELD nodeId, communityId AS Community
+RETURN gds.util.asNode(nodeId).name AS Name, Community
+ORDER BY Community, Name
+----
+
+.Results
+[opts="header",cols="1,1"]
+|===
+| Name      | Community
+| "Charles" | 19
+| "Doug"    | 19
+| "Mark"    | 19
+| "Alice"   | 21
+| "Bridget" | 21
+| "Michael" | 21
+|===
+--
+
+As we can see, the communities are based on the `seed_label` property, concretely `19` is from the node `Mark` and `21` from `Doug`.
+
+NOTE: We have used the `stream` mode to demonstrate running the algorithm using `seedProperty`, this configuration parameter is available for all the modes of the algorithm.

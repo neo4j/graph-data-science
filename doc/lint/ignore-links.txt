@@ -1,0 +1,4 @@
+http://localhost:[0-9]*/docs/*
+http://localhost:[0-9]*/developer/*
+http://localhost:[0-9]*/labs/*
+http://localhost:[0-9]*/graphgists/*

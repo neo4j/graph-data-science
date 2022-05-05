@@ -1,0 +1,213 @@
+[[catalog-graph-export-csv]]
+[.beta]
+
+= Export a named graph to CSV
+
+We can export projected graphs stored in the graph catalog to a set of CSV files.
+All nodes, relationships and properties present in a projected graph are exported.
+This includes data that has been projected with `gds.graph.project` and data that has been added by running algorithms in `mutate` mode.
+The location of the exported CSV files can be configured via the configuration parameter `gds.export.location` in the `neo4j.conf`.
+All files will be stored in a subfolder using the specified export name.
+The export will fail if a folder with the given export name already exists.
+
+[NOTE]
+====
+The `gds.export.location` parameter must be configured for this feature.
+====
+
+== Syntax
+
+[.graph-export-syntax]
+--
+.Export a named graph to a set of CSV files:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.graph.export.csv(graphName: String, configuration: Map)
+YIELD
+    graphName: String,
+    exportName: String,
+    nodeCount: Integer,
+    nodePropertyCount: Integer,
+    relationshipCount: Integer,
+    relationshipTypeCount: Integer,
+    relationshipPropertyCount: Integer,
+    writeMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,1, 4"]
+|===
+| Name                  | Type                | Optional | Description
+| graphName             | String              | no       | The name under which the graph is stored in the catalog.
+| configuration         | Map                 | no       | Additional parameters to configure the database export.
+|===
+
+.Graph export configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                     | Type                | Default   | Optional | Description
+| exportName               | String              | none      | No       | The name of the directory where the graph is exported to. The absolute path of the exported CSV files depends on the configuration parameter `gds.export.location` in the `neo4j.conf`.
+| writeConcurrency         | Boolean             | 4         | yes      | The number of concurrent threads used for writing the database.
+| defaultRelationshipType  | String              | +__ALL__+ | yes      | Relationship type used for `*` relationship projections.
+| additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
+|===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                      | Type     | Description
+| graphName                 | String   | The name under which the graph is stored in the catalog.
+| exportName                | String   | The name of the directory where the graph is exported to.
+| nodeCount                 | Integer  | The number of nodes exported.
+| nodePropertyCount         | Integer  | The number of node properties exported.
+| relationshipCount         | Integer  | The number of relationships exported.
+| relationshipTypeCount     | Integer  | The number of relationship types exported.
+| relationshipPropertyCount | Integer  | The number of relationship properties exported.
+| writeMillis               | Integer  | Milliseconds for writing the graph into the new database.
+|===
+--
+
+== Estimation
+
+As many other procedures in GDS, export to csv has an estimation mode. For more details see xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Using the `gds.beta.graph.export.csv.estimate` procedure, it is possible to estimate the required disk space of the exported CSV files.
+The estimation uses sampling to generate a more accurate estimate.
+
+[.estimate-syntax]
+--
+.Estimate the required disk space for exporting a named graph to CSV files.:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.graph.export.csv.estimate(graphName:String, configuration: Map)
+YIELD
+  nodeCount: Integer,
+  relationshipCount: Integer,
+  requiredMemory: String,
+  treeView: String,
+  mapView: Map,
+  bytesMin: Integer,
+  bytesMax: Integer,
+  heapPercentageMin: Float,
+  heapPercentageMax: Float;
+----
+
+.Parameters
+[opts="header",cols="1,1,1, 4"]
+|===
+| Name                  | Type                | Optional | Description
+| graphName             | String              | no       | The name under which the graph is stored in the catalog.
+| configuration         | Map                 | no       | Additional parameters to configure the database export.
+|===
+
+.Graph export estimate configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                    | Type    | Default    | Optional  | Description
+| exportName              | String  | none       | no        | Name of the folder the exported CSV files are saved at.
+| samplingFactor          | Double  | 0.001      | yes       | The fraction of nodes and relationships to sample for the estimation.
+| writeConcurrency        | Boolean | 4          | yes       | The number of concurrent threads used for writing the database.
+| defaultRelationshipType | String  | +__ALL__+  | yes       | Relationship type used for `*` relationship projections.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                  | Type      | Description
+| nodeCount             | Integer   | The number of nodes in the graph.
+| relationshipCount     | Integer   | The number of relationships in the graph.
+| requiredMemory        | String    | An estimation of the required memory in a human readable format.
+| treeView              | String    | A more detailed representation of the required memory, including estimates of the different components in human readable format.
+| mapView               | Map       | A more detailed representation of the required memory, including estimates of the different components in structured format.
+| bytesMin              | Integer   | The minimum number of bytes required.
+| bytesMax              | Integer   | The maximum number of bytes required.
+| heapPercentageMin     | Float     | The minimum percentage of the configured maximum heap required.
+| heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
+|===
+--
+
+== Export format
+
+The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
+
+=== Nodes
+
+Nodes are exported into files grouped by the nodes labels, i.e., for every label combination that exists in the graph a set of export files is created.
+The naming schema of the exported files is: `nodes_LABELS_INDEX.csv`, where:
+
+- `LABELS` is the ordered list of labels joined by `_`.
+- `INDEX` is a number between 0 and concurrency.
+
+For each label combination one or more data files are created, as each exporter thread exports into a separate file.
+
+Additionally, each label combination produces a single header file, which contains a single line describing the columns in the data files
+More information about the header files can be found here: https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/#import-tool-header-format[CSV header format].
+
+For example a Graph with the node combinations `:A`, `:B` and `:A:B` might create the following files
+
+----
+nodes_A_header.csv
+nodes_A_0.csv
+nodes_B_header.csv
+nodes_B_0.csv
+nodes_B_2.csv
+nodes_A_B_header.csv
+nodes_A_B_0.csv
+nodes_A_B_1.csv
+nodes_A_B_2.csv
+----
+
+=== Relationships
+
+The format of the relationship files is similar to those of the nodes.
+Relationships are exported into files grouped by the relationship type.
+The naming schema of the exported files is: `relationships_TYPE_INDEX.csv`, where:
+
+- `TYPE` is the relationship type
+- `INDEX` is a number between 0 and concurrency.
+
+For each relationship type one or more data files are created, as each exporter thread exports into a separate file.
+
+Additionally, each relationship type produces a single header file, which contains a single line describing the columns in the data files.
+
+For example a Graph with the relationship types `:KNOWS`, `:LIVES_IN` might create the following files
+
+----
+relationships_KNOWS_header.csv
+relationships_KNOWS_0.csv
+relationships_LIVES_IN_header.csv
+relationships_LIVES_IN_0.csv
+relationships_LIVES_IN_2.csv
+----
+
+== Example
+
+.Export the `my-graph` from GDS into a directory `my-export`:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export' })
+----
+
+== Example with additional node properties
+
+Suppose we have a graph `my-db-graph` in the Neo4j database that has a string node property `myproperty`, and that we have a corresponding in-memory graph called `my-in-memory-graph` which does not have the `myproperty` node property.
+If we want to export `my-in-memory-graph` but additionally add the `myproperty` properties from `my-db-graph` we can use the `additionalProperties` configuration parameter.
+
+.Export the `my-in-memory-graph` from GDS with the `myproperty` from `my-db-graph` into a directory `my-export`:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
+----
+
+[NOTE]
+====
+The original database (`my-db-graph`) must not have changed since loading the in-memory representation (`my-in-memory-graph`) that we export in order for the export to work correctly.
+====
+
+The `additionalNodeProperties` parameter uses the same syntax as `nodeProperties` of the xref::graph-project.adoc[graph project procedure].
+So we could for instance define a default value for our `myproperty`.
+
+.Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a directory called `my-export`:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
+----

@@ -1,0 +1,148 @@
+[[logging]]
+= Logging
+:description: This section describes logging features in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This section describes logging features in the Neo4j Graph Data Science library.
+--
+
+In the GDS library there are three types of logging: debug logging, progress logging and hints or warnings logging.
+
+*Debug logging* provides information about events in the system.
+For example, when an algorithm computation completes, the amount of memory used and the total runtime may be logged.
+Exceptional events, when an operation fails to complete normally, are also logged.
+The debug log information is useful for understanding events in the system, especially when troubleshooting a problem.
+
+*Progress logging* is performed to track the progress of operations that are expected to take a long time.
+This includes graph projections, algorithm computation, and result writing.
+
+*Hints or warnings logging* provides the user with useful hints or warnings related to their queries.
+
+All log entries are written to the log files configured for the Neo4j database.
+For more information on configuring Neo4j logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
+
+[[logging-progress-logging]]
+[.beta]
+== Progress-logging procedure
+
+Progress is also tracked by the GDS library itself.
+This makes it possible to inspect progress via Cypher, in addition to looking in the log files.
+To access progress information for currently running tasks (also referred to as jobs), we can make use of the list progress procedure: `gds.beta.listProgress`.
+A task in the GDS library is defined as a running procedure, such as an algorithm or a graph load procedure.
+
+The list progress procedure has two modes, depending on whether a `jobId` parameter was set:
+First, if `jobId` is not set, the procedure will produce a single row for each task currently running.
+This can be seen as the summary of those tasks, displaying the overall progress of a particular task for example.
+Second, if the `jobId` parameter is set it will show a detailed view for the given running job.
+The detailed view will produce a row for each step or task that job will perform during execution.
+It will also show how tasks are structured as a tree and print progress for each individual task.
+
+[[logging-progress-logging-syntax]]
+=== Syntax
+
+.Getting the progress of tasks:
+[source, cypher, role=noplay, indent=0]
+----
+CALL gds.beta.listProgress(jobId: String)
+YIELD
+  jobId,
+  taskName,
+  progress,
+  progressBar,
+  status,
+  timeStarted,
+  elapsedTime
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type          | Default   | Optional  | Description
+| jobId             | String        | ""        | yes       | The jobId of a running task. This will trigger a detailed overview for that particular task.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name          | Type      | Description
+| jobId         | String    | A generated identifier of the running task.
+| taskName      | String    | The name of the running task, i.e. `Node2Vec`.
+| progress      | String    | The progress of the job shown as a percentage value.
+| progressBar   | String    | The progress of the job shown as an ASCII progress bar.
+| status        | String    | The current status of the job, i.e. `RUNNING` or `CANCELED`.
+| timeStarted   | LocalTime | The local wall clock time when the task has been started.
+| elapsedTime   | Duration  | The duration from `timeStarted` to now.
+|===
+
+[[logging-progress-logging-examples]]
+=== Examples
+
+Assuming we just started `gds.beta.node2vec.stream` procedure.
+
+[source,cypher,role=noplay, indent=0]
+----
+CALL gds.beta.listProgress()
+YIELD
+  jobId,
+  taskName,
+  progress
+----
+
+.Results
+[opts="header"]
+|===
+| jobId                                  | taskName   | progress
+| "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "42%"
+|===
+
+[[logging-user-warnings]]
+[.alpha]
+== User Log
+
+Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
+The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.
+When a user calls procedure `gds.alpha.userLog`, their respective list of generated hints and warnings is returned.
+
+[[userlog-syntax]]
+=== Syntax
+
+.Getting the hints and warnings for a user:
+[source,cypher,role=noplay, indent=0]
+----
+CALL gds.alpha.userLog()
+YIELD
+  taskName,
+  timeStarted,
+  message
+----
+
+.Results
+[opts="header",cols="1m,1,3"]
+|===
+| Name          | Type      | Description
+| taskName      | String    | The name of the task that generated a warning or hint, i.e. `WCC`.
+|timeStarted      | LocalTime      | The local wall clock time when the task has been started.
+| message      | String    | A hint or warning associated with the task.
+|===
+
+[[userlog-examples]]
+=== Examples
+
+Suppose that we have called the  `gds.wcc.stream` procedure and set a `relationshipWeightProperty` without specifying a `threshold` value.
+This generates a warning which can be accessed via the user log as seen below.
+
+[source,cypher,role=noplay, indent=0]
+----
+CALL gds.alpha.userLog()
+YIELD
+  taskName,
+  message
+----
+
+.Results
+[opts="header"]
+|===
+|taskName   | message
+| "WCC"     |"Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set"
+|===
