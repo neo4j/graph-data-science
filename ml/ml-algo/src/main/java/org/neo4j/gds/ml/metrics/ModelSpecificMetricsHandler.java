@@ -31,7 +31,7 @@ public final class ModelSpecificMetricsHandler {
 
     private final BiConsumer<Metric, Double> metricConsumer;
 
-    private ModelSpecificMetricsHandler(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
+    public ModelSpecificMetricsHandler(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
         this.metrics = metrics;
         this.metricConsumer = metricConsumer;
     }
