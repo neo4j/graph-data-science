@@ -36,9 +36,7 @@ Note here the blue area which shows one trapezoid under the curve.
 
 The area under the Precision-Recall curve can also be interpreted as an average precision where the average is over different classification thresholds.
 
-The `OUT_OF_BAG_METRIC` is computed only for RandomForest models and is evaluated as the accuracy of each decision tree on the part of the training set that the tree did not use for training.
-The accuracies of the individual trees are averaged to yield the `OUT_OF_BAG_METRIC`.
-The proportion of training set which is used by each tree is controlled by the training parameters `numberOfSamplesRatio`.
+include::../out-of-bag-error-explanation.adoc[]
 
 
 [[linkprediction-pipelines-classimbalance]]
