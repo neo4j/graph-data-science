@@ -301,8 +301,8 @@ class NodeClassificationTrainTest {
         assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(1).noneMatch(Objects::isNull);
         assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).hasSize(1).containsOnlyNulls();
 
-        assertThat(trainingStatistics.winningModelOuterTrainMetrics().keySet()).containsExactly(OUT_OF_BAG_ERROR);
-        assertThat(trainingStatistics.winningModelTestMetrics()).isEmpty();
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).isEmpty();
+        assertThat(trainingStatistics.winningModelTestMetrics().keySet()).containsExactly(OUT_OF_BAG_ERROR);
     }
 
     @ParameterizedTest

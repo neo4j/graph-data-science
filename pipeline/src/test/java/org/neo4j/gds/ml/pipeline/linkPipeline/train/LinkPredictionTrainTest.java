@@ -59,7 +59,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -253,27 +253,69 @@ class LinkPredictionTrainTest {
 
         var result = runLinkPrediction(trainConfig);
 
-        var trainingStatistics = result.trainingStatistics().toMap();
-        var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
+        var trainingStatistics = result.trainingStatistics();
 
-        var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
-        assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
+        assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
+        assertThat(trainingStatistics.getValidationStats(AUCPR))
+            .hasSize(10)
+            .noneMatch(Objects::isNull);
+        assertThat(trainingStatistics.getTrainStats(AUCPR))
+            .hasSize(10)
+            .noneMatch(Objects::isNull);
 
-        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(0, 10);
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).containsKeys(AUCPR);
+        assertThat(trainingStatistics.winningModelTestMetrics()).containsOnlyKeys(AUCPR);
 
-        var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
-        assertThat(candidateStats.size()).isEqualTo(10);
-        for (int i = 0; i < candidateStats.size(); i++) {
-            var candidateMap = (Map) candidateStats.get(i);
-            assertThat(candidateMap).containsKey("parameters");
-            assertThat((Map) candidateMap.get("metrics")).containsKey("AUCPR");
-            if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
-                assertThat((Map) candidateMap.get("metrics")).containsKey("OUT_OF_BAG_ERROR");
-            }
-            if (!includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
-                assertThat((Map) candidateMap.get("metrics")).doesNotContainKey("OUT_OF_BAG_ERROR");
-            }
+        if (includeOOB) {
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(10);
+            assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
+        } else {
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
         }
+    }
+
+    @Test
+    void shouldProduceCorrectTrainingStatisticsForWinningRF() {
+        String modelName = "model";
+
+        var trainConfig = trainingConfig(modelName, List.of(OUT_OF_BAG_ERROR));
+
+        var pipeline = new LinkPredictionTrainingPipeline();
+
+        pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
+            .validationFolds(2)
+            .negativeSamplingRatio(1)
+            .trainFraction(0.5)
+            .testFraction(0.5)
+            .build());
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio", Map.of("range", List.of(0.05, 0.1))
+                ),
+                TrainingMethod.RandomForestClassification
+            ));
+        pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
+
+        var linkPredictionTrain = new LinkPredictionTrain(
+            trainGraph,
+            trainGraph,
+            pipeline,
+            trainConfig,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var trainingStatistics = linkPredictionTrain.compute().trainingStatistics();
+
+        assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(10).noneMatch(Objects::isNull);
+        assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).hasSize(10).containsOnlyNulls();
+
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).isEmpty();
+        assertThat(trainingStatistics.winningModelTestMetrics()).containsOnlyKeys(OUT_OF_BAG_ERROR);
     }
 
     @Test

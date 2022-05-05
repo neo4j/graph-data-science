@@ -390,7 +390,7 @@ public final class NodeClassificationTrain {
             outerSplit.trainSet(),
             trainingStatistics.bestParameters(),
             progressTracker,
-            new ModelSpecificMetricsHandler(metrics, trainingStatistics::addOuterTrainScore)
+            ModelSpecificMetricsHandler.of(metrics, trainingStatistics::addTestScore)
         );
 
         progressTracker.endSubTask("Train best model");
