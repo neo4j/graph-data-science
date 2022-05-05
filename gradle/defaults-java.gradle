@@ -81,7 +81,7 @@ allprojects {
             jvmArgs += '--add-opens=java.base/sun.net.www.protocol.http=ALL-UNNAMED'
             jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
 
-            maxHeapSize = "3G"
+            maxHeapSize = "4G"
             useJUnitPlatform {
                 includeEngines 'junit-jupiter'
                 includeEngines 'jqwik'
