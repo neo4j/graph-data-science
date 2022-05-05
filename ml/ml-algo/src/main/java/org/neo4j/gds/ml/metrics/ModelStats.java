@@ -24,23 +24,16 @@ import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Map;
 
+/**
+ * Statistics of the metric of the model candidate over (inner) folds
+ */
 @ValueClass
 public interface ModelStats {
 
-    /**
-     * The average of the metric of the model candidate over (inner) folds
-     * @return
-     */
     double avg();
-    /**
-     * The average of the metric of the model candidate over (inner) folds
-     * @return
-     */
+
     double min();
-    /**
-     * The average of the metric of the model candidate over (inner) folds
-     * @return
-     */
+
     double max();
 
     @Value.Derived
