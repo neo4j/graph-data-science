@@ -107,6 +107,19 @@ print(G_office.node_properties("City"))
 ----
 
 
+== Close open connections
+
+Similarly to how the Neo4j Python driver supports closing all open connections to the DBMS, you can call `close` on the `GraphDataScience` object to the same effect:
+
+[source,python]
+----
+# Close any open connections in the underlying Neo4j driver's connection pool
+gds.close()
+----
+
+`close` is also called automatically when the `GraphDataScience` object is deleted.
+
+
 [[python-client-getting-started-mapping]]
 == Mapping between Cypher and Python
 
