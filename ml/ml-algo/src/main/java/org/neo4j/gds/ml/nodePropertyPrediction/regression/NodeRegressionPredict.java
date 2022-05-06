@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodePropertyPrediction.regression;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -50,21 +49,21 @@ public class NodeRegressionPredict extends Algorithm<HugeDoubleArray> {
         this.terminationFlag = terminationFlag;
     }
 
-    public static Task progressTask(Graph graph) {
-        return Tasks.leaf("Node Regression predict", graph.nodeCount());
+    public static Task progressTask(long nodeCount) {
+        return Tasks.leaf("Predict", nodeCount);
     }
 
 
     @Override
     public HugeDoubleArray compute() {
-        progressTracker.beginSubTask("Node Regression predict");
+        progressTracker.beginSubTask("Predict");
         var predictedTargets = HugeDoubleArray.newArray(features.size());
         ParallelUtil.parallelForEachNode(
             features.size(),
             concurrency,
             id -> predictedTargets.set(id, regressor.predict(features.get(id)))
         );
-        progressTracker.endSubTask("Node Regression predict");
+        progressTracker.endSubTask("Predict");
 
         return predictedTargets;
     }
