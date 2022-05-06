@@ -150,7 +150,7 @@ class FilteredKnnTest {
         assertCorrectNeighborList(result, nodeCId, nodeAId, nodeBId);
     }
     private void assertCorrectNeighborList(
-        FilteredKnn.Result result,
+        FilteredKnnResult result,
         long nodeId,
         long... expectedNeighbors
     ) {
@@ -265,7 +265,7 @@ class FilteredKnnTest {
         assertCorrectNeighborList(result, nodeEveId, nodeBobId);
     }
 
-    private void assertEmptyNeighborList(FilteredKnn.Result result, long nodeId) {
+    private void assertEmptyNeighborList(FilteredKnnResult result, long nodeId) {
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors).isEmpty();
     }
@@ -288,7 +288,7 @@ class FilteredKnnTest {
         var result = knn.compute();
         assertThat(result)
             .isNotNull()
-            .extracting(FilteredKnn.Result::size)
+            .extracting(FilteredKnnResult::size)
             .isEqualTo(3L);
     }
 
@@ -322,7 +322,7 @@ class FilteredKnnTest {
 
         softly.assertThat(result)
             .isNotNull()
-            .extracting(FilteredKnn.Result::size)
+            .extracting(FilteredKnnResult::size)
             .isEqualTo(3L);
 
         long nodeAId = idFunction.of("a");

@@ -23,15 +23,12 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.List;
@@ -39,15 +36,11 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
+public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private final Graph graph;
     private final FilteredNeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
@@ -177,7 +170,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     }
 
     @Override
-    public Result compute() {
+    public FilteredKnnResult compute() {
         this.progressTracker.beginSubTask();
         HugeObjectArray<FilteredNeighborList> neighbors;
         try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
@@ -187,7 +180,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                 this.progressTracker.endSubTask();
             }
             if (neighbors == null) {
-                return new EmptyResult();
+                return FilteredKnnResult.empty();
             }
 
             var maxUpdates = (long) Math.ceil(this.sampleRate * this.topK * graph.nodeCount());
@@ -223,7 +216,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, this.sourceNodes);
+            return ImmutableFilteredKnnResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, this.sourceNodes);
         }
     }
 
@@ -394,84 +387,5 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
 
     private void logOverallTime(long ms) {
         progressTracker.logMessage(formatWithLocale("Graph execution took %d ms", ms));
-    }
-
-    @ValueClass
-    public abstract static class Result {
-        abstract HugeObjectArray<FilteredNeighborList> neighborList();
-
-        public abstract int ranIterations();
-
-        public abstract boolean didConverge();
-
-        public abstract long nodePairsConsidered();
-
-        public abstract List<Long> sourceNodes();
-
-        public LongStream neighborsOf(long nodeId) {
-            return neighborList().get(nodeId).elements().map(FilteredNeighborList::clearCheckedFlag);
-        }
-
-        // http://www.flatmapthatshit.com/
-        public Stream<SimilarityResult> streamSimilarityResult() {
-            var neighborList = neighborList();
-            return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
-                .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                    .filter(index -> sourceNodes().contains(index + cursor.base))
-                    .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
-                    .flatMap(Function.identity())
-                );
-        }
-
-        public long totalSimilarityPairs() {
-            var neighborList = neighborList();
-            return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
-                .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                    .filter(index -> sourceNodes().contains(index + cursor.base))
-                    .mapToLong(index -> cursor.array[index].size()))
-                .sum();
-        }
-
-        public long size() {
-            return neighborList().size();
-        }
-    }
-
-    private static final class EmptyResult extends Result {
-
-        @Override
-        HugeObjectArray<FilteredNeighborList> neighborList() {
-            return HugeObjectArray.of();
-        }
-
-        @Override
-        public int ranIterations() {
-            return 0;
-        }
-
-        @Override
-        public boolean didConverge() {
-            return false;
-        }
-
-        @Override
-        public long nodePairsConsidered() {
-            return 0;
-        }
-
-        @Override
-        public List<Long> sourceNodes() {
-            return List.of();
-        }
-
-        @Override
-        public LongStream neighborsOf(long nodeId) {
-            return LongStream.empty();
-        }
-
-        @Override
-        public long size() {
-            return 0;
-        }
     }
 }
