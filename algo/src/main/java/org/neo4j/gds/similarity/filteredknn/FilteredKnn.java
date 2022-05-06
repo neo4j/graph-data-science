@@ -49,12 +49,22 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private final Graph graph;
-    private final FilteredKnnBaseConfig config;
     private final FilteredNeighborFilterFactory neighborFilterFactory;
     private final FilteredKnnContext context;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
     private final List<Long> sourceNodes;
+    private final int maxIterations;
+    private final double sampleRate;
+    private final int topK;
+    private final double deltaThreshold;
+    private final double similarityCutoff;
+    private final int concurrency;
+    private final int minBatchSize;
+    private final double perturbationRate;
+    private final int sampledK;
+    private final int randomJoins;
+    private final Function<SplittableRandom, FilteredKnnSampler> samplerSupplier;
 
     private long nodePairsConsidered;
 
@@ -64,6 +74,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             context.progressTracker(),
             graph,
             config,
+            config.maxIterations(),
             sourceNodes,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
@@ -85,6 +96,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             context.progressTracker(),
             graph,
             config,
+            config.maxIterations(),
             sourceNodes,
             similarityComputer,
             neighborFilterFactory,
@@ -102,6 +114,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         ProgressTracker progressTracker,
         Graph graph,
         FilteredKnnBaseConfig config,
+        int maxIterations,
         List<Long> sourceNodes,
         SimilarityComputer similarityComputer,
         FilteredNeighborFilterFactory neighborFilterFactory,
@@ -110,12 +123,35 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.sampleRate = config.sampleRate();
+        this.deltaThreshold = config.deltaThreshold();
+        this.similarityCutoff = config.similarityCutoff();
+        this.topK = config.topK();
+        this.concurrency = config.concurrency();
+        this.minBatchSize = config.minBatchSize();
+        this.perturbationRate = config.perturbationRate();
+        this.sampledK = config.sampledK(graph.nodeCount());
+        this.randomJoins = config.randomJoins();
+        this.maxIterations = maxIterations;
         this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
         this.context = context;
         this.splittableRandom = splittableRandom;
         this.sourceNodes = sourceNodes;
+        switch(config.initialSampler()) {
+            case UNIFORM:
+                this.samplerSupplier = new UniformFilteredKnnSamplerSupplier(graph);
+                break;
+            case RANDOMWALK:
+                this.samplerSupplier = new RandomWalkFilteredKnnSamplerSupplier(
+                    graph.concurrentCopy(),
+                    config.randomSeed(),
+                    config.boundedK(graph.nodeCount())
+                );
+                break;
+            default:
+                throw new IllegalStateException("Invalid FilteredKnnSampler");
+        }
     }
 
     public long nodeCount() {
@@ -140,16 +176,15 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                 return new EmptyResult();
             }
 
-            var maxIterations = this.config.maxIterations();
-            var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
-            var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
+            var maxUpdates = (long) Math.ceil(this.sampleRate * this.topK * graph.nodeCount());
+            var updateThreshold = (long) Math.floor(this.deltaThreshold * maxUpdates);
 
             long updateCount;
             int iteration = 0;
             boolean didConverge = false;
 
             this.progressTracker.beginSubTask();
-            for (; iteration < maxIterations; iteration++) {
+            for (; iteration < this.maxIterations; iteration++) {
                 int currentIteration = iteration;
                 try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration + 1, took))) {
                     updateCount = iteration(neighbors);
@@ -160,17 +195,16 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                     break;
                 }
             }
-            if (config.similarityCutoff() > 0) {
-                var similarityCutoff = config.similarityCutoff();
+            if (this.similarityCutoff > 0) {
                 var neighborFilterTasks = PartitionUtils.rangePartition(
-                    config.concurrency(),
+                    this.concurrency,
                     neighbors.size(),
                     partition -> (Runnable) () -> partition.consume(
-                        nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
+                        nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(this.similarityCutoff)
                     ),
-                    Optional.of(config.minBatchSize())
+                    Optional.of(this.minBatchSize)
                 );
-                ParallelUtil.runWithConcurrency(config.concurrency(), neighborFilterTasks, context.executor());
+                ParallelUtil.runWithConcurrency(this.concurrency, neighborFilterTasks, context.executor());
             }
             this.progressTracker.endSubTask();
 
@@ -183,61 +217,73 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     public void release() {
 
     }
+
     private @Nullable HugeObjectArray<FilteredNeighborList> initializeRandomNeighbors() {
-        var k = this.config.topK();
         // (int) is safe since it is at most k, which is an int
-        var boundedK = (int) Math.min(graph.nodeCount() - 1, k);
+        var boundedK = (int) Math.min(graph.nodeCount() - 1, this.topK);
 
-        assert boundedK <= k && boundedK <= graph.nodeCount() - 1;
-
-        if (graph.nodeCount() < 2 || k == 0) {
+        if (graph.nodeCount() < 2 || this.topK == 0) {
             return null;
         }
 
         var neighbors = HugeObjectArray.newArray(FilteredNeighborList.class, graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
-            config.concurrency(),
+            this.concurrency,
             graph.nodeCount(),
             partition -> {
                 var localRandom = splittableRandom.split();
                 return new FilteredGenerateRandomNeighbors(
-                    initializeSampler(localRandom),
+                    samplerSupplier.apply(localRandom),
                     localRandom,
                     this.similarityComputer,
                     this.neighborFilterFactory.create(),
                     neighbors,
-                    k,
+                    this.topK,
                     boundedK,
                     partition,
                     progressTracker
                 );
             },
-            Optional.of(config.minBatchSize())
+            Optional.of(this.minBatchSize)
         );
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, context.executor());
+        ParallelUtil.runWithConcurrency(this.concurrency, randomNeighborGenerators, context.executor());
 
         this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(FilteredGenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
     }
 
-    private FilteredKnnSampler initializeSampler(SplittableRandom random) {
-        switch(config.initialSampler()) {
-            case UNIFORM: {
-                return new UniformFilteredKnnSampler(random, graph.nodeCount());
-            }
-            case RANDOMWALK: {
-                return new RandomWalkFilteredKnnSampler(
-                    graph.concurrentCopy(),
-                    random,
-                    config.randomSeed(),
-                    config.boundedK(graph.nodeCount())
-                );
-            }
-            default:
-                throw new IllegalStateException("Invalid FilteredKnnSampler");
+    static class UniformFilteredKnnSamplerSupplier implements Function<SplittableRandom, FilteredKnnSampler> {
+
+        private final Graph graph;
+
+        UniformFilteredKnnSamplerSupplier(Graph graph) {
+            this.graph = graph;
+        }
+
+        @Override
+        public FilteredKnnSampler apply(SplittableRandom splittableRandom) {
+            return new UniformFilteredKnnSampler(splittableRandom, graph.nodeCount());
+        }
+    }
+
+    static class RandomWalkFilteredKnnSamplerSupplier implements Function<SplittableRandom, FilteredKnnSampler> {
+
+        private final Graph graph;
+        private final Optional<Long> randomSeed;
+        private final int boundedK;
+
+        RandomWalkFilteredKnnSamplerSupplier(Graph graph, Optional<Long> randomSeed, int boundedK) {
+            this.graph = graph;
+            this.randomSeed = randomSeed;
+            this.boundedK = boundedK;
+        }
+
+        @Override
+        public FilteredKnnSampler apply(SplittableRandom splittableRandom) {
+            return new RandomWalkFilteredKnnSampler(graph.concurrentCopy(), splittableRandom, randomSeed, boundedK);
         }
     }
 
@@ -246,26 +292,24 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         // we check for this before any iteration and return
         // and just make sure that this invariant holds on every iteration
         var nodeCount = graph.nodeCount();
-        if (nodeCount < 2 || this.config.topK() == 0) {
+        if (nodeCount < 2 || this.topK == 0) {
             return FilteredNeighborList.NOT_INSERTED;
         }
 
-        var concurrency = this.config.concurrency();
         var executor = this.context.executor();
 
-        var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executor, new FilteredSplitOldAndNewNeighbors(
+        ParallelUtil.readParallel(this.concurrency, nodeCount, executor, new FilteredSplitOldAndNewNeighbors(
             this.splittableRandom,
             neighbors,
             allOldNeighbors,
             allNewNeighbors,
-            sampledK,
+            this.sampledK,
             progressTracker
         ));
         progressTracker.endSubTask();
@@ -281,13 +325,14 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             allNewNeighbors,
             reverseOldNeighbors,
             reverseNewNeighbors,
-            config,
+            this.concurrency,
+            this.minBatchSize,
             progressTracker
         );
         progressTracker.endSubTask();
 
         var neighborsJoiners = PartitionUtils.rangePartition(
-            concurrency,
+            this.concurrency,
             nodeCount,
             partition -> new JoinNeighbors(
                 this.splittableRandom.split(),
@@ -299,18 +344,18 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                 reverseOldNeighbors,
                 reverseNewNeighbors,
                 nodeCount,
-                this.config.topK(),
-                sampledK,
-                this.config.perturbationRate(),
-                this.config.randomJoins(),
+                this.topK,
+                this.sampledK,
+                this.perturbationRate,
+                this.randomJoins,
                 partition,
                 progressTracker
             ),
-            Optional.of(config.minBatchSize())
+            Optional.of(this.minBatchSize)
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, executor);
+        ParallelUtil.runWithConcurrency(this.concurrency, neighborsJoiners, executor);
         progressTracker.endSubTask();
 
         this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();
@@ -324,10 +369,11 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
-        FilteredKnnBaseConfig config,
+        int concurrency,
+        int minBatchSize,
         ProgressTracker progressTracker
     ) {
-        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.concurrency(), config.minBatchSize());
+        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
 
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
