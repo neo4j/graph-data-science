@@ -47,8 +47,8 @@ allprojects {
                 url = "file://${rootProject.projectDir}/neo4j-repo"
             }
             maven {
-                name = 'GDS local-hosted dependencies'
-                url "$privateDir/dependencies/repository"
+                name = 'GDS local-hosted Neo4j drop version'
+                url "$privateDir/dependencies/neo4j-4.4.6-drop01.0"
             }
         }
 
