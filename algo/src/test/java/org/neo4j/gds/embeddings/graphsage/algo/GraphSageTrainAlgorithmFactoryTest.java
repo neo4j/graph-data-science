@@ -58,6 +58,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.eclipse.collections.impl.tuple.primitive.PrimitiveTuples.pair;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
@@ -461,13 +462,15 @@ class GraphSageTrainAlgorithmFactoryTest {
     void testLogging() {
         var config = ImmutableGraphSageTrainConfig.builder()
             .addFeatureProperties(DUMMY_PROPERTY)
-            .embeddingDimension(64)
+            .embeddingDimension(12)
+            .aggregator(Aggregator.AggregatorType.POOL)
+            .tolerance(1e-10)
+            .sampleSizes(List.of(5, 3))
+            .batchSize(5)
+            .randomSeed(42L)
             .modelName("model")
             .epochs(2)
             .maxIterations(2)
-            .tolerance(1e-10)
-            .learningRate(0.001)
-            .randomSeed(42L)
             .build();
 
         var log = Neo4jProxy.testLog();
@@ -485,6 +488,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         AssertionsForInterfaceTypes.assertThat(messagesInOrder)
             // avoid asserting on the thread id
             .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals(2))
             .containsExactly(
                 "GraphSageTrain :: Start",
                 "GraphSageTrain :: Prepare batches :: Start",
@@ -493,17 +497,23 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "GraphSageTrain :: Train model :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: LOSS: 531.5699087433",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: LOSS: 132.63",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: LOSS: 129.13",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: LOSS: 123.38",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Start",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: LOSS: 116.06",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 100%",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Finished",
                 "GraphSageTrain :: Finished"
