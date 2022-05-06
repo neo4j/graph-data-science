@@ -20,12 +20,11 @@
 package org.neo4j.gds.catalog;
 
 import org.HdrHistogram.AtomicHistogram;
-import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.MapUtil;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Map;
 
@@ -56,9 +55,9 @@ public final class GraphInfoHelper {
             graph,
             Pools.DEFAULT,
             (nodeOffset, nodeIds) -> () -> {
-                PrimitiveLongIterator iterator = nodeIds.iterator();
+                var iterator = nodeIds.iterator();
                 while (iterator.hasNext()) {
-                    long nodeId = iterator.next();
+                    long nodeId = iterator.nextLong();
                     int degree = graph.degree(nodeId);
                     histogram.recordValue(degree);
                 }

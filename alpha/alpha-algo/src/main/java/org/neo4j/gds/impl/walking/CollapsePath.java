@@ -175,7 +175,7 @@ public class CollapsePath extends Algorithm<Relationships> {
         public void accept(long targetNode, int depth, BfsSources sourceNode) {
             if (depth == targetDepth) {
                 while (sourceNode.hasNext()) {
-                    relImporter.addFromInternal(sourceNode.next(), targetNode);
+                    relImporter.addFromInternal(sourceNode.nextLong(), targetNode);
                 }
             }
         }
@@ -191,7 +191,7 @@ public class CollapsePath extends Algorithm<Relationships> {
         public void accept(long targetNode, int depth, BfsSources sourceNode) {
             if (depth == targetDepth) {
                 while (sourceNode.hasNext()) {
-                    var sourceNodeId = sourceNode.next();
+                    var sourceNodeId = sourceNode.nextLong();
                     if (sourceNodeId != targetNode) {
                         relImporter.addFromInternal(sourceNodeId, targetNode);
                     }

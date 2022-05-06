@@ -35,7 +35,6 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -45,6 +44,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -83,12 +83,12 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator() {
+    public PrimitiveIterator.OfLong nodeIterator() {
         return filteredIdMap.nodeIterator();
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return filteredIdMap.nodeIterator(labels);
     }
 

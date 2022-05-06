@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.msbfs;
 
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
+import java.util.PrimitiveIterator;
 
-public interface BfsSources extends PrimitiveLongIterator {
+public interface BfsSources extends PrimitiveIterator.OfLong {
 
     int size();
 }

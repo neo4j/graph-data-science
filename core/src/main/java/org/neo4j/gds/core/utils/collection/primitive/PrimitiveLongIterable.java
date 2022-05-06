@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.core.utils.collection.primitive;
 
+import java.util.PrimitiveIterator;
+
 public interface PrimitiveLongIterable {
 
-    PrimitiveLongIterator iterator();
+    PrimitiveIterator.OfLong iterator();
 }

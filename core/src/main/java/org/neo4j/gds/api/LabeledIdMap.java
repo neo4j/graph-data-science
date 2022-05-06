@@ -23,10 +23,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -56,12 +56,12 @@ public abstract class LabeledIdMap implements IdMap {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator() {
+    public PrimitiveIterator.OfLong nodeIterator() {
         return new IdIterator(nodeCount());
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return labelInformation.nodeIterator(labels, nodeCount());
     }
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.collection.primitive;
 
 import java.util.NoSuchElementException;
+import java.util.PrimitiveIterator;
 
 /**
  * Basic and common primitive long collection utils and manipulations.
@@ -31,14 +32,14 @@ public final class PrimitiveLongCollections {
     }
 
     // Range
-    public static PrimitiveLongIterator range(long start, long end) {
+    public static PrimitiveIterator.OfLong range(long start, long end) {
         return new PrimitiveLongRangeIterator(start, end);
     }
 
     /**
-     * Base iterator for simpler implementations of {@link PrimitiveLongIterator}s.
+     * Base iterator for simpler implementations of {@link PrimitiveIterator.OfLong}s.
      */
-    public abstract static class PrimitiveLongBaseIterator implements PrimitiveLongIterator {
+    public abstract static class PrimitiveLongBaseIterator implements PrimitiveIterator.OfLong {
         private boolean hasNextDecided;
         private boolean hasNext;
         protected long next;
@@ -53,7 +54,7 @@ public final class PrimitiveLongCollections {
         }
 
         @Override
-        public long next() {
+        public long nextLong() {
             if (!hasNext()) {
                 throw new NoSuchElementException("No more elements in " + this);
             }

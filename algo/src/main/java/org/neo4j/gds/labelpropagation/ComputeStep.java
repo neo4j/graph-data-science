@@ -23,9 +23,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.PrimitiveIterator;
 
 final class ComputeStep implements Step {
 
@@ -69,10 +70,10 @@ final class ComputeStep implements Step {
         return !this.didChange;
     }
 
-    private boolean iterateAll(PrimitiveLongIterator nodeIds) {
+    private boolean iterateAll(PrimitiveIterator.OfLong nodeIds) {
         boolean didChange = false;
         while (nodeIds.hasNext()) {
-            long nodeId = nodeIds.next();
+            long nodeId = nodeIds.nextLong();
             didChange = compute(nodeId, didChange);
             progressTracker.logProgress(graph.degree(nodeId));
         }

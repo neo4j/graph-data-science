@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.utils;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.NoSuchElementException;
 import java.util.PrimitiveIterator;
@@ -51,7 +50,7 @@ public class SetBitsIterable implements Iterable<Long> {
         return new Iterator(offset);
     }
 
-    public PrimitiveLongIterator primitiveLongIterator() {
+    public PrimitiveIterator.OfLong primitiveLongIterator() {
         return new PrimitiveLongIteratorWrapper(iterator());
     }
 
@@ -92,7 +91,7 @@ public class SetBitsIterable implements Iterable<Long> {
         }
     }
 
-    private static final class PrimitiveLongIteratorWrapper implements PrimitiveLongIterator {
+    private static final class PrimitiveLongIteratorWrapper implements PrimitiveIterator.OfLong {
 
         private final PrimitiveIterator.OfLong nodeIterator;
 
@@ -104,8 +103,8 @@ public class SetBitsIterable implements Iterable<Long> {
         }
 
         @Override
-        public long next() {
-            return nodeIterator.next();
+        public long nextLong() {
+            return nodeIterator.nextLong();
         }
     }
 }

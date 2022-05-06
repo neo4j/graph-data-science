@@ -24,11 +24,11 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.OptionalLong;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
 
@@ -117,12 +117,12 @@ public class DirectIdMap implements IdMap {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator() {
+    public PrimitiveIterator.OfLong nodeIterator() {
         return PrimitiveLongCollections.range(0, nodeCount - 1);
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return nodeIterator();
     }
 }

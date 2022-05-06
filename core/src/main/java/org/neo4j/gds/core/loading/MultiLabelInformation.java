@@ -25,7 +25,6 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicGrowingBitSet;
 
 import java.util.ArrayList;
@@ -33,6 +32,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.LongUnaryOperator;
@@ -151,7 +151,7 @@ public final class MultiLabelInformation implements LabelInformation {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
+    public PrimitiveIterator.OfLong nodeIterator(Collection<NodeLabel> labels, long nodeCount) {
         if (labels.contains(NodeLabel.ALL_NODES)) {
             return new BatchNodeIterable.IdIterator(nodeCount);
         }

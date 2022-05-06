@@ -21,13 +21,14 @@ package org.neo4j.gds.core.utils.queue;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.mem.MemoryUsage;
+
+import java.util.PrimitiveIterator;
 
 /**
  * A PriorityQueue specialized for longs that maintains a partial ordering of
@@ -280,8 +281,8 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     }
 
     @Override
-    public PrimitiveLongIterator iterator() {
-        return new PrimitiveLongIterator() {
+    public PrimitiveIterator.OfLong iterator() {
+        return new PrimitiveIterator.OfLong() {
 
             int i = 1;
 
@@ -294,7 +295,7 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
              * @throws ArrayIndexOutOfBoundsException when the iterator is exhausted.
              */
             @Override
-            public long next() {
+            public long nextLong() {
                 return heap.get(i++);
             }
         };

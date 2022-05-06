@@ -25,12 +25,12 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.PrimitiveIterator;
 import java.util.Set;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -133,12 +133,12 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator() {
+    public PrimitiveIterator.OfLong nodeIterator() {
         return graph.nodeIterator();
     }
 
     @Override
-    public PrimitiveLongIterator nodeIterator(Set<NodeLabel> labels) {
+    public PrimitiveIterator.OfLong nodeIterator(Set<NodeLabel> labels) {
         return graph.nodeIterator(labels);
     }
 

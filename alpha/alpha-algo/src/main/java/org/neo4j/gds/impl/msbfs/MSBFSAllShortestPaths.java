@@ -99,7 +99,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
                     graph,
                     (target, distance, sources) -> {
                         while (sources.hasNext()) {
-                            long source = sources.next();
+                            long source = sources.nextLong();
                             var result = AllShortestPathsStream.result(
                                 graph.toOriginalNodeId(source),
                                 graph.toOriginalNodeId(target),

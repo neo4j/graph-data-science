@@ -34,7 +34,6 @@ import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterator;
 import org.neo4j.gds.core.utils.paged.HugeArray;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -47,6 +46,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
@@ -280,7 +280,7 @@ public final class RandomGraphGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private NodePropertyValues generateProperties(PrimitiveLongIterator nodes, PropertyProducer<?> propertyProducer) {
+    private NodePropertyValues generateProperties(PrimitiveIterator.OfLong nodes, PropertyProducer<?> propertyProducer) {
         switch (propertyProducer.propertyType()) {
             case LONG:
                 var longValues = HugeLongArray.newArray(nodeCount);
@@ -327,14 +327,14 @@ public final class RandomGraphGenerator {
     }
 
     private <T, A extends HugeArray<T, ?, A>> NodePropertyValues generateProperties(
-        PrimitiveLongIterator nodes,
+        PrimitiveIterator.OfLong nodes,
         A values,
         PropertyProducer<T> propertyProducer,
         Function<A, NodePropertyValues> toProperties
     ) {
         var cursor = values.initCursor(values.newCursor());
         while (nodes.hasNext()) {
-            var nodeId = nodes.next();
+            var nodeId = nodes.nextLong();
             var i = seek(nodeId, cursor);
             propertyProducer.setProperty(nodeId, cursor.array, i, random);
         }

@@ -265,7 +265,7 @@ final class MultiSourceBFSTest extends BaseTest {
                                 assertEquals(1, d);
                                 synchronized (seen) {
                                     while (s.hasNext()) {
-                                        seen[(int) s.next()][(int) i] += 1;
+                                        seen[(int) s.nextLong()][(int) i] += 1;
                                     }
                                 }
                             }
@@ -363,7 +363,7 @@ final class MultiSourceBFSTest extends BaseTest {
                     synchronized (seen) {
                         final int[] nodeSeen = seen[(int) nodeId];
                         while (sourceNodeIds.hasNext()) {
-                            nodeSeen[(int) sourceNodeIds.next()] += 1;
+                            nodeSeen[(int) sourceNodeIds.nextLong()] += 1;
                         }
                     }
                 },
@@ -406,7 +406,7 @@ final class MultiSourceBFSTest extends BaseTest {
     private static BfsSources toList(BfsSources sources, LongUnaryOperator modify) {
         List<Long> longs = new ArrayList<>();
         while (sources.hasNext()) {
-            longs.add(modify.applyAsLong(sources.next()));
+            longs.add(modify.applyAsLong(sources.nextLong()));
         }
         return new FakeListIterator(longs);
     }
@@ -434,7 +434,7 @@ final class MultiSourceBFSTest extends BaseTest {
         }
 
         @Override
-        public long next() {
+        public long nextLong() {
             return 0;
         }
 

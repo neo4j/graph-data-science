@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils.collection.primitive;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.PrimitiveIterator;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -33,7 +34,7 @@ class PrimitiveLongCollectionsTest {
     void shouldNotContinueToCallNextOnHasNextFalse() {
         // GIVEN
         AtomicLong count = new AtomicLong(2);
-        PrimitiveLongIterator iterator = new PrimitiveLongCollections.PrimitiveLongBaseIterator() {
+        PrimitiveIterator.OfLong iterator = new PrimitiveLongCollections.PrimitiveLongBaseIterator() {
             @Override
             protected boolean fetchNext() {
                 return count.decrementAndGet() >= 0 && next(count.get());
@@ -43,10 +44,10 @@ class PrimitiveLongCollectionsTest {
         // WHEN/THEN
         assertTrue(iterator.hasNext());
         assertTrue(iterator.hasNext());
-        assertEquals(1L, iterator.next());
+        assertEquals(1L, iterator.nextLong());
         assertTrue(iterator.hasNext());
         assertTrue(iterator.hasNext());
-        assertEquals(0L, iterator.next());
+        assertEquals(0L, iterator.nextLong());
         assertFalse(iterator.hasNext());
         assertFalse(iterator.hasNext());
         assertEquals(-1L, count.get());

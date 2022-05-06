@@ -65,7 +65,7 @@ class LabelInformationTest {
 
         var actual = new ArrayList<Long>();
         while (iter.hasNext()) {
-            actual.add(iter.next());
+            actual.add(iter.nextLong());
         }
 
         assertThat(actual).containsExactlyElementsOf(expectedIds);
