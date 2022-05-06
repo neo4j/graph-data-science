@@ -460,8 +460,9 @@ class GraphSageTrainAlgorithmFactoryTest {
 
     @Test
     void testLogging() {
-        var config = ImmutableGraphSageTrainConfig.builder()
-            .addFeatureProperties(DUMMY_PROPERTY)
+        var config = GraphSageTrainConfigImpl.builder()
+            .username("DUMMY")
+            .featureProperties(List.of(DUMMY_PROPERTY))
             .embeddingDimension(12)
             .aggregator(Aggregator.AggregatorType.POOL)
             .tolerance(1e-10)
@@ -469,6 +470,7 @@ class GraphSageTrainAlgorithmFactoryTest {
             .batchSize(5)
             .randomSeed(42L)
             .modelName("model")
+            .activationFunction("RELU")
             .epochs(2)
             .maxIterations(2)
             .build();

@@ -228,17 +228,17 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                    91.33327272,
-                    88.17940500,
-                    87.68340477,
-                    85.60797746,
-                    85.59108701,
-                    85.59007234,
-                    81.44403525,
-                    81.44260858,
-                    81.44349342,
-                    81.45612978
-                }, Offset.offset(1e-8)
+                78.30,
+                71.55,
+                71.07,
+                71.65,
+                74.36,
+                74.08,
+                73.98,
+                80.28,
+                71.07,
+                71.07
+                }, Offset.offset(0.05)
             );
     }
 
@@ -276,16 +276,16 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                    90.53,
-                    83.29,
-                    74.75,
-                    74.61,
-                    74.68,
-                    74.54,
-                    74.46,
-                    74.47,
-                    74.41,
-                    74.41
+                87.34,
+                80.75,
+                74.07,
+                93.12,
+                96.36,
+                80.50,
+                77.31,
+                99.70,
+                83.60,
+                83.60
                 }, Offset.offset(0.05)
             );
     }

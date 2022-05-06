@@ -57,7 +57,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
@@ -148,12 +150,17 @@ public class GraphSageModelTrainer {
         boolean converged = false;
         var iterationLossesPerEpoch = new ArrayList<List<Double>>();
 
+        var prevEpochLoss = Double.NaN;
+        var random = new Random(randomSeed);
+
         progressTracker.beginSubTask("Train model");
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-            var epochResult = trainEpoch(batchTasks, weights);
-            iterationLossesPerEpoch.add(epochResult.losses());
+            var epochResult = trainEpoch(() -> batchTasks.get(random.nextInt(batchTasks.size())), weights, prevEpochLoss);
+            List<Double> epochLosses = epochResult.losses();
+            iterationLossesPerEpoch.add(epochLosses);
+            prevEpochLoss = epochLosses.get(epochLosses.size() - 1);
             converged = epochResult.converged();
             progressTracker.endSubTask("Epoch");
         }
@@ -194,26 +201,36 @@ public class GraphSageModelTrainer {
         return new BatchTask(lossFunction, weights, tolerance, progressTracker);
     }
 
-    private EpochResult trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
+    private EpochResult trainEpoch(Supplier<BatchTask> batchTaskSupplier, List<Weights<? extends Tensor<?>>> weights, double prevEpochLoss) {
         var updater = new AdamOptimizer(weights, learningRate);
 
         int iteration = 1;
         var iterationLosses = new ArrayList<Double>();
+        double prevLoss = prevEpochLoss;
         var converged = false;
 
         for (;iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
+            // TODO let the user configer the number of batches per iteration
+            var batchTasks = IntStream
+                .range(0, concurrency)
+                .mapToObj(__ -> batchTaskSupplier.get())
+                .collect(Collectors.toList());
+
             // run forward + maybe backward for each Batch
             ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
             var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
             iterationLosses.add(avgLoss);
+            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
 
-            converged = batchTasks.stream().allMatch(task -> task.converged);
-            if (converged) {
-                progressTracker.endSubTask();
+            if (Math.abs(prevLoss - avgLoss) < tolerance) {
+                converged = true;
+                progressTracker.endSubTask("Iteration");
                 break;
             }
+
+            prevLoss = avgLoss;
 
             var batchedGradients = batchTasks
                 .stream()
@@ -223,8 +240,6 @@ public class GraphSageModelTrainer {
             var meanGradients = averageTensors(batchedGradients);
 
             updater.update(meanGradients);
-
-            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
             progressTracker.endSubTask("Iteration");
         }
 
@@ -245,7 +260,6 @@ public class GraphSageModelTrainer {
         private List<? extends Tensor<?>> weightGradients;
         private final double tolerance;
         private final ProgressTracker progressTracker;
-        private boolean converged;
         private double prevLoss;
 
         BatchTask(
@@ -262,14 +276,9 @@ public class GraphSageModelTrainer {
 
         @Override
         public void run() {
-            if(converged) { // Don't try to go further
-                return;
-            }
-
             var localCtx = new ComputationContext();
             var loss = localCtx.forward(lossFunction).value();
 
-            converged = Math.abs(prevLoss - loss) < tolerance;
             prevLoss = loss;
 
             localCtx.backward(lossFunction);
