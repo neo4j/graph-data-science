@@ -11,9 +11,9 @@ Additionally, the `Graph` objects have convenience methods allowing for inspecti
 include::python-client-gds-object.adoc[]
 
 
-== Constructing a graph object
+== Projecting a graph object
 
-There are several ways of constructing a graph object.
+There are several ways of projecting a graph object.
 The simplest way is to do a <<graph-project-native-syntax, native projection>>:
 
 [source,python]
@@ -41,13 +41,63 @@ To get a graph object that represents a graph that has already been projected in
 G = gds.graph.get("my-graph")
 ----
 
-In addition to those aforementioned there are three more methods that construct graph objects:
+In addition to those aforementioned there are three more methods that create graph objects:
 
 * `gds.graph.project.cypher`
 * `gds.beta.graph.subgraph`
 * `gds.beta.graph.generate`
 
 Their Cypher signatures map to Python in much the same way as `gds.graph.project` above.
+
+[.enterprise-edition]
+== Constructing a graph
+
+Instead of projecting a graph from the Neo4j database it is also possible to construct new graphs using pandas `DataFrames` from the client.
+
+NOTE: To use this feature the <<installation-apache-arrow, Arrow Flight Server>> needs to be enabled.
+
+[source,python]
+----
+nodes = pandas.DataFrame(
+    "nodeId": [0, 1, 2, 3],
+    "label":  ["A", "B", "C", "A"],
+    "prop1": [42, 1337, 8, 0],
+    "otherProperty": [0.1, 0.2, 0.3, 0.4]
+)
+
+relationships = pandas.DataFrame(
+    "sourceId": [0, 1, 2, 3],
+    "targetId": [1, 2, 3, 0],
+    "type": ["REL", "REL", "REL", "REL"],
+    "weight": [0.0, 0.0, 0.1, 42.0]
+)
+
+G = gds.alpha.graph.construct(
+    "my-graph",      # Graph name
+    nodes,           # One or more dataframes containing node data
+    relationships    # One or more dataframes containing relationship data
+)
+----
+
+The above example creates a simple graph using one node and one relationship `DataFrame`.
+The created graph is equivalent to a graph created by the following Cypher query:
+
+[source, cypher]
+----
+CREATE
+    (a:A {prop1: 42,    otherProperty: 0.1),
+    (b:B {prop1: 1337,  otherProperty: 0.2),
+    (c:C {prop1: 8,     otherProperty: 0.3),
+    (d:A {prop1: 0,     otherProperty: 0.4),
+    (a)-[:REL {weight: 0.0}]->(b),
+    (b)-[:REL {weight: 0.0}]->(c),
+    (c)-[:REL {weight: 0.1}]->(d),
+    (d)-[:REL {weight: 42.0}]->(a),
+----
+
+It is possible to supply more than one data frame, both for nodes and relationships.
+If multiple node dataframes are used, they need to contain distinct node ids across all node data frames.
+The supported format for the node data frames is described in <<arrow-node-columns, Arrow node schema>> and the format for the relationship data frames is described in <<arrow-relationship-columns, Arrow relationship schema>>.
 
 
 == Inspecting a graph object
