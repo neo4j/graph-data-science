@@ -42,11 +42,12 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
     @Override
     public void single(long reference) {
         reset();
+        setId(reference - 1);
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
 
         graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
             this.sourceId = nodeId;
-            setType(tokenHolders.relationshipTypeTokens().getIdByName(context.relationshipType().name));
+            findContextAndInitializeCursor(context);
 
             for (long i = 0; i < offset; i++) {
                 next();

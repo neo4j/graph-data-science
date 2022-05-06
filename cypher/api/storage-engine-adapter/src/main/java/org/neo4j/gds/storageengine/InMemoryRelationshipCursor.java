@@ -182,6 +182,23 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
             return progressToNextContext();
         }
 
+        initializeCursorForContext(context);
+
+        setId(relationshipTypeOffset + context.offsets().get(sourceId) - 1);
+
+        return true;
+    }
+
+    protected void findContextAndInitializeCursor(RelationshipIds.RelationshipIdContext context) {
+        for (int i = 0; i < relationshipIdContexts.size(); i++) {
+            if (relationshipIdContexts.get(i) == context) {
+                this.relationshipContextIndex = i;
+                initializeCursorForContext(context);
+            }
+        }
+    }
+
+    private void initializeCursorForContext(RelationshipIds.RelationshipIdContext context) {
         setType(context.relationshipTypeId());
 
         // initialize the adjacency cursor
@@ -195,11 +212,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         this.propertyCursors = propertyCursorCache.get(relationshipContextIndex);
         var adjacencyProperties = context.adjacencyProperties();
         for (int i = 0; i < propertyCursors.length; i++) {
-                adjacencyProperties[i].propertyCursor(propertyCursors[i], this.sourceId);
+            adjacencyProperties[i].propertyCursor(propertyCursors[i], this.sourceId);
         }
-
-        setId(relationshipTypeOffset + context.offsets().get(sourceId) - 1);
-
-        return true;
     }
 }
