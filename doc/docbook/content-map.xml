@@ -29,6 +29,9 @@
             <d:tocentry linkend="installation-causal-cluster">
                 <?dbhtml filename="installation/installation-causal-cluster/index.html"?>
             </d:tocentry>
+            <d:tocentry linkend="installation-apache-arrow">
+                <?dbhtml filename="installation/installation-apache-arrow/index.html"?>
+            </d:tocentry>
             <d:tocentry linkend="additional-config-parameters">
                 <?dbhtml filename="installation/additional-config-parameters/index.html"?>
             </d:tocentry>
@@ -67,6 +70,8 @@
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-project-cypher-aggregation"><?dbhtml filename="graph-project-cypher-aggregation/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="graph-project-apache-arrow"><?dbhtml filename="graph-project-apache-arrow/index.html"?>
+                </d:tocentry>
                 <d:tocentry linkend="catalog-graph-list"><?dbhtml filename="graph-list/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="catalog-graph-exists"><?dbhtml filename="graph-exists/index.html"?>
@@ -80,6 +85,8 @@
                 <d:tocentry linkend="graph-catalog-relationship-ops"><?dbhtml filename="graph-catalog-relationship-ops/index.html"?>
                 </d:tocentry>
                 <d:tocentry linkend="graph-catalog-export-ops"><?dbhtml filename="graph-catalog-export-ops/index.html"?>
+                </d:tocentry>
+                <d:tocentry linkend="graph-catalog-apache-arrow-ops"><?dbhtml filename="graph-catalog-apache-arrow-ops/index.html"?>
                 </d:tocentry>
             </d:tocentry>
         <d:tocentry linkend="node-properties"><?dbhtml filename="management-ops/node-properties/index.html"?>

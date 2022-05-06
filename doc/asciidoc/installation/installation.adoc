@@ -19,6 +19,7 @@ This chapter is divided into the following sections:
 . <<installation-enterprise-edition>>
 . <<installation-docker>>
 . <<installation-causal-cluster>>
+. <<installation-apache-arrow>>
 . <<additional-config-parameters>>
 . <<System-requirements>>
 
@@ -28,5 +29,6 @@ include::neo4j-server.adoc[leveloffset=+1]
 include::installation-enterprise-edition.adoc[leveloffset=+1]
 include::installation-docker.adoc[leveloffset=+1]
 include::installation-causal-cluster.adoc[leveloffset=+1]
+include::installation-apache-arrow.adoc[leveloffset=+1]
 include::additional-config-parameters.adoc[leveloffset=+1]
 include::system-requirements.adoc[leveloffset=+1]
