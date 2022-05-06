@@ -270,38 +270,6 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         return neighbors;
     }
 
-    static class UniformFilteredKnnSamplerSupplier implements Function<SplittableRandom, FilteredKnnSampler> {
-
-        private final Graph graph;
-
-        UniformFilteredKnnSamplerSupplier(Graph graph) {
-            this.graph = graph;
-        }
-
-        @Override
-        public FilteredKnnSampler apply(SplittableRandom splittableRandom) {
-            return new UniformFilteredKnnSampler(splittableRandom, graph.nodeCount());
-        }
-    }
-
-    static class RandomWalkFilteredKnnSamplerSupplier implements Function<SplittableRandom, FilteredKnnSampler> {
-
-        private final Graph graph;
-        private final Optional<Long> randomSeed;
-        private final int boundedK;
-
-        RandomWalkFilteredKnnSamplerSupplier(Graph graph, Optional<Long> randomSeed, int boundedK) {
-            this.graph = graph;
-            this.randomSeed = randomSeed;
-            this.boundedK = boundedK;
-        }
-
-        @Override
-        public FilteredKnnSampler apply(SplittableRandom splittableRandom) {
-            return new RandomWalkFilteredKnnSampler(graph.concurrentCopy(), splittableRandom, randomSeed, boundedK);
-        }
-    }
-
     private long iteration(HugeObjectArray<FilteredNeighborList> neighbors) {
         // this is a sanity check
         // we check for this before any iteration and return
