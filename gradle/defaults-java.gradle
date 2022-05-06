@@ -36,6 +36,7 @@ allprojects {
 
         repositories {
             mavenCentral()
+            mavenLocal()
             if (project.hasProperty('pipelineRepository')) {
                 maven {
                     url = "file://${project.getProperty('pipelineRepository')}"
@@ -45,7 +46,10 @@ allprojects {
                 name = 'teamcity-artifacts'
                 url = "file://${rootProject.projectDir}/neo4j-repo"
             }
-            mavenLocal()
+            maven {
+                name = 'GDS local-hosted dependencies'
+                url "$privateDir/dependencies/repository"
+            }
         }
 
         task sourcesJar(type: Jar) {
