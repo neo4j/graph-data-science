@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 
 import java.util.Collection;
@@ -50,9 +51,10 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
+        var nodes = graphStore.nodes();
         var missingNodes = sourceNodeFilter()
             .stream()
-            .filter(n -> !graphStore.nodes().contains(n))
+            .filter(n -> nodes.toMappedNodeId(n) == IdMap.NOT_FOUND)
             .collect(Collectors.toList());
         if (!missingNodes.isEmpty()) {
             throw new IllegalArgumentException(

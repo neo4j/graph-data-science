@@ -40,6 +40,7 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -53,14 +54,17 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private final FilteredKnnContext context;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
+    private final List<Long> sourceNodes;
 
     private long nodePairsConsidered;
 
     public static FilteredKnn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, FilteredKnnContext context) {
+        var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         return new FilteredKnn(
             context.progressTracker(),
             graph,
             config,
+            sourceNodes,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
             context,
@@ -76,10 +80,12 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         FilteredKnnContext context
     ) {
         SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
+        var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         return new FilteredKnn(
             context.progressTracker(),
             graph,
             config,
+            sourceNodes,
             similarityComputer,
             neighborFilterFactory,
             context,
@@ -96,6 +102,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         ProgressTracker progressTracker,
         Graph graph,
         FilteredKnnBaseConfig config,
+        List<Long> sourceNodes,
         SimilarityComputer similarityComputer,
         FilteredNeighborFilterFactory neighborFilterFactory,
         FilteredKnnContext context,
@@ -108,6 +115,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         this.neighborFilterFactory = neighborFilterFactory;
         this.context = context;
         this.splittableRandom = splittableRandom;
+        this.sourceNodes = sourceNodes;
     }
 
     public long nodeCount() {
@@ -167,7 +175,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, config.sourceNodeFilter());
+            return ImmutableResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, this.sourceNodes);
         }
     }
 
@@ -603,7 +611,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
 
         public abstract long nodePairsConsidered();
 
-        public abstract List<Long> sourceNodeFilter();
+        public abstract List<Long> sourceNodes();
 
         public LongStream neighborsOf(long nodeId) {
             return neighborList().get(nodeId).elements().map(FilteredNeighborList::clearCheckedFlag);
@@ -614,7 +622,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             var neighborList = neighborList();
             return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
                 .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                    .filter(index -> sourceNodeFilter().contains(index + cursor.base))
+                    .filter(index -> sourceNodes().contains(index + cursor.base))
                     .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
                     .flatMap(Function.identity())
                 );
@@ -624,7 +632,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             var neighborList = neighborList();
             return Stream.iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
                 .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                    .filter(index -> sourceNodeFilter().contains(index + cursor.base))
+                    .filter(index -> sourceNodes().contains(index + cursor.base))
                     .mapToLong(index -> cursor.array[index].size()))
                 .sum();
         }
@@ -657,7 +665,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         }
 
         @Override
-        public List<Long> sourceNodeFilter() {
+        public List<Long> sourceNodes() {
             return List.of();
         }
 
