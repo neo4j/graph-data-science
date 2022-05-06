@@ -35,7 +35,7 @@ image::arrow/import-protocol.png[Client-server protocol for Arrow import in GDS,
 1. Initialize the import process
 +
 To initialize the import process, the client needs to execute a Flight action on the server.
-The action type is called `CREATE_GRAPH` and the action body contains configures the import process.
+The action type is called `CREATE_GRAPH` and the action body configures the import process.
 The server receives the action, creates the import process and acknowledges success.
 +
 See <<arrow-initialize-import-process>> for more details.
@@ -117,9 +117,10 @@ The following table describes the node columns with reserved names.
 Any additional column is interpreted as a node property.
 The supported data types are equivalent to the GDS node property types, i.e., `long`, `double`, `long[]`, `double[]` and `float[]`.
 
-To increase the throughput, Flight streams can be sent from multiple clients in parallel.
+To increase the throughput, multiple Flight streams can be sent in parallel.
 The server manages multiple incoming streams for the same import process.
 In addition to the number of parallel streams, the size of a single record batch can also affect the overall throughput.
+The client has to make sure that node ids are unique across all streams.
 
 Once all node record batches are sent to the server, the client needs to indicate that node loading is done.
 This is achieved by sending another Flight action with the action type `NODE_LOAD_DONE` and the following JSON document as action body:

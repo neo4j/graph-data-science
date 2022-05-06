@@ -15,7 +15,7 @@ GDS supports importing graphs and exporting properties via https://arrow.apache.
 This chapter is dedicated to configuring the Arrow Flight Server as part of the Neo4j and GDS installation.
 For using Arrow Flight with an Arrow client, please refer to our documentation for <<graph-project-apache-arrow, projecting graphs>> and <<graph-catalog-apache-arrow-ops, streaming properties>>.
 
-Arrow is bundled with GDS Enterprise edition which must be <<neo4j-server, installed>>.
+Arrow is bundled with GDS Enterprise Edition which must be <<neo4j-server, installed>>.
 
 
 == Installation
@@ -95,6 +95,6 @@ YIELD
 | enabled           | Boolean   | True, if the corresponding setting is enabled.
 | listenAddress     | String    | Address (host and port) the Arrow Flight Server is bound to.
 | batchSize         | Integer   | The batch size used for arrow property export.
-| abortionTimeout   | Integer   | The maximum time in minutes to wait for the next command before aborting the import process.
+| abortionTimeout   | Duration  | The maximum time to wait for the next command before aborting the import process.
 |===
 ======
