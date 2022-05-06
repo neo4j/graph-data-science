@@ -38,6 +38,7 @@ import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -50,7 +51,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private final Graph graph;
     private final FilteredNeighborFilterFactory neighborFilterFactory;
-    private final FilteredKnnContext context;
+    private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
     private final List<Long> sourceNodes;
@@ -91,7 +92,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             sourceNodes,
             similarityComputer,
             neighborFilterFactory,
-            context,
+            context.executor(),
             splittableRandom,
             config.sampleRate(),
             config.deltaThreshold(),
@@ -134,7 +135,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         List<Long> sourceNodes,
         SimilarityComputer similarityComputer,
         FilteredNeighborFilterFactory neighborFilterFactory,
-        FilteredKnnContext context,
+        ExecutorService executorService,
         SplittableRandom splittableRandom,
         double sampleRate,
         double deltaThreshold,
@@ -162,7 +163,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         this.maxIterations = maxIterations;
         this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
-        this.context = context;
+        this.executorService = executorService;
         this.splittableRandom = splittableRandom;
         this.sourceNodes = sourceNodes;
         this.samplerSupplier = samplerSupplier;
@@ -172,8 +173,8 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         return graph.nodeCount();
     }
 
-    public FilteredKnnContext context() {
-        return context;
+    public ExecutorService executorService() {
+        return this.executorService;
     }
 
     @Override
@@ -218,7 +219,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
                     ),
                     Optional.of(this.minBatchSize)
                 );
-                ParallelUtil.runWithConcurrency(this.concurrency, neighborFilterTasks, context.executor());
+                ParallelUtil.runWithConcurrency(this.concurrency, neighborFilterTasks, this.executorService);
             }
             this.progressTracker.endSubTask();
 
@@ -262,7 +263,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             Optional.of(this.minBatchSize)
         );
 
-        ParallelUtil.runWithConcurrency(this.concurrency, randomNeighborGenerators, context.executor());
+        ParallelUtil.runWithConcurrency(this.concurrency, randomNeighborGenerators, this.executorService);
 
         this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(FilteredGenerateRandomNeighbors::neighborsFound).sum();
 
@@ -310,15 +311,12 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
             return FilteredNeighborList.NOT_INSERTED;
         }
 
-        var executor = this.context.executor();
-
-
         // TODO: init in ctor and reuse - benchmark against new allocations
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(this.concurrency, nodeCount, executor, new FilteredSplitOldAndNewNeighbors(
+        ParallelUtil.readParallel(this.concurrency, nodeCount, this.executorService, new FilteredSplitOldAndNewNeighbors(
             this.splittableRandom,
             neighbors,
             allOldNeighbors,
@@ -369,7 +367,7 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(this.concurrency, neighborsJoiners, executor);
+        ParallelUtil.runWithConcurrency(this.concurrency, neighborsJoiners, executorService);
         progressTracker.endSubTask();
 
         this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();

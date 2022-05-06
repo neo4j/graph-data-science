@@ -118,7 +118,7 @@ public class KnnMutateProc extends AlgoBaseProc<Knn, Knn.Result, KnnMutateConfig
                     algorithm.nodeCount(),
                     config.concurrency(),
                     Objects.requireNonNull(result),
-                    algorithm.context()
+                    algorithm.executorService()
                 );
             }
 

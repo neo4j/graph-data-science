@@ -37,6 +37,7 @@ import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
@@ -49,7 +50,7 @@ public class Knn extends Algorithm<Knn.Result> {
     private final Graph graph;
     private final KnnBaseConfig config;
     private final NeighborFilterFactory neighborFilterFactory;
-    private final KnnContext context;
+    private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
 
@@ -62,7 +63,7 @@ public class Knn extends Algorithm<Knn.Result> {
             config,
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            context,
+            context.executor(),
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -81,7 +82,7 @@ public class Knn extends Algorithm<Knn.Result> {
             config,
             similarityComputer,
             neighborFilterFactory,
-            context,
+            context.executor(),
             splittableRandom
         );
     }
@@ -97,7 +98,7 @@ public class Knn extends Algorithm<Knn.Result> {
         KnnBaseConfig config,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
-        KnnContext context,
+        ExecutorService executorService,
         SplittableRandom splittableRandom
     ) {
         super(progressTracker);
@@ -105,7 +106,7 @@ public class Knn extends Algorithm<Knn.Result> {
         this.config = config;
         this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
-        this.context = context;
+        this.executorService = executorService;
         this.splittableRandom = splittableRandom;
     }
 
@@ -113,8 +114,8 @@ public class Knn extends Algorithm<Knn.Result> {
         return graph.nodeCount();
     }
 
-    public KnnContext context() {
-        return context;
+    public ExecutorService executorService() {
+        return this.executorService;
     }
 
     @Override
@@ -161,7 +162,7 @@ public class Knn extends Algorithm<Knn.Result> {
                     ),
                     Optional.of(config.minBatchSize())
                 );
-                ParallelUtil.runWithConcurrency(config.concurrency(), neighborFilterTasks, context.executor());
+                ParallelUtil.runWithConcurrency(config.concurrency(), neighborFilterTasks, this.executorService);
             }
             this.progressTracker.endSubTask();
 
@@ -207,7 +208,7 @@ public class Knn extends Algorithm<Knn.Result> {
             Optional.of(config.minBatchSize())
         );
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, context.executor());
+        ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, this.executorService);
 
         this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
@@ -242,7 +243,6 @@ public class Knn extends Algorithm<Knn.Result> {
         }
 
         var concurrency = this.config.concurrency();
-        var executor = this.context.executor();
 
         var sampledK = this.config.sampledK(nodeCount);
 
@@ -251,7 +251,7 @@ public class Knn extends Algorithm<Knn.Result> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executor, new SplitOldAndNewNeighbors(
+        ParallelUtil.readParallel(concurrency, nodeCount, this.executorService, new SplitOldAndNewNeighbors(
             this.splittableRandom,
             neighbors,
             allOldNeighbors,
@@ -301,7 +301,7 @@ public class Knn extends Algorithm<Knn.Result> {
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, executor);
+        ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, this.executorService);
         progressTracker.endSubTask();
 
         this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();

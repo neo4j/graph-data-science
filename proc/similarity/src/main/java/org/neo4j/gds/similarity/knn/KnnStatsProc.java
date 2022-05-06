@@ -126,7 +126,7 @@ public final class KnnStatsProc extends StatsProc<Knn, Knn.Result, KnnStatsProc.
                         algorithm.nodeCount(),
                         config.concurrency(),
                         result,
-                        algorithm.context()
+                        algorithm.executorService()
                     );
 
                     Graph similarityGraph = similarityGraphResult.similarityGraph();

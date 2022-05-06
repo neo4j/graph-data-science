@@ -36,6 +36,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
@@ -100,7 +101,7 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
             algorithm.nodeCount(),
             config.concurrency(),
             Objects.requireNonNull(computationResult.result()),
-            algorithm.context()
+            algorithm.executorService()
         );
     }
 
@@ -109,12 +110,12 @@ public class KnnWriteProc extends SimilarityWriteProc<Knn, Knn.Result, KnnWriteP
         long nodeCount,
         int concurrency,
         Knn.Result result,
-        KnnContext context
+        ExecutorService executor
     ) {
         Graph similarityGraph = new SimilarityGraphBuilder(
             graph,
             concurrency,
-            context.executor()
+            executor
         ).build(result.streamSimilarityResult());
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
