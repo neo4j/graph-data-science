@@ -50,6 +50,10 @@ allprojects {
                 name = 'GDS local-hosted Neo4j drop version'
                 url "$privateDir/dependencies/neo4j-4.4.6-drop01.0"
             }
+            maven {
+                name = 'GDS local-hosted Benchmark infrastructure version'
+                url "$privateDir/dependencies/benchmark-infra-1.1.23"
+            }
         }
 
         task sourcesJar(type: Jar) {
