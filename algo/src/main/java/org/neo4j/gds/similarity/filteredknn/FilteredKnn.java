@@ -69,40 +69,57 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     private long nodePairsConsidered;
 
     public static FilteredKnn createWithDefaults(Graph graph, FilteredKnnBaseConfig config, FilteredKnnContext context) {
-        var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-        return new FilteredKnn(
-            context.progressTracker(),
-            graph,
-            config,
-            config.maxIterations(),
-            sourceNodes,
-            SimilarityComputer.ofProperties(graph, config.nodeProperties()),
-            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
-            context,
-            getSplittableRandom(config.randomSeed())
-        );
+        var similarityComputer = SimilarityComputer.ofProperties(graph, config.nodeProperties());
+        var neighborFilterFactory = new FilteredKnnNeighborFilterFactory(graph.nodeCount());
+        return create(graph, config, context, similarityComputer, neighborFilterFactory);
     }
 
     public static FilteredKnn create(
         Graph graph,
         FilteredKnnBaseConfig config,
+        FilteredKnnContext context,
         SimilarityComputer similarityComputer,
-        FilteredNeighborFilterFactory neighborFilterFactory,
-        FilteredKnnContext context
+        FilteredNeighborFilterFactory neighborFilterFactory
     ) {
-        SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
+        var splittableRandom = getSplittableRandom(config.randomSeed());
         var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
+        var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),
             graph,
-            config,
             config.maxIterations(),
             sourceNodes,
             similarityComputer,
             neighborFilterFactory,
             context,
-            splittableRandom
+            splittableRandom,
+            config.sampleRate(),
+            config.deltaThreshold(),
+            config.similarityCutoff(),
+            config.topK(),
+            config.concurrency(),
+            config.minBatchSize(),
+            config.perturbationRate(),
+            config.sampledK(graph.nodeCount()),
+            config.randomJoins(),
+            samplerSupplier
         );
+    }
+
+    @NotNull
+    private static Function<SplittableRandom, FilteredKnnSampler> samplerSupplier(Graph graph, FilteredKnnBaseConfig config) {
+        switch(config.initialSampler()) {
+            case UNIFORM:
+                return new UniformFilteredKnnSamplerSupplier(graph);
+            case RANDOMWALK:
+                return new RandomWalkFilteredKnnSamplerSupplier(
+                    graph.concurrentCopy(),
+                    config.randomSeed(),
+                    config.boundedK(graph.nodeCount())
+                );
+            default:
+                throw new IllegalStateException("Invalid FilteredKnnSampler");
+        }
     }
 
     @NotNull
@@ -113,45 +130,42 @@ public class FilteredKnn extends Algorithm<FilteredKnn.Result> {
     FilteredKnn(
         ProgressTracker progressTracker,
         Graph graph,
-        FilteredKnnBaseConfig config,
         int maxIterations,
         List<Long> sourceNodes,
         SimilarityComputer similarityComputer,
         FilteredNeighborFilterFactory neighborFilterFactory,
         FilteredKnnContext context,
-        SplittableRandom splittableRandom
+        SplittableRandom splittableRandom,
+        double sampleRate,
+        double deltaThreshold,
+        double similarityCutoff,
+        int topK,
+        int concurrency,
+        int minBatchSize,
+        double perturbationRate,
+        int sampledK,
+        int randomJoins,
+        Function<SplittableRandom, FilteredKnnSampler> samplerSupplier
+
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.sampleRate = config.sampleRate();
-        this.deltaThreshold = config.deltaThreshold();
-        this.similarityCutoff = config.similarityCutoff();
-        this.topK = config.topK();
-        this.concurrency = config.concurrency();
-        this.minBatchSize = config.minBatchSize();
-        this.perturbationRate = config.perturbationRate();
-        this.sampledK = config.sampledK(graph.nodeCount());
-        this.randomJoins = config.randomJoins();
+        this.sampleRate = sampleRate;
+        this.deltaThreshold = deltaThreshold;
+        this.similarityCutoff = similarityCutoff;
+        this.topK = topK;
+        this.concurrency = concurrency;
+        this.minBatchSize = minBatchSize;
+        this.perturbationRate = perturbationRate;
+        this.sampledK = sampledK;
+        this.randomJoins = randomJoins;
         this.maxIterations = maxIterations;
         this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
         this.context = context;
         this.splittableRandom = splittableRandom;
         this.sourceNodes = sourceNodes;
-        switch(config.initialSampler()) {
-            case UNIFORM:
-                this.samplerSupplier = new UniformFilteredKnnSamplerSupplier(graph);
-                break;
-            case RANDOMWALK:
-                this.samplerSupplier = new RandomWalkFilteredKnnSamplerSupplier(
-                    graph.concurrentCopy(),
-                    config.randomSeed(),
-                    config.boundedK(graph.nodeCount())
-                );
-                break;
-            default:
-                throw new IllegalStateException("Invalid FilteredKnnSampler");
-        }
+        this.samplerSupplier = samplerSupplier;
     }
 
     public long nodeCount() {

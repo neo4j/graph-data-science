@@ -281,9 +281,9 @@ class FilteredKnnTest {
         var knn = FilteredKnn.create(
             graph,
             knnConfig,
+            knnContext,
             SimilarityComputer.ofProperty(graph, "knn", nodeProperties),
-            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
-            knnContext
+            new FilteredKnnNeighborFilterFactory(graph.nodeCount())
         );
         var result = knn.compute();
         assertThat(result)
@@ -313,9 +313,9 @@ class FilteredKnnTest {
                 .concurrency(1)
                 .randomSeed(42L)
                 .build(),
+            ImmutableFilteredKnnContext.builder().build(),
             SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties),
-            new FilteredKnnNeighborFilterFactory(graph.nodeCount()),
-            ImmutableFilteredKnnContext.builder().build()
+            new FilteredKnnNeighborFilterFactory(graph.nodeCount())
         );
 
         var result = knn.compute();
