@@ -100,7 +100,7 @@ Given an example node such as `(:Pokemon { weight: 8.5, height: 0.6, hp: 39 })`,
 [[arrow-node-schema]]
 [opts=header,cols="1,1,1,1,1"]
 |===
-| node_id   | label     | weight    | height    | hp
+| nodeId    | label     | weight    | height    | hp
 | 0         | "Pokemon" | 8.5       | 0.6       | 39
 |===
 
@@ -110,7 +110,7 @@ The following table describes the node columns with reserved names.
 [opts=header,cols="1m,1,1,1,1"]
 |===
 | Name      | Type              | Optional | Nullable   | Description
-| node_id   | Integer           | No       | No         | Unique 64-bit node identifiers for the in-memory graph. Must be positive values.
+| nodeId    | Integer           | No       | No         | Unique 64-bit node identifiers for the in-memory graph. Must be positive values.
 | label     | String or Integer | Yes      | No         | Single node label. Either a string literal or a dictionary encoded number.
 |===
 
@@ -159,7 +159,7 @@ For example, given the relationship `(a)-[:EVOLVES_TO { at_level: 16 }]->(b)` an
 [[arrow-relationship-schema]]
 [opts=header,cols="1,1,1,1"]
 |===
-| source_id | target_id | type          | at_level
+| sourceId  | targetId  | type          | at_level
 | 0         | 1         | "EVOLVES_TO"  | 16
 |===
 
@@ -169,8 +169,8 @@ The following table describes the node columns with reserved names.
 [opts=header,cols="1m,1,1,1,1"]
 |===
 | Name      | Type              | Optional | Nullable   | Description
-| source_id | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
-| target_id | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
+| sourceId  | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
+| targetId  | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
 | type      | String or Integer | Yes      | No         | Single relationship type. Either a string literal or a dictionary encoded number.
 |===
 
