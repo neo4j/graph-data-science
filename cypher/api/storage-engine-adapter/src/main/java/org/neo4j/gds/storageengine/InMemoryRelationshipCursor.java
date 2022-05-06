@@ -161,7 +161,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
                 .map(AdjacencyProperties::rawPropertyCursor)
                 .toArray(PropertyCursor[]::new)
         );
-        var newSize = this.propertyCursorCache.size() + relationshipIdContext.adjacencyProperties().length;
+        var newSize = this.propertyCursorCache.stream().mapToInt(cursor -> cursor.length).max().orElse(0);
         this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
     }
 

@@ -93,6 +93,9 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         Relationships relationships
     ) {
         super.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType, relationships);
+        relationshipPropertyKey.ifPresent(
+            propertyKey -> stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipPropertyAdded(propertyKey))
+        );
         stateVisitors.forEach(stateVisitor -> stateVisitor.relationshipTypeAdded(relationshipType.name()));
     }
 
@@ -108,6 +111,8 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
         void nodeLabelAdded(String nodeLabel);
 
         void relationshipTypeAdded(String relationshipType);
+
+        void relationshipPropertyAdded(String relationshipProperty);
 
         class Adapter implements StateVisitor {
             @Override
@@ -127,6 +132,11 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
             @Override
             public void relationshipTypeAdded(String relationshipType) {
+
+            }
+
+            @Override
+            public void relationshipPropertyAdded(String relationshipProperty) {
 
             }
         }
