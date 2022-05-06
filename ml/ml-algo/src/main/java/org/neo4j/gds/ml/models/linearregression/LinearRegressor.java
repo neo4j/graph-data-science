@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.models.Regressor;
 public class LinearRegressor implements Regressor {
     private final LinearRegressionData data;
 
-    LinearRegressor(LinearRegressionData data) {this.data = data;}
+    public LinearRegressor(LinearRegressionData data) {this.data = data;}
 
     @Override
     public double predict(double[] features) {
