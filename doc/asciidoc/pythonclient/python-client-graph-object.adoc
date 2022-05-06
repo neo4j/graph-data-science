@@ -69,17 +69,17 @@ relationships = pandas.DataFrame(
     "sourceId": [0, 1, 2, 3],
     "targetId": [1, 2, 3, 0],
     "type": ["REL", "REL", "REL", "REL"],
-    "weight": [0.0, 0.0, 1.0, 42.0]
+    "weight": [0.0, 0.0, 0.1, 42.0]
 )
 
 G = gds.alpha.graph.construct(
     "my-graph",      # Graph name
-    nodes,           # One or more dataframes describing the nodes
-    relationships    # One or more dataframes describing the relationships
+    nodes,           # One or more dataframes containing node data
+    relationships    # One or more dataframes containing relationship data
 )
 ----
 
-The above examples create a simple graph using one node and one relationship `DataFrame`.
+The above example creates a simple graph using one node and one relationship `DataFrame`.
 The created graph is equivalent to a graph created by the following Cypher query:
 
 [source, cypher]
@@ -95,7 +95,7 @@ CREATE
     (d)-[:REL {weight: 42.0}]->(a),
 ----
 
-It is possible to supply more than one data frame for both the nodes and the relationships.
+It is possible to supply more than one data frame, both for nodes and relationships.
 If multiple node dataframes are used, they need to contain distinct node ids across all node data frames.
 The supported format for the node data frames is described in <<arrow-node-columns, Arrow node schema>> and the format for the relationship data frames is described in <<arrow-relationship-columns, Arrow relationship schema>>.
 
