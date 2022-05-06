@@ -70,19 +70,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class GraphSageModelTrainer {
     private final long randomSeed;
     private final boolean useWeights;
-    private final double learningRate;
-    private final double tolerance;
-    private final int negativeSampleWeight;
-    private final int concurrency;
-    private final int epochs;
-    private final int maxIterations;
-    private final int maxSearchDepth;
     private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
-    private final int batchSize;
+    private final GraphSageTrainConfig config;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
         this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
@@ -96,14 +89,7 @@ public class GraphSageModelTrainer {
         Collection<Weights<Matrix>> labelProjectionWeights
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
-        this.batchSize = config.batchSize();
-        this.learningRate = config.learningRate();
-        this.tolerance = config.tolerance();
-        this.negativeSampleWeight = config.negativeSampleWeight();
-        this.concurrency = config.concurrency();
-        this.epochs = config.epochs();
-        this.maxIterations = config.maxIterations();
-        this.maxSearchDepth = config.searchDepth();
+        this.config = config;
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
@@ -141,7 +127,7 @@ public class GraphSageModelTrainer {
 
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
-            batchSize,
+            config.batchSize(),
             batch -> createBatchTask(graph, features, layers, weights, batch)
         );
 
@@ -155,6 +141,7 @@ public class GraphSageModelTrainer {
 
         progressTracker.beginSubTask("Train model");
 
+        int epochs = config.epochs();
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
             var epochResult = trainEpoch(() -> batchTasks.get(random.nextInt(batchTasks.size())), weights, prevEpochLoss);
@@ -195,36 +182,36 @@ public class GraphSageModelTrainer {
             useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
             totalBatch,
-            negativeSampleWeight
+            config.negativeSampleWeight()
         );
 
-        return new BatchTask(lossFunction, weights, tolerance, progressTracker);
+        return new BatchTask(lossFunction, weights, progressTracker);
     }
 
     private EpochResult trainEpoch(Supplier<BatchTask> batchTaskSupplier, List<Weights<? extends Tensor<?>>> weights, double prevEpochLoss) {
-        var updater = new AdamOptimizer(weights, learningRate);
+        var updater = new AdamOptimizer(weights, config.learningRate());
 
         int iteration = 1;
         var iterationLosses = new ArrayList<Double>();
         double prevLoss = prevEpochLoss;
         var converged = false;
 
-        for (;iteration <= maxIterations; iteration++) {
+        int maxIterations = config.maxIterations();
+        for (; iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
-            // TODO let the user configer the number of batches per iteration
             var batchTasks = IntStream
-                .range(0, concurrency)
+                .range(0, config.batchesPerIteration())
                 .mapToObj(__ -> batchTaskSupplier.get())
                 .collect(Collectors.toList());
 
             // run forward + maybe backward for each Batch
-            ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
+            ParallelUtil.runWithConcurrency(config.concurrency(), batchTasks, executor);
             var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
             iterationLosses.add(avgLoss);
             progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
 
-            if (Math.abs(prevLoss - avgLoss) < tolerance) {
+            if (Math.abs(prevLoss - avgLoss) < config.tolerance()) {
                 converged = true;
                 progressTracker.endSubTask("Iteration");
                 break;
@@ -258,19 +245,16 @@ public class GraphSageModelTrainer {
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
-        private final double tolerance;
         private final ProgressTracker progressTracker;
         private double prevLoss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
             List<Weights<? extends Tensor<?>>> weightVariables,
-            double tolerance,
             ProgressTracker progressTracker
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
-            this.tolerance = tolerance;
             this.progressTracker = progressTracker;
         }
 
@@ -321,7 +305,7 @@ public class GraphSageModelTrainer {
         // sample a neighbor for each batchNode
         batch.consume(nodeId -> {
             // randomWalk with at most maxSearchDepth steps and only save last node
-            int searchDepth = localRandom.nextInt(maxSearchDepth) + 1;
+            int searchDepth = localRandom.nextInt(config.searchDepth()) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
                 NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + searchDepth);

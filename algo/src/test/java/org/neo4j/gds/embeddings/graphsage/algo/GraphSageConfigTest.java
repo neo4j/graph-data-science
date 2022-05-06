@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,6 +49,17 @@ class GraphSageTrainConfigTest {
             Arguments.of(1, "Expected Aggregator or String. Got Integer."),
             Arguments.of("alwaysTrue", "Aggregator `alwaysTrue` is not supported. Must be one of: ['MEAN', 'POOL'].")
         );
+    }
+
+    @Test
+    void specifyBatchesPerIteration() {
+        var mapWrapper = CypherMapWrapper.create(Map.of(
+            "modelName", "foo",
+            "featureProperties", List.of("a"),
+            "batchesPerIteration", 42
+        ));
+
+        assertThat(GraphSageTrainConfig.of("user", mapWrapper).batchesPerIteration()).isEqualTo(42);
     }
 
     @Test

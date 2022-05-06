@@ -120,6 +120,15 @@ public interface GraphSageTrainConfig extends
         return 10;
     }
 
+    @Configuration.Key("batchesPerIteration")
+    Optional<Integer> maybeBatchesPerIteration();
+
+    @Configuration.Ignore
+    @Value.Derived
+    default int batchesPerIteration() {
+        return maybeBatchesPerIteration().orElse(concurrency());
+    }
+
     @Value.Default
     default int searchDepth() {
         return 5;
