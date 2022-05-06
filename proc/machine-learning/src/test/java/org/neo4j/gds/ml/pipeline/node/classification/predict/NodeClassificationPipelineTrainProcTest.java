@@ -327,7 +327,9 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "}) YIELD modelInfo" +
             " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR AS OOB",
             Map.of("graphName", GRAPH_NAME, "pipeline", PIPELINE_NAME, "modelName", "anything"),
-            List.of(Map.of("OOB", Map.of("validation", Map.of(
+            List.of(Map.of("OOB", Map.of(
+                "test", 1.0,
+                "validation", Map.of(
                         "avg", 1.0,
                         "min", 1.0,
                         "max", 1.0
