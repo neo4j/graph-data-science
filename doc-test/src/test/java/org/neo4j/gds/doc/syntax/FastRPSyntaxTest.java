@@ -40,6 +40,6 @@ class FastRPSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/node-embeddings/fastrp/fastrp.adoc";
+        return "pages/machine-learning/node-embeddings/fastrp.adoc";
     }
 }

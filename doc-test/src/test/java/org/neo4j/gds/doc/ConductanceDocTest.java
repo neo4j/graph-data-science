@@ -44,6 +44,6 @@ class ConductanceDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/conductance/conductance.adoc";
+        return "pages/algorithms/alpha/conductance.adoc";
     }
 }

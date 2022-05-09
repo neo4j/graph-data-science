@@ -29,6 +29,6 @@ class PipelineCatalogDropSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/pipeline-catalog/pipeline-catalog-drop.adoc";
+        return "pages/pipeline-catalog/drop.adoc";
     }
 }

@@ -23,6 +23,6 @@ class LabelPropagationSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/label-propagation/label-propagation.adoc";
+        return "pages/algorithms/label-propagation.adoc";
     }
 }

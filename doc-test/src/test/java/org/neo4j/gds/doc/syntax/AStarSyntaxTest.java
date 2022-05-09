@@ -37,7 +37,7 @@ class AStarSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/shortest-path/astar.adoc";
+        return "pages/algorithms/astar.adoc";
     }
 
 }

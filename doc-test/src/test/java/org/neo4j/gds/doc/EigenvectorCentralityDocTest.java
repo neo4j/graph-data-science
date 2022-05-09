@@ -48,7 +48,7 @@ class EigenvectorCentralityDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/eigenvector-centrality/eigenvector-centrality.adoc";
+        return "pages/algorithms/eigenvector-centrality.adoc";
     }
 
 }

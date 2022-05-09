@@ -36,6 +36,6 @@ public class BfsSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/bfs/bfs.adoc";
+        return "pages/algorithms/bfs.adoc";
     }
 }
