@@ -9,6 +9,7 @@ Additionally, the `Model` objects have convenience methods allowing for inspecti
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
 
+
 [[python-client-model-object-constructing]]
 == Constructing a model object
 
@@ -16,7 +17,7 @@ There are several ways of constructing a model object.
 One of the simplest is to train a xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE] model.
 Supposing we have a graph `G` that have an integer node property "price", we could do the following:
 
-[source,python, indent=0]
+[source,python]
 ----
 model, res = gds.beta.graphSage.train(G, modelName="my-model", featureProperties=["price"])
 ----
@@ -27,10 +28,11 @@ Similarly, we can also get model objects from training xref::python-client/pipel
 
 To get a model object that represents a model that has already been trained and is present in the model catalog, one can call the client-side only `get` method and passing it a name:
 
-[source,python, indent=0]
+[source,python]
 ----
 model = gds.model.get("my-model")
 ----
+
 
 [[python-client-model-object-inspecting]]
 == Inspecting a model object
@@ -55,10 +57,11 @@ There are convenience methods on all model objects that let us extract informati
 
 For example, to get the train configuration of a model object `model`, we would do the following:
 
-[source,python, indent=0]
+[source,python]
 ----
 train_config = model.train_config()
 ----
+
 
 == Using a model object
 
@@ -68,13 +71,14 @@ How to do so for GraphSAGE is xref::python-client/model-object.adoc#python-clien
 Additionally, model objects can be used as input to xref::model-catalog/index.adoc[GDS Model Catalog operations].
 For instance, supposing we have a model object `model`, we could:
 
-[source,python, indent=0]
+[source,python]
 ----
 # Store the model on disk (GDS Enterprise Edition)
 _ = gds.alpha.model.store(model)
 
 gds.beta.model.drop(model)  # same as model.drop()
 ----
+
 
 [[python-client-model-object-graphsage]]
 === GraphSAGE
@@ -98,7 +102,7 @@ Once trained, in addition to the xref::python-client/model-object.adoc#python-cl
 
 Suppose then that we have a trained GraphSAGE model `gs_model` and a graph `H` for which we would like to derive node embeddings. Then we could do the following:
 
-[source,python, indent=0]
+[source,python]
 ----
 # Make sure our training actually converged
 metrics = gs_model.metrics()

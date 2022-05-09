@@ -14,11 +14,12 @@ Once instantiated it forms the entrypoint to interacting with the GDS library.
 That includes projecting graphs, running algorithms, and defining and using machine learning pipelines in GDS.
 As a convention we recommend always calling the instantiated `GraphDataScience` object `gds` as using it will then most resemble using the Cypher API directly.
 
+
 == Import and setup
 
 The simplest way to instantiate the `GraphDataScience` object is from a Neo4j server URI and corresponding credentials:
 
-[source,python, indent=0]
+[source,python]
 ----
 from graphdatascience import GraphDataScience
 
@@ -38,17 +39,18 @@ Alternatively, for use cases where direct access and control of the Neo4j driver
 
 If we don't want to use the default database of our DBMS, we can specify which one to use:
 
-[source,python, indent=0]
+[source,python]
 ----
 gds.set_database("my-db")
 ----
+
 
 === AuraDS
 
 If you are connecting the client to an https://neo4j.com/cloud/graph-data-science/[AuraDS instance], you can get recommended non-default configuration settings of the Python Driver applied automatically.
 To achieve this, set the constructor argument `aura_ds=True`:
 
-[source, python, indent=0]
+[source, python]
 ----
 from graphdatascience import GraphDataScience
 
@@ -60,11 +62,12 @@ gds = GraphDataScience(
 )
 ----
 
+
 == Minimal example
 
 In the following example we illustrate the Python client to run a Cypher query, project a graph into GDS, run an algorithm and inspect the result via the client-side graph object.
 
-[source,python, indent=0]
+[source,python]
 ----
 from graphdatascience import GraphDataScience
 
@@ -102,6 +105,7 @@ print(G_office.node_properties("City"))
 ----
 ["rank"]
 ----
+
 
 [[python-client-getting-started-mapping]]
 == Mapping between Cypher and Python

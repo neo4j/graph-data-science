@@ -20,7 +20,7 @@ The `gds.export.location` parameter must be configured for this feature.
 [.graph-export-syntax]
 --
 .Export a named graph to a set of CSV files:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv(graphName: String, configuration: Map)
 YIELD
@@ -52,6 +52,7 @@ YIELD
 | additionalNodeProperties | String, List or Map | {}        | yes      | Allows for exporting additional node properties from the original graph backing the projected graph.
 |===
 
+
 .Results
 [opts="header",cols="2,1,4"]
 |===
@@ -76,7 +77,7 @@ The estimation uses sampling to generate a more accurate estimate.
 [.estimate-syntax]
 --
 .Estimate the required disk space for exporting a named graph to CSV files.:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv.estimate(graphName:String, configuration: Map)
 YIELD
@@ -125,9 +126,11 @@ YIELD
 |===
 --
 
+
 == Export format
 
 The format of the exported CSV files is based on the format that is supported by the Neo4j Admin https://neo4j.com/docs/operations-manual/current/tools/neo4j-admin/neo4j-admin-import/[import] command.
+
 
 === Nodes
 
@@ -156,6 +159,7 @@ nodes_A_B_1.csv
 nodes_A_B_2.csv
 ----
 
+
 === Relationships
 
 The format of the relationship files is similar to those of the nodes.
@@ -182,10 +186,11 @@ relationships_LIVES_IN_2.csv
 == Example
 
 .Export the `my-graph` from GDS into a directory `my-export`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export' })
 ----
+
 
 == Example with additional node properties
 
@@ -193,7 +198,7 @@ Suppose we have a graph `my-db-graph` in the Neo4j database that has a string no
 If we want to export `my-in-memory-graph` but additionally add the `myproperty` properties from `my-db-graph` we can use the `additionalProperties` configuration parameter.
 
 .Export the `my-in-memory-graph` from GDS with the `myproperty` from `my-db-graph` into a directory `my-export`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: ['myproperty']})
 ----
@@ -207,7 +212,7 @@ The `additionalNodeProperties` parameter uses the same syntax as `nodeProperties
 So we could for instance define a default value for our `myproperty`.
 
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a directory called `my-export`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.export.csv('my-graph', { exportName: 'my-export', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----

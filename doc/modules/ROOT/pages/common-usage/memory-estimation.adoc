@@ -20,6 +20,7 @@ The model contains three types of data:
 
 Memory configuration depends on the graph projection that we're using.
 
+
 [[estimate-procedure-algo]]
 == Estimating memory requirements for algorithms
 
@@ -29,7 +30,7 @@ Note that only algorithms in the production-ready tier are guaranteed to have an
 For more details please refer to xref::algorithms/syntax.adoc[Syntax overview].
 
 .Syntax outline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
   graphNameOrConfig: String or Map,
@@ -75,6 +76,7 @@ With this it is possible to measure the memory consumption of projecting a graph
 | heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
 |===
 
+
 [[estimate-procedure-graph-project-config]]
 === Graph creation configuration
 
@@ -99,7 +101,7 @@ The xref::graph-project.adoc[`gds.graph.project`] procedures also support `.esti
 Those procedures don't accept the graph name as the first argument, as they don't actually project the graph.
 
 .Syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.estimate(nodeProjection: String|List|Map, relationshipProjection: String|List|Map, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
@@ -137,7 +139,7 @@ However, it is recommended to specify `'*'` for both in the fictive graph case a
 The query below is an example of estimating a fictive graph with 100 nodes and 1000 relationships.
 
 .Example
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.estimate('*', '*', {
   nodeCount: 100,
@@ -158,7 +160,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 The xref::graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher.estimate(nodeQuery: String, relationshipQuery: String, configuration: Map)
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
@@ -172,6 +174,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, 
 | relationshipQuery | String | -         | no        | The relationship query to estimate for.
 | configuration     | Map    | {}        | yes       | Additional configuration, such as concurrency.
 |===
+
 
 [[estimate-heap-control]]
 == Automatic estimation and execution blocking
@@ -201,7 +204,7 @@ To enable sudo mode, add the sudo parameter when calling a procedure. Here is an
 [role=query-example]
 --
 .Run Louvain in sudo mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.write('myGraph', { writeProperty: 'community', sudo: true })
 YIELD communityCount, modularity, modularities

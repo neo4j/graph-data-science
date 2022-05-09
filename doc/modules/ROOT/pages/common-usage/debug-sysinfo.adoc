@@ -19,7 +19,7 @@ It will give information on the installed GDS version, GDS edition, Neo4j versio
 [.debug-sysinfo-syntax]
 --
 .Monitor the system capacity and analytics workload:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.debug.sysInfo()
 YIELD
@@ -36,10 +36,11 @@ YIELD
 |===
 --
 
+
 === Example
 
 .Full view of the system configuration:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.debug.sysInfo()
 ----

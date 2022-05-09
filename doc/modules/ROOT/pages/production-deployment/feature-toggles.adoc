@@ -9,6 +9,7 @@ This section describes the available feature toggles in the Neo4j Graph Data Sci
 
 WARNING: Feature toggles are not considered part of the public API and can be removed or changed between minor releases of the GDS Library.
 
+
 [.enterprise-edition]
 [[bit-id-map-feature-toggle]]
 == BitIdMap Feature Toggle
@@ -18,7 +19,7 @@ This in-memory graph implementation performance depends on the underlying graph 
 It can be slower for write procedures and graph creation of smaller graphs.
 To switch to the more memory intensive implementation used in GDS Community Edition you can disable this feature by using the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useBitIdMap(false)
 ----
@@ -38,21 +39,21 @@ Using the uncompressed adjacency list on those graphs has a higher chance of run
 
 To switch to uncompressed adjacency lists, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useUncompressedAdjacencyList(true)
 ----
 
 To switch to compressed adjacency lists, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useUncompressedAdjacencyList(false)
 ----
 
 To reset the setting to the default value, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useUncompressedAdjacencyList.reset() YIELD enabled
 ----
@@ -68,21 +69,21 @@ The order depends on the GDS internal node ids that are assigned in the in-memor
 
 To enable reordering, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useReorderedAdjacencyList(true)
 ----
 
 To disable reordering, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useReorderedAdjacencyList(false)
 ----
 
 To reset the setting to the default value, use the following procedure call.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.features.useReorderedAdjacencyList.reset() YIELD enabled
 ----

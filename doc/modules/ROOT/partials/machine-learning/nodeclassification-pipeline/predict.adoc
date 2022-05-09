@@ -24,7 +24,7 @@ If the predict and train graphs are distinct, it is also beneficial that they ha
 [.include-with-stream]
 ======
 .Run Node Classification in stream mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.stream(
   graphName: String,
@@ -55,7 +55,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/specific-stream-c
 [.include-with-mutate]
 ======
 .Run Node Classification in mutate mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.mutate(
   graphName: String,
@@ -92,7 +92,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/specific-write-mu
 [.include-with-write]
 ======
 .Run Node Classification in write mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.write(
   graphName: String,
@@ -145,7 +145,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example, group=nc]
 --
 .The following will estimate the memory requirements for running the algorithm in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.stream.estimate('myGraph', {
   modelName: 'nc-pipeline-model',
@@ -169,7 +169,7 @@ NOTE: If a node property step does not have an estimation implemented, the step 
 ==== Stream
 [role=query-example, group=nc]
 --
-[source, cypher, indent=0]
+[source, cypher]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.stream('myGraph', {
   modelName: 'nc-pipeline-model',
@@ -213,7 +213,7 @@ For more details on the `mutate` mode in general, see xref::common-usage/running
 
 [role=query-example, group=nc]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.mutate('myGraph', {
   nodeLabels: ['UnknownHouse'],
@@ -233,6 +233,7 @@ CALL gds.beta.pipeline.nodeClassification.predict.mutate('myGraph', {
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.
 
+
 [[nodeclassification-pipelines-examples-write]]
 ==== Write
 
@@ -245,7 +246,7 @@ For more details on the `write` mode in general, see xref::common-usage/running-
 
 [role=query-example, group=nc]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.predict.write('myGraph', {
   nodeLabels: ['UnknownHouse'],

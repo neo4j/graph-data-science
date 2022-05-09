@@ -41,6 +41,7 @@ A relationship property value greater than 1 will increase the likelihood of a r
 For every node in the graph Node2Vec generates a series of random walks with the particular node as start node.
 The number of random walks per node can be influenced by the `walkPerNode` configuration parameters, the walk length is controlled by the `walkLength` parameter.
 
+
 [[algorithms-embeddings-node2vec-syntax]]
 == Syntax
 
@@ -51,7 +52,7 @@ The number of random walks per node can be influenced by the `walkPerNode` confi
 [.include-with-stream]
 ======
 .Run Node2Vec in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.node2vec.stream(
   graphName: String,
@@ -67,6 +68,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 include::partial$/machine-learning/node-embeddings/node2vec/specific-configuration.adoc[]
 
+
 .Results
 [opts="header",cols="1m,1,6"]
 |===
@@ -79,7 +81,7 @@ include::partial$/machine-learning/node-embeddings/node2vec/specific-configurati
 [.include-with-mutate]
 ======
 .Run Node2Vec in mutate mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.node2vec.mutate(
   graphName: String,
@@ -101,6 +103,7 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-na
 
 include::partial$/machine-learning/node-embeddings/node2vec/specific-configuration.adoc[]
 
+
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -118,7 +121,7 @@ include::partial$/machine-learning/node-embeddings/node2vec/specific-configurati
 [.include-with-write]
 ======
 .Run Node2Vec in write mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.node2vec.write(
   graphName: String,
@@ -139,6 +142,7 @@ include::partial$/algorithms/common-configuration/common-write-configuration-nam
 
 include::partial$/machine-learning/node-embeddings/node2vec/specific-configuration.adoc[]
 
+
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -153,12 +157,13 @@ include::partial$/machine-learning/node-embeddings/node2vec/specific-configurati
 ======
 ====
 
+
 [[algorithms-embeddings-node2vec-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:Person {name: 'Alice'})
 CREATE (bob:Person {name: 'Bob'})
@@ -181,7 +186,7 @@ CREATE (dave)-[:LIKES]->(synth)
 CREATE (dave)-[:LIKES]->(bongos);
 ----
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
@@ -189,7 +194,7 @@ CALL gds.graph.project('myGraph', ['Person', 'Instrument'], 'LIKES');
 [role=query-example,no-result=true]
 --
 .Run the Node2Vec algorithm on `myGraph`
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.node2vec.stream('myGraph', {embeddingDimension: 2})
 YIELD nodeId, embedding

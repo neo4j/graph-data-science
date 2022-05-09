@@ -43,7 +43,7 @@ When doing memory estimation of the training, the feature dimension is computed 
 [.include-with-train]
 ======
 .Run GraphSAGE in train mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.train(
   graphName: String,
@@ -92,7 +92,7 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-train-con
 [.include-with-stream]
 ======
 .Run GraphSAGE in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.stream(
   graphName: String,
@@ -120,7 +120,7 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-configura
 [.include-with-mutate]
 ======
 .Run GraphSAGE in mutate mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.mutate(
   graphName: String,
@@ -157,7 +157,7 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-configura
 [.include-with-write]
 ======
 .Run GraphSAGE in write mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.write(
   graphName: String,
@@ -192,6 +192,7 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-configura
 ======
 ====
 
+
 [[algorithms-embeddings-graph-sage-examples]]
 == Examples
 
@@ -201,7 +202,7 @@ include::partial$/machine-learning/node-embeddings/graph-sage/specific-configura
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   // Persons
@@ -224,7 +225,7 @@ CREATE
   (john)-[:KNOWS {relWeight: 5.0}]->(jeff)
 ----
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons',
@@ -244,6 +245,7 @@ CALL gds.graph.project(
 
 NOTE: The algorithm is defined for UNDIRECTED graphs.
 
+
 === Train
 
 Before we are able to generate node embeddings we need to train a model and store it in the model catalog.
@@ -253,7 +255,7 @@ NOTE: The names specified in the `featureProperties` configuration parameter mus
 
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -289,6 +291,7 @@ For different datasets, GraphSAGE may require different train parameters for pro
 
 The trained model is automatically registered in the xref::model-catalog/index.adoc[model catalog].
 
+
 === Train with multiple node labels
 
 In this section we describe how to train on a graph with multiple labels.
@@ -309,10 +312,12 @@ The projected feature dimension is configured with `projectedFeatureDimension`, 
 The feature properties used for a label are those present in the `featureProperties` configuration parameter which exist in the graph for that label.
 In the multi-label mode, it is no longer required that all labels have all the specified properties.
 
+
 ==== Assumptions
 
 - A requirement for multi-label mode is that each node belongs to exactly one label.
 - A GraphSAGE model trained in this mode must be applied on graphs with the same schema with regards to node labels and properties.
+
 
 ==== Examples
 
@@ -321,7 +326,7 @@ In order to demonstrate GraphSAGE with multiple labels, we add instruments and r
 image::example-graphs/graph-sage-multi-label-graph.svg[Visualization of the multi-label example graph,align="center"]
 
 .The following Cypher statement will extend the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 MATCH
   (dan:Person {name: "Dan"}),
@@ -346,7 +351,7 @@ CREATE
   (john)-[:LIKES]->(trumpet)
 ----
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons_with_instruments',
@@ -378,7 +383,7 @@ The `projectedFeatureDimension` equals the maximum length of the feature-array, 
 For each node its unique labels properties is projected using a label specific projection to vector space of dimension `projectedFeatureDimension`.
 Note that the `cost` feature is only defined for the instrument nodes, while `age` and `heightAndWeight` are only defined for persons.
 
-[source, cypher, role=noplay query-example, no-result=true, indent=0]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
   'persons_with_instruments',
@@ -390,13 +395,14 @@ CALL gds.beta.graphSage.train(
 )
 ----
 
+
 === Train with relationship weights
 
 The GraphSAGE implementation supports training using relationship weights.
 Greater relationship weight between nodes signifies that the nodes should have more similar embedding values.
 
 .The following Cypher query trains a GraphSAGE model using relationship weights
-[source, cypher, role=noplay query-example, no-result=true, indent=0]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -410,6 +416,7 @@ CALL gds.beta.graphSage.train(
 )
 ----
 
+
 === Train when there are no node properties present in the graph
 
 In the case when you have a graph that does not have node properties we recommend to use existing algorithm in `mutate` mode to create node properties.
@@ -419,7 +426,7 @@ The following example illustrates calling Degree Centrality in `mutate` mode and
 For the purpose of this example we are going to use the `Persons` graph, but we will not load any properties to the in-memory graph.
 
 .Create a graph projection without any node properties
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'noPropertiesGraph',
@@ -432,7 +439,7 @@ CALL gds.graph.project(
 ----
 
 .Run DegreeCentrality mutate to create a new property for each node
-[source, cypher, role=noplay query-example, no-result=true, group=noProps, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=noProps]
 ----
 CALL gds.degree.mutate(
   'noPropertiesGraph',
@@ -443,7 +450,7 @@ CALL gds.degree.mutate(
 ----
 
 .Run GraphSAGE train using the property produced by DegreeCentrality as feature property
-[source, cypher, role=noplay query-example, no-result=true, group=noProps, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=noProps]
 ----
 CALL gds.beta.graphSage.train(
   'noPropertiesGraph',
@@ -466,7 +473,7 @@ To generate embeddings and stream them back to the client we can use the stream 
 We must first train a model, which we do using the `gds.beta.graphSage.train` procedure.
 
 [[graph-sage-trained-model-example]]
-[source, cypher, role=noplay query-example, no-result=true, group=graphSage, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.train(
   'persons',
@@ -483,7 +490,7 @@ Once we have trained a model (named `'graphSage'`) we can use it to generate and
 
 [role=query-example, group=graphSage]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.stream(
   'persons',
@@ -517,7 +524,7 @@ The xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-mo
 Below is an example of how to achieve this.
 
 --
-[source, cypher, role=noplay query-example, no-result=true, group=graphSage, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.mutate(
   'persons',
@@ -545,7 +552,7 @@ The xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-mo
 Below is an example of how to achieve this.
 
 --
-[source, cypher, role=noplay query-example, no-result=true, group=graphSage, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.write(
   'persons',

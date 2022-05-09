@@ -9,12 +9,13 @@ This section details how to list graphs stored in the graph catalog of the Neo4j
 
 Information about graphs in the catalog can be retrieved using the `gds.graph.list()` procedure.
 
+
 == Syntax
 
 [.graph-list-syntax]
 --
 .List information about graphs in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list(
   graphName: String
@@ -78,12 +79,13 @@ Note that not specifying a `YIELD` clause is the same as requesting all possible
 
 The `density` is the result of `relationshipCount` divided by the maximal number of relationships for a simple graph with the given `nodeCount`.
 
+
 == Examples
 
 In order to demonstrate the GDS Graph List capabilities we are going to create a small social network graph in Neo4j.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
@@ -96,13 +98,13 @@ CREATE
 Additionally, we will project a few graphs to the graph catalog, for more details see xref::graph-project.adoc[native projections] and xref::graph-project-cypher.adoc[Cypher projections].
 
 .Project `Person` nodes and `KNOWS` relationships using native projections:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('personsNative', 'Person', 'KNOWS')
 ----
 
 .Project `Person` nodes and `KNOWS` relationships using Cypher projections:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project.cypher(
   'personsCypher',
@@ -111,7 +113,7 @@ CALL gds.graph.project.cypher(
 ----
 
 .Project `Person` nodes with property `age` and `KNOWS` relationships using Native projections:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'personsWithAgeNative',
@@ -127,7 +129,7 @@ CALL gds.graph.project(
 [role=query-example]
 --
 .List basic information about all graphs in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list()
 YIELD graphName, nodeCount, relationshipCount
@@ -145,12 +147,13 @@ ORDER BY graphName ASC
 |===
 --
 
+
 === List extended information about a specific named graph in the catalog
 
 [role=query-example]
 --
 .List extended information about a specific Cypher named graph in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
 YIELD graphName, configuration
@@ -169,7 +172,7 @@ RETURN graphName, configuration.nodeQuery AS nodeQuery
 [role=query-example]
 --
 .List extended information about a specific native named graph in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
 YIELD graphName, configuration
@@ -193,7 +196,7 @@ Despite different result columns being present for the different projections tha
 [role=query-example]
 --
 .Cypher graph schema:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsCypher')
 YIELD graphName, schema
@@ -211,7 +214,7 @@ YIELD graphName, schema
 [role=query-example]
 --
 .Native graph schema:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
 YIELD graphName, schema
@@ -226,12 +229,13 @@ YIELD graphName, schema
 |===
 --
 
+
 === Degree distribution of a specific graph
 
 [role=query-example]
 --
 .List information about the degree distribution of a specific graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list('personsNative')
 YIELD graphName, degreeDistribution;

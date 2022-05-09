@@ -6,7 +6,7 @@ The plugins guide for Docker is found at the https://neo4j.com/docs/operations-m
 
 To run a Neo4j Container with GDS available, you can run
 
-[source,shell, indent=0]
+[source,shell]
 ----
 docker run -it --rm \
   --publish=7474:7474 --publish=7687:7687 \

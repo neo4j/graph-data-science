@@ -17,6 +17,7 @@ This section describes the Article Rank algorithm in the Neo4j Graph Data Scienc
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-article-rank-introduction]]
 == Introduction
 
@@ -49,6 +50,7 @@ There are some things to be aware of when using the Article Rank algorithm:
 Changing the damping factor can help with all the considerations above.
 It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
 
+
 [[algorithms-article-rank-syntax]]
 == Syntax
 
@@ -62,7 +64,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 ======
 
 .Run Article Rank in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream(
   graphName: String,
@@ -93,7 +95,7 @@ include::partial$/algorithms/article-rank/specific-configuration.adoc[]
 ======
 
 .Run Article Rank in stats mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stats(
   graphName: String,
@@ -134,7 +136,7 @@ include::partial$/algorithms/article-rank/specific-configuration.adoc[]
 ======
 
 .Run Article Rank in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.mutate(
   graphName: String,
@@ -179,7 +181,7 @@ include::partial$/algorithms/article-rank/specific-configuration.adoc[]
 ======
 
 .Run Article Rank in write mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.write(
   graphName: String,
@@ -222,6 +224,7 @@ include::partial$/algorithms/article-rank/specific-configuration.adoc[]
 
 ====
 
+
 [[algorithms-article-rank-examples]]
 == Examples
 
@@ -230,7 +233,7 @@ include::partial$/algorithms/article-rank/specific-configuration.adoc[]
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (home:Page {name:'Home'}),
@@ -264,7 +267,7 @@ Each relationship has a property called `weight`, which describes the importance
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -276,6 +279,7 @@ CALL gds.graph.project(
 )
 ----
 
+
 [[algorithms-page-rank-examples-memory-estimation]]
 === Memory Estimation
 
@@ -285,7 +289,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.write.estimate('myGraph', {
   writeProperty: 'centrality',
@@ -302,6 +306,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-article-rank-examples-stream]]
 === Stream
 
@@ -311,7 +316,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream('myGraph')
 YIELD nodeId, score
@@ -337,6 +342,7 @@ ORDER BY score DESC, name ASC
 The above query is running the algorithm in `stream` mode as `unweighted`.
 Below, one can find an example for xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-weighted[weighted graphs].
 
+
 [[algorithms-article-rank-examples-stats]]
 === Stats
 
@@ -347,7 +353,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and return statistics about the centrality scores.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stats('myGraph')
 YIELD centralityDistribution
@@ -362,6 +368,7 @@ RETURN centralityDistribution.max AS max
 |===
 --
 
+
 [[algorithms-article-rank-examples-mutate]]
 === Mutate
 
@@ -370,7 +377,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.mutate('myGraph', {
   mutateProperty: 'centrality'
@@ -386,6 +393,7 @@ YIELD nodePropertiesWritten, ranIterations
 |===
 --
 
+
 [[algorithms-article-rank-examples-write]]
 === Write
 
@@ -394,7 +402,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.write('myGraph', {
   writeProperty: 'centrality'
@@ -410,6 +418,7 @@ YIELD nodePropertiesWritten, ranIterations
 |===
 --
 
+
 [[algorithms-article-rank-examples-weighted]]
 === Weighted
 
@@ -424,7 +433,7 @@ In the following example, we use the `weight` property of the input graph as rel
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using relationship weights:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream('myGraph', {
   relationshipWeightProperty: 'weight'
@@ -454,6 +463,7 @@ In contrast, the "Product" now has the second highest instead of the fourth high
 
 NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted`, however, all the algorithm modes support the `relationshipWeightProperty` configuration parameter.
 
+
 [[algorithms-article-rank-examples-tolerance]]
 === Tolerance
 
@@ -464,7 +474,7 @@ Note, that setting a higher tolerance leads to earlier convergence, but also to 
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using a high `tolerance` value:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream('myGraph', {
   tolerance: 0.1
@@ -492,6 +502,7 @@ ORDER BY score DESC, name ASC
 We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example].
 However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
 
+
 [[algorithms-article-rank-examples-personalised]]
 === Personalised Article Rank
 
@@ -504,7 +515,7 @@ The following examples show how to run Eigenvector centrality centered around 'S
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (siteA:Page {name: 'Site A'}), (siteB:Page {name: 'Site B'})
 CALL gds.articleRank.stream('myGraph', {
@@ -533,6 +544,7 @@ ORDER BY score DESC, name ASC
 
 Comparing these results to the ones from the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
+
 [[algorithms-article-rank-examples-scaler]]
 === Scaling centrality scores
 
@@ -543,7 +555,7 @@ A description of all available scalers can be found in the documentation for the
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode and returns normalized results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.articleRank.stream('myGraph', {
   scaler: "L1Norm"

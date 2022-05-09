@@ -12,6 +12,7 @@
 | `sourceNode`
 |===
 
+
 .Changes in YIELD fields
 [options=header, cols=2]
 |===

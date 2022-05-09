@@ -21,7 +21,7 @@
 | 1.x               | 2.x
 2+| Native Projection:
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
   'myGraph',
@@ -31,7 +31,7 @@ CALL gds.graph.create(
 )
 ----
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -42,7 +42,7 @@ CALL gds.graph.project(
 ----
 2+| Cypher Projection:
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.cypher(
   'myGraph',
@@ -52,7 +52,7 @@ CALL gds.graph.create.cypher(
 )
 ----
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'myGraph',
@@ -63,7 +63,7 @@ CALL gds.graph.project.cypher(
 ----
 2+| Projecting subgraphs:
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.create.subgraph(
   'myGraph',
@@ -73,7 +73,7 @@ CALL gds.graph.create.subgraph(
 )
 ----
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'myGraph',

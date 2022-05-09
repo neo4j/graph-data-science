@@ -8,6 +8,7 @@
 This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
 --
 
+
 [[algorithms-collapse-path-intro]]
 == Introduction
 
@@ -20,6 +21,7 @@ Starting from every node in the specified graph, these relationship types are tr
 Only nodes reached after traversing every relationship type specified are used as end nodes.
 Exactly one directed relationship is created for every pair of nodes for which at least one path from start to end node exists.
 
+
 [[algorithms-collapse-path-syntax]]
 == Syntax
 
@@ -30,7 +32,7 @@ Exactly one directed relationship is created for every pair of nodes for which a
 [.include-with-mutate]
 ======
 .Run Collapse Path in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.collapsePath.mutate(
   graphName: String,
@@ -74,7 +76,7 @@ include::partial$/algorithms/alpha/collapse-path/specific-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (Dan:Person),
@@ -95,7 +97,7 @@ CREATE
 In this example we want to create a relationship, called `PLAYS_SAME_INSTRUMENT`, between `Person` nodes that play the same instrument.
 To achieve that we have to traverse a path specified by the following Cypher pattern:
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 (p1:Person)-[:PLAYS]->(:Instrument)-[:PLAYED_BY]->(p2:Person)
 ----
@@ -104,7 +106,7 @@ In our source graph only the `PLAYS` relationship type exists.
 The `PLAYED_BY` relationship type can be created by loading the `PLAYS` relationship type in `REVERSE` direction.
 The following query will project such a graph:
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'persons',
@@ -125,7 +127,7 @@ Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in t
 
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.collapsePath.mutate(
   'persons',
@@ -146,7 +148,7 @@ CALL gds.alpha.collapsePath.mutate(
 --
 
 .The mutated graph will look like the following graph when filtered by the `PLAYS_SAME_INSTRUMENT` relationship
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE
   (Dan:Person),

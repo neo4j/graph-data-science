@@ -22,6 +22,7 @@ Finally, the configured `topN` predictions are stored back to the projected grap
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
 
+
 === Syntax
 
 .Link Prediction syntax per mode
@@ -30,7 +31,7 @@ If the predict and train graphs are distinct, it is also beneficial that they ha
 [.include-with-mutate]
 ======
 .Run Link Prediction in mutate mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.mutate(
   graphName: String,
@@ -79,10 +80,11 @@ include::partial$/machine-learning/linkprediction-pipeline/specific-predict-conf
 |===
 ======
 
+
 [.include-with-stream]
 ======
 .Run Link Prediction in stream mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.stream(
   graphName: String,
@@ -111,6 +113,7 @@ include::partial$/machine-learning/linkprediction-pipeline/specific-predict-conf
 ======
 ====
 
+
 [[algorithms-link-prediction-pipelines-predict-examples]]
 === Example
 
@@ -131,6 +134,7 @@ So for example if when doing approximate search, `a -- b` are among the top pred
 The stream procedure will yield a node pair only once.
 ====
 
+
 [[algorithms-link-prediction-pipelines-predict-examples-estimate]]
 ==== Memory Estimation
 
@@ -140,7 +144,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for applying the model:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('myGraph', {
   modelName: 'lp-pipeline-model',
@@ -158,12 +162,13 @@ YIELD requiredMemory
 |===
 --
 
+
 [[algorithms-link-prediction-pipelines-predict-examples-stream]]
 ==== Stream
 
 [role=query-example, group=lp]
 --
-[source, cypher, indent=0]
+[source, cypher]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
@@ -191,11 +196,13 @@ We specified `threshold` to filter out predictions with probability less than 45
 We can see, that our model predicts the most likely link is between Michael and Veselin.
 --
 
+
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
 ==== Mutate
 
 In these examples we will show how to write the predictions to your projected graph.
 We will use the model `lp-pipeline-model`, that we trained in the xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[train example].
+
 
 [[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]
 ===== Exhaustive search
@@ -205,7 +212,7 @@ For each such node pair the model we trained will be used to predict whether the
 
 [role=query-example, group=lp]
 --
-[source, cypher, indent=0]
+[source, cypher]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
@@ -236,6 +243,7 @@ If our graph is very large there may be a lot of possible new links.
 As such it may take a very long time to run the predictions.
 It may therefore be a more viable option to use a search strategy that only looks at a subset of all possible new links.
 
+
 [[algorithms-link-prediction-pipelines-predict-examples-approximate]]
 ===== Approximate search
 
@@ -251,7 +259,7 @@ See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more de
 
 [role=query-example, group=lp]
 --
-[source, cypher, indent=0]
+[source, cypher]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',

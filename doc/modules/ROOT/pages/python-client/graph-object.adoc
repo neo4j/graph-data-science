@@ -10,12 +10,13 @@ Additionally, the `Graph` objects have convenience methods allowing for inspecti
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
 
+
 == Constructing a graph object
 
 There are several ways of constructing a graph object.
 The simplest way is to do a xref::graph-project.adoc#graph-project-native-syntax[native projection]:
 
-[source,python, indent=0]
+[source,python]
 ----
 G, res = gds.graph.project(
     "my-graph",                 #  Graph name
@@ -35,7 +36,7 @@ Similarly to Cypher there's also a corresponding `gds.graph.project.estimate` me
 
 To get a graph object that represents a graph that has already been projected into the graph catalog, one can call the client-side only `get` method and passing it a name:
 
-[source,python, indent=0]
+[source,python]
 ----
 G = gds.graph.get("my-graph")
 ----
@@ -47,6 +48,7 @@ In addition to those aforementioned there are three more methods that construct 
 * `gds.beta.graph.generate`
 
 Their Cypher signatures map to Python in much the same way as `gds.graph.project` above.
+
 
 == Inspecting a graph object
 
@@ -71,11 +73,12 @@ There are convenience methods on the graph object that let us extract informatio
 
 For example, to get the node count and node properties of a graph `G`, we would do the following:
 
-[source,python, indent=0]
+[source,python]
 ----
 n = G.node_count()
 props = G.node_properties("MyLabel")
 ----
+
 
 == Using a graph object
 
@@ -86,7 +89,7 @@ include::partial$/pythonclient/python-client-syntax.adoc[]
 
 For example, to run the WCC on a graph `G`, and then drop the graph, do the following:
 
-[source,python, indent=0]
+[source,python]
 ----
 G, _ = gds.graph.project(...)
 

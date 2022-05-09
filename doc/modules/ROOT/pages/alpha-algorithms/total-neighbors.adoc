@@ -13,6 +13,7 @@ It is based on the idea that the more connected a node is, the more likely it is
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 [[algorithms-linkprediction-total-neighbors-context]]
 == History and explanation
 
@@ -26,17 +27,19 @@ A value of 0 indicates that two nodes are not close, while higher values indicat
 
 The library contains a function to calculate the closeness between two nodes.
 
+
 [[algorithms-linkprediction-total-neighbors-syntax]]
 == Syntax
 
 .The following will run the algorithm and return the result:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {
     relationshipQuery: null,
     direction: "BOTH"
 })
 ----
+
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -48,11 +51,12 @@ RETURN gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {
 | `direction`         | String | BOTH    | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
 |===
 
+
 [[algorithms-linkprediction-total-neighbors-sample]]
 == Total Neighbors algorithm sample
 
 .The following will create a sample graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE (zhen:Person {name: 'Zhen'}),
        (praveena:Person {name: 'Praveena'}),
@@ -69,7 +73,7 @@ CREATE (zhen:Person {name: 'Zhen'}),
 ----
 
 .The following will return the Total Neighbors score for Michael and Karin:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})
@@ -86,7 +90,7 @@ RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score
 We can also compute the score of a pair of nodes, based on a specific relationship type.
 
 .The following will return the Total Neighbors score for Michael and Karin based only on the `FRIENDS` relationship:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (p1:Person {name: 'Michael'})
 MATCH (p2:Person {name: 'Karin'})

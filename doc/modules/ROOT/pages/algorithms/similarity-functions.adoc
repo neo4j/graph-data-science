@@ -29,7 +29,7 @@ An example of usage for each function is provided below:
 [role=query-example]
 --
 .Jaccard similarity function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.jaccard(
   [1.0, 5.0, 3.0, 6.7],
@@ -48,7 +48,7 @@ RETURN gds.similarity.jaccard(
 [role=query-example]
 --
 .Overlap similarity function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.overlap(
   [1.0, 5.0, 3.0, 6.7],
@@ -67,7 +67,7 @@ RETURN gds.similarity.overlap(
 [role=query-example]
 --
 .Cosine similarity function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.cosine(
   [1.0, 5.0, 3.0, 6.7],
@@ -86,7 +86,7 @@ RETURN gds.similarity.cosine(
 [role=query-example]
 --
 .Pearson similarity function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.pearson(
   [1.0, 5.0, 3.0, 6.7],
@@ -105,7 +105,7 @@ RETURN gds.similarity.pearson(
 [role=query-example]
 --
 .Euclidean similarity function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.euclidean(
   [1.0, 5.0, 3.0, 6.7],
@@ -124,7 +124,7 @@ RETURN gds.similarity.euclidean(
 [role=query-example]
 --
 .Euclidean distance function
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.euclideanDistance(
   [1.0, 5.0, 3.0, 6.7],
@@ -148,7 +148,7 @@ See the examples below.
 [role=query-example]
 --
 .Jaccard with null values
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.jaccard(
   [1.0, null, 3.0],
@@ -167,7 +167,7 @@ RETURN gds.similarity.jaccard(
 [role=query-example]
 --
 .Cosine with null values
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 RETURN gds.similarity.cosine(
   [1.0, null, 3.0],

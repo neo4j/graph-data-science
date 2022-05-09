@@ -16,6 +16,7 @@ This section describes the Degree Centrality algorithm in the Neo4j Graph Data S
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-degree-centrality-intro]]
 == Introduction
 
@@ -30,6 +31,7 @@ For more information on this algorithm, see:
 
 * http://leonidzhukov.net/hse/2014/socialnetworks/papers/freeman79-centrality.pdf[Linton C. Freeman: Centrality in Social Networks Conceptual Clarification, 1979.^]
 
+
 [[algorithms-degree-centrality-usecase]]
 == Use-cases
 
@@ -43,6 +45,7 @@ For example, in BrandWatch's https://www.brandwatch.com/blog/react-influential-m
 The weighted centrality for fraudsters is significantly higher because they tend to collude with each other to artificially increase the price of items.
 Read more in https://link.springer.com/chapter/10.1007/978-3-319-23461-8_11[Two Step graph-based semi-supervised Learning for Online Auction Fraud Detection^]
 
+
 [[algorithms-degree-centrality-syntax]]
 == Syntax
 
@@ -55,7 +58,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run Degree Centrality in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stream(
   graphName: String,
@@ -80,10 +83,11 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-stats]
 ======
 .Run Degree Centrality in stats mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stats(
   graphName: String,
@@ -114,10 +118,11 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-mutate]
 ======
 .Run Degree Centrality in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.mutate(
   graphName: String,
@@ -152,10 +157,11 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-write]
 ======
 .Run Degree Centrality in write mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.write(
   graphName: String,
@@ -192,6 +198,7 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 
 ====
 
+
 [[algorithms-degree-centrality-exsamples]]
 == Examples
 
@@ -201,7 +208,7 @@ include::partial$/algorithms/degree-centrality/specific-configuration.adoc[]
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:User {name: 'Alice'}),
@@ -227,7 +234,7 @@ We do this using a native projection targeting the `User` nodes and the `FOLLOWS
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a reverse projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -244,6 +251,7 @@ CALL gds.graph.project(
 The graph is projected in a `REVERSE` orientation in order to retrieve people with the most followers in the following examples.
 This will be demonstrated using the Degree Centrality algorithm on this graph.
 
+
 [[algorithms-degree-centrality-examples-memory-estimation]]
 === Memory Estimation
 
@@ -253,7 +261,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.write.estimate('myGraph', { writeProperty: 'degree' })
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -267,6 +275,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-degree-centrality-examples-stream]]
 === Stream
 
@@ -276,7 +285,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stream('myGraph')
 YIELD nodeId, score
@@ -301,6 +310,7 @@ We can see that Doug is the most popular user in our imaginary social network gr
 In a real social network, celebrities have very high follower counts but tend to follow only very few people.
 We could therefore consider Doug quite the celebrity!
 
+
 [[algorithms-degree-centrality-examples-stats]]
 === Stats
 
@@ -310,7 +320,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stats` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stats('myGraph')
 YIELD centralityDistribution
@@ -327,6 +337,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 
 Comparing this to the results we saw in the xref::algorithms/degree-centrality.adoc#algorithms-degree-centrality-examples-stream[stream example], we can find our minimum and mean values from the table.
 
+
 [[algorithms-degree-centrality-examples-mutate]]
 === Mutate
 
@@ -335,7 +346,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.mutate('myGraph', { mutateProperty: 'degree' })
 YIELD centralityDistribution, nodePropertiesWritten
@@ -354,6 +365,7 @@ The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `degree` which stores the degree centrality score for each node.
 To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs in the catalog].
 
+
 [[algorithms-degree-centrality-examples-write]]
 === Write
 
@@ -362,7 +374,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.write('myGraph', { writeProperty: 'degree' })
 YIELD centralityDistribution, nodePropertiesWritten
@@ -380,6 +392,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 The returned result is the same as in the `stats` example.
 Additionally, each of the seven nodes now has a new property `degree` in the Neo4j database, containing the degree centrality score for that node.
 
+
 [[algorithms-degree-centrality-weighted-example]]
 == Weighted Degree Centrality example
 
@@ -389,7 +402,7 @@ This algorithm is a variant of the Degree Centrality algorithm, that measures th
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode, showing which users have the highest weighted degree centrality:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stream(
    'myGraph',
@@ -418,6 +431,7 @@ Charles and Michael both only have one follower, but those relationships have a 
 Note that Bridget also has a weighted score of 0.0, despite having a connection from Alice.
 That is because the `score` property value between Bridget and Alice is negative and will be ignored by the algorithm.
 
+
 [[algorithms-degree-centrality-orientation-example]]
 == Setting an orientation
 
@@ -429,7 +443,7 @@ Supported values are `NATURAL` (default), `REVERSE` and `UNDIRECTED`.
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode, showing which users have the highest in-degree centrality using the reverse orientation of the relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.degree.stream(
    'myGraph',

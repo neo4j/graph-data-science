@@ -11,6 +11,7 @@
 This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
 --
 
+
 [[algorithms-approx-max-k-cut-intro]]
 == Introduction
 
@@ -29,6 +30,7 @@ Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum C
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 === Applications
 
 Finding the maximum k-cut for a graph has several known applications, for example it is used to:
@@ -38,6 +40,7 @@ Finding the maximum k-cut for a graph has several known applications, for exampl
 * solve wireless communication problems
 * analyze cryptocurrency transaction patterns
 * design computer networks
+
 
 === Approximation
 
@@ -58,16 +61,19 @@ To see how the algorithm above performs in terms of solution quality compared to
 By the stochastic nature of the algorithm, the results it yields will not be deterministic unless running single-threaded (`concurrency = 1`) and using the same random seed (`randomSeed = SOME_FIXED_VALUE`).
 ====
 
+
 [[algorithms-approx-max-k-cut-tuning]]
 == Tuning the algorithm parameters
 
 There are two important algorithm specific parameters which lets you trade solution quality for shorter runtime.
+
 
 [[algorithms-approx-max-k-cut-iterations]]
 === Iterations
 GRASP style algorithms are iterative by nature.
 Every iteration they run the same well-defined steps to derive a solution, but each time with a different random seed yielding solutions that (highly likely) are different too.
 In the end the highest scoring solution is picked as the winner.
+
 
 [[algorithms-approx-max-k-cut-vns-order]]
 === VNS max neighborhood order
@@ -80,6 +86,7 @@ This means that although potentially better solutions can be derived using VNS i
 By default, VNS is not used (`vnsMaxNeighborhoodOrder = 0`).
 To use it, experimenting with a maximum order equal to `20` is a good place to start.
 
+
 [[algorithms-approx-max-k-cut-syntax]]
 == Syntax
 
@@ -89,10 +96,11 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.tabbed-example]
 ====
 
+
 [.include-with-stream]
 ======
 .Run Approximate Maximum k-cut in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.stream(
   graphName: String,
@@ -117,10 +125,11 @@ include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[
 |===
 ======
 
+
 [.include-with-mutate]
 ======
 .Run Approximate Maximum k-cut in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.mutate(
   graphName: String,
@@ -156,6 +165,7 @@ include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[
 ======
 ====
 
+
 [[algorithms-approx-max-k-cut-examples]]
 == Examples
 
@@ -165,7 +175,7 @@ include::partial$/algorithms/alpha/approx-max-k-cut/specific-configuration.adoc[
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:Person {name: 'Alice'}),
@@ -196,7 +206,7 @@ With the graph in Neo4j we can now project it into the graph catalog to prepare 
 We do this using a native projection targeting the `Person` nodes and the `TRANSACTION` relationships.
 
 .The following statement will project a graph store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -209,6 +219,7 @@ CALL gds.graph.project(
 )
 ----
 
+
 === Memory Estimation
 
 :mode: mutate
@@ -217,7 +228,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.mutate.estimate('myGraph', {mutateProperty: 'community'})
 YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
@@ -231,6 +242,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-approx-max-k-cut-mutate-unweighted-example]]
 === Mutate
 
@@ -239,7 +251,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.mutate('myGraph', {mutateProperty: 'community'})
 YIELD cutCost, nodePropertiesWritten
@@ -263,7 +275,7 @@ To inspect which community each node belongs to we can xref::graph-catalog-node-
 [role=query-example]
 --
 .Stream node properties:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('myGraph', 'community')
 YIELD nodeId, propertyValue
@@ -296,6 +308,7 @@ For our case here it would be equally plausible to get the inverse solution, i.e
 Note however, that for that solution the cut cost would remain the same.
 ====
 
+
 === Mutate with relationship weights
 
 In this example we will have a look at how adding relationship weight can affect our solution.
@@ -303,7 +316,7 @@ In this example we will have a look at how adding relationship weight can affect
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode, diving our nodes into two communities once again:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.mutate(
    'myGraph',
@@ -314,6 +327,7 @@ CALL gds.alpha.maxkcut.mutate(
 )
 YIELD cutCost, nodePropertiesWritten
 ----
+
 
 .Results
 [opts="header"]
@@ -330,7 +344,7 @@ Let us now xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-pr
 [role=query-example]
 --
 .Stream node properties:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperty('myGraph', 'weightedCommunity')
 YIELD nodeId, propertyValue
@@ -374,12 +388,13 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using default configuration parameters:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.maxkcut.stream('myGraph')
 YIELD nodeId, communityId
 RETURN gds.util.asNode(nodeId).name AS name, communityId
 ----
+
 
 .Results
 [opts="header"]

@@ -4,10 +4,12 @@
 :entity: relationship
 :result: relationships
 
+
 [abstract]
 --
 This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
 --
+
 
 [[linkprediction-pipelines-intro]]
 == Introduction
@@ -50,6 +52,7 @@ The rest of this page is divided as follows:
 * xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[Training the pipeline]
 * xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[Applying a trained model for prediction]
 
+
 [[linkprediction-creating-a-pipeline]]
 == Creating a pipeline
 
@@ -58,12 +61,13 @@ This stores a trainable pipeline object in the pipeline catalog of type `Link pr
 This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
 The latter is also a model which is stored in the catalog with type `LinkPrediction`.
 
+
 === Syntax
 
 [.pipeline-create-syntax]
 --
 .Create pipeline syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.create(
   pipelineName: String
@@ -86,12 +90,13 @@ YIELD
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
 
+
 === Example
 
 [role=query-example,group=lp]
 --
 .The following will create a pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.create('pipe')
 ----
@@ -108,6 +113,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
+
 [[linkprediction-adding-node-properties]]
 == Adding node properties
 
@@ -120,12 +126,13 @@ The ending `.mutate` may be omitted and one may also use shorthand forms such as
 
 For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
 
+
 === Syntax
 
 [.pipeline-add-node-property-syntax]
 --
 .Add node property syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addNodeProperty(
   pipelineName: String,
@@ -149,6 +156,7 @@ YIELD
 | procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
 |===
 
+
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
 === Example
@@ -156,7 +164,7 @@ include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.ad
 [role=query-example,group=lp]
 --
 .The following will add a node property step to the pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
   mutateProperty: 'embedding',
@@ -179,6 +187,7 @@ The pipeline will now execute the xref::machine-learning/node-embeddings/fastrp.
 This ensures the `embedding` property can be used as an input for link features.
 --
 
+
 [[linkprediction-adding-features]]
 == Adding link features
 
@@ -189,12 +198,13 @@ The order of the features in the link feature vector follows the order of the fe
 Like with node property steps, the feature steps are also executed both at xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training] and xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[prediction] time.
 The supported methods for obtaining features are described xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-supported-features[below].
 
+
 === Syntax
 
 [.pipeline-add-feature-syntax]
 --
 .Adding a link feature to a pipeline syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addFeature(
   pipelineName: String,
@@ -228,6 +238,7 @@ YIELD
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
 
+
 [[linkprediction-supported-features]]
 === Supported feature types
 
@@ -246,12 +257,13 @@ The supported types of features can then be described as follows:
 | COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
 |===
 
+
 === Example
 
 [role=query-example,group=lp]
 --
 .The following will add a feature step to the pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
   nodeProperties: ['embedding', 'numberOfPosts']
@@ -268,6 +280,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
 For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
 --
+
 
 [[linkprediction-configure-splits]]
 == Configuring the relationship splits
@@ -304,12 +317,13 @@ The `train` and `test` relationship sets are used for:
 However, they are not used by the algorithms run in the node property steps.
 The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
 
+
 === Syntax
 
 [.pipeline-configure-split-syntax]
 --
 .Configure the relationship split syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.configureSplit(
   pipelineName: String,
@@ -344,12 +358,13 @@ YIELD
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
 
+
 === Example
 
 [role=query-example,group=lp]
 --
 .The following will configure the splitting of the pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
   testFraction: 0.25,
@@ -390,7 +405,9 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 At least one model candidate must be added to the pipeline before training it.
 ====
 
+
 === Syntax
+
 
 [.tabbed-example, caption = ]
 ====
@@ -399,7 +416,7 @@ At least one model candidate must be added to the pipeline before training it.
 [.pipeline-add-lr-syntax]
 --
 .Configure the train parameters syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression(
   pipelineName: String,
@@ -432,7 +449,7 @@ include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.ad
 [.pipeline-add-rf-syntax]
 --
 .Configure the train parameters syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.linkPrediction.addRandomForest(
   pipelineName: String,
@@ -461,18 +478,19 @@ include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.ad
 ======
 ====
 
+
 === Example
 
 We can add multiple model candidates to our pipeline.
 
-[source, cypher, role=noplay query-example, no-result=true, group=lp, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
 .The following will add a logistic regression model:
 --
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 0.0625})
 YIELD parameterSpace
 --
 
-[source, cypher, role=noplay query-example, no-result=true, group=lp, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
 .The following will add a random forest model:
 --
 CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 5})
@@ -482,7 +500,7 @@ YIELD parameterSpace
 [role=query-example,group=lp]
 --
 .The following will add another logistic regression model:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500})
 YIELD parameterSpace
@@ -509,6 +527,7 @@ Please see xref::machine-learning/training-methods.adoc[Training methods] for mo
 include::partial$/machine-learning/linkprediction-pipeline/training.adoc[]
 
 include::partial$/machine-learning/linkprediction-pipeline/predict.adoc[]
+
 
 == Appendix
 
@@ -539,6 +558,7 @@ Note here the blue area which shows one trapezoid under the curve.
 
 The area under the Precision-Recall curve can also be interpreted as an average precision where the average is over different classification thresholds.
 
+
 [[linkprediction-pipelines-classimbalance]]
 === Class imbalance
 
@@ -561,7 +581,7 @@ Please note that the `relationshipCount` reported by the xref::graph-list.adoc[g
 Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
 For example, this query will count the number of relationships of type `T` or `R`:
 
-[source, cypher, indent=0]
+[source, cypher]
 ----
 MATCH (a)-[rel:T | R]-(b)
 WHERE a < b

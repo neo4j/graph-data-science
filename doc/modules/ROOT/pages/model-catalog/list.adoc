@@ -4,12 +4,13 @@
 
 Information about models in the catalog can be retrieved using the `gds.beta.model.list()` procedure.
 
+
 == Syntax
 
 [.model-list-syntax]
 --
 .List models from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list(modelName: String)
 YIELD
@@ -41,7 +42,7 @@ Once we have trained models in the catalog we can see information about either a
 [role=query-example]
 --
 .Listing detailed information about all models:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list()
 YIELD modelInfo, loaded, shared, stored
@@ -61,7 +62,7 @@ RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 [role=query-example]
 --
 .Listing detailed information about specific model:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.list('my-model')
 YIELD modelInfo, loaded, shared, stored

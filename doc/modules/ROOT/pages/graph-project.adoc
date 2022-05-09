@@ -14,6 +14,7 @@ This allows multiple algorithms to use the same graph without having to project 
 Native projections provide the best performance by reading from the Neo4j store files.
 Recommended for both the development, and the production phase.
 
+
 [NOTE]
 --
 There is also a way to generate a random graph, see xref::alpha-algorithms/graph-generation.adoc[Graph Generation] documentation for more details.
@@ -28,6 +29,7 @@ The projected graphs will reside in the catalog until:
 - the Neo4j database management system is stopped.
 --
 
+
 [[graph-project-native-syntax]]
 == Syntax
 
@@ -36,7 +38,7 @@ In addition, the optional `configuration` parameter allows us to further configu
 
 [.graph-project-syntax]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
     graphName: String,
@@ -87,6 +89,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 | projectMillis          | Integer  | Milliseconds for projecting the graph.
 |===
 --
+
 
 [[node-projection-syntax]]
 === Node Projection
@@ -144,6 +147,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 |Integer   |`Integer.MIN_VALUE`
 |Integer[] | null
 |===
+
 
 [[relationship-projection-syntax]]
 === Relationship Projection
@@ -209,6 +213,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 | defaultValue              | Float or Integer    |  yes     |  `Double.NaN`            | The default value if the property is not defined for a node.
 |===
 
+
 [[graph-project-examples]]
 == Examples
 
@@ -218,7 +223,7 @@ The example graph looks like this:
 image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
@@ -244,7 +249,7 @@ We are going to start with demonstrating how to load a simple graph by projectin
 [role=query-example]
 --
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'persons',            // <1>
@@ -270,6 +275,7 @@ In the example above, we used a short-hand syntax for the node and relationship 
 The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
 In addition, we can see the projected in-memory graph contains three `Person` nodes, and the two `KNOWS` relationships.
 
+
 === Multi-graph
 
 A multi-graph is a graph with multiple node labels and relationship types.
@@ -279,7 +285,7 @@ To project multiple node labels and relationship types, we can adjust the projec
 [role=query-example]
 --
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'personsAndBooks',    // <1>
@@ -305,6 +311,7 @@ In the example above, we used a short-hand syntax for the node and relationship 
 The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the Results table.
 In addition, we can see the projected in-memory graph contains five nodes, and the two relationships.
 
+
 === Relationship orientation
 
 By default, relationships are loaded in the same orientation as stored in the Neo4j db.
@@ -314,7 +321,7 @@ Additionally, we provide the functionality to load the relationships in the `REV
 [role=query-example]
 --
 .Project `Person` nodes and undirected `KNOWS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'undirectedKnows',                    // <1>
@@ -343,6 +350,7 @@ To specify the orientation, we need to write the `relationshipProjection` with t
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
 Thus, the `undirectedKnows` graph contains four relationships, twice as many as the `persons` graph in xref::graph-project-cypher.adoc#graph-project-example-single-label-type[Simple graph].
 
+
 [[node-properties-example]]
 === Node properties
 
@@ -351,7 +359,7 @@ To project node properties, we can either use the `nodeProperties` configuration
 [role=query-example, group=node-properties]
 --
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'graphWithProperties',                                // <1>
@@ -393,7 +401,7 @@ In the following we check if the price was correctly projected:
 [role=query-example, group=node-properties]
 --
 .Verify the ratings property of Adam in the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Book)
 RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') as price
@@ -411,6 +419,7 @@ ORDER BY price
 
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
+
 === Relationship properties
 
 Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
@@ -418,7 +427,7 @@ Analogous to node properties, we can either use the `relationshipProperties` con
 [role=query-example, group=rel-properties]
 --
 .Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'readWithProperties',                     // <1>
@@ -451,7 +460,7 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 [role=query-example, group=rel-properties]
 --
 .Stream the relationship property `numberOfPages` of the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
@@ -475,6 +484,7 @@ ORDER BY person ASC, numberOfPages DESC
 
 We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref::graph-project-cypher-aggregation.adoc#node-properties-example[Node properties].
 
+
 === Parallel relationships
 
 Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
@@ -490,7 +500,7 @@ If we do not need the count, we could use the `SINGLE` aggregation.
 [role=query-example, group=count-aggregate]
 --
 .Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'readCount',                      // <1>
@@ -532,7 +542,7 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 [role=query-example, group=count-aggregate]
 --
 .Stream the relationship property `numberOfReads` of the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
@@ -555,6 +565,7 @@ ORDER BY numberOfReads DESC, person
 
 We can see, that the two READ relationships between Florentin, and the Hobbit result in `2` numberOfReads.
 
+
 === Parallel relationships with properties
 
 For graphs with relationship properties we can also use other aggregations.
@@ -562,7 +573,7 @@ For graphs with relationship properties we can also use other aggregations.
 [role=query-example, group=sum-aggregate]
 --
 .Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'readSums',                                                   // <1>
@@ -592,7 +603,7 @@ Next, we will verify that the relationship property `numberOfPages` was correctl
 [role=query-example, group=sum-aggregate]
 --
 .Stream the relationship property `numberOfPages` of the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
 YIELD
@@ -616,6 +627,7 @@ ORDER BY numberOfPages DESC, person
 
 We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
 
+
 === Validate relationships flag
 
 As mentioned in the xref::graph-project.adoc#graph-project-native-syntax[syntax section], the `validateRelationships` flag controls whether an error will be raised when attempting to project a relationship where either the source or target node is not present in the xref::graph-project.adoc#node-projection-syntax[node projection].
@@ -625,7 +637,7 @@ We can simulate such a case with the xref::graph-project-cypher.adoc#graph-proje
 
 --
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
-[source, cypher, indent=0]
+[source, cypher]
 ----
 CALL gds.graph.project(
   'danglingRelationships',

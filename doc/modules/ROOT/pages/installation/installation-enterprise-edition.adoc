@@ -9,6 +9,7 @@ You can configure the location of the license key file by setting the `gds.enter
 The location must be specified using an absolute path.
 It is necessary to restart the database when configuring the license key for the first time and every time the license key is changed, e.g., when a new license key is added or the location of the key file changes.
 
+
 Example configuration for the license key file:
 ----
 gds.enterprise.license_file=/path/to/my/license/keyfile

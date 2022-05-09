@@ -44,7 +44,7 @@ Before running this algorithm, we recommend that you read xref::common-usage/mem
 [.include-with-stream]
 ======
 .Run RandomWalk in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.randomWalk.stream(
   graphName: String,
@@ -61,6 +61,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
 
+
 .Results
 [opts="header",cols="1m,1,6"]
 |===
@@ -76,7 +77,7 @@ include::partial$/algorithms/beta/randomWalk/specific-configuration.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (home:Page {name: 'Home'}),
        (about:Page {name: 'About'}),
@@ -103,7 +104,7 @@ CREATE (home:Page {name: 'Home'}),
        (d)-[:LINKS]->(home)
 ----
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -112,12 +113,13 @@ CALL gds.graph.project(
 );
 ----
 
+
 === Without specified source nodes
 
 [role=query-example]
 --
 .Run the RandomWalk algorithm on `myGraph`
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.randomWalk.stream(
   'myGraph',
@@ -147,12 +149,13 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 |===
 --
 
+
 === With specified source nodes
 
 [role=query-example]
 --
 .Run the RandomWalk algorithm on `myGraph` with specified sourceNodes
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (page:Page)
 WHERE page.name IN ['Home', 'About']

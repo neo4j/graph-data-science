@@ -11,11 +11,13 @@
 This section describes the Conductance algorithm in the Neo4j Graph Data Science library.
 --
 
+
 :directed:
 :undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 == Introduction
 
@@ -30,6 +32,7 @@ The algorithm runs in time linear to the number of relationships in the graph.
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 == Syntax
 
 include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
@@ -38,10 +41,11 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.tabbed-example]
 ====
 
+
 [.include-with-stream]
 ======
 .Run Conductance in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.conductance.stream(
   graphName: String,
@@ -74,6 +78,7 @@ Only non-negative community IDs are valid for identifying communities.
 Nodes with a negative community ID will only take part in the computation to the extent that they are connected to nodes in valid communities, and thus contribute to those valid communities' outward relationship counts.
 ====
 
+
 == Examples
 
 :algorithm-name: Conductance
@@ -82,7 +87,7 @@ Nodes with a negative community ID will only take part in the computation to the
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (nAlice:User {name: 'Alice', seed: 42}),
@@ -113,7 +118,7 @@ We load the `LINK` relationships with orientation set to `UNDIRECTED` as this wo
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -135,7 +140,7 @@ We now run the xref::algorithms/louvain.adoc[Louvain algorithm] to create a divi
 [role=query-example, group=louvain-conductance]
 --
 .The following will run the Louvain algorithm and store the results in `myGraph`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.louvain.mutate('myGraph', { mutateProperty: 'community', relationshipWeightProperty: 'weight' })
 YIELD communityCount
@@ -168,6 +173,7 @@ Please see the xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-nod
 
 For more information about Louvain, see its xref::algorithms/louvain.adoc[algorithm page].
 
+
 === Stream
 
 Since we now have a community detection, we can evaluate how good it is under the conductance metric.
@@ -181,7 +187,7 @@ For more details on the stream mode in general, see xref::common-usage/running-a
 [role=query-example, group=louvain-conductance]
 --
 .The following will run the Conductance algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.conductance.stream('myGraph', { communityProperty: 'community', relationshipWeightProperty: 'weight' })
 YIELD community, conductance

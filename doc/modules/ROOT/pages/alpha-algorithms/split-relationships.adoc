@@ -10,6 +10,7 @@
 This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
 --
 
+
 [[algorithms-split-relationships-intro]]
 == Introduction
 
@@ -23,6 +24,7 @@ Both, the holdout and the remaining relationships are added to the projected gra
 If the configuration option `relationshipWeightProperty` is specified, then the corresponding relationship property is preserved on the remaining set of relationships.
 Note however that the holdout set only has the `label` property; it is not possible to induce relationship weights on the holdout set as it also contains negative samples.
 
+
 [[algorithms-split-relationships-syntax]]
 == Syntax
 
@@ -35,7 +37,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-mutate]
 ======
 .Run Split Relationships in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate(
   graphName: String,
@@ -90,7 +92,7 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
     (n0:Label),
@@ -112,7 +114,7 @@ The holdout set will be split into two same-sized classes: positive and negative
 Positive relationships will be randomly selected from the existing relationships and marked with a property `label: 1`.
 Negative relationships will be randomly generated, i.e., they do not exist in the input graph, and are marked with a property `label: 0`.
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'graph',
@@ -126,7 +128,7 @@ We use a random seed value in order to produce deterministic results.
 
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('graph', {
     holdoutRelationshipType: 'TYPE_HOLDOUT',
@@ -153,7 +155,7 @@ Finally, the `TYPE_REMAINING` relationship type is formed with the remaining 80%
 These are written as orientation `UNDIRECTED` which counts as writing 8 relationships.
 
 .The mutated graph will look like the following graph when filtered by the `TEST` and `TRAIN` relationship.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE
     (n0:Label),

@@ -12,7 +12,9 @@ The Strongly Connected Components (SCC) algorithm finds maximal sets of connecte
 A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
 
+
 include::partial$/algorithms/alpha/alpha-note.adoc[]
+
 
 [[algorithms-strongly-connected-components-context]]
 == History and explanation
@@ -21,6 +23,7 @@ include::partial$/algorithms/alpha/alpha-note.adoc[]
 SCC is one of the earliest graph algorithms, and the first linear-time algorithm was described by Tarjan in 1972.
 Decomposing a directed graph into its strongly connected components is a classic application of the depth-first search algorithm.
 // end::explanation[]
+
 
 [[algorithms-strongly-connected-components-usecase]]
 == Use-cases - when to use the Strongly Connected Components algorithm
@@ -37,11 +40,12 @@ Decomposing a directed graph into its strongly connected components is a classic
   The SCC algorithms can be used to find such groups, and suggest the commonly liked pages or games to the people in the group who have not yet liked those pages or games.
 // end::use-case[]
 
+
 [[algorithms-strongly-connected-components-syntax]]
 == Syntax
 
 .The following will run the algorithm and write back results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.write(
   graphName: string,
@@ -85,7 +89,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, setCount, maxSetSize, min
 |===
 
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
 YIELD nodeId, componentId
@@ -107,13 +111,14 @@ YIELD nodeId, componentId
 | componentId | Integer | Component ID.
 |===
 
+
 [[algorithms-strongly-connected-components-example]]
 == Strongly Connected Components algorithm example
 
 image::strongly_connected_components.png[]
 
 .The following will create a sample graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE (nAlice:User {name:'Alice'})
 CREATE (nBridget:User {name:'Bridget'})
@@ -135,13 +140,13 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 ----
 
 .The following will project and store a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
 .The following will run the algorithm and write back results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.write('graph', {
   writeProperty: 'componentId'
@@ -157,7 +162,7 @@ YIELD setCount, maxSetSize, minSetSize;
 |===
 
 .The following will run the algorithm and stream back results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scc.stream('graph', {})
 YIELD nodeId, componentId
@@ -185,7 +190,7 @@ Charles ends up in his own component because there isn't an outgoing relationshi
 // end::stream-sample-graph-explanation[]
 
 .The following will find the largest partition:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User)
 RETURN u.componentId AS Component, count(*) AS ComponentSize
@@ -199,6 +204,7 @@ LIMIT 1
 | Component | ComponentSize
 | 0         | 3
 |===
+
 
 ifndef::env-docs[]
 == References

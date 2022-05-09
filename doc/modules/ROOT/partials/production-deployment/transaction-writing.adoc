@@ -10,7 +10,7 @@ The goal is to demonstrate correct usage of the GDS library write functionality 
 
 Example for incorrect use.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -43,7 +43,7 @@ Notice the reordering of the statements, this ensures that the in-memory graph w
 
 First remove the unwanted relationships.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -54,7 +54,7 @@ MATCH ()-[r:SIMILAR_TO]->() DELETE r;
 
 Project a graph.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -70,7 +70,7 @@ CALL gds.graph.project.cypher(
 
 Run the algorithm.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :BEGIN
 
@@ -84,12 +84,13 @@ CALL gds.nodeSimilarity.write(
 :COMMIT
 ----
 
+
 == Java API
 
 The same issue can be seen using the Java API, the examples are below.
 
 .Constants used throughout the examples below:
-[source, java, indent=0]
+[source, java]
 ----
 // Removes the in-memory graph (if exists) from the graph catalog
 static final String CYPHER_DROP_GDS_GRAPH_IF_EXISTS =
@@ -115,7 +116,7 @@ static final String CYPHER_WRITE_SIMILAR_TO =
 ----
 
 .Incorrect use:
-[source, java, indent=0]
+[source, java]
 ----
 try (var session = driver.session()) {
 	var params = Map.<String, Object>of("graphName", "genre-related-to-artist");
@@ -132,7 +133,7 @@ Here we are facing the same issue with running everything in the same transactio
 This can be written correctly by splitting each statement in its own transaction.
 
 .Correct handling of the statements:
-[source, java, indent=0]
+[source, java]
 ----
 try (var session = driver.session()) {
 

@@ -11,16 +11,18 @@ Additionally, the `TrainingPipeline` has convenience methods allowing for inspec
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
 
+
 == Node classification
 
 This section outlines how to use the Python client to build, configure and train a xref::machine-learning/nodeclassification-pipelines.adoc[node classification pipeline], as well as how to use the model that training produces for predictions.
+
 
 === Pipeline
 
 The creation of the node classification pipeline is very similar to xref::machine-learning/nodeclassification-pipelines.adoc#nodeclassification-creating-a-pipeline[how it's done in Cypher].
 To create a new node classification pipeline one would make the following call:
 
-[source,python, indent=0]
+[source,python]
 ----
 pipe, res = gds.beta.pipeline.nodeClassification.create("my-pipe")
 ----
@@ -68,6 +70,7 @@ Another difference is that the `train` Python call takes a xref::python-client/g
 
 Please consult the xref::machine-learning/nodeclassification-pipelines.adoc[node classification Cypher documentation] for information about what kind of input the methods expect.
 
+
 [[python-client-pipelines-nodeclassification-pipe-example]]
 ==== Example
 
@@ -75,7 +78,7 @@ Below is a small example of how one could configure and train a very basic node 
 Note that we don't configure splits explicitly, but rather use the default.
 We suppose that the graph `G` we train on has a node property "my-class" which will be the target of our classification training.
 
-[source,python, indent=0]
+[source,python]
 ----
 pipe, _ = gds.beta.pipeline.nodeClassification.create("my-pipe")
 
@@ -101,6 +104,7 @@ assert res["trainMillis"] >= 0
 
 A model referred to as "my-model" in the xref::model-catalog/index.adoc[GDS Model Catalog] is produced.
 In the next section we will go over how to use that model to make predictions.
+
 
 === Model
 
@@ -134,12 +138,13 @@ The three main differences are that:
 * They have Python keyword arguments representing the keys of the configuration map.
 * One does not have to provide a "modelName" since the xref::python-client/model-object.adoc[model object] used itself have this information.
 
+
 ==== Example (continued)
 
 We now continue the xref::python-client/pipelines.adoc#python-client-pipelines-nodeclassification-pipe-example[example above] using the node classification model `trained_pipe_model` we trained there.
 Suppose that we have a new graph `H` that we want to run predictions on.
 
-[source,python, indent=0]
+[source,python]
 ----
 # Make sure our model performed well enough on the test set
 metrics = trained_pipe_model.metrics()
@@ -150,16 +155,19 @@ result = trained_pipe_model.predict_stream(H, concurrency=8)
 assert len(results) == H.node_count()
 ----
 
+
 == Link prediction
 
 This section outlines how to use the Python client to build, configure and train a xref::machine-learning/linkprediction-pipelines.adoc[link prediction pipeline], as well as how to use the model that training produces for predictions.
+
 
 === Pipeline
 
 The creation of the link prediction pipeline is very similar to xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-creating-a-pipeline[how it's done in Cypher].
 To create a new link prediction pipeline one would make the following call:
 
-[source,python, indent=0]
+
+[source,python]
 ----
 pipe, res = gds.beta.pipeline.linkPrediction.create("my-pipe")
 ----
@@ -207,6 +215,7 @@ Another difference is that the `train` Python call takes a xref::python-client/g
 
 Please consult the xref::machine-learning/linkprediction-pipelines.adoc[link prediction Cypher documentation] for information about what kind of input the methods expect.
 
+
 [[python-client-pipelines-linkprediction-pipe-example]]
 ==== Example
 
@@ -214,7 +223,7 @@ Below is a small example of how one could configure and train a very basic link 
 Note that we don't configure training parameters explicitly, but rather use the default.
 Suppose we have a graph `G` that we want to train our pipeline on.
 
-[source,python, indent=0]
+[source,python]
 ----
 pipe, _ = gds.beta.pipeline.linkPrediction.create("my-pipe")
 
@@ -243,6 +252,7 @@ assert res["trainMillis"] >= 0
 A model referred to as "my-model" in the xref::model-catalog/index.adoc[GDS Model Catalog] is produced.
 In the next section we will go over how to use that model to make predictions.
 
+
 === Model
 
 As we saw in the previous section, link prediction models are created when training a link prediction pipeline.
@@ -270,12 +280,13 @@ The three main differences are that:
 * They have Python keyword arguments representing the keys of the configuration map.
 * One does not have to provide a "modelName" since the xref::python-client/model-object.adoc[model object] used itself have this information.
 
+
 ==== Example (continued)
 
 We now continue the xref::python-client/pipelines.adoc#python-client-pipelines-linkprediction-pipe-example[example above] using the link prediction model `trained_pipe_model` we trained there.
 Suppose that we have a new graph `H` that we want to run predictions on.
 
-[source,python, indent=0]
+[source,python]
 ----
 # Make sure our model performed well enough on the test set
 metrics = trained_pipe_model.metrics()
@@ -286,13 +297,14 @@ results = trained_pipe_model.predict_mutate(H, topN=5, mutateRelationshipType="P
 assert result["relationshipsWritten"] == 5 * 2  # Undirected relationships
 ----
 
+
 == The pipeline catalog
 
 The primary way to use pipeline objects is for training models.
 Additionally, pipeline objects can be used as input to xref::pipeline-catalog/index.adoc[GDS Pipeline Catalog operations].
 For instance, supposing we have a pipeline object `pipe`, we could:
 
-[source,python, indent=0]
+[source,python]
 ----
 catalog_contains_pipe = gds.beta.pipeline.exists(pipe)
 

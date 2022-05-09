@@ -19,6 +19,7 @@ Executing Cypher queries on a projected graph can be achieved by leveraging the 
 This procedure will create a new impermanent database which you can switch to.
 That database will then use data from the projected graph as compared to the store files for usual Neo4j databases.
 
+
 [[create-cypher-db-limitations]]
 == Limitations
 
@@ -30,12 +31,13 @@ Some known limitations are listed below:
 * Writes
 ** All queries that attempt to write things, such as nodes, properties or labels, will fail
 
+
 [[create-cypher-db-syntax]]
 == Syntax
 
 [.create-cypher-db-syntax]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.create.cypherdb(
     dbName: String
@@ -65,13 +67,14 @@ YIELD
 |===
 --
 
+
 [[create-cypher-db-example]]
 == Example
 
 To demonstrate how to execute cypher statements on projected graphs we are going to create a simple social network graph.
 We will use this graph to create a new database which we will execute our statements on.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE
   (alice:Person { name: 'Alice', age: 23 }),
@@ -86,7 +89,7 @@ CREATE
 We will now load a graph projection of the created graph via the xref::graph-project.adoc[graph project] procedure:
 
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'social_network',
@@ -105,10 +108,11 @@ YIELD
 | "social_network" | 3        | 3
 |===
 
+
 With a named graph loaded into the Neo4j Graph Data Science library, we can proceed to create the new database using the loaded graph as underlying data.
 
 .Create a new database `gdsdb` using our `social_network` graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.create.cypherdb(
   'gdsdb',
@@ -118,7 +122,7 @@ CALL gds.alpha.create.cypherdb(
 
 In order to verify that the new database was created successfully we can use the Neo4j database administration commands.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 SHOW DATABASES
 ----
@@ -134,14 +138,14 @@ SHOW DATABASES
 
 We can now switch to the newly created database.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :use gdsdb
 ----
 
 Finally, we are set up to execute cypher queries on our in-memory graph.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Person)-[:KNOWS]->(m:Person) RETURN n.age AS age1, m.age AS age2
 ----

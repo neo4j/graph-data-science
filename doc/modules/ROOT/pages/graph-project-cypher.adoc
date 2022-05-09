@@ -7,6 +7,7 @@
 This section details projecting GDS graphs using `Cypher` projections.
 --
 
+
 A projected graph can be stored in the catalog under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
 This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
@@ -28,6 +29,7 @@ The projected graph will reside in the catalog until:
 - the Neo4j database management system is stopped.
 --
 
+
 [[graph-project-cypher-syntax]]
 == Syntax
 
@@ -36,7 +38,7 @@ In addition, the optional `configuration` parameter allows us to further configu
 
 [.graph-project-cypher-syntax]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
     graphName: String,
@@ -86,6 +88,7 @@ CALL gds.graph.project.cypher(
 
 NOTE: To get information about a stored graph, such as its schema, one can use xref::graph-list.adoc[gds.graph.list].
 
+
 [[graph-project-examples]]
 == Examples
 
@@ -95,7 +98,7 @@ The example graph looks like this:
 image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
@@ -112,6 +115,7 @@ CREATE
   (veselin)-[:READ]->(frankenstein)
 ----
 
+
 [[graph-project-example-single-label-type]]
 === Simple graph
 
@@ -121,7 +125,7 @@ We are going to start with demonstrating how to load a simple graph by projectin
 [role=query-example]
 --
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'persons',
@@ -139,6 +143,7 @@ YIELD
 |===
 --
 
+
 === Multi-graph
 
 A multi-graph is a graph with multiple node labels and relationship types.
@@ -148,7 +153,7 @@ To retain the label and type information when we load multiple node labels and r
 [role=query-example]
 --
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'personsAndBooks',
@@ -166,6 +171,7 @@ YIELD
 |===
 --
 
+
 === Relationship orientation
 
 The native projection supports specifying an orientation per relationship type.
@@ -178,6 +184,7 @@ Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
 These algorithms can not be used with a graph projected by a Cypher projection.
 --
 
+
 [[node-properties-example]]
 === Node properties
 
@@ -187,7 +194,7 @@ Thereby, we use the Cypher function https://neo4j.com/docs/cypher-manual/current
 [role=query-example, group=cypher-node-properties]
 --
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'graphWithProperties',
@@ -225,7 +232,7 @@ In the following we check if the price was correctly projected:
 [role=query-example, group=cypher-node-properties]
 --
 .Verify the ratings property of Adam in the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (n:Book)
 RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') AS price
@@ -243,6 +250,7 @@ ORDER BY price
 
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
+
 [[cypher-relationship-properties]]
 === Relationship properties
 
@@ -251,7 +259,7 @@ Analogous to node properties, we can project relationship properties using the `
 [role=query-example, group=cypher-rel-properties]
 --
 .Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'readWithProperties',
@@ -276,7 +284,7 @@ Next, we will verify that the relationship property `numberOfPages` was correctl
 [role=query-example, group=cypher-rel-properties]
 --
 .Stream the relationship property `numberOfPages` from the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
@@ -300,6 +308,7 @@ ORDER BY person ASC, numberOfPages DESC
 
 We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref::graph-project-cypher-aggregation.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
 
+
 === Parallel relationships
 
 The Property Graph Model in Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
@@ -312,7 +321,7 @@ Alternatively, we can aggregate the parallel relationship by using the https://n
 [role=query-example, group=cypher-count-aggregate]
 --
 .Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'readCount',
@@ -337,7 +346,7 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 [role=query-example, group=cypher-count-aggregate]
 --
 .Stream the relationship property `numberOfReads` of the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
@@ -360,6 +369,7 @@ ORDER BY numberOfReads DESC, person
 
 We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
 
+
 === Parallel relationships with properties
 
 For graphs with relationship properties we can also use other aggregations documented in the https://neo4j.com/docs/cypher-manual/current/functions/aggregating/[Cypher Manual].
@@ -367,7 +377,7 @@ For graphs with relationship properties we can also use other aggregations docum
 [role=query-example, group=cypher-sum-aggregate]
 --
 .Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'readSums',
@@ -392,7 +402,7 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 [role=query-example, group=cypher-sum-aggregate]
 --
 .Stream the relationship property `numberOfPages` of the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
@@ -415,6 +425,7 @@ ORDER BY numberOfPages DESC, person
 
 We can see, that the two `READ` relationships between Florentin and the Hobbit sum up to `46` numberOfPages.
 
+
 === Projecting filtered Neo4j graphs
 
 Cypher-projections allow us to specify the graph to project in a more fine-grained way.
@@ -423,7 +434,7 @@ The following examples will demonstrate how we to filter out `READ` relationship
 [role=query-example, group=cypher-rel-filtering-properties]
 --
 .Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is present:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'existingNumberOfPages',
@@ -449,7 +460,7 @@ Next, we will verify that the relationship property `numberOfPages` was correctl
 [role=query-example, group=cypher-rel-filtering-properties]
 --
 .Stream the relationship property `numberOfPages` from the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty('existingNumberOfPages', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
@@ -482,7 +493,7 @@ In the following example we supply a list of strings to limit the cities we want
 .Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is greater than 9:
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'existingNumberOfPages',
@@ -513,7 +524,7 @@ For example, pre-computing the list of nodes can be useful if the node filter is
 .Project `Person` nodes younger than 17 and their name not beginning with _V_, and `KNOWS` relationships:
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'personSubset',
@@ -542,7 +553,7 @@ By passing the relevant Persons as a parameter, the above query can be transform
 .Project `Person` nodes younger than 20 and their name not beginning with _V_, and `KNOWS` relationships by using parameters:
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (n)
 WHERE n.age < 20 AND NOT n.name STARTS WITH "V"

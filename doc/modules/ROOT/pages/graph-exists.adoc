@@ -8,12 +8,13 @@ We can check if a graph is stored in the catalog by looking up its name.
 [.graph-exists-syntax]
 --
 .Check if a graph exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.exists(graphName: String) YIELD
   graphName: String,
   exists: Boolean
 ----
+
 
 [[graph-exists-syntax]]
 .Parameters
@@ -35,17 +36,18 @@ CALL gds.graph.exists(graphName: String) YIELD
 Additionally, to the procedure, we provide a function which directly returns the exists field from the procedure.
 
 .Check if a graph exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.graph.exists(graphName: String)::Boolean
 ----
+
 
 == Examples
 
 In order to demonstrate the GDS Graph Exists capabilities we are going to create a small social network graph in Neo4j and project it into our graph catalog.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (florentin:Person { name: 'Florentin', age: 16 }),
@@ -56,17 +58,18 @@ CREATE
 ----
 
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('persons', 'Person', 'KNOWS')
 ----
+
 
 == Procedure
 
 [role=query-example]
 --
 .Check if graphs exist in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 UNWIND ['persons', 'books'] AS graph
 CALL gds.graph.exists(graph)
@@ -85,6 +88,7 @@ RETURN graphName, exists
 
 We can verify the projected `persons` graph exists while a `books` graph does not.
 
+
 == Function
 
 As an alternative to the procedure, we can also use the corresponding function.
@@ -93,7 +97,7 @@ Unlike procedures, functions can be inlined in other cypher-statements such as `
 [role=query-example]
 --
 .Check if graphs exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.graph.exists('persons') AS personsExists, gds.graph.exists('books') AS booksExists
 ----

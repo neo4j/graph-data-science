@@ -21,7 +21,7 @@ This section provides explanations and examples for each of the utility function
 [role=query-example]
 --
 .Usage:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.version() AS version
 ----
@@ -33,6 +33,7 @@ RETURN gds.version() AS version
 | "2.0.5"
 |===
 --
+
 
 [[utility-functions-numeric]]
 == Numeric Functions
@@ -48,6 +49,7 @@ RETURN gds.version() AS version
 | gds.util.isInfinite | Return true if the given argument is ±Infinity, NaN, or null.
 |===
 
+
 === Syntax
 
 [[Numeric-functions-syntax-table]]
@@ -60,12 +62,13 @@ RETURN gds.version() AS version
 | gds.util.isInfinite(value: NUMBER)    | value to be checked if it is infinite.
 |===
 
+
 === Examples
 
 [role=query-example]
 --
 .Example for gds.util.IsFinite:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
 RETURN gds.util.isFinite(value) AS isFinite
@@ -84,7 +87,7 @@ RETURN gds.util.isFinite(value) AS isFinite
 [role=query-example]
 --
 .Example for gds.util.isInfinite():
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 UNWIND [1.0, gds.util.NaN(), gds.util.infinity()] AS value
 RETURN gds.util.isInfinite(value) AS isInfinite
@@ -102,6 +105,7 @@ RETURN gds.util.isInfinite(value) AS isInfinite
 
 A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering streamed results, as for instance seen in the examples of xref::alpha-algorithms/all-pairs-shortest-path.adoc#algorithm-all-pairs-shortest-path-sample[`gds.alpha.allShortestPaths`].
 
+
 [[utility-functions-node-path]]
 == Node id functions
 
@@ -114,6 +118,7 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 | gds.util.asNodes | Return the node objects for the given node ids or an empty list if none exists.
 |===
 
+
 === Syntax
 
 [[Node-and-Path-functions-syntax-table]]
@@ -124,12 +129,13 @@ A common usage of `gds.util.IsFinite` and `gds.util.IsInfinite` is for filtering
 | gds.util.asNodes(nodeIds: List of NUMBER) | list of nodeIds of nodes in the neo4j-graph
 |===
 
+
 === Examples
 
 Consider the graph created by the following Cypher statement:
 
 .Example graph:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE  (nAlice:User {name: 'Alice'})
 CREATE  (nBridget:User {name: 'Bridget'})
@@ -141,7 +147,7 @@ CREATE  (nBridget)-[:LINK]->(nCharles)
 [role=query-example]
 --
 .Example for gds.util.asNode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User{name: 'Alice'})
 WITH id(u) AS nodeId
@@ -159,7 +165,7 @@ RETURN gds.util.asNode(nodeId).name AS node
 [role=query-example]
 --
 .Example for gds.util.asNodes:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (u:User)
 WHERE NOT u.name = 'Charles'

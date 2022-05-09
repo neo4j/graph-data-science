@@ -4,10 +4,12 @@
 :entity: node
 :result: predicted property
 
+
 [abstract]
 --
 This section describes Node classification pipelines in the Neo4j Graph Data Science library.
 --
+
 
 [[nodeclassification-pipelines-intro]]
 == Introduction
@@ -62,7 +64,7 @@ The latter is also a model which is stored in the catalog with type `NodeClassif
 [.pipeline-create-syntax]
 --
 .Create pipeline syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.create(
   pipelineName: String
@@ -90,7 +92,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 [role=query-example,group=nc]
 --
 .The following will create a pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.create('pipe')
 ----
@@ -124,7 +126,7 @@ For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithm
 [.pipeline-add-node-property-syntax]
 --
 .Add node property syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.addNodeProperty(
   pipelineName: String,
@@ -155,7 +157,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 [role=query-example,group=nc]
 --
 .The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.addNodeProperty('pipe', 'alpha.scaleProperties', {
   nodeProperties: 'sizePerStory',
@@ -175,6 +177,7 @@ YIELD name, nodePropertySteps
 The `scaledSizes` property can be later used as a feature.
 --
 
+
 [[nodeclassification-pipelines-adding-features]]
 == Adding features
 
@@ -187,7 +190,7 @@ For example, the `embedding` property could be created by the previous example, 
 [.pipeline-add-feature-syntax]
 --
 .Adding a feature to a pipeline syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.selectFeatures(
   pipelineName: String,
@@ -217,7 +220,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 [role=query-example,group=nc]
 --
 .The following will select features for the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.selectFeatures('pipe', ['scaledSizes', 'sizePerStory'])
 YIELD name, featureProperties
@@ -267,7 +270,7 @@ image::train-test-splitting/validation-folds-node-classification.gif[validation-
 [.pipeline-configure-split-syntax]
 --
 .Configure the node split syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.configureSplit(
   pipelineName: String,
@@ -305,7 +308,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 [role=query-example,group=nc]
 --
 .The following will configure the splitting of the pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.configureSplit('pipe', {
  testFraction: 0.2,
@@ -345,6 +348,7 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 At least one model candidate must be added to the pipeline before training it.
 ====
 
+
 === Syntax
 
 [.tabbed-example, caption = ]
@@ -354,7 +358,7 @@ At least one model candidate must be added to the pipeline before training it.
 [.pipeline-add-lr-syntax]
 --
 .Configure the train parameters syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression(
   pipelineName: String,
@@ -388,7 +392,7 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 [.pipeline-add-rf-syntax]
 --
 .Configure the train parameters syntax
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.pipeline.nodeClassification.addRandomForest(
   pipelineName: String,
@@ -417,18 +421,19 @@ include::partial$/machine-learning/nodeclassification-pipeline/pipelineInfoResul
 ======
 ====
 
+
 === Example
 
 We can add multiple model candidates to our pipeline.
 
-[source, cypher, role=noplay query-example, no-result=true, group=nc, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=nc]
 .The following will add a logistic regression model:
 --
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {penalty: 0.0625})
 YIELD parameterSpace
 --
 
-[source, cypher, role=noplay query-example, no-result=true, group=nc, indent=0]
+[source, cypher, role=noplay query-example, no-result=true, group=nc]
 .The following will add a random forest model:
 --
 CALL gds.alpha.pipeline.nodeClassification.addRandomForest('pipe', {numberOfDecisionTrees: 5})
@@ -438,7 +443,7 @@ YIELD parameterSpace
 [role=query-example,group=nc]
 --
 .The following will add another logistic regression model:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500})
 YIELD parameterSpace
@@ -461,6 +466,7 @@ Each specified model candidate will be tried out during the model selection in x
 These are somewhat naive examples of how to add and configure model candidates.
 Please see xref::machine-learning/training-methods.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
 ====
+
 
 include::partial$/machine-learning/nodeclassification-pipeline/training.adoc[]
 

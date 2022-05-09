@@ -9,6 +9,7 @@ This chapter provides a brief introduction of the main concepts in the Neo4j Gra
 
 This library provides efficiently implemented, parallel versions of common graph algorithms for Neo4j, exposed as Cypher procedures.
 
+
 [[introduction-algorithms]]
 == Algorithms
 
@@ -24,6 +25,7 @@ Fortunately, optimized algorithms exist that utilize certain structures of the g
 Whenever possible, we've applied these optimizations.
 
 The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the xref::algorithms/index.adoc[Algorithms] chapter.
+
 
 [[introduction-algorithms-traits]]
 === Algorithm traits
@@ -56,6 +58,7 @@ The algorithm supports configuration to set node and/or relationship properties 
 These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref::common-usage/running-algos.adoc#common-configuration-node-weight-property[nodeWeightProperty], nodeProperties and xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameters.
 The algorithm will by default consider each node and/or relationship as equally important.
 
+
 [[introduction-catalog]]
 == Graph Catalog
 
@@ -64,6 +67,7 @@ It is therefore necessary to load the graph data from the Neo4j database into an
 The amount of data loaded can be controlled by so called graph projections, which also allow, for example, filtering on node labels and relationship types, among other options.
 
 For more information see xref::management-ops/index.adoc[Graph Management].
+
 
 [[introduction-editions]]
 == Editions

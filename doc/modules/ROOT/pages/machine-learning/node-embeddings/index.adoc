@@ -18,3 +18,4 @@ The Neo4j Graph Data Science library contains the following node embedding algor
 ** xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 ** xref::machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
 
+

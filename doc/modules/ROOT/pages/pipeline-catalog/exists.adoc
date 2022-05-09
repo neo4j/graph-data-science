@@ -4,12 +4,13 @@
 
 We can check if a pipeline is available in the catalog by looking up its name.
 
+
 == Syntax
 
 [.pipeline-exists-syntax]
 --
 .Check if a pipeline exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.exists(pipelineName: String)
 YIELD
@@ -35,13 +36,14 @@ YIELD
 |===
 --
 
+
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.pipeline.exists`.
 To exemplify this, we create a xref::machine-learning/nodeclassification-pipelines.adoc[node classification pipeline] and check for its existence.
 
 .Creating a link prediction training pipelines:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CALL gds.beta.pipeline.nodeClassification.create('pipe')
 ----
@@ -49,7 +51,7 @@ CALL gds.beta.pipeline.nodeClassification.create('pipe')
 [role=query-example]
 --
 .Check if a pipeline exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.exists('pipe')
 ----

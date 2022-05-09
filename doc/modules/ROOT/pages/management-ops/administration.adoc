@@ -14,10 +14,12 @@ Any user granted a role with the name `admin` is considered an administrator by 
 A GDS administrator has access to graphs projected by any other user.
 This includes the ability to list, drop and run algorithms over these graphs.
 
+
 == Disambiguating identically named graphs
 
 Sometimes, several users (including the admin user themselves) could have a graph with the same name.
 To disambiguate between these graphs, the `username` configuration parameter can be used.
+
 
 == Examples
 
@@ -25,7 +27,7 @@ We will illustrate the administrator capabilities using a small example.
 In this example we have three users where one is an administrator.
 We create the users and set up the roles using the following Cypher commands:
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE USER alice SET PASSWORD $alice_pw CHANGE NOT REQUIRED;
 CREATE USER bob SET PASSWORD $bob_pw CHANGE NOT REQUIRED;
@@ -42,12 +44,13 @@ As we can see, `alice` and `bob` are standard users with read access to the data
 Now `alice` and `bob` each project a few graphs.
 They both project a graph called `graphA` and `bob` also projects a graph called `graphB`.
 
+
 === Listing
 
 To list all graphs from all users, `carol` simply uses the graph list procedure.
 
 .Listing all graphs as administrator user:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.list()
 YIELD graphName
@@ -64,12 +67,13 @@ YIELD graphName
 
 Notice that all graphs from all users are visible to `carol` since they are considered a GDS admin.
 
+
 === Running algorithms with other users' graphs
 
 `carol` may use `graphB` by simply naming it.
 
 .`carol` can run WCC on the `graphB` graph owned by `bob`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stats('graphB')
 YIELD componentCount
@@ -78,11 +82,12 @@ YIELD componentCount
 To use the `graphA` owned by `alice`, `carol` must use the `username` override.
 
 .`carol` can run WCC on `graphA` owned by `alice`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.wcc.stats('graphA', { username: 'alice' })
 YIELD componentCount
 ----
+
 
 === Dropping other users' graphs
 
@@ -92,7 +97,7 @@ In the query below we have used the default values for the second and third para
 For more details see xref::graph-drop.adoc[Dropping graphs].
 
 .To drop `graphA` owned by `bob`, `carol` can run the following:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('graphA', true, '', 'bob')
 YIELD graphName

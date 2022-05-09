@@ -3,6 +3,7 @@
 
 This section describes changes between version 1.x and 2.x that are common to all procedures.
 
+
 .Changes in algorithm configuration parameter map
 [opts=header,cols="1,1"]
 |===
@@ -11,6 +12,7 @@ This section describes changes between version 1.x and 2.x that are common to al
 |relationshipProjection | removed, due to removal of anonymous graph loading
 |readConcurrency | removed, due to removal of anonymous graph loading
 |===
+
 
 .Changes in algorithm YIELD fields
 [opts=header,cols="1,1"]

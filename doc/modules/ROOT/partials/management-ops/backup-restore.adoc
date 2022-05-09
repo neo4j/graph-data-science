@@ -27,7 +27,7 @@ The `gds.export.location` parameter must be configured for this feature.
 [.backup-syntax]
 --
 .Back-up in-memory graphs and models
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.backup
 YIELD
@@ -52,7 +52,7 @@ YIELD
 [.restore-syntax]
 --
 .Restore graphs and models
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.restore
 YIELD
@@ -73,12 +73,13 @@ YIELD
 |===
 --
 
+
 == Examples
 
 First we need to create a graph in the corresponding Neo4j database.
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:Person {name: 'Alice'}),
@@ -90,7 +91,7 @@ CREATE
 Now we need to project an in-memory graph which we want to back-up.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -102,7 +103,7 @@ CALL gds.graph.project(
 We can now run the back-up procedure in order to store the in-memory graph on disk.
 
 .The following will run the back-up procedure:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.backup
 YIELD graphName, status
@@ -118,7 +119,7 @@ YIELD graphName, status
 It is now safe to drop the in-memory graph or shutdown the db, as we can restore it at a later point.
 
 .The following will drop the in-memory graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.drop('myGraph')
 ----
@@ -126,7 +127,7 @@ CALL gds.graph.drop('myGraph')
 If we want to restore the backed-up graph, we can simply run the restore procedure to load it back into memory.
 
 .The following will run the restore procedure:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.restore
 YIELD restoredGraphs

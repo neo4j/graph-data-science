@@ -45,7 +45,7 @@ The other shard, the analytical database, stores a graph with the same data, exc
 
 First we need to project a named graph on the analytical database shard.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL {
   USE FABRIC_DB_NAME.ANALYTICS_DB
@@ -58,7 +58,7 @@ RETURN graphName
 
 Using Fabric, we can now calculate the PageRank score for each Person and join the results with the name of that Person.
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL {
   USE FABRIC_DB_NAME.ANALYTICS_DB

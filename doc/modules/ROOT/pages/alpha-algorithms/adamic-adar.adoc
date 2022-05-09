@@ -12,6 +12,7 @@ link:https://en.wikipedia.org/wiki/Adamic/Adar_index[Adamic Adar] is a measure u
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 [[algorithms-linkprediction-adamic-adar-context]]
 == History and explanation
 
@@ -26,17 +27,19 @@ A value of 0 indicates that two nodes are not close, while higher values indicat
 
 The library contains a function to calculate closeness between two nodes.
 
+
 [[algorithms-linkprediction-adamic-adar-syntax]]
 == Syntax
 
 .The following will run the algorithm and return the result:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
     relationshipQuery:String,
     direction:String
 })
 ----
+
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -48,11 +51,12 @@ RETURN gds.alpha.linkprediction.adamicAdar(node1:Node, node2:Node, {
 | `direction`            | String  | BOTH           | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
 |===
 
+
 [[algorithms-linkprediction-adamic-adar-sample]]
 == Adamic Adar algorithm sample
 
 .The following will create a sample graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE
  (zhen:Person {name: 'Zhen'}),
@@ -70,7 +74,7 @@ CREATE
 ----
 
 .The following will return the Adamic Adar score for Michael and Karin:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
@@ -84,15 +88,17 @@ CREATE
 | 0.9102392266268373
 |===
 
+
 We can also compute the score of a pair of nodes based on a specific relationship type.
 
 .The following will return the Adamic Adar score for Michael and Karin based only on the `FRIENDS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
  RETURN gds.alpha.linkprediction.adamicAdar(p1, p2, {relationshipQuery: 'FRIENDS'}) AS score
 ----
+
 
 .Results
 [opts="header",cols="1"]
@@ -100,4 +106,5 @@ We can also compute the score of a pair of nodes based on a specific relationshi
 | `score`
 | 0.0
 |===
+
 

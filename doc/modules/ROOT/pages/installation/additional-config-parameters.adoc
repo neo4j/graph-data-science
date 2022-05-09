@@ -5,10 +5,12 @@ In order to make use of certain features of the GDS library, additional configur
 Configuration is done in the _neo4j.conf_ configuration file before starting the DBMS.
 The following features require such additional configuration:
 
+
 == Graph export
 
 Exporting xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[graphs to CSV] files requires the configuration parameter `gds.export.location` to be set to the absolute path to the folder in which exported graphs will be stored.
 This directory has to be writable by the Neo4j process.
+
 
 == Model persistence
 

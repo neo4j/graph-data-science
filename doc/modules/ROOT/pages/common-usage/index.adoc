@@ -38,6 +38,7 @@ The more detail on each individual operation, see the corresponding section:
 2. xref::common-usage/projecting-graphs.adoc[Projecting graphs]
 3. xref::common-usage/running-algos.adoc[Running algorithms]
 
+
 In this chapter, we will go through these aspects and guide you towards the most useful operations.
 
 This chapter is divided into the following sections:
@@ -48,4 +49,5 @@ This chapter is divided into the following sections:
 * xref::common-usage/logging.adoc[Logging]
 * xref::common-usage/monitoring-system.adoc[Monitoring system]
 * xref::common-usage/debug-sysinfo.adoc[System Information]
+
 

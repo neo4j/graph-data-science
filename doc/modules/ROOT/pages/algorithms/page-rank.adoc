@@ -16,6 +16,7 @@ This section describes the PageRank algorithm in the Neo4j Graph Data Science li
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-page-rank-intro]]
 == Introduction
 
@@ -47,6 +48,7 @@ Running this algorithm requires sufficient memory availability.
 Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
+
 [[algorithms-page-rank-considerations]]
 == Considerations
 
@@ -58,6 +60,7 @@ There are some things to be aware of when using the PageRank algorithm:
 
 Changing the damping factor can help with all the considerations above.
 It can be interpreted as a probability of a web surfer to sometimes jump to a random page and therefore not getting stuck in sinks.
+
 
 [[algorithms-page-rank-syntax]]
 == Syntax
@@ -72,7 +75,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 ======
 
 .Run PageRank in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream(
   graphName: String,
@@ -103,7 +106,7 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 ======
 
 .Run PageRank in stats mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stats(
   graphName: String,
@@ -144,7 +147,7 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 ======
 
 .Run PageRank in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.mutate(
   graphName: String,
@@ -189,7 +192,7 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 ======
 
 .Run PageRank in write mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write(
   graphName: String,
@@ -232,6 +235,7 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 
 ====
 
+
 [[algorithms-page-rank-examples]]
 == Examples
 
@@ -241,7 +245,7 @@ include::partial$/algorithms/page-rank/specific-configuration.adoc[]
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (home:Page {name:'Home'}),
@@ -275,7 +279,7 @@ Each relationship has a property called `weight`, which describes the importance
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -287,6 +291,7 @@ CALL gds.graph.project(
 )
 ----
 
+
 [[algorithms-page-rank-examples-memory-estimation]]
 === Memory Estimation
 
@@ -296,7 +301,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write.estimate('myGraph', {
   writeProperty: 'pageRank',
@@ -314,6 +319,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-page-rank-examples-stream]]
 === Stream
 
@@ -323,7 +329,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph')
 YIELD nodeId, score
@@ -362,7 +368,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and returns the result in form of statistical and measurement values
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stats('myGraph', {
   maxIterations: 20,
@@ -390,7 +396,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.mutate('myGraph', {
   maxIterations: 20,
@@ -408,6 +414,7 @@ YIELD nodePropertiesWritten, ranIterations
 |===
 --
 
+
 [[algorithms-page-rank-examples-write]]
 === Write
 
@@ -416,7 +423,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.write('myGraph', {
   maxIterations: 20,
@@ -434,6 +441,7 @@ YIELD nodePropertiesWritten, ranIterations
 |===
 --
 
+
 [[algorithms-page-rank-examples-weighted]]
 === Weighted
 
@@ -445,7 +453,7 @@ Below is an example of running the algorithm using the relationship property.
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using relationship weights:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
@@ -474,6 +482,7 @@ ORDER BY score DESC, name ASC
 
 NOTE: We are using `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
 
+
 [[algorithms-page-rank-examples-tolerance]]
 === Tolerance
 
@@ -483,7 +492,7 @@ If all scores change less than the configured `tolerance` value the result stabi
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using bigger `tolerance` value:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
@@ -513,6 +522,7 @@ ORDER BY score DESC, name ASC
 In this example we are using `tolerance: 0.1`, so the results are a bit different compared to the ones from xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `tolerance`.
 Note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `tolerance` the node 'Product' has higher score than the other two.
 
+
 [[algorithms-page-rank-examples-damping]]
 === Damping Factor
 
@@ -523,7 +533,7 @@ If it's too low then all scores are pushed towards 1, and the result will not su
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode using smaller `dampingFactor` value:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', {
   maxIterations: 20,
@@ -552,6 +562,7 @@ ORDER BY score DESC, name ASC
 Compared to the results from the xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
 Also, note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `dampingFactor` the node 'Product' has higher score than the other two.
 
+
 [[algorithms-page-rank-examples-personalised]]
 === Personalised PageRank
 
@@ -563,7 +574,7 @@ The following examples show how to run PageRank centered around 'Site A'.
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (siteA:Page {name: 'Site A'})
 CALL gds.pageRank.stream('myGraph', {
@@ -593,6 +604,7 @@ ORDER BY score DESC, name ASC
 
 Comparing these results to the ones from the xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.
 
+
 [[algorithms-page-rank-examples-scaler]]
 === Scaling centrality scores
 
@@ -603,7 +615,7 @@ A description of all available scalers can be found in the documentation for the
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode and returns normalized results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.pageRank.stream('myGraph', {
   scaler: "L1Norm"

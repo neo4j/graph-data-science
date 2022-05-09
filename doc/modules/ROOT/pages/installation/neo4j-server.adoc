@@ -13,6 +13,7 @@ On a standalone Neo4j Server, the library will need to be installed and configur
 
 1. Download `neo4j-graph-data-science-[version].jar` from the https://neo4j.com/download-center/#algorithms[Neo4j Download Center] and copy it into the `$NEO4J_HOME/plugins` directory.
 
+
 2. Add the following to your `$NEO4J_HOME/conf/neo4j.conf` file:
 +
 ----
@@ -30,21 +31,23 @@ dbms.security.procedures.allowlist=gds.*
 
 NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
 
+
 4. Restart Neo4j
+
 
 [[neo4j-server-verify]]
 == Verifying installation
 
 To verify your installation, the library version can be printed by entering into the browser in Neo4j Desktop and calling the `gds.version()` function:
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.version()
 ----
 
 To list all installed algorithms, run the `gds.list()` procedure:
 
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.list()
 ----

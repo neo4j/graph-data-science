@@ -7,12 +7,14 @@
 This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
 --
 
+
 Machine learning algorithms which support the `train` mode produce trained models which are stored in the Model Catalog.
 Similarly, `predict` procedures can use such trained models to produce predictions.
 A model is generally a mathematical formula representing real-world or fictitious entities.
 Each algorithm requiring a trained model provides the formulation and means to compute this model.
 
 The model catalog is a concept within the GDS library that allows storing and managing multiple trained models by name.
+
 
 This chapter explains the available model catalog operations.
 

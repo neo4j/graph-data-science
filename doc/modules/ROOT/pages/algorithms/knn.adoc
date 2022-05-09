@@ -65,11 +65,13 @@ Running this algorithm requires sufficient available memory.
 Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
+
 [[algorithms-knn-introduction-metrics]]
 === Similarity metrics
 
 The similarity measure used in the KNN algorithm depends on the type of the configured node properties.
 KNN supports both scalar numeric values and lists of numbers.
+
 
 ==== Scalar numbers
 
@@ -79,6 +81,7 @@ image::equations/knn-scalar-similarity.svg[title="one divided by one plus the ab
 
 This gives us a number in the range `(0, 1]`.
 
+
 ==== List of integers
 
 When a property is a list of integers, similarity can be measured with either the Jaccard similarity or the Overlap coefficient.
@@ -87,12 +90,14 @@ Jaccard similarity::
 +
 image::knn-formulas/jacard.svg[title="size of intersection divided by size of union", float="center"]
 
+
 Overlap coefficient::
 +
 image::knn-formulas/overlap.svg[title="size of intersection divided by size of minimum set", float="center"]
 
 Both of these metrics give a score in the range `[0, 1]` and no normalization needs to be performed.
 Jaccard similarity is used as the default option for comparing lists of integers when the metric is not specified.
+
 
 ==== List of floating-point numbers
 
@@ -109,11 +114,13 @@ The score is normalized into the range `[0, 1]` by doing `score = (score + 1) / 
 
 The other two metrics include the Pearson correlation score and Normalized Euclidean similarity.
 
+
 Pearson correlation score::
 +
 image::knn-formulas/pearson.svg[title="covariance divided by the product of the standard deviations", float="center"]
 
 As above, the formula gives a score in the range `[-1, 1]`, which is normalized into the range `[0, 1]` similarly.
+
 
 Euclidean similarity::
 +
@@ -121,6 +128,7 @@ image::knn-formulas/ed.svg[title="the root of the sum of the square difference b
 
 The result from this formula is a non-negative value, but is not necessarily bounded into the  `[0, 1]` range.
 Τo bound the number into this range and obtain a similarity score, we return `score = 1 / (1 + distance)`, i.e., we perform the same normalization as in the case of scalar values.
+
 
 ==== Multiple properties
 
@@ -177,6 +185,7 @@ The available metrics by type are:
 For any property type, `DEFAULT` can also be specified to use the default metric.
 For scalar numbers, there is only the default metric.
 
+
 [[algorithms-knn-introduction-sampling]]
 === Initial neighbor sampling
 
@@ -202,6 +211,7 @@ The random walk used is biased towards depth in the sense that it will more like
 The intuition of this bias is that subsequent iterations of comparing neighbor-of-neighbors will likely cover the extended (topological) neighborhood of each node.
 ====
 
+
 [[algorithms-knn-syntax]]
 == Syntax
 
@@ -214,7 +224,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run K-Nearest Neighbors in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.stream(
   graphName: String,
@@ -244,7 +254,7 @@ include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 [.include-with-stats]
 ======
 .Run K-Nearest Neighbors in stats mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.stats(
   graphName: String,
@@ -289,7 +299,7 @@ include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 [.include-with-mutate]
 ======
 .Run K-Nearest Neighbors in mutate mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.mutate(
   graphName: String,
@@ -336,7 +346,7 @@ include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 [.include-with-write]
 ======
 .Run K-Nearest Neighbors in write mode on a graph stored in the catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.write(
   graphName: String,
@@ -381,6 +391,7 @@ include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 ======
 ====
 
+
 [NOTE]
 ====
 The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.
@@ -401,7 +412,7 @@ To get a deterministic result when running the algorithm:
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:Person {name: 'Alice', age: 24, lotteryNumbers: [1, 3], embedding: [1.0, 3.0]})
 CREATE (bob:Person {name: 'Bob', age: 73, lotteryNumbers: [1, 2, 3], embedding: [2.1, 1.6]})
@@ -415,7 +426,7 @@ In the example, we want to use the K-Nearest Neighbors algorithm to compare peop
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source,cypher,role=noplay graph-project-query, indent=0]
+[source,cypher,role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -429,6 +440,7 @@ CALL gds.graph.project(
 );
 ----
 
+
 [[algorithms-knn-examples-memory-estimation]]
 === Memory Estimation
 
@@ -438,7 +450,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.write.estimate('myGraph', {
   nodeProperties: ['age'],
@@ -457,6 +469,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-knn-examples-stream]]
 === Stream
 
@@ -465,7 +478,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm, and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.stream('myGraph', {
     topK: 1,
@@ -508,7 +521,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and return the result in form of statistical and measurement values:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.stats('myGraph', {topK: 1, concurrency: 1, randomSeed: 42, nodeProperties: ['age']})
 YIELD nodesCompared, similarityPairs
@@ -522,6 +535,7 @@ YIELD nodesCompared, similarityPairs
 |===
 --
 
+
 [[algorithms-knn-examples-mutate]]
 === Mutate
 
@@ -530,7 +544,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm, and write back results to the in-memory graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.mutate('myGraph', {
     mutateRelationshipType: 'SIMILAR',
@@ -560,6 +574,7 @@ If for example `a -> b` is topK for `a` and symmetrically `b -> a` is topK for `
 However, they are just two directed relationships that have been independently produced.
 ====
 
+
 [[algorithms-knn-examples-write]]
 === Write
 
@@ -571,10 +586,11 @@ The result is a single summary row, similar to `stats`, but with some additional
 
 For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
 
+
 [role=query-example]
 --
 .The following will run the algorithm, and write back results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.write('myGraph', {
     writeRelationshipType: 'SIMILAR',
@@ -613,7 +629,7 @@ As an example, we can use the Normalized Euclidean similarity metric for the emb
 [role=query-example]
 --
 .The following shows an example of using multiple properties to calculate similarity and streams the results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.stream('myGraph', {
     topK: 1,

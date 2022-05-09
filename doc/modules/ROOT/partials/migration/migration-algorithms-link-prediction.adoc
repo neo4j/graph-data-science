@@ -4,6 +4,7 @@
 The original alpha version of link prediction has been completely removed and incorporated into xref::machine-learning/linkprediction-pipelines.adoc[link prediction pipelines].
 Before training a link prediction model, you must xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-creating-a-pipeline[create] and configure a training pipeline.
 
+
 == Train
 
 Some parts of the training are now configured in specific configuration procedures for the training pipeline.
@@ -42,6 +43,7 @@ There is also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to 
 | `gds.beta.pipeline.linkPrediction.configureParams`
 | This procedure, which is no longer present, added logistic regression model candidates. Adding logistic regression candidates, can instead be done by calling `gds.beta.pipeline.linkPrediction.addLogisticRegression` one or multiple times.
 |===
+
 
 == Predict
 

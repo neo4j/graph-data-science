@@ -4,12 +4,13 @@
 
 We can check if a model is available in the catalog by looking up its name.
 
+
 == Syntax
 
 [.model-exists-syntax]
 --
 .Check if a model exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.exists(modelName: String)
 YIELD
@@ -35,6 +36,7 @@ YIELD
 |===
 --
 
+
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.model.exists`.
@@ -43,7 +45,7 @@ Assume we trained a model by running `train` on one of our xref::machine-learnin
 [role=query-example]
 --
 .Check if a model exists in the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.exists('my-model');
 ----

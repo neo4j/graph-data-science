@@ -16,6 +16,7 @@ This section describes the Closeness Centrality algorithm in the Neo4j Graph Dat
 :homogeneous:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-closeness-centrality-intro]]
 == Introduction
 
@@ -53,6 +54,7 @@ their corrected formula for a given node _u_ is given as follows:
 Note that in the case of a directed graph, closeness centrality is defined alternatively.
 That is, rather than considering distances from _u_ to every other node, we instead sum and average the distance from every other node to _u_.
 
+
 [[algorithms-closeness-centrality-considerations]]
 === Use-cases - when to use the Closeness Centrality algorithm
 
@@ -70,6 +72,7 @@ This process is described by Florian Boudin in https://www.aclweb.org/anthology/
 
 // end::use-case[]
 
+
 [[algorithms-closeness-centrality-limitations]]
 === Constraints - when not to use the Closeness Centrality algorithm
 
@@ -80,6 +83,7 @@ This means that we'll end up with an infinite closeness centrality score when we
 +
 In practice, a variation on the original formula is used so that we don't run into these issues.
 // end::constraint[]
+
 
 [[algorithms-closeness-centrality-syntax]]
 == Syntax
@@ -93,7 +97,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run Closeness Centrality in stream mode on a named graph.
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.closeness.stream(
   graphName: String,
@@ -119,10 +123,11 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-stats]
 ======
 .Run Closeness Centrality in stats mode on a named graph.
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.closeness.stats(
   graphName: String,
@@ -154,10 +159,11 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-mutate]
 ======
 .Run Betweenness Centrality in mutate mode on a named graph.
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.closeness.mutate(
   graphName: String,
@@ -195,10 +201,11 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-write]
 ======
 .Run Closeness Centrality in write mode on a named graph.
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.closeness.write(
   graphName: String,
@@ -238,6 +245,7 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 
 ====
 
+
 [[algorithms-closeness-centrality-examples]]
 == Examples
 
@@ -246,8 +254,9 @@ include::partial$/algorithms/beta/closeness/specific-configuration.adoc[]
 :image-file: closeness-centrality-graph.png
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
+
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Node {id:"A"}),
        (b:Node {id:"B"}),
@@ -270,12 +279,13 @@ We do this using a native projection targeting the `Node` nodes and the `LINK` r
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', 'Node', 'LINK')
 ----
 
 In the following examples we will demonstrate using the Closeness Centrality algorithm on this graph.
+
 
 [[algorithms-closeness-centrality-examples-stream]]
 === Stream
@@ -286,7 +296,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.stream('myGraph')
 YIELD nodeId, score
@@ -314,6 +324,7 @@ A and E don't have close ties to many other nodes, so their scores are lower.
 Any node that has a direct connection to all other nodes would score 1.
 // end::stream-sample-graph-explanation[]
 
+
 [[algorithms-closeness-centrality-examples-stats]]
 === Stats
 
@@ -323,7 +334,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stats` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.stats('myGraph')
 YIELD centralityDistribution
@@ -338,6 +349,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 |===
 --
 
+
 [[algorithms-closeness-centrality-examples-mutate]]
 === Mutate
 
@@ -346,7 +358,7 @@ include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.mutate('myGraph', { mutateProperty: 'centrality' })
 YIELD centralityDistribution, nodePropertiesWritten
@@ -369,7 +381,7 @@ include::partial$/algorithms/shared/examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.closeness.write('myGraph', { writeProperty: 'centrality' })
 YIELD centralityDistribution, nodePropertiesWritten

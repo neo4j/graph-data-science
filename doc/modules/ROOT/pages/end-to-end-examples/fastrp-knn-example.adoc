@@ -8,13 +8,14 @@ These embeddings will then be the input to the kNN algorithm.
 
 For each pair of similar customers we can then recommend products that have been purchased by one of the customers but not the other, using a simple cypher query.
 
+
 == Graph creation
 
 We will start by creating our graph of products and customers in the database.
 The `amount` relationship property represents the average weekly amount of money spent by a customer on a given product.
 
 .Consider the graph created by the following Cypher statement:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
  (dan:Person {name: 'Dan'}),
@@ -64,7 +65,7 @@ image::example-graphs/knn-fastrp.png[Visualization of the example graph,align="c
 Now we can proceed to project a graph which we can run the algorithms on.
 
 .Project a graph called 'purchases' and store it in the graph catalog:
-[source, cypher, role=graph-project-query no-play, indent=0]
+[source, cypher, role=graph-project-query no-play]
 ----
 CALL gds.graph.project(
   'purchases',
@@ -78,6 +79,7 @@ CALL gds.graph.project(
 )
 ----
 
+
 == FastRP embedding
 
 Now we run the FastRP algorithm to generate node embeddings that capture topological information from the graph.
@@ -89,7 +91,7 @@ Since we want to use the embeddings as input when we run kNN later we use FastRP
 [role=query-example, group=fastrp-knn]
 --
 .Create node embeddings using FastRP:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.fastRP.mutate('purchases',
   {
@@ -122,7 +124,7 @@ Note that we use the algorithm's xref::common-usage/running-algos.adoc#running-a
 [role=query-example, group=fastrp-knn]
 --
 .Run kNN with FastRP node embeddings as input:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.knn.write('purchases', {
     topK: 2,
@@ -149,6 +151,7 @@ RETURN nodesCompared, relationshipsWritten, similarityDistribution.mean as meanS
 As we can see the mean similarity between nodes is quite high.
 This is due to the fact that we have a small example where there are no long paths between nodes leading to many similar FastRP node embeddings.
 
+
 == Results exploration
 
 Let us now inspect the results of our kNN call by using Cypher.
@@ -158,7 +161,7 @@ And since we just care about similarities between people for our product recomme
 [role=query-example, group=fastrp-knn]
 --
 .List pairs of people that are similar:
-[source, cypher, role=noplay , group=fastrp-knn, indent=0]
+[source, cypher, role=noplay , group=fastrp-knn]
 ----
 MATCH (n:Person)-[r:SIMILAR]->(m:Person)
 RETURN n.name as person1, m.name as person2, r.score as similarity
@@ -182,6 +185,7 @@ Looking at the `BUYS` relationships for these two nodes we can see that such a c
 They both buy three products, two of which are the same (`Product` nodes named "Cucumber" and "Tomatoes") for both people and with similar amounts.
 We therefore have high confidence in our approach.
 
+
 == Making recommendations
 
 Using the information we derived that the `Person` nodes named "Annie" and "Matt" are similar, we can make product recommendations for each of them.
@@ -191,7 +195,7 @@ By this principle we can derive product recommendations for the `Person` named "
 [role=query-example, group=fastrp-knn]
 --
 .Product recommendations for `Person` node with name "Matt":
-[source, cypher, role=noplay , group=fastrp-knn, indent=0]
+[source, cypher, role=noplay , group=fastrp-knn]
 ----
 MATCH (:Person {name: "Annie"})-->(p1:Product)
 WITH collect(p1) as products
@@ -209,6 +213,7 @@ RETURN p2.name as recommendation
 --
 
 Indeed, "Kale" is the one product that the `Person` named "Annie" buys that is also not purchased by the `Person` named "Matt".
+
 
 == Conclusion
 

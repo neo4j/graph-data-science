@@ -33,12 +33,13 @@ The trainer method of a model can be inspected in the `modelInfo` under `bestPar
 
 Currently, we only support xref::machine-learning/training-methods.adoc#machine-learning-training-methods-logistic-regression[Logistic Regression].
 
+
 === Syntax
 
 [.model-store-syntax]
 --
 .Remove a model from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.store(
     modelName: String,
@@ -66,12 +67,13 @@ YIELD
 |===
 --
 
+
 === Example
 
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.store('my-model')
 YIELD
@@ -93,7 +95,7 @@ In order to use a stored model, it has to be explicitly loaded.
 [.model-load-syntax]
 --
 .Remove a model from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.load(modelName: String)
 YIELD
@@ -122,7 +124,7 @@ YIELD
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.load('my-model')
 YIELD
@@ -144,12 +146,13 @@ This is different from dropping a model.
 Dropping a model will remove it from the in-memory model catalog, but not from disk.
 Deleting a model will remove it from disk, but keep it in the in-memory model catalog if it was already loaded.
 
+
 === Syntax
 
 [.model-delete-syntax]
 --
 .Remove a model from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.delete(modelName: String)
 YIELD
@@ -178,7 +181,7 @@ YIELD
 [role=query-example, no-result=true]
 --
 .Store a model on disk:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.model.delete('my-model')
 YIELD

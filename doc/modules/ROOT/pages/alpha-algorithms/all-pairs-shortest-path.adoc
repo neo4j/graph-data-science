@@ -13,6 +13,7 @@ This algorithm has optimizations that make it quicker than calling the Single So
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 [[algorithm-all-pairs-shortest-path-context]]
 == History and explanation
 
@@ -22,6 +23,7 @@ In this scenario, the algorithm will return `Infinity` value as a result between
 // end::explanation[]
 
 Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite` function was added to help filter `Infinity` values from results.
+
 
 [[algorithm-all-pairs-shortest-path-usecase]]
 == Use-cases - when to use the All Pairs Shortest Path algorithm
@@ -36,10 +38,11 @@ Plain cypher does not support filtering `Infinity` values, so `gds.util.isFinite
 
 // end::use-case[]
 
+
 [[algorithm-all-pairs-shortest-path-syntax]]
 == Syntax
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream(
   graphName: string,
@@ -57,13 +60,14 @@ YIELD startNodeId, targetNodeId, distance
 | readConcurrency                                                                  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 
+
 [[algorithm-all-pairs-shortest-path-sample]]
 == All Pairs Shortest Path algorithm sample
 
 image::shortest-path_graph.png[]
 
 .The following will create a sample graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE (a:Loc {name: 'A'}),
        (b:Loc {name: 'B'}),
@@ -84,7 +88,7 @@ CREATE (a:Loc {name: 'A'}),
 ----
 
 .The following will project and store a graph using native projection:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project(
   'nativeGraph',
@@ -100,7 +104,7 @@ YIELD graphName
 ----
 
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream('nativeGraph', {
   relationshipWeightProperty: 'cost'
@@ -145,7 +149,7 @@ Note that relationship query does not specify direction of the relationship.
 This is applicable to all other algorithms that use Cypher loading.
 
 .The following will project and store an undirected graph using cypher projection:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project.cypher(
   'cypherGraph',
@@ -156,7 +160,7 @@ YIELD graphName
 ----
 
 .The following will run the algorithm, treating the graph as undirected:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.allShortestPaths.stream('cypherGraph', {
   relationshipWeightProperty: 'cost'

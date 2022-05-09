@@ -4,12 +4,13 @@
 
 If we no longer need a trained model and want to free up memory, we can remove the model from the catalog.
 
+
 == Syntax
 
 [.model-drop-syntax]
 --
 .Remove a model from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.drop(modelName: String, failIfMissing: Boolean)
 YIELD
@@ -33,6 +34,7 @@ YIELD
 include::partial$/machine-learning/model-catalog/shared/model-info-result.adoc[]
 --
 
+
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.model.drop`.
@@ -41,7 +43,7 @@ Assume we trained a model by running `train` on one of our xref::machine-learnin
 [role=query-example]
 --
 .Remove a model from the catalog:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.model.drop('my-model')
 YIELD modelInfo, loaded, shared, stored

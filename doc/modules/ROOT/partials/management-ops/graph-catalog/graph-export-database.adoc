@@ -13,12 +13,13 @@ The feature is useful in the following, exemplary scenarios:
 * Produce snapshots of analytical results and persistent them for archiving and inspection.
 * Share analytical results within the organization.
 
+
 == Syntax
 
 [.graph-export-syntax]
 --
 .Export a projected graph to a new database in the Neo4j databases directory:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export(graphName: String, configuration: Map)
 YIELD
@@ -67,23 +68,26 @@ YIELD
 |===
 --
 
+
 == Example
 
 .Export the `my-graph` from GDS into a Neo4j database called `mydatabase`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase' })
 ----
 
 The new database can be started using link:https://neo4j.com/docs/cypher-manual/current/administration/databases/#administration-databases-start-database[databases management commands].
 
+
 [NOTE]
 ====
 The database must not exist when using the export procedure. It needs to be created manually using the following commands.
 ====
 
+
 .After running exporting the graph, we can start a new database and query the exported graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 :use system
 CREATE DATABASE mydatabase;
@@ -91,13 +95,14 @@ CREATE DATABASE mydatabase;
 MATCH (n) RETURN n;
 ----
 
+
 == Example with additional node properties
 
 Suppose we have a graph `my-db-graph` in the Neo4j database that has a string node property `myproperty`, and that we have a corresponding in-memory graph called `my-in-memory-graph` which does not have the `myproperty` node property.
 If we want to export `my-in-memory-graph` but additionally add the `myproperty` properties from `my-db-graph` we can use the `additionalProperties` configuration parameter.
 
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` into a Neo4j database called `mydatabase`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase', additionalNodeProperties: ['myproperty']})
 ----
@@ -113,7 +118,7 @@ The `additionalNodeProperties` parameter uses the same syntax as `nodeProperties
 So we could for instance define a default value for our `myproperty`.
 
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a Neo4j database called `mydatabase`:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.export('my-graph', { dbName: 'mydatabase', additionalNodeProperties: [{ myproperty: {defaultValue: 'my-default-value'}}] })
 ----

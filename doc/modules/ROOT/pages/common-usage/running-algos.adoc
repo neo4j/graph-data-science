@@ -16,6 +16,7 @@ In short, algorithms are run using one of the execution modes `stream`, `stats`,
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
 For more on how transactions are used, see xref::production-deployment/transaction-handling.adoc[Transaction Handling].
 
+
 [[running-algos-stream]]
 == Stream
 
@@ -27,6 +28,7 @@ The returned data can be a node ID and a computed value for the node (such as a 
 If the graph is very large, the result of a `stream` mode computation will also be very large.
 Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
 
+
 [[running-algos-stats]]
 == Stats
 
@@ -34,6 +36,7 @@ The `stats` mode returns statistical results for the algorithm computation like 
 A statistical summary of the computation is returned as a single Cypher result row.
 The direct results of the algorithm are not available when using the `stats` mode.
 This mode forms the basis of the `mutate` and `write` execution modes but does not attempt to make any modifications or updates anywhere.
+
 
 [[running-algos-mutate]]
 == Mutate
@@ -50,6 +53,7 @@ This execution mode is especially useful in three scenarios:
 
 A statistical summary of the computation is returned similar to the `stats` mode.
 Mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
+
 
 [[running-algos-write]]
 == Write

@@ -33,12 +33,14 @@ See xref::alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-exa
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
+
 [[algorithms-scale-properties-minmax]]
 === Min-max scaler
 
 Scales all property values into the range `[0, 1]` where the minimum value(s) get the scaled value `0` and the maximum value(s) get the scaled value `1`, according to this formula:
 
 image::equations/scale-properties/minmax.svg[scaled p equals p minus minimum of p divided by maximum of p minus minimum of p,align="center"]
+
 
 [[algorithms-scale-properties-max]]
 === Max scaler
@@ -47,12 +49,14 @@ Scales all property values into the range `[-1, 1]` where the absolute maximum v
 
 image::equations/scale-properties/max.svg[scaled p equals p divided by the absolute maximum of p,align="center"]
 
+
 [[algorithms-scale-properties-mean]]
 === Mean scaler
 
 Scales all property values into the range `[-1, 1]` where the average value(s) get the scaled value `0`.
 
 image::equations/scale-properties/mean.svg[scaled p equals p minus average of p divided by maximum of p minus minimum of p,align="center"]
+
 
 [[algorithms-scale-properties-log]]
 === Log scaler
@@ -61,6 +65,7 @@ Transforms all property values using the natural logarithm.
 
 image::equations/scale-properties/log.svg[scaled p equals natural logarithm of p,align="center"]
 
+
 [[algorithms-scale-properties-standard]]
 === Standard Score
 
@@ -68,12 +73,14 @@ Scales all property values using the https://en.wikipedia.org/wiki/Standard_scor
 
 image::equations/scale-properties/standardScore.svg[scaled p equals p minus average of p divided by standard deviation of p,align="center"]
 
+
 [[algorithms-scale-properties-l1norm]]
 === L1 Norm
 
 Scales all property values into the range `[0.0, 1.0]`.
 
 image::equations/scale-properties/l1norm.svg[scaled p equals p divided by l1 norm of p ,align="center"]
+
 
 [[algorithms-scale-properties-l2norm]]
 === L2 Norm
@@ -94,7 +101,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 [.include-with-stream]
 ======
 .Run Scale Properties in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.stream(
   graphName: String,
@@ -122,7 +129,7 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 [.include-with-mutate]
 ======
 .Run Scale Properties in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.mutate(
   graphName: String,
@@ -156,6 +163,7 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 ======
 ====
 
+
 [[algorithms-scale-properties-examples]]
 == Examples
 
@@ -165,7 +173,7 @@ include::partial$/algorithms/alpha/scale-properties/specific-configuration.adoc[
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (:Hotel {avgReview: 4.2, buildYear: 1978, storyCapacity: [32, 32, 0], name: 'East'}),
@@ -186,7 +194,7 @@ Thus we use a star projection ('*') for relationships.
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -198,6 +206,7 @@ CALL gds.graph.project(
 
 In the following examples we will demonstrate how to scale the node properties of this graph.
 
+
 [[algorithms-scale-properties-examples-stream]]
 === Stream
 
@@ -207,7 +216,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `stream` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.stream('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
@@ -236,6 +245,7 @@ In the results we can observe that the first element in the resulting `scaledPro
 This can be verified with the example graph.
 The second value in the `scaledProperty` result are the scaled values of the `avgReview` property.
 
+
 === Mutate
 
 The `mutate` execution mode enables updating the named graph with a new node property containing the scaled properties for that node.
@@ -251,7 +261,7 @@ The output is a list property which we will call `hotelFeatures`, imagining that
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.mutate('myGraph', {
   nodeProperties: ['buildYear', 'avgReview'],
@@ -272,6 +282,7 @@ The result shows that there are now eight new node properties in the in-memory g
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
 To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs in the catalog].
 
+
 [[algorithms-scale-properties-examples-list]]
 === List properties
 
@@ -285,7 +296,7 @@ Additionally, we will include the `avgReview` property in our feature vector.
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.alpha.scaleProperties.stream('myGraph', {
   nodeProperties: ['avgReview', 'storyCapacity'],

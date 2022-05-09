@@ -14,6 +14,7 @@ The objective of this page is to give a brief overview of logistic regression an
 
 Configuring and training model candidates using these methods is supported for xref::machine-learning/nodeclassification-pipelines.adoc#nodeclassification-pipelines-configure-model-parameters[Node Classification] and xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-model-parameters[Link Prediction] pipelines.
 
+
 [[machine-learning-training-methods-logistic-regression]]
 [.beta]
 == Logistic regression
@@ -32,6 +33,7 @@ where `CE` is the https://en.wikipedia.org/wiki/Cross_entropy#Cross-entropy_loss
 
 To avoid overfitting one may also add a https://en.wikipedia.org/wiki/Regularization_(mathematics)[regularization] term to the loss.
 In GDS, this we provide the option of adding `l2` regularization.
+
 
 === Tuning the hyperparameters
 
@@ -55,6 +57,7 @@ The gradients are computed concurrently on batches of `batchSize` samples using 
 At the end of an epoch the gradients are summed and scaled before updating the weights.
 Therefore `batchSize` and `concurrency` do not affect model quality, but are very useful to tune for training speed.
 
+
 [[machine-learning-training-methods-random-forest]]
 [.alpha]
 == Random forest
@@ -70,10 +73,12 @@ The approach of combining several predictors (in this case decision trees) is al
 
 The loss used by the decision trees in GDS is the https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity].
 
+
 === Tuning the hyperparameters
 
 In order to balance matters such as bias vs variance of the model, and speed vs memory consumption of the training, GDS exposes several hyperparameters that one can tune.
 Each of these are described below.
+
 
 ==== Number of decision trees
 
@@ -82,6 +87,7 @@ This parameter sets the number of decision trees that will be part of the random
 Having a too small number of trees could mean that the model will overfit to some parts of the dataset.
 
 A larger number of trees will in general mean that the training takes longer, and the memory consumption will be higher.
+
 
 ==== Max features ratio
 
@@ -94,6 +100,7 @@ A high (close to 1.0) max features ratio means that the training will take longe
 It will also mean that each decision tree will be better at predictions over the training set.
 While this is positive in some sense, it might also mean that each decision tree will overfit on the training set.
 
+
 ==== Max depth
 
 This parameter sets the maximum depth of the decision trees in the random forest.
@@ -103,6 +110,7 @@ The memory footprint of the produced prediction model might also be higher since
 
 A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
 
+
 ==== Min split size
 
 This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
@@ -110,6 +118,7 @@ To split a node means to continue the tree construction process to add further c
 
 A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
 It will likely also mean that the training will be faster as probably fewer node splits will be considered.
+
 
 ==== Number of samples ratio
 

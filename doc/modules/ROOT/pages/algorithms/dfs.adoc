@@ -16,6 +16,7 @@ This section describes the Depth First Search traversal algorithm in the Neo4j G
 :heterogeneous:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-dfs-intro]]
 == Introduction
 
@@ -34,7 +35,7 @@ The output of the procedure contains information about which nodes were visited 
 [.include-with-stream]
 ======
 .Run Depth First Search in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.dfs.stream(
   graphName: String,
@@ -67,7 +68,7 @@ include::specific-configuration.adoc
 [.include-with-mutate]
 ======
 .Run Depth First Search in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.dfs.mutate(
   graphName: string,
@@ -121,7 +122,7 @@ include::partial$/algorithms/shared/examples-intro.adoc[]
 
 Consider the graph projected by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
        (nA:Node {name: 'A'}),
@@ -137,12 +138,13 @@ CREATE
 ----
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project('myGraph', 'Node', 'REL')
 ----
 
 In the following examples we will demonstrate using the Depth First Search algorithm on this graph.
+
 
 === Memory Estimation
 
@@ -152,7 +154,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Node {name: 'A'})
 CALL gds.dfs.stream.estimate('myGraph', {
@@ -170,6 +172,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 === Stream
 
 :!stream-details:
@@ -178,7 +181,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Node{name:'A'})
 CALL gds.dfs.stream('myGraph', {
@@ -194,10 +197,11 @@ In the image below we can see the traversal order of the nodes, marked by relati
 
 image::dfs-full-stream-path.svg[Visualization of Depth First Search stream without early termination conditions ,align="center"]
 
+
 [role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm with target nodes:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (a:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
 WITH id(a) AS source, [id(d), id(e)] AS targetNodes
@@ -214,10 +218,11 @@ If specifying nodes `D` and `E` as target nodes, not all nodes at distance 1 wil
 
 image::dfs-target-nodes-stream-path.svg[Visualization of Depth First Search stream with target nodes ,align="center"]
 
+
 [role=query-example, no-result=true]
 --
 .Running the Depth First Search algorithm with maxDepth:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Node{name:'A'})
 CALL gds.dfs.stream('myGraph', {
@@ -232,6 +237,7 @@ RETURN path
 In the above case, nodes `D` and `E` were not visited since they are at distance 2 from node `A`.
 
 image::dfs-max-depth-stream-path.svg[Visualization of Depth First Search stream with max depth ,align="center"]
+
 
 === Mutate
 
@@ -248,7 +254,7 @@ Depth First Search `mutate` supports the same early termination conditions as th
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Node{name:'A'})
 CALL gds.dfs.mutate('myGraph', {

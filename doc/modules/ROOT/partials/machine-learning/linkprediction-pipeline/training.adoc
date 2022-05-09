@@ -26,12 +26,13 @@ The actual steps as well as their ordering in the implementation may differ.
 
 NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
 
+
 === Syntax
 
 [.include-with-train]
 --
 .Run Link Prediction in train mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.train(
   graphName: String,
@@ -58,6 +59,7 @@ include::partial$/algorithms/common-configuration/common-parameters-named-graph.
 | xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
 |===
 
+
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -79,6 +81,7 @@ The `modelInfo` return field has the following algorithm-specific subfields:
 | metrics                 | Map           | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
 | trainingPipeline        | Map           | The pipeline used for the training.
 |===
+
 
 The structure of `modelInfo` is:
 
@@ -123,7 +126,7 @@ The example graph looks like this:
 image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, group=lp, indent=0]
+[source, cypher, role=noplay setup-query, group=lp]
 ----
 CREATE
   (alice:Person {name: 'Alice', numberOfPosts: 38}),
@@ -156,7 +159,7 @@ For the relationships we must use the `UNDIRECTED` orientation.
 This is because the Link Prediction pipelines are defined only for undirected graphs.
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, group=lp, indent=0]
+[source, cypher, role=noplay graph-project-query, group=lp]
 ----
 CALL gds.graph.project(
   'myGraph',
@@ -175,6 +178,7 @@ CALL gds.graph.project(
 
 WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
 
+
 [[linkprediction-pipeline-examples-train-estimate]]
 ==== Memory Estimation
 
@@ -188,7 +192,7 @@ For more details on `estimate` in general, see xref::common-usage/memory-estimat
 [role=query-example]
 --
 .The following will estimate the memory requirements for training the pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
   pipeline: 'pipe',
@@ -205,13 +209,14 @@ YIELD requiredMemory
 |===
 --
 
+
 ==== Training
 
 [[linkprediction-pipeline-examples-train-query]]
 [role=query-example,group=lp]
 --
 .The following will train a model using a pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',

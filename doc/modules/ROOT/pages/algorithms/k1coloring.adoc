@@ -10,6 +10,7 @@ This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Scienc
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 
+
 [[algorithms-k1coloring-intro]]
 == Introduction
 
@@ -34,8 +35,10 @@ Running this algorithm requires sufficient memory availability.
 Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
+
 [[algorithms-k1coloring-syntax]]
 == Syntax
+
 
 .K-1 Coloring syntax per mode
 [.tabbed-example, caption = ]
@@ -44,7 +47,7 @@ Before running this algorithm, we recommend that you read xref::common-usage/mem
 [.include-with-stream]
 ======
 .The following describes the API for running the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stream(graphName: String, configuration: Map)
 YIELD nodeId, color
@@ -78,7 +81,7 @@ YIELD nodeId, color
 [.include-with-stats]
 ======
 .The following describes the API for running the algorithm and returning the computation statistics:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stats(
     graphName: String,
@@ -118,10 +121,11 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 ======
 
+
 [.include-with-mutate]
 ======
 .The following describes the API for running the algorithm and mutating the projected graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
 YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, mutateMillis
@@ -148,10 +152,11 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 |===
 ======
 
+
 [.include-with-write]
 ======
 .The following describes the API for running the algorithm and writing results back to Neo4j:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
 YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, writeMillis
@@ -184,14 +189,16 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 ======
 
+
 ====
+
 
 [[algorithms-k1coloring-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (alice:User {name: 'Alice'}),
        (bridget:User {name: 'Bridget'}),
@@ -207,7 +214,7 @@ CREATE (alice:User {name: 'Alice'}),
 This graph has a super node with name "Alice" that connects to all other nodes.
 It should therefore not be possible for any other node to be assigned the same color as the Alice node.
 
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -224,7 +231,7 @@ We can now go ahead and project a graph with all the `User` nodes and the `LINK`
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.project('myGraph', 'Person', 'LIKES')
 ----
@@ -234,7 +241,7 @@ In the following examples we will demonstrate using the K-1 Coloring algorithm o
 [role=query-example]
 --
 .Running the K-1 Coloring algorithm in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stream('myGraph')
 YIELD nodeId, color
@@ -258,7 +265,7 @@ It is also possible to write the assigned colors back to the database using the 
 [role=query-example]
 --
 .Running the K-1 Coloring algorithm in write mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})
 YIELD nodeCount, colorCount, ranIterations, didConverge
@@ -280,7 +287,7 @@ To instead mutate the in-memory graph with the assigned colors, the `mutate` mod
 [role=query-example]
 --
 .Running the K-1 Coloring algorithm in mutate mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.mutate('myGraph', {mutateProperty: 'color'})
 YIELD nodeCount, colorCount, ranIterations, didConverge
@@ -299,7 +306,7 @@ Similar to the `write` mode, `stats` mode can run the algorithm and return only 
 [role=query-example]
 --
 .Running the K-1 Coloring algorithm in stats mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.k1coloring.stats('myGraph')
 YIELD nodeCount, colorCount, ranIterations, didConverge

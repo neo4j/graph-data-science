@@ -10,6 +10,7 @@ This section describes the Modularity Optimization algorithm in the Neo4j Graph 
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 
+
 [[algorithms-modularity-optimization-intro]]
 == Introduction
 
@@ -39,7 +40,7 @@ Before running this algorithm, we recommend that you read xref::common-usage/mem
 [.include-with-stream]
 ======
 .Run Modularity Optimization in stream mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.stream(graphName: String, configuration: Map)
 YIELD
@@ -71,10 +72,11 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 |===
 ======
 
+
 [.include-with-mutate]
 ======
 .Run Modularity Optimization in mutate mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate(graphName: String, configuration: Map})
 YIELD
@@ -115,10 +117,11 @@ Also, specifying `writeConcurrency` is not possible in `mutate` mode.
 |===
 ======
 
+
 [.include-with-write]
 ======
 .Run Modularity Optimization in write mode on a named graph.
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.write(graphName: String, configuration: Map})
 YIELD
@@ -170,12 +173,13 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 ======
 ====
 
+
 [[algorithms-modularity-optimization-examples]]
 == Examples
 
 Consider the graph created by the following Cypher statement:
 
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (a:Person {name:'Alice'})
@@ -198,10 +202,11 @@ Additionally, each neighbor of "Alice" is connected to one of the neighbors of "
 Looking at the weights of the relationships, it can be seen that the connections from the two center nodes to their neighbors are very strong, while connections between those groups are weak.
 Therefore the Modularity Optimization algorithm should detect two communities: "Alice" and "Bob" together with their neighbors respectively.
 
+
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -220,7 +225,7 @@ The following example demonstrates using the Modularity Algorithm on this weight
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in stream mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.stream('myGraph', { relationshipWeightProperty: 'weight' })
 YIELD nodeId, communityId
@@ -246,7 +251,7 @@ It is also possible to write the assigned community ids back to the database usi
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in write mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.write('myGraph', { relationshipWeightProperty: 'weight', writeProperty: 'community' })
 YIELD nodes, communityCount, ranIterations, didConverge
@@ -270,7 +275,7 @@ To instead mutate the in-memory graph with the assigned community ids, the `muta
 [role=query-example]
 --
 .Running the Modularity Optimization algorithm in mutate mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.modularityOptimization.mutate('myGraph', { relationshipWeightProperty: 'weight', mutateProperty: 'community' })
 YIELD nodes, communityCount, ranIterations, didConverge

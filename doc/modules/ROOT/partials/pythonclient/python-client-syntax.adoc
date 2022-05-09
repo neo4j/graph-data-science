@@ -1,5 +1,5 @@
 .Syntax composition:
-[source, python, indent=0]
+[source, python]
 ----
 result = gds[.<tier>].<algorithm>.<execution-mode>[.<estimate>](
   G: Graph,

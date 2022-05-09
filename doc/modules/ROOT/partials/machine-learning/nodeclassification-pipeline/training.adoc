@@ -53,7 +53,7 @@ The primary metric may not be a `*` expansion due to the ambiguity of which of t
 [.include-with-train]
 --
 .Run Node Classification in train mode on a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.train(
   graphName: String,
@@ -154,7 +154,7 @@ The example graph looks like this:
 image::example-graphs/node_classification.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, group=nc, indent=0]
+[source, cypher, role=noplay setup-query, group=nc]
 ----
 CREATE
   (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], class: 0}),
@@ -180,7 +180,7 @@ We will also project the `sizeOfStory` property to use as a model feature, and t
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, group=nc, indent=0]
+[source, cypher, role=noplay graph-project-query, group=nc]
 ----
 CALL gds.graph.project('myGraph', {
     House: { properties: ['sizePerStory', 'class'] },
@@ -199,7 +199,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example, group=nc]
 --
 .The following will estimate the memory requirements for running the algorithm in train mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.train.estimate('myGraph', {
   pipeline: 'pipe',
@@ -222,6 +222,7 @@ YIELD bytesMin, bytesMax, requiredMemory
 
 NOTE: If a node property step does not have an estimation implemented, the step will be ignored in the estimation.
 
+
 ==== Train
 
 In the following examples we will demonstrate running the Node Classification training pipeline on this graph.
@@ -231,7 +232,7 @@ We will train a model to predict the class in which a house belongs, based on it
 [role=query-example, group=nc]
 --
 .The following will train a model using a pipeline:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   pipeline: 'pipe',

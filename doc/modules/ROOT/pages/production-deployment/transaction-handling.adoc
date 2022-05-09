@@ -8,6 +8,7 @@ This section describes the usage of transactions during the execution of an algo
 When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement.
 --
 
+
 [[tx-graph-projection]]
 == During graph projection
 
@@ -18,7 +19,7 @@ For example, the following statement will only project an empty graph (assuming 
 
 [role=query-example]
 --
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE (n:MyLabel) // the new node is part of Cypher transaction state
 WITH *
@@ -35,6 +36,7 @@ RETURN nodeCount
 |===
 --
 
+
 [[tx-results-writing]]
 == During results writing
 
@@ -44,6 +46,7 @@ These transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 
 include::partial$/production-deployment/transaction-writing.adoc[leveloffset=+2]
+
 
 [[tx-termination]]
 == Transaction termination

@@ -27,11 +27,12 @@ The graph generation is parameterized by three dimensions:
  * average degree - describes the average out-degree of the generated nodes
  * relationship distribution function - the probability distribution method used to connect generated nodes
 
+
 [[graph-generation-syntax]]
 == Syntax
 
 .The following describes the API for running the algorithm
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.graph.generate(graphName: String, nodeCount: Integer, averageDegree: Integer, {
   relationshipDistribution: String,
@@ -85,6 +86,7 @@ Currently there are three supported methods:
 * `UNIFORM` - Distributes the outgoing relationships evenly, i.e., every node has exactly the same out degree (equal to the average degree). The target nodes are selected randomly.
 * `RANDOM` - Distributes the outgoing relationships using a normal distribution with an average of `averageDegree` and a standard deviation of `2 * averageDegree`. The target nodes are selected randomly.
 * `POWER_LAW` - Distributes the incoming relationships using a power law distribution. The out degree is based on a normal distribution.
+
 
 [[graph-generation-seed]]
 == Relationship Seed

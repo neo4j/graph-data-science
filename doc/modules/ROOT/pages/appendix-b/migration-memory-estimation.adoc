@@ -7,7 +7,7 @@
 | 1.x | 2.x
 2+| Algorithm estimation on anonymous graphs:
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.ALGO_NAME.estimate(
   {
@@ -18,7 +18,7 @@ CALL gds.ALGO_NAME.estimate(
 )
 ----
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.ALGO_NAME.estimate(
   {
@@ -30,7 +30,7 @@ CALL gds.ALGO_NAME.estimate(
 ----
 2+| Algorithm estimation on fictive graphs::
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.ALGO_NAME.estimate(
   {
@@ -43,7 +43,7 @@ CALL gds.ALGO_NAME.estimate(
 )
 ----
 |
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.ALGO_NAME.estimate(
   {

@@ -22,6 +22,7 @@ This includes graph projections, algorithm computation, and result writing.
 All log entries are written to the log files configured for the Neo4j database.
 For more information on configuring Neo4j logs, please refer to the https://neo4j.com/docs/operations-manual/current/monitoring/logging/#logging[Neo4j Operations Manual].
 
+
 [[logging-progress-logging]]
 [.beta]
 == Progress-logging procedure
@@ -42,7 +43,7 @@ It will also show how tasks are structured as a tree and print progress for each
 === Syntax
 
 .Getting the progress of tasks:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.beta.listProgress(jobId: String)
 YIELD
@@ -75,12 +76,13 @@ YIELD
 | elapsedTime   | Duration  | The duration from `timeStarted` to now.
 |===
 
+
 [[logging-progress-logging-examples]]
 === Examples
 
 Assuming we just started `gds.beta.node2vec.stream` procedure.
 
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.beta.listProgress()
 YIELD
@@ -108,7 +110,7 @@ When a user calls procedure `gds.alpha.userLog`, their respective list of genera
 === Syntax
 
 .Getting the hints and warnings for a user:
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.alpha.userLog()
 YIELD
@@ -132,7 +134,7 @@ YIELD
 Suppose that we have called the  `gds.wcc.stream` procedure and set a `relationshipWeightProperty` without specifying a `threshold` value.
 This generates a warning which can be accessed via the user log as seen below.
 
-[source,cypher,role=noplay, indent=0]
+[source,cypher,role=noplay]
 ----
 CALL gds.alpha.userLog()
 YIELD

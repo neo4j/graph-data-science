@@ -8,12 +8,14 @@
 | `improve` | `useWassermanFaust`
 |===
 
+
 .Changes in `stream` mode YIELD fields
 [options=header, cols=2]
 |===
 | 1.x          | 2.x
 | `centrality` | `score`
 |===
+
 
 .Changes in `write` mode YIELD fields
 [options=header, cols=2]

@@ -12,8 +12,10 @@ Common neighbors captures the idea that two strangers who have a friend in commo
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
+
 [[algorithms-linkprediction-common-neighbors-context]]
 == History and explanation
+
 
 It is computed using the following formula:
 
@@ -29,13 +31,14 @@ The library contains a function to calculate closeness between two nodes.
 == Syntax
 
 .The following will run the algorithm and return the result:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
     relationshipQuery:String,
     direction:String
 })
 ----
+
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -47,11 +50,12 @@ RETURN gds.alpha.linkprediction.commonNeighbors(node1:Node, node2:Node, {
 | `direction`            | String  | BOTH           | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
 |===
 
+
 [[algorithms-linkprediction-common-neighbors-sample]]
 == Common Neighbors algorithm sample
 
 .The following will project a sample graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CREATE
  (zhen:Person {name: 'Zhen'}),
@@ -69,7 +73,7 @@ CREATE
 ----
 
 .The following will return the number of common neighbors for Michael and Karin:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})
@@ -83,10 +87,11 @@ CREATE
 | 1.0
 |===
 
+
 We can also compute the score of a pair of nodes based on a specific relationship type.
 
 .The following will return the number of common neighbors for Michael and Karin based only on the `FRIENDS` relationships:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
  MATCH (p1:Person {name: 'Michael'})
  MATCH (p2:Person {name: 'Karin'})

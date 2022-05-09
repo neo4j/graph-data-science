@@ -8,7 +8,7 @@ include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
 ======
 
 .Run {algorithm} in stream mode on a named graph.
-[source, cypher, role=noplay, subs="quotes,attributes+", indent=0]
+[source, cypher, role=noplay, subs="quotes,attributes+"]
 ----
 CALL {procedure-name}.stream(
   graphName: String,
@@ -72,7 +72,7 @@ Each relationship represents a path from the source node to the target node.
 The total cost of a path is stored via the `totalCost` relationship property.
 
 .Run {algorithm} in mutate mode on a named graph.
-[source, cypher, role=noplay, subs="quotes,attributes+", indent=0]
+[source, cypher, role=noplay, subs="quotes,attributes+"]
 ----
 CALL {procedure-name}.mutate(
   graphName: String,
@@ -132,7 +132,7 @@ By default, the write mode stores a `totalCost` property.
 Optionally, one can also store `nodeIds` and `costs` of intermediate nodes on the path.
 
 .Run {algorithm} in write mode on a named graph.
-[source, cypher, role=noplay, subs="quotes,attributes+", indent=0]
+[source, cypher, role=noplay, subs="quotes,attributes+"]
 ----
 CALL {procedure-name}.write(
   graphName: String,
@@ -183,5 +183,6 @@ endif::[]
 |===
 
 ======
+
 
 ====

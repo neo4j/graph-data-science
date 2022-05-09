@@ -18,6 +18,7 @@ This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph D
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+
 [[algorithms-dijkstra-source-target-intro]]
 == Introduction
 
@@ -31,10 +32,12 @@ The implementation is also used for the xref::algorithms/astar.adoc[A*] and xref
 The algorithm implementation is executed using a single thread.
 Altering the concurrency configuration has no effect.
 
+
 [[algorithms-dijkstra-source-target-syntax]]
 == Syntax
 
 include::partial$/algorithms/shortest-path/path-syntax.adoc[]
+
 
 [[algorithms-dijkstra-source-target-examples]]
 == Examples
@@ -45,7 +48,7 @@ include::partial$/algorithms/shortest-path/path-syntax.adoc[]
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE (a:Location {name: 'A'}),
        (b:Location {name: 'B'}),
@@ -71,7 +74,7 @@ These lengths are represented by the `cost` relationship property.
 include::partial$/algorithms/shared/examples-named-native-note.adoc[]
 
 .The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
     'myGraph',
@@ -85,6 +88,7 @@ CALL gds.graph.project(
 
 In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
 
+
 [[algorithms-dijkstra-source-target-examples-memory-estimation]]
 === Memory Estimation
 
@@ -94,7 +98,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 [role=query-example]
 --
 .The following will estimate the memory requirements for running the algorithm in write mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write.estimate('myGraph', {
@@ -115,6 +119,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
+
 [[algorithms-dijkstra-source-target-examples-stream]]
 === Stream
 
@@ -124,7 +129,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm and stream results:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.stream('myGraph', {
@@ -166,7 +171,7 @@ include::partial$/algorithms/shortest-path/path-examples-mutate-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `mutate` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.mutate('myGraph', {
@@ -195,6 +200,7 @@ The new relationship will store a single property `totalCost`.
 The relationship produced is always directed, even if the input graph is undirected.
 ====
 
+
 [[algorithms-dijkstra-source-target-examples-write]]
 === Write
 
@@ -203,7 +209,7 @@ include::partial$/algorithms/shortest-path/path-examples-write-intro.adoc[]
 [role=query-example]
 --
 .The following will run the algorithm in `write` mode:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write('myGraph', {

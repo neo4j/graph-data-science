@@ -30,7 +30,7 @@ This is useful to free up main memory or to remove accidentally added relationsh
 
 [.include-with-stream-single-property]
 ======
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty(
     graphName: String,
@@ -79,7 +79,7 @@ a|
 
 [.include-with-stream]
 ======
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties(
     graphName: String,
@@ -130,7 +130,7 @@ a|
 
 [.include-with-write]
 ======
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship(
     graphName: String,
@@ -180,7 +180,7 @@ YIELD
 
 [.include-with-delete-relationships]
 ======
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.deleteRelationships(
     graphName: String,
@@ -213,6 +213,7 @@ YIELD
 ======
 ====
 
+
 == Examples
 
 In order to demonstrate the GDS capabilities over node properties, we are going to create a small graph in Neo4j and project it into our graph catalog.
@@ -220,7 +221,7 @@ In order to demonstrate the GDS capabilities over node properties, we are going 
 image::example-graphs/node-similarity.svg[Visualization of the example graph,align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, indent=0]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (alice:Person {name: 'Alice'}),
@@ -245,7 +246,7 @@ CREATE
 ----
 
 .Project the graph:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'personsAndInstruments',
@@ -272,7 +273,7 @@ CALL gds.graph.project(
 <4> Project property `score` of relationship type `LIKES`.
 
 .Compute the Node Similarity in our graph:
-[source, cypher, role=noplay graph-project-query, indent=0]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
   mutateRelationshipType: 'SIMILAR',                        // <2>
@@ -282,6 +283,7 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 <1> Run NodeSimilarity in `mutate` mode on `personsAndInstruments` projected graph.
 <2> The algorithm will add relationships of type `SIMILAR` to the projected graph.
 <3> The algorithm will add relationship property `score` for each added relationship.
+
 
 === Stream
 
@@ -294,7 +296,7 @@ In the example below we stream the relationship property `score`.
 [role=query-example]
 --
 .Stream a single relationship property:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty(
   'personsAndInstruments',                  // <1>
@@ -341,7 +343,7 @@ We can further on filter the relationship types we want to stream, this is demon
 [role=query-example]
 --
 .Stream a single relationship property for specific relationship type:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperty(
   'personsAndInstruments',                  // <1>
@@ -383,7 +385,7 @@ It is also possible to stream multiple relationship properties.
 [role=query-example]
 --
 .Stream multiple relationship properties:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties(
   'personsAndInstruments',                      // <1>
@@ -425,6 +427,7 @@ ORDER BY source ASC, target ASC
 |===
 --
 
+
 ==== Multiple relationship types
 
 Similar to the multiple relationship properties we can stream properties for multiple relationship types.
@@ -432,7 +435,7 @@ Similar to the multiple relationship properties we can stream properties for mul
 [role=query-example]
 --
 .Stream relationship properties of a multiple relationship projections:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.streamRelationshipProperties(
   'personsAndInstruments',                          // <1>
@@ -498,7 +501,7 @@ NOTE: Relationships are always written using a single thread.
 [role=query-example]
 --
 .Write relationships to Neo4j:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship(
   'personsAndInstruments',        // <1>
@@ -527,6 +530,7 @@ image::write_relationships_graph.svg[Visualization of the example graph after wr
 The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
 The relationships in this example are undirected because we used xref::algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
 
+
 ==== Relationship type with property
 
 To write relationship properties, these have to be explicitly specified.
@@ -534,7 +538,7 @@ To write relationship properties, these have to be explicitly specified.
 [role=query-example]
 --
 .Write relationships and their properties to Neo4j:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.writeRelationship(
   'personsAndInstruments',          // <1>
@@ -556,6 +560,7 @@ YIELD
 |===
 --
 
+
 [[catalog-graph-delete-rel-type]]
 === Delete
 
@@ -571,7 +576,7 @@ If we still want to delete these relationships we need to xref::graph-drop.adoc[
 [role=query-example]
 --
 .Delete all relationships of type `SIMILAR` from a named graph:
-[source, cypher, role=noplay, indent=0]
+[source, cypher, role=noplay]
 ----
 CALL gds.graph.deleteRelationships(
   'personsAndInstruments',            // <1>

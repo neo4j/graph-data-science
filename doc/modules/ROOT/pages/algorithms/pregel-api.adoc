@@ -46,7 +46,7 @@ The first step is to implement the `org.neo4j.gds.beta.pregel.PregelComputation`
 It is the main interface to express user-defined logic using the Pregel framework.
 
 .The Pregel computation
-[source, java, indent=0]
+[source, java]
 ----
 public interface PregelComputation<C extends PregelConfig> {
     // The schema describes the node property layout.
@@ -160,7 +160,7 @@ It provides access to node properties stored in the in-memory graph.
 We can set the initial node state to a fixed value, e.g. the node id, or use graph properties and the user-defined configuration to initialize a context-dependent state.
 
 .The InitContext
-[source, java, indent=0]
+[source, java]
 ----
 public final class InitContext {
     // The currently processed node id.
@@ -192,7 +192,7 @@ In contrast, `org.neo4j.gds.beta.pregel.PregelContext.ComputeContext` can be acc
 The context provides methods to access the computation state, e.g. the current superstep, and to send messages to other nodes in the graph.
 
 .The ComputeContext
-[source, java, indent=0]
+[source, java]
 ----
 public final class ComputeContext {
     // The currently processed node id.
@@ -247,7 +247,7 @@ That context is similar to the `ComputeContext` but is not tied to a specific no
 Furthermore, the `MasterComputeContext` allows to run a function for every node in the graph and has access to the computation state of all nodes.
 
 .The MasterComputeContext
-[source, java, indent=0]
+[source, java]
 ----
 public final class MasterComputeContext {
     // User-defined Pregel configuration
@@ -296,7 +296,7 @@ All messages sent to a node are stored in a queue and received in the next super
 To enable message reduction, one needs to implement the `reducer` method and provide either a custom or a pre-defined reducer.
 
 .The Reducer interface that needs to be implemented.
-[source, java, indent=0]
+[source, java]
 ----
 public interface Reducer {
     // The identity element is used as the initial value.
@@ -313,7 +313,7 @@ The framework already provides implementations for computing the minimum, maximu
 The default implementations are part of the `Reducer` interface and can be applied as follows:
 
 .Applying the sum reducer in a custom computation.
-[source, java, indent=0]
+[source, java]
 ----
 public class CustomComputation implements PregelComputation<PregelConfig> {
 
@@ -370,7 +370,7 @@ We can achieve that by declaring an option to set that key in a custom configura
 If a user-defined Pregel computation requires custom options a custom configuration can be created by extending the `PregelConfig`.
 
 .A custom configuration and how it can be used in the init phase.
-[source, java, indent=0]
+[source, java]
 ----
 @ValueClass
 @Configuration
@@ -408,7 +408,7 @@ public class CustomComputation implements PregelComputation<CustomConfig> {
 The following methods are available for all contexts (`InitContext`, `ComputeContext`, `MasterComputeContext`) to inject custom messages into the progress log of the algorithm execution.
 
 .The log methods can be used in Pregel contexts
-[source, java, indent=0]
+[source, java]
 ----
 // All contexts inherit from PregelContext
 public abstract class PregelContext<CONFIG extends PregelConfig> {
@@ -444,7 +444,7 @@ To generate procedures for a computation, it needs to be annotated with the `@or
 In addition, the config parameter of the custom computation must be a subtype of `org.neo4j.gds.beta.pregel.PregelProcedureConfig`.
 
 .Using the `@PregelProcedure` annotation to configure code generation.
-[source, java, indent=0]
+[source, java]
 ----
 @PregelProcedure(
     name = "custom.pregel.proc",
@@ -492,7 +492,7 @@ Therefore, GDS needs to be installed as a plugin on the Neo4j server.
 
 To build the project and create a plugin jar, just run:
 
-[source, bash, indent=0]
+[source, bash]
 ----
 ./gradlew shadowJar
 ----
@@ -502,13 +502,14 @@ The jar needs to be placed in the `plugins` directory within your Neo4j installa
 In order to have access to the procedure in Cypher, its namespace potentially needs to be added to the `neo4j.conf` file.
 
 .Enabling an example procedure in `neo4j.conf`
-[source, bash, indent=0]
+[source, bash]
 ----
 dbms.security.procedures.unrestricted=custom.pregel.proc.*
 dbms.security.procedures.allowlist=custom.pregel.proc.*
 ----
 
 NOTE: Before `Neo4j 4.2`, the configuration setting is called `dbms.security.procedures.whitelist`
+
 
 [[algorithms-pregel-api-example]]
 == Examples

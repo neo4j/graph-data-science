@@ -15,6 +15,7 @@ Since GDS performs large computations with the full resources of the system it i
 We make use of a _Read Replica_ instance to deploy the GDS library and process analytical workloads.
 Calls to GDS `write` procedures are internally directed to the cluster `LEADER` instance via _server-side routing_.
 
+
 == Deployment
 
 * The cluster must contain at least one _Read Replica_ instance
