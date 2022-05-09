@@ -154,4 +154,59 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
         );
     }
 
+    @Test
+    void trainAndPredictWithRF() {
+        runQuery("CALL gds.graph.project(" +
+                 "'g', " +
+                 "['N', 'Hidden'], " +
+                 "{T: {properties: 'w'}}, " +
+                 "{nodeProperties: ['a', 'b', 'cost']})"
+        );
+
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.create('p')");
+
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('p', 'wcc', {" +
+                 "  mutateProperty: 'community', " +
+                 "  relationshipWeightProperty: 'w'" +
+                 "})");
+        // let's try both list and single string syntaxes
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.selectFeatures('p', 'a')");
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.selectFeatures('p', ['b', 'community'])");
+
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.configureSplit('p', {" +
+                 "  testFraction: 0.2, " +
+                 "  validationFolds: 5" +
+                 "})");
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('p', {numberOfDecisionTrees: 10})");
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.addRandomForest('p', {numberOfDecisionTrees: 25, minSplitSize: 5})");
+
+        runQuery("CALL gds.alpha.pipeline.nodeRegression.train('g', {" +
+                 " nodeLabels: ['N']," +
+                 " pipeline: 'p'," +
+                 " modelName: 'model'," +
+                 " targetProperty: 'cost'," +
+                 " metrics: ['MEAN_SQUARED_ERROR']," +
+                 " randomSeed: 2" +
+                 "})");
+
+        assertCypherResult(
+            "CALL gds.beta.model.list() YIELD modelInfo RETURN count(*) AS modelCount",
+            List.of(Map.of("modelCount", 1L))
+        );
+
+        assertCypherResult(
+            "CALL gds.alpha.pipeline.nodeRegression.predict.stream('g', {" +
+            "  nodeLabels: ['Hidden']," +
+            "  modelName: 'model'" +
+            "}) YIELD nodeId, predictedValue " +
+            "RETURN gds.util.asNode(nodeId).name AS name, predictedValue AS predictedCost " +
+            "  ORDER BY name ASC",
+            List.of(
+                Map.of("name", "0_hidden", "predictedCost", closeTo(23.7784, 1e-4)),
+                Map.of("name", "1_hidden", "predictedCost", closeTo(46.7967, 1e-4)),
+                Map.of("name", "2_hidden", "predictedCost", closeTo(14.4183, 1e-4))
+            )
+        );
+    }
+
 }
