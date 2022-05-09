@@ -62,6 +62,22 @@ class FilteredKnnBaseConfigTest {
     }
 
     @Test
+    void shouldAcceptValidTargetNodeFilter() {
+        new FilteredKnnBaseConfigImpl(
+            CypherMapWrapper.create(
+                Map.of(
+                    "nodeProperties", List.of("dummy"),
+                    "targetNodeFilter", List.of(idFunction.of("a"))
+                )
+            )
+        ).validateSourceNodeFilter(
+            graphStore,
+            List.of(),
+            List.of()
+        );
+    }
+
+    @Test
     void shouldRejectOutOfRangeSourceNodeFilter() {
         var outOfRangeNode = -1L;
         assertThatThrownBy(
@@ -75,6 +91,22 @@ class FilteredKnnBaseConfigTest {
             )
         ).isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Value for `sourceNodeFilter` was `" + outOfRangeNode + "`, but must be within the range [0, 9223372036854775807].");
+    }
+
+    @Test
+    void shouldRejectOutOfRangeTargetNodeFilter() {
+        var outOfRangeNode = -1L;
+        assertThatThrownBy(
+            () -> new FilteredKnnBaseConfigImpl(
+                CypherMapWrapper.create(
+                    Map.of(
+                        "nodeProperties", List.of("dummy"),
+                        "targetNodeFilter", List.of(outOfRangeNode)
+                    )
+                )
+            )
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Value for `targetNodeFilter` was `" + outOfRangeNode + "`, but must be within the range [0, 9223372036854775807].");
     }
 
     @Test
@@ -105,5 +137,35 @@ class FilteredKnnBaseConfigTest {
         ).isInstanceOf(IllegalArgumentException.class)
             .hasMessage(
                 "Invalid configuration value 'sourceNodeFilter', the following nodes are missing from the graph: [" + missingNode + "]");
+    }
+
+    @Test
+    void shouldRejectTargetNodeFilterWithMissingNode() {
+        //noinspection OptionalGetWithoutIsPresent
+        var missingNode = new Random()
+            .longs(
+                0,
+                4_294_967_295L // a large-ish number that still fits in our id maps (Math.pow(2, 32) - 1)
+            ).filter(l -> !graphStore.nodes().contains(l))
+            .limit(1)
+            .findFirst()
+            .getAsLong();
+
+        assertThatThrownBy(
+            () -> new FilteredKnnBaseConfigImpl(
+                CypherMapWrapper.create(
+                    Map.of(
+                        "nodeProperties", List.of("dummy"),
+                        "targetNodeFilter", List.of(idFunction.of("a"), missingNode) // one existing, one missing
+                    )
+                )
+            ).validateTargetNodeFilter(
+                graphStore,
+                List.of(),
+                List.of()
+            )
+        ).isInstanceOf(IllegalArgumentException.class)
+            .hasMessage(
+                "Invalid configuration value 'targetNodeFilter', the following nodes are missing from the graph: [" + missingNode + "]");
     }
 }

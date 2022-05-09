@@ -45,6 +45,12 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         return List.of();
     }
 
+    @Value.Default
+    @Configuration.LongRange(min = 0)
+    default List<Long> targetNodeFilter() {
+        return List.of();
+    }
+
     @Configuration.GraphStoreValidationCheck
     default void validateSourceNodeFilter(
         GraphStore graphStore,
@@ -66,4 +72,24 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         }
     }
 
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodeFilter(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var nodes = graphStore.nodes();
+        var missingNodes = targetNodeFilter()
+            .stream()
+            .filter(n -> nodes.toMappedNodeId(n) == IdMap.NOT_FOUND)
+            .collect(Collectors.toList());
+        if (!missingNodes.isEmpty()) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Invalid configuration value 'targetNodeFilter', the following nodes are missing from the graph: %s",
+                    missingNodes
+                )
+            );
+        }
+    }
 }
