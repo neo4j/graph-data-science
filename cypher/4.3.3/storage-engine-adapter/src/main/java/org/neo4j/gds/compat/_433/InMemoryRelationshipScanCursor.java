@@ -27,7 +27,7 @@ import org.neo4j.token.TokenHolders;
 
 public class InMemoryRelationshipScanCursor extends AbstractInMemoryRelationshipScanCursor {
 
-    InMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
+    public InMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
     }
 

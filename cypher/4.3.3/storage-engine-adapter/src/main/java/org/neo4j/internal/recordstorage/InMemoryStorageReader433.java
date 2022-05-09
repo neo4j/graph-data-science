@@ -23,6 +23,7 @@ import org.neo4j.common.EntityType;
 import org.neo4j.counts.CountsAccessor;
 import org.neo4j.gds.compat._433.InMemoryNodeCursor;
 import org.neo4j.gds.compat._433.InMemoryPropertyCursor;
+import org.neo4j.gds.compat._433.InMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat._433.InMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
@@ -90,6 +91,6 @@ public class InMemoryStorageReader433 extends AbstractInMemoryStorageReader {
 
     @Override
     public StorageRelationshipScanCursor allocateRelationshipScanCursor(CursorContext cursorContext) {
-        return new RecordRelationshipScanCursor(null, cursorContext);
+        return new InMemoryRelationshipScanCursor(graphStore, tokenHolders);
     }
 }
