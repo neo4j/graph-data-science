@@ -22,6 +22,7 @@ package org.neo4j.gds.storageengine;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.gds.compat.InMemoryPropertySelection;
@@ -33,7 +34,9 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.values.storable.ValueGroup;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -117,5 +120,35 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
         assertThat(propertyCursor.propertyValue().asObject()).isEqualTo(3.0D);
         assertThat(propertyCursor.propertyType()).isEqualTo(ValueGroup.NUMBER);
         assertThat(propertyCursor.propertyKey()).isEqualTo(relationshipScanCursor.tokenHolders.propertyKeyTokens().getIdByName("relProp"));
+    }
+
+    @Test
+    void shouldPerformRangeScan() {
+        relationshipScanCursor.scanRange(1, 3);
+
+        var actualRelationships = new HashMap<Long, Relationship>();
+        while(relationshipScanCursor.next()) {
+            actualRelationships.put(
+                relationshipScanCursor.getId(),
+                ImmutableRelationship.of(
+                    relationshipScanCursor.sourceNodeReference(),
+                    relationshipScanCursor.targetNodeReference()
+                )
+            );
+        }
+
+        var expectedRelationships = Map.of(
+            1L, ImmutableRelationship.of(idFunction.of("a"), idFunction.of("c")),
+            2L, ImmutableRelationship.of(idFunction.of("b"), idFunction.of("c")),
+            3L, ImmutableRelationship.of(idFunction.of("a"), idFunction.of("a"))
+        );
+
+        assertThat(actualRelationships).containsExactlyInAnyOrderEntriesOf(expectedRelationships);
+    }
+
+    @ValueClass
+    interface Relationship {
+        long source();
+        long target();
     }
 }

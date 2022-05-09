@@ -48,6 +48,8 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     private final List<PropertyCursor[]> propertyCursorCache;
     private MutableDoubleList propertyValuesCache;
 
+    protected long maxRelationshipId;
+
     protected long sourceId;
     protected long targetId;
     protected RelationshipSelection selection;
@@ -67,6 +69,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         this.propertyCursorCache = new ArrayList<>();
         this.propertyValuesCache = new DoubleArrayList();
 
+        this.maxRelationshipId = 0;
         this.graphStore.relationshipIds().registerUpdateListener(this::newRelationshipIdContextAdded);
     }
 
@@ -163,6 +166,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         );
         var newSize = this.propertyCursorCache.stream().mapToInt(cursor -> cursor.length).max().orElse(0);
         this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
+        this.maxRelationshipId += relationshipIdContext.relationshipCount();
     }
 
     private boolean progressToNextContext() {
@@ -191,9 +195,13 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
 
     protected void findContextAndInitializeCursor(RelationshipIds.RelationshipIdContext context) {
         for (int i = 0; i < relationshipIdContexts.size(); i++) {
+            if (i > 0) {
+                relationshipTypeOffset += relationshipIdContexts.get(i - 1).relationshipCount();
+            }
             if (relationshipIdContexts.get(i) == context) {
                 this.relationshipContextIndex = i;
                 initializeCursorForContext(context);
+                break;
             }
         }
     }

@@ -5,6 +5,7 @@ description = 'Neo4j Graph Data Science :: Storage Engine Testing'
 group = 'org.neo4j.gds'
 
 dependencies {
+    testAnnotationProcessor project(':annotations')
     testAnnotationProcessor group: 'org.immutables', name: 'builder',            version: ver.'immutables'
     testAnnotationProcessor group: 'org.immutables', name: 'value',              version: ver.'immutables'
 

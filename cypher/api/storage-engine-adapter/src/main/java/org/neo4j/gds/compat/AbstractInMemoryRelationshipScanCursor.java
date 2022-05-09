@@ -21,12 +21,17 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
+import org.neo4j.internal.recordstorage.InMemoryRelationshipScan;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
 import org.neo4j.token.TokenHolders;
 
+import static java.lang.Math.min;
+
 public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRelationshipCursor implements StorageRelationshipScanCursor {
+
+    private long highMark;
 
     public AbstractInMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
@@ -37,30 +42,23 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         reset();
         this.sourceId = 0;
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
+        this.highMark = maxRelationshipId;
     }
 
     @Override
     public void single(long reference) {
         reset();
         setId(reference - 1);
+        this.highMark = reference;
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
 
-        graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
-            this.sourceId = nodeId;
-            findContextAndInitializeCursor(context);
-
-            for (long i = 0; i < offset; i++) {
-                next();
-            }
-
-            return null;
-        });
+        initializeForRelationshipReference(reference);
     }
 
     @Override
     public boolean next() {
         if (super.next()) {
-            return true;
+            return getId() <= highMark;
         } else {
             this.sourceId++;
             if (this.sourceId >= graphStore.nodeCount()) {
@@ -73,6 +71,33 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
     }
 
     public boolean scanBatch(AllRelationshipsScan scan, int sizeHint) {
-        throw new UnsupportedOperationException();
+        if (getId() != NO_ID) {
+            reset();
+        }
+
+        highMark = maxRelationshipId;
+        return ((InMemoryRelationshipScan) scan).scanBatch(sizeHint, this);
+    }
+
+    public boolean scanRange(long start, long stop) {
+        reset();
+        this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
+        highMark = min(stop, maxRelationshipId);
+
+        initializeForRelationshipReference(start);
+        return true;
+    }
+
+    private void initializeForRelationshipReference(long reference) {
+        graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
+            this.sourceId = nodeId;
+            findContextAndInitializeCursor(context);
+
+            for (long i = 0; i < offset; i++) {
+                next();
+            }
+            setId(reference - 1);
+            return null;
+        });
     }
 }
