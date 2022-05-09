@@ -74,7 +74,8 @@ class LeidenTest {
 
     @Test
     void leiden() {
-        Leiden leiden = new Leiden(graph, 2, 1.0 / graph.relationshipCount(), 0.01, 19L, ProgressTracker.NULL_TRACKER);
+        Leiden leiden = new Leiden(graph, 2, 1.0 / graph.relationshipCount(), 0.01, 19L, 1, ProgressTracker.NULL_TRACKER
+        );
         var communities = leiden.compute();
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
