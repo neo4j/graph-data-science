@@ -33,7 +33,9 @@ class NodeRegressionPipelineSyntaxTest extends SyntaxTestBase {
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_RF_MODEL),
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_NODE_PROPERTY),
             SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_FEATURE),
-            SyntaxModeMeta.of(SyntaxMode.TRAIN)
+            SyntaxModeMeta.of(SyntaxMode.TRAIN),
+            SyntaxModeMeta.of(SyntaxMode.STREAM),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE)
         );
     }
 
