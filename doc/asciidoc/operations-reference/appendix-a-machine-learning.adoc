@@ -62,7 +62,7 @@ include::model-operation-references.adoc[]
 .2+<.^| <<nodeclassification-pipelines, Node Classification Pipeline>>
 | `gds.alpha.pipeline.nodeClassification.addRandomForest`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
-.9+<.^| <<noderegression-pipelines, Node Regression Pipeline>>
+.10+<.^| <<noderegression-pipelines, Node Regression Pipeline>>
 | `gds.alpha.pipeline.nodeRegression.create`
 | `gds.alpha.pipeline.nodeRegression.addNodeProperty`
 | `gds.alpha.pipeline.nodeRegression.selectFeatures`
@@ -72,6 +72,7 @@ include::model-operation-references.adoc[]
 | `gds.alpha.pipeline.nodeRegression.addRandomForest`
 | `gds.alpha.pipeline.nodeRegression.train`
 | `gds.alpha.pipeline.nodeRegression.predict.stream`
+| `gds.alpha.pipeline.nodeRegression.predict.mutate`
 |===
 
 
