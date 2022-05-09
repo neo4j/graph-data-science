@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -27,8 +28,8 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
@@ -192,14 +193,21 @@ public final class NodeRegressionTrain {
         Regressor regressor,
         BiConsumer<Metric, Double> scoreConsumer
     ) {
-        // TODO parallelize this part
-        HugeDoubleArray predictions = HugeDoubleArray.newArray(evaluationSet.size());
-        predictions.setAll(idx -> regressor.predict(features.get(evaluationSet.get(idx))));
+        var localPredictions = HugeDoubleArray.newArray(evaluationSet.size());
+        ParallelUtil.parallelForEachNode(
+            evaluationSet.size(),
+            trainConfig.concurrency(),
+            idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
+        );
 
         HugeDoubleArray localTargets = HugeDoubleArray.newArray(evaluationSet.size());
-        localTargets.setAll(idx -> targets.get(evaluationSet.get(idx)));
+        ParallelUtil.parallelForEachNode(
+            evaluationSet.size(),
+            trainConfig.concurrency(),
+            idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
+        );
 
-        trainConfig.metrics().forEach(metric -> scoreConsumer.accept(metric, metric.compute(localTargets, predictions)));
+        trainConfig.metrics().forEach(metric -> scoreConsumer.accept(metric, metric.compute(localTargets, localPredictions)));
     }
 
     private void evaluateBestModel(
