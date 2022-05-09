@@ -53,7 +53,7 @@ class FootballTest {
     void leiden(long seed) {
         var gamma = 1.0 / graph.relationshipCount();
         Leiden leiden = new Leiden(graph, 5, gamma, 0.01, seed, 1, ProgressTracker.NULL_TRACKER);
-        var communities = leiden.compute();
+        var communities = leiden.compute().communities();
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)

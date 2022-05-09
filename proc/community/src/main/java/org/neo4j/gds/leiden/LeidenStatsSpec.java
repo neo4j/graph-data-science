@@ -24,40 +24,52 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.leiden.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStreamConfig, Stream<StreamResult>, LeidenAlgorithmFactory<LeidenStreamConfig>> {
+@GdsCallable(name = "gds.alpha.leiden.stats", description = DESCRIPTION, executionMode = STREAM)
+public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>, LeidenAlgorithmFactory<LeidenStatsConfig>> {
     @Override
     public String name() {
-        return "LeidenStream";
+        return "LeidenStats";
     }
 
     @Override
-    public LeidenAlgorithmFactory<LeidenStreamConfig> algorithmFactory() {
+    public LeidenAlgorithmFactory<LeidenStatsConfig> algorithmFactory() {
         return new LeidenAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<LeidenStreamConfig> newConfigFunction() {
-        return (__, config) -> LeidenStreamConfig.of(config);
+    public NewConfigFunction<LeidenStatsConfig> newConfigFunction() {
+        return (__, config) -> LeidenStatsConfig.of(config);
     }
 
     @Override
-    public ComputationResultConsumer<Leiden, LeidenResult, LeidenStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var leidenResult = computationResult.result();
             if (leidenResult == null) {
                 return Stream.empty();
             }
-            var graph = computationResult.graph();
-            var communities = leidenResult.communities();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), communities.get(nodeId)));
+
+            var statsBuilder = new StatsResult.StatsBuilder(
+                executionContext.callContext(),
+                computationResult.config().concurrency()
+            );
+
+            var statsResult = statsBuilder
+                .withLevels(leidenResult.ranLevels())
+                .withDidConverge(leidenResult.didConverge())
+                .withCommunityFunction(leidenResult.communitiesFunction())
+                .withPreProcessingMillis(computationResult.preProcessingMillis())
+                .withComputeMillis(computationResult.computeMillis())
+                .withNodeCount(computationResult.graph().nodeCount())
+                .withConfig(computationResult.config())
+                .build();
+
+            return Stream.of(statsResult);
         };
     }
 }

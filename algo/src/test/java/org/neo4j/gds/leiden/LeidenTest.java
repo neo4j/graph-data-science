@@ -74,9 +74,16 @@ class LeidenTest {
 
     @Test
     void leiden() {
-        Leiden leiden = new Leiden(graph, 2, 1.0 / graph.relationshipCount(), 0.01, 19L, 1, ProgressTracker.NULL_TRACKER
+        int maxLevels = 3;
+        Leiden leiden = new Leiden(graph, maxLevels, 1.0 / graph.relationshipCount(), 0.01, 19L, 1, ProgressTracker.NULL_TRACKER
         );
-        var communities = leiden.compute();
+
+        var leidenResult = leiden.compute();
+
+        assertThat(leidenResult.ranLevels()).isLessThanOrEqualTo(maxLevels);
+        assertThat(leidenResult.didConverge()).isTrue();
+
+        var communities = leidenResult.communities();
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)

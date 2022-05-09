@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 //TODO: take care of potential issues w. self-loops
 
-public class Leiden extends Algorithm<HugeLongArray> {
+public class Leiden extends Algorithm<LeidenResult> {
 
     private final Graph rootGraph;
 
@@ -74,7 +74,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
     }
 
     @Override
-    public HugeLongArray compute() {
+    public LeidenResult compute() {
         var workingGraph = rootGraph;
         var orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
 
@@ -85,6 +85,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
         HugeLongArray partition = HugeLongArray.newArray(workingGraph.nodeCount());
         partition.setAll(nodeId -> nodeId);
 
+        boolean didConverge = false;
         int iteration;
         // move on with refinement -> aggregation -> local move again
         for (iteration = 0; iteration < maxIterations; iteration++) {
@@ -97,7 +98,8 @@ public class Leiden extends Algorithm<HugeLongArray> {
             communityVolumes = localMovePhasePartition.communityVolumes();
             var communitiesCount = Arrays.stream(partition.toArray()).distinct().count();
 
-            if (communitiesCount == workingGraph.nodeCount()) {
+            didConverge = communitiesCount == workingGraph.nodeCount();
+            if (didConverge) {
                 break;
             }
 
@@ -140,7 +142,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
             nodeVolumes = communityData.aggregatedNodeSeedVolume;
         }
 
-        return dendrograms[iteration - 1];
+        return LeidenResult.of(dendrograms[iteration - 1], iteration, didConverge);
     }
 
     private void initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes) {
