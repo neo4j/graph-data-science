@@ -390,8 +390,9 @@ public final class NodeClassificationTrain {
             outerSplit.trainSet(),
             trainingStatistics.bestParameters(),
             progressTracker,
-            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
+            ModelSpecificMetricsHandler.of(metrics, trainingStatistics::addTestScore)
         );
+
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask(

@@ -227,7 +227,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
             var actualModel = result.model();
             assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
-                Map.of("OUT_OF_BAG_ERROR", Map.of("validation", Map.of("avg", 0.75, "max", 0.75, "min", 0.75)))
+                Map.of("OUT_OF_BAG_ERROR", Map.of(
+                    "test", 0.75,
+                    "validation", Map.of("avg", 0.75, "max", 0.75, "min", 0.75))
+                )
             );
             assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
         });

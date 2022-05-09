@@ -144,7 +144,7 @@ public final class LinkPredictionTrain {
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
             progressTracker,
-            ModelSpecificMetricsHandler.NOOP // currently no specific metrics are evaluated on outerTrain
+            ModelSpecificMetricsHandler.of(config.metrics(), trainingStatistics::addTestScore)
         );
         progressTracker.endSubTask("Train best model");
 

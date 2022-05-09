@@ -52,7 +52,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -60,6 +60,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
+import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 @GdlExtension
@@ -188,7 +190,6 @@ class NodeClassificationTrainTest {
 
         // Should NOT be the winning model, so give it bad hyperparams.
         pipeline.addTrainerConfig(
-
             TunableTrainerConfig.of(
                 Map.of(
                     "minSplitSize", 2,
@@ -236,27 +237,72 @@ class NodeClassificationTrainTest {
 
         var result = ncTrain.compute();
 
-        var trainingStatistics = result.trainingStatistics().toMap();
-        var trainingStatisticsMap = (Map<String, Object>) trainingStatistics;
+        var trainingStatistics = result.trainingStatistics();
 
-        var expectedKeys = Set.of("modelCandidates", "bestTrial", "bestParameters");
-        assertThat(trainingStatisticsMap.keySet()).isEqualTo(expectedKeys);
+        assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
+        assertThat(trainingStatistics.getValidationStats(F1_WEIGHTED))
+            .hasSize(10)
+            .noneMatch(Objects::isNull);
+        assertThat(trainingStatistics.getTrainStats(F1_WEIGHTED))
+            .hasSize(10)
+            .noneMatch(Objects::isNull);
 
-        assertThat((int) trainingStatisticsMap.get("bestTrial")).isBetween(0, 10);
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).containsKeys(F1_WEIGHTED);
+        assertThat(trainingStatistics.winningModelTestMetrics()).containsOnlyKeys(F1_WEIGHTED);
 
-        var candidateStats = (List) trainingStatisticsMap.get("modelCandidates");
-        assertThat(candidateStats.size()).isEqualTo(10);
-        for (int i = 0; i < candidateStats.size(); i++) {
-            var candidateMap = (Map) candidateStats.get(i);
-            assertThat(candidateMap).containsKey("parameters");
-            assertThat((Map) candidateMap.get("metrics")).containsKey("F1_WEIGHTED");
-            if (includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
-                assertThat((Map) candidateMap.get("metrics")).containsKey("OUT_OF_BAG_ERROR");
-            }
-            if (!includeOOB && ((Map) candidateMap.get("parameters")).get("methodName").equals("RandomForest")) {
-                assertThat((Map) candidateMap.get("metrics")).doesNotContainKey("OUT_OF_BAG_ERROR");
-            }
+        if (includeOOB) {
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(10);
+            assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
+        } else {
+            assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).containsOnlyNulls();
         }
+    }
+
+    @Test
+    void shouldComputeOOBForRF() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addFeatureStep(NodeFeatureStep.of("a"));
+
+        pipeline.addTrainerConfig(
+            TunableTrainerConfig.of(
+                Map.of(
+                    "minSplitSize", 2,
+                    "maxDepth", 1,
+                    "numberOfDecisionTrees", 1,
+                    "maxFeaturesRatio",  0.1
+                ),
+                TrainingMethod.RandomForestClassification
+            ));
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .graphName("IGNORE")
+            .pipeline("IGNORE")
+            .username("IGNORE")
+            .modelName("anyThing")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .metrics(List.of(ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR")))
+            .build();
+
+        var ncTrain = NodeClassificationTrain.create(
+            graph,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        var result = ncTrain.compute();
+
+        var trainingStatistics = result.trainingStatistics();
+
+        assertThat(trainingStatistics.getValidationStats(OUT_OF_BAG_ERROR)).hasSize(1).noneMatch(Objects::isNull);
+        assertThat(trainingStatistics.getTrainStats(OUT_OF_BAG_ERROR)).hasSize(1).containsOnlyNulls();
+
+        assertThat(trainingStatistics.winningModelOuterTrainMetrics()).isEmpty();
+        assertThat(trainingStatistics.winningModelTestMetrics().keySet()).containsExactly(OUT_OF_BAG_ERROR);
     }
 
     @ParameterizedTest

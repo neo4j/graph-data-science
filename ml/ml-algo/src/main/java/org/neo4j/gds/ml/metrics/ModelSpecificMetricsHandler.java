@@ -36,11 +36,15 @@ public final class ModelSpecificMetricsHandler {
         this.metricConsumer = metricConsumer;
     }
 
-    public static ModelSpecificMetricsHandler of(List<Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
+    public static ModelSpecificMetricsHandler of(List<Metric> metrics, BiConsumer<Metric, Double> metricConsumer) {
         return new ModelSpecificMetricsHandler(
             metrics.stream().filter(Metric::isModelSpecific).collect(Collectors.toList()),
-            modelStatsBuilder::update
+            metricConsumer
         );
+    }
+
+    public static ModelSpecificMetricsHandler of(List<Metric> metrics, ModelStatsBuilder modelStatsBuilder) {
+        return ModelSpecificMetricsHandler.of(metrics, modelStatsBuilder::update);
     }
 
     public boolean isRequested(Metric metric) {

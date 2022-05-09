@@ -1,0 +1,3 @@
+The `OUT_OF_BAG_ERROR` is computed only for RandomForest models and is evaluated as the accuracy of majority voting, where for each example only the trees that did not use that example during training are considered.
+The proportion the train set used by each tree is controlled by the configuration parameter `numberOfSamplesRatio`.
+`OUT_OF_BAG_ERROR` is reported as a validation score when evaluated during the cross-validation phase. In the case when a random forest model wins, it is reported as a test score based on retraining the model on the entire train set.

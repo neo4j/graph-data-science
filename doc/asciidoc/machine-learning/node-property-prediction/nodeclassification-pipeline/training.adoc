@@ -35,7 +35,7 @@ The Node Classification model in the Neo4j GDS library supports the following ev
 ** `F1_WEIGHTED`
 ** `F1_MACRO`
 ** `ACCURACY`
-** `OUT_OF_BAG_ERROR` (only for RandomForest and only gives validation score)
+** `OUT_OF_BAG_ERROR` (only for RandomForest and only gives validation and test score)
 
 * Per-class metrics
 ** `F1(class=<number>)` or `F1(class=*)`
@@ -49,9 +49,7 @@ When using a per-class metric, the reported metrics contain keys like for exampl
 More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
 The primary metric may not be a `*` expansion due to the ambiguity of which of the expanded metrics should be the `primary` one.
 
-The `OUT_OF_BAG_METRIC` is computed only for RandomForest models and is evaluated as the accuracy of each decision tree on the part of the training set that the tree did not use for training.
-The accuracies of the individual trees are averaged to yield the `OUT_OF_BAG_METRIC`.
-The proportion of training set which is used by each tree is controlled by the training parameters `numberOfSamplesRatio`.
+include::../../out-of-bag-error-explanation.adoc[]
 
 == Syntax
 

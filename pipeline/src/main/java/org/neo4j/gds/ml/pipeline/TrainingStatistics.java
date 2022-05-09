@@ -38,7 +38,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 public final class TrainingStatistics {
 
-    List<ModelCandidateStats> modelCandidateStats;
+    private final List<ModelCandidateStats> modelCandidateStats;
     private final List<Metric> metrics;
     private final Map<Metric, Double> testScores;
     private final Map<Metric, Double> outerTrainScores;

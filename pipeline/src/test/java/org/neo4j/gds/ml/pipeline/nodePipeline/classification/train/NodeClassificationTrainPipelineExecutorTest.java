@@ -216,7 +216,10 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
 
             var actualModel = ncPipeTrain.compute().model();
             assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
-                Map.of("OUT_OF_BAG_ERROR", Map.of("validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666)))
+                Map.of("OUT_OF_BAG_ERROR", Map.of(
+                        "test", 0.5,
+                        "validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666))
+                )
             );
             assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
         });
