@@ -39,7 +39,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public abstract class InMemoryRelationshipCursor extends RelationshipRecord implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor {
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
+public abstract class InMemoryRelationshipCursor
+    extends RelationshipRecord
+    implements RelationshipVisitor<RuntimeException>, StorageRelationshipCursor, RelationshipIds.UpdateListener {
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
@@ -70,7 +74,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         this.propertyValuesCache = new DoubleArrayList();
 
         this.maxRelationshipId = 0;
-        this.graphStore.relationshipIds().registerUpdateListener(this::newRelationshipIdContextAdded);
+        this.graphStore.relationshipIds().registerUpdateListener(this);
     }
 
     @Override
@@ -123,6 +127,21 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     }
 
     @Override
+    public void onRelationshipIdsAdded(RelationshipIds.RelationshipIdContext relationshipIdContext) {
+        this.relationshipIdContexts.add(relationshipIdContext);
+        this.adjacencyCursorCache.add(relationshipIdContext.adjacencyList().rawAdjacencyCursor());
+        this.propertyCursorCache.add(
+            Arrays
+                .stream(relationshipIdContext.adjacencyProperties())
+                .map(AdjacencyProperties::rawPropertyCursor)
+                .toArray(PropertyCursor[]::new)
+        );
+        var newSize = this.propertyCursorCache.stream().mapToInt(cursor -> cursor.length).max().orElse(0);
+        this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
+        this.maxRelationshipId += relationshipIdContext.relationshipCount();
+    }
+
+    @Override
     public void reset() {
         this.relationshipContextIndex = -1;
         this.relationshipTypeOffset = 0;
@@ -133,7 +152,7 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         setId(NO_ID);
     }
 
-    public void resetCursors() {
+    protected void resetCursors() {
         relationshipContextIndex = -1;
         relationshipTypeOffset = 0;
         adjacencyCursor = null;
@@ -153,20 +172,6 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
     public void properties(StoragePropertyCursor propertyCursor, InMemoryPropertySelection selection) {
         var inMemoryCursor = (AbstractInMemoryRelationshipPropertyCursor) propertyCursor;
         inMemoryCursor.initRelationshipPropertyCursor(this.sourceId, propertyIds, propertyValuesCache, selection);
-    }
-
-    private void newRelationshipIdContextAdded(RelationshipIds.RelationshipIdContext relationshipIdContext) {
-        this.relationshipIdContexts.add(relationshipIdContext);
-        this.adjacencyCursorCache.add(relationshipIdContext.adjacencyList().rawAdjacencyCursor());
-        this.propertyCursorCache.add(
-            Arrays
-                .stream(relationshipIdContext.adjacencyProperties())
-                .map(AdjacencyProperties::rawPropertyCursor)
-                .toArray(PropertyCursor[]::new)
-        );
-        var newSize = this.propertyCursorCache.stream().mapToInt(cursor -> cursor.length).max().orElse(0);
-        this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
-        this.maxRelationshipId += relationshipIdContext.relationshipCount();
     }
 
     private boolean progressToNextContext() {
@@ -193,17 +198,29 @@ public abstract class InMemoryRelationshipCursor extends RelationshipRecord impl
         return true;
     }
 
-    protected void findContextAndInitializeCursor(RelationshipIds.RelationshipIdContext context) {
-        for (int i = 0; i < relationshipIdContexts.size(); i++) {
-            if (i > 0) {
-                relationshipTypeOffset += relationshipIdContexts.get(i - 1).relationshipCount();
+    protected void initializeForRelationshipReference(long reference) {
+        graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
+            this.sourceId = nodeId;
+            findContextAndInitializeCursor(context);
+
+            for (long i = 0; i < offset; i++) {
+                next();
             }
-            if (relationshipIdContexts.get(i) == context) {
-                this.relationshipContextIndex = i;
-                initializeCursorForContext(context);
-                break;
+            setId(reference - 1);
+            return null;
+        });
+    }
+
+    private void findContextAndInitializeCursor(RelationshipIds.RelationshipIdContext context) {
+        while (progressToNextContext()) {
+            if (relationshipIdContexts.get(relationshipContextIndex) == context) {
+                return;
             }
         }
+        throw new IllegalStateException(formatWithLocale(
+            "No relationship context for relationship type %s was found",
+            context.relationshipType().name()
+        ));
     }
 
     private void initializeCursorForContext(RelationshipIds.RelationshipIdContext context) {

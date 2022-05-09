@@ -87,17 +87,4 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         initializeForRelationshipReference(start);
         return true;
     }
-
-    private void initializeForRelationshipReference(long reference) {
-        graphStore.relationshipIds().resolveRelationshipId(reference, (nodeId, offset, context) -> {
-            this.sourceId = nodeId;
-            findContextAndInitializeCursor(context);
-
-            for (long i = 0; i < offset; i++) {
-                next();
-            }
-            setId(reference - 1);
-            return null;
-        });
-    }
 }
