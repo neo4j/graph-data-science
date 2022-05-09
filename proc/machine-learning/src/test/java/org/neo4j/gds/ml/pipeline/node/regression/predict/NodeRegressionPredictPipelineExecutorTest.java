@@ -107,7 +107,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
             double[] weights = {2, -1, 3};
             var bias = 0.0;
-            Regressor.RegressorData modelData = createModelData(weights, bias);
 
             var expectedSchema = graphStore.schema();
 
@@ -118,7 +117,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                modelData
+                createModelData(weights, bias)
             ).compute();
 
             assertThat(graphStore.schema()).isEqualTo(expectedSchema);
@@ -208,7 +207,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
             double[] manyWeights = {-1.5, -2, 2.5, -1};
             var bias = 0.0;
-            Regressor.RegressorData modelData = createModelData(manyWeights, bias);
 
 
             var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
@@ -218,7 +216,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                modelData
+                createModelData(manyWeights, bias)
             );
 
             assertThatThrownBy(() -> pipelineExecutor.compute().toArray())

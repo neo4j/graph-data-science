@@ -27,6 +27,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Regressor;
+import org.neo4j.gds.ml.models.linearregression.LinearRegressionData;
+import org.neo4j.gds.ml.models.linearregression.LinearRegressor;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
+import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorData;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
 
@@ -80,9 +84,23 @@ public class NodeRegressionPredictPipelineAlgorithmFactory
             graphStore,
             configuration.graphName(),
             progressTracker,
-            model.data()
+            regressorFrom(model.data())
         );
     }
+
+    private static Regressor regressorFrom(
+        Regressor.RegressorData regressorData
+    ) {
+        switch (regressorData.trainerMethod()) {
+            case LinearRegression:
+                return new LinearRegressor((LinearRegressionData) regressorData);
+            case RandomForestRegression:
+                return new RandomForestRegressor((RandomForestRegressorData) regressorData);
+            default:
+                throw new IllegalStateException("No such regressor: " + regressorData.trainerMethod().name());
+        }
+    }
+
 
     private static Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> getTrainedNRPipelineModel(
         ModelCatalog modelCatalog,

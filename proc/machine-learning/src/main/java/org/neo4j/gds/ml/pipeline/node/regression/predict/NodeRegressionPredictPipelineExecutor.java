@@ -29,7 +29,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.models.RegressorFactory;
 import org.neo4j.gds.ml.nodePropertyPrediction.regression.NodeRegressionPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
@@ -47,7 +46,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     NodePropertyPredictPipeline,
     HugeDoubleArray
     > {
-    private final Regressor.RegressorData modelData;
+    private final Regressor regressor;
 
     public NodeRegressionPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
@@ -56,10 +55,10 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker,
-        Regressor.RegressorData modelData
+        Regressor regressor
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
-        this.modelData = modelData;
+        this.regressor = regressor;
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
@@ -95,17 +94,17 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
         );
         Features features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
 
-        if (features.featureDimension() != modelData.featureDimension()) {
+        if (features.featureDimension() != regressor.data().featureDimension()) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Model expected features %s to have a dimension of `%d`, but got `%d`.",
                 StringJoining.join(pipeline.featureProperties()),
-                modelData.featureDimension(),
+                regressor.data().featureDimension(),
                 features.featureDimension()
             ));
         }
 
         return new NodeRegressionPredict(
-            RegressorFactory.create(modelData),
+            regressor,
             features,
             config.concurrency(),
             progressTracker,
