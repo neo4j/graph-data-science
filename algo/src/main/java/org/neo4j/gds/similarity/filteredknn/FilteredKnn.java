@@ -41,23 +41,25 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class FilteredKnn extends Algorithm<FilteredKnnResult> {
-    private final Graph graph;
-    private final FilteredNeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
-    private final SplittableRandom splittableRandom;
-    private final SimilarityComputer similarityComputer;
-    private final List<Long> sourceNodes;
-    private final int maxIterations;
-    private final double sampleRate;
-    private final int topK;
-    private final double deltaThreshold;
-    private final double similarityCutoff;
     private final int concurrency;
+    private final Graph graph;
+    private final SimilarityComputer similarityComputer;
+    private final FilteredNeighborFilterFactory neighborFilterFactory;
+    private final SplittableRandom splittableRandom;
+    private final Function<SplittableRandom, FilteredKnnSampler> samplerSupplier;
+
+    private final double deltaThreshold;
+    private final int maxIterations;
     private final int minBatchSize;
     private final double perturbationRate;
-    private final int sampledK;
     private final int randomJoins;
-    private final Function<SplittableRandom, FilteredKnnSampler> samplerSupplier;
+    private final int sampledK;
+    private final double sampleRate;
+    private final double similarityCutoff;
+    private final List<Long> sourceNodes;
+    private final List<Long> targetNodes;
+    private final int topK;
 
     private long nodePairsConsidered;
 
@@ -76,6 +78,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     ) {
         var splittableRandom = getSplittableRandom(config.randomSeed());
         var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
+        var targetNodes = config.targetNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),
@@ -95,6 +98,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             config.sampleRate(),
             config.similarityCutoff(),
             sourceNodes,
+            targetNodes,
             config.topK()
         );
     }
@@ -138,6 +142,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         double sampleRate,
         double similarityCutoff,
         List<Long> sourceNodes,
+        List<Long> targetNodes,
         int topK
 
     ) {
@@ -158,6 +163,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         this.sampleRate = sampleRate;
         this.similarityCutoff = similarityCutoff;
         this.sourceNodes = sourceNodes;
+        this.targetNodes = targetNodes;
         this.topK = topK;
     }
 
