@@ -23,7 +23,9 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.procedure.Description;
@@ -66,6 +68,14 @@ public class NodeRegressionPipelineStreamProc
     @Override
     public AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig> algorithmFactory() {
         return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
+    }
+
+    @Override
+    public AlgorithmSpec<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig, Stream<NodeRegressionStreamResult>, AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig>> withModelCatalog(
+        ModelCatalog modelCatalog
+    ) {
+        this.setModelCatalog(modelCatalog);
+        return this;
     }
 
     @Override
