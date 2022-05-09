@@ -26,6 +26,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -35,8 +37,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.core.Is.isA;
+
 @Neo4jModelCatalogExtension
-class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
+final class NodeRegressionPipelineMutateProcTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
 
@@ -62,7 +68,8 @@ class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            NodeRegressionPipelineStreamProc.class
+            GraphStreamNodePropertiesProc.class,
+            NodeRegressionPipelineMutateProc.class
         );
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
@@ -82,17 +89,32 @@ class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
     }
 
     @Test
-    void stream() {
+    void mutate() {
+        var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+        assertThat(graphStore.nodePropertyKeys()).doesNotContain("p");
+
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeRegression.predict.stream($graph, {modelName: $model})",
+            "CALL gds.alpha.pipeline.nodeRegression.predict.mutate($graph, {modelName: $model, mutateProperty: 'p'})",
             Map.of("graph", GRAPH_NAME, "model", SIMPLE_MODEL_NAME),
-            List.of(
-                Map.of("nodeId", idFunction.of("n0"), "predictedValue", 99.3),
-                Map.of("nodeId", idFunction.of("n1"), "predictedValue", 100.0),
-                Map.of("nodeId", idFunction.of("n2"), "predictedValue", 101.0),
-                Map.of("nodeId", idFunction.of("n3"), "predictedValue", 100.8),
-                Map.of("nodeId", idFunction.of("n4"), "predictedValue", 99.4)
-            )
+            List.of(Map.of(
+                "computeMillis", greaterThanOrEqualTo(0L),
+                "preProcessingMillis", greaterThanOrEqualTo(0L),
+                "postProcessingMillis", greaterThanOrEqualTo(0L),
+                "mutateMillis", greaterThanOrEqualTo(0L),
+                "configuration", isA(Map.class),
+                "nodePropertiesWritten", 5L
+            ))
         );
+
+        assertThat(graphStore.nodePropertyKeys()).contains("p");
+        var propertyValues = graphStore.nodeProperty("p").values();
+        assertThat(propertyValues.size()).isEqualTo(5);
+
+        assertThat(propertyValues.doubleValue(idFunction.of("n0"))).isEqualTo(99.3);
+        assertThat(propertyValues.doubleValue(idFunction.of("n1"))).isEqualTo(100.0);
+        assertThat(propertyValues.doubleValue(idFunction.of("n2"))).isEqualTo(101.0);
+        assertThat(propertyValues.doubleValue(idFunction.of("n3"))).isEqualTo(100.8);
+        assertThat(propertyValues.doubleValue(idFunction.of("n4"))).isEqualTo(99.4);
     }
+
 }

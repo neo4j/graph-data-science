@@ -36,11 +36,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.NodeRegressionStreamResult;
-import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.PREDICT_DESC;
 
-@GdsCallable(name = "gds.alpha.pipeline.nodeRegression.predict.stream", description = PREDICT_DESC, executionMode = STREAM)
+@GdsCallable(name = "gds.alpha.pipeline.nodeRegression.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class NodeRegressionPipelineStreamProc
     extends StreamProc<
     NodeRegressionPredictPipelineExecutor,
@@ -48,10 +47,9 @@ public class NodeRegressionPipelineStreamProc
     NodeRegressionStreamResult,
     NodeRegressionPredictPipelineBaseConfig>
 {
-    static final String PREDICT_DESC = "Predicts target node property using a previously trained `NodeRegression` model";
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
-    @Description(PREDICT_DESC)
+    @Description(PREDICT_DESCRIPTION)
     public Stream<NodeRegressionStreamResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration") Map<String, Object> configuration
