@@ -244,6 +244,8 @@ CALL gds.graph.project(
 CALL gds.degree.mutate('socialGraph', {mutateProperty: 'score'})
 ----
 
+
+[[catalog-graph-examples-stream]]
 === Stream
 
 We can stream node properties stored in a named in-memory graph back to the user.

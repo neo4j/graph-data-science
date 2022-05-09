@@ -1,6 +1,7 @@
 [[noderegression-pipelines-predict]]
 = Applying a trained model for prediction
 :modelType: NodeRegression
+:entity: node
 
 In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.
 After <<noderegression-pipelines-train, training>>, the produced, runnable model is of type `{modelType}` and resides in the <<model-catalog-ops, model catalog>>.
@@ -44,10 +45,44 @@ include::../../../algorithms/common-configuration/common-stream-stats-configurat
 |===
 ======
 
+[.include-with-mutate]
+======
+.Run Node Regression in mutate mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.predict.mutate(
+  graphName: String,
+  configuration: Map
+) YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                    | Type    | Description
+| preProcessingMillis     | Integer | Milliseconds for preprocessing the graph.
+| computeMillis           | Integer | Milliseconds for running the algorithm.
+| postProcessingMillis    | Integer | Milliseconds for computing the global metrics.
+| mutateMillis            | Integer | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten   | Integer | Number of node properties written.
+| configuration           | Map     | Configuration used for running the algorithm.
+|===
+======
+
 ====
 
 
-== Example
+== Examples
 
 In the following examples we will show how to use a regression model to predict a property value of a node in your in-memory graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
@@ -83,3 +118,35 @@ As we can see, the model is predicting the "Tan" house to be the cheapest, and t
 This may not seem accurate given that the "Yellow" house has only one story.
 To get a prediction that better matches our expectations, we may need to tune the model candidate parameters.
 --
+
+
+=== Mutate
+
+The `mutate` execution mode updates the named graph with a new node property containing the predicted value for each node.
+The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
+The result is a single summary row including information about timings and how many properties were written.
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see <<running-algos-mutate>>.
+
+[role=query-example, group=nr]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.predict.mutate('myGraph', {
+  nodeLabels: ['UnknownHouse'],
+  modelName: 'nr-pipeline-model',
+  mutateProperty: 'predictedPrice'
+}) YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 3
+|===
+--
+
+The output tells us that we added a property for each of the `UnknownHouse` nodes.
+To use this property, we can run another algorithm using the `predictedPrice` property, or inspect it using <<catalog-graph-examples-stream, `gds.graph.streamNodeProperty`>>.

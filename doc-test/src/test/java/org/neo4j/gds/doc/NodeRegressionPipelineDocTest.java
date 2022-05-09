@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelin
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureAutoTuningProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineCreateProc;
+import org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineMutateProc;
 import org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc;
 
 import java.util.List;
@@ -50,7 +51,8 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
             NodeRegressionPipelineAddStepProcs.class,
             NodeRegressionPipelineConfigureAutoTuningProc.class,
             NodeRegressionPipelineTrainProc.class,
-            NodeRegressionPipelineStreamProc.class
+            NodeRegressionPipelineStreamProc.class,
+            NodeRegressionPipelineMutateProc.class
         );
     }
 
