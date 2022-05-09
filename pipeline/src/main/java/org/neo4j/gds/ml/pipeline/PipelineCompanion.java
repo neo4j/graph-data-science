@@ -35,7 +35,7 @@ public final class PipelineCompanion {
 
     private PipelineCompanion() {}
 
-    public static void prepareTrainConfig(
+    public static void preparePipelineConfig(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {

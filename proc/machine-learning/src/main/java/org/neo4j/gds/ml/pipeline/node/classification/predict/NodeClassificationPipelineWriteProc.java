@@ -47,7 +47,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -67,7 +67,7 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        prepareTrainConfig(graphName, configuration);
+        preparePipelineConfig(graphName, configuration);
         return write(compute(graphName, configuration));
     }
 
@@ -77,7 +77,7 @@ public class NodeClassificationPipelineWriteProc
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

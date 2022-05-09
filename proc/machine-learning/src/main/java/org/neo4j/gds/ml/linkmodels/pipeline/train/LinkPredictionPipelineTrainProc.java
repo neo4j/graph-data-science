@@ -56,7 +56,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> config
     ) {
-        PipelineCompanion.prepareTrainConfig(graphName, config);
+        PipelineCompanion.preparePipelineConfig(graphName, config);
         return trainAndStoreModelWithResult(compute(graphName, config));
     }
 
@@ -66,7 +66,7 @@ public class LinkPredictionPipelineTrainProc extends TrainProc<
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        PipelineCompanion.prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        PipelineCompanion.preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

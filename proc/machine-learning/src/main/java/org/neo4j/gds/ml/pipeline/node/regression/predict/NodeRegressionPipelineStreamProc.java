@@ -34,6 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.NodeRegressionStreamResult;
@@ -55,7 +56,7 @@ public class NodeRegressionPipelineStreamProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        prepareTrainConfig(graphName, configuration);
+        preparePipelineConfig(graphName, configuration);
         return stream(compute(graphName, configuration));
     }
 

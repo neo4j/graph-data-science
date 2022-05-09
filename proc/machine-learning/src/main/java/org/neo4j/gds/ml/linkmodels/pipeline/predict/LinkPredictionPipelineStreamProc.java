@@ -41,7 +41,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
 
@@ -54,7 +54,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        prepareTrainConfig(graphName, configuration);
+        preparePipelineConfig(graphName, configuration);
         var result = compute(graphName, configuration);
         return computationResultConsumer().consume(result, executionContext());
     }
@@ -65,7 +65,7 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

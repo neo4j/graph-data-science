@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor.NodeClassificationTrainPipelineResult;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.train", description = "Trains a node classification model based on a pipeline", executionMode = TRAIN)
@@ -57,7 +57,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        prepareTrainConfig(graphName, configuration);
+        preparePipelineConfig(graphName, configuration);
         return trainAndStoreModelWithResult(compute(graphName, configuration));
     }
 
@@ -67,7 +67,7 @@ public class NodeClassificationPipelineTrainProc extends TrainProc<
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 

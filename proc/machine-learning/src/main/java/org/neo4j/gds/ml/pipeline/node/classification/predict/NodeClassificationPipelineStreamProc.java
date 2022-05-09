@@ -46,7 +46,7 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelineStreamProc.NodeClassificationStreamResult;
@@ -66,7 +66,7 @@ public class NodeClassificationPipelineStreamProc
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        prepareTrainConfig(graphName, configuration);
+        preparePipelineConfig(graphName, configuration);
         return stream(compute(graphName, configuration));
     }
 
@@ -76,7 +76,7 @@ public class NodeClassificationPipelineStreamProc
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        prepareTrainConfig(graphNameOrConfiguration, algoConfiguration);
+        preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
