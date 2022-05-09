@@ -32,18 +32,11 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.tensor.Matrix;
-import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.models.linearregression.ImmutableLinearRegressionData;
-import org.neo4j.gds.ml.models.linearregression.LinearRegressionData;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
@@ -59,11 +52,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionModelTestUtil.createModelData;
 
 class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
-    private static final String MODEL_NAME = "model";
 
     @Neo4jGraph
     static String GDL = "CREATE " +
@@ -78,9 +71,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
-
-    @Inject
-    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -234,18 +224,5 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             assertThatThrownBy(() -> pipelineExecutor.compute().toArray())
                 .hasMessage("Model expected features ['a'] to have a dimension of `4`, but got `1`.");
         });
-    }
-
-    static LinearRegressionData createModelData(double[] weights, double bias) {
-        return ImmutableLinearRegressionData.builder()
-            .weights(new Weights<>(
-                new Matrix(
-                    weights,
-                    1,
-                    weights.length
-                ))
-            )
-            .bias(new Weights<>(new Scalar(bias)))
-            .build();
     }
 }

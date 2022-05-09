@@ -1,0 +1,98 @@
+/*
+ * Copyright (c) "Neo4j"
+ * Neo4j Sweden AB [http://neo4j.com]
+ *
+ * This file is part of Neo4j.
+ *
+ * Neo4j is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+package org.neo4j.gds.ml.pipeline.node.regression.predict;
+
+import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.StreamProc;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.executor.ComputationResult;
+import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Mode;
+import org.neo4j.procedure.Name;
+import org.neo4j.procedure.Procedure;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.prepareTrainConfig;
+import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.NodeRegressionStreamResult;
+import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.PREDICT_DESC;
+
+@GdsCallable(name = "gds.alpha.pipeline.nodeRegression.predict.stream", description = PREDICT_DESC, executionMode = STREAM)
+public class NodeRegressionPipelineStreamProc
+    extends StreamProc<
+    NodeRegressionPredictPipelineExecutor,
+    HugeDoubleArray,
+    NodeRegressionStreamResult,
+    NodeRegressionPredictPipelineBaseConfig>
+{
+    static final String PREDICT_DESC = "Predicts target node property using a previously trained `NodeRegression` model";
+
+    @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
+    @Description(PREDICT_DESC)
+    public Stream<NodeRegressionStreamResult> mutate(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration") Map<String, Object> configuration
+    ) {
+        prepareTrainConfig(graphName, configuration);
+        return stream(compute(graphName, configuration));
+    }
+
+    @Override
+    protected NodePropertyValues nodeProperties(ComputationResult<NodeRegressionPredictPipelineExecutor, HugeDoubleArray, NodeRegressionPredictPipelineBaseConfig> computationResult) {
+        return computationResult.result().asNodeProperties();
+    }
+
+    @Override
+    public AlgorithmFactory<?, NodeRegressionPredictPipelineExecutor, NodeRegressionPredictPipelineBaseConfig> algorithmFactory() {
+        return new NodeRegressionPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
+    }
+
+    @Override
+    protected NodeRegressionPredictPipelineBaseConfig newConfig(String username, CypherMapWrapper config) {
+        return new NodeRegressionPredictPipelineBaseConfigImpl(username, config);
+    }
+
+    @Override
+    protected NodeRegressionStreamResult streamResult(
+        long originalNodeId,
+        long internalNodeId,
+        NodePropertyValues nodePropertyValues
+    ) {
+        return new NodeRegressionStreamResult(originalNodeId, nodePropertyValues.doubleValue(internalNodeId));
+    }
+
+
+    @SuppressWarnings("unused")
+    public static final class NodeRegressionStreamResult {
+
+        public long nodeId;
+        public double predictedTarget;
+
+        public NodeRegressionStreamResult(long nodeId, double predictedTarget) {
+            this.nodeId = nodeId;
+            this.predictedTarget = predictedTarget;
+        }
+    }
+}
