@@ -32,9 +32,9 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
+import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardMutateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
@@ -55,12 +55,12 @@ public class NodeClassificationPipelineMutateProc
     extends MutatePropertyProc<
     NodeClassificationPredictPipelineExecutor,
     NodeClassificationPredict.NodeClassificationResult,
-    NodeClassificationPipelineMutateProc.MutateResult,
+    PredictMutateResult,
     NodeClassificationPredictPipelineMutateConfig>
 {
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.mutate", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<PredictMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -84,7 +84,7 @@ public class NodeClassificationPipelineMutateProc
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig, Stream<MutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig, Stream<PredictMutateResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineMutateConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);
@@ -124,11 +124,11 @@ public class NodeClassificationPipelineMutateProc
 
 
     @Override
-    protected AbstractResultBuilder<MutateResult> resultBuilder(
+    protected AbstractResultBuilder<PredictMutateResult> resultBuilder(
         ComputationResult<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new PredictMutateResult.Builder();
     }
 
     @Override
@@ -141,40 +141,4 @@ public class NodeClassificationPipelineMutateProc
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
-    @SuppressWarnings("unused")
-    public static final class MutateResult extends StandardMutateResult {
-
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                configuration
-            );
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }
