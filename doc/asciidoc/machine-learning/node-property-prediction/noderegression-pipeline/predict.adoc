@@ -1,2 +1,85 @@
 [[noderegression-pipelines-predict]]
 = Applying a trained model for prediction
+:modelType: NodeRegression
+
+In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.
+After <<noderegression-pipelines-train, training>>, the produced, runnable model is of type `{modelType}` and resides in the <<model-catalog-ops, model catalog>>.
+The regression model can be applied on a graph in the graph catalog to predict a property value for previously unseen nodes.
+
+Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.
+As during training, intermediate node properties created by the node property steps in the feature pipeline are transient and not visible after execution.
+
+The predict graph must contain the properties that the pipeline requires and the used array properties must have the same dimensions as in the train graph.
+If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
+
+
+== Syntax
+
+.Node Regression prediction syntax per mode
+[.tabbed-example, caption = ]
+====
+[.include-with-stream]
+======
+.Run Node Regression in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.predict.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  nodeId: Integer,
+  predictedValue: Float
+----
+
+include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name           | Type    | Description
+| nodeId         | Integer | Node ID.
+| predictedValue | Float   | Predicted property value for this node.
+|===
+======
+
+====
+
+
+== Example
+
+In the following examples we will show how to use a regression model to predict a property value of a node in your in-memory graph.
+In order to do this, we must first have an already trained model registered in the Model Catalog.
+We will use the model which we trained in the <<noderegression-pipelines-examples-train, train example>> which we gave the name `'nr-pipeline-model'`.
+
+
+=== Stream
+
+[role=query-example, group=nr]
+--
+[source, cypher]
+----
+CALL gds.alpha.pipeline.nodeRegression.predict.stream('myGraph', {
+  modelName: 'nr-pipeline-model',
+  nodeLabels: ['UnknownHouse']
+}) YIELD nodeId, predictedValue
+WITH gds.util.asNode(nodeId) AS houseNode, predictedValue AS predictedPrice
+RETURN
+  houseNode.color AS houseColor, predictedPrice
+  ORDER BY predictedPrice
+----
+
+.Results
+[opts="header",cols="m,m"]
+|===
+| houseColor | predictedPrice
+| "Tan"      | 108.63
+| "Pink"     | 113.074
+| "Yellow"   | 125.546
+|===
+
+As we can see, the model is predicting the "Tan" house to be the cheapest, and the "Yellow" house to be the most expensive.
+This may not seem accurate given that the "Yellow" house has only one story.
+To get a prediction that better matches our expectations, we may need to tune the model candidate parameters.
+--

@@ -1,10 +1,9 @@
 [[noderegression-pipelines-train]]
 = Training the pipeline
 
-The train mode, `gds.alpha.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
+The train mode, `gds.alpha.pipeline.nodeRegression.train`, is responsible for data splitting, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a regression model of type `NodeRegression`, which is then stored in the <<model-catalog-ops, model catalog>>.
-// FIXME add this back
-//The regression model can be <<noderegression-pipelines-predict, applied>> to a possibly different graph which classifies nodes.
+The regression model can be <<noderegression-pipelines-predict, applied>> on a graph to predict property values for new nodes.
 
 More precisely, the training proceeds as follows:
 
@@ -129,7 +128,7 @@ The structure of `modelInfo` is:
 <8> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
-[[noderegression-pipelines-examples-train]]
+
 == Example
 
 In this section we will show examples of running a Node Regression training pipeline on a concrete graph.
@@ -177,12 +176,22 @@ CALL gds.graph.project('myGraph', {
 )
 ----
 
+
+[[noderegression-pipelines-examples-train]]
 === Train
 
 In the following examples we will demonstrate running the Node Regression training pipeline on this graph.
 We will train a model to predict the price of a house, based on its `sizePerStory` property.
+The configuration of the pipeline is the result of running the examples on the previous page:
 
-[[nodeRegression-pipelines-examples-train-query]]
+. <<noderegression-pipelines-examples-create, Create>>
+. <<noderegression-pipelines-examples-add-node-property, Add node properties>>
+. <<noderegression-pipelines-examples-select-features, Select features>>
+. <<noderegression-pipelines-examples-configure-split, Configure split>>
+. <<noderegression-pipelines-examples-add-model-candidates, Adding model candidates>>
+. <<noderegression-pipelines-examples-autotuning, Configure autotuning>>
+
+
 [role=query-example, group=nr]
 --
 .The following will train a model using a pipeline:
@@ -212,5 +221,6 @@ RETURN
 |===
 
 Here we can observe that the `RandomForest` candidate with 5 decision trees performed the best in the training phase.
-Notice that this is just a toy example on a very small graph. In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
+Notice that this is just a toy example on a very small graph.
+In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
 --

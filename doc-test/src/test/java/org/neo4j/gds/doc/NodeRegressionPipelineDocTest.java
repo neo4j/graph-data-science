@@ -21,6 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterAll;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionPipelineTrainProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineAddStepProcs;
@@ -28,6 +29,7 @@ import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelin
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureAutoTuningProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineCreateProc;
+import org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc;
 
 import java.util.List;
 
@@ -47,8 +49,14 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
             NodeRegressionPipelineAddTrainerMethodProcs.class,
             NodeRegressionPipelineAddStepProcs.class,
             NodeRegressionPipelineConfigureAutoTuningProc.class,
-            NodeRegressionPipelineTrainProc.class
+            NodeRegressionPipelineTrainProc.class,
+            NodeRegressionPipelineStreamProc.class
         );
+    }
+
+    @Override
+    List<Class<?>> functions() {
+        return List.of(AsNodeFunc.class);
     }
 
     @Override
