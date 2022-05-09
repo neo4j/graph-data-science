@@ -7,10 +7,6 @@ ifeval::["{modelType}" != ""]
 | modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
 endif::[]
 
-| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
-| <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
-
 ifeval::["{entity}" == "node"]
 | mutateProperty                                                | String      | n/a                    | no       | The {entity} property in the GDS graph to which the {result} is written.
 endif::[]
@@ -23,6 +19,10 @@ endif::[]
 ifeval::["{entity}" == "source-target-pair"]
 | mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
 endif::[]
+
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 
 ifeval::["{entity}" == "pregel"]
 | mutateProperty                                                | String      | ""                     | yes      | The prefix used for all public properties in the PregelSchema.
