@@ -36,7 +36,6 @@ allprojects {
 
         repositories {
             mavenCentral()
-            mavenLocal()
             if (project.hasProperty('pipelineRepository')) {
                 maven {
                     url = "file://${project.getProperty('pipelineRepository')}"
