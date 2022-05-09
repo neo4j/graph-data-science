@@ -20,3 +20,6 @@ The Neo4j GDS library includes the following pipelines to train and apply machin
 * Beta
 ** <<nodeclassification-pipelines, Node Classification Pipelines>>
 ** <<linkprediction-pipelines, Link Prediction Pipelines>>
+
+* Alpha
+** <<noderegression-pipelines, Node Regression Pipelines>>
