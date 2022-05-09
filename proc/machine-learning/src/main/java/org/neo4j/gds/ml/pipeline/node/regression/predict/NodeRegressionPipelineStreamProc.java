@@ -88,11 +88,11 @@ public class NodeRegressionPipelineStreamProc
     public static final class NodeRegressionStreamResult {
 
         public long nodeId;
-        public double predictedTarget;
+        public double predictedValue;
 
-        public NodeRegressionStreamResult(long nodeId, double predictedTarget) {
+        public NodeRegressionStreamResult(long nodeId, double predictedValue) {
             this.nodeId = nodeId;
-            this.predictedTarget = predictedTarget;
+            this.predictedValue = predictedValue;
         }
     }
 }

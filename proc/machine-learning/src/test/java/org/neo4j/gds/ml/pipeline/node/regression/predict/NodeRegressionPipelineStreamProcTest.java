@@ -78,7 +78,7 @@ class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
         modelCatalog.set(NodeRegressionModelTestUtil.createModel(
             getUsername(),
             SIMPLE_MODEL_NAME,
-            NodeRegressionModelTestUtil.createModelData(new double[] {0.5, 1.0, -2.0}, 100),
+            NodeRegressionModelTestUtil.createModelData(new double[] {0.5, 1.0, -2.0}, 100).data(),
             Stream.of("a", "b", "c")
         ));
     }
@@ -89,11 +89,11 @@ class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
             "CALL gds.alpha.pipeline.nodeRegression.predict.stream($graph, {modelName: $model})",
             Map.of("graph", GRAPH_NAME, "model", SIMPLE_MODEL_NAME),
             List.of(
-                Map.of("nodeId", idFunction.of("n0"), "predictedTarget", 99.3),
-                Map.of("nodeId", idFunction.of("n1"), "predictedTarget", 100.0),
-                Map.of("nodeId", idFunction.of("n2"), "predictedTarget", 101.0),
-                Map.of("nodeId", idFunction.of("n3"), "predictedTarget", 100.8),
-                Map.of("nodeId", idFunction.of("n4"), "predictedTarget", 99.4)
+                Map.of("nodeId", idFunction.of("n0"), "predictedValue", 99.3),
+                Map.of("nodeId", idFunction.of("n1"), "predictedValue", 100.0),
+                Map.of("nodeId", idFunction.of("n2"), "predictedValue", 101.0),
+                Map.of("nodeId", idFunction.of("n3"), "predictedValue", 100.8),
+                Map.of("nodeId", idFunction.of("n4"), "predictedValue", 99.4)
             )
         );
     }
