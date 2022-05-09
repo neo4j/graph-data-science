@@ -5,6 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineAddStepProcs;
@@ -20,6 +23,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.closeTo;
 
+@Neo4jModelCatalogExtension
 final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH =
@@ -77,6 +81,9 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
         ", (c8)-[:T {w: 3}]->(b6)" +
         ", (c9h)-[:T {w: 3}]->(a6h)";
 
+    @Inject
+    ModelCatalog modelCatalog;
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
@@ -97,6 +104,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         PipelineCatalog.removeAll();
+        modelCatalog.removeAllLoadedModels();
     }
 
     @Test
