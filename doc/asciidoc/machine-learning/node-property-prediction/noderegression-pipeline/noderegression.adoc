@@ -25,7 +25,10 @@ This segment is divided into the following pages:
 
 * <<noderegression-pipelines-config, Configuring the pipeline>>
 * <<noderegression-pipelines-train, Training the pipeline>>
+* <<noderegression-pipelines-predict, Applying a trained model for prediction>>
 
 include::config.adoc[leveloffset =+ 1]
 
 include::training.adoc[leveloffset =+ 1]
+
+include::predict.adoc[leveloffset =+ 1]

@@ -1,0 +1,2 @@
+[[noderegression-pipelines-predict]]
+= Applying a trained model for prediction

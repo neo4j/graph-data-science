@@ -316,6 +316,8 @@
                 </d:tocentry>
                 <d:tocentry linkend="noderegression-pipelines-train"><?dbhtml filename="machine-learning/node-property-prediction/noderegression-pipelines/training/index.html"?>
                 </d:tocentry>
+                <d:tocentry linkend="noderegression-pipelines-predict"><?dbhtml filename="machine-learning/node-property-prediction/noderegression-pipelines/predict/index.html"?>
+                </d:tocentry>
             </d:tocentry>
         </d:tocentry>
 
