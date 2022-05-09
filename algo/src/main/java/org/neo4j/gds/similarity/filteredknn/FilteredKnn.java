@@ -79,23 +79,23 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),
+            context.executor(),
+            config.concurrency(),
             graph,
-            config.maxIterations(),
-            sourceNodes,
             similarityComputer,
             neighborFilterFactory,
-            context.executor(),
             splittableRandom,
-            config.sampleRate(),
+            samplerSupplier,
             config.deltaThreshold(),
-            config.similarityCutoff(),
-            config.topK(),
-            config.concurrency(),
+            config.maxIterations(),
             config.minBatchSize(),
             config.perturbationRate(),
-            config.sampledK(graph.nodeCount()),
             config.randomJoins(),
-            samplerSupplier
+            config.sampledK(graph.nodeCount()),
+            config.sampleRate(),
+            config.similarityCutoff(),
+            sourceNodes,
+            config.topK()
         );
     }
 
@@ -120,45 +120,45 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    FilteredKnn(
+    private FilteredKnn(
         ProgressTracker progressTracker,
+        ExecutorService executorService,
+        int concurrency,
         Graph graph,
-        int maxIterations,
-        List<Long> sourceNodes,
         SimilarityComputer similarityComputer,
         FilteredNeighborFilterFactory neighborFilterFactory,
-        ExecutorService executorService,
         SplittableRandom splittableRandom,
-        double sampleRate,
+        Function<SplittableRandom, FilteredKnnSampler> samplerSupplier,
         double deltaThreshold,
-        double similarityCutoff,
-        int topK,
-        int concurrency,
+        int maxIterations,
         int minBatchSize,
         double perturbationRate,
-        int sampledK,
         int randomJoins,
-        Function<SplittableRandom, FilteredKnnSampler> samplerSupplier
+        int sampledK,
+        double sampleRate,
+        double similarityCutoff,
+        List<Long> sourceNodes,
+        int topK
 
     ) {
         super(progressTracker);
-        this.graph = graph;
-        this.sampleRate = sampleRate;
-        this.deltaThreshold = deltaThreshold;
-        this.similarityCutoff = similarityCutoff;
-        this.topK = topK;
+        this.executorService = executorService;
         this.concurrency = concurrency;
-        this.minBatchSize = minBatchSize;
-        this.perturbationRate = perturbationRate;
-        this.sampledK = sampledK;
-        this.randomJoins = randomJoins;
-        this.maxIterations = maxIterations;
+        this.graph = graph;
         this.similarityComputer = similarityComputer;
         this.neighborFilterFactory = neighborFilterFactory;
-        this.executorService = executorService;
         this.splittableRandom = splittableRandom;
-        this.sourceNodes = sourceNodes;
         this.samplerSupplier = samplerSupplier;
+        this.deltaThreshold = deltaThreshold;
+        this.maxIterations = maxIterations;
+        this.minBatchSize = minBatchSize;
+        this.perturbationRate = perturbationRate;
+        this.randomJoins = randomJoins;
+        this.sampledK = sampledK;
+        this.sampleRate = sampleRate;
+        this.similarityCutoff = similarityCutoff;
+        this.sourceNodes = sourceNodes;
+        this.topK = topK;
     }
 
     public long nodeCount() {
