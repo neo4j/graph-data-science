@@ -349,7 +349,7 @@ CALL gds.alpha.pipeline.nodeRegression.addRandomForest(
 | configuration   | Map         | The random forest configuration for a candidate model. Supported parameters for model candidates are defined in the next table.
 |===
 
-include::../../training-methods/randomForestConfig.adoc[]
+include::../../training-methods/random-forest-regression-config.adoc[]
 
 include::../pipelineInfoResult.adoc[]
 --
