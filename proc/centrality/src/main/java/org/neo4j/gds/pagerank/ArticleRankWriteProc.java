@@ -33,12 +33,12 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.articleRank.write", description = PageRankProc.PAGE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.articleRank.write", description = PageRankProc.ARTICLE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ArticleRankWriteProc extends PageRankWriteProc {
 
     @Override
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
-    @Description(PageRankProc.PAGE_RANK_DESCRIPTION)
+    @Description(PageRankProc.ARTICLE_RANK_DESCRIPTION)
     public Stream<PageRankWriteProc.WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
