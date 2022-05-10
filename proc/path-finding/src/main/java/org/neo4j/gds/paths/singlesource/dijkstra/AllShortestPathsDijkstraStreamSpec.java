@@ -25,7 +25,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
 import org.neo4j.gds.paths.StreamResult;
-import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
@@ -53,9 +52,8 @@ public class AllShortestPathsDijkstraStreamSpec implements AlgorithmSpec<Dijkstr
         return (username, configuration) -> AllShortestPathsDijkstraStreamConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public ComputationResultConsumer<DeltaStepping, DijkstraResult, AllShortestPathsDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, DijkstraResult, AllShortestPathsDijkstraStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 }

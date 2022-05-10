@@ -38,7 +38,7 @@ public interface AlgorithmSpec<
 
     NewConfigFunction<CONFIG> newConfigFunction();
 
-    <T extends ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT>> T computationResultConsumer();
+    ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, RESULT> computationResultConsumer();
 
     default ValidationConfiguration<CONFIG> validationConfig() {
         return ValidationConfiguration.empty();
