@@ -46,6 +46,7 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.ImmutableRelationshipsAndProperties;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.RelationshipsAndProperties;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -129,7 +130,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         GraphDimensions graphDimensions,
         NamedDatabaseId databaseId
     ) {
-        super(graphProjectConfig, GraphLoaderContext.NULL_CONTEXT, graphDimensions);
+        super(
+            graphProjectConfig,
+            ImmutableStaticCapabilities.of(false),
+            GraphLoaderContext.NULL_CONTEXT,
+            graphDimensions
+        );
         this.gdlHandler = gdlHandler;
         this.databaseId = databaseId;
     }
@@ -235,6 +241,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         return CSRGraphStore.of(
             databaseId,
+            capabilities,
             schema,
             nodes.idMap(),
             nodes.properties(),

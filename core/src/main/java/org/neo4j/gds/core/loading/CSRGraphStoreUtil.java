@@ -79,6 +79,8 @@ public final class CSRGraphStoreUtil {
 
         return new CSRGraphStore(
             databaseId,
+            // TODO: is it correct that we only use this for generated graphs?
+            ImmutableStaticCapabilities.of(false),
             schema,
             graph.idMap(),
             nodeProperties,

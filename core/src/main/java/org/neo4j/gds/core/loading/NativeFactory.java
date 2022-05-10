@@ -76,7 +76,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions
     ) {
-        super(graphProjectConfig, loadingContext, graphDimensions);
+        super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
         this.storeConfig = graphProjectConfig;
     }
 

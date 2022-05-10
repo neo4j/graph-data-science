@@ -83,7 +83,8 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions
     ) {
-        super(graphProjectConfig, loadingContext, graphDimensions);
+        // TODO: need to pass capabilities from outside?
+        super(graphProjectConfig, ImmutableStaticCapabilities.of(true), loadingContext, graphDimensions);
         this.cypherConfig = getCypherConfig(graphProjectConfig).orElseThrow(() -> new IllegalArgumentException(
             "Expected GraphProjectConfig to be a cypher config."));
     }

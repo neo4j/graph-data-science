@@ -111,6 +111,7 @@ public final class GraphStoreFilter {
 
             return CSRGraphStore.of(
                 graphStore.databaseId(),
+                graphStore.capabilities(),
                 filteredSchema,
                 filteredNodes.idMap(),
                 filteredNodes.propertyStores(),
