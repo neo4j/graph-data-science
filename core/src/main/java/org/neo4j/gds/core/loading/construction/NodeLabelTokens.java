@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphdb.Label;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -148,6 +149,11 @@ public final class NodeLabelTokens {
         public @NotNull NodeLabel get(int index) {
             throw new NoSuchElementException();
         }
+
+        @Override
+        public String[] getStrings() {
+            return new String[0];
+        }
     }
 
     private static final class Array<T> implements NodeLabelToken {
@@ -173,6 +179,11 @@ public final class NodeLabelTokens {
         @Override
         public @NotNull NodeLabel get(int index) {
             return toNodeLabel.apply(nodeLabels[index]);
+        }
+
+        @Override
+        public String[] getStrings() {
+            return Arrays.stream(nodeLabels).map(toNodeLabel).map(NodeLabel::name).toArray(String[]::new);
         }
     }
 
@@ -200,6 +211,11 @@ public final class NodeLabelTokens {
         public @NotNull NodeLabel get(int index) {
             return toNodeLabel.apply(nodeLabels.get(index));
         }
+
+        @Override
+        public String[] getStrings() {
+            return nodeLabels.stream().map(toNodeLabel).map(NodeLabel::name).toArray(String[]::new);
+        }
     }
 
     private static final class Singleton<T> implements NodeLabelToken {
@@ -224,6 +240,11 @@ public final class NodeLabelTokens {
         public @NotNull NodeLabel get(int index) {
             assert index == 0;
             return item;
+        }
+
+        @Override
+        public String[] getStrings() {
+            return new String[]{item.name};
         }
     }
 

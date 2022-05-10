@@ -29,6 +29,8 @@ public interface NodeLabelToken {
     int size();
 
     @NotNull NodeLabel get(int index);
+
+    String[] getStrings();
 }
 
 
