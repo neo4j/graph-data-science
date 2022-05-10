@@ -82,10 +82,10 @@ public class Leiden extends Algorithm<HugeLongArray> {
 
             // 1. LOCAL MOVE PHASE - over the singleton partition
             var localMovePhase = LocalMovePhase.create(workingGraph, partition, nodeVolumes, communityVolumes, gamma);
-            var localMovePhaseResult = localMovePhase.run();
+            var localMovePhasePartition = localMovePhase.run();
 
-            partition = localMovePhaseResult.communities();
-            communityVolumes = localMovePhaseResult.communityVolumes();
+            partition = localMovePhasePartition.communities();
+            communityVolumes = localMovePhasePartition.communityVolumes();
             var communitiesCount = Arrays.stream(partition.toArray()).distinct().count();
 
             if (communitiesCount == workingGraph.nodeCount()) {
@@ -102,10 +102,10 @@ public class Leiden extends Algorithm<HugeLongArray> {
                 theta,
                 seed
             );
-            var refinedPhaseResult = refinementPhase.run();
-            var refinedPartition = refinedPhaseResult.communities();
+            var refinedPhasePartition = refinementPhase.run();
+            var refinedPartition = refinedPhasePartition.communities();
 
-            var refinedCommunityVolumes = refinedPhaseResult.communityVolumes();
+            var refinedCommunityVolumes = refinedPhasePartition.communityVolumes();
             long maxCommunityId = buildDendrogram(workingGraph, iteration, refinedPartition);
 
             // 3 CREATE NEW GRAPH

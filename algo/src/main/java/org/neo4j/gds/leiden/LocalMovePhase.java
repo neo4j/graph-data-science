@@ -75,7 +75,7 @@ final class LocalMovePhase {
         this.communityVolumes = communityVolumes;
     }
 
-    public LocalMovePhaseResult run() {
+    public Partition run() {
         var queue = createQueue();
 
         while (!queue.isEmpty()) {
@@ -83,7 +83,7 @@ final class LocalMovePhase {
             long currentNodeCommunityId = currentCommunities.get(nodeId);
             double currentNodeVolume = nodeVolumes.get(nodeId);
 
-            // Remove the current node degree from the sum of degrees of its community
+            // Remove the current node degree from its community volume
             communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
 
             var communityRelationshipWeights = communityRelationshipWeights(nodeId);
@@ -110,7 +110,7 @@ final class LocalMovePhase {
             );
         }
 
-        return new LocalMovePhaseResult(currentCommunities, communityVolumes);
+        return new Partition(currentCommunities, communityVolumes);
     }
 
     private long findBestCommunity(
@@ -167,8 +167,6 @@ final class LocalMovePhase {
         double currentNodeVolume
     ) {
         currentCommunities.set(nodeId, newCommunityId);
-
-
         communityVolumes.addTo(newCommunityId, currentNodeVolume);
     }
 

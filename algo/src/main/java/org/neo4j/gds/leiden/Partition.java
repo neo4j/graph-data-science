@@ -22,14 +22,11 @@ package org.neo4j.gds.leiden;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-public class RefinementPhaseResult {
-
-
+class Partition {
     private final HugeLongArray communities;
     private final HugeDoubleArray communityVolumes;
 
-
-    RefinementPhaseResult(HugeLongArray communities, HugeDoubleArray communityVolumes) {
+    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes) {
         this.communities = communities;
         this.communityVolumes = communityVolumes;
     }
@@ -41,5 +38,4 @@ public class RefinementPhaseResult {
     HugeDoubleArray communityVolumes() {
         return communityVolumes;
     }
-
 }

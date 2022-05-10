@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import java.util.Random;
 import java.util.concurrent.atomic.DoubleAdder;
 
-class RefinementPhase {
+final class RefinementPhase {
 
     private final Graph workingGraph;
     private final HugeLongArray originalCommunities;
@@ -89,13 +89,12 @@ class RefinementPhase {
         this.seed = seed;
     }
 
-    RefinementPhaseResult run() {
+    Partition run() {
         var refinedCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         refinedCommunities.setAll(nodeId -> nodeId); //singleton partition
 
         BitSet singleton = new BitSet(workingGraph.nodeCount());
         singleton.set(0, workingGraph.nodeCount());
-
 
         var random = new Random(seed);
 
@@ -108,7 +107,7 @@ class RefinementPhase {
             return true;
         });
 
-        return new RefinementPhaseResult(refinedCommunities, communityVolumesAfterMerge);
+        return new Partition(refinedCommunities, communityVolumesAfterMerge);
     }
 
     private void mergeNodeSubset(
