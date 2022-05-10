@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -224,6 +225,7 @@ class NodeClassificationPredictTest {
             NodeClassificationPredict.progressTask(graph),
             log,
             1,
+            new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,
             EmptyUserLogRegistryFactory.INSTANCE
         );

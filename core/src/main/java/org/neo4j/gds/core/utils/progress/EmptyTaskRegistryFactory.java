@@ -23,7 +23,7 @@ public enum EmptyTaskRegistryFactory implements TaskRegistryFactory {
     INSTANCE;
 
     @Override
-    public TaskRegistry newInstance() {
-        return new TaskRegistry("", EmptyTaskStore.INSTANCE);
+    public TaskRegistry newInstance(JobId jobId) {
+        return new TaskRegistry("", EmptyTaskStore.INSTANCE, jobId);
     }
 }

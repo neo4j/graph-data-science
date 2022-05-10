@@ -39,13 +39,13 @@ class LocalTaskRegistryFactoryTest {
     @Test
     void shouldPutAndRemoveDistinctTasks() {
         var task1 = Tasks.leaf("root1");
-        var taskRegistry1 = taskRegistryFactory.newInstance();
+        var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
 
         assertThat(taskStore.query("")).size().isEqualTo(1);
 
         var task2 = Tasks.leaf("root2");
-        var taskRegistry2 = taskRegistryFactory.newInstance();
+        var taskRegistry2 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry2.registerTask(task2);
 
         assertThat(taskStore.query("")).size().isEqualTo(2);

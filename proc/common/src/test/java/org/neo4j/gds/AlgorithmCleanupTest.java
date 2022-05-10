@@ -51,7 +51,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryUnderRegularExecution() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -67,7 +67,7 @@ class AlgorithmCleanupTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFails() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, proc -> {
             proc.taskRegistryFactory = taskRegistryFactory;

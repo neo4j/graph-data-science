@@ -60,6 +60,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             progressTask,
             log,
             configuration.concurrency(),
+            configuration.jobId(),
             taskRegistryFactory,
             userLogRegistryFactory
         );

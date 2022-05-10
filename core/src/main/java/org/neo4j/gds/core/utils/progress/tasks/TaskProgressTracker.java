@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -44,15 +45,15 @@ public class TaskProgressTracker implements ProgressTracker {
     protected Optional<Task> currentTask;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
-        this(baseTask, log, concurrency, taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
+        this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
     }
 
     public TaskProgressTracker(
-        Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory,
+        Task baseTask, Log log, int concurrency, JobId jobId, TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.baseTask = baseTask;
-        this.taskRegistry = taskRegistryFactory.newInstance();
+        this.taskRegistry = taskRegistryFactory.newInstance(jobId);
         this.taskProgressLogger = new TaskProgressLogger(log, baseTask, concurrency);
         this.currentTask = Optional.empty();
         this.nestedTasks = new Stack<>();

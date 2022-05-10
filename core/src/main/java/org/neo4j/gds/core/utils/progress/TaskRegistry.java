@@ -39,6 +39,12 @@ public class TaskRegistry {
         this.jobId = new JobId();
     }
 
+    public TaskRegistry(String username, TaskStore taskStore, JobId jobId) {
+        this.username = username;
+        this.taskStore = taskStore;
+        this.jobId = jobId;
+    }
+
     public void registerTask(Task task) {
         taskStore.store(username, jobId, task);
     }

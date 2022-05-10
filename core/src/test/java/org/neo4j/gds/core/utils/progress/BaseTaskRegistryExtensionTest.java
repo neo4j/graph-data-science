@@ -69,7 +69,7 @@ abstract class BaseTaskRegistryExtensionTest extends BaseTest {
         @Procedure("gds.test.algo")
         public Stream<Bar> foo() {
             var task = Tasks.leaf("foo");
-            var taskRegistry = taskRegistryFactory.newInstance();
+            var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             taskRegistry.registerTask(task);
             return Stream.empty();
         }

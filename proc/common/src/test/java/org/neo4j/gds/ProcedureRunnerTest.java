@@ -88,9 +88,10 @@ class ProcedureRunnerTest extends BaseTest {
             var procedureCallContext = ProcedureCallContext.EMPTY;
             var log = Neo4jProxy.testLog();
             var username = Username.of("foo");
-            TaskRegistryFactory taskRegistryFactory = () -> new TaskRegistry(
+            TaskRegistryFactory taskRegistryFactory = jobId -> new TaskRegistry(
                 username.username(),
-                new GlobalTaskStore()
+                new GlobalTaskStore(),
+                jobId
             );
             ProcedureRunner.applyOnProcedure(
                 db,

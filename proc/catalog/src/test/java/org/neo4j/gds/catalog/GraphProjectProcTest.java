@@ -193,7 +193,7 @@ class GraphProjectProcTest extends BaseProcTest {
     void testNativeProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
-            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
 
             proc.project("myGraph", "*", "*", Map.of());
 
@@ -205,7 +205,7 @@ class GraphProjectProcTest extends BaseProcTest {
     void testCypherProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, GraphProjectProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
-            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
 
             proc.projectCypher("myGraph", ALL_NODES_QUERY, ALL_RELATIONSHIPS_QUERY, Map.of());
 

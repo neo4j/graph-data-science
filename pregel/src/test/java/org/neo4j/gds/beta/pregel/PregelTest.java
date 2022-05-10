@@ -193,7 +193,7 @@ class PregelTest {
             task,
             Neo4jProxy.testLog(),
             config.concurrency(),
-            () -> new TaskRegistry("", taskStore)
+            jobId -> new TaskRegistry("", taskStore, jobId)
         );
 
         var pregelAlgo = Pregel.create(

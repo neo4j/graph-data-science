@@ -30,7 +30,7 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
     }
 
     @Override
-    public TaskRegistry newInstance() {
-        return new TaskRegistry(username, taskStore);
+    public TaskRegistry newInstance(JobId jobId) {
+        return new TaskRegistry(username, taskStore, jobId);
     }
 }

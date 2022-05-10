@@ -17,9 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.config;
 
-@FunctionalInterface
-public interface TaskRegistryFactory {
-    TaskRegistry newInstance(JobId jobId);
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+class AlgoBaseConfigTest {
+
+    @Test
+    void shouldAcceptValidJobId() {
+        AlgoBaseConfigImpl.builder()
+            .jobId("df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
+            .build();
+    }
+
+    @Test
+    void shouldRejectInvalidJobId() {
+        var configBuilder = AlgoBaseConfigImpl.builder();
+
+        configBuilder.jobId("banana-sweatshirt");
+        assertThrows(IllegalArgumentException.class, configBuilder::build);
+
+        configBuilder.jobId(Long.valueOf(42L));
+        assertThrows(IllegalArgumentException.class, configBuilder::build);
+    }
 }

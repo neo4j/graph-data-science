@@ -92,6 +92,7 @@ class PageRankStreamProcTest extends PageRankProcTest<PageRankStreamConfig> {
             .algo("pageRank")
             .streamMode()
             .addParameter("relationshipWeightProperty", "weight")
+            .addParameter("jobId", "df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
             .yields("nodeId", "score");
 
         assertCypherResult(query, weightedExpected);
