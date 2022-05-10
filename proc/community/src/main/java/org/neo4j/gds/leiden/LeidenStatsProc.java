@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,9 +28,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.AlgoBaseProc.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LeidenStatsProc extends AlgoBaseProc<Leiden, LeidenResult, LeidenStatsConfig, StatsResult> {
+public class LeidenStatsProc extends BaseProc {
 
     @Procedure(value = "gds.alpha.leiden.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
@@ -41,30 +39,9 @@ public class LeidenStatsProc extends AlgoBaseProc<Leiden, LeidenResult, LeidenSt
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var statsSpec = new LeidenStatsSpec();
         return new ProcedureExecutor<>(
-            statsSpec,
+            new LeidenStatsSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-    }
-
-
-
-    @Override
-    @Deprecated
-    public AlgorithmFactory<?, Leiden, LeidenStatsConfig> algorithmFactory() {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    public <T extends ComputationResultConsumer<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>>> T computationResultConsumer() {
-        return null;
-    }
-
-    @Override
-    @Deprecated
-    protected LeidenStatsConfig newConfig(String username, CypherMapWrapper config) {
-        return null;
     }
 }
