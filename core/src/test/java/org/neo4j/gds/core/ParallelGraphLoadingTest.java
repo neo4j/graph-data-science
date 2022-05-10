@@ -93,7 +93,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     @Test
-    @Timeout(value = 10)
+    @Timeout(value = 15)
     void shouldLoadAllRelationships() {
         Graph graph = loadEverything();
         runInTransaction(db, tx -> graph.forEachNode(id -> testRelationships(tx, graph, id)));
