@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,6 +50,23 @@ class GraphSageTrainConfigTest {
             Arguments.of(1, "Expected Aggregator or String. Got Integer."),
             Arguments.of("alwaysTrue", "Aggregator `alwaysTrue` is not supported. Must be one of: ['MEAN', 'POOL'].")
         );
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0.5, 100, 1",
+        "0.2, 1000, 2",
+        "0.99, 1000, 10",
+    })
+    void specifyBatchesPerIteration(double samplingRatio, long nodeCount, int expectedSampledBatches) {
+        var mapWrapper = CypherMapWrapper.create(Map.of(
+            "modelName", "foo",
+            "featureProperties", List.of("a"),
+            "batchSamplingRatio", samplingRatio,
+            "batchSize", 100
+        ));
+
+        assertThat(GraphSageTrainConfig.of("user", mapWrapper).batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
     }
 
     @Test

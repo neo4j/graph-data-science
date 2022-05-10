@@ -57,7 +57,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
@@ -68,19 +70,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class GraphSageModelTrainer {
     private final long randomSeed;
     private final boolean useWeights;
-    private final double learningRate;
-    private final double tolerance;
-    private final int negativeSampleWeight;
-    private final int concurrency;
-    private final int epochs;
-    private final int maxIterations;
-    private final int maxSearchDepth;
     private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
-    private final int batchSize;
+    private final GraphSageTrainConfig config;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
         this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
@@ -94,14 +89,7 @@ public class GraphSageModelTrainer {
         Collection<Weights<Matrix>> labelProjectionWeights
     ) {
         this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
-        this.batchSize = config.batchSize();
-        this.learningRate = config.learningRate();
-        this.tolerance = config.tolerance();
-        this.negativeSampleWeight = config.negativeSampleWeight();
-        this.concurrency = config.concurrency();
-        this.epochs = config.epochs();
-        this.maxIterations = config.maxIterations();
-        this.maxSearchDepth = config.searchDepth();
+        this.config = config;
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
@@ -139,21 +127,29 @@ public class GraphSageModelTrainer {
 
         var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
-            batchSize,
+            config.batchSize(),
             batch -> createBatchTask(graph, features, layers, weights, batch)
         );
+        var random = new Random(randomSeed);
+        Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
+            .mapToObj(__ -> batchTasks.get(random.nextInt(batchTasks.size())))
+            .collect(Collectors.toList());
 
         progressTracker.endSubTask("Prepare batches");
 
+        progressTracker.beginSubTask("Train model");
+
         boolean converged = false;
         var iterationLossesPerEpoch = new ArrayList<List<Double>>();
-
-        progressTracker.beginSubTask("Train model");
+        var prevEpochLoss = Double.NaN;
+        int epochs = config.epochs();
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-            var epochResult = trainEpoch(batchTasks, weights);
-            iterationLossesPerEpoch.add(epochResult.losses());
+            var epochResult = trainEpoch(batchTaskSampler, weights, prevEpochLoss);
+            List<Double> epochLosses = epochResult.losses();
+            iterationLossesPerEpoch.add(epochLosses);
+            prevEpochLoss = epochLosses.get(epochLosses.size() - 1);
             converged = epochResult.converged();
             progressTracker.endSubTask("Epoch");
         }
@@ -188,34 +184,45 @@ public class GraphSageModelTrainer {
             useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
             totalBatch,
-            negativeSampleWeight
+            config.negativeSampleWeight()
         );
 
-        return new BatchTask(lossFunction, weights, tolerance, progressTracker);
+        return new BatchTask(lossFunction, weights, progressTracker);
     }
 
-    private EpochResult trainEpoch(List<BatchTask> batchTasks, List<Weights<? extends Tensor<?>>> weights) {
-        var updater = new AdamOptimizer(weights, learningRate);
+    private EpochResult trainEpoch(
+        Supplier<List<BatchTask>> sampledBatchTaskSupplier,
+        List<Weights<? extends Tensor<?>>> weights,
+        double prevEpochLoss
+    ) {
+        var updater = new AdamOptimizer(weights, config.learningRate());
 
         int iteration = 1;
         var iterationLosses = new ArrayList<Double>();
+        double prevLoss = prevEpochLoss;
         var converged = false;
 
-        for (;iteration <= maxIterations; iteration++) {
+        int maxIterations = config.maxIterations();
+        for (; iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
-            // run forward + maybe backward for each Batch
-            ParallelUtil.runWithConcurrency(concurrency, batchTasks, executor);
-            var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
-            iterationLosses.add(avgLoss);
+            var sampledBatchTasks = sampledBatchTaskSupplier.get();
 
-            converged = batchTasks.stream().allMatch(task -> task.converged);
-            if (converged) {
-                progressTracker.endSubTask();
+            // run forward + maybe backward for each Batch
+            ParallelUtil.runWithConcurrency(config.concurrency(), sampledBatchTasks, executor);
+            var avgLoss = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
+            iterationLosses.add(avgLoss);
+            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
+
+            if (Math.abs(prevLoss - avgLoss) < config.tolerance()) {
+                converged = true;
+                progressTracker.endSubTask("Iteration");
                 break;
             }
 
-            var batchedGradients = batchTasks
+            prevLoss = avgLoss;
+
+            var batchedGradients = sampledBatchTasks
                 .stream()
                 .map(BatchTask::weightGradients)
                 .collect(Collectors.toList());
@@ -223,8 +230,6 @@ public class GraphSageModelTrainer {
             var meanGradients = averageTensors(batchedGradients);
 
             updater.update(meanGradients);
-
-            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
             progressTracker.endSubTask("Iteration");
         }
 
@@ -243,34 +248,23 @@ public class GraphSageModelTrainer {
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
-        private final double tolerance;
         private final ProgressTracker progressTracker;
-        private boolean converged;
-        private double prevLoss;
+        private double loss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
             List<Weights<? extends Tensor<?>>> weightVariables,
-            double tolerance,
             ProgressTracker progressTracker
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
-            this.tolerance = tolerance;
             this.progressTracker = progressTracker;
         }
 
         @Override
         public void run() {
-            if(converged) { // Don't try to go further
-                return;
-            }
-
             var localCtx = new ComputationContext();
-            var loss = localCtx.forward(lossFunction).value();
-
-            converged = Math.abs(prevLoss - loss) < tolerance;
-            prevLoss = loss;
+            loss = localCtx.forward(lossFunction).value();
 
             localCtx.backward(lossFunction);
             weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
@@ -279,7 +273,7 @@ public class GraphSageModelTrainer {
         }
 
         public double loss() {
-            return prevLoss;
+            return loss;
         }
 
         List<? extends Tensor<?>> weightGradients() {
@@ -312,7 +306,7 @@ public class GraphSageModelTrainer {
         // sample a neighbor for each batchNode
         batch.consume(nodeId -> {
             // randomWalk with at most maxSearchDepth steps and only save last node
-            int searchDepth = localRandom.nextInt(maxSearchDepth) + 1;
+            int searchDepth = localRandom.nextInt(config.searchDepth()) + 1;
             AtomicLong currentNode = new AtomicLong(nodeId);
             while (searchDepth > 0) {
                 NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + searchDepth);

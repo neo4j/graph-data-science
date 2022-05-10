@@ -26,6 +26,7 @@ import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -34,7 +35,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -77,7 +78,7 @@ class GraphSageModelTrainerTest {
     @Inject
     private Graph arrayGraph;
     private HugeObjectArray<double[]> features;
-    private ImmutableGraphSageTrainConfig.Builder configBuilder;
+    private GraphSageTrainConfigImpl.Builder configBuilder;
 
 
     @BeforeEach
@@ -87,7 +88,8 @@ class GraphSageModelTrainerTest {
 
         Random random = new Random(19L);
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
-        configBuilder = ImmutableGraphSageTrainConfig.builder()
+        configBuilder = GraphSageTrainConfigImpl.builder()
+            .username("DUMMY")
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
@@ -202,7 +204,7 @@ class GraphSageModelTrainerTest {
             .embeddingDimension(12)
             .epochs(10)
             .tolerance(1e-10)
-            .addSampleSizes(5, 3)
+            .sampleSizes(List.of(5, 3))
             .batchSize(5)
             .maxIterations(100)
             .randomSeed(42L)
@@ -228,17 +230,17 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                    91.33327272,
-                    88.17940500,
-                    87.68340477,
-                    85.60797746,
-                    85.59108701,
-                    85.59007234,
-                    81.44403525,
-                    81.44260858,
-                    81.44349342,
-                    81.45612978
-                }, Offset.offset(1e-8)
+                78.30,
+                71.55,
+                71.07,
+                71.65,
+                74.36,
+                74.08,
+                73.98,
+                80.28,
+                71.07,
+                71.07
+                }, Offset.offset(0.05)
             );
     }
 
@@ -250,7 +252,7 @@ class GraphSageModelTrainerTest {
             .aggregator(AggregatorType.POOL)
             .epochs(10)
             .tolerance(1e-10)
-            .addSampleSizes(5, 3)
+            .sampleSizes(List.of(5, 3))
             .batchSize(5)
             .maxIterations(100)
             .randomSeed(42L)
@@ -276,16 +278,16 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                    90.53,
-                    83.29,
-                    74.75,
-                    74.61,
-                    74.68,
-                    74.54,
-                    74.46,
-                    74.47,
-                    74.41,
-                    74.41
+                87.34,
+                80.75,
+                74.07,
+                93.12,
+                96.36,
+                80.50,
+                77.31,
+                99.70,
+                83.60,
+                83.60
                 }, Offset.offset(0.05)
             );
     }
@@ -304,6 +306,35 @@ class GraphSageModelTrainerTest {
         assertThat(trainMetrics.didConverge()).isTrue();
         assertThat(trainMetrics.ranEpochs()).isEqualTo(1);
         assertThat(trainMetrics.ranIterationsPerEpoch()).containsExactly(2);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0.01, true, 8",
+        "1.0, false, 10"
+    })
+    void batchesPerIteration(double batchSamplingRatio, boolean expectedConvergence, int expectedRanEpochs) {
+        var trainer = new GraphSageModelTrainer(
+            configBuilder.modelName("convergingModel:)")
+                .maybeBatchSamplingRatio(batchSamplingRatio)
+                .embeddingDimension(12)
+                .aggregator(AggregatorType.POOL)
+                .epochs(10)
+                .tolerance(1e-10)
+                .sampleSizes(List.of(5, 3))
+                .batchSize(5)
+                .maxIterations(100)
+                .randomSeed(42L)
+                .build(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var trainResult = trainer.train(graph, features);
+
+        var trainMetrics = trainResult.metrics();
+        assertThat(trainMetrics.didConverge()).isEqualTo(expectedConvergence);
+        assertThat(trainMetrics.ranEpochs()).isEqualTo(expectedRanEpochs);
     }
 
     @ParameterizedTest

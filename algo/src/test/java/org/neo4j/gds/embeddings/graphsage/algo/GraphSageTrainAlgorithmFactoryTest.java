@@ -460,8 +460,9 @@ class GraphSageTrainAlgorithmFactoryTest {
 
     @Test
     void testLogging() {
-        var config = ImmutableGraphSageTrainConfig.builder()
-            .addFeatureProperties(DUMMY_PROPERTY)
+        var config = GraphSageTrainConfigImpl.builder()
+            .username("DUMMY")
+            .featureProperties(List.of(DUMMY_PROPERTY))
             .embeddingDimension(12)
             .aggregator(Aggregator.AggregatorType.POOL)
             .tolerance(1e-10)
@@ -497,21 +498,21 @@ class GraphSageTrainAlgorithmFactoryTest {
                 "GraphSageTrain :: Train model :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: LOSS: 132.63",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: LOSS: 132.52",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: LOSS: 129.13",
+                "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: LOSS: 130.73",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Start",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: LOSS: 123.38",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: LOSS: 122.98",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 1 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Start",
-                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: LOSS: 116.06",
+                "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: LOSS: 126.44",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 100%",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Iteration 2 of 2 :: Finished",
                 "GraphSageTrain :: Train model :: Epoch 2 of 2 :: Finished",
