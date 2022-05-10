@@ -24,7 +24,7 @@ The underlying assumption roughly speaking is that a page is only as important a
 
 PageRank is introduced in the original Google paper as a function that solves the following equation:
 
-image::page-rank-formula.svg[align="center"]
+image::equations/page-rank-formula.svg[align="center"]
 
 where,
 

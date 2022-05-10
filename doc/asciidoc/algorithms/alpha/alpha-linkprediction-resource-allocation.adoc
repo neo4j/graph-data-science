@@ -19,7 +19,7 @@ include::alpha-note.adoc[]
 The Resource Allocation  algorithm was introduced in 2009 by Tao Zhou, Linyuan Lü, and Yi-Cheng Zhang as part of a study to predict links in various networks.
 It is computed using the following formula:
 
-image::resource-allocation.svg[role="middle"]
+image::equations/resource-allocation.svg[role="middle"]
 
 where `N(u)` is the set of nodes adjacent to `u`.
 

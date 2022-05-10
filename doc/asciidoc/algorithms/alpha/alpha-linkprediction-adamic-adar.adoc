@@ -18,7 +18,7 @@ include::alpha-note.adoc[]
 The Adamic Adar algorithm was introduced in 2003 by Lada Adamic and Eytan Adar to https://www.semanticscholar.org/paper/Friends-and-neighbors-on-the-Web-Adamic-Adar/39348c10c90be968357e2a6b65d5e0e479307735[predict links in a social network^].
 It is computed using the following formula:
 
-image::adamic-adar.svg[role="middle"]
+image::equations/adamic-adar.svg[role="middle"]
 
 where `N(u)` is the set of nodes adjacent to `u`.
 

@@ -63,7 +63,7 @@ YIELD startNodeId, targetNodeId, distance
 [[algorithm-all-pairs-shortest-path-sample]]
 == All Pairs Shortest Path algorithm sample
 
-image::shortest-path_graph.png[]
+image::example-graphs/shortest-path_graph.png[]
 
 .The following will create a sample graph:
 [source, cypher, role=noplay]
