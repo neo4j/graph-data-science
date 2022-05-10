@@ -75,7 +75,7 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
     @Override
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext)
     throws ParameterResolutionException {
-        return freePortFromStore(extensionContext, parameterContext.findAnnotation(FreePort.class).get());
+        return freePortFromStore(extensionContext, parameterContext.findAnnotation(FreePort.class).orElseThrow());
     }
 
     @Override

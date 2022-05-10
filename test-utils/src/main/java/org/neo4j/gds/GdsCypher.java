@@ -744,16 +744,10 @@ public abstract class GdsCypher {
         }
 
         default <R> Optional<R> fold(
-            Function<String, R> string,
-            Function<Map<String, Object>, R> map
+            Function<String, R> stringFunc,
+            Function<Map<String, Object>, R> mapFunc
         ) {
-            if (string().isPresent()) {
-                return Optional.of(string.apply(string().get()));
-            }
-            if (map().isPresent()) {
-                return Optional.of(map.apply(map().get()));
-            }
-            return Optional.empty();
+            return string().map(stringFunc).or(() -> map().map(mapFunc));
         }
 
         @Value.Check

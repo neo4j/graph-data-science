@@ -32,10 +32,10 @@ public interface NodeSimilarityResult {
     Optional<SimilarityGraphResult> maybeGraphResult();
 
     default Stream<SimilarityResult> streamResult() {
-        return maybeStreamResult().get();
+        return maybeStreamResult().orElseThrow();
     }
 
     default SimilarityGraphResult graphResult() {
-        return maybeGraphResult().get();
+        return maybeGraphResult().orElseThrow();
     }
 }

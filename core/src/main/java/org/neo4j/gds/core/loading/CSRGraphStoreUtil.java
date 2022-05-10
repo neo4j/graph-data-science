@@ -134,7 +134,7 @@ public final class CSRGraphStoreUtil {
                 .values()
                 .stream()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             String propertyKey = relationshipProperty.get();
             relationshipProperties = singletonMap(
@@ -145,7 +145,7 @@ public final class CSRGraphStoreUtil {
                         propertyKey,
                         NumberType.FLOATING_POINT,
                         relationshipPropertySchema.state(),
-                        relationships.properties().get(),
+                        relationships.properties().orElseThrow(),
                         relationshipPropertySchema.defaultValue().isUserDefined()
                             ? relationshipPropertySchema.defaultValue()
                             : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),

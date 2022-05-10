@@ -353,9 +353,8 @@ public final class DeltaStepping extends Algorithm<DijkstraResult> {
         long sourceNode,
         int concurrency
     ) {
-        assert tentativeDistances.predecessors().isPresent();
         var distances = tentativeDistances.distances();
-        var predecessors = tentativeDistances.predecessors().get();
+        var predecessors = tentativeDistances.predecessors().orElseThrow();
 
         var pathIndex = new AtomicLong(0L);
 
