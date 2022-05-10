@@ -23,14 +23,12 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Optional;
@@ -86,17 +84,14 @@ class GraphAggregationPhase {
             .addPropertyConfig(Aggregation.SUM, DefaultValue.forDouble())
             .executorService(executorService)
             .build();
+        // when the graph is undirected the weight of the relationship is being doubled hence we need to scale it
         double propertyScale = (orientation == Orientation.UNDIRECTED) ? 0.5 : 1;
         var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
             workingGraph.nodeCount(),
             partition ->
                 new RelationshipCreator(
-                    propertyScale,
-                    relationshipsBuilder,
-                    communities,
-                    workingGraph.concurrentCopy(),
-                    partition
+                    communities, partition, relationshipsBuilder, workingGraph.concurrentCopy(), propertyScale
                 ),
             Optional.empty()
         );
@@ -106,43 +101,4 @@ class GraphAggregationPhase {
         return GraphFactory.create(idMap, relationshipsBuilder.build());
     }
 
-    static final class RelationshipCreator implements Runnable {
-
-        private double propertyScale;
-        private final RelationshipsBuilder relationshipsBuilder;
-
-        private final HugeLongArray communities;
-
-        private final RelationshipIterator relationshipIterator;
-
-        private final Partition partition;
-
-
-        private RelationshipCreator(
-            double propertyScale, RelationshipsBuilder relationshipsBuilder,
-            HugeLongArray communities,
-            RelationshipIterator relationshipIterator,
-            Partition partition
-        ) {
-            this.propertyScale = propertyScale;
-            this.relationshipsBuilder = relationshipsBuilder;
-            this.communities = communities;
-            this.relationshipIterator = relationshipIterator;
-            this.partition = partition;
-        }
-
-        @Override
-        public void run() {
-            partition.consume(nodeId -> {
-                long communityId = communities.get(nodeId);
-                relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                    // do not allow self-loops
-                    if (communityId != communities.get(target)) {
-                        relationshipsBuilder.add(communityId, communities.get(target), property * propertyScale);
-                    }
-                    return true;
-                });
-            });
-        }
-    }
 }
