@@ -100,8 +100,8 @@ Given an example node such as `(:Pokemon { weight: 8.5, height: 0.6, hp: 39 })`,
 [[arrow-node-schema]]
 [opts=header,cols="1,1,1,1,1"]
 |===
-| nodeId    | label     | weight    | height    | hp
-| 0         | "Pokemon" | 8.5       | 0.6       | 39
+| nodeId    | labels     | weight    | height    | hp
+| 0         | "Pokemon"  | 8.5       | 0.6       | 39
 |===
 
 The following table describes the node columns with reserved names.
@@ -109,9 +109,9 @@ The following table describes the node columns with reserved names.
 [[arrow-node-columns]]
 [opts=header,cols="1m,1,1,1,1"]
 |===
-| Name      | Type              | Optional | Nullable   | Description
-| nodeId    | Integer           | No       | No         | Unique 64-bit node identifiers for the in-memory graph. Must be positive values.
-| label     | String or Integer | Yes      | No         | Single node label. Either a string literal or a dictionary encoded number.
+| Name      | Type                                | Optional | Nullable   | Description
+| nodeId    | Integer                             | No       | No         | Unique 64-bit node identifiers for the in-memory graph. Must be positive values.
+| labels    | String or Integer or List of String | Yes      | No         | Node labels, either a single string node label, a single dictionary encoded node label or a list of node label strings.
 |===
 
 Any additional column is interpreted as a node property.
