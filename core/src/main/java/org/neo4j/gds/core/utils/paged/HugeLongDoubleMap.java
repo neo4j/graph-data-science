@@ -417,7 +417,7 @@ public class HugeLongDoubleMap implements Iterable<LongDoubleCursor> {
 
         @Override
         public Iterator<LongDoubleCursor> iterator() {
-            return this;
+            return reset();
         }
 
         @Override

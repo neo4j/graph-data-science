@@ -453,7 +453,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
 
         @Override
         public Iterator<LongLongCursor> iterator() {
-            return this;
+            return reset();
         }
 
         @Override
