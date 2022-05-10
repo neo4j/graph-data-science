@@ -130,21 +130,23 @@ public class GraphSageModelTrainer {
             config.batchSize(),
             batch -> createBatchTask(graph, features, layers, weights, batch)
         );
+        var random = new Random(randomSeed);
+        Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
+            .mapToObj(__ -> batchTasks.get(random.nextInt(batchTasks.size())))
+            .collect(Collectors.toList());
 
         progressTracker.endSubTask("Prepare batches");
 
-        boolean converged = false;
-        var iterationLossesPerEpoch = new ArrayList<List<Double>>();
-
-        var prevEpochLoss = Double.NaN;
-        var random = new Random(randomSeed);
-
         progressTracker.beginSubTask("Train model");
 
+        boolean converged = false;
+        var iterationLossesPerEpoch = new ArrayList<List<Double>>();
+        var prevEpochLoss = Double.NaN;
         int epochs = config.epochs();
+
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-            var epochResult = trainEpoch(() -> batchTasks.get(random.nextInt(batchTasks.size())), weights, prevEpochLoss);
+            var epochResult = trainEpoch(batchTaskSampler, weights, prevEpochLoss);
             List<Double> epochLosses = epochResult.losses();
             iterationLossesPerEpoch.add(epochLosses);
             prevEpochLoss = epochLosses.get(epochLosses.size() - 1);
@@ -188,7 +190,11 @@ public class GraphSageModelTrainer {
         return new BatchTask(lossFunction, weights, progressTracker);
     }
 
-    private EpochResult trainEpoch(Supplier<BatchTask> batchTaskSupplier, List<Weights<? extends Tensor<?>>> weights, double prevEpochLoss) {
+    private EpochResult trainEpoch(
+        Supplier<List<BatchTask>> sampledBatchTaskSupplier,
+        List<Weights<? extends Tensor<?>>> weights,
+        double prevEpochLoss
+    ) {
         var updater = new AdamOptimizer(weights, config.learningRate());
 
         int iteration = 1;
@@ -200,14 +206,11 @@ public class GraphSageModelTrainer {
         for (; iteration <= maxIterations; iteration++) {
             progressTracker.beginSubTask("Iteration");
 
-            var batchTasks = IntStream
-                .range(0, config.batchesPerIteration())
-                .mapToObj(__ -> batchTaskSupplier.get())
-                .collect(Collectors.toList());
+            var sampledBatchTasks = sampledBatchTaskSupplier.get();
 
             // run forward + maybe backward for each Batch
-            ParallelUtil.runWithConcurrency(config.concurrency(), batchTasks, executor);
-            var avgLoss = batchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
+            ParallelUtil.runWithConcurrency(config.concurrency(), sampledBatchTasks, executor);
+            var avgLoss = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
             iterationLosses.add(avgLoss);
             progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
 
@@ -219,7 +222,7 @@ public class GraphSageModelTrainer {
 
             prevLoss = avgLoss;
 
-            var batchedGradients = batchTasks
+            var batchedGradients = sampledBatchTasks
                 .stream()
                 .map(BatchTask::weightGradients)
                 .collect(Collectors.toList());
@@ -246,7 +249,7 @@ public class GraphSageModelTrainer {
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
         private final ProgressTracker progressTracker;
-        private double prevLoss;
+        private double loss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
@@ -261,9 +264,7 @@ public class GraphSageModelTrainer {
         @Override
         public void run() {
             var localCtx = new ComputationContext();
-            var loss = localCtx.forward(lossFunction).value();
-
-            prevLoss = loss;
+            loss = localCtx.forward(lossFunction).value();
 
             localCtx.backward(lossFunction);
             weightGradients = weightVariables.stream().map(localCtx::gradient).collect(Collectors.toList());
@@ -272,7 +273,7 @@ public class GraphSageModelTrainer {
         }
 
         public double loss() {
-            return prevLoss;
+            return loss;
         }
 
         List<? extends Tensor<?>> weightGradients() {

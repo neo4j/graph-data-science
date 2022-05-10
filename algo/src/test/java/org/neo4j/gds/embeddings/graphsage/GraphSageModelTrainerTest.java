@@ -310,13 +310,13 @@ class GraphSageModelTrainerTest {
 
     @ParameterizedTest
     @CsvSource({
-        "1, true, 8",
-        "5, false, 10"
+        "0.01, true, 8",
+        "1.0, false, 10"
     })
-    void batchesPerIteration(int batchesPerIteration, boolean expectedConvergence, int expectedRanEpochs) {
+    void batchesPerIteration(double batchSamplingRatio, boolean expectedConvergence, int expectedRanEpochs) {
         var trainer = new GraphSageModelTrainer(
             configBuilder.modelName("convergingModel:)")
-                .maybeBatchesPerIteration(batchesPerIteration)
+                .maybeBatchSamplingRatio(batchSamplingRatio)
                 .embeddingDimension(12)
                 .aggregator(AggregatorType.POOL)
                 .epochs(10)

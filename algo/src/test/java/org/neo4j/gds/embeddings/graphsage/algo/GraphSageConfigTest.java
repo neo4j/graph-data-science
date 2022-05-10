@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -51,15 +52,21 @@ class GraphSageTrainConfigTest {
         );
     }
 
-    @Test
-    void specifyBatchesPerIteration() {
+    @ParameterizedTest
+    @CsvSource({
+        "0.5, 100, 1",
+        "0.2, 1000, 2",
+        "0.99, 1000, 10",
+    })
+    void specifyBatchesPerIteration(double samplingRatio, long nodeCount, int expectedSampledBatches) {
         var mapWrapper = CypherMapWrapper.create(Map.of(
             "modelName", "foo",
             "featureProperties", List.of("a"),
-            "batchesPerIteration", 42
+            "batchSamplingRatio", samplingRatio,
+            "batchSize", 100
         ));
 
-        assertThat(GraphSageTrainConfig.of("user", mapWrapper).batchesPerIteration()).isEqualTo(42);
+        assertThat(GraphSageTrainConfig.of("user", mapWrapper).batchesPerIteration(nodeCount)).isEqualTo(expectedSampledBatches);
     }
 
     @Test

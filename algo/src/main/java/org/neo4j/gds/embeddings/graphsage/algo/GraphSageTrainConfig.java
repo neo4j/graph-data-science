@@ -120,13 +120,16 @@ public interface GraphSageTrainConfig extends
         return 10;
     }
 
-    @Configuration.Key("batchesPerIteration")
-    Optional<Integer> maybeBatchesPerIteration();
+    @Configuration.Key("batchSamplingRatio")
+    @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
+    Optional<Double> maybeBatchSamplingRatio();
 
     @Configuration.Ignore
     @Value.Derived
-    default int batchesPerIteration() {
-        return maybeBatchesPerIteration().orElse(concurrency());
+    default int batchesPerIteration(long nodeCount) {
+        var samplingRatio = maybeBatchSamplingRatio().orElse(Math.min(1.0, batchSize() * concurrency() / (double) nodeCount));
+        var totalNumberOfBatches = Math.ceil(nodeCount / (double) batchSize());
+        return (int) Math.ceil(samplingRatio * totalNumberOfBatches);
     }
 
     @Value.Default
