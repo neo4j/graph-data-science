@@ -192,6 +192,12 @@ public interface GraphStore {
         return getGraph(NodeLabel.of(nodeLabel), RelationshipType.of(relationshipType), maybeRelationshipProperty);
     }
 
+    default Graph getGraph(NodeLabel nodeLabel) {
+        return getGraph(List.of(nodeLabel));
+    }
+
+    Graph getGraph(List<NodeLabel> nodeLabels);
+
     default Graph getGraph(
         NodeLabel nodeLabel,
         RelationshipType relationshipType,

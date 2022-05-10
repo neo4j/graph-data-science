@@ -99,4 +99,26 @@ public interface AdjacencyList extends AutoCloseable {
 
     @Override
     void close();
+
+    AdjacencyList EMPTY = new AdjacencyList() {
+        @Override
+        public int degree(long node) {
+            return 0;
+        }
+
+        @Override
+        public AdjacencyCursor adjacencyCursor(long node, double fallbackValue) {
+            return AdjacencyCursor.empty();
+        }
+
+        @Override
+        public AdjacencyCursor rawAdjacencyCursor() {
+            return AdjacencyCursor.empty();
+        }
+
+        @Override
+        public void close() {
+
+        }
+    };
 }

@@ -255,6 +255,23 @@ class GraphStoreTest extends BaseTest {
         assertThat(graph).isExactlyInstanceOf(UnionGraph.class);
     }
 
+    @Test
+    void nodeOnlyGraph() {
+        var graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabels("A", "B")
+            .addNodeProperty(PropertyMapping.of("nodeProperty"))
+            .addRelationshipTypes("T1", "T3")
+            .build()
+            .graphStore();
+
+        var labelAGraph = graphStore.getGraph(NodeLabel.of("A"));
+        var labelABGraph = graphStore.getGraph(List.of(NodeLabel.of("A"), NodeLabel.of("B")));
+
+        assertGraphEquals(fromGdl("(:A { nodeProperty: 33 })"), labelAGraph);
+        assertGraphEquals(fromGdl("(:A { nodeProperty: 33 }), (:B { nodeProperty: 42 })"), labelABGraph);
+    }
+
     @NotNull
     private static List<NodeProjection> nodeProjections() {
         NodeProjection aMapping = NodeProjection.builder()

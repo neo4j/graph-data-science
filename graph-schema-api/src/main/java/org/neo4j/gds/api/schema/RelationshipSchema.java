@@ -70,7 +70,11 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
         if (maybeProperty.isPresent()) {
             return RelationshipSchema
                 .builder()
-                .addProperty(relationshipType, maybeProperty.get(), properties().get(relationshipType).get(maybeProperty.get()))
+                .addProperty(
+                    relationshipType,
+                    maybeProperty.get(),
+                    properties().get(relationshipType).get(maybeProperty.get())
+                )
                 .build();
         } else {
             return RelationshipSchema
@@ -78,6 +82,10 @@ public interface RelationshipSchema extends ElementSchema<RelationshipSchema, Re
                 .addRelationshipType(relationshipType)
                 .build();
         }
+    }
+
+    static RelationshipSchema empty() {
+        return builder().build();
     }
 
     static RelationshipSchema of(Map<RelationshipType, Map<String, RelationshipPropertySchema>> properties) {

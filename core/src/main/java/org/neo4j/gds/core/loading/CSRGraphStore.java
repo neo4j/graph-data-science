@@ -484,6 +484,30 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
+    public Graph getGraph(List<NodeLabel> nodeLabels) {
+        var filteredNodes = getFilteredIdMap(nodeLabels);
+        var filteredNodeProperties = filterNodeProperties(nodeLabels);
+
+        var graphSchema = GraphSchema.of(
+            schema().nodeSchema(),
+            RelationshipSchema.empty(),
+            schema.graphProperties()
+        );
+
+        var initialGraph = HugeGraph.create(
+            nodes,
+            graphSchema,
+            filteredNodeProperties,
+            Relationships.Topology.EMPTY,
+            Optional.empty()
+        );
+
+        return filteredNodes.isPresent()
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
+            : initialGraph;
+    }
+
+    @Override
     public CSRGraph getGraph(
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relationshipTypes,
