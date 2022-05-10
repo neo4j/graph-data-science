@@ -69,6 +69,7 @@ Pregel node values are composite values.
 The `schema` describes the layout of that composite value.
 Each element of the schema can represent either a primitive long or double value as well as arrays of those.
 The element is uniquely identified by a key, which is used to access the value during the computation.
+Details on schema declaration can be found in the <<algorithms-pregel-api-schema, dedicated section>>.
 
 The `init` method is called in the beginning of the first superstep of the Pregel computation and allows initializing node values.
 The interface defines an abstract `compute` method, which is called for each node in every superstep.
@@ -93,6 +94,57 @@ Check the <<algorithms-pregel-api-reducer, dedicated section>> for more details.
 
 The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
 If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
+
+
+[[algorithms-pregel-api-schema]]
+=== Pregel schema
+
+In Pregel, each node is associated with a value which can be accessed from within the `compute` method.
+The value is typically used to represent intermediate computation state and eventually the computation result.
+To represent complex state, the node value is a composite type which consists of one or more named values.
+From the perspective of the `compute` function, each of these values can be accessed by its name.
+
+When implementing a `PregelComputation`, one must override the `schema()` method.
+The following example shows the simplest possible example:
+
+```
+PregelSchema schema() {
+    return PregelSchema.Builder().add("foobar", ValueType.LONG).build();
+}
+```
+
+The node value consists of a single value named `foobar` which is of type `long`.
+A node value can be of any GDS-supported type, i.e. `long`, `double`, `long[]`, `double[]` and `float[]`.
+
+We can add an arbitrary number of values to the schema:
+
+```
+PregelSchema schema() {
+    return PregelSchema.Builder()
+        .add("foobar", ValueType.LONG)
+        .add("baz", ValueType.DOUBLE)
+        .build();
+}
+```
+
+Note, that each property consumes additional memory when executing the algorithm, which typically amounts to the number of nodes multiplied by the size of a single value (e.g. 64 Bit for a `long` or `double`).
+
+The `add` method on the builder takes a third argument: `Visibility`.
+There are two possible values: `PUBLIC` (default) and `PRIVATE`.
+The visibility is considered during <<algorithms-pregel-api-procedure, procedure code generation>> to indicate if the value is part of the Pregel result or not.
+Any value that has visibility `PUBLIC` will be part of the computation result and included in the result of the procedure, e.g., streamed to the caller, mutated to the in-memory graph or written to the database.
+
+The following shows a schema where one value is used as result and a second value is only used during computation:
+
+```
+PregelSchema schema() {
+    return PregelSchema.Builder()
+        .add("result", ValueType.LONG, Visiblity.PUBLIC)
+        .add("tempValue", ValueType.DOUBLE, Visiblity.PRIVATE)
+        .build();
+}
+```
+
 
 [[algorithms-pregel-api-java-context]]
 === Init context and compute context
@@ -420,6 +472,10 @@ For the above Code snippet, we generate four procedures:
 * `custom.pregel.proc.stream.estimate`
 * `custom.pregel.proc.write`
 * `custom.pregel.proc.write.estimate`
+
+Note that by default, all values specified in the `PregelSchema` are included in the procedure results.
+To change that behaviour, we can change the visibility for individual parts of the schema.
+For more details, please refer to the <<algorithms-pregel-api-schema, dedicated documentation section>>.
 
 
 [[algorithms-pregel-api-plugin]]
