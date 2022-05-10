@@ -169,36 +169,14 @@ class KarateTest {
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
             .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
-        communitiesMap.forEach((key, value) -> System.out.println(key + " " + value));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
                 community -> assertThat(community).containsExactlyInAnyOrder(
-                    "a1",
-                    "a2",
-                    "a3",
-                    "a4",
-                    "a8",
-                    "a10",
-                    "a12",
-                    "a13",
-                    "a14",
-                    "a18",
-                    "a20",
-                    "a22"
+                    "a1", "a2", "a3", "a4", "a8", "a10", "a12", "a13", "a14", "a18", "a20", "a22"
                 ),
                 community -> assertThat(community).containsExactlyInAnyOrder(
-                    "a9",
-                    "a15",
-                    "a16",
-                    "a19",
-                    "a21",
-                    "a23",
-                    "a27",
-                    "a30",
-                    "a31",
-                    "a33",
-                    "a34"
+                    "a9", "a15", "a16", "a19", "a21", "a23", "a27", "a30", "a31", "a33", "a34"
                 ),
                 community -> assertThat(community).containsExactlyInAnyOrder("a24", "a25", "a26", "a28", "a29", "a32"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a6", "a7", "a11", "a17"),
@@ -206,4 +184,3 @@ class KarateTest {
             );
     }
 }
-

@@ -787,7 +787,6 @@ class FootballTest {
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
             .collect(Collectors.groupingBy(v -> communities.get(idFunction.of(v))));
-        communitiesMap.forEach((key, value) -> System.out.println(key + " " + value));
 
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(

@@ -197,8 +197,6 @@ class RefinementPhaseKarateTest {
             .mapToObj(v -> "a" + v)
             .collect(Collectors.groupingBy(v -> refinedCommunities.get(idFunction.of(v))));
 
-        communitiesMap.forEach((c, members) -> System.out.println(c + ": " + String.join(", ", members)));
-
         assertThat(communitiesMap.values())
             .satisfiesExactlyInAnyOrder(
                 community -> assertThat(community).containsExactlyInAnyOrder("a0"),
