@@ -133,7 +133,7 @@ public final class TrainingStatistics {
             .stream()
             .map(stats -> stats.validationStats().get(evaluationMetric()).avg())
             .max(evaluationMetric().comparator())
-            .get();
+            .orElseThrow(() -> new IllegalStateException("Empty validation stats."));
     }
 
     public TrainerConfig bestParameters() {

@@ -63,8 +63,8 @@ public abstract class NodeValue {
             ));
 
         if (properties.size() == 1) {
-            var element = schema.elements().stream().findFirst().get();
-            var property = properties.values().stream().findFirst().get();
+            var element = schema.elements().iterator().next();
+            var property = properties.values().iterator().next();
             return new SingleNodeValue(schema, element, property);
         }
 

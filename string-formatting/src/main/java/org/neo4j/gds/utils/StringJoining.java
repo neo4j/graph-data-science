@@ -71,7 +71,7 @@ public final class StringJoining {
         }
         return joinVerbose(List.of(
             join(alternatives.stream().limit(alternatives.size() - 1), ", "),
-            alternatives.stream().skip(alternatives.size() - 1).findFirst().get()
+            alternatives.stream().skip(alternatives.size() - 1).findFirst().orElseThrow(() -> new IllegalStateException("No alternatives found."))
         ));
     }
 }

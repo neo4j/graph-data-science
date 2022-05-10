@@ -92,7 +92,7 @@ public final class UnionGraph implements CSRGraph {
             .stream()
             .map(Graph::schema)
             .reduce(GraphSchema::union)
-            .get();
+            .orElseThrow(() -> new IllegalArgumentException("no graphs"));
     }
 
     @Override

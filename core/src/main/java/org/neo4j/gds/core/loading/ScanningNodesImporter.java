@@ -77,7 +77,7 @@ public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeRef
 
         LabelInformation.Builder labelInformationBuilder;
         if (graphProjectConfig.nodeProjections().allProjections().size() == 1) {
-            var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().stream().findFirst().get();
+            var singleLabel = graphProjectConfig.nodeProjections().projections().keySet().iterator().next();
             labelInformationBuilder = LabelInformation.single(singleLabel);
         } else {
             labelInformationBuilder = LabelInformation.builder(expectedCapacity, labelTokenNodeLabelMapping);

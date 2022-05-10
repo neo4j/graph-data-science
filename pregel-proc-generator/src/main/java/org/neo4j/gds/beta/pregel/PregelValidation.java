@@ -198,12 +198,9 @@ final class PregelValidation {
     }
 
     private TypeMirror config(Element pregelElement) {
-        var maybeInterface = pregelComputation(pregelElement);
-        return maybeInterface.get()
-            .getTypeArguments()
-            .stream()
-            .findFirst()
-            .get();
+        return pregelComputation(pregelElement)
+            .map(declaredType -> declaredType.getTypeArguments().get(0))
+            .orElseThrow(() -> new IllegalStateException("Could not find a pregel computation"));
     }
 
     @ValueClass
