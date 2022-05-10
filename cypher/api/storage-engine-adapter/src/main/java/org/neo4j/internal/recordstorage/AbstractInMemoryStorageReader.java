@@ -221,7 +221,7 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
 
     @Override
     public AllRelationshipsScan allRelationshipScan() {
-        return new InMemoryRelationshipScan() ;
+        return new InMemoryRelationshipScan();
     }
 
     @Override
