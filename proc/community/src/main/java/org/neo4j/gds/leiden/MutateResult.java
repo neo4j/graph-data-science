@@ -19,68 +19,81 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
-    public final long ranLevels;
-    public final boolean didConverge;
-    public final long nodeCount;
-    public final long communityCount;
-    public final Map<String, Object> communityDistribution;
+public final class MutateResult extends StatsResult {
 
-    StatsResult(
+    public final long mutateMillis;
+    public final long nodePropertiesWritten;
+
+    private MutateResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
         long communityCount,
-        Map<String, Object> communityDistribution,
+
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
+        long mutateMillis,
+        long nodePropertiesWritten,
+        @Nullable Map<String, Object> communityDistribution,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.ranLevels = ranLevels;
-        this.didConverge = didConverge;
-        this.nodeCount = nodeCount;
-        this.communityCount = communityCount;
-        this.communityDistribution = communityDistribution;
+        super(
+            ranLevels,
+            didConverge,
+            nodeCount,
+            communityCount,
+            communityDistribution,
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            configuration
+        );
+        this.mutateMillis = mutateMillis;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class StatsBuilder extends AbstractCommunityResultBuilder<StatsResult> {
+    static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
 
         long levels = -1;
         boolean didConverge = false;
 
-        StatsBuilder(ProcedureCallContext context, int concurrency) {
+        Builder(
+            ProcedureCallContext context,
+            int concurrency
+        ) {
             super(context, concurrency);
         }
 
-        StatsBuilder withLevels(long levels) {
+        Builder withLevels(long levels) {
             this.levels = levels;
             return this;
         }
 
-        StatsBuilder withDidConverge(boolean didConverge) {
+        Builder withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
 
         @Override
-        protected StatsResult buildResult() {
-            return new StatsResult(
+        protected MutateResult buildResult() {
+            return new MutateResult(
                 levels,
                 didConverge,
                 nodeCount,
                 maybeCommunityCount.orElse(0L),
-                communityHistogramOrNull(),
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
+                mutateMillis,
+                nodePropertiesWritten,
+                communityHistogramOrNull(),
                 config.toMap()
             );
         }
