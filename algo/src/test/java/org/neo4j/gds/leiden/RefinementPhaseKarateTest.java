@@ -65,7 +65,7 @@ class RefinementPhaseKarateTest {
         var originalCommunities = localMovePhaseResult.communities();
         var communityVolumesForRefinement = localMovePhaseResult.communityVolumes();
 
-        var refinementPhase = new RefinementPhase(
+        var refinementPhase = RefinementPhase.create(
             graph,
             originalCommunities,
             nodeVolumes,

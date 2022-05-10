@@ -43,11 +43,36 @@ class RefinementPhase {
     private final long seed;
     private long communityCounter = 0L;
 
-    RefinementPhase(
+    static RefinementPhase create(
         Graph workingGraph,
         HugeLongArray originalCommunities,
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
+        double gamma,
+        double theta,
+        long seed
+    ) {
+        var encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
+        var encounteredCommunitiesWeights = HugeDoubleArray.newArray(workingGraph.nodeCount());
+        encounteredCommunitiesWeights.setAll(c -> -1L);
+        return new RefinementPhase(
+            workingGraph,
+            originalCommunities,
+            nodeVolumes, communityVolumes, encounteredCommunities,
+            encounteredCommunitiesWeights,
+            gamma,
+            theta,
+            seed
+        );
+    }
+
+    private RefinementPhase(
+        Graph workingGraph,
+        HugeLongArray originalCommunities,
+        HugeDoubleArray nodeVolumes,
+        HugeDoubleArray communityVolumes,
+        HugeLongArray encounteredCommunities,
+        HugeDoubleArray encounteredCommunitiesWeights,
         double gamma,
         double theta,
         long seed
@@ -57,13 +82,11 @@ class RefinementPhase {
         this.nodeVolumes = nodeVolumes;
         this.communityVolumesAfterMerge = nodeVolumes.copyOf(nodeVolumes.size());
         this.communityVolumes = communityVolumes;
+        this.encounteredCommunities = encounteredCommunities;
+        this.encounteredCommunitiesWeights = encounteredCommunitiesWeights;
         this.gamma = gamma;
         this.theta = theta;
-
-        encounteredCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
-        encounteredCommunitiesWeights = HugeDoubleArray.newArray(workingGraph.nodeCount());
         this.seed = seed;
-        encounteredCommunitiesWeights.setAll(c -> -1L);
     }
 
     RefinementPhaseResult run() {

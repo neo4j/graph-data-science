@@ -72,7 +72,7 @@ class RefinementPhaseTest {
         var localPhaseCommunities = HugeLongArray.of(0, 0, 2, 2, 2, 7, 7, 7);
         var nodeVolumes = HugeDoubleArray.of(1, 1, 1, 1, 1, 1, 1, 1);
         var communityVolumes = HugeDoubleArray.of(2, 0, 3, 0, 0, 0, 0, 3);
-        var refinement = new RefinementPhase(graph, localPhaseCommunities,
+        var refinement = RefinementPhase.create(graph, localPhaseCommunities,
             nodeVolumes, communityVolumes, 1.0, 0.01, 19L
         );
         var communities = refinement.run().communities();

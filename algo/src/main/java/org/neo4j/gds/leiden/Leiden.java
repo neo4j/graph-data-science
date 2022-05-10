@@ -93,7 +93,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
             }
 
             // 2 REFINE
-            var refinementPhase = new RefinementPhase(
+            var refinementPhase = RefinementPhase.create(
                 workingGraph,
                 partition,
                 nodeVolumes,
