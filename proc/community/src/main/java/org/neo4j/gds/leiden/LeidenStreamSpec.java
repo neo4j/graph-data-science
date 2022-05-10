@@ -32,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.leiden.stream", description = DESCRIPTION, executionMode = STREAM)
-public class LeidenStreamSpec implements AlgorithmSpec<Leiden, HugeLongArray, LeidenStreamConfig, Stream<LeidenStreamProc.StreamResult>, LeidenAlgorithmFactory<LeidenStreamConfig>> {
+public class LeidenStreamSpec implements AlgorithmSpec<Leiden, HugeLongArray, LeidenStreamConfig, Stream<StreamResult>, LeidenAlgorithmFactory<LeidenStreamConfig>> {
     @Override
     public String name() {
         return "LeidenStream";
@@ -49,12 +49,12 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, HugeLongArray, Le
     }
 
     @Override
-    public ComputationResultConsumer<Leiden, HugeLongArray, LeidenStreamConfig, Stream<LeidenStreamProc.StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Leiden, HugeLongArray, LeidenStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
             var communities = computationResult.result();
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> new LeidenStreamProc.StreamResult(graph.toOriginalNodeId(nodeId), communities.get(nodeId)));
+                .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), communities.get(nodeId)));
         };
     }
 }

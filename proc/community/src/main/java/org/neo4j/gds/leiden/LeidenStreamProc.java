@@ -19,11 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -34,15 +30,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class LeidenStreamProc extends AlgoBaseProc<Leiden, HugeLongArray, LeidenStreamConfig, LeidenStreamProc.StreamResult> {
-    // Config
-    // relationshipWeightProperty
-    // maxIterations
-
-    // Output
-    // nodeId
-    // communityId
-
+public class LeidenStreamProc extends BaseProc {
     static final String DESCRIPTION =
         "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
@@ -52,37 +40,9 @@ public class LeidenStreamProc extends AlgoBaseProc<Leiden, HugeLongArray, Leiden
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new LeidenStreamSpec();
-
         return new ProcedureExecutor<>(
-            streamSpec,
+            new LeidenStreamSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-    }
-
-    @Override
-    public AlgorithmFactory<?, Leiden, LeidenStreamConfig> algorithmFactory() {
-        return new LeidenStreamSpec().algorithmFactory();
-    }
-
-    @Override
-    public ComputationResultConsumer<Leiden, HugeLongArray, LeidenStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return new LeidenStreamSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected LeidenStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return new LeidenStreamSpec().newConfigFunction().apply(username, config);
-    }
-
-    public static class StreamResult {
-
-        public final long nodeId;
-        public final long communityId;
-
-        StreamResult(long nodeId, long communityId) {
-            this.nodeId = nodeId;
-            this.communityId = communityId;
-        }
     }
 }
