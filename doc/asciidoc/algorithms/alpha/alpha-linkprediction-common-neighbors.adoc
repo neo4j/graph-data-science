@@ -18,7 +18,7 @@ include::alpha-note.adoc[]
 
 It is computed using the following formula:
 
-image::common-neighbors.svg[role="middle"]
+image::equations/common-neighbors.svg[role="middle"]
 
 where `N(x)` is the set of nodes adjacent to node `x`, and `N(y)` is the set of nodes adjacent to node `y`.
 

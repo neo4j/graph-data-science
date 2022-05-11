@@ -18,7 +18,7 @@ include::alpha-note.adoc[]
 
 Total Neighbors is computed using the following formula:
 
-image::total-neighbors.svg[role="middle"]
+image::equations/total-neighbors.svg[role="middle"]
 
 where `N(x)` is the set of nodes adjacent to `x`, and `N(y)` is the set of nodes adjacent to `y`.
 

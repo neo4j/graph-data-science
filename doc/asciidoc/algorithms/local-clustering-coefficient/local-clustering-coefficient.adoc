@@ -22,7 +22,7 @@ The local clustering coefficient _C~n~_ of a node _n_ describes the likelihood t
 To compute _C~n~_ we use the number of triangles a node is a part of _T~n~_, and the degree of the node _d~n~_.
 The formula to compute the local clustering coefficient is as follows:
 
-image::lcc_formula.svg[align="center"]
+image::equations/lcc_formula.svg[align="center"]
 
 As we can see the triangle count is required to compute the local clustering coefficient.
 To do this the <<algorithms-triangle-count, Triangle Count>> algorithm is utilised.

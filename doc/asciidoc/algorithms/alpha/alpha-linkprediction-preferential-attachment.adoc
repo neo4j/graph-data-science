@@ -19,7 +19,7 @@ Preferential attachment means that the more connected a node is, the more likely
 This algorithm was popularised by https://en.wikipedia.org/wiki/Barab%C3%A1si%E2%80%93Albert_model[Albert-László Barabási and Réka Albert^] through their work on scale-free networks.
 It is computed using the following formula:
 
-image::preferential-attachment.svg[role="middle"]
+image::equations/preferential-attachment.svg[role="middle"]
 
 where `N(u)` is the set of nodes adjacent to `u`.
 

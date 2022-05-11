@@ -524,7 +524,7 @@ By default, no relationship properties will be written, as it can be seen from t
 
 Here is an illustration of how the example graph looks in Neo4j after executing the example above.
 
-image::write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
+image::example-graphs/write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
 
 The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
 The relationships in this example are undirected because we used <<algorithms-node-similarity, Node Similarity>> to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
