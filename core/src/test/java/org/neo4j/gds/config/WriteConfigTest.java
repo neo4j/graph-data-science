@@ -27,9 +27,10 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
-import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 
@@ -42,7 +43,7 @@ class WriteConfigTest {
         var testConfig = new TestConfigImpl(config);
 
         var testGraphStore = new GraphStoreBuilder()
-            .databaseId(NamedDatabaseId.NAMED_SYSTEM_DATABASE_ID)
+            .databaseId(DatabaseIdFactory.from("neo4j", UUID.randomUUID()))
             .capabilities(ImmutableStaticCapabilities.of(isBackedByDatabase))
             .schema(GraphSchema.empty())
             .nodes(new DirectIdMap(0))
