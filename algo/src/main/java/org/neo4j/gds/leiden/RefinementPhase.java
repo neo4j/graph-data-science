@@ -38,6 +38,8 @@ final class RefinementPhase {
     private final double gamma;
     private final double theta; // randomness
 
+    private final HugeDoubleArray relationShipsBetweenCommunties;
+
     private final HugeLongArray encounteredCommunities;
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private final long seed;
@@ -87,12 +89,25 @@ final class RefinementPhase {
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
+        encounteredCommunitiesWeights.setAll(c -> -1L);
+        this.relationShipsBetweenCommunties = HugeDoubleArray.newArray(workingGraph.nodeCount());
     }
 
     Partition run() {
         var refinedCommunities = HugeLongArray.newArray(workingGraph.nodeCount());
         refinedCommunities.setAll(nodeId -> nodeId); //singleton partition
 
+        workingGraph.forEachNode(nodeId -> {
+            long originalCommunityId = originalCommunities.get(nodeId);
+            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
+                var tOriginalCommunityId = originalCommunities.get(t);
+                if (originalCommunityId == tOriginalCommunityId) {
+                    relationShipsBetweenCommunties.addTo(nodeId, relationshipWeight);
+                }
+                return true;
+            });
+            return true;
+        });
         BitSet singleton = new BitSet(workingGraph.nodeCount());
         singleton.set(0, workingGraph.nodeCount());
 
@@ -191,6 +206,17 @@ final class RefinementPhase {
             var nodeVolume = nodeVolumes.get(nodeId);
             communityVolumesAfterMerge.addTo(nextCommunityId, nodeVolume);
             communityVolumesAfterMerge.addTo(currentNodeCommunityId, -nodeVolume);
+
+            long originalCommunityId = originalCommunities.get(nodeId);
+            final long updatedCommunityId = nextCommunityId;
+            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
+                long tOriginalCommunity = originalCommunities.get(t);
+                long tCommunity = refinedCommunities.get(t);
+                if (tOriginalCommunity == originalCommunityId && tCommunity != updatedCommunityId) {
+                    relationShipsBetweenCommunties.addTo(updatedCommunityId, relationshipWeight);
+                }
+                return true;
+            });
         }
     }
 
@@ -198,24 +224,14 @@ final class RefinementPhase {
         long nodeId,
         HugeLongArray refinedCommunities
     ) {
-        WellConnectedCommunities wellConnectedCommunities = new WellConnectedCommunities();
 
         long originalCommunityId = originalCommunities.get(nodeId);
         workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
             long tOriginalCommunity = originalCommunities.get(t);
             if (tOriginalCommunity == originalCommunityId) { //they are in the same original partition
                 long tCommunity = refinedCommunities.get(t);
-                //TODO: Cache WellConnectednessCommunities
-                boolean candidateCommunityIsWellConnected = wellConnectedCommunities.test(
-                    workingGraph,
-                    originalCommunityId,
-                    tCommunity,
-                    originalCommunities,
-                    refinedCommunities,
-                    communityVolumes,
-                    communityVolumesAfterMerge,
-                    gamma
-                );
+
+                boolean candidateCommunityIsWellConnected = isCommunityWellConnected(tCommunity, originalCommunityId);
 
                 if (candidateCommunityIsWellConnected) {
                     if (encounteredCommunitiesWeights.get(tCommunity) < 0) {
@@ -229,6 +245,18 @@ final class RefinementPhase {
             }
             return true;
         });
+    }
+
+
+    private boolean isCommunityWellConnected(
+        long communityId,
+        long originalCommunityId
+    ) {
+        double originalCommunityVolume = communityVolumes.get(originalCommunityId);
+        double updatedCommunityVolume = communityVolumesAfterMerge.get(communityId);
+        double rightSide = gamma * updatedCommunityVolume * (originalCommunityVolume - updatedCommunityVolume);
+
+        return relationShipsBetweenCommunties.get(communityId) >= rightSide;
     }
 
     private boolean isNodeWellConnected(
