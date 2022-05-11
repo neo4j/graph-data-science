@@ -96,7 +96,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
 
         if (features.featureDimension() != regressor.data().featureDimension()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Model expected features %s to have a dimension of `%d`, but got `%d`.",
+                "Model expected features %s to have a total dimension of `%d`, but got `%d`.",
                 StringJoining.join(pipeline.featureProperties()),
                 regressor.data().featureDimension(),
                 features.featureDimension()

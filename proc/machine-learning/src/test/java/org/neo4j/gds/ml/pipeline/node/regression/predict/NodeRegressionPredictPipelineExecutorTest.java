@@ -219,7 +219,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             assertThatThrownBy(() -> pipelineExecutor.compute().toArray())
-                .hasMessage("Model expected features ['a'] to have a dimension of `4`, but got `1`.");
+                .hasMessage("Model expected features ['a'] to have a total dimension of `4`, but got `1`.");
         });
     }
 }

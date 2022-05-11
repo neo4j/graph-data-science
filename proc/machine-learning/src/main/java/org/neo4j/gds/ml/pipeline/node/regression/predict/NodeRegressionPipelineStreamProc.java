@@ -36,8 +36,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.regression.NodeRegressionProcCompanion.PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineStreamProc.NodeRegressionStreamResult;
 
@@ -52,7 +52,7 @@ public class NodeRegressionPipelineStreamProc
 
     @Procedure(name = "gds.alpha.pipeline.nodeRegression.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
-    public Stream<NodeRegressionStreamResult> mutate(
+    public Stream<NodeRegressionStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
