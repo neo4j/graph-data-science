@@ -68,7 +68,7 @@ class FilteredGenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             idMap,
             "myProperty",
             nodeProperties,
-            SimilarityMetric.LONG_PROPERTY_METRIC
+            SimilarityMetric.NORMALIZED_ABSOLUTE_DIFFERENCE
         );
 
         var random = new SplittableRandom();

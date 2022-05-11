@@ -25,7 +25,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public enum SimilarityMetric {
-    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON, LONG_PROPERTY_METRIC, DOUBLE_PROPERTY_METRIC, DEFAULT;
+    JACCARD, OVERLAP, COSINE, EUCLIDEAN, PEARSON,
+    NORMALIZED_ABSOLUTE_DIFFERENCE, DOUBLE_PROPERTY_METRIC,
+    HAMMING_DISTANCE, DEFAULT;
 
     public static SimilarityMetric parse(String value) {
         return SimilarityMetric.valueOf(toUpperCaseWithLocale(value));
@@ -34,7 +36,7 @@ public enum SimilarityMetric {
     public static SimilarityMetric defaultMetricForType(ValueType valueType) {
         switch (valueType) {
             case LONG:
-                return LONG_PROPERTY_METRIC;
+                return NORMALIZED_ABSOLUTE_DIFFERENCE;
             case DOUBLE:
                 return DOUBLE_PROPERTY_METRIC;
             case DOUBLE_ARRAY:
