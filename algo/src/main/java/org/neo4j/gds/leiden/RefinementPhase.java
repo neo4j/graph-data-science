@@ -148,10 +148,12 @@ final class RefinementPhase {
 
         double bestGain = 0d;
         long bestCommunityId = 0;
+        double totalSumOfRelationships = 0.0;
         for (long c = 0; c < communityCounter; c++) {
             var candidateCommunityId = encounteredCommunities.get(c);
             var communityRelationshipsCount = encounteredCommunitiesWeights.get(candidateCommunityId);
-            encounteredCommunitiesWeights.set(candidateCommunityId, -1);
+            totalSumOfRelationships += communityRelationshipsCount;
+            encounteredCommunitiesWeights.set(candidateCommunityId, -communityRelationshipsCount);
 
             var modularityGain =
                 communityRelationshipsCount - currentNodeVolume * communityVolumesAfterMerge.get(candidateCommunityId) * gamma;
@@ -209,14 +211,11 @@ final class RefinementPhase {
 
             long originalCommunityId = originalCommunities.get(nodeId);
             final long updatedCommunityId = nextCommunityId;
-            workingGraph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
-                long tOriginalCommunity = originalCommunities.get(t);
-                long tCommunity = refinedCommunities.get(t);
-                if (tOriginalCommunity == originalCommunityId && tCommunity != updatedCommunityId) {
-                    relationShipsBetweenCommunties.addTo(updatedCommunityId, relationshipWeight);
-                }
-                return true;
-            });
+            double externalEdgesWithNewCommunity = Math.abs(encounteredCommunitiesWeights.get(updatedCommunityId));
+            relationShipsBetweenCommunties.addTo(
+                updatedCommunityId,
+                totalSumOfRelationships - externalEdgesWithNewCommunity
+            );
         }
     }
 
