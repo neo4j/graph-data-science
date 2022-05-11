@@ -24,22 +24,20 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 final class LongPropertySimilarityComputer implements SimilarityComputer {
     private final NodePropertyValues nodePropertyValues;
+    private final LongPropertySimilarityMetric metric;
 
-    LongPropertySimilarityComputer(NodePropertyValues nodePropertyValues) {
+    LongPropertySimilarityComputer(NodePropertyValues nodePropertyValues, LongPropertySimilarityMetric metric) {
         if (nodePropertyValues.valueType() != ValueType.LONG) {
             throw new IllegalArgumentException("The property is not of type LONG");
         }
         this.nodePropertyValues = nodePropertyValues;
+        this.metric = metric;
     }
 
     @Override
     public double similarity(long firstNodeId, long secondNodeId) {
         var left = nodePropertyValues.longValue(firstNodeId);
         var right = nodePropertyValues.longValue(secondNodeId);
-        var abs = Math.abs(left - right);
-        if (abs == Long.MIN_VALUE) {
-            abs = Long.MAX_VALUE;
-        }
-        return 1.0 / (1.0 + abs);
+        return metric.compute(left, right);
     }
 }
