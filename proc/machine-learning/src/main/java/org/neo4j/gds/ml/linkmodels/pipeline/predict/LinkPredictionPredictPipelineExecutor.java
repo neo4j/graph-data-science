@@ -38,10 +38,14 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     LinkPredictionPredictPipelineBaseConfig,
@@ -155,6 +159,22 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         boolean isApproximateStrategy,
         LinkFeatureExtractor linkFeatureExtractor
     ) {
+        if (linkFeatureExtractor.featureDimension() != classifier.data().featureDimension()) {
+            var inputNodeProperties = pipeline
+                .featureSteps()
+                .stream()
+                .flatMap(step -> step.inputNodeProperties().stream())
+                .collect(Collectors.toSet());
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Model expected link features to have a total dimension of `%d`, but got `%d`." +
+                " This indicates the dimension of the node-properties %s differ between the input and the original train graph.",
+                classifier.data().featureDimension(),
+                linkFeatureExtractor.featureDimension(),
+                StringJoining.join(inputNodeProperties)
+                ));
+        }
+
         if (isApproximateStrategy) {
             return new ApproximateLinkPrediction(
                 classifier,

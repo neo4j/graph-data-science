@@ -108,6 +108,10 @@ public final class LinkFeatureExtractor {
         return FeaturesFactory.wrap(linkFeatures);
     }
 
+    public int featureDimension() {
+        return featureDimension;
+    }
+
     public double[] extractFeatures(long source, long target) {
         var featuresForLink = new double[featureDimension];
         int featureOffset = 0;
