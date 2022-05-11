@@ -19,27 +19,17 @@
  */
 package org.neo4j.gds.config;
 
-import org.junit.jupiter.api.Test;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.utils.progress.JobId;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-class AlgoBaseConfigTest {
-
-    @Test
-    void shouldAcceptValidJobId() {
-        AlgoBaseConfigImpl.builder()
-            .jobId("df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
-            .build();
-    }
-
-    @Test
-    void shouldRejectInvalidJobId() {
-        var configBuilder = AlgoBaseConfigImpl.builder();
-
-        configBuilder.jobId("banana-sweatshirt");
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
-
-        configBuilder.jobId(Long.valueOf(42L));
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
+@Configuration
+public interface JobIdConfig {
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.gds.core.utils.progress.JobId#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.core.utils.progress.JobId#asString")
+    default JobId jobId() {
+        return new JobId();
     }
 }

@@ -25,15 +25,13 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Configuration
-public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
+public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
     String NODE_LABELS_KEY = "nodeLabels";
     String RELATIONSHIP_TYPES_KEY = "relationshipTypes";
@@ -72,11 +70,4 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {}
-
-    @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.core.utils.progress.JobId#parse")
-    @Configuration.ToMapValue("org.neo4j.gds.core.utils.progress.JobId#asString")
-    default JobId jobId() {
-        return new JobId();
-    }
 }
