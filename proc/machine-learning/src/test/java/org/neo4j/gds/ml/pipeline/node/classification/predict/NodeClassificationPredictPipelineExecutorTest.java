@@ -37,13 +37,11 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
@@ -73,11 +71,9 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.addPipelineModelWithFeatures;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.createModel;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.createModeldata;
 
-@Neo4jModelCatalogExtension
 class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
@@ -96,9 +92,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
-
-    @Inject
-    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -353,24 +346,25 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void validateFeaturesExistOnGraph() {
-        addPipelineModelWithFeatures(modelCatalog, GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
+        var model = createModel(GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var factory = new NodeClassificationPredictPipelineAlgorithmFactory<>(
-                caller.executionContext(),
-                modelCatalog
-            );
-            var streamConfig = ImmutableNodeClassificationPredictPipelineBaseConfig.builder()
+            var streamConfig = NodeClassificationPredictPipelineBaseConfigImpl.builder()
                 .username(getUsername())
                 .modelName(MODEL_NAME)
                 .graphName(GRAPH_NAME)
                 .includePredictedProbabilities(false)
                 .build();
 
-            var algo = factory.build(
-                graphStore,
+            var algo = new NodeClassificationPredictPipelineExecutor(
+                model.customInfo().pipeline(),
                 streamConfig,
-                ProgressTracker.NULL_TRACKER
+                caller.executionContext(),
+                graphStore,
+                streamConfig.graphName(),
+                ProgressTracker.NULL_TRACKER,
+                model.data()
             );
+
             assertThatThrownBy(algo::compute)
                 .hasMessage(
                     "Node properties [d] defined in the feature steps do not exist in the graph or part of the pipeline"
@@ -389,7 +383,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, modelCatalog);
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog());
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.nodeCount(),
@@ -442,13 +436,46 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, modelCatalog);
         assertMemoryEstimation(
-            () -> memoryEstimation,
+            () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog()),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
             MemoryRange.of(352)
         );
+    }
+
+    @Test
+    void failOnInvalidFeatureDimensions() {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var config = NodeClassificationPredictPipelineBaseConfigImpl.builder()
+                .username("")
+                .modelName("DUMMY")
+                .includePredictedProbabilities(false)
+                .graphName(GRAPH_NAME)
+                .build();
+
+            var pipeline = NodePropertyPredictPipeline.from(
+                Stream.of(),
+                Stream.of("a").map(NodeFeatureStep::of)
+            );
+
+            double[] manyWeights = {-1.5, -2, 2.5, -1};
+            var bias = new double[] {0.0, 0.0};
+
+
+            var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
+                pipeline,
+                config,
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER,
+                NodeClassificationPipelinePredictProcTestUtil.createModeldata(manyWeights, bias)
+            );
+
+            assertThatThrownBy(pipelineExecutor::compute)
+                .hasMessage("Model expected features ['a'] to have a total dimension of `2`, but got `1`.");
+        });
     }
 }

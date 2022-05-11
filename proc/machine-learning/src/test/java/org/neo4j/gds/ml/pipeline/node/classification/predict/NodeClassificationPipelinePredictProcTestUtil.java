@@ -134,9 +134,6 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
     }
 
     static LogisticRegressionData createModeldata(double[] weights, double[] bias) {
-        var idMap = new LocalIdMap();
-        idMap.toMapped(0);
-        idMap.toMapped(1);
         return ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(
                 new Matrix(
@@ -146,7 +143,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 ))
             )
             .bias(new Weights<>(new Vector(bias)))
-            .classIdMap(idMap)
+            .classIdMap(LocalIdMap.of(0 ,1))
             .build();
     }
 
