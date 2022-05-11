@@ -71,8 +71,8 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.createClassifierData;
 import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.createModel;
-import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassificationPipelinePredictProcTestUtil.createModeldata;
 
 class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
@@ -141,7 +141,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 -1.5, -1.3, 2.6
             };
             var bias = new double[]{0.0, 0.0};
-            var modelData = createModeldata(weights, bias);
+            var modelData = createClassifierData(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -248,7 +248,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 0.0, -1.5, -1.3, 2.6
             };
             var bias = new double[]{3.0, 0.0};
-            var modelData = createModeldata(weights, bias);
+            var modelData = createClassifierData(weights, bias);
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
@@ -302,7 +302,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 0.0, -1.5, -1.3, 2.6
             };
             var bias = new double[]{3.0, 0.0};
-            var modelData = createModeldata(weights, bias);
+            var modelData = createClassifierData(weights, bias);
 
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
@@ -471,7 +471,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                NodeClassificationPipelinePredictProcTestUtil.createModeldata(manyWeights, bias)
+                NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias)
             );
 
             assertThatThrownBy(pipelineExecutor::compute)
