@@ -380,7 +380,7 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
     }
 
-    private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext() {
+    private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext(Map.of()) {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
             throw new UnsupportedOperationException();
@@ -394,6 +394,8 @@ class ExpressionEvaluatorTest {
 
     @ValueClass
     static class TestContext extends EvaluationContext {
+
+        TestContext() {super(Map.of());}
 
         @Value.Default
         public String propertyKey() {

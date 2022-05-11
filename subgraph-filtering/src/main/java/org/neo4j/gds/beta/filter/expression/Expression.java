@@ -198,6 +198,24 @@ public interface Expression {
             }
 
         }
+
+        @ValueClass
+        interface NewParameter extends UnaryExpression {
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.resolveParameter(((LeafExpression.Variable) in()).name());
+            }
+
+            @Override
+            default ValidationContext validate(ValidationContext context) {
+                if (!(in() instanceof LeafExpression.Variable)) {
+                    throw new IllegalStateException();
+                }
+                return context;
+            }
+        }
     }
 
     interface BinaryExpression extends Expression {

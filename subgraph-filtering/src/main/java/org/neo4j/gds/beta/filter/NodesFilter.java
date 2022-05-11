@@ -44,6 +44,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
@@ -61,6 +62,7 @@ final class NodesFilter {
         GraphStore inputGraphStore,
         Expression expression,
         int concurrency,
+        Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -79,6 +81,7 @@ final class NodesFilter {
         var tasks = NodeFilterTask.of(
             inputGraphStore,
             expression,
+            parameterMap,
             partitions,
             nodesBuilder,
             progressTracker
@@ -247,6 +250,7 @@ final class NodesFilter {
         static Iterator<NodeFilterTask> of(
             GraphStore inputGraphStore,
             Expression expression,
+            Map<String, Object> parameterMap,
             Iterator<Partition> partitions,
             NodesBuilder nodesBuilder,
             ProgressTracker progressTracker
@@ -261,6 +265,7 @@ final class NodesFilter {
                     return new NodeFilterTask(
                         partitions.next(),
                         expression,
+                        parameterMap,
                         inputGraphStore,
                         nodesBuilder,
                         progressTracker
@@ -272,6 +277,7 @@ final class NodesFilter {
         private NodeFilterTask(
             Partition partition,
             Expression expression,
+            Map<String, Object> parameterMap,
             GraphStore inputGraphStore,
             NodesBuilder nodesBuilder,
             ProgressTracker progressTracker
@@ -280,7 +286,7 @@ final class NodesFilter {
             this.expression = expression;
             this.inputGraphStore = inputGraphStore;
             this.nodesBuilder = nodesBuilder;
-            this.nodeContext = new EvaluationContext.NodeEvaluationContext(inputGraphStore);
+            this.nodeContext = new EvaluationContext.NodeEvaluationContext(inputGraphStore, parameterMap);
             this.progressTracker = progressTracker;
         }
 

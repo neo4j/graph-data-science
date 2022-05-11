@@ -67,6 +67,7 @@ final class RelationshipsFilter {
         IdMap inputNodes,
         IdMap outputNodes,
         int concurrency,
+        Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -85,6 +86,7 @@ final class RelationshipsFilter {
                 outputNodes,
                 relType,
                 concurrency,
+                parameterMap,
                 executorService,
                 progressTracker
             );
@@ -140,6 +142,7 @@ final class RelationshipsFilter {
         IdMap outputNodes,
         RelationshipType relType,
         int concurrency,
+        Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -172,6 +175,7 @@ final class RelationshipsFilter {
                 outputNodes,
                 relationshipsBuilder,
                 relType,
+                parameterMap,
                 propertyIndices,
                 progressTracker
             ),
@@ -217,6 +221,7 @@ final class RelationshipsFilter {
             IdMap outputNodes,
             RelationshipsBuilder relationshipsBuilder,
             RelationshipType relType,
+            Map<String, Object> parameterMap,
             Map<String, Integer> propertyIndices,
             ProgressTracker progressTracker
         ) {
@@ -227,7 +232,7 @@ final class RelationshipsFilter {
             this.outputNodes = outputNodes;
             this.relationshipsBuilder = relationshipsBuilder;
             this.relType = relType;
-            this.evaluationContext = new EvaluationContext.RelationshipEvaluationContext(propertyIndices);
+            this.evaluationContext = new EvaluationContext.RelationshipEvaluationContext(propertyIndices, parameterMap);
             this.progressTracker = progressTracker;
         }
 

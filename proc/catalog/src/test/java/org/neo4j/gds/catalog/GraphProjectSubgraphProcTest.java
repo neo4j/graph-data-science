@@ -41,7 +41,7 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    public static final String DB = "CREATE (a:A)-[:REL]->(b:B)";
+    public static final String DB = "CREATE (a:A)-[:REL { weight: 42.0 }]->(b:B)";
 
     @BeforeEach
     void setup() throws Exception {
@@ -51,7 +51,8 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
-            .withAnyRelationshipType()
+            .withRelationshipType("REL")
+            .withRelationshipProperty("weight")
             .yields()
         );
     }
@@ -155,12 +156,19 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticRelationshipError() {
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.weight > 42')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.prop > 42')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
             .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Unknown property `weight`.")
+            .hasMessageContaining("Unknown property `prop`.")
             .hasMessageContaining("Unknown relationship type `BAR`.");
+    }
+
+    @Test
+    void shouldResolveParameters() {
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight > $weight', { parameterMap: { weight: $weight } })";
+
+        runQuery(subGraphQuery, Map.of("weight", 42));
     }
 }
