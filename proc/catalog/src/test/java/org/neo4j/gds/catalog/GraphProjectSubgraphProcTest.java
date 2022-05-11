@@ -22,6 +22,8 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -33,10 +35,12 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectSubgraphProcTest extends BaseProcTest {
 
@@ -165,10 +169,20 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             .hasMessageContaining("Unknown relationship type `BAR`.");
     }
 
-    @Test
-    void shouldResolveParameters() {
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight > $weight', { parameterMap: { weight: $weight } })";
+    @ParameterizedTest
+    @CsvSource({
+        "=, 1",
+        ">, 0"
+    })
+    void shouldResolveParameters(String operator, int expectedRelationships) {
+        var subGraphQuery = formatWithLocale(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight %s $weight', { parameterMap: { weight: $weight } })",
+            operator
+        );
 
         runQuery(subGraphQuery, Map.of("weight", 42));
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        assertThat(graphStore.relationshipCount()).isEqualTo(expectedRelationships);
     }
 }
