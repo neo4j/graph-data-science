@@ -304,6 +304,142 @@ assert result["relationshipsWritten"] == 5 * 2  # Undirected relationships
 ----
 
 
+== Node regression
+
+This section outlines how to use the Python client to build, configure and train a <<noderegression-pipelines, node regression pipeline>>, as well as how to use the model that training produces for predictions.
+
+
+=== Pipeline
+
+The creation of the node regression pipeline is very similar to <<noderegression-creating-a-pipeline, how it's done in Cypher>>.
+To create a new node regression pipeline one would make the following call:
+
+[source,python]
+----
+pipe, res = gds.alpha.pipeline.nodeRegression.create("my-pipe")
+----
+
+where `pipe` is a pipeline object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
+
+To then go on to build, configure and train the pipeline we would call methods directly on the node regression pipeline object.
+Below is a description of the methods on such objects:
+
+.Node regression pipeline methods
+[opts="header",cols="2m,2m,2m,3"]
+|===
+| Name                  | Arguments                | Return type             | Description
+| addNodeProperty       | procedure_name: str, +
+config: **kwargs       | Series                  | <<noderegression-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+| selectFeatures        | node_properties: +
+Union[str, list[str]]  | Series                  | <<noderegression-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit        | config: **kwargs         | Series                  | <<noderegression-pipelines-configure-splits, Configure the train-test dataset split>>.
+| addLinearRegression | parameter_space: +
+dict[str, any]         | Series                  | <<noderegression-pipelines-adding-model-candidates, Add a linear regression model configuration to train as a candidate in the model selection phase>>.
+| addRandomForest       | parameter_space: +
+dict[str, any]         | Series                  | <<noderegression-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>.
+| configureAutoTuning   | config: **kwargs footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+| Series                  | <<noderegression-pipelines-configure-auto-tuning, Configure the auto-tuning>>.
+| train                 | G: Graph, +
+config: **kwargs       | NCPredictionPipeline, +
+Series          | <<noderegression-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                        | DataFrame               | Returns the node property steps of the pipeline.
+| feature_properties    | -                        | Series                  | Returns a list of the selected feature properties for the pipeline.
+| split_config          | -                        | Series                  | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space       | -                        | Series                  | Returns the model parameter space set up for model selection when training.
+| auto_tuning_config    | -                        | Series                  | Returns the configuration set up for auto-tuning.
+| name                  | -                        | str                     | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                        | str                     | The type of pipeline.
+| creation_time         | -                        | neo4j.time.Datetime     | Time when the pipeline was created.
+| drop                  | -                        | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
+| exists                | -                        | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+|===
+
+There are two main differences when comparing the methods above that map to procedures of the Cypher API:
+
+* As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
+* Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
+
+Another difference is that the `train` Python call takes a <<python-client-graph-object, graph object>> instead of a graph name, and returns a `NRModel` <<python-client-model-object, model object>> that we can run predictions with as well as a pandas `Series` with the metadata from the training.
+
+Please consult the <<noderegression-pipelines, node regression Cypher documentation>> for information about what kind of input the methods expect.
+
+
+[[python-client-pipelines-noderegression-pipe-example]]
+==== Example
+
+Below is a small example of how one could configure and train a very basic node regression pipeline.
+Note that we don't configure splits explicitly, but rather use the default.
+We suppose that the graph `G` we train on has a node property "my-target" which will be the target of our regression training.
+
+[source,python]
+----
+pipe, _ = gds.alpha.pipeline.nodeRegression.create("my-pipe")
+
+# Add Degree centrality as a property step producing "rank" node properties
+pipe.addNodeProperty("degree", mutateProperty="rank")
+
+# Select our "rank" property as a feature for the model training
+pipe.selectFeatures("rank")
+
+# Verify that the features to be used in model training are what we expect
+steps = pipe.feature_properties()
+assert len(steps) == 1
+assert steps[0]["feature"] == "rank"
+
+# Configure the model training to do cross-validation over linear regression
+pipe.addLinearRegression(tolerance=(0.01, 0.001))
+pipe.addLinearRegression(penalty=1.0)
+
+# Train the pipeline targeting node property "my-target" as label and "MEAN_SQUARED_ERROR" as only metric
+trained_pipe_model, res = pipe.train(G, modelName="my-model", targetProperty="my-target", metrics=["MEAN_SQUARED_ERROR"])
+assert res["trainMillis"] >= 0
+----
+
+A model referred to as "my-model" in the <<model-catalog-ops, GDS Model Catalog>> is produced.
+In the next section we will go over how to use that model to make predictions.
+
+
+=== Model
+
+As we saw in the previous section, node regression models are created when training a node regression pipeline.
+In addition to inheriting the methods common to all <<python-client-model-object, model objects>>, node regression models have the following methods:
+
+.Node regression model methods
+[opts="header",cols="8m,6m,4m,13"]
+|===
+| Name                    | Arguments        | Return type | Description
+| predict_mutate          | G: Graph, +
+config: **kwargs | Series      | <<noderegression-pipelines-predict-examples-mutate, Predict property values for nodes of the input graph and mutate graph with predictions>>.
+| predict_stream          | G: Graph, +
+config: **kwargs | DataFrame   | <<noderegression-pipelines-predict-examples-stream, Predict property values for nodes of the input graph and stream the results>>.
+| metrics                 | -                | Series      | Returns values for the metrics specified when training, for this particular model.
+|===
+
+One can note that the predict methods are indeed very similar to <<noderegression-pipelines-predict, their Cypher counterparts>>.
+The three main differences are that:
+
+* They take a <<python-client-graph-object, graph object>> instead of a graph name.
+* They have Python keyword arguments representing the keys of the configuration map.
+* One does not have to provide a "modelName" since the <<python-client-model-object, model object>> used itself have this information.
+
+
+==== Example (continued)
+
+We now continue the <<python-client-pipelines-noderegression-pipe-example, example above>> using the node regression model `trained_pipe_model` we trained there.
+Suppose that we have a new graph `H` that we want to run predictions on.
+
+[source,python]
+----
+# Make sure our model performed well enough on the test set
+metrics = trained_pipe_model.metrics()
+assert metrics["MEAN_SQUARED_ERROR"]["test"] <= 20.0
+
+# Predict on `H` and stream the results with a specific concurrency of 8
+result = trained_pipe_model.predict_stream(H, concurrency=8)
+assert len(results) == H.node_count()
+----
+
+
 == The pipeline catalog
 
 The primary way to use pipeline objects is for training models.

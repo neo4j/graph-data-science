@@ -89,6 +89,7 @@ In order to do this, we must first have an already trained model registered in t
 We will use the model which we trained in the <<noderegression-pipelines-examples-train, train example>> which we gave the name `'nr-pipeline-model'`.
 
 
+[[noderegression-pipelines-predict-examples-stream]]
 === Stream
 
 [role=query-example, group=nr]
@@ -120,6 +121,7 @@ To get a prediction that better matches our expectations, we may need to tune th
 --
 
 
+[[noderegression-pipelines-predict-examples-mutate]]
 === Mutate
 
 The `mutate` execution mode updates the named graph with a new node property containing the predicted value for each node.
