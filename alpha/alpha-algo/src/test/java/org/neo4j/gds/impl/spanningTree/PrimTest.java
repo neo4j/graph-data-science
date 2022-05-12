@@ -67,7 +67,7 @@ class PrimTest {
         ", (c)-[:TYPE {cost: 5.0}]->(e)" +
         ", (d)-[:TYPE {cost: 6.0}]->(e)";
 
-    private static int a, b, c, d, e, y, z;
+    private static long a, b, c, d, e, y, z;
 
     @Inject
     private Graph graph;
@@ -138,13 +138,13 @@ class PrimTest {
 
     private void assertMinimum(SpanningTree mst) {
         assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1, mst.parent[y]);
-        assertEquals(-1, mst.parent[z]);
+        assertEquals(-1, mst.parent.get(y));
+        assertEquals(-1, mst.parent.get(z));
     }
 
     private void assertMaximum(SpanningTree mst) {
         assertEquals(5, mst.effectiveNodeCount);
-        assertEquals(-1, mst.parent[y]);
-        assertEquals(-1, mst.parent[z]);
+        assertEquals(-1, mst.parent.get(y));
+        assertEquals(-1, mst.parent.get(z));
     }
 }

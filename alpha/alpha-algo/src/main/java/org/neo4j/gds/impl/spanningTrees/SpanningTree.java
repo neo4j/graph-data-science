@@ -21,8 +21,8 @@ package org.neo4j.gds.impl.spanningTrees;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
-import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -30,12 +30,12 @@ import java.util.Objects;
  */
 public class SpanningTree {
 
-    public final int head;
-    public final int nodeCount;
-    public final int effectiveNodeCount;
-    public final int[] parent;
+    public final long head;
+    public final long nodeCount;
+    public final long effectiveNodeCount;
+    public final HugeLongArray parent;
 
-    public SpanningTree(int head, int nodeCount, int effectiveNodeCount, int[] parent) {
+    public SpanningTree(long head, long nodeCount, long effectiveNodeCount, HugeLongArray parent) {
         this.head = head;
         this.nodeCount = nodeCount;
         this.effectiveNodeCount = effectiveNodeCount;
@@ -44,7 +44,7 @@ public class SpanningTree {
 
     public void forEach(RelationshipConsumer consumer) {
         for (int i = 0; i < nodeCount; i++) {
-            final int parent = this.parent[i];
+            final long parent = this.parent.get(i);
             if (parent == -1) {
                 continue;
             }
@@ -54,10 +54,10 @@ public class SpanningTree {
         }
     }
 
-    public int head(int node) {
-        int p = node;
-        while (-1 != parent[p]) {
-            p = parent[p];
+    public long head(long node) {
+        long p = node;
+        while (-1 != parent.get(p)) {
+            p = parent.get(p);
         }
         return p;
     }
@@ -81,7 +81,7 @@ public class SpanningTree {
     @Override
     public int hashCode() {
         int result = Objects.hash(head, nodeCount, effectiveNodeCount);
-        result = 31 * result + Arrays.hashCode(parent);
+        result = 31 * result + parent.hashCode();
         return result;
     }
 }

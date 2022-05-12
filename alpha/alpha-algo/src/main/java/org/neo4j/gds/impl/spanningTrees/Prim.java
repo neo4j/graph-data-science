@@ -20,19 +20,15 @@
 package org.neo4j.gds.impl.spanningTrees;
 
 import com.carrotsearch.hppc.BitSet;
-import com.carrotsearch.hppc.IntDoubleMap;
-import com.carrotsearch.hppc.IntDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.impl.queue.SharedIntPriorityQueue;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
-
-import static org.neo4j.gds.Converters.longToIntConsumer;
 
 /**
  * Sequential Single-Source minimum weight spanning tree algorithm (PRIM).
@@ -73,42 +69,39 @@ public class Prim extends Algorithm<SpanningTree> {
     @Override
     public SpanningTree compute() {
         progressTracker.beginSubTask(graph.nodeCount());
-        int[] parent = new int[nodeCount];
-        IntDoubleMap cost = new IntDoubleScatterMap(nodeCount);
-        SharedIntPriorityQueue queue = SharedIntPriorityQueue.min(
-                nodeCount,
-                cost,
-                Double.MAX_VALUE);
+        HugeLongArray parent = HugeLongArray.newArray(graph.nodeCount());
+
+        HugeLongPriorityQueue queue = HugeLongPriorityQueue.min(nodeCount);
         BitSet visited = new BitSet(nodeCount);
-        Arrays.fill(parent, -1);
-        cost.put(startNodeId, 0.0);
-        queue.add(startNodeId, -1.0);
-        int effectiveNodeCount = 0;
+        parent.fill(-1);
+
+        queue.add(startNodeId, 0.0);
+        long effectiveNodeCount = 0;
         while (!queue.isEmpty() && running()) {
-            int node = queue.pop();
+            long node = queue.pop();
             if (visited.get(node)) {
                 continue;
             }
             effectiveNodeCount++;
             visited.set(node);
-            graph.forEachRelationship(node, 0.0D, longToIntConsumer((s, t, w) -> {
+            graph.forEachRelationship(node, 0.0D, (s, t, w) -> {
                 if (visited.get(t)) {
                     return true;
                 }
                 // invert weight to calculate maximum
                 double weight = minMax.applyAsDouble(w);
-                if (weight < cost.getOrDefault(t, Double.MAX_VALUE)) {
-                    if (cost.containsKey(t)) {
-                        cost.put(t, weight);
-                        queue.update(t);
-                    } else {
-                        cost.put(t, weight);
-                        queue.add(t, -1.0);
-                    }
-                    parent[t] = s;
+                if (!queue.containsElement(t)) {
+                    queue.add(t, weight);
+                    parent.set(t, s);
+
+                } else if (Double.compare(weight, queue.cost(t)) < 0) {
+                    queue.set(t, weight);
+                    parent.set(t, s);
                 }
+
+
                 return true;
-            }));
+            });
             progressTracker.logProgress();
         }
         this.spanningTree = new SpanningTree(startNodeId, nodeCount, effectiveNodeCount, parent);
@@ -132,10 +125,12 @@ public class Prim extends Algorithm<SpanningTree> {
         public final long writeMillis;
         public final long effectiveNodeCount;
 
-        public Result(long preProcessingMillis,
-                      long computeMillis,
-                      long writeMillis,
-                      int effectiveNodeCount) {
+        public Result(
+            long preProcessingMillis,
+            long computeMillis,
+            long writeMillis,
+            long effectiveNodeCount
+        ) {
             this.preProcessingMillis = preProcessingMillis;
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
@@ -145,9 +140,9 @@ public class Prim extends Algorithm<SpanningTree> {
 
     public static class Builder extends AbstractResultBuilder<Result> {
 
-        protected int effectiveNodeCount;
+        protected long effectiveNodeCount;
 
-        public Builder withEffectiveNodeCount(int effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
