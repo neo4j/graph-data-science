@@ -130,7 +130,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
         List<Long> initialCenterIds = sampler.sampleClusters(random, nodePropertyValues, nodeCount, k);
-        clusterManager.assignCenter(initialCenterIds);
+        clusterManager.assignCenters(initialCenterIds);
 
         //
         int iteration = 0;

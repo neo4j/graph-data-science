@@ -25,24 +25,36 @@ import org.neo4j.gds.core.utils.Intersections;
 
 import java.util.List;
 
-interface ClusterManager {
+abstract class ClusterManager {
 
-    void initialAssignCluster(int i, long id);
+    final long[] nodesInCluster;
+    final NodePropertyValues nodePropertyValues;
+    final int dimensions;
+    final int k;
 
-    void reset();
+    public ClusterManager(NodePropertyValues values, int dimensions, int k) {
+        this.dimensions = dimensions;
+        this.k = k;
+        this.nodePropertyValues = values;
+        this.nodesInCluster = new long[k];
+    }
 
-    void normalizeClusters();
+    abstract void initialAssignCluster(int i, long id);
 
-    void considerTaskForUpdate(KmeansTask task);
+    abstract void reset();
 
-    default void assignCenter(List<Long> initialCenterIds) {
+    abstract void normalizeClusters();
+
+    abstract void considerTaskForUpdate(KmeansTask task);
+
+    void assignCenters(List<Long> initialCenterIds) {
         int clusterUpdateId = 0;
         for (Long currentId : initialCenterIds) {
             initialAssignCluster(clusterUpdateId++, currentId);
         }
     }
 
-    int findNextCenterForId(long nodeId);
+    abstract int findNextCenterForId(long nodeId);
 
     static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
@@ -52,20 +64,11 @@ interface ClusterManager {
     }
 }
 
-class FloatClusterManager implements ClusterManager {
+class FloatClusterManager extends ClusterManager {
     private final float[][] clusterCenters;
 
-    private final long[] nodesInCluster;
-    private final NodePropertyValues nodePropertyValues;
-    private final int dimensions;
-    private final int k;
-
-
     public FloatClusterManager(NodePropertyValues values, int dimensions, int k) {
-        this.dimensions = dimensions;
-        this.k = k;
-        this.nodePropertyValues = values;
-        this.nodesInCluster = new long[k];
+        super(values, dimensions, k);
         this.clusterCenters = new float[k][dimensions];
     }
 
@@ -127,19 +130,11 @@ class FloatClusterManager implements ClusterManager {
     }
 }
 
-class DoubleClusterManager implements ClusterManager {
+class DoubleClusterManager extends ClusterManager {
     private final double[][] clusterCenters;
-    private final long[] nodesInCluster;
-    private final NodePropertyValues nodePropertyValues;
-    private final int dimensions;
-    private final int k;
-
 
     public DoubleClusterManager(NodePropertyValues values, int dimensions, int k) {
-        this.dimensions = dimensions;
-        this.k = k;
-        this.nodePropertyValues = values;
-        this.nodesInCluster = new long[k];
+        super(values, dimensions, k);
         this.clusterCenters = new double[k][dimensions];
     }
 

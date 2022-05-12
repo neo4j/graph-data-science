@@ -25,11 +25,41 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public interface KmeansTask extends Runnable {
-    long getNumAssignedAtCenter(int ith);
+public abstract class KmeansTask implements Runnable {
 
+    final ProgressTracker progressTracker;
+    final Partition partition;
+    final NodePropertyValues nodePropertyValues;
+    final HugeIntArray communities;
+    final long[] communitySizes;
+    final int k;
+    final int dimensions;
+    long swaps;
 
-    long getSwaps();
+    long getNumAssignedAtCenter(int ith) {
+        return communitySizes[ith];
+    }
+
+    long getSwaps() {
+        return swaps;
+    }
+
+    KmeansTask(
+        NodePropertyValues nodePropertyValues,
+        HugeIntArray communities,
+        int k,
+        int dimensions,
+        Partition partition,
+        ProgressTracker progressTracker
+    ) {
+        this.nodePropertyValues = nodePropertyValues;
+        this.communities = communities;
+        this.k = k;
+        this.dimensions = dimensions;
+        this.partition = partition;
+        this.progressTracker = progressTracker;
+        this.communitySizes = new long[k];
+    }
 
     static KmeansTask createTask(
         ClusterManager clusterManager,
@@ -64,19 +94,10 @@ public interface KmeansTask extends Runnable {
 
 }
 
-final class DoubleKmeansTask implements KmeansTask {
+final class DoubleKmeansTask extends KmeansTask {
 
-    private final ProgressTracker progressTracker;
-    private final Partition partition;
     private final double[][] communityCoordinateSums;
-    private final NodePropertyValues nodePropertyValues;
-    private final HugeIntArray communities;
-    private final long[] communitySizes;
-    private final ClusterManager clusterManager;
-    private final int k;
-    private final int dimensions;
-
-    private long swaps;
+    private final DoubleClusterManager doubleClusterManager;
 
     DoubleKmeansTask(
         ClusterManager clusterManager,
@@ -87,30 +108,14 @@ final class DoubleKmeansTask implements KmeansTask {
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        this.progressTracker = progressTracker;
-        this.partition = partition;
-        this.clusterManager = clusterManager;
-        this.communitySizes = new long[k];
-        this.k = k;
-        this.dimensions = dimensions;
-        this.nodePropertyValues = nodePropertyValues;
-        this.communities = communities;
+        super(nodePropertyValues, communities, k, dimensions, partition, progressTracker);
+        doubleClusterManager = (DoubleClusterManager) clusterManager;
         this.communityCoordinateSums = new double[k][dimensions];
 
     }
 
     double[] getCenterContribution(int ith) {
         return communityCoordinateSums[ith];
-    }
-
-    @Override
-    public long getNumAssignedAtCenter(int ith) {
-        return communitySizes[ith];
-    }
-
-    @Override
-    public long getSwaps() {
-        return swaps;
     }
 
 
@@ -129,7 +134,7 @@ final class DoubleKmeansTask implements KmeansTask {
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
             var property = nodePropertyValues.doubleArrayValue(nodeId);
-            int community = clusterManager.findNextCenterForId(nodeId);
+            int community = doubleClusterManager.findNextCenterForId(nodeId);
             communitySizes[community]++;
             int previousCommunity = communities.get(nodeId);
             if (community != previousCommunity) {
@@ -150,19 +155,10 @@ final class DoubleKmeansTask implements KmeansTask {
 
 }
 
-final class FloatKmeansTask implements KmeansTask {
+final class FloatKmeansTask extends KmeansTask {
 
-    private final ProgressTracker progressTracker;
-    private final Partition partition;
     private final float[][] communityCoordinateSums;
-    private final NodePropertyValues nodePropertyValues;
-    private final HugeIntArray communities;
-    private final long[] communitySizes;
-    private final ClusterManager clusterManager;
-    private final int k;
-    private final int dimensions;
-
-    private long swaps;
+    private final FloatClusterManager floatClusterManager;
 
     FloatKmeansTask(
         ClusterManager clusterManager,
@@ -173,32 +169,15 @@ final class FloatKmeansTask implements KmeansTask {
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        this.progressTracker = progressTracker;
-        this.partition = partition;
-        this.clusterManager = clusterManager;
-        this.communitySizes = new long[k];
-        this.k = k;
-        this.dimensions = dimensions;
-        this.nodePropertyValues = nodePropertyValues;
-        this.communities = communities;
+        super(nodePropertyValues, communities, k, dimensions, partition, progressTracker);
         this.communityCoordinateSums = new float[k][dimensions];
+        this.floatClusterManager = (FloatClusterManager) clusterManager;
 
     }
 
     float[] getCenterContribution(int ith) {
         return communityCoordinateSums[ith];
     }
-
-    @Override
-    public long getNumAssignedAtCenter(int ith) {
-        return communitySizes[ith];
-    }
-
-    @Override
-    public long getSwaps() {
-        return swaps;
-    }
-
 
     @Override
     public void run() {
@@ -215,7 +194,7 @@ final class FloatKmeansTask implements KmeansTask {
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
             var property = nodePropertyValues.floatArrayValue(nodeId);
-            int community = clusterManager.findNextCenterForId(nodeId);
+            int community = floatClusterManager.findNextCenterForId(nodeId);
             communitySizes[community]++;
             int previousCommunity = communities.get(nodeId);
             if (community != previousCommunity) {
