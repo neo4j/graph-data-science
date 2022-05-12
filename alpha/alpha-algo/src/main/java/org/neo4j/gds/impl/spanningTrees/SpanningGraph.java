@@ -38,7 +38,7 @@ public class SpanningGraph extends GraphAdapter {
     @Override
     public int degree(long nodeId) {
         if (spanningTree.parent.get(nodeId) == -1) {
-            return (int) Arrays.stream(spanningTree.parent.toArray()).filter(i -> i == -1).count();
+            return Math.toIntExact(Arrays.stream(spanningTree.parent.toArray()).filter(i -> i == -1).count());
         } else {
             return 1;
         }
