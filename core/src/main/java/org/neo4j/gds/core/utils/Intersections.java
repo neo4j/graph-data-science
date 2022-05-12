@@ -89,6 +89,15 @@ public final class Intersections {
         return result;
     }
 
+    public static float sumSquareDelta(float[] vector1, float[] vector2, int len) {
+        float result = 0;
+        for (int i = 0; i < len; i++) {
+            float delta = vector1[i] - vector2[i];
+            result += delta * delta;
+        }
+        return result;
+    }
+
     public static double[] sumSquareDeltas(double[] vector1, double[][] vector2, int len) {
         int vectors = vector2.length;
         double[] result = new double[vectors];
