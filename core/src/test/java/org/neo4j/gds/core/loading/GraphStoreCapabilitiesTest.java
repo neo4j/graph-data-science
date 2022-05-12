@@ -29,14 +29,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class GraphStoreCapabilitiesTest extends BaseProcTest {
 
     @Test
-    void gdlGraphIsNotBackedByDatabase() {
+    void gdlGraphIsBackedByDatabase() {
         var graphStore = GdlFactory
             .builder()
             .gdlGraph("()-->()")
             .build()
             .build();
         var capabilities = graphStore.capabilities();
-        assertThat(capabilities.isBackedByDatabase()).isFalse();
+        assertThat(capabilities.isBackedByDatabase()).isTrue();
     }
 
     @Test

@@ -132,7 +132,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     ) {
         super(
             graphProjectConfig,
-            ImmutableStaticCapabilities.of(false),
+            // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
+            ImmutableStaticCapabilities.of(true),
             GraphLoaderContext.NULL_CONTEXT,
             graphDimensions
         );
