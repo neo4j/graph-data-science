@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
+import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -93,41 +94,49 @@ public class Training {
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
         Updater updater = new AdamOptimizer(objective.weights(), config.learningRate());
-        int epoch = 0;
         var stopper = TrainingStopper.defaultStopper(config);
-        double initialLoss = Double.NaN;
-        double lastLoss = Double.NaN;
+
+        var losses = new ArrayList<Double>();
+        var initialLoss = new MutableDouble(Double.NaN);
 
         while (!stopper.terminated()) {
             terminationFlag.assertRunning();
 
-            lastLoss = trainEpoch(objective, queueSupplier.get(), concurrency, updater);
-            if (epoch == 0) {
-                initialLoss = lastLoss;
-            }
-
-            stopper.registerLoss(lastLoss);
-            epoch++;
-
-            progressTracker.logMessage(StringFormatting.formatWithLocale("Epoch %d with loss %s", epoch, lastLoss));
+            trainEpoch(objective, queueSupplier.get(), concurrency, updater, loss -> {
+                if (initialLoss.isNaN()) {
+                    initialLoss.setValue(loss);
+                    progressTracker.logMessage(StringFormatting.formatWithLocale("Initial loss %s", loss));
+                } else {
+                    losses.add(loss);
+                    stopper.registerLoss(loss);
+                    progressTracker.logMessage(StringFormatting.formatWithLocale(
+                        "Epoch %d with loss %s",
+                        losses.size(),
+                        loss
+                    ));
+                }
+                return !stopper.terminated();
+            });
         }
+
         progressTracker.logMessage(StringFormatting.formatWithLocale(
             "%s after %d out of %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
-            epoch,
+            losses.size(),
             config.maxEpochs(),
             initialLoss,
-            lastLoss,
+            losses.get(losses.size() - 1),
             stopper.converged() ? "" : " Did not converge"
 
         ));
     }
 
-    private double trainEpoch(
+    private void trainEpoch(
         Objective<?> objective,
         BatchQueue batches,
         int concurrency,
-        Updater updater
+        Updater updater,
+        LossConsumer lossEvaluator
     ) {
         var lossSummer = new DoubleAdder();
 
@@ -148,11 +157,18 @@ public class Training {
             .mapToInt(ObjectiveUpdateConsumer::consumedBatches)
             .sum();
 
+        if (lossEvaluator.consume(lossSummer.doubleValue())) {
+            var avgWeightGradients = averageTensors(localGradientSums, numberOfBatches);
+            updater.update(avgWeightGradients);
+        }
+    }
 
-        var avgWeightGradients = averageTensors(localGradientSums, numberOfBatches);
-        updater.update(avgWeightGradients);
-
-        return lossSummer.doubleValue();
+    @FunctionalInterface
+    interface LossConsumer {
+        /**
+         * @return if the loss converged
+         */
+        boolean consume(double loss);
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
