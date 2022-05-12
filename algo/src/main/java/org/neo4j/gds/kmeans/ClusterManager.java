@@ -31,6 +31,8 @@ interface ClusterManager {
 
     void reset();
 
+    void normalizeClusters();
+
     void considerTaskForUpdate(KmeansTask task);
 
     default void assignCenter(List<Long> initialCenterIds) {
@@ -67,10 +69,6 @@ class FloatClusterManager implements ClusterManager {
         this.clusterCenters = new float[k][dimensions];
     }
 
-    @Override
-    public void considerTaskForUpdate(KmeansTask task) {
-
-    }
 
     @Override
     public void reset() {
@@ -83,10 +81,29 @@ class FloatClusterManager implements ClusterManager {
     }
 
     @Override
+    public void normalizeClusters() {
+        for (int centreId = 0; centreId < k; ++centreId) {
+            for (int dimension = 0; dimension < dimensions; ++dimension)
+                clusterCenters[centreId][dimension] /= (double) nodesInCluster[centreId];
+        }
+    }
+
+    @Override
     public void initialAssignCluster(int i, long id) {
         float[] cluster = nodePropertyValues.floatArrayValue(id);
         for (int dimension = 0; dimension < dimensions; ++dimension) {
             clusterCenters[i][dimension] = cluster[dimension];
+        }
+    }
+
+    @Override
+    public void considerTaskForUpdate(KmeansTask task) {
+        var doubleKmeansTask = (FloatKmeansTask) task;
+        for (int centerId = 0; centerId < k; ++centerId) {
+            nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                clusterCenters[centerId][dimension] += doubleKmeansTask.getCenterContribution(centerId)[dimension];
+            }
         }
     }
 
@@ -137,8 +154,22 @@ class DoubleClusterManager implements ClusterManager {
     }
 
     @Override
-    public void considerTaskForUpdate(KmeansTask task) {
+    public void normalizeClusters() {
+        for (int centreId = 0; centreId < k; ++centreId) {
+            for (int dimension = 0; dimension < dimensions; ++dimension)
+                clusterCenters[centreId][dimension] /= (float) nodesInCluster[centreId];
+        }
+    }
 
+    @Override
+    public void considerTaskForUpdate(KmeansTask task) {
+        var doubleKmeansTask = (DoubleKmeansTask) task;
+        for (int centerId = 0; centerId < k; ++centerId) {
+            nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                clusterCenters[centerId][dimension] += doubleKmeansTask.getCenterContribution(centerId)[dimension];
+            }
+        }
     }
 
     @Override
