@@ -177,7 +177,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(11)
+                    "configuration", aMapWithSize(12)
                 ))
         );
 
@@ -248,7 +248,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(11)
+                    "configuration", aMapWithSize(12)
                 ))
         );
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
