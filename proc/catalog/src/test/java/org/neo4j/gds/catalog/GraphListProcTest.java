@@ -98,7 +98,7 @@ class GraphListProcTest extends BaseProcTest {
                 new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(9)
+                        .hasSize(10)
                         .containsEntry(
                             "nodeProjection", map(
                                 "A", map(
@@ -208,7 +208,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(11)
+                        .hasSize(12)
                         .containsEntry("nodeProjections", map(
                             "10_Nodes", map(
                                 "label", "10_Nodes",
@@ -324,7 +324,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(8)
+                        .hasSize(9)
                         .hasEntrySatisfying(
                             "relationshipQuery",
                             stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(

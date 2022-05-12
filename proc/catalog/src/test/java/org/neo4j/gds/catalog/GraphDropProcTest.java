@@ -96,7 +96,7 @@ class GraphDropProcTest extends BaseProcTest {
                     new Condition<>(config -> {
                         assertThat(config)
                             .asInstanceOf(stringObjectMapAssertFactory())
-                            .hasSize(9)
+                            .hasSize(10)
                             .containsEntry(
                                 "nodeProjection", map(
                                     "A", map(
