@@ -170,7 +170,7 @@ class DoubleClusterManager extends ClusterManager {
     @Override
     public void initialAssignCluster(int i, long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
-        for (int dimension = 0; dimension < dimensions; ++i) {
+        for (int dimension = 0; dimension < dimensions; ++dimension) {
             clusterCenters[i][dimension] = cluster[dimension];
         }
     }

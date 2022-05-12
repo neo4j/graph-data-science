@@ -171,17 +171,5 @@ public class Kmeans extends Algorithm<KmeansResult> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    private void assignCenters(double[][] clusterCenters, List<Long> initialCenterIds, int dimensions) {
-        int clusterUpdateId = 0;
-        for (long centerId : initialCenterIds) {
-            var property = nodePropertyValues.doubleArrayValue(centerId);
-            for (int j = 0; j < dimensions; ++j) {
-                clusterCenters[clusterUpdateId][j] = property[j];
-            }
-            clusterUpdateId++;
-        }
-    }
-
-
 
 }
