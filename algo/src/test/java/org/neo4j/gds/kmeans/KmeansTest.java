@@ -41,6 +41,16 @@ class KmeansTest {
     @Inject
     private Graph graph;
 
+    @GdlGraph(graphNamePrefix = "float")
+    private static final String floatQuery =
+        "CREATE" +
+        "  (a {  kmeans: [1.0f, 1.0f]} )" +
+        "  (b {  kmeans: [1.0f, 2.0f]} )" +
+        "  (c {  kmeans: [102.0f, 100.0f]} )" +
+        "  (d {  kmeans: [100.0f, 102.0f]} )";
+    @Inject
+    private Graph floatGraph;
+
     @GdlGraph(graphNamePrefix = "line")
     private static final String LineQuery =
         "CREATE" +
@@ -52,6 +62,7 @@ class KmeansTest {
 
     @Inject
     private TestGraph lineGraph;
+
 
     @Inject
     private IdFunction idFunction;
@@ -67,6 +78,23 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var result = kmeans.compute().communities();
+        assertThat(result.get(0)).isEqualTo(result.get(1));
+        assertThat(result.get(2)).isEqualTo(result.get(3));
+        assertThat(result.get(0)).isNotEqualTo(result.get(2));
+    }
+
+    @Test
+    void shouldRunOnFloatGraph() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .k(2)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+
+        var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig, kmeansContext);
         var result = kmeans.compute().communities();
         assertThat(result.get(0)).isEqualTo(result.get(1));
         assertThat(result.get(2)).isEqualTo(result.get(3));
