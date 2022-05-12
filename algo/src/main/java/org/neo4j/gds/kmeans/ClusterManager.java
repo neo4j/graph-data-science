@@ -29,6 +29,9 @@ interface ClusterManager {
 
     void initialAssignCluster(int i, long id);
 
+    void reset();
+
+    void considerTaskForUpdate(KmeansTask task);
 
     default void assignCenter(List<Long> initialCenterIds) {
         int clusterUpdateId = 0;
@@ -48,15 +51,35 @@ interface ClusterManager {
 }
 
 class FloatClusterManager implements ClusterManager {
-    float[][] clusterCenters;
-    NodePropertyValues nodePropertyValues;
-    int dimensions;
-    int k;
+    private final float[][] clusterCenters;
+
+    private final long[] nodesInCluster;
+    private final NodePropertyValues nodePropertyValues;
+    private final int dimensions;
+    private final int k;
+
 
     public FloatClusterManager(NodePropertyValues values, int dimensions, int k) {
         this.dimensions = dimensions;
         this.k = k;
-        nodePropertyValues = values;
+        this.nodePropertyValues = values;
+        this.nodesInCluster = new long[k];
+        this.clusterCenters = new float[k][dimensions];
+    }
+
+    @Override
+    public void considerTaskForUpdate(KmeansTask task) {
+
+    }
+
+    @Override
+    public void reset() {
+        for (int centerId = 0; centerId < k; ++centerId) {
+            nodesInCluster[centerId] = 0;
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                clusterCenters[centerId][dimension] = 0.0f;
+            }
+        }
     }
 
     @Override
@@ -88,16 +111,34 @@ class FloatClusterManager implements ClusterManager {
 }
 
 class DoubleClusterManager implements ClusterManager {
-    double[][] clusterCenters;
-    NodePropertyValues nodePropertyValues;
-    int dimensions;
-    int k;
+    private final double[][] clusterCenters;
+    private final long[] nodesInCluster;
+    private final NodePropertyValues nodePropertyValues;
+    private final int dimensions;
+    private final int k;
 
 
     public DoubleClusterManager(NodePropertyValues values, int dimensions, int k) {
         this.dimensions = dimensions;
         this.k = k;
-        nodePropertyValues = values;
+        this.nodePropertyValues = values;
+        this.nodesInCluster = new long[k];
+        this.clusterCenters = new double[k][dimensions];
+    }
+
+    @Override
+    public void reset() {
+        for (int centerId = 0; centerId < k; ++centerId) {
+            nodesInCluster[centerId] = 0;
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                clusterCenters[centerId][dimension] = 0.0d;
+            }
+        }
+    }
+
+    @Override
+    public void considerTaskForUpdate(KmeansTask task) {
+
     }
 
     @Override
