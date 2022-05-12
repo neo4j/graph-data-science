@@ -27,19 +27,22 @@ class JobIdConfigTest {
 
     @Test
     void shouldAcceptValidJobId() {
-        JobIdConfigImpl.builder()
+        var configBuilder = JobIdConfigImpl.builder();
+
+        configBuilder
             .jobId("df16706f-0fb7-4a85-bf1c-a2c6f3c1cf08")
+            .build();
+
+        configBuilder
+            .jobId("banana-sweatshirt")
             .build();
     }
 
     @Test
     void shouldRejectInvalidJobId() {
-        var configBuilder = JobIdConfigImpl.builder();
-
-        configBuilder.jobId("banana-sweatshirt");
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
-
-        configBuilder.jobId(Long.valueOf(42L));
-        assertThrows(IllegalArgumentException.class, configBuilder::build);
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> JobIdConfigImpl.builder().jobId(Long.valueOf(42L)).build()
+        );
     }
 }

@@ -61,7 +61,7 @@ class ListProgressDetailProcTest extends BaseProgressTest {
         AtomicReference<JobId> jobIdRef = new AtomicReference<>();
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
-            row -> jobIdRef.set(JobId.fromString(row.getString("jobId")))
+            row -> jobIdRef.set(new JobId(row.getString("jobId")))
         );
         this.jobId = jobIdRef.get().asString();
     }

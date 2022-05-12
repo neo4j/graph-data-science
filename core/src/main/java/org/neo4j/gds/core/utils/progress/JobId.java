@@ -24,22 +24,22 @@ import java.util.Objects;
 import java.util.UUID;
 
 public final class JobId {
-    private final UUID value;
-
-    public static JobId fromString(String id) {
-        return new JobId(UUID.fromString(id));
-    }
+    private final String value;
 
     public JobId() {
-        this.value = UUID.randomUUID();
+        this.value = UUID.randomUUID().toString();
     }
 
     public JobId(UUID id) {
+        this(id.toString());
+    }
+
+    public JobId(String id) {
         this.value = id;
     }
 
     public String asString() {
-        return value.toString();
+        return value;
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class JobId {
 
     public static JobId parse(Object input) {
         if (input instanceof String) {
-            return fromString((String) input);
+            return new JobId((String) input);
         } else if (input instanceof JobId) {
             return (JobId) input;
         }

@@ -93,7 +93,7 @@ public class ListProgressProcTest extends BaseProgressTest {
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
             Map.of(),
-            row -> assertDoesNotThrow(() -> JobId.fromString(row.getString("jobId")))
+            row -> assertDoesNotThrow(() -> new JobId(row.getString("jobId")))
         );
     }
 

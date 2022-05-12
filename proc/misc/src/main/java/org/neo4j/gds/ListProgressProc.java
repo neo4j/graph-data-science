@@ -64,7 +64,7 @@ public class ListProgressProc extends BaseProc {
     }
 
     private Stream<ProgressResult> jobDetailView(String jobIdAsString) {
-        var jobId = JobId.fromString(jobIdAsString);
+        var jobId = new JobId(jobIdAsString);
         var task = taskStore.query(username(), jobId).orElseThrow(
             () -> new IllegalArgumentException(formatWithLocale("No task with job id `%s` was found.", jobIdAsString))
         );
