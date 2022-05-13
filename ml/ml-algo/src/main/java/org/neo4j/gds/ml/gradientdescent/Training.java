@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
-import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -38,7 +37,6 @@ import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -97,26 +95,26 @@ public class Training {
         var stopper = TrainingStopper.defaultStopper(config);
 
         var losses = new ArrayList<Double>();
-        var initialLoss = new MutableDouble(Double.NaN);
 
+        var consumers = executeBatches(concurrency, objective, queueSupplier.get());
+        var prevWeightGradients = avgWeightGradients(consumers);
+        var initialLoss = totalLoss(consumers);
+        progressTracker.logMessage(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
+            // each loop represents one epoch
             terminationFlag.assertRunning();
+            updater.update(prevWeightGradients);
+            consumers = executeBatches(concurrency, objective, queueSupplier.get());
+            prevWeightGradients = avgWeightGradients(consumers);
 
-            trainEpoch(objective, queueSupplier.get(), concurrency, updater, loss -> {
-                if (initialLoss.isNaN()) {
-                    initialLoss.setValue(loss);
-                    progressTracker.logMessage(StringFormatting.formatWithLocale("Initial loss %s", loss));
-                } else {
-                    losses.add(loss);
-                    stopper.registerLoss(loss);
-                    progressTracker.logMessage(StringFormatting.formatWithLocale(
-                        "Epoch %d with loss %s",
-                        losses.size(),
-                        loss
-                    ));
-                }
-                return !stopper.terminated();
-            });
+            double loss = totalLoss(consumers);
+            losses.add(loss);
+            stopper.registerLoss(loss);
+            progressTracker.logMessage(StringFormatting.formatWithLocale(
+                "Epoch %d with loss %s",
+                losses.size(),
+                loss
+            ));
         }
 
         progressTracker.logMessage(StringFormatting.formatWithLocale(
@@ -131,22 +129,16 @@ public class Training {
         ));
     }
 
-    private void trainEpoch(
-        Objective<?> objective,
-        BatchQueue batches,
-        int concurrency,
-        Updater updater,
-        LossConsumer lossEvaluator
-    ) {
-        var lossSummer = new DoubleAdder();
-
+    private List<ObjectiveUpdateConsumer> executeBatches(int concurrency, Objective<?> objective, BatchQueue batches) {
         var consumers = new ArrayList<ObjectiveUpdateConsumer>(concurrency);
         for (int i = 0; i < concurrency; i++) {
-            consumers.add(new ObjectiveUpdateConsumer(objective, trainSize, lossSummer));
+            consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
         }
-
         batches.parallelConsume(concurrency, consumers, terminationFlag);
+        return consumers;
+    }
 
+    private List<? extends Tensor<? extends Tensor<?>>> avgWeightGradients(List<ObjectiveUpdateConsumer> consumers) {
         List<? extends List<? extends Tensor<?>>> localGradientSums = consumers
             .stream()
             .map(ObjectiveUpdateConsumer::summedWeightGradients)
@@ -157,31 +149,23 @@ public class Training {
             .mapToInt(ObjectiveUpdateConsumer::consumedBatches)
             .sum();
 
-        if (lossEvaluator.consume(lossSummer.doubleValue())) {
-            var avgWeightGradients = averageTensors(localGradientSums, numberOfBatches);
-            updater.update(avgWeightGradients);
-        }
+        return averageTensors(localGradientSums, numberOfBatches);
     }
 
-    @FunctionalInterface
-    interface LossConsumer {
-        /**
-         * @return if the loss converged
-         */
-        boolean consume(double loss);
+    private double totalLoss(List<ObjectiveUpdateConsumer> consumers) {
+        return consumers.stream().mapToDouble(ObjectiveUpdateConsumer::lossSum).sum();
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
         private final Objective<?> objective;
         private final long trainSize;
         private final List<? extends Tensor<?>> summedWeightGradients;
-        private final DoubleAdder lossSummer;
+        private double lossSum;
         private int consumedBatches;
 
         ObjectiveUpdateConsumer(
             Objective<?> objective,
-            long trainSize,
-            DoubleAdder lossSummer
+            long trainSize
         ) {
             this.objective = objective;
             this.trainSize = trainSize;
@@ -190,15 +174,15 @@ public class Training {
                 .stream()
                 .map(weight -> weight.data().createWithSameDimensions())
                 .collect(Collectors.toList());
-            this.lossSummer = lossSummer;
             this.consumedBatches = 0;
+            this.lossSum = 0;
         }
 
         @Override
         public void accept(Batch batch) {
             Variable<Scalar> loss = objective.loss(batch, trainSize);
             var ctx = new ComputationContext();
-            lossSummer.add(ctx.forward(loss).value());
+            lossSum += ctx.forward(loss).value();
             ctx.backward(loss);
 
             List<? extends Tensor<?>> localWeightGradient = objective
@@ -220,6 +204,10 @@ public class Training {
 
         int consumedBatches() {
             return consumedBatches;
+        }
+
+        double lossSum() {
+            return lossSum;
         }
     }
 
