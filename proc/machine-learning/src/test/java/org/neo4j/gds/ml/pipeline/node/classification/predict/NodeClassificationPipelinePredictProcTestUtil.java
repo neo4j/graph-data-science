@@ -47,11 +47,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public final class NodeClassificationPipelinePredictProcTestUtil {
+final class NodeClassificationPipelinePredictProcTestUtil {
 
     static final String GRAPH_NAME = "g";
 
-    public static final String TEST_GRAPH_QUERY =
+    static final String TEST_GRAPH_QUERY =
         "CREATE " +
         " (n1:N {a: -1.36753705, b:  1.46853155})" +
         ", (n2:N {a: -1.45431768, b: -1.67820474})" +
@@ -67,7 +67,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         String username,
         int dimensionOfNodeFeatures
     ) {
-        addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a","b"));
+        addPipelineModelWithFeatures(modelCatalog, graphName, username, dimensionOfNodeFeatures, List.of("a", "b"));
     }
 
     static Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> createModel(
@@ -75,7 +75,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         String username,
         int dimensionOfNodeFeatures,
         List<String> nodeFeatures
-    ){
+    ) {
         var pipeline = NodePropertyPredictPipeline.from(
             Stream.of(NodePropertyStepFactory.createNodePropertyStep(
                 "degree",
@@ -98,7 +98,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
             }
         }
 
-        var modelData = createModeldata(weights.data(), bias.data());
+        var modelData = createClassifierData(weights.data(), bias.data());
         return Model.of(
             username,
             "model",
@@ -133,10 +133,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
         modelCatalog.set(createModel(graphName, username, dimensionOfNodeFeatures, nodeFeatures));
     }
 
-    static LogisticRegressionData createModeldata(double[] weights, double[] bias) {
-        var idMap = new LocalIdMap();
-        idMap.toMapped(0);
-        idMap.toMapped(1);
+    static LogisticRegressionData createClassifierData(double[] weights, double[] bias) {
         return ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(
                 new Matrix(
@@ -146,7 +143,7 @@ public final class NodeClassificationPipelinePredictProcTestUtil {
                 ))
             )
             .bias(new Weights<>(new Vector(bias)))
-            .classIdMap(idMap)
+            .classIdMap(LocalIdMap.of(0, 1))
             .build();
     }
 

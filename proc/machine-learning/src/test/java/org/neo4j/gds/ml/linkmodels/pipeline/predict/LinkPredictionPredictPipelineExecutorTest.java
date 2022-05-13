@@ -37,13 +37,11 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -69,13 +67,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
-@Neo4jModelCatalogExtension
 class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
@@ -92,9 +90,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
-
-    @Inject
-    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setup() throws Exception {
@@ -291,7 +286,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 Weights.ofVector(0.0)
             );
 
-            modelCatalog.set(Model.of(
+            Model.of(
                 getUsername(),
                 "model",
                 MODEL_TYPE,
@@ -310,7 +305,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
                     pipeline
                 )
-            ));
+            );
 
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
@@ -379,9 +374,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(modelCatalog, pipeline, config, modelData);
         assertMemoryEstimation(
-            () -> memoryEstimation,
+            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
@@ -408,13 +402,51 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             .username("user")
             .build();
 
-        var memoryEstimation = LinkPredictionPredictPipelineExecutor.estimate(modelCatalog, pipeline, config, modelData);
         assertMemoryEstimation(
-            () -> memoryEstimation,
+            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
             MemoryRange.of(489)
         );
+    }
+
+    @Test
+    void failOnInvalidFeatureDimension() {
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var tooManyFeatureWeights = new Weights<>(new Matrix(
+                new double[]{2.0, 1.0, -3.0, 42, 42},
+                1,
+                5
+            ));
+
+            var modelData = ImmutableLogisticRegressionData.of(
+                LinkPredictionTrain.makeClassIdMap(),
+                tooManyFeatureWeights,
+                Weights.ofVector(0.0)
+            );
+
+            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+                LinkPredictionPredictPipeline.from(
+                    Stream.of(),
+                    Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
+                ),
+                LogisticRegressionClassifier.from(modelData),
+                LinkPredictionPredictPipelineBaseConfigImpl.builder()
+                    .username("")
+                    .modelName("model")
+                    .topN(3)
+                    .graphName(GRAPH_NAME)
+                    .build(),
+                caller.executionContext(),
+                graphStore,
+                GRAPH_NAME,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            assertThatThrownBy(pipelineExecutor::compute)
+                .hasMessageContaining("Model expected link features to have a total dimension of `5`, but got `3`. ")
+                .hasMessageContaining("This indicates the dimension of the node-properties ['a', 'b', 'c'] differ between the input and the original train graph.");
+        });
     }
 }

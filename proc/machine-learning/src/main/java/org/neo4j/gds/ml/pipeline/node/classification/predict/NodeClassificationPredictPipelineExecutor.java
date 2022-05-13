@@ -38,10 +38,13 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
@@ -126,15 +129,26 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             config.internalRelationshipTypes(graphStore),
             Optional.empty()
         );
-        var innerAlgo = new NodeClassificationPredict(
+
+        var features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+
+        if (features.featureDimension() != modelData.featureDimension()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Model expected features %s to have a total dimension of `%d`, but got `%d`.",
+                StringJoining.join(pipeline.featureProperties()),
+                modelData.featureDimension(),
+                features.featureDimension()
+            ));
+        }
+
+        return new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
-            FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties()),
+            features,
             MIN_BATCH_SIZE,
             config.concurrency(),
             config.includePredictedProbabilities(),
             progressTracker,
             terminationFlag
-        );
-        return innerAlgo.compute();
+        ).compute();
     }
 }
