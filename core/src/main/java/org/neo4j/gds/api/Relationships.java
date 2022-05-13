@@ -84,6 +84,28 @@ public interface Relationships {
         Orientation orientation();
 
         boolean isMultiGraph();
+
+        Topology EMPTY = new Topology() {
+            @Override
+            public AdjacencyList adjacencyList() {
+                return AdjacencyList.EMPTY;
+            }
+
+            @Override
+            public long elementCount() {
+                return 0;
+            }
+
+            @Override
+            public Orientation orientation() {
+                return Orientation.NATURAL;
+            }
+
+            @Override
+            public boolean isMultiGraph() {
+                return false;
+            }
+        };
     }
 
     @ValueClass

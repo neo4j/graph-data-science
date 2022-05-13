@@ -237,12 +237,27 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
         Optional<NumberType> relationshipPropertyType,
         Relationships relationships
     ) {
-        graphStore.addRelationshipType(relationshipType, relationshipPropertyKey, relationshipPropertyType, relationships);
+        graphStore.addRelationshipType(
+            relationshipType,
+            relationshipPropertyKey,
+            relationshipPropertyType,
+            relationships
+        );
     }
 
     @Override
     public DeletionResult deleteRelationships(RelationshipType relationshipType) {
         return graphStore.deleteRelationships(relationshipType);
+    }
+
+    @Override
+    public Graph getGraph(NodeLabel nodeLabel) {
+        return graphStore.getGraph(nodeLabel);
+    }
+
+    @Override
+    public Graph getGraph(List<NodeLabel> nodeLabels) {
+        return graphStore.getGraph(nodeLabels);
     }
 
     @Override
