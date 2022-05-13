@@ -23,6 +23,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.Intersections;
 
+import java.util.Arrays;
 import java.util.List;
 
 abstract class ClusterManager {
@@ -45,16 +46,16 @@ abstract class ClusterManager {
 
     abstract void normalizeClusters();
 
-    abstract void considerTaskForUpdate(KmeansTask task);
+    abstract void updateFromTask(KmeansTask task);
 
-    void assignCenters(List<Long> initialCenterIds) {
+    void initializeCenters(List<Long> initialCenterIds) {
         int clusterUpdateId = 0;
         for (Long currentId : initialCenterIds) {
             initialAssignCluster(clusterUpdateId++, currentId);
         }
     }
 
-    abstract int findNextCenterForId(long nodeId);
+    abstract int findClosestCenter(long nodeId);
 
     static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
@@ -77,9 +78,7 @@ class FloatClusterManager extends ClusterManager {
     public void reset() {
         for (int centerId = 0; centerId < k; ++centerId) {
             nodesInCluster[centerId] = 0;
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                clusterCenters[centerId][dimension] = 0.0f;
-            }
+            Arrays.fill(clusterCenters[centerId], 0.0f);
         }
     }
 
@@ -87,25 +86,23 @@ class FloatClusterManager extends ClusterManager {
     public void normalizeClusters() {
         for (int centreId = 0; centreId < k; ++centreId) {
             for (int dimension = 0; dimension < dimensions; ++dimension)
-                clusterCenters[centreId][dimension] /= (double) nodesInCluster[centreId];
+                clusterCenters[centreId][dimension] /= (float) nodesInCluster[centreId];
         }
     }
 
     @Override
     public void initialAssignCluster(int i, long id) {
         float[] cluster = nodePropertyValues.floatArrayValue(id);
-        for (int dimension = 0; dimension < dimensions; ++dimension) {
-            clusterCenters[i][dimension] = cluster[dimension];
-        }
+        System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
     }
 
     @Override
-    public void considerTaskForUpdate(KmeansTask task) {
-        var doubleKmeansTask = (FloatKmeansTask) task;
+    public void updateFromTask(KmeansTask task) {
+        var floatKmeansTask = (FloatKmeansTask) task;
         for (int centerId = 0; centerId < k; ++centerId) {
             nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
             for (int dimension = 0; dimension < dimensions; ++dimension) {
-                clusterCenters[centerId][dimension] += doubleKmeansTask.getCenterContribution(centerId)[dimension];
+                clusterCenters[centerId][dimension] += floatKmeansTask.getCenterContribution(centerId)[dimension];
             }
         }
     }
@@ -115,7 +112,7 @@ class FloatClusterManager extends ClusterManager {
     }
 
     @Override
-    public int findNextCenterForId(long nodeId) {
+    public int findClosestCenter(long nodeId) {
         var property = nodePropertyValues.floatArrayValue(nodeId);
         int community = 0;
         float smallestDistance = Float.MAX_VALUE;
@@ -142,9 +139,7 @@ class DoubleClusterManager extends ClusterManager {
     public void reset() {
         for (int centerId = 0; centerId < k; ++centerId) {
             nodesInCluster[centerId] = 0;
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                clusterCenters[centerId][dimension] = 0.0d;
-            }
+            Arrays.fill(clusterCenters[centerId], 0.0d);
         }
     }
 
@@ -152,15 +147,16 @@ class DoubleClusterManager extends ClusterManager {
     public void normalizeClusters() {
         for (int centreId = 0; centreId < k; ++centreId) {
             for (int dimension = 0; dimension < dimensions; ++dimension)
-                clusterCenters[centreId][dimension] /= (float) nodesInCluster[centreId];
+                clusterCenters[centreId][dimension] /= (double) nodesInCluster[centreId];
         }
     }
 
     @Override
-    public void considerTaskForUpdate(KmeansTask task) {
+    public void updateFromTask(KmeansTask task) {
         var doubleKmeansTask = (DoubleKmeansTask) task;
         for (int centerId = 0; centerId < k; ++centerId) {
             nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
+
             for (int dimension = 0; dimension < dimensions; ++dimension) {
                 clusterCenters[centerId][dimension] += doubleKmeansTask.getCenterContribution(centerId)[dimension];
             }
@@ -170,9 +166,7 @@ class DoubleClusterManager extends ClusterManager {
     @Override
     public void initialAssignCluster(int i, long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
-        for (int dimension = 0; dimension < dimensions; ++dimension) {
-            clusterCenters[i][dimension] = cluster[dimension];
-        }
+        System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
     }
 
     private double doubleEuclidean(double[] left, double[] right) {
@@ -180,7 +174,7 @@ class DoubleClusterManager extends ClusterManager {
     }
 
     @Override
-    public int findNextCenterForId(long nodeId) {
+    public int findClosestCenter(long nodeId) {
         var property = nodePropertyValues.doubleArrayValue(nodeId);
         int community = 0;
         double smallestDistance = Double.MAX_VALUE;
