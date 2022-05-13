@@ -23,40 +23,56 @@ import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
-public final class GraphSageBatchSampler {
+public final class BatchSampler {
 
     public static final double DEGREE_SMOOTHING_FACTOR = 0.75;
+    private final Graph graph;
 
-    private GraphSageBatchSampler() {}
+    BatchSampler(Graph graph) {
+        this.graph = graph;
+    }
+
+    List<long[]> extendedBatches(int batchSize, int searchDepth, long randomSeed) {
+        return PartitionUtils.rangePartitionWithBatchSize(
+            graph.nodeCount(),
+            batchSize,
+            batch -> {
+                var localSeed = Math.toIntExact(Math.floorDiv(batch.startNode(), graph.nodeCount())) + randomSeed;
+                return sampleNeighborAndNegativeNodePerBatchNode(batch, searchDepth, localSeed);
+            }
+        );
+    }
 
     /**
      * For each node in the batch we sample one neighbor node and one negative node from the graph.
      */
-    static long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, Graph localGraph, int searchDepth, long randomSeed) {
-        var neighbours = neighborBatch(localGraph, batch, randomSeed, searchDepth).toArray();
+    long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, int searchDepth, long randomSeed) {
+        var neighbours = neighborBatch(batch, randomSeed, searchDepth).toArray();
 
-        LongStream negativeSamples = negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, randomSeed);
+        LongStream negativeSamples = negativeBatch(Math.toIntExact(batch.nodeCount()), neighbours, randomSeed);
 
         return LongStream.concat(
             batch.stream(),
             LongStream.concat(
                 Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, randomSeed)
+                negativeSamples
             )
         ).toArray();
     }
 
-    static LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed, int searchDepth) {
+    LongStream neighborBatch(Partition batch, long batchLocalSeed, int searchDepth) {
         var neighborBatchBuilder = LongStream.builder();
         var localRandom = new Random(batchLocalSeed);
 
@@ -83,7 +99,7 @@ public final class GraphSageBatchSampler {
     }
 
     // get a negative sample per node in batch
-    static LongStream negativeBatch(Graph graph, int batchSize, long[] batchNeighbors, long batchLocalRandomSeed) {
+    LongStream negativeBatch(int batchSize, long[] batchNeighbors, long batchLocalRandomSeed) {
         long nodeCount = graph.nodeCount();
         var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
 

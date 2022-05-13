@@ -25,8 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -117,11 +115,14 @@ public class GraphSageModelTrainer {
 
         progressTracker.beginSubTask("Prepare batches");
 
-        var batchTasks = PartitionUtils.rangePartitionWithBatchSize(
-            graph.nodeCount(),
-            config.batchSize(),
-            batch -> createBatchTask(graph, features, layers, weights, batch)
-        );
+        var batchSampler = new BatchSampler(graph);
+
+        var batchTasks = batchSampler
+            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed)
+            .stream()
+            .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
+            .collect(Collectors.toList());
+
         var random = new Random(randomSeed);
         Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
             .mapToObj(__ -> batchTasks.get(random.nextInt(batchTasks.size())))
@@ -152,18 +153,15 @@ public class GraphSageModelTrainer {
     }
 
     private BatchTask createBatchTask(
+        long[] extendedBatch,
         Graph graph,
         HugeObjectArray<double[]> features,
         Layer[] layers,
-        ArrayList<Weights<? extends Tensor<?>>> weights,
-        Partition batch
+        ArrayList<Weights<? extends Tensor<?>>> weights
     ) {
         var localGraph = graph.concurrentCopy();
 
-        var localSeed = Math.toIntExact(Math.floorDiv(batch.startNode(), localGraph.nodeCount())) + randomSeed;
-        long[] totalBatch = GraphSageBatchSampler.sampleNeighborAndNegativeNodePerBatchNode(batch, localGraph, config.searchDepth(), localSeed);
-
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, extendedBatch, layers);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,
@@ -176,7 +174,7 @@ public class GraphSageModelTrainer {
         GraphSageLoss lossFunction = new GraphSageLoss(
             useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
             embeddingVariable,
-            totalBatch,
+            extendedBatch,
             config.negativeSampleWeight()
         );
 
