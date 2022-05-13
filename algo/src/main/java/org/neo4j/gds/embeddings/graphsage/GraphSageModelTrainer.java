@@ -117,16 +117,10 @@ public class GraphSageModelTrainer {
 
         var batchSampler = new BatchSampler(graph);
 
-        var batchTasks = batchSampler
-            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed)
-            .stream()
-            .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
-            .collect(Collectors.toList());
+        List<long[]> extendedBatches = batchSampler
+            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed);
 
         var random = new Random(randomSeed);
-        Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
-            .mapToObj(__ -> batchTasks.get(random.nextInt(batchTasks.size())))
-            .collect(Collectors.toList());
 
         progressTracker.endSubTask("Prepare batches");
 
@@ -139,6 +133,16 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
+
+            List<BatchTask> tasksForEpoch = extendedBatches
+                .stream()
+                .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
+                .collect(Collectors.toList());
+
+            Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
+                .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
+                .collect(Collectors.toList());
+
             var epochResult = trainEpoch(batchTaskSampler, weights, prevEpochLoss);
             List<Double> epochLosses = epochResult.losses();
             iterationLossesPerEpoch.add(epochLosses);
@@ -152,6 +156,9 @@ public class GraphSageModelTrainer {
         return ModelTrainResult.of(iterationLossesPerEpoch, converged, layers);
     }
 
+    /**
+     * sampling the neighbor subgraph for each layer + constructing the loss function
+     */
     private BatchTask createBatchTask(
         long[] extendedBatch,
         Graph graph,
