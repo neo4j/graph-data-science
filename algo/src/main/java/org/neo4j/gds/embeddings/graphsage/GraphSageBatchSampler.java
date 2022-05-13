@@ -34,13 +34,17 @@ import java.util.stream.LongStream;
 
 public final class GraphSageBatchSampler {
 
+    public static final double DEGREE_SMOOTHING_FACTOR = 0.75;
+
     private GraphSageBatchSampler() {}
 
     /**
-     * For each node in the batch we sample a neighbor node and a negative node from the graph.
+     * For each node in the batch we sample one neighbor node and one negative node from the graph.
      */
     static long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, Graph localGraph, int searchDepth, long randomSeed) {
         var neighbours = neighborBatch(localGraph, batch, randomSeed, searchDepth).toArray();
+
+        LongStream negativeSamples = negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, randomSeed);
 
         return LongStream.concat(
             batch.stream(),
@@ -91,7 +95,9 @@ public final class GraphSageBatchSampler {
         // therefore we need fictive rels to all nodes
         // Math.log to avoid always sampling the high degree nodes
         var degreeWeightedNodes = LongStream.range(0, nodeCount)
-            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
+            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId),
+                DEGREE_SMOOTHING_FACTOR
+            )));
 
         return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighborsSet.contains(sample));
     }

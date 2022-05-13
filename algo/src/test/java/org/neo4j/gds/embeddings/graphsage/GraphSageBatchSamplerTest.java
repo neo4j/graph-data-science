@@ -21,10 +21,12 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageBatchSampler.negativeBatch;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageBatchSampler.neighborBatch;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageBatchSampler.sampleNeighborAndNegativeNodePerBatchNode;
 
 @GdlExtension
 class GraphSageBatchSamplerTest {
@@ -41,6 +44,21 @@ class GraphSageBatchSamplerTest {
 
     @Inject
     Graph graph;
+
+    @Test
+    void sampleDenseGraph() {
+        Graph clique = GdlFactory.of("(a)-->(b), (b)-->(a), (b)-->(c), (c)-->(b), (c)-->(a), (a)-->(c)").build().getUnion();
+        Partition allNodes = Partition.of(0, 2);
+        int searchDepth = 3;
+
+        assertThat(sampleNeighborAndNegativeNodePerBatchNode(allNodes, clique, searchDepth, 42))
+            .containsExactly(
+                0L, 1L,
+                2L, 2L,
+                0L, 1L
+            );
+    }
+
 
     @Test
     void seededNegativeBatch() {
