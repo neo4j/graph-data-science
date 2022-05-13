@@ -55,7 +55,7 @@ CALL gds.beta.graph.project.subgraph(
 |===
 | Name               | Type    | Default              | Optional | Description
 | concurrency        | Integer | 4                    | yes      | The number of concurrent threads used for filtering the graph.
-| jobId              | String  | Generated internally | yes      | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the projection's progress.
+| jobId              | String  | Generated internally | yes      | An ID that can be provided to more easily track the projection's progress.
 |===
 
 .Results

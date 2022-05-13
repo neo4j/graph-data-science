@@ -74,7 +74,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 | nodeProperties         | String, List or Map   | {}                   | The node properties to load for _all_ node projections.
 | relationshipProperties | String, List or Map   | {}                   | The relationship properties to load for _all_ relationship projections.
 | validateRelationships  | Boolean               | false                | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
-| jobId                  | String                | Generated internally | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the projection's progress.
+| jobId                  | String                | Generated internally | An ID that can be provided to more easily track the projection's progress.
 |===
 
 .Results

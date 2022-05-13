@@ -68,7 +68,7 @@ include::../../../algorithms/common-configuration/common-parameters-named-graph.
 | metrics                                                       | List of String    | n/a                  | no       | <<noderegression-pipeline-metrics,Metrics>> used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
 | modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
-| <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the training's progress.
+| <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
 .Results

@@ -58,7 +58,7 @@ include::../../algorithms/common-configuration/common-parameters-named-graph.ado
 | <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
 | <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
 | <<common-configuration-concurrency,concurrency>>              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
-| <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the training's progress.
+| <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
 

@@ -133,4 +133,3 @@ The Default is `concurrency`
 [[common-configuration-jobid]]
 jobId - String::
 An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's <<logging, logging capabilities>>.
-A provided `jobId` must be a valid https://en.wikipedia.org/wiki/Universally_unique_identifier[universally unique identifier] in order to be accepted.

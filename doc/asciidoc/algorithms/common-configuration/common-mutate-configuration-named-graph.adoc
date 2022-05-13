@@ -28,5 +28,5 @@ ifeval::["{entity}" == "pregel"]
 | mutateProperty                                                | String      | ""                     | yes      | The prefix used for all public properties in the PregelSchema.
 endif::[]
 
-| <<common-configuration-jobid, jobId>>                         | String      | Generated internally   | yes      | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the algorithm's progress.
+| <<common-configuration-jobid, jobId>>                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.
 |===

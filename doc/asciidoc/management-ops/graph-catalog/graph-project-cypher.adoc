@@ -70,7 +70,7 @@ CALL gds.graph.project.cypher(
 | readConcurrency        | Integer | 4                    | The number of concurrent threads used for creating the graph.
 | validateRelationships  | Boolean | true                 | Whether to throw an error if the `relationshipQuery` returns relationships between nodes not returned by the `nodeQuery`.
 | parameters             | Map     | {}                   | A map of user-defined query parameters that are passed into the node and relationship queries.
-| jobId                  | String  | Generated internally | A https://en.wikipedia.org/wiki/Universally_unique_identifier[UUID] that can be provided to more easily track the projection's progress.
+| jobId                  | String  | Generated internally | An ID that can be provided to more easily track the projection's progress.
 |===
 
 .Results
