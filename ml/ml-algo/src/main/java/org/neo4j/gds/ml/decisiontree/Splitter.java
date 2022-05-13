@@ -77,7 +77,7 @@ public class Splitter {
         int[] featureBag = featureBagger.sample();
 
         for (int featureIdx : featureBag) {
-            double bestImpurityForIdx = Double.MAX_VALUE;
+            double bestImpurityForIdx = bestImpurity;
             double bestValueForIdx = Double.MAX_VALUE;
             long bestLeftGroupSizeForIdx = -1;
 
