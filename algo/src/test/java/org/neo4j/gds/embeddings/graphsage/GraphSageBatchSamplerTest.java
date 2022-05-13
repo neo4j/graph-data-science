@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -55,8 +54,7 @@ class GraphSageBatchSamplerTest {
             Function.identity()
         );
 
-        var neighborsSet = new LongHashSet(5);
-        neighborsSet.addAll(0, 3, 5, 6, 10);
+        long[] neighborsSet = {0, 3, 5, 6, 10};
 
         for (int i = 0; i < partitions.size(); i++) {
             var localSeed = i + seed;

@@ -48,15 +48,12 @@ public class GraphSageBatchSampler {
 
         var neighbours = neighborBatch(localGraph, batch, batchLocalRandomSeed, searchDepth).toArray();
 
-        var neighborsSet = new LongHashSet(neighbours.length);
-        neighborsSet.addAll(neighbours);
-
         return LongStream.concat(
             batch.stream(),
             LongStream.concat(
                 Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
+                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, batchLocalRandomSeed)
             )
         ).toArray();
     }
@@ -88,9 +85,13 @@ public class GraphSageBatchSampler {
     }
 
     // get a negative sample per node in batch
-    LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours, long batchLocalRandomSeed) {
+    LongStream negativeBatch(Graph graph, int batchSize, long[] batchNeighbors, long batchLocalRandomSeed) {
         long nodeCount = graph.nodeCount();
         var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
+
+        // avoid sampling the sampled neighbor as a negative example
+        var neighborsSet = new LongHashSet(batchNeighbors.length);
+        neighborsSet.addAll(batchNeighbors);
 
         // each node should be possible to sample
         // therefore we need fictive rels to all nodes
@@ -98,7 +99,7 @@ public class GraphSageBatchSampler {
         var degreeWeightedNodes = LongStream.range(0, nodeCount)
             .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
 
-        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
+        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighborsSet.contains(sample));
     }
 
     private static int getBatchIndex(Partition partition, long nodeCount) {
