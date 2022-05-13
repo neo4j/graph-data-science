@@ -68,7 +68,6 @@ public class GraphSageModelTrainer {
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
     private final GraphSageTrainConfig config;
-    private final GraphSageBatchSampler batchSampler;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
         this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
@@ -89,7 +88,6 @@ public class GraphSageModelTrainer {
         this.progressTracker = progressTracker;
         this.useWeights = config.hasRelationshipWeightProperty();
         this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
-        this.batchSampler = new GraphSageBatchSampler(randomSeed);
     }
 
     public static List<Task> progressTasks(GraphSageTrainConfig config) {
@@ -162,7 +160,8 @@ public class GraphSageModelTrainer {
     ) {
         var localGraph = graph.concurrentCopy();
 
-        long[] totalBatch = batchSampler.sampleNeighborAndNegativeNodePerBatchNode(batch, localGraph, config.searchDepth());
+        var localSeed = Math.toIntExact(Math.floorDiv(batch.startNode(), localGraph.nodeCount())) + randomSeed;
+        long[] totalBatch = GraphSageBatchSampler.sampleNeighborAndNegativeNodePerBatchNode(batch, localGraph, config.searchDepth(), localSeed);
 
         List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
 

@@ -30,6 +30,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageBatchSampler.negativeBatch;
+import static org.neo4j.gds.embeddings.graphsage.GraphSageBatchSampler.neighborBatch;
 
 @GdlExtension
 class GraphSageBatchSamplerTest {
@@ -45,9 +47,6 @@ class GraphSageBatchSamplerTest {
         var batchSize = 5;
         var seed = 20L;
 
-        var sampler = new GraphSageBatchSampler(seed);
-        var otherSampler = new GraphSageBatchSampler(seed);
-
         var partitions = PartitionUtils.rangePartitionWithBatchSize(
             100,
             batchSize,
@@ -58,8 +57,8 @@ class GraphSageBatchSamplerTest {
 
         for (int i = 0; i < partitions.size(); i++) {
             var localSeed = i + seed;
-            var negativeBatch = sampler.negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
-            var otherNegativeBatch = otherSampler.negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
+            var negativeBatch = negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
+            var otherNegativeBatch = negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
 
             assertThat(negativeBatch).containsExactlyElementsOf(otherNegativeBatch.boxed().collect(Collectors.toList()));
         }
@@ -71,9 +70,6 @@ class GraphSageBatchSamplerTest {
         var seed = 20L;
         int searchDepth = 12;
 
-        var sampler = new GraphSageBatchSampler(seed);
-        var otherSampler = new GraphSageBatchSampler(seed);
-
         var partitions = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
@@ -82,8 +78,8 @@ class GraphSageBatchSamplerTest {
 
         for (int i = 0; i < partitions.size(); i++) {
             var localSeed = i + seed;
-            var neighborBatch = sampler.neighborBatch(graph, partitions.get(i), localSeed, searchDepth);
-            var otherNeighborBatch = otherSampler.neighborBatch(graph, partitions.get(i), localSeed, searchDepth);
+            var neighborBatch = neighborBatch(graph, partitions.get(i), localSeed, searchDepth);
+            var otherNeighborBatch = neighborBatch(graph, partitions.get(i), localSeed, searchDepth);
             assertThat(neighborBatch).containsExactlyElementsOf(otherNeighborBatch.boxed().collect(Collectors.toList()));
         }
     }

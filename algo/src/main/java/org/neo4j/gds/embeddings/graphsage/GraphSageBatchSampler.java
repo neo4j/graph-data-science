@@ -32,33 +32,27 @@ import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 
-public class GraphSageBatchSampler {
+public final class GraphSageBatchSampler {
 
-    private final long randomSeed;
-
-    GraphSageBatchSampler(long randomSeed) {
-        this.randomSeed = randomSeed;
-    }
+    private GraphSageBatchSampler() {}
 
     /**
      * For each node in the batch we sample a neighbor node and a negative node from the graph.
      */
-    long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, Graph localGraph, int searchDepth) {
-        var batchLocalRandomSeed = getBatchIndex(batch, localGraph.nodeCount()) + randomSeed;
-
-        var neighbours = neighborBatch(localGraph, batch, batchLocalRandomSeed, searchDepth).toArray();
+    static long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, Graph localGraph, int searchDepth, long randomSeed) {
+        var neighbours = neighborBatch(localGraph, batch, randomSeed, searchDepth).toArray();
 
         return LongStream.concat(
             batch.stream(),
             LongStream.concat(
                 Arrays.stream(neighbours),
                 // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, batchLocalRandomSeed)
+                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighbours, randomSeed)
             )
         ).toArray();
     }
 
-    LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed, int searchDepth) {
+    static LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed, int searchDepth) {
         var neighborBatchBuilder = LongStream.builder();
         var localRandom = new Random(batchLocalSeed);
 
@@ -85,7 +79,7 @@ public class GraphSageBatchSampler {
     }
 
     // get a negative sample per node in batch
-    LongStream negativeBatch(Graph graph, int batchSize, long[] batchNeighbors, long batchLocalRandomSeed) {
+    static LongStream negativeBatch(Graph graph, int batchSize, long[] batchNeighbors, long batchLocalRandomSeed) {
         long nodeCount = graph.nodeCount();
         var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
 
@@ -100,9 +94,5 @@ public class GraphSageBatchSampler {
             .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
 
         return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighborsSet.contains(sample));
-    }
-
-    private static int getBatchIndex(Partition partition, long nodeCount) {
-        return Math.toIntExact(Math.floorDiv(partition.startNode(), nodeCount));
     }
 }
