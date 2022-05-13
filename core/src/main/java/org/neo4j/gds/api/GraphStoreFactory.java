@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -42,16 +43,19 @@ public abstract class GraphStoreFactory<STORE extends GraphStore, CONFIG extends
     }
 
     protected final CONFIG graphProjectConfig;
+    protected final Capabilities capabilities;
     protected final GraphLoaderContext loadingContext;
     protected final GraphDimensions dimensions;
     protected final ProgressTracker progressTracker;
 
     public GraphStoreFactory(
         CONFIG graphProjectConfig,
+        Capabilities capabilities,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions
     ) {
         this.graphProjectConfig = graphProjectConfig;
+        this.capabilities = capabilities;
         this.loadingContext = loadingContext;
         this.dimensions = dimensions;
         this.progressTracker = initProgressTracker();

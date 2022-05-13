@@ -20,9 +20,13 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 
+import java.util.Collection;
 
 public interface WriteConfig extends ConcurrencyConfig {
 
@@ -36,6 +40,20 @@ public interface WriteConfig extends ConcurrencyConfig {
 
     @Value.Check
     default void validateWriteConcurrency() {
-        ConcurrencyValidatorService.validator().validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+        ConcurrencyValidatorService
+            .validator()
+            .validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateGraphIsSuitableForWrite(
+        GraphStore graphStore,
+        @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,
+        @SuppressWarnings("unused") Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.capabilities().isBackedByDatabase()) {
+            throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
+        }
     }
 }

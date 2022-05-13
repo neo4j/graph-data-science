@@ -34,6 +34,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -98,7 +99,10 @@ public final class CsvGraphStoreImporter {
         this.concurrency = concurrency;
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableGraphSchema.builder();
-        this.graphStoreBuilder = new GraphStoreBuilder().concurrency(concurrency);
+        this.graphStoreBuilder = new GraphStoreBuilder()
+            .concurrency(concurrency)
+            // TODO: we need to export and import this flag: https://trello.com/c/2cEMPZ9L
+            .capabilities(ImmutableStaticCapabilities.of(true));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
     }

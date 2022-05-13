@@ -43,6 +43,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -441,6 +442,7 @@ public final class CypherAggregation extends BaseProc {
 
             var graphStoreBuilder = new GraphStoreBuilder()
                 .concurrency(4)
+                .capabilities(ImmutableStaticCapabilities.of(true))
                 .databaseId(databaseId);
 
             var nodes = buildNodesWithProperties(graphStoreBuilder);

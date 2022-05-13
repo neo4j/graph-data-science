@@ -169,31 +169,4 @@ public interface GraphProjectConfig extends BaseConfig {
 
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
     }
-
-    interface Rewriter extends Cases<GraphProjectConfig> {
-
-        @Override
-        default GraphProjectConfig store(GraphProjectFromStoreConfig storeConfig) {
-            return storeConfig;
-        }
-
-        @Override
-        default GraphProjectConfig cypher(GraphProjectFromCypherConfig cypherConfig) {
-            return cypherConfig;
-        }
-
-        @Override
-        default GraphProjectConfig graph(GraphProjectFromGraphConfig graphConfig) {
-            return graphConfig;
-        }
-
-        @Override
-        default GraphProjectConfig random(RandomGraphGeneratorConfig randomGraphConfig) {
-            return randomGraphConfig;
-        }
-
-        default GraphProjectConfig apply(GraphProjectConfig config) {
-            return config.accept(this);
-        }
-    }
 }

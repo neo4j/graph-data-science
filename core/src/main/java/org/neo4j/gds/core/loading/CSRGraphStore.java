@@ -86,6 +86,8 @@ public class CSRGraphStore implements GraphStore {
 
     private final NamedDatabaseId databaseId;
 
+    private final Capabilities capabilities;
+
     private final IdMap nodes;
 
     protected final Map<RelationshipType, Relationships.Topology> relationships;
@@ -105,6 +107,7 @@ public class CSRGraphStore implements GraphStore {
     @Builder.Factory
     public static CSRGraphStore of(
         NamedDatabaseId databaseId,
+        Capabilities capabilities,
         GraphSchema schema,
         IdMap nodes,
         @Nullable NodePropertyStore nodePropertyStore,
@@ -119,6 +122,7 @@ public class CSRGraphStore implements GraphStore {
 
         return new CSRGraphStore(
             databaseId,
+            capabilities,
             schema,
             nodes,
             nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore,
@@ -130,6 +134,7 @@ public class CSRGraphStore implements GraphStore {
 
     protected CSRGraphStore(
         NamedDatabaseId databaseId,
+        Capabilities capabilities,
         GraphSchema schema,
         IdMap nodes,
         NodePropertyStore nodeProperties,
@@ -138,6 +143,7 @@ public class CSRGraphStore implements GraphStore {
         int concurrency
     ) {
         this.databaseId = databaseId;
+        this.capabilities = capabilities;
 
         this.schema = schema;
 
@@ -167,6 +173,11 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public ZonedDateTime modificationTime() {
         return modificationTime;
+    }
+
+    @Override
+    public Capabilities capabilities() {
+        return capabilities;
     }
 
     // Graph properties

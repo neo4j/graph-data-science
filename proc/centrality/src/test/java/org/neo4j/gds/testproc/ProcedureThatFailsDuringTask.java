@@ -73,7 +73,7 @@ public class ProcedureThatFailsDuringTask extends AlgoBaseProc<FailingAlgorithm,
     }
 
     @Override
-    public <T extends ComputationResultConsumer<FailingAlgorithm, Output, DummyConfig, Stream<Output>>> T computationResultConsumer() {
+    public ComputationResultConsumer<FailingAlgorithm, Output, DummyConfig, Stream<Output>> computationResultConsumer() {
         throw new UnsupportedOperationException("Not implemented");
     }
 
