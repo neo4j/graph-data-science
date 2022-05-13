@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import com.carrotsearch.hppc.LongHashSet;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -38,29 +36,23 @@ import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
-import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
-import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalLong;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.LongStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
 import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
@@ -76,6 +68,7 @@ public class GraphSageModelTrainer {
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
     private final GraphSageTrainConfig config;
+    private final GraphSageBatchSampler batchSampler;
 
     public GraphSageModelTrainer(GraphSageTrainConfig config, ExecutorService executor, ProgressTracker progressTracker) {
         this(config, executor, progressTracker, new SingleLabelFeatureFunction(), Collections.emptyList());
@@ -96,6 +89,7 @@ public class GraphSageModelTrainer {
         this.progressTracker = progressTracker;
         this.useWeights = config.hasRelationshipWeightProperty();
         this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
+        this.batchSampler = new GraphSageBatchSampler(randomSeed);
     }
 
     public static List<Task> progressTasks(GraphSageTrainConfig config) {
@@ -168,7 +162,7 @@ public class GraphSageModelTrainer {
     ) {
         var localGraph = graph.concurrentCopy();
 
-        long[] totalBatch = addSamplesPerBatchNode(batch, localGraph);
+        long[] totalBatch = batchSampler.sampleNeighborAndNegativeNodePerBatchNode(batch, localGraph, config.searchDepth());
 
         List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, totalBatch, layers);
 
@@ -279,68 +273,6 @@ public class GraphSageModelTrainer {
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
         }
-    }
-
-    private long[] addSamplesPerBatchNode(Partition batch, Graph localGraph) {
-        var batchLocalRandomSeed = getBatchIndex(batch, localGraph.nodeCount()) + randomSeed;
-
-        var neighbours = neighborBatch(localGraph, batch, batchLocalRandomSeed).toArray();
-
-        var neighborsSet = new LongHashSet(neighbours.length);
-        neighborsSet.addAll(neighbours);
-
-        return LongStream.concat(
-            batch.stream(),
-            LongStream.concat(
-                Arrays.stream(neighbours),
-                // batch.nodeCount is <= config.batchsize (which is an int)
-                negativeBatch(localGraph, Math.toIntExact(batch.nodeCount()), neighborsSet, batchLocalRandomSeed)
-            )
-        ).toArray();
-    }
-
-    LongStream neighborBatch(Graph graph, Partition batch, long batchLocalSeed) {
-        var neighborBatchBuilder = LongStream.builder();
-        var localRandom = new Random(batchLocalSeed);
-
-        // sample a neighbor for each batchNode
-        batch.consume(nodeId -> {
-            // randomWalk with at most maxSearchDepth steps and only save last node
-            int searchDepth = localRandom.nextInt(config.searchDepth()) + 1;
-            AtomicLong currentNode = new AtomicLong(nodeId);
-            while (searchDepth > 0) {
-                NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + searchDepth);
-                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId);
-                if (maybeSample.isPresent()) {
-                    currentNode.set(maybeSample.getAsLong());
-                } else {
-                    // terminate
-                    searchDepth = 0;
-                }
-                searchDepth--;
-            }
-            neighborBatchBuilder.add(currentNode.get());
-        });
-
-        return neighborBatchBuilder.build();
-    }
-
-    // get a negative sample per node in batch
-    LongStream negativeBatch(Graph graph, int batchSize, LongHashSet neighbours, long batchLocalRandomSeed) {
-        long nodeCount = graph.nodeCount();
-        var sampler = new WeightedUniformSampler(batchLocalRandomSeed);
-
-        // each node should be possible to sample
-        // therefore we need fictive rels to all nodes
-        // Math.log to avoid always sampling the high degree nodes
-        var degreeWeightedNodes = LongStream.range(0, nodeCount)
-            .mapToObj(nodeId -> ImmutableRelationshipCursor.of(0, nodeId, Math.pow(graph.degree(nodeId), 0.75)));
-
-        return sampler.sample(degreeWeightedNodes, nodeCount, batchSize, sample -> !neighbours.contains(sample));
-    }
-
-    private static int getBatchIndex(Partition partition, long nodeCount) {
-        return Math.toIntExact(Math.floorDiv(partition.startNode(), nodeCount));
     }
 
     private static int firstLayerColumns(GraphSageTrainConfig config, Graph graph) {
