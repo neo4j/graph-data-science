@@ -32,16 +32,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, PropertySchema> {
+public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
 
     private static final List<String> EMPTY_LABELS = Collections.emptyList();
     private static final Set<NodeLabel> EMPTY_LABELS_LABEL = Set.of(NodeLabel.ALL_NODES);
+
+    private final NodeSchema nodeSchema;
     private long currentId;
     private List<String> currentLabels;
     private String labelIdentifier;
 
     protected NodeVisitor(NodeSchema nodeSchema) {
-        super(nodeSchema);
+        super(nodeSchema.allProperties());
+        this.nodeSchema = nodeSchema;
         reset();
     }
 
@@ -98,7 +101,7 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
         var nodeLabelList = currentLabels.isEmpty()
             ? EMPTY_LABELS_LABEL
             : currentLabels.stream().map(NodeLabel::of).collect(Collectors.toSet());
-        var propertySchemaForLabels = elementSchema.filter(nodeLabelList);
+        var propertySchemaForLabels = nodeSchema.filter(nodeLabelList);
         return new ArrayList<>(propertySchemaForLabels.unionProperties().values());
     }
 

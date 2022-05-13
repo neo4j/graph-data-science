@@ -23,8 +23,6 @@ import com.carrotsearch.hppc.ObjectIntMap;
 import com.carrotsearch.hppc.ObjectIntScatterMap;
 import com.carrotsearch.hppc.ObjectObjectMap;
 import com.carrotsearch.hppc.ObjectObjectScatterMap;
-import org.neo4j.gds.ElementIdentifier;
-import org.neo4j.gds.api.schema.ElementSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 
@@ -34,24 +32,18 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
-abstract class ElementVisitor<
-    ELEMENT_SCHEMA extends ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA>,
-    I extends ElementIdentifier,
-    PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter implements Flushable {
-
-    final ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema;
+abstract class ElementVisitor<PROPERTY_SCHEMA extends PropertySchema> extends InputEntityVisitor.Adapter implements Flushable {
 
     private final Object[] currentProperties;
     private final ObjectObjectMap<String, List<PROPERTY_SCHEMA>> propertySchemas;
     private final ObjectIntMap<String> propertyKeyPositions;
 
-    ElementVisitor(ElementSchema<ELEMENT_SCHEMA, I, PROPERTY_SCHEMA> elementSchema) {
-        this.elementSchema = elementSchema;
+    ElementVisitor(Iterable<String> propertyKeys) {
         this.propertySchemas = new ObjectObjectScatterMap<>();
         this.propertyKeyPositions = new ObjectIntScatterMap<>();
 
         var i = 0;
-        for (String propertyKey : elementSchema.allProperties()) {
+        for (String propertyKey : propertyKeys) {
             propertyKeyPositions.put(propertyKey, i++);
         }
 

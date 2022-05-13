@@ -25,12 +25,12 @@ import org.neo4j.internal.batchimport.InputIterator;
 import java.io.IOException;
 
 final class ElementImportRunner implements Runnable {
-    private final ElementVisitor<?, ?, ?> visitor;
+    private final ElementVisitor<?> visitor;
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;
 
     ElementImportRunner(
-        ElementVisitor<?, ?, ?> visitor,
+        ElementVisitor<?> visitor,
         InputIterator inputIterator,
         ProgressTracker progressTracker
     ) {
