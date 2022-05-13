@@ -192,10 +192,24 @@ public interface GraphStore {
         return getGraph(NodeLabel.of(nodeLabel), RelationshipType.of(relationshipType), maybeRelationshipProperty);
     }
 
+    /**
+     * Returns a graph containing only nodes with the
+     * given node label and no relationships.
+     *
+     * @param nodeLabel node label filter
+     * @return a node-only graph
+     */
     default Graph getGraph(NodeLabel nodeLabel) {
         return getGraph(List.of(nodeLabel));
     }
 
+    /**
+     * Returns a graph containing only nodes with the
+     * given node labels and no relationships.
+     *
+     * @param nodeLabels node label filter
+     * @return a node-only graph
+     */
     Graph getGraph(List<NodeLabel> nodeLabels);
 
     default Graph getGraph(
