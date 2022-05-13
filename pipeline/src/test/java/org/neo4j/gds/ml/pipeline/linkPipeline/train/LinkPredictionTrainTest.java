@@ -582,6 +582,7 @@ class LinkPredictionTrainTest {
             .extracting(keepingFixedNumberOfDecimals(4))
             .contains(
                 "MY TEST TASK :: Train best model :: Start",
+                "MY TEST TASK :: Train best model :: Initial loss 0.6931",
                 "MY TEST TASK :: Train best model :: Epoch 1 with loss 0.6880",
                 "MY TEST TASK :: Train best model :: Epoch 2 with loss 0.6832",
                 "MY TEST TASK :: Train best model :: Epoch 3 with loss 0.6784",
@@ -685,6 +686,7 @@ class LinkPredictionTrainTest {
                 "MY TEST TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.7169",
                 "MY TEST TASK :: Select best model :: Finished",
                 "MY TEST TASK :: Train best model :: Start",
+                "MY TEST TASK :: Train best model :: Initial loss 0.6931",
                 "MY TEST TASK :: Train best model :: Epoch 1 with loss 0.6880",
                 "MY TEST TASK :: Train best model :: Epoch 2 with loss 0.6832",
                 "MY TEST TASK :: Train best model :: Epoch 3 with loss 0.6784",

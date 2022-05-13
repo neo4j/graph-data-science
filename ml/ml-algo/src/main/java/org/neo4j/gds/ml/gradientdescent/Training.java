@@ -37,7 +37,6 @@ import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -93,62 +92,53 @@ public class Training {
 
     public void train(Objective<?> objective, Supplier<BatchQueue> queueSupplier, int concurrency) {
         Updater updater = new AdamOptimizer(objective.weights(), config.learningRate());
-        int epoch = 0;
         var stopper = TrainingStopper.defaultStopper(config);
-        double initialLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
-        double lastLoss = initialLoss;
 
+        var losses = new ArrayList<Double>();
+
+        var consumers = executeBatches(concurrency, objective, queueSupplier.get());
+        var prevWeightGradients = avgWeightGradients(consumers);
+        var initialLoss = totalLoss(consumers);
+        progressTracker.logMessage(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
+            // each loop represents one epoch
             terminationFlag.assertRunning();
+            updater.update(prevWeightGradients);
+            consumers = executeBatches(concurrency, objective, queueSupplier.get());
+            prevWeightGradients = avgWeightGradients(consumers);
 
-            trainEpoch(objective, queueSupplier.get(), concurrency, updater);
-            lastLoss = evaluateLoss(objective, queueSupplier.get(), concurrency);
-            stopper.registerLoss(lastLoss);
-            epoch++;
-
-            progressTracker.logMessage(StringFormatting.formatWithLocale("Epoch %d with loss %s", epoch, lastLoss));
+            double loss = totalLoss(consumers);
+            losses.add(loss);
+            stopper.registerLoss(loss);
+            progressTracker.logMessage(StringFormatting.formatWithLocale(
+                "Epoch %d with loss %s",
+                losses.size(),
+                loss
+            ));
         }
+
         progressTracker.logMessage(StringFormatting.formatWithLocale(
             "%s after %d out of %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
-            epoch,
+            losses.size(),
             config.maxEpochs(),
             initialLoss,
-            lastLoss,
+            losses.get(losses.size() - 1),
             stopper.converged() ? "" : " Did not converge"
 
         ));
     }
 
-    private double evaluateLoss(Objective<?> objective, BatchQueue batches, int concurrency) {
-        DoubleAdder totalLoss = new DoubleAdder();
-
-        batches.parallelConsume(
-            new LossEvalConsumer(
-                objective,
-                totalLoss,
-                trainSize
-            ),
-            concurrency,
-            terminationFlag
-        );
-
-        return totalLoss.doubleValue();
-    }
-
-    private void trainEpoch(
-        Objective<?> objective,
-        BatchQueue batches,
-        int concurrency,
-        Updater updater
-    ) {
+    private List<ObjectiveUpdateConsumer> executeBatches(int concurrency, Objective<?> objective, BatchQueue batches) {
         var consumers = new ArrayList<ObjectiveUpdateConsumer>(concurrency);
         for (int i = 0; i < concurrency; i++) {
             consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
         }
-
         batches.parallelConsume(concurrency, consumers, terminationFlag);
+        return consumers;
+    }
 
+    private List<? extends Tensor<? extends Tensor<?>>> avgWeightGradients(List<ObjectiveUpdateConsumer> consumers) {
         List<? extends List<? extends Tensor<?>>> localGradientSums = consumers
             .stream()
             .map(ObjectiveUpdateConsumer::summedWeightGradients)
@@ -159,15 +149,18 @@ public class Training {
             .mapToInt(ObjectiveUpdateConsumer::consumedBatches)
             .sum();
 
+        return averageTensors(localGradientSums, numberOfBatches);
+    }
 
-        var avgWeightGradients = averageTensors(localGradientSums, numberOfBatches);
-        updater.update(avgWeightGradients);
+    private double totalLoss(List<ObjectiveUpdateConsumer> consumers) {
+        return consumers.stream().mapToDouble(ObjectiveUpdateConsumer::lossSum).sum();
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
         private final Objective<?> objective;
         private final long trainSize;
-        private List<? extends Tensor<?>> summedWeightGradients;
+        private final List<? extends Tensor<?>> summedWeightGradients;
+        private double lossSum;
         private int consumedBatches;
 
         ObjectiveUpdateConsumer(
@@ -182,13 +175,14 @@ public class Training {
                 .map(weight -> weight.data().createWithSameDimensions())
                 .collect(Collectors.toList());
             this.consumedBatches = 0;
+            this.lossSum = 0;
         }
 
         @Override
         public void accept(Batch batch) {
             Variable<Scalar> loss = objective.loss(batch, trainSize);
             var ctx = new ComputationContext();
-            ctx.forward(loss);
+            lossSum += ctx.forward(loss).value();
             ctx.backward(loss);
 
             List<? extends Tensor<?>> localWeightGradient = objective
@@ -211,25 +205,10 @@ public class Training {
         int consumedBatches() {
             return consumedBatches;
         }
+
+        double lossSum() {
+            return lossSum;
+        }
     }
 
-    static class LossEvalConsumer implements Consumer<Batch> {
-        private final Objective<?> objective;
-        private final DoubleAdder totalLoss;
-        private final long trainSize;
-
-        LossEvalConsumer(Objective<?> objective, DoubleAdder lossAdder, long trainSize) {
-            this.objective = objective;
-            this.totalLoss = lossAdder;
-            this.trainSize = trainSize;
-        }
-
-        @Override
-        public void accept(Batch batch) {
-            Variable<Scalar> loss = objective.loss(batch, trainSize);
-            ComputationContext ctx = new ComputationContext();
-            totalLoss.add(ctx.forward(loss).value());
-        }
-
-    }
 }
