@@ -21,5 +21,5 @@ package org.neo4j.gds.core.loading;
 
 public interface Capabilities {
 
-    boolean isBackedByDatabase();
+    boolean canWriteToDatabase();
 }
