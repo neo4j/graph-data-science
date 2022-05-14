@@ -55,13 +55,27 @@ abstract class ClusterManager {
         }
     }
 
-    abstract int findClosestCenter(long nodeId);
 
     static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
             return new FloatClusterManager(values, dimensions, k);
         }
         return new DoubleClusterManager(values, dimensions, k);
+    }
+
+    public abstract double euclidean(long nodeId, int centerId);
+
+    public int findClosestCenter(long nodeId) {
+        int community = 0;
+        double smallestDistance = Double.MAX_VALUE;
+        for (int centerId = 0; centerId < k; ++centerId) {
+            double distance = euclidean(nodeId, centerId);
+            if (Double.compare(distance, smallestDistance) < 0) {
+                smallestDistance = distance;
+                community = centerId;
+            }
+        }
+        return community;
     }
 }
 
@@ -105,6 +119,13 @@ class FloatClusterManager extends ClusterManager {
                 clusterCenters[centerId][dimension] += floatKmeansTask.getCenterContribution(centerId)[dimension];
             }
         }
+    }
+
+    @Override
+    public double euclidean(long nodeId, int centerId) {
+        float[] left = nodePropertyValues.floatArrayValue(nodeId);
+        float[] right = clusterCenters[centerId];
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 
     private float floatEuclidean(float[] left, float[] right) {
@@ -164,28 +185,18 @@ class DoubleClusterManager extends ClusterManager {
     }
 
     @Override
+    public double euclidean(long nodeId, int centerId) {
+        double[] left = nodePropertyValues.doubleArrayValue(nodeId);
+        double[] right = clusterCenters[centerId];
+        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+
+    }
+
+    @Override
     public void initialAssignCluster(int i, long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
         System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
     }
 
-    private double doubleEuclidean(double[] left, double[] right) {
-        return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
-    }
-
-    @Override
-    public int findClosestCenter(long nodeId) {
-        var property = nodePropertyValues.doubleArrayValue(nodeId);
-        int community = 0;
-        double smallestDistance = Double.MAX_VALUE;
-        for (int centerId = 0; centerId < k; ++centerId) {
-            double distance = doubleEuclidean(property, clusterCenters[centerId]);
-            if (Double.compare(distance, smallestDistance) < 0) {
-                smallestDistance = distance;
-                community = centerId;
-            }
-        }
-        return community;
-    }
 
 }
