@@ -32,6 +32,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class ConfigKeyValidationTest extends BaseProcTest {
 
+    private static final String newLine = System.lineSeparator();
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class, TestProc.class);
@@ -145,8 +147,8 @@ class ConfigKeyValidationTest extends BaseProcTest {
             () -> runQuery(formatWithLocale("CALL gds.testProc.write('%s', {maxIterations: [1]})", DEFAULT_GRAPH_NAME))
         );
 
-        String expectedMsg = "Multiple errors in configuration arguments:\n" +
-                             "\t\t\t\tThe value of `maxIterations` must be of type `Integer` but was `ArrayList`.\n" +
+        String expectedMsg = "Multiple errors in configuration arguments:" + newLine +
+                             "\t\t\t\tThe value of `maxIterations` must be of type `Integer` but was `ArrayList`." + newLine +
                              "\t\t\t\tNo value specified for the mandatory configuration parameter `writeProperty`";
         assertThat(
             exception,

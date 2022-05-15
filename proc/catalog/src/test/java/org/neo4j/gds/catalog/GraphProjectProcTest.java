@@ -103,6 +103,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class GraphProjectProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER = "CREATE (:A {age: 2})-[:REL {weight: 55}]->(:A)";
+    private static final String newLine = System.lineSeparator();
 
     @BeforeEach
     void setup() throws Exception {
@@ -1188,8 +1189,8 @@ class GraphProjectProcTest extends BaseProcTest {
     void failsOnBothEmptyProjection() {
         String query = "CALL gds.graph.project('g','','')";
 
-        String expectedMsg = "Multiple errors in configuration arguments:\n" +
-                             "\t\t\t\tAn empty node projection was given; at least one node label must be projected.\n" +
+        String expectedMsg = "Multiple errors in configuration arguments:" + newLine +
+                             "\t\t\t\tAn empty node projection was given; at least one node label must be projected." + newLine +
                              "\t\t\t\tAn empty relationship projection was given; at least one relationship type must be projected.";
 
         assertError(
