@@ -77,6 +77,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class NodeSimilarityTest {
 
+    private static final String newLine = System.lineSeparator();
+
     @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL)
     @GdlGraph(graphNamePrefix = "reverse", orientation = REVERSE)
     @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED)
@@ -881,7 +883,7 @@ final class NodeSimilarityTest {
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertThat(result).contains("0,1 0.500000\n" );
+        assertThat(result).contains("0,1 0.500000" + newLine);
 
         nodeSimilarity = new NodeSimilarity(
             graph,
@@ -895,7 +897,7 @@ final class NodeSimilarityTest {
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertThat(result).contains("0,1 0.333333\n" );
+        assertThat(result).contains("0,1 0.333333" + newLine);
 
     }
 

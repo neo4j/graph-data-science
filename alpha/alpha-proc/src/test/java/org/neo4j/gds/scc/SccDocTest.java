@@ -48,6 +48,8 @@ class SccDocTest extends BaseProcTest {
         "CREATE (nBridget)-[:FOLLOW]->(nAlice) " +
         "CREATE (nMichael)-[:FOLLOW]->(nBridget); ";
 
+    private static final String newLine = System.lineSeparator();
+
     @BeforeEach
     void setup() throws Exception {
         runQuery(DB_CYPHER);
@@ -64,17 +66,17 @@ class SccDocTest extends BaseProcTest {
                        "RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component " +
                        "ORDER BY Component DESC";
 
-        String expected = "+-----------------------+\n" +
-                          "| Name      | Component |\n" +
-                          "+-----------------------+\n" +
-                          "| \"Doug\"    | 3         |\n" +
-                          "| \"Mark\"    | 3         |\n" +
-                          "| \"Charles\" | 2         |\n" +
-                          "| \"Alice\"   | 0         |\n" +
-                          "| \"Bridget\" | 0         |\n" +
-                          "| \"Michael\" | 0         |\n" +
-                          "+-----------------------+\n" +
-                          "6 rows\n";
+        String expected = "+-----------------------+" + newLine +
+                          "| Name      | Component |" + newLine +
+                          "+-----------------------+" + newLine +
+                          "| \"Doug\"    | 3         |" + newLine +
+                          "| \"Mark\"    | 3         |" + newLine +
+                          "| \"Charles\" | 2         |" + newLine +
+                          "| \"Alice\"   | 0         |" + newLine +
+                          "| \"Bridget\" | 0         |" + newLine +
+                          "| \"Michael\" | 0         |" + newLine +
+                          "+-----------------------+" + newLine +
+                          "6 rows" + newLine;
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
     }
@@ -86,12 +88,12 @@ class SccDocTest extends BaseProcTest {
                        "}) " +
                        "YIELD setCount, maxSetSize, minSetSize; ";
 
-        String expected = "+------------------------------------+\n" +
-                          "| setCount | maxSetSize | minSetSize |\n" +
-                          "+------------------------------------+\n" +
-                          "| 3        | 3          | 1          |\n" +
-                          "+------------------------------------+\n" +
-                          "1 row\n";
+        String expected = "+------------------------------------+" + newLine +
+                          "| setCount | maxSetSize | minSetSize |" + newLine +
+                          "+------------------------------------+" + newLine +
+                          "| 3        | 3          | 1          |" + newLine +
+                          "+------------------------------------+" + newLine +
+                          "1 row" + newLine;
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
     }
@@ -109,12 +111,12 @@ class SccDocTest extends BaseProcTest {
                        "ORDER BY PartitionSize DESC " +
                        "LIMIT 1 ";
 
-        String expected = "+---------------------------+\n" +
-                          "| Component | PartitionSize |\n" +
-                          "+---------------------------+\n" +
-                          "| 0         | 3             |\n" +
-                          "+---------------------------+\n" +
-                          "1 row\n";
+        String expected = "+---------------------------+" + newLine +
+                          "| Component | PartitionSize |" + newLine +
+                          "+---------------------------+" + newLine +
+                          "| 0         | 3             |" + newLine +
+                          "+---------------------------+" + newLine +
+                          "1 row" + newLine;
 
         assertEquals(expected, runQuery(query, Result::resultAsString));
     }
