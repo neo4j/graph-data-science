@@ -42,7 +42,7 @@ public abstract class FilteredKnnResult {
 
     public abstract long nodePairsConsidered();
 
-    public abstract List<Long> sourceNodes();
+    public abstract NodeFilter sourceNodeFilter();
 
     public LongStream neighborsOf(long nodeId) {
         return neighborList().get(nodeId).elements().map(FilteredNeighborList::clearCheckedFlag);
@@ -55,7 +55,7 @@ public abstract class FilteredKnnResult {
         return Stream
             .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
             .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
-//                .filter(index -> sourceNodes().contains(index + cursor.base))
+                .filter(index -> sourceNodeFilter().test(index + cursor.base))
                 .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
                 .flatMap(Function.identity())
             );
@@ -66,7 +66,7 @@ public abstract class FilteredKnnResult {
         return Stream
             .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
             .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
-//                .filter(index -> sourceNodes().contains(index + cursor.base))
+                .filter(index -> sourceNodeFilter().test(index + cursor.base))
                 .mapToLong(index -> cursor.array[index].size()))
             .sum();
     }
@@ -100,8 +100,8 @@ public abstract class FilteredKnnResult {
             }
 
             @Override
-            public List<Long> sourceNodes() {
-                return List.of();
+            public NodeFilter sourceNodeFilter() {
+                return new NodeFilter(List.of());
             }
 
             @Override

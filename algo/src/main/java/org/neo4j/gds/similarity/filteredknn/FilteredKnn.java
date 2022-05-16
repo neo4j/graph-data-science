@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
@@ -57,8 +56,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private final int sampledK;
     private final double sampleRate;
     private final double similarityCutoff;
-    private final List<Long> sourceNodes;
-    private final TargetNodePredicate targetNodePredicate;
+    private final NodeFilter sourceNodeFilter;
+    private final NodeFilter targetNodeFilter;
     private final int topK;
 
     private long nodePairsConsidered;
@@ -79,7 +78,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         var splittableRandom = getSplittableRandom(config.randomSeed());
         var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         var targetNodes = config.targetNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-        var targetNodePredicate = new TargetNodePredicate(targetNodes);
+        var sourceNodeFilter = new NodeFilter(sourceNodes);
+        var targetNodeFilter = new NodeFilter(targetNodes);
         var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),
@@ -98,8 +98,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             config.sampledK(graph.nodeCount()),
             config.sampleRate(),
             config.similarityCutoff(),
-            sourceNodes,
-            targetNodePredicate,
+            sourceNodeFilter,
+            targetNodeFilter,
             config.topK()
         );
     }
@@ -142,8 +142,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         int sampledK,
         double sampleRate,
         double similarityCutoff,
-        List<Long> sourceNodes,
-        TargetNodePredicate targetNodePredicate,
+        NodeFilter sourceNodeFilter,
+        NodeFilter targetNodeFilter,
         int topK
 
     ) {
@@ -163,8 +163,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         this.sampledK = sampledK;
         this.sampleRate = sampleRate;
         this.similarityCutoff = similarityCutoff;
-        this.sourceNodes = sourceNodes;
-        this.targetNodePredicate = targetNodePredicate;
+        this.sourceNodeFilter = sourceNodeFilter;
+        this.targetNodeFilter = targetNodeFilter;
         this.topK = topK;
     }
 
@@ -223,7 +223,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableFilteredKnnResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, this.sourceNodes);
+            return ImmutableFilteredKnnResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered, this.sourceNodeFilter);
         }
     }
 

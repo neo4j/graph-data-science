@@ -21,10 +21,10 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import java.util.List;
 
-public class TargetNodePredicate {
+public class NodeFilter {
     private final List<Long> nodeIds;
 
-    public TargetNodePredicate(List<Long> nodeIds) {this.nodeIds = nodeIds;}
+    public NodeFilter(List<Long> nodeIds) {this.nodeIds = nodeIds;}
 
     public boolean test(long nodeId) {
         return nodeIds.contains(nodeId);
