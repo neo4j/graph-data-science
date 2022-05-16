@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
@@ -37,6 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class FootballTest {
 
+    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     public static final String GRAPH = TestGraphs.FOOTBALL_GRAPH;
 
