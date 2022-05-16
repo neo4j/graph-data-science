@@ -103,23 +103,21 @@ public final class LinkPredictionTrain {
         // the relationship count estimates depend on both UndirectedEdgeSplitter
         // and the volume set in extractFeaturesAndLabels
         var selectionRatio = (1 + splitConfig.negativeSamplingRatio());
-        double nonTestRelationshipCount = relationshipCount * (1 - splitConfig.testFraction());
+        long nonTestRelationshipCount = (long) (relationshipCount * (1 - splitConfig.testFraction()));
+        long testRelationshipCount = (long) (relationshipCount * splitConfig.testFraction() * selectionRatio);
+        long trainRelationshipCount = (long) (nonTestRelationshipCount * splitConfig.trainFraction() * selectionRatio);
         return List.of(
-            Tasks.leaf("Extract train features",
-                (long) (nonTestRelationshipCount * splitConfig.trainFraction() * selectionRatio)
-            ),
+            Tasks.leaf("Extract train features", trainRelationshipCount),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds())),
+                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * trainRelationshipCount)),
                 numberOfModelSelectionTrials
             ),
             ClassifierTrainer.progressTask("Train best model"),
             Tasks.leaf("Compute train metrics"),
             Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features",
-                    (long) (relationshipCount * splitConfig.testFraction() * selectionRatio)
-                ),
+                Tasks.leaf("Extract test features", testRelationshipCount),
                 Tasks.leaf("Compute test metrics")
             )
         );
@@ -217,9 +215,11 @@ public final class LinkPredictionTrain {
             config.randomSeed()
         );
 
+        var trainRelationshipCount = trainGraph.relationshipCount();
         int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
+            progressTracker.setVolume(pipeline.splitConfig().validationFolds() * trainRelationshipCount);
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
@@ -254,7 +254,7 @@ public final class LinkPredictionTrain {
                     ProgressTracker.NULL_TRACKER
                 );
 
-                progressTracker.logProgress();
+                progressTracker.logProgress(trainRelationshipCount);
             }
 
             // insert the candidates' metrics into trainStats and validationStats
