@@ -49,7 +49,7 @@ class FilteredKnnResultTest {
             1,
             true,
             2,
-            new NodeFilter(List.of())
+            NodeFilter.noOp()
         );
 
         var neighborLists = result.neighborList();

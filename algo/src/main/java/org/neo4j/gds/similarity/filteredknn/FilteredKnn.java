@@ -35,7 +35,6 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -76,10 +75,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         FilteredNeighborFilterFactory neighborFilterFactory
     ) {
         var splittableRandom = getSplittableRandom(config.randomSeed());
-        var sourceNodes = config.sourceNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-        var targetNodes = config.targetNodeFilter().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-        var sourceNodeFilter = new NodeFilter(sourceNodes);
-        var targetNodeFilter = new NodeFilter(targetNodes);
+        var sourceNodeFilter = NodeFilter.create(config.sourceNodeFilter(), graph);
+        var targetNodeFilter = NodeFilter.create(config.targetNodeFilter(), graph);
         var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),

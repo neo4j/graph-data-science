@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
@@ -101,7 +100,7 @@ public abstract class FilteredKnnResult {
 
             @Override
             public NodeFilter sourceNodeFilter() {
-                return new NodeFilter(List.of());
+                return NodeFilter.noOp();
             }
 
             @Override

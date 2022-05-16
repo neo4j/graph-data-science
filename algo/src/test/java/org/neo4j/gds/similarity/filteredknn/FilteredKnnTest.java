@@ -635,14 +635,14 @@ class FilteredKnnTest {
         @Test
         void shouldOnlyProduceResultsForFilteredSourceNode() {
             var filteredSourceNode = idFunction.of("a");
-            var config = ImmutableFilteredKnnBaseConfig.builder()
-                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties(List.of("knn"))
                 .topK(3)
                 .randomJoins(0)
                 .maxIterations(1)
                 .randomSeed(20L)
                 .concurrency(1)
-                .sourceNodeFilter(List.of(filteredSourceNode))
+                .sourceNodeFilter(filteredSourceNode)
                 .build();
             var knnContext = FilteredKnnContext.empty();
             var knn = FilteredKnn.createWithDefaults(graph, config, knnContext);
@@ -657,8 +657,8 @@ class FilteredKnnTest {
         void shouldOnlyProduceResultsForMultipleFilteredSourceNode() {
             var filteredNode1 = idFunction.of("a");
             var filteredNode2 = idFunction.of("b");
-            var config = ImmutableFilteredKnnBaseConfig.builder()
-                .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties("knn")
                 .topK(3)
                 .randomJoins(0)
                 .maxIterations(1)
