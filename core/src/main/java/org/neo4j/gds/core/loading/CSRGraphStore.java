@@ -495,7 +495,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public Graph getGraph(List<NodeLabel> nodeLabels) {
+    public Graph getGraph(Collection<NodeLabel> nodeLabels) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         var filteredNodeProperties = filterNodeProperties(nodeLabels);
 

@@ -213,7 +213,7 @@ public interface GraphStore {
      * @param nodeLabels node label filter
      * @return a node-only graph
      */
-    Graph getGraph(List<NodeLabel> nodeLabels);
+    Graph getGraph(Collection<NodeLabel> nodeLabels);
 
     default Graph getGraph(
         NodeLabel nodeLabel,
