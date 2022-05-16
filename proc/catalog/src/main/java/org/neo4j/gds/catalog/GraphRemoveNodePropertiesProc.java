@@ -73,7 +73,7 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         var removedPropertiesCount = new MutableLong(0);
 
         config.nodeProperties().forEach(propertyKey -> {
-            removedPropertiesCount.add(graphStore.nodePropertyValues(propertyKey).size());
+            removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().size());
             graphStore.removeNodeProperty(propertyKey);
         });
 

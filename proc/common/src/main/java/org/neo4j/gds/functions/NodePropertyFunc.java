@@ -96,7 +96,7 @@ public class NodePropertyFunc {
             return null;
         }
 
-        var propertyValues = graphStore.nodePropertyValues(propertyKey);
+        var propertyValues = graphStore.nodeProperty(propertyKey).values();
 
         switch (propertyValues.valueType()) {
             case LONG:

@@ -134,7 +134,7 @@ class InMemoryNodeCursorTest extends CypherTest {
 
         var propertyName = tokenHolders.propertyKeyTokens().getTokenById(propertyCursor.propertyKey()).name();
         var propertyValue = ((LongValue) propertyCursor.propertyValue()).longValue();
-        assertThat(propertyValue).isEqualTo(graphStore.nodePropertyValues(propertyName).longValue(nodeCursor.getId()));
+        assertThat(propertyValue).isEqualTo(graphStore.nodeProperty(propertyName).values().longValue(nodeCursor.getId()));
 
         assertThat(propertyCursor.next()).isFalse();
     }

@@ -32,7 +32,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -111,8 +110,8 @@ class ModularityOptimizationMutateProcTest extends ModularityOptimizationProcTes
         runQuery(query);
 
         GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), TEST_GRAPH_NAME).graphStore();
-        NodePropertyValues communities = mutatedGraph.nodePropertyValues(mutateProperty());
-        NodePropertyValues seeds = mutatedGraph.nodePropertyValues("seed1");
+        var communities = mutatedGraph.nodeProperty(mutateProperty()).values();
+        var seeds = mutatedGraph.nodeProperty("seed1").values();
         for (int i = 0; i < mutatedGraph.nodeCount(); i++) {
             assertEquals(communities.longValue(i), seeds.longValue(i));
         }

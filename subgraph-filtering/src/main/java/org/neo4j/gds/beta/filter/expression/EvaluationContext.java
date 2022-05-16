@@ -51,7 +51,7 @@ public abstract class EvaluationContext {
             if (!graphStore.hasNodeProperty(propertyKey)) {
                 return DefaultValue.DOUBLE_DEFAULT_FALLBACK;
             } else {
-                NodePropertyValues nodePropertyValues = graphStore.nodePropertyValues(propertyKey);
+                NodePropertyValues nodePropertyValues = graphStore.nodeProperty(propertyKey).values();
                 return propertyType == ValueType.LONG
                     ? Double.longBitsToDouble(nodePropertyValues.longValue(nodeId))
                     : nodePropertyValues.doubleValue(nodeId);

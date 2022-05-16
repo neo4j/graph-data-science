@@ -115,7 +115,8 @@ final class NodePropertySampler {
 
             propertyCharactersSamples.forEach((propertyKey, sampleList) -> {
                 var propertyValue = graphStore
-                    .nodePropertyValues(propertyKey)
+                    .nodeProperty(propertyKey)
+                    .values()
                     .getObject(nodeId);
 
                 int characterCount = 0;
