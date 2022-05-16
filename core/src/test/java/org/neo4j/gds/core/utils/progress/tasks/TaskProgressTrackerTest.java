@@ -199,7 +199,7 @@ public class TaskProgressTrackerTest {
 
         var taskStore = new GlobalTaskStore();
         var taskRegistry = new TaskRegistry("", taskStore);
-        var progressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, () -> taskRegistry);
+        var progressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, jobId -> taskRegistry);
 
         assertThat(taskStore.query("")).isEmpty();
 

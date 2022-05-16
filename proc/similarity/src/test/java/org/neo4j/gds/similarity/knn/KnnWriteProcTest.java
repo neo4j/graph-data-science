@@ -184,9 +184,10 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
 
             var taskStore = new GlobalTaskStore();
 
-            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(
+            pathProc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(
                 getUsername(),
-                taskStore
+                taskStore,
+                jobId
             ));
 
             pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());

@@ -27,6 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -217,7 +218,7 @@ class UserLogProcTest extends BaseProcTest {
         ) throws InterruptedException {
             var task = Tasks.task(taskName, Tasks.leaf("leaf", 3));
 
-            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, taskRegistryFactory,
+            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, new JobId(), taskRegistryFactory,
                 userLogRegistryFactory
             );
             taskProgressTracker.beginSubTask();

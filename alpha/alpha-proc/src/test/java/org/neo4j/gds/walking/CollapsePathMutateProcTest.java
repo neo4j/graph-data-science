@@ -157,4 +157,8 @@ class CollapsePathMutateProcTest extends BaseProcTest implements
     @Disabled
     @Override
     public void shouldUnregisterTaskAfterComputation() {}
+
+    @Disabled
+    @Override
+    public void shouldRegisterTaskWithCorrectJobId() {}
 }

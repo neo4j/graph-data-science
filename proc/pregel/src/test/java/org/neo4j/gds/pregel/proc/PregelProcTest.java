@@ -198,7 +198,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInStreamMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -222,7 +222,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInWriteMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
@@ -246,7 +246,7 @@ public class PregelProcTest extends BaseProcTest {
     @Test
     void cleanupTaskRegistryWhenTheAlgorithmFailsInMutateMode() {
         var taskStore = new TestTaskStore();
-        var taskRegistryFactory = (TaskRegistryFactory) () -> new TaskRegistry(getUsername(), taskStore);
+        var taskRegistryFactory = (TaskRegistryFactory) jobId -> new TaskRegistry(getUsername(), taskStore, jobId);
         try (var transactions = newKernelTransaction(db)) {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;

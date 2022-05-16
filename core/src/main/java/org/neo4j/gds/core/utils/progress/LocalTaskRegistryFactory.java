@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class LocalTaskRegistryFactory implements TaskRegistryFactory {
 
     private final String username;
@@ -30,7 +32,16 @@ public class LocalTaskRegistryFactory implements TaskRegistryFactory {
     }
 
     @Override
-    public TaskRegistry newInstance() {
-        return new TaskRegistry(username, taskStore);
+    public TaskRegistry newInstance(JobId jobId) {
+        taskStore
+            .query(username, jobId)
+            .ifPresent(id -> {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "There's already a job running with jobId '%s'",
+                    jobId.asString()
+                ));
+            });
+
+        return new TaskRegistry(username, taskStore, jobId);
     }
 }

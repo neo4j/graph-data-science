@@ -93,7 +93,7 @@ public class ListProgressProcTest extends BaseProgressTest {
         runQueryWithRowConsumer(
             "CALL gds.beta.listProgress() YIELD jobId RETURN jobId",
             Map.of(),
-            row -> assertDoesNotThrow(() -> JobId.fromString(row.getString("jobId")))
+            row -> assertDoesNotThrow(() -> new JobId(row.getString("jobId")))
         );
     }
 
@@ -161,8 +161,8 @@ public class ListProgressProcTest extends BaseProgressTest {
             @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
-            var taskRegistry = taskRegistryFactory.newInstance();
-            this.taskRegistryFactory = () -> new NonReleasingTaskRegistry(taskRegistry);
+            var taskRegistry = taskRegistryFactory.newInstance(new JobId());
+            this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
             return super.stream(graphName, configuration);
         }
 

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class LocalTaskRegistryFactoryTest {
 
@@ -39,13 +40,13 @@ class LocalTaskRegistryFactoryTest {
     @Test
     void shouldPutAndRemoveDistinctTasks() {
         var task1 = Tasks.leaf("root1");
-        var taskRegistry1 = taskRegistryFactory.newInstance();
+        var taskRegistry1 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry1.registerTask(task1);
 
         assertThat(taskStore.query("")).size().isEqualTo(1);
 
         var task2 = Tasks.leaf("root2");
-        var taskRegistry2 = taskRegistryFactory.newInstance();
+        var taskRegistry2 = taskRegistryFactory.newInstance(new JobId());
         taskRegistry2.registerTask(task2);
 
         assertThat(taskStore.query("")).size().isEqualTo(2);
@@ -53,5 +54,16 @@ class LocalTaskRegistryFactoryTest {
         taskRegistry1.unregisterTask();
 
         assertThat(taskStore.query("")).containsValue(task2).doesNotContainValue(task1);
+    }
+
+    @Test
+    void shouldThrowOnDuplicateJobId() {
+        var jobId = new JobId();
+
+        var task1 = Tasks.leaf("root1");
+        var taskRegistry1 = taskRegistryFactory.newInstance(jobId);
+        taskRegistry1.registerTask(task1);
+
+        assertThrows(IllegalArgumentException.class, () -> taskRegistryFactory.newInstance(jobId));
     }
 }

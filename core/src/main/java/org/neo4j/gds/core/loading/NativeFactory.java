@@ -45,6 +45,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.internal.id.IdGeneratorFactory;
 
 import java.util.List;
@@ -218,7 +219,9 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             task,
             loadingContext.log(),
             graphProjectConfig.readConcurrency(),
-            loadingContext.taskRegistryFactory()
+            graphProjectConfig.jobId(),
+            loadingContext.taskRegistryFactory(),
+            EmptyUserLogRegistryFactory.INSTANCE
         );
     }
 

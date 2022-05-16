@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.FictitiousGraphStoreLoader;
 import org.neo4j.gds.executor.GraphStoreCreator;
 import org.neo4j.gds.executor.GraphStoreFromDatabaseLoader;
@@ -220,7 +221,9 @@ public class GraphProjectProc extends CatalogProc {
             GraphStoreFilter.progressTask(fromGraphStore),
             log,
             config.concurrency(),
-            taskRegistryFactory
+            config.jobId(),
+            taskRegistryFactory,
+            EmptyUserLogRegistryFactory.INSTANCE
         );
 
         var graphStore = GraphStoreFilter.filter(

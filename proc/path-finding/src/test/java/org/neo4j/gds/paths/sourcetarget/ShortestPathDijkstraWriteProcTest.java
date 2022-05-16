@@ -194,7 +194,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
 
             var taskStore = new GlobalTaskStore();
 
-            pathProc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            pathProc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
 
             pathProc.write(
                 "graph",

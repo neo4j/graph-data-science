@@ -147,7 +147,7 @@ class SccProcTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, SccWriteProc.class, proc -> {
             var taskStore = new GlobalTaskStore();
 
-            proc.taskRegistryFactory = () -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore));
+            proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
             proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 TransactionContext.of(proc.api, proc.procedureTransaction)
             );

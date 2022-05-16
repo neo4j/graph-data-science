@@ -36,7 +36,7 @@ import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUE
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.config.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 
-public interface GraphProjectConfig extends BaseConfig {
+public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
     String IMPLICIT_GRAPH_NAME = "";
     String NODE_COUNT_KEY = "nodeCount";

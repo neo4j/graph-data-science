@@ -31,7 +31,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig {
+public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
     String NODE_LABELS_KEY = "nodeLabels";
     String RELATIONSHIP_TYPES_KEY = "relationshipTypes";

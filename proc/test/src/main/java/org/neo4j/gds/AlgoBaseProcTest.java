@@ -52,7 +52,9 @@ import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -167,6 +169,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     class InvocationCountingTaskStore extends GlobalTaskStore {
         public int registerTaskInvocations;
         public int removeTaskInvocations;
+        public List<JobId> seenJobIds = new ArrayList<>();
 
         @Override
         public void store(
@@ -174,6 +177,8 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         ) {
             super.store(username, jobId, task);
             registerTaskInvocations++;
+
+            seenJobIds.add(jobId);
         }
 
         @Override
@@ -194,7 +199,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
             relationshipProjections()
         );
         applyOnProcedure(proc -> {
-            proc.taskRegistryFactory = () -> new TaskRegistry("", taskStore);
+            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
 
             GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
             GraphStoreCatalog.set(
@@ -225,6 +230,40 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                     StringJoining.join(taskStore.taskStream().map(Task::description))
                 )).isEmpty();
             assertThat(taskStore.registerTaskInvocations).isGreaterThan(1);
+        });
+    }
+
+    @Test
+    default void shouldRegisterTaskWithCorrectJobId() {
+        var taskStore = new InvocationCountingTaskStore();
+
+        String loadedGraphName = "loadedGraph";
+        GraphProjectConfig graphProjectConfig = withNameAndRelationshipProjections(
+            "",
+            loadedGraphName,
+            relationshipProjections()
+        );
+        applyOnProcedure(proc -> {
+            proc.taskRegistryFactory = jobId -> new TaskRegistry("", taskStore, jobId);
+
+            GraphStore graphStore = graphLoader(graphProjectConfig).graphStore();
+            GraphStoreCatalog.set(
+                graphProjectConfig,
+                graphStore
+            );
+
+            var someJobId = new JobId();
+            Map<String, Object> mapWithJobId = Map.of("jobId", someJobId);
+
+            Map<String, Object> configMap = createMinimalConfig(CypherMapWrapper.create(mapWithJobId)).toMap();
+            proc.compute(
+                loadedGraphName,
+                configMap,
+                releaseAlgorithm(),
+                true
+            );
+
+            assertThat(taskStore.seenJobIds).containsExactly(someJobId);
         });
     }
 

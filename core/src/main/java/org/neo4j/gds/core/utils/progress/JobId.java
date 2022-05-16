@@ -19,26 +19,27 @@
  */
 package org.neo4j.gds.core.utils.progress;
 
+import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
 
 public final class JobId {
-    private final UUID value;
-
-    public static JobId fromString(String id) {
-        return new JobId(UUID.fromString(id));
-    }
+    private final String value;
 
     public JobId() {
-        this.value = UUID.randomUUID();
+        this.value = UUID.randomUUID().toString();
     }
 
-    private JobId(UUID id) {
+    public JobId(UUID id) {
+        this(id.toString());
+    }
+
+    public JobId(String id) {
         this.value = id;
     }
 
     public String asString() {
-        return value.toString();
+        return value;
     }
 
     @Override
@@ -57,5 +58,23 @@ public final class JobId {
     @Override
     public int hashCode() {
         return Objects.hash(value);
+    }
+
+    public static JobId parse(Object input) {
+        if (input instanceof String) {
+            return new JobId((String) input);
+        } else if (input instanceof JobId) {
+            return (JobId) input;
+        }
+
+        throw new IllegalArgumentException(String.format(
+            Locale.ENGLISH,
+            "Expected JobId or String. Got %s.",
+            input.getClass().getSimpleName()
+        ));
+    }
+
+    public static String asString(JobId jobId) {
+        return jobId.asString();
     }
 }

@@ -17,9 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.progress;
+package org.neo4j.gds.config;
 
-@FunctionalInterface
-public interface TaskRegistryFactory {
-    TaskRegistry newInstance(JobId jobId);
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.utils.progress.JobId;
+
+@Configuration
+public interface JobIdConfig {
+    @Value.Default
+    @Value.Parameter(false)
+    @Configuration.ConvertWith("org.neo4j.gds.core.utils.progress.JobId#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.core.utils.progress.JobId#asString")
+    default JobId jobId() {
+        return new JobId();
+    }
 }

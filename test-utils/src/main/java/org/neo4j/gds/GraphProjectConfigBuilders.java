@@ -27,6 +27,7 @@ import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -61,6 +62,7 @@ public final class GraphProjectConfigBuilders {
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
         Optional<Integer> concurrency,
+        Optional<JobId> jobId,
         Optional<Orientation> globalProjection,
         Optional<Aggregation> globalAggregation,
         Optional<Boolean> validateRelationships
@@ -118,6 +120,7 @@ public final class GraphProjectConfigBuilders {
             .nodeProperties(PropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
             .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
+            .jobId(jobId.orElse(new JobId()))
             .validateRelationships(validateRelationships.orElse(false))
             .build()
             .withNormalizedPropertyMappings();
@@ -133,6 +136,7 @@ public final class GraphProjectConfigBuilders {
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
         Optional<Integer> concurrency,
+        Optional<JobId> jobId,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters
     ) {
@@ -145,6 +149,7 @@ public final class GraphProjectConfigBuilders {
             .readConcurrency(concurrency.orElse(ConcurrencyConfig.DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))
+            .jobId(jobId.orElse(new JobId()))
             .build();
     }
 }
