@@ -113,7 +113,7 @@ public final class LinkPredictionTrain {
                 () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * trainRelationshipCount)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model"),
+            ClassifierTrainer.progressTask("Train best model", trainRelationshipCount),
             Tasks.leaf("Compute train metrics"),
             Tasks.task(
                 "Evaluate on test data",
