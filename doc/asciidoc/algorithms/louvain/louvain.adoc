@@ -209,7 +209,7 @@ include::specific-configuration-write.adoc[]
 | communityCount        | Integer   | The number of communities found.
 | ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
-| modularities          | List of Integer | The modularity scores for each level.
+| modularities          | List of Float | The modularity scores for each level.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
