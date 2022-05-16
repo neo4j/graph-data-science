@@ -121,7 +121,8 @@ final class RefinementPhase {
             return true;
         });
 
-        return new Partition(refinedCommunities, communityVolumesAfterMerge);
+        // We don't use the `communityCount` from the RefinementPhase => set it to `-1` in case we try to read it by mistake.
+        return new Partition(refinedCommunities, communityVolumesAfterMerge, -1L);
     }
 
     private void mergeNodeSubset(

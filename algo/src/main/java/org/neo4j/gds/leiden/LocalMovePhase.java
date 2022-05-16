@@ -44,16 +44,20 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
+    private long communityCount;
+
     static LocalMovePhase create(
         Graph graph,
         HugeLongArray seedCommunities,
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
-        double gamma
+        double gamma,
+        long communityCount
     ) {
 
         return new LocalMovePhase(
             graph,
+            communityCount,
             seedCommunities,
             nodeVolumes,
             communityVolumes,
@@ -63,12 +67,14 @@ final class LocalMovePhase {
 
     private LocalMovePhase(
         Graph graph,
+        long communityCount,
         HugeLongArray seedCommunities,
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma
     ) {
         this.graph = graph;
+        this.communityCount = communityCount;
         this.currentCommunities = seedCommunities;
         this.gamma = gamma;
         this.nodeVolumes = nodeVolumes;
@@ -110,7 +116,7 @@ final class LocalMovePhase {
             );
         }
 
-        return new Partition(currentCommunities, communityVolumes);
+        return new Partition(currentCommunities, communityVolumes, communityCount);
     }
 
     private long findBestCommunity(
@@ -156,6 +162,7 @@ final class LocalMovePhase {
         if (shouldChangeCommunity) {
             moveNodeToNewCommunity(
                 nodeId,
+                currentNodeCommunityId,
                 bestCommunityId,
                 currentNodeVolume
             );
@@ -169,11 +176,16 @@ final class LocalMovePhase {
 
     private void moveNodeToNewCommunity(
         long nodeId,
+        long currentNodeCommunityId,
         long newCommunityId,
         double currentNodeVolume
     ) {
         currentCommunities.set(nodeId, newCommunityId);
         communityVolumes.addTo(newCommunityId, currentNodeVolume);
+
+        if(Double.compare(communityVolumes.get(currentNodeCommunityId), 0.0) == 0) {
+            communityCount--;
+        }
     }
 
     private LongDoubleMap communityRelationshipWeights(long nodeId) {

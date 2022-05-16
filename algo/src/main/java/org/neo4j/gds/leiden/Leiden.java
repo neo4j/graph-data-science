@@ -85,20 +85,24 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray partition = HugeLongArray.newArray(workingGraph.nodeCount());
         partition.setAll(nodeId -> nodeId);
 
+        var communityCount = workingGraph.nodeCount();
+
         boolean didConverge = false;
+
         int iteration;
         // move on with refinement -> aggregation -> local move again
         for (iteration = 0; iteration < maxIterations; iteration++) {
 
             // 1. LOCAL MOVE PHASE - over the singleton partition
-            var localMovePhase = LocalMovePhase.create(workingGraph, partition, nodeVolumes, communityVolumes, gamma);
+            var localMovePhase = LocalMovePhase.create(workingGraph, partition, nodeVolumes, communityVolumes, gamma, communityCount);
             var localMovePhasePartition = localMovePhase.run();
 
             partition = localMovePhasePartition.communities();
             communityVolumes = localMovePhasePartition.communityVolumes();
-            var communitiesCount = Arrays.stream(partition.toArray()).distinct().count();
 
+            var communitiesCount = localMovePhasePartition.communityCount();
             didConverge = communitiesCount == workingGraph.nodeCount();
+
             if (didConverge) {
                 break;
             }
@@ -140,6 +144,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             partition = communityData.seededCommunitiesForNextIteration;
             communityVolumes = communityData.communityVolumes;
             nodeVolumes = communityData.aggregatedNodeSeedVolume;
+            communityCount = communityData.communityCount;
         }
 
         return LeidenResult.of(dendrograms[iteration - 1], iteration, didConverge);
@@ -233,7 +238,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             aggregatedNodeSeedVolume.set(aggregatedCommunityId, volumeOfTheAggregatedCommunity);
             return true;
         });
-        return new CommunityData(seededCommunitiesForNextIteration, aggregatedCommunitySeedVolume, aggregatedNodeSeedVolume);
+        return new CommunityData(seededCommunitiesForNextIteration, aggregatedCommunitySeedVolume, aggregatedNodeSeedVolume, localPhaseCommunityToAggregatedNewId.size());
     }
 
     @Override

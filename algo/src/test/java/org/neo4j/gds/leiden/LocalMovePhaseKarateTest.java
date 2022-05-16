@@ -60,7 +60,7 @@ class LocalMovePhaseKarateTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma);
+        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma, graph.nodeCount());
 
         var communities = localMovePhase.run().communities();
 

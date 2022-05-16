@@ -59,7 +59,7 @@ class RefinementPhaseKarateTest {
 
         double gamma = 1.0 / graph.relationshipCount();
 
-        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma);
+        var localMovePhase = LocalMovePhase.create(graph, seed, nodeVolumes, communityVolumes, gamma, graph.nodeCount());
 
         var localMovePhaseResult = localMovePhase.run();
         var originalCommunities = localMovePhaseResult.communities();

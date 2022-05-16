@@ -85,7 +85,8 @@ class LocalMovePhaseTest {
             HugeLongArray.of(0, 1, 2, 3, 4, 5, 6, 7),
             nodeVolumes,
             communityVolumes,
-            gamma
+            gamma,
+            graph.nodeCount()
         );
 
         var communities = localMovePhase.run().communities();

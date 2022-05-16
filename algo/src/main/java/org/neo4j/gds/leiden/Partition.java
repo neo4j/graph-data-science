@@ -25,10 +25,12 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 class Partition {
     private final HugeLongArray communities;
     private final HugeDoubleArray communityVolumes;
+    private final long communityCount;
 
-    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes) {
+    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes, long communityCount) {
         this.communities = communities;
         this.communityVolumes = communityVolumes;
+        this.communityCount = communityCount;
     }
 
     HugeLongArray communities() {
@@ -37,5 +39,9 @@ class Partition {
 
     HugeDoubleArray communityVolumes() {
         return communityVolumes;
+    }
+
+    long communityCount() {
+        return communityCount;
     }
 }
