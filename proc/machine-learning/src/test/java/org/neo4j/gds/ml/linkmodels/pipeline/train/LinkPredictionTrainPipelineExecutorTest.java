@@ -386,8 +386,17 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
+            var relationshipCount = config
+                .internalRelationshipTypes(graphStore)
+                .stream()
+                .mapToLong(graphStore::relationshipCount)
+                .sum();
             var progressTracker = new TestProgressTracker(
-                LinkPredictionTrainPipelineExecutor.progressTask("Link Prediction Train Pipeline", pipeline),
+                LinkPredictionTrainPipelineExecutor.progressTask(
+                    "Link Prediction Train Pipeline",
+                    pipeline,
+                    relationshipCount
+                ),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE

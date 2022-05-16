@@ -461,7 +461,8 @@ class LinkPredictionTrainTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
-                pipeline.splitConfig().validationFolds(),
+                trainGraph.relationshipCount(),
+                pipeline.splitConfig(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
@@ -552,7 +553,8 @@ class LinkPredictionTrainTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
-                pipeline.splitConfig().validationFolds(),
+                trainGraph.relationshipCount(),
+                pipeline.splitConfig(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
@@ -614,7 +616,8 @@ class LinkPredictionTrainTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
-                pipeline.splitConfig().validationFolds(),
+                trainGraph.relationshipCount(),
+                pipeline.splitConfig(),
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
@@ -713,8 +716,11 @@ class LinkPredictionTrainTest {
             );
     }
 
-    static Task progressTask(int validationFolds, int numberOfModelSelectionTrials) {
-        return Tasks.task("MY TEST TASK", LinkPredictionTrain.progressTasks(validationFolds, numberOfModelSelectionTrials));
+    static Task progressTask(long relationshipCount, LinkPredictionSplitConfig splitConfig, int numberOfModelSelectionTrials) {
+        return Tasks.task(
+            "MY TEST TASK",
+            LinkPredictionTrain.progressTasks(relationshipCount, splitConfig, numberOfModelSelectionTrials)
+        );
     }
 
     private LinkPredictionTrainingPipeline linkPredictionPipeline() {

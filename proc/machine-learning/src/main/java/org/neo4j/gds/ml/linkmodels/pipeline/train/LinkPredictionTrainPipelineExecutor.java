@@ -81,7 +81,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         );
     }
 
-    public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline) {
+    public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline, long relationshipCount) {
         return Tasks.task(taskName, new ArrayList<>() {{
             add(Tasks.leaf("Split relationships"));
             add(Tasks.iterativeFixed(
@@ -90,7 +90,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 pipeline.nodePropertySteps().size()
             ));
             addAll(LinkPredictionTrain.progressTasks(
-                pipeline.splitConfig().validationFolds(),
+                relationshipCount,
+                pipeline.splitConfig(),
                 pipeline.numberOfModelSelectionTrials()
             ));
         }});

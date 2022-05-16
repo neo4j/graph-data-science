@@ -70,9 +70,15 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
 
     @Override
     public Task progressTask(GraphStore graphStore, LinkPredictionTrainConfig config) {
+        var relationshipCount = config
+            .internalRelationshipTypes(graphStore)
+            .stream()
+            .mapToLong(graphStore::relationshipCount)
+            .sum();
         return LinkPredictionTrainPipelineExecutor.progressTask(
             taskName(),
-            PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class)
+            PipelineCatalog.getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class),
+            relationshipCount
         );
     }
 

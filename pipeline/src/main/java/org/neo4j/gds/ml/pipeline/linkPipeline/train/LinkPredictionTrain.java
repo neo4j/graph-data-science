@@ -95,19 +95,31 @@ public final class LinkPredictionTrain {
         this.classIdMap = makeClassIdMap();
     }
 
-    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(
+        long relationshipCount,
+        LinkPredictionSplitConfig splitConfig,
+        int numberOfModelSelectionTrials
+    ) {
+        // the relationship count estimates depend on both UndirectedEdgeSplitter
+        // and the volume set in extractFeaturesAndLabels
+        var selectionRatio = (1 + splitConfig.negativeSamplingRatio());
+        double nonTestRelationshipCount = relationshipCount * (1 - splitConfig.testFraction());
         return List.of(
-            Tasks.leaf("Extract train features"),
+            Tasks.leaf("Extract train features",
+                (long) (nonTestRelationshipCount * splitConfig.trainFraction() * selectionRatio)
+            ),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", validationFolds)),
+                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds())),
                 numberOfModelSelectionTrials
             ),
             ClassifierTrainer.progressTask("Train best model"),
             Tasks.leaf("Compute train metrics"),
             Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features"),
+                Tasks.leaf("Extract test features",
+                    (long) (relationshipCount * splitConfig.testFraction() * selectionRatio)
+                ),
                 Tasks.leaf("Compute test metrics")
             )
         );
