@@ -73,15 +73,16 @@ include::../../../algorithms/common-configuration/common-parameters-named-graph.
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                                                          | Type              | Default | Optional | Description
-| pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
-| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
-| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
-| <<common-configuration-concurrency,concurrency>>              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
-| targetProperty                                                | String            | n/a     | no       | The class of the node. Must be of type Integer.
-| metrics                                                       | List of String    | n/a     | no       | <<nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
-| randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
-| modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
+| Name                                                          | Type              | Default              | Optional | Description
+| pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
+| <<common-configuration-node-labels,nodeLabels>>               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
+| <<common-configuration-relationship-types,relationshipTypes>> | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
+| <<common-configuration-concurrency,concurrency>>              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
+| targetProperty                                                | String            | n/a                  | no       | The class of the node. Must be of type Integer.
+| metrics                                                       | List of String    | n/a                  | no       | <<nodeclassification-pipeline-metrics,Metrics>> used to evaluate the models.
+| randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
+| modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
+| <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
 .Results

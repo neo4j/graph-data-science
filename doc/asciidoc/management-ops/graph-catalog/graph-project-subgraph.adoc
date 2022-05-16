@@ -51,10 +51,11 @@ CALL gds.beta.graph.project.subgraph(
 |===
 
 .Subgraph specific configuration
-[opts="header",cols="1,1,1m,1,5"]
+[opts="header",cols="2,1,2m,1,5"]
 |===
-| Name               | Type    | Default | Optional | Description
-| concurrency        | Integer | 4       | yes      | The number of concurrent threads used for filtering the graph.
+| Name               | Type    | Default              | Optional | Description
+| concurrency        | Integer | 4                    | yes      | The number of concurrent threads used for filtering the graph.
+| jobId              | String  | Generated internally | yes      | An ID that can be provided to more easily track the projection's progress.
 |===
 
 .Results

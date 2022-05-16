@@ -129,3 +129,7 @@ If the property already exists, existing values will be overwritten.
 writeConcurrency - Integer::
 In `write` mode this parameter controls the parallelism of write operations.
 The Default is `concurrency`
+
+[[common-configuration-jobid]]
+jobId - String::
+An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's <<logging, logging capabilities>>.

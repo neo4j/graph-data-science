@@ -38,6 +38,7 @@ Second, if the `jobId` parameter is set it will show a detailed view for the giv
 The detailed view will produce a row for each step or task that job will perform during execution.
 It will also show how tasks are structured as a tree and print progress for each individual task.
 
+
 [[logging-progress-logging-syntax]]
 === Syntax
 
@@ -63,7 +64,7 @@ YIELD
 |===
 
 .Results
-[opts="header",cols="1m,1,6"]
+[opts="header",cols="2m,1,6"]
 |===
 | Name          | Type      | Description
 | jobId         | String    | A generated identifier of the running task.
@@ -74,6 +75,13 @@ YIELD
 | timeStarted   | LocalTime | The local wall clock time when the task has been started.
 | elapsedTime   | Duration  | The duration from `timeStarted` to now.
 |===
+
+[NOTE]
+====
+Some kinds of jobs that typically take while to run, like graph projections and running algorithms, takes an optional `jobId` in their configuration parameter maps.
+This can make tracking them easier as they will then be listed under the provided `jobId` in the `gds.beta.listProgress` results.
+For algorithms, see <<common-configuration-jobid, the `jobId` parameter documentation>> for more on this.
+====
 
 
 [[logging-progress-logging-examples]]
@@ -97,6 +105,7 @@ YIELD
 | "d21bb4ca-e1e9-4a31-a487-42ac8c9c1a0d" | "Node2Vec" | "42%"
 |===
 
+
 [[logging-user-warnings]]
 [.alpha]
 == User Log
@@ -104,6 +113,7 @@ YIELD
 Hints and warnings can also be tracked through the GDS library and be accessed via Cypher queries.
 The GDS library keeps track for each user their 100 most recent tasks that have generated hints or warnings and stores them in memory.
 When a user calls procedure `gds.alpha.userLog`, their respective list of generated hints and warnings is returned.
+
 
 [[userlog-syntax]]
 === Syntax
@@ -126,6 +136,7 @@ YIELD
 |timeStarted      | LocalTime      | The local wall clock time when the task has been started.
 | message      | String    | A hint or warning associated with the task.
 |===
+
 
 [[userlog-examples]]
 === Examples

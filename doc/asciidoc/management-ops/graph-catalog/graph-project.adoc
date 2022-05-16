@@ -69,11 +69,12 @@ NOTE: To get information about a stored graph, such as its schema, one can use <
 .Configuration
 [opts="header",cols="1,1,1,4"]
 |===
-| Name                   | Type                  | Default | Description
-| readConcurrency        | Integer               | 4       | The number of concurrent threads used for creating the graph.
-| nodeProperties         | String, List or Map   | {}      | The node properties to load for _all_ node projections.
-| relationshipProperties | String, List or Map   | {}      | The relationship properties to load for _all_ relationship projections.
-| validateRelationships  | Boolean               | false   | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
+| Name                   | Type                  | Default              | Description
+| readConcurrency        | Integer               | 4                    | The number of concurrent threads used for creating the graph.
+| nodeProperties         | String, List or Map   | {}                   | The node properties to load for _all_ node projections.
+| relationshipProperties | String, List or Map   | {}                   | The relationship properties to load for _all_ relationship projections.
+| validateRelationships  | Boolean               | false                | Whether to throw an error if the `relationshipProjection` includes relationships between nodes not part of the `nodeProjection`.
+| jobId                  | String                | Generated internally | An ID that can be provided to more easily track the projection's progress.
 |===
 
 .Results
