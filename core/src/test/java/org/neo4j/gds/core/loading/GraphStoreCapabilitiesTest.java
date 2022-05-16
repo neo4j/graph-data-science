@@ -36,7 +36,7 @@ class GraphStoreCapabilitiesTest extends BaseProcTest {
             .build()
             .build();
         var capabilities = graphStore.capabilities();
-        assertThat(capabilities.isBackedByDatabase()).isTrue();
+        assertThat(capabilities.canWriteToDatabase()).isTrue();
     }
 
     @Test
@@ -48,6 +48,6 @@ class GraphStoreCapabilitiesTest extends BaseProcTest {
             .graphStore();
 
         var capabilities = graphStore.capabilities();
-        assertThat(capabilities.isBackedByDatabase()).isTrue();
+        assertThat(capabilities.canWriteToDatabase()).isTrue();
     }
 }

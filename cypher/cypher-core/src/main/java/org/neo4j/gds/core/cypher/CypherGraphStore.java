@@ -60,7 +60,7 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
 
     @Override
     public Capabilities capabilities() {
-        return ImmutableStaticCapabilities.builder().from(super.capabilities()).isBackedByDatabase(false).build();
+        return ImmutableStaticCapabilities.builder().from(super.capabilities()).canWriteToDatabase(false).build();
     }
 
     @Override

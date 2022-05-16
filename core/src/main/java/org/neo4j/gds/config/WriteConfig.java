@@ -52,7 +52,7 @@ public interface WriteConfig extends ConcurrencyConfig {
         @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,
         @SuppressWarnings("unused") Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (!graphStore.capabilities().isBackedByDatabase()) {
+        if (!graphStore.capabilities().canWriteToDatabase()) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
