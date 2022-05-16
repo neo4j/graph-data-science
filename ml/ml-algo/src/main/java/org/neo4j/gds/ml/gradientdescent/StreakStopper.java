@@ -26,7 +26,7 @@ class StreakStopper implements TrainingStopper {
     private final int maxEpochs;
     private final double tolerance;
 
-    private int count;
+    private int ranEpochs;
     private double bestLoss;
     private int unproductiveStreak;
 
@@ -41,9 +41,9 @@ class StreakStopper implements TrainingStopper {
     @Override
     public void registerLoss(double loss) {
         if(terminated()) {
-            return; // or throw???
+            throw new IllegalStateException("Does not accept losses after convergence");
         }
-        if(count >= minEpochs) {
+        if(ranEpochs >= minEpochs) {
             if (loss - bestLoss >= - tolerance * Math.abs(bestLoss)) {
                 unproductiveStreak++;
             } else {
@@ -51,13 +51,13 @@ class StreakStopper implements TrainingStopper {
             }
         }
 
-        count++;
+        ranEpochs++;
         bestLoss = Math.min(bestLoss, loss);
     }
 
     @Override
     public boolean terminated() {
-        return count >= maxEpochs ||
+        return ranEpochs >= maxEpochs ||
                unproductiveStreak >= patience;
     }
 

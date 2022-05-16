@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class StreakStopperTest {
 
@@ -105,5 +106,15 @@ class StreakStopperTest {
         assertThat(stopper.terminated()).isFalse();
         stopper.registerLoss(0.5);
         assertThat(stopper.terminated()).isTrue();
+    }
+
+    @Test
+    void failOnRegisteringOnConvergedStopper() {
+        var stopper = new StreakStopper(0, 1, 100, 1e-2);
+
+        stopper.registerLoss(100);
+        stopper.registerLoss(101);
+
+        assertThatThrownBy(() -> stopper.registerLoss(1)).hasMessageContaining("Does not accept losses after convergence");
     }
 }

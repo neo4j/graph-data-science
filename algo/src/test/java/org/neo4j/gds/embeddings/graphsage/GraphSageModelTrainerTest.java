@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import com.carrotsearch.hppc.LongHashSet;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
@@ -32,7 +31,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
@@ -47,8 +45,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -375,65 +371,5 @@ class GraphSageModelTrainerTest {
 
         // Needs deterministic weights updates
         assertThat(result).usingRecursiveComparison().withComparatorForType(new DoubleComparator(1e-10), Double.class).isEqualTo(otherResult);
-    }
-
-    @Test
-    void seededNeighborBatch() {
-        var batchSize = 5;
-        var seed = 20L;
-        var config = configBuilder
-            .modelName("randomSeed")
-            .embeddingDimension(12)
-            .randomSeed(seed)
-            .batchSize(batchSize)
-            .build();
-
-        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-
-        var partitions = PartitionUtils.rangePartitionWithBatchSize(
-            graph.nodeCount(),
-            batchSize,
-            Function.identity()
-        );
-
-        for (int i = 0; i < partitions.size(); i++) {
-            var localSeed = i + seed;
-            var neighborBatch = trainer.neighborBatch(graph, partitions.get(i), localSeed);
-            var otherNeighborBatch = otherTrainer.neighborBatch(graph, partitions.get(i), localSeed);
-            assertThat(neighborBatch).containsExactlyElementsOf(otherNeighborBatch.boxed().collect(Collectors.toList()));
-        }
-    }
-
-    @Test
-    void seededNegativeBatch() {
-        var batchSize = 5;
-        var seed = 20L;
-        var config = configBuilder
-            .modelName("randomSeed")
-            .embeddingDimension(12)
-            .randomSeed(seed)
-            .batchSize(batchSize)
-            .build();
-
-        var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-        var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
-
-        var partitions = PartitionUtils.rangePartitionWithBatchSize(
-            graph.nodeCount(),
-            batchSize,
-            Function.identity()
-        );
-
-        var neighborsSet = new LongHashSet(5);
-        neighborsSet.addAll(0, 3, 5, 6, 10);
-
-        for (int i = 0; i < partitions.size(); i++) {
-            var localSeed = i + seed;
-            var negativeBatch = trainer.negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
-            var otherNegativeBatch = otherTrainer.negativeBatch(graph, Math.toIntExact(partitions.get(i).nodeCount()), neighborsSet, localSeed);
-
-            assertThat(negativeBatch).containsExactlyElementsOf(otherNegativeBatch.boxed().collect(Collectors.toList()));
-        }
     }
 }
