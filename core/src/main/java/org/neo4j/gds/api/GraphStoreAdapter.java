@@ -158,21 +158,6 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public ValueType nodePropertyType(String propertyKey) {
-        return graphStore.nodePropertyType(propertyKey);
-    }
-
-    @Override
-    public PropertyState nodePropertyState(String propertyKey) {
-        return graphStore.nodePropertyState(propertyKey);
-    }
-
-    @Override
-    public NodePropertyValues nodePropertyValues(String propertyKey) {
-        return graphStore.nodePropertyValues(propertyKey);
-    }
-
-    @Override
     public void addNodeProperty(
        Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues
     ) {

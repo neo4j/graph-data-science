@@ -127,7 +127,7 @@ public class NodeStore {
         graphStore.nodeLabels().forEach(label -> {
             var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
             graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
-                properties.put(propertySchema.key(), graphStore.nodePropertyValues(propertySchema.key()));
+                properties.put(propertySchema.key(), graphStore.nodeProperty(propertySchema.key()).values());
             });
         });
 

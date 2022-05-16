@@ -108,7 +108,7 @@ class Node2VecMutateProcTest
     }
 
     private void assertMutatedGraph(GraphStore mutatedGraphStore) {
-        var mutatedProperties = mutatedGraphStore.nodePropertyValues(mutateProperty());
+        var mutatedProperties = mutatedGraphStore.nodeProperty(mutateProperty()).values();
         mutatedGraphStore.nodes().forEachNode(nodeId -> {
             var embedding = mutatedProperties.floatArrayValue(nodeId);
             assertThat(embedding)
