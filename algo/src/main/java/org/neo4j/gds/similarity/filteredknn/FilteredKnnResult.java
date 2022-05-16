@@ -50,11 +50,12 @@ public abstract class FilteredKnnResult {
 
     // http://www.flatmapthatshit.com/
     public Stream<SimilarityResult> streamSimilarityResult() {
+        // [[],[],[]]
         var neighborList = neighborList();
         return Stream
             .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
             .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                .filter(index -> sourceNodes().contains(index + cursor.base))
+//                .filter(index -> sourceNodes().contains(index + cursor.base))
                 .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
                 .flatMap(Function.identity())
             );
@@ -65,7 +66,7 @@ public abstract class FilteredKnnResult {
         return Stream
             .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
             .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                .filter(index -> sourceNodes().contains(index + cursor.base))
+//                .filter(index -> sourceNodes().contains(index + cursor.base))
                 .mapToLong(index -> cursor.array[index].size()))
             .sum();
     }
