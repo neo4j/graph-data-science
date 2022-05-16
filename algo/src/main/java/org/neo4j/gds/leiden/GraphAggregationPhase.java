@@ -70,10 +70,14 @@ class GraphAggregationPhase {
             .build();
 
         terminationFlag.assertRunning();
-        workingGraph.forEachNode((nodeId) -> {
-            nodesBuilder.addNode(communities.get(nodeId));
-            return true;
-        });
+
+        ParallelUtil.parallelForEachNode(
+            workingGraph.nodeCount(),
+            concurrency,
+            (nodeId) -> {
+                nodesBuilder.addNode(communities.get(nodeId));
+            }
+        );
 
         terminationFlag.assertRunning();
 

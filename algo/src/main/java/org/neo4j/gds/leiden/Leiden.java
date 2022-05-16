@@ -136,14 +136,17 @@ public class Leiden extends Algorithm<HugeLongArray> {
 
     private void initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes) {
         if (rootGraph.hasRelationshipProperty()) {
-            rootGraph.forEachNode(nodeId -> {
-                rootGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                    nodeVolumes.addTo(nodeId, w);
-                    communityVolumes.addTo(nodeId, w);
-                    return true;
-                });
-                return true;
-            });
+            ParallelUtil.parallelForEachNode(
+                rootGraph.nodeCount(),
+                concurrency,
+                nodeId -> {
+                    rootGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                        nodeVolumes.addTo(nodeId, w);
+                        communityVolumes.addTo(nodeId, w);
+                        return true;
+                    });
+                }
+            );
         } else {
             nodeVolumes.setAll(rootGraph::degree);
             communityVolumes.setAll(rootGraph::degree);

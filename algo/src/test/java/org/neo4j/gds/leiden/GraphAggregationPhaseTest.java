@@ -80,7 +80,7 @@ class GraphAggregationPhaseTest {
             communities,
             1L,
             Pools.DEFAULT_SINGLE_THREAD_POOL,
-            1,
+            4,
             TerminationFlag.RUNNING_TRUE
         );
 
