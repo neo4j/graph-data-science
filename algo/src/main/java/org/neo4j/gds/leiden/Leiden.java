@@ -121,7 +121,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
             workingGraph = graphAggregationPhase.run();
 
             // Post-aggregate step: MAINTAIN PARTITION
-            var communityData = iterationCommunityMapping(
+            var communityData = maintainPartition(
                 workingGraph,
                 partition,
                 refinedCommunityVolumes
@@ -180,7 +180,7 @@ public class Leiden extends Algorithm<HugeLongArray> {
         return maxCommunityId.get();
     }
 
-    static @NotNull CommunityData iterationCommunityMapping(
+    static @NotNull CommunityData maintainPartition(
         Graph workingGraph,
         @NotNull HugeLongArray localPhaseCommunities,
         HugeDoubleArray refinedCommunityVolumes

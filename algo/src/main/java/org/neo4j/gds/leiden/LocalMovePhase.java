@@ -128,9 +128,15 @@ final class LocalMovePhase {
             double modularityGain =
                 candidateCommunityRelationshipsWeight - currentNodeVolume * communityVolumes.get(candidateCommunityId) * gamma;
 
-            boolean improves = modularityGain > currentBestGain
-                               || (Double.compare(modularityGain, currentBestGain) == 0
-                                   && candidateCommunityId < bestCommunityId && modularityGain > 0);
+            boolean improves = modularityGain > currentBestGain // gradually better modularity gain
+                               // tie-breaking case; consider only positive modularity gains
+                               || (modularityGain > 0
+                                   // when the current gain is equal to the best gain
+                                   && Double.compare(modularityGain, currentBestGain) == 0
+                                   // consider it as improvement only if the candidate community ID is lower than the best community ID
+                                   // similarly to the Louvain implementation
+                                   && candidateCommunityId < bestCommunityId);
+
             if (improves) {
                 bestCommunityId = candidateCommunityId;
                 currentBestGain = modularityGain;

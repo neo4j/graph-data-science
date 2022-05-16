@@ -90,7 +90,7 @@ class LeidenTest {
     }
 
     @Test
-    void testCommunityMappingForNextPhase() {
+    void maintainPartition() {
         var localCommunities = HugeLongArray.of(1, 1, 1, 3, 3, 3, 1, 3);
         var refinedCommunities = HugeLongArray.of(1, 1, 2, 3, 4, 3, 1, 3);
         var aggregationPhase = new GraphAggregationPhase(
@@ -104,7 +104,7 @@ class LeidenTest {
         );
         HugeDoubleArray refinedVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         var workingGraph = aggregationPhase.run();
-        var nextCommunities = Leiden.iterationCommunityMapping(
+        var nextCommunities = Leiden.maintainPartition(
             workingGraph,
             localCommunities, refinedVolumes
 
