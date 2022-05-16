@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -78,7 +77,7 @@ public abstract class KmeansTask implements Runnable {
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        if (nodePropertyValues.valueType() == ValueType.DOUBLE_ARRAY) {
+        if (clusterManager instanceof DoubleClusterManager) {
             return new DoubleKmeansTask(
                 clusterManager,
                 nodePropertyValues,
