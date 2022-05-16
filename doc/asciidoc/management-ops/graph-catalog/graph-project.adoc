@@ -1,5 +1,5 @@
 [[catalog-graph-project]]
-= Creating graphs
+= Projecting graphs using native projections
 
 [abstract]
 --
