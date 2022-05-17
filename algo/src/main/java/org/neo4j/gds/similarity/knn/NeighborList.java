@@ -81,6 +81,9 @@ class NeighborList {
     static final int NOT_INSERTED = 0;
     private static final int INSERTED = 1;
 
+    // a listener that sees every neighbour someone tries to add
+    private final NeighbourConsumer neighbourConsumer;
+
     // maximum number of elements, aka the top K
     private final int elementCapacity;
     // currently stored number of elements
@@ -90,13 +93,14 @@ class NeighborList {
     // every item occupies two entries in the array, [ doubleToLongBits(priority), element ]
     private final long[] priorityElementPairs;
 
-    NeighborList(int elementCapacity) {
+    NeighborList(int elementCapacity, NeighbourConsumer neighbourConsumer) {
         if (elementCapacity <= 0) {
             throw new IllegalArgumentException("Bound cannot be smaller than or equal to 0");
         }
 
         this.elementCapacity = elementCapacity;
         this.priorityElementPairs = new long[elementCapacity * 2];
+        this.neighbourConsumer = neighbourConsumer;
     }
 
     public LongStream elements() {
@@ -125,6 +129,8 @@ class NeighborList {
      * This allows KNN to just add the return values together without having the check on each of them.
      */
     public long add(long element, double priority, SplittableRandom random, double perturbationRate) {
+        neighbourConsumer.offer(element, priority);
+
         int insertIdx = 0;
         int currNumElementsWithPriority = elementCount * 2;
 

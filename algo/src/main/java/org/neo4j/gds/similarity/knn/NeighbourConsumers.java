@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
-public class FilteredKnnNeighborFilterFactory implements FilteredNeighborFilterFactory {
+/**
+ * A holder for {@link org.neo4j.gds.similarity.knn.NeighbourConsumer}s. This instrument helps us extend KNN.
+ */
+public interface NeighbourConsumers {
+    /**
+     * A holder for sending data into the void, which is the default behaviour in regular KNN
+     */
+    NeighbourConsumers devNull = nodeId -> (element, priority) -> { /* do nothing */ };
 
-    private final long nodeCount;
-
-    public FilteredKnnNeighborFilterFactory(long nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    @Override
-    public FilteredNeighborFilter create() {
-        return new FilteredKnnNeighborFilter(nodeCount);
-    }
+    NeighbourConsumer get(long nodeId);
 }

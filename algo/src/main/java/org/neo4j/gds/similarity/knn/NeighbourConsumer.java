@@ -17,8 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
-public interface FilteredNeighborFilterFactory {
-    FilteredNeighborFilter create();
+/**
+ * During KNN execution, this listener is offered every neighbour we encounter.
+ */
+public interface NeighbourConsumer {
+    NeighbourConsumer devNull = (element, priority) -> { /* do nothing */ };
+
+    void offer(long element, double priority);
 }
