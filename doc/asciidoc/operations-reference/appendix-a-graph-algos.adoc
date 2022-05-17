@@ -309,7 +309,8 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
-.2+<.^| Leiden
+.3+<.^| Leiden
+| `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`
 |===

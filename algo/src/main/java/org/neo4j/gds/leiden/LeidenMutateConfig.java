@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.leiden;
 
-
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface LeidenStreamConfig extends LeidenBaseConfig {
-    static LeidenStreamConfig of(CypherMapWrapper userInput) {
-        return new LeidenStreamConfigImpl(userInput);
+public interface LeidenMutateConfig extends LeidenBaseConfig, MutatePropertyConfig {
+
+    static LeidenMutateConfig of(CypherMapWrapper userInput) {
+        return new LeidenMutateConfigImpl(userInput);
     }
+
 }
