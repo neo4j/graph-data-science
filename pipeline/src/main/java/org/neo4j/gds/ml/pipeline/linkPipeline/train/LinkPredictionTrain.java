@@ -210,11 +210,10 @@ public final class LinkPredictionTrain {
             config.randomSeed()
         );
 
-        var trainRelationshipCount = trainGraph.relationshipCount();
         int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
-            progressTracker.setVolume(pipeline.splitConfig().validationFolds() * trainRelationshipCount);
+            progressTracker.setSteps(pipeline.splitConfig().validationFolds());
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
@@ -249,7 +248,7 @@ public final class LinkPredictionTrain {
                     ProgressTracker.NULL_TRACKER
                 );
 
-                progressTracker.logProgress(trainRelationshipCount);
+                progressTracker.logSteps(1);
             }
 
             // insert the candidates' metrics into trainStats and validationStats
