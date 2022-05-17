@@ -448,9 +448,7 @@ public class CSRGraphStore implements GraphStore {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
                 var removedTopology = graphStore.relationships.remove(relationshipType);
-                if (removedTopology != null) {
-                    builder.deletedRelationships(removedTopology.elementCount());
-                }
+                builder.deletedRelationships(removedTopology == null ? 0 : removedTopology.elementCount());
 
                 var removedProperties = graphStore.relationshipProperties.remove(relationshipType);
 
