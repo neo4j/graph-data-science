@@ -262,7 +262,7 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public Graph getGraph(List<NodeLabel> nodeLabels) {
+    public Graph getGraph(Collection<NodeLabel> nodeLabels) {
         return graphStore.getGraph(nodeLabels);
     }
 
