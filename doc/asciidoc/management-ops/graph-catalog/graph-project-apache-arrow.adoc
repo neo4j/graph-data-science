@@ -168,10 +168,10 @@ The following table describes the node columns with reserved names.
 [[arrow-relationship-columns]]
 [opts=header,cols="1m,1,1,1,1"]
 |===
-| Name      | Type              | Optional | Nullable   | Description
-| sourceId  | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
-| targetId  | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
-| type      | String or Integer | Yes      | No         | Single relationship type. Either a string literal or a dictionary encoded number.
+| Name              | Type              | Optional | Nullable   | Description
+| sourceId          | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
+| targetId          | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
+| relationshipType  | String or Integer | Yes      | No         | Single relationship type. Either a string literal or a dictionary encoded number.
 |===
 
 Any additional column is interpreted as a relationship property.
