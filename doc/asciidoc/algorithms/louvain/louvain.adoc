@@ -234,7 +234,7 @@ YIELD
   communityCount: Integer,
   ranLevels: Integer,
   modularity: Float,
-  modularities: List of Integer,
+  modularities: List of Float,
   communityDistribution: Map,
   configuration: Map
 ----
