@@ -19,12 +19,19 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import com.carrotsearch.hppc.IntObjectHashMap;
+import com.carrotsearch.hppc.IntObjectMap;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
+import org.neo4j.gds.core.loading.LabelInformation;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NodeFilterTest {
@@ -43,10 +50,57 @@ class NodeFilterTest {
             .hasMessage("Invalid types in list. Expected Longs or Nodes but found [Double]");
 
         // String is valid as scalar but not in a list
-//        assertThatNoException().isThrownBy(() -> NodeFilter.create("foo", idMap)); // Not implemented yet
+        assertThatNoException().isThrownBy(() -> NodeFilter.create("foo", idMap));
         assertThatThrownBy(() -> NodeFilter.create(List.of(validInput, "foo"), idMap))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid types in list. Expected Longs or Nodes but found [String]");
+    }
+
+    @Test
+    void shouldFilterBasedOnLabel() {
+        // set up an idMap with four nodes and two labels
+        var labelOne = NodeLabel.of("one");
+        var labelTwo = NodeLabel.of("two");
+
+        IntObjectMap<List<NodeLabel>> labelTokenNodeLabelMappings = new IntObjectHashMap<List<NodeLabel>>();
+        labelTokenNodeLabelMappings.put(1, Collections.singletonList(labelOne));
+        labelTokenNodeLabelMappings.put(2, Collections.singletonList(labelTwo));
+
+        var labelInformationBuilder = LabelInformation.builder(4, labelTokenNodeLabelMappings);
+        labelInformationBuilder.addNodeIdToLabel(labelOne, 0);
+        labelInformationBuilder.addNodeIdToLabel(labelTwo, 1);
+        labelInformationBuilder.addNodeIdToLabel(labelOne, 2);
+        labelInformationBuilder.addNodeIdToLabel(labelTwo, 3);
+
+        var arrayIdMapBuilder = ArrayIdMapBuilder.of(4);
+        arrayIdMapBuilder.allocate(4);
+        var graphIds = arrayIdMapBuilder.array();
+        graphIds.set(0, 0);
+        graphIds.set(1, 1);
+        graphIds.set(2, 2);
+        graphIds.set(3, 3);
+        var arrayIdMap = arrayIdMapBuilder.build(labelInformationBuilder, 3, 1);
+
+        // test that the idMap is as expected
+        assertThat(arrayIdMap.hasLabel(0, labelOne)).isTrue();
+        assertThat(arrayIdMap.hasLabel(1, labelTwo)).isTrue();
+        assertThat(arrayIdMap.hasLabel(2, labelOne)).isTrue();
+        assertThat(arrayIdMap.hasLabel(3, labelTwo)).isTrue();
+
+        // create a node filter based on the idMap
+        var nodeFilterOne = NodeFilter.create("one", arrayIdMap);
+        var nodeFilterTwo = NodeFilter.create("two", arrayIdMap);
+
+        // test that the filter correctly filters based on the label
+        assertThat(nodeFilterOne.test(0)).isTrue();
+        assertThat(nodeFilterOne.test(1)).isFalse();
+        assertThat(nodeFilterOne.test(2)).isTrue();
+        assertThat(nodeFilterOne.test(3)).isFalse();
+
+        assertThat(nodeFilterTwo.test(0)).isFalse();
+        assertThat(nodeFilterTwo.test(1)).isTrue();
+        assertThat(nodeFilterTwo.test(2)).isFalse();
+        assertThat(nodeFilterTwo.test(3)).isTrue();
     }
 
     @Test

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.graphdb.Node;
 
@@ -39,7 +40,7 @@ public class NodeFilter implements LongPredicate {
 
         if (input instanceof String) {
             // parse as label
-            return parseFromString((String) input);
+            return parseFromString((String) input, idMap);
         }
 
         Set<Long> nodeIds = null;
@@ -65,8 +66,8 @@ public class NodeFilter implements LongPredicate {
         return new NodeFilter(nodeIds);
     }
 
-    private static NodeFilter parseFromString(String input) {
-        throw new UnsupportedOperationException("Not implemented yet");
+    private static NodeFilter parseFromString(String input, IdMap idMap) {
+        return new NodeFilter(input, idMap);
     }
 
     private static Set<Long> parseFromLong(Long input, IdMap idMap) {
@@ -109,14 +110,26 @@ public class NodeFilter implements LongPredicate {
     }
 
     private final Set<Long> nodeIds;
+    private final NodeLabel nodeLabel;
+    private final IdMap idMap;
 
     private NodeFilter(Set<Long> nodeIds) {
         this.nodeIds = nodeIds;
+        this.nodeLabel = null;
+        this.idMap = null;
+    }
+
+    private NodeFilter(String labelString, IdMap idMap) {
+        this.nodeIds = null;
+        this.nodeLabel = NodeLabel.of(labelString);
+        this.idMap = idMap;
     }
 
     @Override
     public boolean test(long nodeId) {
-        return nodeIds.contains(nodeId);
+        return null == nodeIds
+            ? idMap.hasLabel(nodeId, nodeLabel)
+            : nodeIds.contains(nodeId);
     }
 
     private static class NoOpNodeFilter extends NodeFilter {
