@@ -82,11 +82,15 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     public static Task progressTask(String taskName, LinkPredictionTrainingPipeline pipeline, long relationshipCount) {
+        var sizes = pipeline.splitConfig().expectedSetSizes(relationshipCount);
         return Tasks.task(taskName, new ArrayList<>() {{
-            add(Tasks.leaf("Split relationships"));
+            add(Tasks.leaf(
+                "Split relationships",
+                sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
+            ));
             add(Tasks.iterativeFixed(
                 "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
+                () -> List.of(Tasks.leaf("Step", 10 * sizes.featureInputSize())),
                 pipeline.nodePropertySteps().size()
             ));
             addAll(LinkPredictionTrain.progressTasks(

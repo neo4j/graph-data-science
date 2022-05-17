@@ -71,7 +71,7 @@ public class RelationshipSplitter {
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask("Split relationships");
 
         splitConfig.validateAgainstGraphStore(graphStore);
 
@@ -90,7 +90,7 @@ public class RelationshipSplitter {
 
         graphStore.deleteRelationships(RelationshipType.of(testComplementRelationshipType));
 
-        progressTracker.endSubTask();
+        progressTracker.endSubTask("Split relationships");
     }
 
     private void validateTestSplit(GraphStore graphStore) {

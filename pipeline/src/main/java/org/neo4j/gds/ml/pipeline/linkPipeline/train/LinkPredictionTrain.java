@@ -102,17 +102,17 @@ public final class LinkPredictionTrain {
     ) {
         var sizes = splitConfig.expectedSetSizes(relationshipCount);
         return List.of(
-            Tasks.leaf("Extract train features", sizes.trainSize()),
+            Tasks.leaf("Extract train features", sizes.trainSize() * 3),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * sizes.trainSize())),
+                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * sizes.trainSize() * 5)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model", sizes.trainSize()),
+            ClassifierTrainer.progressTask("Train best model", sizes.trainSize() * 5),
             Tasks.leaf("Compute train metrics", sizes.trainSize()),
             Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features", sizes.testSize()),
+                Tasks.leaf("Extract test features", sizes.testSize() * 3),
                 Tasks.leaf("Compute test metrics", sizes.testSize())
             )
         );
