@@ -62,7 +62,7 @@ public class FilteredKnnIdMappingTest extends BaseTest {
             .maxIterations(1)
             .randomSeed(20L)
             .concurrency(1)
-            .sourceNodeFilter(NodeFilter.create(lowestNeoId, graph))
+            .sourceNodeFilter(NodeFilterSpec.create(lowestNeoId))
             .build();
         var knn = FilteredKnn.createWithDefaults(graph, config, FilteredKnnContext.empty());
 

@@ -21,88 +21,34 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.graphdb.Node;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.LongPredicate;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeFilter implements LongPredicate {
 
-    public static NodeFilter create(Object input, IdMap idMap) {
-        if (input instanceof NodeFilter) {
-            return (NodeFilter) input;
-        }
-
-        if (input instanceof String) {
-            // parse as label
-            return parseFromString((String) input, idMap);
-        }
-
-        Set<Long> nodeIds = null;
-
-        if (input instanceof List) {
-            nodeIds = parseFromList((List) input, idMap);
-        }
-
-        if (input instanceof Long) {
-            nodeIds = parseFromLong((Long) input, idMap);
-        }
-
-        if (input instanceof Node) {
-            nodeIds = parseFromNode((Node) input, idMap);
-        }
-
-        if (nodeIds == null) {
-            throw new IllegalArgumentException(
-                String.format("Invalid scalar type. Expected Long or Node but found: %s", input.getClass().getSimpleName())
-            );
-        }
-
-        return new NodeFilter(nodeIds);
+    public static NodeFilter create(Set<Long> externalNodeIds, IdMap idMap) {
+       var mappedNodeIds = externalNodeIds.stream().map(idMap::toMappedNodeId).collect(Collectors.toSet());
+        return new NodeFilter(mappedNodeIds);
     }
 
-    private static NodeFilter parseFromString(String input, IdMap idMap) {
-        return new NodeFilter(input, idMap);
-    }
-
-    private static Set<Long> parseFromLong(Long input, IdMap idMap) {
-        Set<Long> nodeIds = new HashSet<>();
-        nodeIds.add(idMap.toMappedNodeId(input));
-        return nodeIds;
-    }
-
-    private static Set<Long> parseFromNode(Node input, IdMap idMap) {
-        Set<Long> nodeIds = new HashSet<>();
-        nodeIds.add(idMap.toMappedNodeId(input.getId()));
-        return nodeIds;
-    }
-
-    private static Set<Long> parseFromList(List input, IdMap idMap) {
-        Set<Long> nodeIds = new HashSet<>();
-        List<String> badTypes = new ArrayList<>();
-        input.forEach(o -> {
-            if (o instanceof Long) {
-                nodeIds.add(idMap.toMappedNodeId((Long) o));
-            } else if (o instanceof Node) {
-                nodeIds.add(idMap.toMappedNodeId(((Node) o).getId()));
-            } else {
-                badTypes.add(o.getClass().getSimpleName());
+    public static NodeFilter create(String labelString, IdMap idMap) {
+        NodeLabel label = null;
+        for (var existingLabel : idMap.availableNodeLabels()) {
+            if (existingLabel.name.equalsIgnoreCase(labelString)) {
+                label = existingLabel;
             }
-        });
-
-        if (badTypes.isEmpty()) {
-            return nodeIds;
         }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Invalid types in list. Expected Longs or Nodes but found %s",
-            badTypes
-        ));
+        if (null == label) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "The label `%s` does not exist in the graph",
+                labelString
+            ));
+        }
+        return new NodeFilter(label, idMap);
     }
 
     public static NodeFilter noOp() {
@@ -110,25 +56,25 @@ public class NodeFilter implements LongPredicate {
     }
 
     private final Set<Long> nodeIds;
-    private final NodeLabel nodeLabel;
+    private final NodeLabel label;
     private final IdMap idMap;
 
     private NodeFilter(Set<Long> nodeIds) {
         this.nodeIds = nodeIds;
-        this.nodeLabel = null;
+        this.label = null;
         this.idMap = null;
     }
 
-    private NodeFilter(String labelString, IdMap idMap) {
+    private NodeFilter(NodeLabel label, IdMap idMap) {
         this.nodeIds = null;
-        this.nodeLabel = NodeLabel.of(labelString);
+        this.label = label;
         this.idMap = idMap;
     }
 
     @Override
     public boolean test(long nodeId) {
         return null == nodeIds
-            ? idMap.hasLabel(nodeId, nodeLabel)
+            ? idMap.hasLabel(nodeId, label)
             : nodeIds.contains(nodeId);
     }
 

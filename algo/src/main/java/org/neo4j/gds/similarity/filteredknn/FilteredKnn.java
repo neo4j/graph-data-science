@@ -75,8 +75,8 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         FilteredNeighborFilterFactory neighborFilterFactory
     ) {
         var splittableRandom = getSplittableRandom(config.randomSeed());
-        var sourceNodeFilter = NodeFilter.create(config.sourceNodeFilter(), graph);
-        var targetNodeFilter = NodeFilter.create(config.targetNodeFilter(), graph);
+        var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
         var samplerSupplier = samplerSupplier(graph, config);
         return new FilteredKnn(
             context.progressTracker(),

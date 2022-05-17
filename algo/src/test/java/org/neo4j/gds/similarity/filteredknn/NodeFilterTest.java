@@ -29,6 +29,7 @@ import org.neo4j.gds.core.loading.LabelInformation;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
@@ -39,19 +40,18 @@ class NodeFilterTest {
     @Test
     void shouldFailToParseInvalidInput() {
         var validInput = 1L;
-        var idMap = new DirectIdMap(10);
 
         // double is invalid
-        assertThatThrownBy(() -> NodeFilter.create(1.0, idMap))
+        assertThatThrownBy(() -> NodeFilterSpec.create(1.0))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid scalar type. Expected Long or Node but found: Double");
-        assertThatThrownBy(() -> NodeFilter.create(List.of(validInput, 1.0), idMap))
+        assertThatThrownBy(() -> NodeFilterSpec.create(List.of(validInput, 1.0)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid types in list. Expected Longs or Nodes but found [Double]");
 
         // String is valid as scalar but not in a list
-        assertThatNoException().isThrownBy(() -> NodeFilter.create("foo", idMap));
-        assertThatThrownBy(() -> NodeFilter.create(List.of(validInput, "foo"), idMap))
+        assertThatNoException().isThrownBy(() -> NodeFilterSpec.create("foo"));
+        assertThatThrownBy(() -> NodeFilterSpec.create(List.of(validInput, "foo")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Invalid types in list. Expected Longs or Nodes but found [String]");
     }
@@ -105,7 +105,7 @@ class NodeFilterTest {
 
     @Test
     void shouldFilter() {
-        var nodeFilter = NodeFilter.create(10L, new DirectIdMap(10));
+        var nodeFilter = NodeFilter.create(Set.of(10L), new DirectIdMap(10));
         assertThat(nodeFilter.test(10)).isTrue();
         assertThat(nodeFilter.test(1)).isFalse();
     }
