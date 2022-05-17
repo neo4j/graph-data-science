@@ -35,6 +35,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             gamma,
             configuration.theta(),
             configuration.randomSeed().orElse(0L),
+            configuration.concurrency(),
             progressTracker
         );
     }
