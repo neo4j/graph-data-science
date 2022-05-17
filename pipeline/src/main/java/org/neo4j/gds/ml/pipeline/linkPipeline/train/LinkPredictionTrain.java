@@ -100,25 +100,20 @@ public final class LinkPredictionTrain {
         LinkPredictionSplitConfig splitConfig,
         int numberOfModelSelectionTrials
     ) {
-        // the relationship count estimates depend on both UndirectedEdgeSplitter
-        // and the volume set in extractFeaturesAndLabels
-        var selectionRatio = (1 + splitConfig.negativeSamplingRatio());
-        long nonTestRelationshipCount = (long) (relationshipCount * (1 - splitConfig.testFraction()));
-        long testRelationshipCount = (long) (relationshipCount * splitConfig.testFraction() * selectionRatio);
-        long trainRelationshipCount = (long) (nonTestRelationshipCount * splitConfig.trainFraction() * selectionRatio);
+        var sizes = splitConfig.expectedSetSizes(relationshipCount);
         return List.of(
-            Tasks.leaf("Extract train features", trainRelationshipCount),
+            Tasks.leaf("Extract train features", sizes.trainSize()),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * trainRelationshipCount)),
+                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * sizes.trainSize())),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model", trainRelationshipCount),
-            Tasks.leaf("Compute train metrics"),
+            ClassifierTrainer.progressTask("Train best model", sizes.trainSize()),
+            Tasks.leaf("Compute train metrics", sizes.trainSize()),
             Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features", testRelationshipCount),
-                Tasks.leaf("Compute test metrics")
+                Tasks.leaf("Extract test features", sizes.testSize()),
+                Tasks.leaf("Compute test metrics", sizes.testSize())
             )
         );
     }

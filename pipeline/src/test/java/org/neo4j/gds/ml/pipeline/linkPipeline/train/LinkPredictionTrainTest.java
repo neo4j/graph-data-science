@@ -616,7 +616,7 @@ class LinkPredictionTrainTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask(
-                trainGraph.relationshipCount(),
+                2 * trainGraph.relationshipCount(),
                 pipeline.splitConfig(),
                 pipeline.numberOfModelSelectionTrials()
             ),
