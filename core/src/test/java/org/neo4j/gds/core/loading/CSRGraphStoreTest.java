@@ -20,10 +20,17 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.List;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestSupport.assertGraphEquals;
+import static org.neo4j.gds.TestSupport.fromGdl;
 
 class CSRGraphStoreTest {
 
@@ -41,6 +48,38 @@ class CSRGraphStoreTest {
 
         assertThat(del2.deletedRelationships()).isEqualTo(0);
         assertThat(del2.deletedProperties()).isEmpty();
+    }
+
+    @Test
+    void validateRelationshipTypesWhenNoneExist() {
+        GdlFactory factory = GdlFactory.of("(a), (b)");
+        var graphStore = factory.build();
+
+        assertThatThrownBy(() -> graphStore.getGraph(
+            List.of(NodeLabel.ALL_NODES),
+            List.of(RelationshipType.of("X")),
+            Optional.empty()
+        )).hasMessageContaining("No relationships have been loaded for relationship type").hasMessageContaining("X");
+    }
+
+    @Test
+    void gettingGraphsWithRelationshipTypes() {
+        GdlFactory factory = GdlFactory.of("()-[:T]->()-[:R]->()-[:R]->()");
+        var graphStore = factory.build();
+
+        var t_graph = graphStore.getGraph(graphStore.nodeLabels(), List.of(RelationshipType.of("T")), Optional.empty());
+        var r_graph = graphStore.getGraph(graphStore.nodeLabels(), List.of(RelationshipType.of("R")), Optional.empty());
+        var t_r_graph = graphStore.getGraph(
+            graphStore.nodeLabels(),
+            List.of(RelationshipType.of("R"), RelationshipType.of("T")),
+            Optional.empty()
+        );
+        var none_graph = graphStore.getGraph(graphStore.nodeLabels(), List.of(), Optional.empty());
+
+        assertGraphEquals(fromGdl("()-[:T]->(), (), ()"), t_graph);
+        assertGraphEquals(fromGdl("(), ()-[:R]->()-[:R]->()"), r_graph);
+        assertGraphEquals(fromGdl("()-[:T]->()-[:R]->()-[:R]->()"), t_r_graph);
+        assertGraphEquals(fromGdl("(), (), (), ()"), none_graph);
     }
 
 }
