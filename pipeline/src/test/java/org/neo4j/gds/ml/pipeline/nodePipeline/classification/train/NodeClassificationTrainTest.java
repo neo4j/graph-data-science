@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -99,7 +100,7 @@ class NodeClassificationTrainTest {
     @MethodSource("metricArguments")
     void selectsTheBestModel(ClassificationMetricSpecification metricSpecification) {
 
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
@@ -308,7 +309,7 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(ClassificationMetricSpecification metricSpecification) {
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         var bananasPipeline = new NodeClassificationTrainingPipeline();
         bananasPipeline.setSplitConfig(SPLIT_CONFIG);
@@ -418,59 +419,7 @@ class NodeClassificationTrainTest {
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
-            .containsExactly(
-                "MY DUMMY TASK :: Start",
-                "MY DUMMY TASK :: Shuffle and split :: Start",
-                "MY DUMMY TASK :: Shuffle and split :: Train set size is 10",
-                "MY DUMMY TASK :: Shuffle and split :: Test set size is 5",
-                "MY DUMMY TASK :: Shuffle and split 100%",
-                "MY DUMMY TASK :: Shuffle and split :: Finished",
-                "MY DUMMY TASK :: Select best model :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0208}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 50%",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 100%",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Main validation metric (F1_class_1): 0.8194",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Validation metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0416}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 50%",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 100%",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Main validation metric (F1_class_1): 0.8194",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Validation metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Training metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished",
-                "MY DUMMY TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.8194",
-                "MY DUMMY TASK :: Select best model :: Finished",
-                "MY DUMMY TASK :: Train best model :: Start",
-                "MY DUMMY TASK :: Train best model :: Initial loss 0.6931",
-                "MY DUMMY TASK :: Train best model :: Epoch 1 with loss 0.6578",
-                "MY DUMMY TASK :: Train best model :: Epoch 2 with loss 0.6326",
-                "MY DUMMY TASK :: Train best model :: Epoch 3 with loss 0.6171",
-                "MY DUMMY TASK :: Train best model :: Epoch 4 with loss 0.6110",
-                "MY DUMMY TASK :: Train best model :: Epoch 5 with loss 0.6128",
-                "MY DUMMY TASK :: Train best model :: converged after 5 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6128.",
-                "MY DUMMY TASK :: Train best model 100%",
-                "MY DUMMY TASK :: Train best model :: Finished",
-                "MY DUMMY TASK :: Evaluate on test data :: Start",
-                "MY DUMMY TASK :: Evaluate on test data 66%",
-                "MY DUMMY TASK :: Evaluate on test data :: Final model metrics on full train set: {F1_class_1=0.8235}",
-                "MY DUMMY TASK :: Evaluate on test data 100%",
-                "MY DUMMY TASK :: Evaluate on test data :: Final model metrics on test set: {F1_class_1=0.7499}",
-                "MY DUMMY TASK :: Evaluate on test data :: Finished",
-                "MY DUMMY TASK :: Retrain best model :: Start",
-                "MY DUMMY TASK :: Retrain best model :: Initial loss 0.6931",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.6645",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.6460",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 3 with loss 0.6373",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 4 with loss 0.6376",
-                "MY DUMMY TASK :: Retrain best model :: converged after 4 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6376.",
-                "MY DUMMY TASK :: Retrain best model 100%",
-                "MY DUMMY TASK :: Retrain best model :: Finished",
-                "MY DUMMY TASK :: Finished"
-            );
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-log"));
     }
 
     @Test
@@ -502,59 +451,7 @@ class NodeClassificationTrainTest {
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
-            .containsExactly(
-                "MY DUMMY TASK :: Start",
-                "MY DUMMY TASK :: Shuffle and split :: Start",
-                "MY DUMMY TASK :: Shuffle and split :: Train set size is 10",
-                "MY DUMMY TASK :: Shuffle and split :: Test set size is 5",
-                "MY DUMMY TASK :: Shuffle and split 100%",
-                "MY DUMMY TASK :: Shuffle and split :: Finished",
-                "MY DUMMY TASK :: Select best model :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0019}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 50%",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 100%",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Main validation metric (F1_class_1): 0.8194",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Validation metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Start",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0566}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 50%",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 100%",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Main validation metric (F1_class_1): 0.8194",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Validation metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Training metrics: {F1_class_1=0.8194}",
-                "MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished",
-                "MY DUMMY TASK :: Select best model :: Best trial was Trial 1 with main validation metric 0.8194",
-                "MY DUMMY TASK :: Select best model :: Finished",
-                "MY DUMMY TASK :: Train best model :: Start",
-                "MY DUMMY TASK :: Train best model :: Initial loss 0.6931",
-                "MY DUMMY TASK :: Train best model :: Epoch 1 with loss 0.6578",
-                "MY DUMMY TASK :: Train best model :: Epoch 2 with loss 0.6326",
-                "MY DUMMY TASK :: Train best model :: Epoch 3 with loss 0.6171",
-                "MY DUMMY TASK :: Train best model :: Epoch 4 with loss 0.6110",
-                "MY DUMMY TASK :: Train best model :: Epoch 5 with loss 0.6128",
-                "MY DUMMY TASK :: Train best model :: converged after 5 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6128.",
-                "MY DUMMY TASK :: Train best model 100%",
-                "MY DUMMY TASK :: Train best model :: Finished",
-                "MY DUMMY TASK :: Evaluate on test data :: Start",
-                "MY DUMMY TASK :: Evaluate on test data 66%",
-                "MY DUMMY TASK :: Evaluate on test data :: Final model metrics on full train set: {F1_class_1=0.8235}",
-                "MY DUMMY TASK :: Evaluate on test data 100%",
-                "MY DUMMY TASK :: Evaluate on test data :: Final model metrics on test set: {F1_class_1=0.7499}",
-                "MY DUMMY TASK :: Evaluate on test data :: Finished",
-                "MY DUMMY TASK :: Retrain best model :: Start",
-                "MY DUMMY TASK :: Retrain best model :: Initial loss 0.6931",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 1 with loss 0.6645",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 2 with loss 0.6460",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 3 with loss 0.6373",
-                "MY DUMMY TASK :: Retrain best model :: Epoch 4 with loss 0.6376",
-                "MY DUMMY TASK :: Retrain best model :: converged after 4 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6376.",
-                "MY DUMMY TASK :: Retrain best model 100%",
-                "MY DUMMY TASK :: Retrain best model :: Finished",
-                "MY DUMMY TASK :: Finished"
-            );
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-with-range-log"));
     }
 
     @ParameterizedTest
