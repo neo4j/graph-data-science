@@ -34,10 +34,17 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RelationshipSchemaTest {
+
+    @Test
+    void handlesOutsideOfSchemaRequests() {
+        var empty = RelationshipSchema.builder().build();
+        assertFalse(empty.hasProperty(RelationshipType.of("NotInSchema"), "notInSchemaEither"));
+    }
 
     @Test
     void testDefaultValuesAndAggregation() {
