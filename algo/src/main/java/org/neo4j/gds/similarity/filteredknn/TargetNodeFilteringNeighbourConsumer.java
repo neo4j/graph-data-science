@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-public class FilteredKnnNeighborFilter implements FilteredNeighborFilter {
-    private final long nodeCount;
+import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 
-    public FilteredKnnNeighborFilter(long nodeCount) {
-        this.nodeCount = nodeCount;
+import java.util.stream.Stream;
+
+public class TargetNodeFilteringNeighbourConsumer implements NeighbourConsumer {
+    @Override
+    public void offer(long element, double priority) {
+        throw new UnsupportedOperationException("TODO");
     }
 
-    @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeCount - 1;
+    Stream<SimilarityResult> asSimilarityStream(long nodeId) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

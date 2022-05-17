@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
 import java.util.List;
@@ -64,13 +65,13 @@ public class FilteredKnnIdMappingTest extends BaseTest {
             .concurrency(1)
             .sourceNodeFilter(NodeFilterSpecFactory.create(lowestNeoId))
             .build();
-        var knn = FilteredKnn.createWithDefaults(graph, config, FilteredKnnContext.empty());
+        var knn = FilteredKnn.create(graph, config, KnnContext.empty());
 
         var result = knn.compute();
 
         // filtering on the lowest Neo ID means all resulting similarity relationships have source node 0
         var sourceNodesInResult = result
-            .streamSimilarityResult()
+            .similarityResultStream()
             .map(res -> res.node1)
             .collect(Collectors.<Long>toSet());
         assertThat(sourceNodesInResult).containsExactly(0L);

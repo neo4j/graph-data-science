@@ -19,21 +19,15 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeCursor;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
-import java.util.stream.IntStream;
-import java.util.stream.LongStream;
+import java.util.List;
 import java.util.stream.Stream;
 
 @ValueClass
 public abstract class FilteredKnnResult {
-    abstract HugeObjectArray<FilteredNeighborList> neighborList();
+    abstract TargetNodeFilteringNeighbourConsumers neighbourConsumers();
 
     public abstract int ranIterations();
 
@@ -41,72 +35,12 @@ public abstract class FilteredKnnResult {
 
     public abstract long nodePairsConsidered();
 
-    public abstract NodeFilter sourceNodeFilter();
+    public abstract List<Long> sourceNodes();
 
-    public LongStream neighborsOf(long nodeId) {
-        return neighborList().get(nodeId).elements().map(FilteredNeighborList::clearCheckedFlag);
-    }
+    public Stream<SimilarityResult> similarityResultStream() {
+        TargetNodeFilteringNeighbourConsumers neighbourConsumers = neighbourConsumers();
+        List<Long> sourceNodes = sourceNodes();
 
-    // http://www.flatmapthatshit.com/
-    public Stream<SimilarityResult> streamSimilarityResult() {
-        // [[],[],[]]
-        var neighborList = neighborList();
-        return Stream
-            .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
-            .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                .filter(index -> sourceNodeFilter().test(index + cursor.base))
-                .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
-                .flatMap(Function.identity())
-            );
-    }
-
-    public long totalSimilarityPairs() {
-        var neighborList = neighborList();
-        return Stream
-            .iterate(neighborList.initCursor(neighborList.newCursor()), HugeCursor::next, UnaryOperator.identity())
-            .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
-                .filter(index -> sourceNodeFilter().test(index + cursor.base))
-                .mapToLong(index -> cursor.array[index].size()))
-            .sum();
-    }
-
-    public long size() {
-        return neighborList().size();
-    }
-
-    @NotNull
-    static FilteredKnnResult empty() {
-        return new FilteredKnnResult() {
-
-            @Override
-            HugeObjectArray<FilteredNeighborList> neighborList() {
-                return HugeObjectArray.of();
-            }
-
-            @Override
-            public int ranIterations() {
-                return 0;
-            }
-
-            @Override
-            public boolean didConverge() {
-                return false;
-            }
-
-            @Override
-            public long nodePairsConsidered() {
-                return 0;
-            }
-
-            @Override
-            public NodeFilter sourceNodeFilter() {
-                return NodeFilter.noOp;
-            }
-
-            @Override
-            public LongStream neighborsOf(long nodeId) {
-                return LongStream.empty();
-            }
-        };
+        return neighbourConsumers.asSimilarityResultStream(sourceNodes::contains);
     }
 }

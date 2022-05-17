@@ -30,9 +30,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-class NeighborList {
+public class NeighborList {
 
-    static MemoryEstimation memoryEstimation(int capacity) {
+    public static MemoryEstimation memoryEstimation(int capacity) {
         return MemoryEstimations.builder(NeighborList.class)
             .fixed("elements", sizeOfLongArray(2L * capacity))
             .build();
