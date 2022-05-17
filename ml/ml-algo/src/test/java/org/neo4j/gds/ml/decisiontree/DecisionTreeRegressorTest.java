@@ -227,10 +227,10 @@ class DecisionTreeRegressorTest {
     @ParameterizedTest
     @CsvSource(value = {
         // Scales with training set size even if maxDepth limits tree size.
-        "  6,  1_000,  40_704,    55_968",
-        "  6, 10_000, 400_704,   487_968",
+        "  6,  1_000,  40_600,    55_864",
+        "  6, 10_000, 400_600,   487_864",
         // Scales with maxDepth when maxDepth is limiting tree size.
-        " 20, 10_000, 400_704, 1_523_136",
+        " 20, 10_000, 400_600, 1_523_032",
     })
     void trainMemoryEstimation(int maxDepth, long numberOfTrainingSamples, long expectedMin, long expectedMax) {
         var config = DecisionTreeTrainerConfigImpl.builder()
