@@ -176,7 +176,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
     })
     void shouldResolveParameters(String operator, int expectedRelationships) {
         var subGraphQuery = formatWithLocale(
-            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight %s $weight', { parameterMap: { weight: $weight } })",
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight %s $weight', { parameters: { weight: $weight } })",
             operator
         );
 
