@@ -21,12 +21,9 @@ package org.neo4j.gds.leiden;
 
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LeidenStreamConfig extends LeidenBaseConfig {
     static LeidenStreamConfig of(CypherMapWrapper userInput) {
         return new LeidenStreamConfigImpl(userInput);

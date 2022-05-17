@@ -77,9 +77,6 @@ public class LeidenMutateSpec  implements AlgorithmSpec<Leiden, LeidenResult, Le
             .withLevels(leidenResult.ranLevels())
             .withDidConverge(leidenResult.didConverge())
             .withCommunityFunction(leidenResult.communitiesFunction())
-            .withPreProcessingMillis(computationResult.preProcessingMillis())
-            .withComputeMillis(computationResult.computeMillis())
-            .withNodeCount(computationResult.graph().nodeCount())
             .withConfig(computationResult.config());
     }
 }
