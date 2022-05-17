@@ -208,6 +208,24 @@ public class TaskProgressTrackerTest {
         assertThat(taskStore.query("")).containsValue(task);
     }
 
+    @Test
+    void stepsShouldGiveProgress() {
+        var leafTask = Tasks.leaf("leaf", 100);
+        var progressTracker = progressTracker(leafTask);
+        
+        progressTracker.beginSubTask();
+        progressTracker.setSteps(13);
+        progressTracker.logProgress(3);
+        progressTracker.logSteps(1);
+        double expectedDoubleProgressFromFirstStep = 100.0 * 1.0 / 13.0;
+        long progressAfterFirstStep = leafTask.getProgress().progress();
+        assertThat(progressAfterFirstStep).isEqualTo((long) expectedDoubleProgressFromFirstStep + 3);
+
+        progressTracker.logProgress(1);
+        progressTracker.logSteps(4);
+        assertThat(leafTask.getProgress().progress()).isEqualTo(3 + 1 + (long) (100.0 * 5.0 / 13));
+    }
+
     private TaskProgressTracker progressTracker(Task task, Log log) {
         return new TaskProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
     }

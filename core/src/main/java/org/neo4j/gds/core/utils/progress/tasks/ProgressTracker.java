@@ -61,6 +61,10 @@ public interface ProgressTracker {
 
     void release();
 
+    void setSteps(long steps);
+
+    void logSteps(long steps);
+
     class EmptyProgressTracker implements ProgressTracker {
 
         @Override
@@ -106,6 +110,16 @@ public interface ProgressTracker {
 
         @Override
         public void setVolume(long volume) {
+        }
+
+        @Override
+        public void setSteps(long steps) {
+
+        }
+
+        @Override
+        public void logSteps(long steps) {
+
         }
 
         @Override
