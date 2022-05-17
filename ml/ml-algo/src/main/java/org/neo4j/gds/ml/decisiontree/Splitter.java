@@ -32,8 +32,6 @@ public class Splitter {
     private final FeatureBagger featureBagger;
     private final int minLeafSize;
     private final HugeLongArray sortCache;
-    private final ImpurityCriterion.ImpurityData bestLeftImpurityDataForIdx;
-    private final ImpurityCriterion.ImpurityData bestRightImpurityDataForIdx;
     private final ImpurityCriterion.ImpurityData rightImpurityData;
 
     Splitter(long trainSetSize, ImpurityCriterion impurityCriterion, FeatureBagger featureBagger, Features features, int minLeafSize) {
@@ -42,8 +40,6 @@ public class Splitter {
         this.features = features;
         this.minLeafSize = minLeafSize;
         this.sortCache = HugeLongArray.newArray(trainSetSize);
-        this.bestLeftImpurityDataForIdx = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
-        this.bestRightImpurityDataForIdx = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
         this.rightImpurityData = impurityCriterion.groupImpurity(HugeLongArray.of(), 0, 0);
     }
 
@@ -52,7 +48,7 @@ public class Splitter {
                // sort cache
                + HugeLongArray.memoryEstimation(numberOfTrainingSamples)
                // impurity data cache
-               + 6 * sizeOfImpurityData
+               + 4 * sizeOfImpurityData
                // group cache
                + 4 * HugeLongArray.memoryEstimation(numberOfTrainingSamples);
     }
@@ -77,10 +73,6 @@ public class Splitter {
         int[] featureBag = featureBagger.sample();
 
         for (int featureIdx : featureBag) {
-            double bestImpurityForIdx = bestImpurity;
-            double bestValueForIdx = Double.MAX_VALUE;
-            long bestLeftGroupSizeForIdx = -1;
-
             // By doing a sort of the group by this particular feature, all possible splits will simply be represented
             // by each index in the ordered group.
             HugeSerialIndirectMergeSort.sort(rightChildArray, group.size(), (long l) -> features.get(l)[featureIdx], sortCache);
@@ -99,6 +91,7 @@ public class Splitter {
             }
 
             var leftImpurityData = impurityCriterion.groupImpurity(leftChildArray, 0, minLeafSize - 1L);
+            boolean foundImprovementWithIdx = false;
 
             // Continue moving feature vectors, but now actually compute combined impurity since left group is large enough.
             for (long leftGroupSize = minLeafSize; leftGroupSize <= group.size() - minLeafSize; leftGroupSize++) {
@@ -112,24 +105,18 @@ public class Splitter {
 
                 // We track best split for a single feature idx in order to keep using `leftChildArray` and `rightChildArray`
                 // throughout search for splits for this particular idx.
-                if (combinedImpurity < bestImpurityForIdx) {
-                    bestValueForIdx = features.get(splittingFeatureVectorIdx)[featureIdx];
-                    bestImpurityForIdx = combinedImpurity;
-                    leftImpurityData.copyTo(bestLeftImpurityDataForIdx);
-                    rightImpurityData.copyTo(bestRightImpurityDataForIdx);
-                    bestLeftGroupSizeForIdx = leftGroupSize;
+                if (combinedImpurity < bestImpurity) {
+                    foundImprovementWithIdx = true;
+                    bestIdx = featureIdx;
+                    bestValue = features.get(splittingFeatureVectorIdx)[featureIdx];
+                    bestImpurity = combinedImpurity;
+                    bestLeftGroupSize = leftGroupSize;
+                    leftImpurityData.copyTo(bestLeftImpurityData);
+                    rightImpurityData.copyTo(bestRightImpurityData);
                 }
             }
 
-            if (bestImpurityForIdx < bestImpurity) {
-                bestIdx = featureIdx;
-                bestValue = bestValueForIdx;
-                bestImpurity = bestImpurityForIdx;
-                bestLeftGroupSize = bestLeftGroupSizeForIdx;
-
-                bestLeftImpurityDataForIdx.copyTo(bestLeftImpurityData);
-                bestRightImpurityDataForIdx.copyTo(bestRightImpurityData);
-
+            if (foundImprovementWithIdx) {
                 // At this time it's fine to swap array pointers since we will have to do a resort for the next feature
                 // anyway.
                 var tmpChildArray = bestRightChildArray;

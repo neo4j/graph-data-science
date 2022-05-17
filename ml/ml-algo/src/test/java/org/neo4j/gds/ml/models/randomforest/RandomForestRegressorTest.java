@@ -166,17 +166,17 @@ class RandomForestRegressorTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "     6, 100_000, 10, 1,   1, 0.1, 1.0,   4_813_754, 5_627_586",
+        "     6, 100_000, 10, 1,   1, 0.1, 1.0,   4_813_650, 5_627_482",
         // Should increase fairly little with more trees if training set big.
-        "    10, 100_000, 10, 1,  10, 0.1, 1.0,   4_814_474, 6_786_058",
+        "    10, 100_000, 10, 1,  10, 0.1, 1.0,   4_814_370, 6_785_954",
         // Should be capped by number of training examples, despite high max depth.
-        " 8_000,     500, 10, 1,   1, 0.1, 1.0,        25_314, 193_098",
+        " 8_000,     500, 10, 1,   1, 0.1, 1.0,        25_210, 192_994",
         // Should increase very little when using more features for splits.
-        "    10, 100_000, 10, 1,  10, 0.9, 1.0,   4_814_514, 6_786_190",
+        "    10, 100_000, 10, 1,  10, 0.9, 1.0,   4_814_410, 6_786_086",
         // Should decrease a lot when sampling fewer training examples per tree.
-        "    10, 100_000, 10, 1,  10, 0.1, 0.2,     964_474, 2_296_058",
+        "    10, 100_000, 10, 1,  10, 0.1, 0.2,     964_370, 2_295_954",
         // Should almost be x4 when concurrency * 4.
-        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 19_255_376, 23_949_952",
+        "    10, 100_000, 10, 4,  10, 0.1, 1.0, 19_254_960, 23_949_536",
     })
     void trainMemoryEstimation(
         int maxDepth,
