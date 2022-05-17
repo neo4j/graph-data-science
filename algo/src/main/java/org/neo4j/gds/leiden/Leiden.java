@@ -50,7 +50,15 @@ public class Leiden extends Algorithm<HugeLongArray> {
     private final int concurrency;
     private final long seed;
 
-    Leiden(Graph graph, int maxIterations, double gamma, double theta, long seed, ProgressTracker progressTracker) {
+    public Leiden(
+        Graph graph,
+        int maxIterations,
+        double gamma,
+        double theta,
+        long seed,
+        int concurrency,
+        ProgressTracker progressTracker
+    ) {
         super(progressTracker);
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
@@ -60,7 +68,8 @@ public class Leiden extends Algorithm<HugeLongArray> {
 
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
-        this.concurrency = 4;
+        this.concurrency = concurrency;
+
         this.dendrograms = new HugeLongArray[maxIterations];
     }
 
