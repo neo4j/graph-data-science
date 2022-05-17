@@ -202,17 +202,17 @@ public interface Expression {
         @ValueClass
         interface NewParameter extends UnaryExpression {
 
+            @Override
+            LeafExpression.Variable in();
+
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return context.resolveParameter(((LeafExpression.Variable) in()).name());
+                return context.resolveParameter(in().name());
             }
 
             @Override
             default ValidationContext validate(ValidationContext context) {
-                if (!(in() instanceof LeafExpression.Variable)) {
-                    throw new IllegalStateException();
-                }
                 return context;
             }
         }
