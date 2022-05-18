@@ -395,7 +395,9 @@ class ExpressionEvaluatorTest {
     @ValueClass
     static class TestContext extends EvaluationContext {
 
-        TestContext() {super(Map.of());}
+        TestContext() {
+            super(Map.of());
+        }
 
         @Value.Default
         public String propertyKey() {
