@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 
-public class FilteredKnn extends Algorithm<FilteredKnnResult> {
+public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
     /**
      * This is KNN instrumented with neighbour consumers
      */
@@ -37,7 +37,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     public static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
         var targetNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
         var neighbourConsumers = TargetNodeFilteringNeighbourConsumers.create(graph.nodeCount()/*, targetNodeFilter*/);
-        var knn = Knn.createWithDefaultsss(graph, config, context, neighbourConsumers);
+        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, neighbourConsumers);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
         return new FilteredKnn(context.progressTracker(), knn, neighbourConsumers, sourceNodeFilter);

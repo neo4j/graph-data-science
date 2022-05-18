@@ -26,7 +26,7 @@ public interface NeighbourConsumers {
     /**
      * A holder for sending data into the void, which is the default behaviour in regular KNN
      */
-    NeighbourConsumers devNull = nodeId -> (element, priority) -> { /* do nothing */ };
+    NeighbourConsumers no_op = nodeId -> (element, priority) -> { /* do nothing */ };
 
     NeighbourConsumer get(long nodeId);
 }

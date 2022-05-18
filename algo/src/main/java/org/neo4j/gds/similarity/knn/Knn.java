@@ -58,11 +58,11 @@ public class Knn extends Algorithm<Knn.Result> {
     private long nodePairsConsidered;
 
     public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
-        return createWithDefaultsss(graph, config, context, NeighbourConsumers.devNull);
+        return createWithDefaultsAndInstrumentation(graph, config, context, NeighbourConsumers.no_op);
     }
 
     @NotNull
-    public static Knn createWithDefaultsss(
+    public static Knn createWithDefaultsAndInstrumentation(
         Graph graph,
         KnnBaseConfig config,
         KnnContext context,
@@ -96,7 +96,7 @@ public class Knn extends Algorithm<Knn.Result> {
             neighborFilterFactory,
             context.executor(),
             splittableRandom,
-            NeighbourConsumers.devNull
+            NeighbourConsumers.no_op
         );
     }
 
