@@ -20,8 +20,6 @@ dependencies {
         }
     }
 
-    compileOnly group: 'org.neo4j', name: 'neo4j-graph-algo', version: ver.'neo4j'
-
     implementation group: 'org.ejml', name: 'ejml-core',   version: ver.'ejml'
     implementation group: 'org.ejml', name: 'ejml-ddense', version: ver.'ejml'
 
