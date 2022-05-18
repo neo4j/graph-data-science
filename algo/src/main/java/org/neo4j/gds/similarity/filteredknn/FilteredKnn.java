@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
  *
- * Firstly, we enable source node filtering, meaning reported results are limited nodes from a certain set.
+ * Firstly, we enable source node filtering, meaning reported results are limited to nodes from a certain set.
  *
  * Secondly, we enable target node filtering in the sense that every result will be from a certain set of nodes.
  *
