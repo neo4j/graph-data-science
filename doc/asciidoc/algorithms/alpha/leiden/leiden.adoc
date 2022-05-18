@@ -1,3 +1,4 @@
+[.alpha]
 [[algorithms-leiden]]
 = Leiden
 :entity: node
@@ -9,7 +10,6 @@
 This section describes the Leiden algorithm in the Neo4j Graph Data Science library.
 --
 
-:directed:
 :undirected:
 :homogeneous:
 :weighted:
@@ -17,6 +17,7 @@ include::../../shared/algorithm-traits.adoc[]
 
 [[algorithms-leiden-intro]]
 == Introduction
+
 The Leiden method is an algorithm to detect communities in large networks.
 It maximizes a modularity score for each community, where the modularity quantifies the quality of an assignment of nodes to communities.
 This means evaluating how much more densely connected the nodes within a community are, compared to how connected they would be in a random network.
@@ -25,8 +26,7 @@ The Leiden algorithm is a hierarchical clustering algorithm, that recursively me
 
 For more information on this algorithm, see:
 
-*
-
+* https://arxiv.org/pdf/1810.08473.pdf[V.A. Traag, L. Waltman and N.J. van Eck "From Louvain to Leiden: guaranteeing well-connected communities"^]
 
 [NOTE]
 ====
@@ -105,13 +105,13 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
+| nodeCount             | Integer   | The number of nodes in the graph.
+| ranLevels             | Integer   | The number of levels the algorithm actually ran.
+| didConverge           | Boolean   | Indicates if the algorithm converged.
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
 | communityCount        | Integer   | The number of communities found.
-| ranLevels             | Integer   | The number of supersteps the algorithm actually ran.
-| didConverge           | Boolean   |
-| nodeCount             | Integer   |
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
@@ -150,21 +150,19 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
+| nodeCount              | Integer   | Indicates if the algorithm converged.
+| ranLevels              | Integer   | The number of levels the algorithm actually ran.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
 | preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
 | communityCount         | Integer   | The number of communities found.
-| ranLevels              | Integer   | The number of supersteps the algorithm actually ran.
-| didConverge            | Boolean   |
-| nodeCount              | Integer   |
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
-
-
 ====
 
 
@@ -238,7 +236,7 @@ include::../../shared/examples-stream-intro.adoc[]
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.leiden.stream('myGraph')
+CALL gds.alpha.leiden.stream('myGraph', { randomSeed: 19 })
 YIELD nodeId, communityId
 RETURN gds.util.asNode(nodeId).name AS name, communityId
 ORDER BY name ASC
@@ -273,7 +271,7 @@ include::../../shared/examples-stats-intro.adoc[]
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.leiden.stats('myGraph')
+CALL gds.alpha.leiden.stats('myGraph', { randomSeed: 19 })
 YIELD communityCount
 ----
 
@@ -296,7 +294,7 @@ include::../../shared/examples-mutate-intro.adoc[]
 .The following will run the algorithm and store the results in `myGraph`:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.leiden.mutate('myGraph', { mutateProperty: 'communityId' })
+CALL gds.alpha.leiden.mutate('myGraph', { mutateProperty: 'communityId', randomSeed: 19 })
 YIELD communityCount
 ----
 
@@ -323,7 +321,7 @@ The Leiden algorithm can also run on weighted graphs, taking the given relations
 .The following will run the algorithm on a weighted graph and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.leiden.stream('myGraph', { relationshipWeightProperty: 'weight' })
+CALL gds.alpha.leiden.stream('myGraph', { relationshipWeightProperty: 'weight', randomSeed: 19 })
 YIELD nodeId, communityId
 RETURN gds.util.asNode(nodeId).name AS name, communityId
 ORDER BY name ASC
