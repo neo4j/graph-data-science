@@ -151,8 +151,50 @@ The schema of the result records is identical to the corresponding procedure:
 .Results
 [opts="header",cols="2,3,5"]
 |===
-|Name           | Type      | Description
-|sourceId       | Integer   | The source node id of the relationship.
-|targetId       | Integer   | The target node id of the relationship.
-|propertyValue  | Float     | The stored property value.
+|Name             | Type      | Description
+|sourceId         | Integer   | The source node id of the relationship.
+|targetId         | Integer   | The target node id of the relationship.
+|relationshipType | String    | The type of the relationship.
+|propertyValue    | Float     | The stored property value.
+|===
+
+
+== Stream multiple relationship properties
+
+To stream multiple relationship properties, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.graph.streamRelationshipProperties",
+    configuration: {
+        relationship_types: "REL",
+        relationship_property: ["foo", "bar"]
+    }
+}
+----
+
+The `procedure_name` indicates that we mirror the behaviour of the existing <<catalog-graph-stream-relationship-properties-example, procedure>>.
+The specific configuration needs to include the following keys:
+
+[[arrow-relationship-property-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name                    | Type                      | Description
+| relationship_types      | String or List of Strings | Stream only properties for relationships with the given type.
+| relationship_properties | String or List of String  | The relationship properties in the graph to stream.
+|===
+
+Note, that the schema of the result records is not identical to the corresponding procedure.
+Instead of separate column containing the property key, every property is returned in its own column.
+As a result, there is only one row per relationship which includes all its property values.
+
+For example, given the relationship `[:REL { foo: 42.0, bar: 13.37 }]` that connects a source node with id `0` wit a target node with id `1`, the resulting record schema is as follows:
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| sourceId  | targetId  | relationshipType  | foo  |  bar
+| 0         | 1         | REL               | 42.0 | 13.37
 |===
