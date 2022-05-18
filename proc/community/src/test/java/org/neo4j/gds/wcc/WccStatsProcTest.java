@@ -51,6 +51,15 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
     }
 
     @Test
+    void testRelationshipTypesEmpty() {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        assertCypherResult("CALL gds.wcc.stats('g', {relationshipTypes: []}) YIELD componentCount", List.of(Map.of(
+            "componentCount", 10L
+        )));
+    }
+
+    @Test
     void yields() {
         loadGraph(DEFAULT_GRAPH_NAME);
         String query = GdsCypher

@@ -49,12 +49,10 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
@@ -115,18 +113,13 @@ public class CSRGraphStore implements GraphStore {
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
         int concurrency
     ) {
-        // A graph store must contain at least one topology, even if it is empty.
-        var topologies = relationships.isEmpty()
-            ? Map.of(RelationshipType.ALL_RELATIONSHIPS, GraphFactory.emptyRelationships(nodes).topology())
-            : relationships;
-
         return new CSRGraphStore(
             databaseId,
             capabilities,
             schema,
             nodes,
             nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore,
-            topologies,
+            relationships,
             relationshipPropertyStores,
             concurrency
         );
@@ -448,9 +441,7 @@ public class CSRGraphStore implements GraphStore {
         return DeletionResult.of(builder ->
             updateGraphStore(graphStore -> {
                 var removedTopology = graphStore.relationships.remove(relationshipType);
-                if (removedTopology != null) {
-                    builder.deletedRelationships(removedTopology.elementCount());
-                }
+                builder.deletedRelationships(removedTopology == null ? 0 : removedTopology.elementCount());
 
                 var removedProperties = graphStore.relationshipProperties.remove(relationshipType);
 
@@ -480,27 +471,8 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public Graph getGraph(Collection<NodeLabel> nodeLabels) {
-        var filteredNodes = getFilteredIdMap(nodeLabels);
-        var filteredNodeProperties = filterNodeProperties(nodeLabels);
-
-        var graphSchema = GraphSchema.of(
-            schema().nodeSchema(),
-            RelationshipSchema.empty(),
-            schema.graphProperties()
-        );
-
-        var initialGraph = HugeGraph.create(
-            nodes,
-            graphSchema,
-            filteredNodeProperties,
-            Relationships.Topology.EMPTY,
-            Optional.empty()
-        );
-
-        return filteredNodes.isPresent()
-            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
-            : initialGraph;
+    public CSRGraph getGraph(Collection<NodeLabel> nodeLabels) {
+        return getGraph(nodeLabels, List.of(), Optional.empty());
     }
 
     @Override
@@ -510,11 +482,18 @@ public class CSRGraphStore implements GraphStore {
         Optional<String> maybeRelationshipProperty
     ) {
         validateInput(relationshipTypes, maybeRelationshipProperty);
-        return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty);
+        if (relationshipTypes.isEmpty()) {
+            return createNodeOnlyGraph(nodeLabels);
+        } else {
+            return createGraph(nodeLabels, relationshipTypes, maybeRelationshipProperty);
+        }
     }
 
     @Override
     public CSRGraph getUnion() {
+        if (relationships.isEmpty()) {
+            return getGraph(nodeLabels());
+        }
         var graphs = relationships
             .keySet()
             .stream()
@@ -683,6 +662,29 @@ public class CSRGraphStore implements GraphStore {
         return UnionGraph.of(filteredGraphs);
     }
 
+    private CSRGraph createNodeOnlyGraph(Collection<NodeLabel> nodeLabels) {
+        var filteredNodes = getFilteredIdMap(nodeLabels);
+        var filteredNodeProperties = filterNodeProperties(nodeLabels);
+
+        var graphSchema = GraphSchema.of(
+            schema().nodeSchema(),
+            RelationshipSchema.empty(),
+            schema.graphProperties()
+        );
+
+        var initialGraph = HugeGraph.create(
+            nodes,
+            graphSchema,
+            filteredNodeProperties,
+            Relationships.Topology.EMPTY,
+            Optional.empty()
+        );
+
+        return filteredNodes.isPresent()
+            ? new NodeFilteredGraph(initialGraph, filteredNodes.get())
+            : initialGraph;
+    }
+
     @NotNull
     private Optional<IdMap> getFilteredIdMap(Collection<NodeLabel> filteredLabels) {
         boolean loadAllNodes = filteredLabels.containsAll(nodeLabels());
@@ -746,13 +748,6 @@ public class CSRGraphStore implements GraphStore {
         Collection<RelationshipType> relationshipTypes,
         Optional<String> maybeRelationshipProperty
     ) {
-        if (relationshipTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The parameter '%s' should not be empty. Use '*' to load all relationship types.",
-                ProcedureConstants.RELATIONSHIP_TYPES
-            ));
-        }
-
         relationshipTypes.forEach(relationshipType -> {
             if (!relationships.containsKey(relationshipType)) {
                 throw new IllegalArgumentException(formatWithLocale(

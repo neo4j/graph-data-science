@@ -59,7 +59,9 @@ public interface ElementSchema<SELF extends ElementSchema<SELF, ELEMENT_IDENTIFI
 
     @Value.Default
     default boolean hasProperty(ELEMENT_IDENTIFIER elementIdentifier, String propertyKey) {
-        return (!properties().get(elementIdentifier).isEmpty() && properties().get(elementIdentifier).containsKey(propertyKey));
+        return properties().containsKey(elementIdentifier) && (!properties()
+            .get(elementIdentifier)
+            .isEmpty() && properties().get(elementIdentifier).containsKey(propertyKey));
     }
 
     @Value.Default
