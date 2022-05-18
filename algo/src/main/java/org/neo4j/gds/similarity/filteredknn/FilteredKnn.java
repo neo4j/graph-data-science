@@ -32,9 +32,10 @@ import java.util.List;
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
  *
- * Firstly, we enable source node filtering, meaning reported results are limited to nodes from a certain set.
+ * Consider each result item to be a relationship from one node to another, with a score.
  *
- * Secondly, we enable target node filtering in the sense that every result will be from a certain set of nodes.
+ * Firstly, we enable source node filtering. This limits the result to only contain relationships where the source node matches the filter.
+ * Secondly, we enable target node filtering. This limits the result to only contain relationships where the target node matches the filter.
  *
  * In both cases the source or target node set can be actual specified nodes, or it could be all nodes with a label.
  */
