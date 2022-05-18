@@ -25,33 +25,46 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 
+<<<<<<< HEAD
+=======
+import java.util.List;
+
+/**
+ * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
+ *
+ * Firstly, we enable source node filtering, meaning reported results are limited nodes from a certain set.
+ *
+ * Secondly, we enable target node filtering in the sense that every result will be from a certain set of nodes.
+ *
+ * In both cases the source or target node set can be actual specified nodes, or it could be all nodes with a label.
+ */
 public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
     /**
      * This is KNN instrumented with neighbour consumers
      */
     private final Knn delegate;
 
-    private final TargetNodeFilteringNeighbourConsumers neighbourConsumers;
+    private final TargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
 
     public static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
         var targetNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
-        var neighbourConsumers = TargetNodeFilteringNeighbourConsumers.create(graph.nodeCount()/*, targetNodeFilter*/);
-        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, neighbourConsumers);
+        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.boundedK(graph.nodeCount())/*, targetNodeFilter*/);
+        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
-        return new FilteredKnn(context.progressTracker(), knn, neighbourConsumers, sourceNodeFilter);
+        return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
     }
 
     private FilteredKnn(
         ProgressTracker progressTracker,
         Knn delegate,
-        TargetNodeFilteringNeighbourConsumers neighbourConsumers,
+        TargetNodeFiltering targetNodeFiltering,
         NodeFilter sourceNodeFilter
     ) {
         super(progressTracker);
         this.delegate = delegate;
-        this.neighbourConsumers = neighbourConsumers;
+        this.targetNodeFiltering = targetNodeFiltering;
         this.sourceNodeFilter = sourceNodeFilter;
     }
 
@@ -60,7 +73,7 @@ public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
         Knn.Result result = delegate.compute();
 
         return ImmutableFilteredKnnResult.of(
-            neighbourConsumers,
+            targetNodeFiltering,
             result.ranIterations(),
             result.didConverge(),
             result.nodePairsConsidered(),

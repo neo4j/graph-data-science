@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 @ValueClass
 public abstract class FilteredKnnResult {
-    abstract TargetNodeFilteringNeighbourConsumers neighbourConsumers();
+    abstract TargetNodeFiltering neighbourConsumers();
 
     public abstract int ranIterations();
 
@@ -38,7 +38,7 @@ public abstract class FilteredKnnResult {
     public abstract List<Long> sourceNodes();
 
     public Stream<SimilarityResult> similarityResultStream() {
-        TargetNodeFilteringNeighbourConsumers neighbourConsumers = neighbourConsumers();
+        TargetNodeFiltering neighbourConsumers = neighbourConsumers();
         List<Long> sourceNodes = sourceNodes();
 
         return neighbourConsumers.asSimilarityResultStream(sourceNodes::contains);

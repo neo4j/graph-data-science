@@ -31,24 +31,24 @@ import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class TargetNodeFilteringNeighbourConsumers implements NeighbourConsumers {
-    private final HugeObjectArray<TargetNodeFilteringNeighbourConsumer> neighbourConsumers;
+public final class TargetNodeFiltering implements NeighbourConsumers {
+    private final HugeObjectArray<TargetNodeFilter> neighbourConsumers;
 
-    public TargetNodeFilteringNeighbourConsumers(HugeObjectArray<TargetNodeFilteringNeighbourConsumer> neighbourConsumers) {
-        this.neighbourConsumers = neighbourConsumers;
-    }
-
-    static TargetNodeFilteringNeighbourConsumers create(long nodeCount) {
-        HugeObjectArray<TargetNodeFilteringNeighbourConsumer> neighbourConsumers = HugeObjectArray.newArray(
-            TargetNodeFilteringNeighbourConsumer.class,
+    static TargetNodeFiltering create(long nodeCount, int k) {
+        HugeObjectArray<TargetNodeFilter> neighbourConsumers = HugeObjectArray.newArray(
+            TargetNodeFilter.class,
             nodeCount
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            neighbourConsumers.set(i, new TargetNodeFilteringNeighbourConsumer());
+            neighbourConsumers.set(i, new TargetNodeFilter(k));
         }
 
-        return new TargetNodeFilteringNeighbourConsumers(neighbourConsumers);
+        return new TargetNodeFiltering(neighbourConsumers);
+    }
+
+    private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> neighbourConsumers) {
+        this.neighbourConsumers = neighbourConsumers;
     }
 
     @Override
