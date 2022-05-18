@@ -100,7 +100,7 @@ public abstract class FilteredKnnResult {
 
             @Override
             public NodeFilter sourceNodeFilter() {
-                return NodeFilter.noOp();
+                return NodeFilter.noOp;
             }
 
             @Override

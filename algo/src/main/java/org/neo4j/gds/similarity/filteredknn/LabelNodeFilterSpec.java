@@ -21,19 +21,16 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.api.IdMap;
 
-/**
- * A {@code NodeFilterSpec} is a partially constructed {@link NodeFilter}. Because we cannot fully construct the
- * {@link NodeFilter} from user inputs alone, we parse and validate what we can, and prepare for completing the
- * construction once the rest is available.
- *
- * There are two types of node filters: ones based on a list of node IDs, and ones based on labels.
- * There are therefore two types of node filter specs, accordingly.
- *
- * The spec is created using {@link NodeFilterSpecFactory#create(Object)} and the {@link NodeFilter} is then created
- * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.IdMap)}.
- */
-interface NodeFilterSpec {
-    NodeFilter toNodeFilter(IdMap idMap);
+public class LabelNodeFilterSpec implements NodeFilterSpec {
 
-    NodeFilterSpec noOp = (idMap) -> NodeFilter.noOp;
+    private final String labelString;
+
+    LabelNodeFilterSpec(String labelString) {
+        this.labelString = labelString;
+    }
+
+    @Override
+    public NodeFilter toNodeFilter(IdMap idMap) {
+        return LabelNodeFilter.create(labelString, idMap);
+    }
 }

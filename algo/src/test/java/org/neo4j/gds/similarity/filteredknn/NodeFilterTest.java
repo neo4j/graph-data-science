@@ -32,29 +32,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatNoException;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class NodeFilterTest {
-
-    @Test
-    void shouldFailToParseInvalidInput() {
-        var validInput = 1L;
-
-        // double is invalid
-        assertThatThrownBy(() -> NodeFilterSpec.create(1.0))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid scalar type. Expected Long or Node but found: Double");
-        assertThatThrownBy(() -> NodeFilterSpec.create(List.of(validInput, 1.0)))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid types in list. Expected Longs or Nodes but found [Double]");
-
-        // String is valid as scalar but not in a list
-        assertThatNoException().isThrownBy(() -> NodeFilterSpec.create("foo"));
-        assertThatThrownBy(() -> NodeFilterSpec.create(List.of(validInput, "foo")))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Invalid types in list. Expected Longs or Nodes but found [String]");
-    }
 
     @Test
     void shouldFilterBasedOnLabel() {
@@ -88,8 +67,8 @@ class NodeFilterTest {
         assertThat(arrayIdMap.hasLabel(3, labelTwo)).isTrue();
 
         // create a node filter based on the idMap
-        var nodeFilterOne = NodeFilter.create("one", arrayIdMap);
-        var nodeFilterTwo = NodeFilter.create("two", arrayIdMap);
+        var nodeFilterOne = LabelNodeFilter.create("one", arrayIdMap);
+        var nodeFilterTwo = LabelNodeFilter.create("two", arrayIdMap);
 
         // test that the filter correctly filters based on the label
         assertThat(nodeFilterOne.test(0)).isTrue();
@@ -104,15 +83,15 @@ class NodeFilterTest {
     }
 
     @Test
-    void shouldFilter() {
-        var nodeFilter = NodeFilter.create(Set.of(10L), new DirectIdMap(10));
+    void shouldFilterBasedOnNodeIds() {
+        var nodeFilter = NodeIdNodeFilter.create(Set.of(10L), new DirectIdMap(10));
         assertThat(nodeFilter.test(10)).isTrue();
         assertThat(nodeFilter.test(1)).isFalse();
     }
 
     @Test
     void noOpFilterShouldReturnTrue() {
-        var nodeFilter = NodeFilter.noOp();
+        var nodeFilter = NodeFilter.noOp;
         assertThat(nodeFilter.test(10)).isTrue();
         assertThat(nodeFilter.test(1)).isTrue();
     }

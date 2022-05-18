@@ -19,74 +19,8 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
-
-import java.util.Set;
 import java.util.function.LongPredicate;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
-public class NodeFilter implements LongPredicate {
-
-    public static NodeFilter create(Set<Long> externalNodeIds, IdMap idMap) {
-       var mappedNodeIds = externalNodeIds.stream().map(idMap::toMappedNodeId).collect(Collectors.toSet());
-        return new NodeFilter(mappedNodeIds);
-    }
-
-    public static NodeFilter create(String labelString, IdMap idMap) {
-        NodeLabel label = null;
-        for (var existingLabel : idMap.availableNodeLabels()) {
-            if (existingLabel.name.equalsIgnoreCase(labelString)) {
-                label = existingLabel;
-            }
-        }
-        if (null == label) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The label `%s` does not exist in the graph",
-                labelString
-            ));
-        }
-        return new NodeFilter(label, idMap);
-    }
-
-    public static NodeFilter noOp() {
-        return new NoOpNodeFilter(Set.of());
-    }
-
-    private final Set<Long> nodeIds;
-    private final NodeLabel label;
-    private final IdMap idMap;
-
-    private NodeFilter(Set<Long> nodeIds) {
-        this.nodeIds = nodeIds;
-        this.label = null;
-        this.idMap = null;
-    }
-
-    private NodeFilter(NodeLabel label, IdMap idMap) {
-        this.nodeIds = null;
-        this.label = label;
-        this.idMap = idMap;
-    }
-
-    @Override
-    public boolean test(long nodeId) {
-        return null == nodeIds
-            ? idMap.hasLabel(nodeId, label)
-            : nodeIds.contains(nodeId);
-    }
-
-    private static class NoOpNodeFilter extends NodeFilter {
-
-        NoOpNodeFilter(Set<Long> nodeIds) {
-            super(nodeIds);
-        }
-
-        @Override
-        public boolean test(long nodeId) {
-            return true;
-        }
-    }
+interface NodeFilter extends LongPredicate {
+    NodeFilter noOp = (nodeId) -> true;
 }

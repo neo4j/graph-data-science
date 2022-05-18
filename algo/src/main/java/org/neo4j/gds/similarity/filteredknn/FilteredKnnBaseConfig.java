@@ -28,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 
 import java.util.Collection;
-import java.util.List;
 
 @ValueClass
 @Configuration
@@ -36,15 +35,15 @@ import java.util.List;
 public interface FilteredKnnBaseConfig extends KnnBaseConfig {
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.filteredknn.NodeFilterSpec#create")
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.filteredknn.NodeFilterSpecFactory#create")
     default NodeFilterSpec sourceNodeFilter() {
-        return NodeFilterSpec.create(List.of());
+        return NodeFilterSpec.noOp;
     }
 
     @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.similarity.filteredknn.NodeFilterSpec#create")
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.filteredknn.NodeFilterSpecFactory#create")
     default NodeFilterSpec targetNodeFilter() {
-        return NodeFilterSpec.create(List.of());
+        return NodeFilterSpec.noOp;
     }
 
     @Configuration.GraphStoreValidationCheck
