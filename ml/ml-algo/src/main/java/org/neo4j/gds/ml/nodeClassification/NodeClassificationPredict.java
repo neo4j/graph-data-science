@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.nodeClassification;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -74,8 +73,8 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         );
     }
 
-    public static Task progressTask(Graph graph) {
-        return Tasks.leaf("Node classification predict", graph.nodeCount());
+    public static Task progressTask(long nodeCount) {
+        return Tasks.leaf("Node classification predict", nodeCount);
     }
 
     public static MemoryEstimation memoryEstimation(
@@ -138,6 +137,7 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
     @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
+        progressTracker.setSteps(features.size());
         var predictedProbabilities = initProbabilities();
         var predictedClasses = predictor.predict(predictedProbabilities);
         progressTracker.endSubTask();

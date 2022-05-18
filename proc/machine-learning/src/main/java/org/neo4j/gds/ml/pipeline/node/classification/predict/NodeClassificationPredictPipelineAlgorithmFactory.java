@@ -52,8 +52,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             modelCatalog,
             config.modelName(),
             config.username()
-        ).customInfo()
-            .pipeline();
+        ).customInfo().pipeline();
 
         return NodeClassificationPredictPipelineExecutor.progressTask(taskName(), trainingPipeline, graphStore);
     }

@@ -222,7 +222,7 @@ class NodeClassificationPredictTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
-            NodeClassificationPredict.progressTask(graph),
+            NodeClassificationPredict.progressTask(graph.nodeCount()),
             log,
             1,
             new JobId(),

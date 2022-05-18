@@ -71,10 +71,10 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             taskName,
             Tasks.iterativeFixed(
                 "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
+                () -> List.of(Tasks.leaf("Step", 10 * graphStore.getUnion().nodeCount())),
                 pipeline.nodePropertySteps().size()
             ),
-            Tasks.leaf("Node classification predict", graphStore.getUnion().nodeCount())
+            NodeClassificationPredict.progressTask(graphStore.getUnion().nodeCount())
         );
     }
 
