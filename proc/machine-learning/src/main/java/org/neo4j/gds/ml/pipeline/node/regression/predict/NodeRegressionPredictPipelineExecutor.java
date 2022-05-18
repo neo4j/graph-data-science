@@ -37,7 +37,6 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -87,12 +86,8 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
 
     @Override
     protected HugeDoubleArray execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-        var graph = graphStore.getGraph(
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore),
-            Optional.empty()
-        );
-        Features features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        Features features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
         if (features.featureDimension() != regressor.data().featureDimension()) {
             throw new IllegalArgumentException(formatWithLocale(

@@ -42,7 +42,6 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -124,13 +123,8 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
 
     @Override
     protected NodeClassificationPredict.NodeClassificationResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-        var graph = graphStore.getGraph(
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore),
-            Optional.empty()
-        );
-
-        var features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
         if (features.featureDimension() != modelData.featureDimension()) {
             throw new IllegalArgumentException(formatWithLocale(
