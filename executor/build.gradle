@@ -18,7 +18,6 @@ dependencies {
     implementation project(':edition-api')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
-    implementation project(':open-model-catalog')
     implementation project(':transaction')
     implementation project(':string-formatting')
 

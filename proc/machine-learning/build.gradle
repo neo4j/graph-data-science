@@ -31,7 +31,6 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':model-catalog-api')
-    implementation project(':open-model-catalog')
     implementation project(':pipeline')
     implementation project(':proc-common')
     implementation project(':string-formatting')
@@ -47,6 +46,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
+    testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')
     testImplementation project(':proc-community')
