@@ -172,4 +172,61 @@ class FilteredKnnTest {
             ).isEqualTo(Set.of(filteredNode1, filteredNode2));
         }
     }
+
+    @Nested
+    class TargetNodeFiltering {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a { knn: 1.2 } )" +
+            ", (b { knn: 1.1 } )" +
+            ", (c { knn: 2.1 } )" +
+            ", (d { knn: 3.1 } )" +
+            ", (e { knn: 4.1 } )";
+
+        @Test
+        void shouldOnlyProduceResultsForFilteredTargetNode() {
+            var targetNode = idFunction.of("a");
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties(List.of("knn"))
+                .topK(3)
+                .randomJoins(0)
+                .maxIterations(1)
+                .randomSeed(20L)
+                .concurrency(1)
+                .targetNodeFilter(targetNode)
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.create(graph, config, knnContext);
+            var result = knn.compute();
+
+            assertThat(result.similarityResultStream()
+                .map(SimilarityResult::targetNodeId)
+                .collect(Collectors.toSet())
+            ).isEqualTo(Set.of(targetNode));
+        }
+
+        @Test
+        void shouldOnlyProduceResultsForFilteredTargetNodes() {
+            var targetNode1 = idFunction.of("a");
+            var targetNode2 = idFunction.of("b");
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties("knn")
+                .topK(3)
+                .randomJoins(0)
+                .maxIterations(1)
+                .randomSeed(20L)
+                .concurrency(1)
+                .targetNodeFilter(List.of(targetNode1, targetNode2))
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.create(graph, config, knnContext);
+            var result = knn.compute();
+
+            assertThat(result.similarityResultStream()
+                .map(SimilarityResult::targetNodeId)
+                .collect(Collectors.toSet())
+            ).isEqualTo(Set.of(targetNode1, targetNode2));
+        }
+    }
 }

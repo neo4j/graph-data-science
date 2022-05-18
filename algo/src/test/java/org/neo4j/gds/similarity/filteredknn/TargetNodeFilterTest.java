@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TargetNodeFilterTest {
     @Test
     void shouldPrioritiseTargetNodes() {
-        TargetNodeFilter consumer = new TargetNodeFilter(3);
+        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 3);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -42,7 +42,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyKeepTopK() {
-        TargetNodeFilter consumer = new TargetNodeFilter(2);
+        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 2);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -52,5 +52,16 @@ class TargetNodeFilterTest {
             new SimilarityResult(117, 23, 3.14),
             new SimilarityResult(117, 87, 2.71)
         );
+    }
+
+    @Test
+    void shouldOnlyIncludeTargetNodes() {
+        TargetNodeFilter consumer = new TargetNodeFilter(l -> false, 3);
+
+        consumer.offer(23, 3.14);
+        consumer.offer(42, 1.61);
+        consumer.offer(87, 2.71);
+
+        assertThat(consumer.asSimilarityStream(117)).isEmpty();
     }
 }

@@ -45,8 +45,8 @@ public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
     private final NodeFilter sourceNodeFilter;
 
     public static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
-        var targetNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
-        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.boundedK(graph.nodeCount())/*, targetNodeFilter*/);
+        var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
+        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.boundedK(graph.nodeCount()), targetNodeFilter);
         var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 
 import java.util.Comparator;
 import java.util.TreeSet;
+import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
 /**
@@ -34,14 +35,19 @@ import java.util.stream.Stream;
  */
 public class TargetNodeFilter implements NeighbourConsumer {
     private final TreeSet<Pair<Double, Long>> priorityQueue = new TreeSet<>(Comparator.reverseOrder());
+
+    private final LongPredicate predicate;
     private final int bound;
 
-    public TargetNodeFilter(int bound) {
+    public TargetNodeFilter(LongPredicate predicate, int bound) {
+        this.predicate = predicate;
         this.bound = bound;
     }
 
     @Override
     public void offer(long element, double priority) {
+        if (! predicate.test(element)) return;
+
         priorityQueue.add(Pair.of(priority, element));
 
         if (priorityQueue.size() > bound) priorityQueue.pollLast();

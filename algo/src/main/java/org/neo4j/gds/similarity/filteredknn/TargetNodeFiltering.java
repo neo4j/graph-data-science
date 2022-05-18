@@ -34,14 +34,14 @@ import java.util.stream.Stream;
 public final class TargetNodeFiltering implements NeighbourConsumers {
     private final HugeObjectArray<TargetNodeFilter> neighbourConsumers;
 
-    static TargetNodeFiltering create(long nodeCount, int k) {
+    static TargetNodeFiltering create(long nodeCount, int k, LongPredicate targetNodePredicate) {
         HugeObjectArray<TargetNodeFilter> neighbourConsumers = HugeObjectArray.newArray(
             TargetNodeFilter.class,
             nodeCount
         );
 
         for (int i = 0; i < nodeCount; i++) {
-            neighbourConsumers.set(i, new TargetNodeFilter(k));
+            neighbourConsumers.set(i, new TargetNodeFilter(targetNodePredicate, k));
         }
 
         return new TargetNodeFiltering(neighbourConsumers);
