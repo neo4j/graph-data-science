@@ -146,17 +146,21 @@ public final class NodeClassificationTrain {
         return builder.build();
     }
 
-    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(NodePropertyPredictionSplitConfig splitConfig, int numberOfModelSelectionTrials, long nodeCount) {
+        long trainSetSize = splitConfig.trainSetSize(nodeCount);
+        long testSetSize = splitConfig.testSetSize(nodeCount);
+        int validationFolds = splitConfig.validationFolds();
+
         return List.of(
-            Tasks.leaf("Shuffle and split"),
+            Tasks.leaf("Shuffle and split", validationFolds * trainSetSize + testSetSize),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", validationFolds)),
+                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model"),
-            Tasks.leaf("Evaluate on test data"),
-            ClassifierTrainer.progressTask("Retrain best model")
+            ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
+            Tasks.leaf("Evaluate on test data", testSetSize),
+            ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
         );
     }
 
@@ -309,8 +313,10 @@ public final class NodeClassificationTrain {
         int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask("Trial");
+            progressTracker.setSteps(nodeSplits.size());
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
+
             var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
             var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
@@ -323,7 +329,8 @@ public final class NodeClassificationTrain {
 
                 registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
                 registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
-                progressTracker.logProgress();
+
+                progressTracker.logSteps(1);
             }
 
             var candidateStats = ModelCandidateStats.of(
@@ -394,11 +401,8 @@ public final class NodeClassificationTrain {
         );
         progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask(
-            "Evaluate on test data",
-            outerSplit.testSet().size() + outerSplit.trainSet().size()
-        );
-
+        progressTracker.beginSubTask("Evaluate on test data");
+        progressTracker.setSteps(outerSplit.testSet().size() + outerSplit.trainSet().size());
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore, progressTracker);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
         progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));

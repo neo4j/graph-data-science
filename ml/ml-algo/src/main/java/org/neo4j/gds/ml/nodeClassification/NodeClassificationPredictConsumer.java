@@ -88,7 +88,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
             currentRow++;
         }
 
-        progressTracker.logProgress(batch.size());
+        progressTracker.logSteps(batch.size());
     }
 
 }

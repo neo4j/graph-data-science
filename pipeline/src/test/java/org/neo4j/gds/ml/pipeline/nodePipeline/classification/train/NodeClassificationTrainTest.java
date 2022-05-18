@@ -406,8 +406,9 @@ class NodeClassificationTrainTest {
         var config = createConfig("bananasModel", metrics, 42L);
 
         var progressTask = progressTask(
-            pipeline.splitConfig().validationFolds(),
-            pipeline.numberOfModelSelectionTrials()
+            pipeline.splitConfig(),
+            pipeline.numberOfModelSelectionTrials(),
+            graph.nodeCount()
         );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
@@ -440,7 +441,7 @@ class NodeClassificationTrainTest {
         var metrics = ClassificationMetricSpecification.parse("F1(class=1)");
         var config = createConfig("bananasModel", metrics, 42L);
 
-        var progressTask = progressTask(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTask = progressTask(pipeline.splitConfig(), MAX_TRIALS, graph.nodeCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
@@ -494,10 +495,10 @@ class NodeClassificationTrainTest {
             ));
     }
 
-    private static Task progressTask(int validationFolds, int trials) {
+    private static Task progressTask(NodePropertyPredictionSplitConfig splitConfig, int trials, long nodeCount) {
         return Tasks.task(
             "MY DUMMY TASK",
-            NodeClassificationTrain.progressTasks(validationFolds, trials)
+            NodeClassificationTrain.progressTasks(splitConfig, trials, nodeCount)
         );
     }
 

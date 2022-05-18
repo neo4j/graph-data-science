@@ -59,18 +59,19 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
     }
 
-    public static Task progressTask(String taskName, NodeClassificationTrainingPipeline pipeline) {
+    public static Task progressTask(String taskName, NodeClassificationTrainingPipeline pipeline, long nodeCount) {
         return Tasks.task(
             taskName,
             new ArrayList<>() {{
                 add(Tasks.iterativeFixed(
                     "Execute node property steps",
-                    () -> List.of(Tasks.leaf("Step")),
+                    () -> List.of(Tasks.leaf("Step", 10L * nodeCount)),
                     pipeline.nodePropertySteps().size()
                 ));
                 addAll(NodeClassificationTrain.progressTasks(
-                    pipeline.splitConfig().validationFolds(),
-                    pipeline.numberOfModelSelectionTrials()
+                    pipeline.splitConfig(),
+                    pipeline.numberOfModelSelectionTrials(),
+                    nodeCount
                 ));
 
             }}

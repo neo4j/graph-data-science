@@ -89,7 +89,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
         return NodeClassificationTrainPipelineExecutor.progressTask(
             taskName(),
-            PipelineCatalog .getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class)
+            PipelineCatalog .getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class),
+            graphStore.nodeCount()
         );
     }
 }

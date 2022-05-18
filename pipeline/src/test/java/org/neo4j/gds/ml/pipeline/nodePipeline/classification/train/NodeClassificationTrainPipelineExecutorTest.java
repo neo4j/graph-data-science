@@ -250,7 +250,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var log = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(
-                NodeClassificationTrainPipelineExecutor.progressTask("Node Classification Train Pipeline", pipeline),
+                NodeClassificationTrainPipelineExecutor.progressTask("Node Classification Train Pipeline", pipeline, graphStore.nodeCount()),
                 log,
                 1,
                 EmptyTaskRegistryFactory.INSTANCE
