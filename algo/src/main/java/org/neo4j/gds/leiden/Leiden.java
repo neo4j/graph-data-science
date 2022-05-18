@@ -151,7 +151,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 rootGraph.nodeCount(),
                 concurrency,
                 nodeId -> {
-                    rootGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    rootGraph.concurrentCopy().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                         nodeVolumes.addTo(nodeId, w);
                         communityVolumes.addTo(nodeId, w);
                         return true;
