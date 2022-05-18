@@ -120,7 +120,6 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
         int numberOfDecisionTrees = config.numberOfDecisionTrees();
         var impurityCriterion = new SplitMeanSquaredError(targets);
 
-        progressTracker.setVolume(numberOfDecisionTrees);
         var numberOfTreesTrained = new AtomicInteger(0);
 
         var tasks = IntStream.range(0, numberOfDecisionTrees).mapToObj(unused ->
@@ -221,10 +220,9 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
             trainedTree = decisionTree.train(bootstrappedDataset());
 
-            progressTracker.logProgress(
-                1,
+            progressTracker.logMessage(
                 formatWithLocale(
-                    ":: trained decision tree %d out of %d",
+                    "trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),
                     randomForestTrainConfig.numberOfDecisionTrees()
                 )

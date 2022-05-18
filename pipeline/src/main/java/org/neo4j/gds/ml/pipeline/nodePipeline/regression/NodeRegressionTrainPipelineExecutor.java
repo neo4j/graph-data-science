@@ -43,14 +43,15 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
     NodeRegressionTrainPipelineResult
 > {
 
-    public static Task progressTask(NodeRegressionTrainingPipeline pipeline, GraphStore graphStore) {
+    public static Task progressTask(NodeRegressionTrainingPipeline pipeline, long nodeCount) {
         return Tasks.task(
             "Node Regression Train Pipeline",
             new ArrayList<>() {{
-                add(nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()));
+                add(nodePropertyStepTasks(pipeline.nodePropertySteps(), nodeCount));
                 addAll(NodeRegressionTrain.progressTasks(
-                    pipeline.splitConfig().validationFolds(),
-                    pipeline.numberOfModelSelectionTrials()
+                    pipeline.splitConfig(),
+                    pipeline.numberOfModelSelectionTrials(),
+                    nodeCount
                 ));
 
             }}

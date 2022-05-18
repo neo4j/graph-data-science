@@ -68,6 +68,6 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             NodeRegressionTrainingPipeline.class
         );
 
-        return NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore);
+        return NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore.nodeCount());
     }
 }

@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.List;
@@ -58,17 +59,25 @@ public final class NodeRegressionTrain {
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
-    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(
+        NodePropertyPredictionSplitConfig splitConfig,
+        int numberOfModelSelectionTrials,
+        long nodeCount
+    ) {
+        long trainSetSize = splitConfig.trainSetSize(nodeCount);
+        long testSetSize = splitConfig.testSetSize(nodeCount);
+        int validationFolds = splitConfig.validationFolds();
+
         return List.of(
-            Tasks.leaf("Shuffle and Split"),
+            Tasks.leaf("Shuffle and Split", validationFolds * trainSetSize + testSetSize),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", validationFolds)),
+                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model"),
-            Tasks.leaf("Evaluate on test data"),
-            ClassifierTrainer.progressTask("Retrain best model")
+            ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
+            Tasks.leaf("Evaluate on test data", testSetSize),
+            ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
         );
     }
 
@@ -160,6 +169,7 @@ public final class NodeRegressionTrain {
             terminationFlag.assertRunning();
 
             progressTracker.beginSubTask("Trial");
+            progressTracker.setSteps(nodeSplits.size());
 
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
@@ -176,7 +186,7 @@ public final class NodeRegressionTrain {
                 registerMetricScores(validationSet, regressor, validationStatsBuilder::update);
                 registerMetricScores(trainSet, regressor, trainStatsBuilder::update);
 
-                progressTracker.logProgress();
+                progressTracker.logSteps(1);
             }
 
             var candidateStats = ModelCandidateStats.of(
@@ -236,7 +246,7 @@ public final class NodeRegressionTrain {
         var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
         progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("Evaluate on test data");
 
         registerMetricScores(outerSplit.trainSet(), bestRegressor, trainingStatistics::addOuterTrainScore);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();

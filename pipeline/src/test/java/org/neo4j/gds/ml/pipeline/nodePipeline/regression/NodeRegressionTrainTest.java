@@ -240,7 +240,7 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTasks = NodeRegressionTrain.progressTasks(pipeline.splitConfig().validationFolds(), MAX_TRIALS);
+        var progressTasks = NodeRegressionTrain.progressTasks(pipeline.splitConfig(), MAX_TRIALS, graph.nodeCount());
         var progressTask = Tasks.task("MY CONTEXT", progressTasks);
 
         var testLog = Neo4jProxy.testLog();
