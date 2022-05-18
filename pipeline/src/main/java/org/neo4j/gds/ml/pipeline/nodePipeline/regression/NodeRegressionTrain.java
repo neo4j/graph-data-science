@@ -154,6 +154,7 @@ public final class NodeRegressionTrain {
             trainConfig.randomSeed()
         );
 
+        int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask("Trial");
 
@@ -169,7 +170,6 @@ public final class NodeRegressionTrain {
 
                 var regressor = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
 
-
                 registerMetricScores(validationSet, regressor, validationStatsBuilder::update);
                 registerMetricScores(trainSet, regressor, trainStatsBuilder::update);
 
@@ -183,6 +183,19 @@ public final class NodeRegressionTrain {
             );
             trainingStatistics.addCandidateStats(candidateStats);
 
+            progressTracker.logMessage(formatWithLocale(
+                "Main validation metric (%s): %.4f",
+                trainingStatistics.evaluationMetric(),
+                trainingStatistics.getMainMetric(trial)
+            ));
+            progressTracker.logMessage(formatWithLocale("Validation metrics: %s",
+                trainingStatistics.validationMetricsAvg(trial)
+            ));
+            progressTracker.logMessage(formatWithLocale("Training metrics: %s",
+                trainingStatistics.trainMetricsAvg(trial)
+            ));
+
+            trial++;
             progressTracker.endSubTask("Trial");
         }
         progressTracker.endSubTask("Select best model");
@@ -219,8 +232,15 @@ public final class NodeRegressionTrain {
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask("Evaluate on test data", outerSplit.testSet().size() + outerSplit.trainSet().size());
-        registerMetricScores(outerSplit.testSet(), bestRegressor, trainingStatistics::addTestScore);
+
         registerMetricScores(outerSplit.trainSet(), bestRegressor, trainingStatistics::addOuterTrainScore);
+        var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
+        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+
+        registerMetricScores(outerSplit.testSet(), bestRegressor, trainingStatistics::addTestScore);
+        var testMetrics = trainingStatistics.winningModelTestMetrics();
+        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
+
         progressTracker.endSubTask("Evaluate on test data");
     }
 
