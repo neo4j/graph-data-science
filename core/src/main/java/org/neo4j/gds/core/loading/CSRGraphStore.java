@@ -333,21 +333,6 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public ValueType nodePropertyType(String propertyKey) {
-        return nodeProperty(propertyKey).valueType();
-    }
-
-    @Override
-    public PropertyState nodePropertyState(String propertyKey) {
-        return nodeProperty(propertyKey).propertyState();
-    }
-
-    @Override
-    public NodePropertyValues nodePropertyValues(String propertyKey) {
-        return nodeProperty(propertyKey).values();
-    }
-
-    @Override
     public Set<RelationshipType> relationshipTypes() {
         return relationships.keySet();
     }
@@ -753,7 +738,7 @@ public class CSRGraphStore implements GraphStore {
             .stream()
             .collect(toMap(
                 Function.identity(),
-                this::nodePropertyValues
+                propertyKey -> nodeProperty(propertyKey).values()
             ));
     }
 

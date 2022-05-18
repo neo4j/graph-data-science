@@ -121,12 +121,11 @@ final class NodesFilter {
         var inputMapping = inputGraphStore.nodes();
 
         propertyKeys.forEach(propertyKey -> {
-            var nodeProperties = inputGraphStore.nodePropertyValues(propertyKey);
-            var propertyState = inputGraphStore.nodePropertyState(propertyKey);
+            var nodeProperty = inputGraphStore.nodeProperty(propertyKey);
 
             NodePropertiesBuilder<?> nodePropertiesBuilder = getPropertiesBuilder(
                 inputMapping,
-                nodeProperties,
+                nodeProperty.values(),
                 concurrency
             );
 
@@ -142,7 +141,11 @@ final class NodesFilter {
 
             builder.putProperty(
                 propertyKey,
-                NodeProperty.of(propertyKey, propertyState, nodePropertiesBuilder.build(filteredNodeCount, filteredIdMap))
+                NodeProperty.of(
+                    propertyKey,
+                    nodeProperty.propertyState(),
+                    nodePropertiesBuilder.build(filteredNodeCount, filteredIdMap)
+                )
             );
         });
         progressTracker.endSubTask();

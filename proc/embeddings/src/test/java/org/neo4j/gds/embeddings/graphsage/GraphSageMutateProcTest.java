@@ -65,7 +65,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             assertThat(row.get("configuration")).isInstanceOf(Map.class);
         });
 
-        NodePropertyValues embeddingNodePropertyValues = graphStore.nodePropertyValues(mutatePropertyKey);
+        NodePropertyValues embeddingNodePropertyValues = graphStore.nodeProperty(mutatePropertyKey).values();
         graphStore.nodes().forEachNode(nodeId -> {
             assertEquals(embeddingSize, embeddingNodePropertyValues.doubleArrayValue(nodeId).length);
             return true;

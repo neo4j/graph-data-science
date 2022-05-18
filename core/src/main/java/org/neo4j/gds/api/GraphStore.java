@@ -110,12 +110,6 @@ public interface GraphStore {
 
     NodeProperty nodeProperty(String propertyKey);
 
-    ValueType nodePropertyType(String propertyKey);
-
-    PropertyState nodePropertyState(String propertyKey);
-
-    NodePropertyValues nodePropertyValues(String propertyKey);
-
     void addNodeProperty(
         Set<NodeLabel> nodeLabels,
         String propertyKey,
