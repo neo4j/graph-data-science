@@ -25,10 +25,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 
-<<<<<<< HEAD
-=======
-import java.util.List;
-
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
  *
@@ -74,10 +70,10 @@ public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
         Knn.Result result = delegate.compute();
 
         return ImmutableFilteredKnnResult.of(
-            targetNodeFiltering,
             result.ranIterations(),
             result.didConverge(),
             result.nodePairsConsidered(),
+            targetNodeFiltering,
             sourceNodeFilter
         );
     }

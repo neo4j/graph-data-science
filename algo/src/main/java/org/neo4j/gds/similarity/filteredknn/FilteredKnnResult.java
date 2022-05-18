@@ -22,25 +22,26 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.similarity.SimilarityResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 @ValueClass
 public abstract class FilteredKnnResult {
-    abstract TargetNodeFiltering neighbourConsumers();
-
     public abstract int ranIterations();
 
     public abstract boolean didConverge();
 
     public abstract long nodePairsConsidered();
 
-    public abstract List<Long> sourceNodes();
-
     public Stream<SimilarityResult> similarityResultStream() {
         TargetNodeFiltering neighbourConsumers = neighbourConsumers();
-        List<Long> sourceNodes = sourceNodes();
+        NodeFilter sourceNodeFilter = sourceNodeFilter();
 
-        return neighbourConsumers.asSimilarityResultStream(sourceNodes::contains);
+        return neighbourConsumers.asSimilarityResultStream(sourceNodeFilter);
     }
+
+    // ***
+    // Below is for internal use only
+    // ***
+    abstract TargetNodeFiltering neighbourConsumers();
+    abstract NodeFilter sourceNodeFilter();
 }
