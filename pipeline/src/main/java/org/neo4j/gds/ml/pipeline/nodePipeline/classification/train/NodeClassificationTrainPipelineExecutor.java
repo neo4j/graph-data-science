@@ -39,7 +39,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainPipelineExecutor.NodeClassificationTrainPipelineResult;
 
@@ -121,13 +120,12 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        var relationshipTypes = config.internalRelationshipTypes(graphStore);
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.empty());
+        var nodesGraph = graphStore.getGraph(nodeLabels);
 
-        this.pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+        this.pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         var trainResult = NodeClassificationTrain
-            .create(graph, pipeline, config, progressTracker, terminationFlag)
+            .create(nodesGraph, pipeline, config, progressTracker, terminationFlag)
             .compute();
 
         var catalogModel = Model.of(
