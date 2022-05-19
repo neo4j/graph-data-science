@@ -35,6 +35,8 @@ import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
 
+    private static final String newLine = System.lineSeparator();
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(NodeClassificationPipelineAddTrainerMethodProcs.class, NodeClassificationPipelineCreateProc.class);
@@ -143,8 +145,8 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     void failOnInvalidParameterValues() {
         assertError(
             "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('myPipeline', {minEpochs: 0.5, batchSize: 0.51})",
-            "Multiple errors in configuration arguments:\n" +
-            "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`.\n" +
+            "Multiple errors in configuration arguments:" + newLine +
+            "\t\t\t\tThe value of `batchSize` must be of type `Integer` but was `Double`." + newLine +
             "\t\t\t\tThe value of `minEpochs` must be of type `Integer` but was `Double`."
         );
     }

@@ -162,7 +162,7 @@ final class NodeSimilarityTest {
             .similarityCutoff(0.0);
     }
     private static String resultString(long node1, long node2, double similarity) {
-        return formatWithLocale("%d,%d %f%n", node1, node2, similarity);
+        return formatWithLocale("%d,%d %f", node1, node2, similarity);
     }
 
     private static String resultString(SimilarityResult result) {
@@ -881,7 +881,7 @@ final class NodeSimilarityTest {
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertThat(result).contains("0,1 0.500000\n" );
+        assertThat(result).contains("0,1 0.500000");
 
         nodeSimilarity = new NodeSimilarity(
             graph,
@@ -895,7 +895,7 @@ final class NodeSimilarityTest {
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertThat(result).contains("0,1 0.333333\n" );
+        assertThat(result).contains("0,1 0.333333");
 
     }
 

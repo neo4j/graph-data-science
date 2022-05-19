@@ -34,17 +34,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 final class CypherExporterTest extends BaseTest {
 
+    private static final String newLine = System.lineSeparator();
+
     @BeforeEach
     void setup() {
         String createGraph =
-                "CREATE (nA:Label1 { foo: 'bar' })\n" +
-                "CREATE (nB:Label1 { property: 42.1337 })\n" +
-                "CREATE (nC:Label2)\n" +
-                "CREATE (nD)\n" +
-                "CREATE\n" +
-                "  (nA)-[:TYPE1 {bar: 'baz'}]->(nB),\n" +
-                "  (nA)-[:TYPE1 {property:1337.42}]->(nC),\n" +
-                "  (nB)-[:TYPE2]->(nC),\n" +
+                "CREATE (nA:Label1 { foo: 'bar' }) " +
+                "CREATE (nB:Label1 { property: 42.1337 }) " +
+                "CREATE (nC:Label2) " +
+                "CREATE (nD) " +
+                "CREATE " +
+                "  (nA)-[:TYPE1 {bar: 'baz'}]->(nB), " +
+                "  (nA)-[:TYPE1 {property:1337.42}]->(nC), " +
+                "  (nB)-[:TYPE2]->(nC), " +
                 "  (nC)-[:TYPE]->(nD)";
 
         runQuery(createGraph);
@@ -57,14 +59,14 @@ final class CypherExporterTest extends BaseTest {
 
         //language=Cypher
         String expected =
-                "CREATE (n0:Label1 {foo:bar})\n" +
-                "CREATE (n1:Label1 {property:42.1337})\n" +
-                "CREATE (n2:Label2)\n" +
-                "CREATE (n3)\n" +
-                "CREATE\n" +
-                "  (n0)-[:TYPE1 {property:1337.42}]->(n2),\n" +
-                "  (n0)-[:TYPE1 {bar:baz}]->(n1),\n" +
-                "  (n1)-[:TYPE2]->(n2),\n" +
+                "CREATE (n0:Label1 {foo:bar})" + newLine +
+                "CREATE (n1:Label1 {property:42.1337})" + newLine +
+                "CREATE (n2:Label2)" + newLine +
+                "CREATE (n3)" + newLine +
+                "CREATE" + newLine +
+                "  (n0)-[:TYPE1 {property:1337.42}]->(n2)," + newLine +
+                "  (n0)-[:TYPE1 {bar:baz}]->(n1)," + newLine +
+                "  (n1)-[:TYPE2]->(n2)," + newLine +
                 "  (n2)-[:TYPE]->(n3);";
 
         assertEquals(expected, output.toString().trim());
@@ -74,14 +76,14 @@ final class CypherExporterTest extends BaseTest {
     void testDumpByGraphForHuge() {
         //language=Cypher
         String expected =
-                "CREATE (n0 {property:42.0})\n" +
-                "CREATE (n1 {property:42.1337})\n" +
-                "CREATE (n2 {property:42.0})\n" +
-                "CREATE (n3 {property:42.0})\n" +
-                "CREATE\n" +
-                "  (n0)-[ {weight:42.0}]->(n1),\n" +
-                "  (n0)-[ {weight:1337.42}]->(n2),\n" +
-                "  (n1)-[ {weight:42.0}]->(n2),\n" +
+                "CREATE (n0 {property:42.0})" + newLine +
+                "CREATE (n1 {property:42.1337})" + newLine +
+                "CREATE (n2 {property:42.0})" + newLine +
+                "CREATE (n3 {property:42.0})" + newLine +
+                "CREATE" + newLine +
+                "  (n0)-[ {weight:42.0}]->(n1)," + newLine +
+                "  (n0)-[ {weight:1337.42}]->(n2)," + newLine +
+                "  (n1)-[ {weight:42.0}]->(n2)," + newLine +
                 "  (n2)-[ {weight:42.0}]->(n3);";
 
         String output = dumpGraph();

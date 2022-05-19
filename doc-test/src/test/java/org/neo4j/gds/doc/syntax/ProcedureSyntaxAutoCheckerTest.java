@@ -46,6 +46,8 @@ class ProcedureSyntaxAutoCheckerTest {
     private File outputDirectory;
     private OptionsBuilder options;
 
+    private static final String newLine = System.lineSeparator();
+
     @BeforeEach
     void setUp() {
         // By default we are forced to use relative path which we don't want.
@@ -149,7 +151,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> assertThat(assertionError)
                 .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                .hasMessageContaining("could not find the following elements:\n" +
+                .hasMessageContaining("could not find the following elements:" + newLine +
                                       "  [\"communityId\", \"intermediateCommunityIds\"]"));
     }
 
@@ -172,7 +174,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> assertThat(assertionError)
                 .hasMessageContaining("Asserting YIELD result columns for `include-with-stream`")
-                .hasMessageContaining("the following elements were unexpected:\n" +
+                .hasMessageContaining("the following elements were unexpected:" + newLine +
                                       "  [\"bogusResultColumn\"]"));
     }
 
@@ -195,7 +197,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> assertThat(assertionError)
                 .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
-                .hasMessageContaining("could not find the following elements:\n" +
+                .hasMessageContaining("could not find the following elements:" + newLine +
                                       "  [\"intermediateCommunityIds\"]"));
     }
 
@@ -218,7 +220,7 @@ class ProcedureSyntaxAutoCheckerTest {
             .hasSize(1)
             .allSatisfy(assertionError -> assertThat(assertionError)
                 .hasMessageContaining("Asserting `Results` table for `include-with-stream`")
-                .hasMessageContaining("the following elements were unexpected:\n" +
+                .hasMessageContaining("the following elements were unexpected:" + newLine +
                                       "  [\"bogusResultColumn\"]"));
     }
 
