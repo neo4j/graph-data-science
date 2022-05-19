@@ -29,9 +29,17 @@ import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
 /**
- * We sort results by score, descending.
+ * This target node filter evaluates and stores incoming elements (neighbours) with their priority (score). We sort
+ * elements by priority, descending.
  *
- * For now a simple bounded priority queue that does _not_ handle duplicates.
+ * For now it is a simple, bounded priority queue backed by a {@link java.util.TreeSet}. We handle duplicates, in the
+ * sense that _exact_ pairs of element and priority, that already exist in the queue, are not added twice - this happens
+ * to be the semantics of the {@link java.util.TreeSet} we use. So no duplicates in the output, even though our dear
+ * {@link org.neo4j.gds.similarity.knn.Knn} algorithm does present us with such cases.
+ *
+ * NB: this data structure would _not_ handle "re-prioritisations" like a neighbour with a different score. Luckily we
+ * have convinced ourselves that {@link org.neo4j.gds.similarity.knn.Knn} never presents us with such cases. So this
+ * data structure suffices.
  */
 public class TargetNodeFilter implements NeighbourConsumer {
     private final TreeSet<Pair<Double, Long>> priorityQueue = new TreeSet<>(Comparator.reverseOrder());

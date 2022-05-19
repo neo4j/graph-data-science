@@ -64,4 +64,40 @@ class TargetNodeFilterTest {
 
         assertThat(consumer.asSimilarityStream(117)).isEmpty();
     }
+
+    @Test
+    void shouldIgnoreExactDuplicates() {
+        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 4);
+
+        consumer.offer(23, 3.14);
+        consumer.offer(42, 1.61);
+        consumer.offer(87, 2.71);
+        consumer.offer(42, 1.61);
+
+        assertThat(consumer.asSimilarityStream(117)).containsExactly(
+            new SimilarityResult(117, 23, 3.14),
+            new SimilarityResult(117, 87, 2.71),
+            new SimilarityResult(117, 42, 1.61)
+        );
+    }
+
+    /**
+     * This is documenting a fact rather than illustrating something desirable.
+     */
+    @Test
+    void shouldAllowDuplicateElementsWithNewPriorities() {
+        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 4);
+
+        consumer.offer(23, 3.14);
+        consumer.offer(42, 1.61);
+        consumer.offer(87, 2.71);
+        consumer.offer(42, 1.41);
+
+        assertThat(consumer.asSimilarityStream(117)).containsExactly(
+            new SimilarityResult(117, 23, 3.14),
+            new SimilarityResult(117, 87, 2.71),
+            new SimilarityResult(117, 42, 1.61),
+            new SimilarityResult(117, 42, 1.41)
+        );
+    }
 }

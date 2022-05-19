@@ -34,6 +34,7 @@ import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -227,6 +228,50 @@ class FilteredKnnTest {
                 .map(SimilarityResult::targetNodeId)
                 .collect(Collectors.toSet())
             ).isEqualTo(Set.of(targetNode1, targetNode2));
+        }
+    }
+
+    @Nested
+    class TargetNodeFilteringAndDuplicates {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (a { knn: 1.2 } )" +
+            ", (b { knn: 1.1 } )" +
+            ", (c { knn: 2.1 } )" +
+            ", (d { knn: 3.1 } )" +
+            ", (e { knn: 4.1 } )";
+
+        @Test
+        void shouldIgnoreDuplicates() {
+            var targetNode1 = idFunction.of("a");
+            var targetNode2 = idFunction.of("b");
+            var targetNode3 = idFunction.of("c");
+            var targetNode4 = idFunction.of("d");
+            var targetNode5 = idFunction.of("e");
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties(List.of("knn"))
+                .topK(42)
+                .targetNodeFilter(List.of(targetNode1, targetNode2, targetNode3, targetNode4, targetNode5))
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.create(graph, config, knnContext);
+            var result = knn.compute();
+
+            /*
+             * Ok we want to express that, for each source node, the target nodes found have no duplicates.
+             * First, group the results
+             */
+            Map<Long, List<SimilarityResult>> resultsPerSourceNode = result
+                .similarityResultStream()
+                .collect(Collectors.groupingBy(SimilarityResult::sourceNodeId));
+
+            // now for each result, see that there are no duplicates
+            resultsPerSourceNode
+                .values()
+                .forEach(similarityResultList -> assertThat(similarityResultList
+                    .stream()
+                    .mapToLong(SimilarityResult::targetNodeId)).doesNotHaveDuplicates());
         }
     }
 }
