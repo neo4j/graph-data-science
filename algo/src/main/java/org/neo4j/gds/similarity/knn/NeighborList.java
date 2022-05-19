@@ -221,11 +221,11 @@ public class NeighborList {
 
     /**
      * filterHighSimilarityResults will override the original array in
-     * priorityElementPairs keeping only the results with similarity>=threshold.
+     * priorityElementPairs keeping only the results with similarity greater than or equal to threshold.
      * It will write all high similarity elements
      * at the beginning of the array and re-define elementCount.
      *
-     * @param threshold we keep all results with similarity >=threshold.
+     * @param threshold we keep all results with similarity greater than or equal to threshold.
      */
     public void filterHighSimilarityResults(double threshold) {
         for (int i = 0; i < elementCount; i++) {
