@@ -39,7 +39,7 @@ public class LeafTask extends Task {
 
         // This task should now be considered to have 100% progress.
         if (volume == UNKNOWN_VOLUME) {
-            volume = 0;
+            volume = currentProgress.longValue();
         }
         currentProgress.add(volume - currentProgress.longValue());
     }
