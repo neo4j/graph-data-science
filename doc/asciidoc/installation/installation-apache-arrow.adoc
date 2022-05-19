@@ -65,8 +65,8 @@ To enable encryption for `https`, use the following DBMS settings:
 
 ----
 dbms.ssl.policy.https.enabled=true
-dbms.ssl.polict.https.private_key=private.key
-dbms.ssl.polict.https.public_certificate=public.crt
+dbms.ssl.policy.https.private_key=private.key
+dbms.ssl.policy.https.public_certificate=public.crt
 ----
 
 
