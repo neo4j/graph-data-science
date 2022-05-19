@@ -39,14 +39,14 @@ final class CypherExporterTest extends BaseTest {
     @BeforeEach
     void setup() {
         String createGraph =
-                "CREATE (nA:Label1 { foo: 'bar' })" + newLine +
-                "CREATE (nB:Label1 { property: 42.1337 })" + newLine +
-                "CREATE (nC:Label2)" + newLine +
-                "CREATE (nD)" + newLine +
-                "CREATE" + newLine +
-                "  (nA)-[:TYPE1 {bar: 'baz'}]->(nB)," + newLine +
-                "  (nA)-[:TYPE1 {property:1337.42}]->(nC)," + newLine +
-                "  (nB)-[:TYPE2]->(nC)," + newLine +
+                "CREATE (nA:Label1 { foo: 'bar' }) " +
+                "CREATE (nB:Label1 { property: 42.1337 }) " +
+                "CREATE (nC:Label2) " +
+                "CREATE (nD) " +
+                "CREATE " +
+                "  (nA)-[:TYPE1 {bar: 'baz'}]->(nB), " +
+                "  (nA)-[:TYPE1 {property:1337.42}]->(nC), " +
+                "  (nB)-[:TYPE2]->(nC), " +
                 "  (nC)-[:TYPE]->(nD)";
 
         runQuery(createGraph);
