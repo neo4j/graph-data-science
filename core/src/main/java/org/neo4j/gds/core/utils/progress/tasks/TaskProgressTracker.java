@@ -37,12 +37,16 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TaskProgressTracker implements ProgressTracker {
 
+    private static final long UNKNOWN_STEPS = -1;
+
     private final Task baseTask;
     private final TaskRegistry taskRegistry;
     private final UserLogRegistry userLogRegistry;
     private final TaskProgressLogger taskProgressLogger;
     private final Stack<Task> nestedTasks;
     protected Optional<Task> currentTask;
+    private long currentTotalSteps;
+    private double progressLeftOvers;
 
     public TaskProgressTracker(Task baseTask, Log log, int concurrency, TaskRegistryFactory taskRegistryFactory) {
         this(baseTask, log, concurrency, new JobId(), taskRegistryFactory, EmptyUserLogRegistryFactory.INSTANCE);
@@ -56,6 +60,8 @@ public class TaskProgressTracker implements ProgressTracker {
         this.taskRegistry = taskRegistryFactory.newInstance(jobId);
         this.taskProgressLogger = new TaskProgressLogger(log, baseTask, concurrency);
         this.currentTask = Optional.empty();
+        this.currentTotalSteps = UNKNOWN_STEPS;
+        this.progressLeftOvers = 0;
         this.nestedTasks = new Stack<>();
         this.userLogRegistry = userLogRegistryFactory.newInstance();
     }
@@ -76,6 +82,8 @@ public class TaskProgressTracker implements ProgressTracker {
         nextTask.start();
         taskProgressLogger.logBeginSubTask(nextTask, parentTask());
         currentTask = Optional.of(nextTask);
+        currentTotalSteps = UNKNOWN_STEPS;
+        progressLeftOvers = 0;
     }
 
     @Override
@@ -88,6 +96,26 @@ public class TaskProgressTracker implements ProgressTracker {
     public void beginSubTask(long taskVolume) {
         beginSubTask();
         setVolume(taskVolume);
+    }
+
+    @Override
+    public void setSteps(long steps) {
+        if (steps <= 0) {
+            throw new IllegalStateException(formatWithLocale(
+                "Total steps for task must be at least 1 but was %d",
+                steps
+            ));
+        }
+        currentTotalSteps = steps;
+    }
+
+    @Override
+    public void logSteps(long steps) {
+        long volume = requireCurrentTask().getProgress().volume();
+        double progress = steps * volume / (double) currentTotalSteps + progressLeftOvers;
+        long longProgress = (long) progress;
+        progressLeftOvers = progress - longProgress;
+        logProgress(longProgress);
     }
 
     @Override

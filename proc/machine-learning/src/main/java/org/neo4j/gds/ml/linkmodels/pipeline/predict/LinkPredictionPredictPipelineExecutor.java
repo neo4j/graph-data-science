@@ -102,7 +102,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
             taskName,
             Tasks.iterativeFixed(
                 "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
+                () -> List.of(Tasks.leaf("Step", 10 * graphStore.getUnion().relationshipCount())),
                 pipeline.nodePropertySteps().size()
             ),
             config.isApproximateStrategy()
@@ -110,7 +110,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 "Approximate link prediction",
                 KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig())
             )
-                : Tasks.leaf("Exhaustive link prediction", graphStore.nodeCount())
+                : Tasks.leaf("Exhaustive link prediction", graphStore.getUnion().nodeCount() * graphStore.getUnion().nodeCount() / 2)
         );
     }
 

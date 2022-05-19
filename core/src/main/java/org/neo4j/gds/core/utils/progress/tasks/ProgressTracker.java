@@ -51,6 +51,9 @@ public interface ProgressTracker {
 
     void logProgress(long value, String messageTemplate);
 
+    // prefer setting volume via factory method for leaves
+    // to make root progress available from the start
+    @Deprecated
     void setVolume(long volume);
 
     void logDebug(String message);
@@ -60,6 +63,10 @@ public interface ProgressTracker {
     void logMessage(String message);
 
     void release();
+
+    void setSteps(long steps);
+
+    void logSteps(long steps);
 
     class EmptyProgressTracker implements ProgressTracker {
 
@@ -106,6 +113,16 @@ public interface ProgressTracker {
 
         @Override
         public void setVolume(long volume) {
+        }
+
+        @Override
+        public void setSteps(long steps) {
+
+        }
+
+        @Override
+        public void logSteps(long steps) {
+
         }
 
         @Override

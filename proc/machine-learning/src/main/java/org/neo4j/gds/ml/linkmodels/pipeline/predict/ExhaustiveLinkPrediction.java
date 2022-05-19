@@ -76,6 +76,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
+        progressTracker.setSteps(graph.nodeCount());
+
         var predictionQueue = BoundedLongLongPriorityQueue.max(topN);
 
         var tasks = PartitionUtils.rangePartition(
@@ -139,7 +141,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 );
             });
 
-            progressTracker.logProgress(partition.nodeCount());
+            progressTracker.logSteps(partition.nodeCount());
         }
 
         private LongHashSet largerNeighbors(long sourceId) {

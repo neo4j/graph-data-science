@@ -28,6 +28,10 @@ public interface ClassifierTrainer {
 
     Classifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet);
 
+    static Task progressTask(String taskName, long volume) {
+        return Tasks.leaf(taskName, volume);
+    }
+
     static Task progressTask(String taskName) {
         return Tasks.leaf(taskName);
     }

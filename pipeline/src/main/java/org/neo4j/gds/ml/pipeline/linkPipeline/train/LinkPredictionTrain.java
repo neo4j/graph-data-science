@@ -95,20 +95,25 @@ public final class LinkPredictionTrain {
         this.classIdMap = makeClassIdMap();
     }
 
-    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials) {
+    public static List<Task> progressTasks(
+        long relationshipCount,
+        LinkPredictionSplitConfig splitConfig,
+        int numberOfModelSelectionTrials
+    ) {
+        var sizes = splitConfig.expectedSetSizes(relationshipCount);
         return List.of(
-            Tasks.leaf("Extract train features"),
+            Tasks.leaf("Extract train features", sizes.trainSize() * 3),
             Tasks.iterativeFixed(
                 "Select best model",
-                () -> List.of(Tasks.leaf("Trial", validationFolds)),
+                () -> List.of(Tasks.leaf("Trial", splitConfig.validationFolds() * sizes.trainSize() * 5)),
                 numberOfModelSelectionTrials
             ),
-            ClassifierTrainer.progressTask("Train best model"),
-            Tasks.leaf("Compute train metrics"),
+            ClassifierTrainer.progressTask("Train best model", sizes.trainSize() * 5),
+            Tasks.leaf("Compute train metrics", sizes.trainSize()),
             Tasks.task(
                 "Evaluate on test data",
-                Tasks.leaf("Extract test features"),
-                Tasks.leaf("Compute test metrics")
+                Tasks.leaf("Extract test features", sizes.testSize() * 3),
+                Tasks.leaf("Compute test metrics", sizes.testSize())
             )
         );
     }
@@ -208,6 +213,7 @@ public final class LinkPredictionTrain {
         int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
             progressTracker.beginSubTask();
+            progressTracker.setSteps(pipeline.splitConfig().validationFolds());
             var modelParams = hyperParameterOptimizer.next();
             progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
             var trainStatsBuilder = new ModelStatsBuilder(pipeline.splitConfig().validationFolds());
@@ -242,7 +248,7 @@ public final class LinkPredictionTrain {
                     ProgressTracker.NULL_TRACKER
                 );
 
-                progressTracker.logProgress();
+                progressTracker.logSteps(1);
             }
 
             // insert the candidates' metrics into trainStats and validationStats

@@ -119,7 +119,7 @@ public abstract class SignedProbabilities {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
-        progressTracker.setVolume(features.size());
+        progressTracker.setSteps(features.size());
 
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
@@ -134,7 +134,7 @@ public abstract class SignedProbabilities {
 
                     signedProbabilities.add(probabilityOfPositiveEdge, isEdge);
                 }
-                progressTracker.logProgress(batch.size());
+                progressTracker.logSteps(batch.size());
             },
             terminationFlag
         );
