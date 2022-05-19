@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -39,7 +39,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -278,43 +278,50 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void progressTracking() {
+        var config = new NodeClassificationPredictPipelineBaseConfigImpl(
+            "",
+            CypherMapWrapper.empty()
+                .withEntry("modelName", "model")
+                .withEntry("includePredictedProbabilities", true)
+                .withEntry("graphName", GRAPH_NAME)
+        );
+
+        var pipeline = NodePropertyPredictPipeline.from(
+            Stream.of(NodePropertyStepFactory.createNodePropertyStep(
+                "degree",
+                Map.of("mutateProperty", "degree")
+            )),
+            Stream.of(
+                NodeFeatureStep.of("a"),
+                NodeFeatureStep.of("b"),
+                NodeFeatureStep.of("c"),
+                NodeFeatureStep.of("degree")
+            )
+        );
+
+        var weights = new double[]{
+            1.0, 1.0, -2.0, -1.0,
+            0.0, -1.5, -1.3, 2.6
+        };
+        var bias = new double[]{3.0, 0.0};
+        var modelData = createClassifierData(weights, bias);
+
+        var log = Neo4jProxy.testLog();
+        var taskStore = new GlobalTaskStore();
+        var progressTracker = new InspectableTestProgressTracker(
+            NodeClassificationPredictPipelineExecutor.progressTask(
+                "Node Classification Predict Pipeline",
+                pipeline,
+                graphStore
+            ),
+            log,
+            1,
+            getUsername(),
+            config.jobId(),
+            taskStore
+        );
+
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = new NodeClassificationPredictPipelineBaseConfigImpl(
-                "",
-                CypherMapWrapper.empty()
-                    .withEntry("modelName", "model")
-                    .withEntry("includePredictedProbabilities", true)
-                    .withEntry("graphName", GRAPH_NAME)
-            );
-
-            var pipeline = NodePropertyPredictPipeline.from(
-                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
-                    "degree",
-                    Map.of("mutateProperty", "degree")
-                )),
-                Stream.of(
-                    NodeFeatureStep.of("a"),
-                    NodeFeatureStep.of("b"),
-                    NodeFeatureStep.of("c"),
-                    NodeFeatureStep.of("degree")
-                )
-            );
-
-            var weights = new double[]{
-                1.0, 1.0, -2.0, -1.0,
-                0.0, -1.5, -1.3, 2.6
-            };
-            var bias = new double[]{3.0, 0.0};
-            var modelData = createClassifierData(weights, bias);
-
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(
-                NodeClassificationPredictPipelineExecutor.progressTask("Node Classification Predict Pipeline", pipeline, graphStore),
-                log,
-                1,
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
                 pipeline,
                 config,
@@ -346,6 +353,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
         });
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test

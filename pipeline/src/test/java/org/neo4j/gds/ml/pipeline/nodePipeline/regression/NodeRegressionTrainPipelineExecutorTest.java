@@ -24,15 +24,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
@@ -183,11 +183,14 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
             .build();
 
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(
+        var taskStore = new GlobalTaskStore();
+        var progressTracker = new InspectableTestProgressTracker(
             NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore.nodeCount()),
             log,
             1,
-            EmptyTaskRegistryFactory.INSTANCE
+            getUsername(),
+            config.jobId(),
+            taskStore
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -215,6 +218,7 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
                     "Node Regression Train Pipeline :: Test set size is 3"
                 );
         });
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test

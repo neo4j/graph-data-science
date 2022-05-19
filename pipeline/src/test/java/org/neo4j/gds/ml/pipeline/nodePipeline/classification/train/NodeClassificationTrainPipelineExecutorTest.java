@@ -28,8 +28,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -39,7 +39,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -249,15 +249,21 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             1L
         );
 
+        var log = Neo4jProxy.testLog();
+        var taskStore = new GlobalTaskStore();
+        var progressTracker = new InspectableTestProgressTracker(
+            NodeClassificationTrainPipelineExecutor.progressTask(
+                "Node Classification Train Pipeline",
+                pipeline,
+                graphStore.nodeCount()
+            ),
+            log,
+            1,
+            getUsername(),
+            config.jobId(),
+            taskStore
+        );
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(
-                NodeClassificationTrainPipelineExecutor.progressTask("Node Classification Train Pipeline", pipeline, graphStore.nodeCount()),
-                log,
-                1,
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-
             NodeClassificationTrainPipelineExecutor executor = new NodeClassificationTrainPipelineExecutor(
                 pipeline,
                 config,

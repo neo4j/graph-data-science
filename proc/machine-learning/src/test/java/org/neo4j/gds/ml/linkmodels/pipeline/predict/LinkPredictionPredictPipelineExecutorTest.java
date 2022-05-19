@@ -24,10 +24,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -39,7 +39,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -139,6 +139,21 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     )),
                 Weights.ofVector(0.0)
             );
+            var log = Neo4jProxy.testLog();
+            var taskStore = new GlobalTaskStore();
+            var progressTracker = new InspectableTestProgressTracker(
+                LinkPredictionPredictPipelineExecutor.progressTask(
+                    "Link Prediction Train Pipeline",
+                    pipeline,
+                    graphStore,
+                    config
+                ),
+                log,
+                1,
+                getUsername(),
+                config.jobId(),
+                taskStore
+            );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
@@ -147,7 +162,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 caller.executionContext(),
                 graphStore,
                 GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
+                progressTracker
             );
 
             var predictionResult = pipelineExecutor.compute();
@@ -158,6 +173,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
             assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
             assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
+            progressTracker.assertValidProgressEvolution();
         });
     }
 
@@ -257,68 +273,73 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void progressTracking() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = LinkPredictionPredictPipelineStreamConfig.of(
-                "",
-                CypherMapWrapper.empty()
-                    .withEntry("modelName", "model")
-                    .withEntry("topN", 3)
-                    .withEntry("graphName", GRAPH_NAME)
-            );
 
-            var pipeline = LinkPredictionPredictPipeline.from(
-                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
-                    "degree",
-                    Map.of("mutateProperty", "degree")
+
+        var config = LinkPredictionPredictPipelineStreamConfig.of(
+            "",
+            CypherMapWrapper.empty()
+                .withEntry("modelName", "model")
+                .withEntry("topN", 3)
+                .withEntry("graphName", GRAPH_NAME)
+        );
+
+        var pipeline = LinkPredictionPredictPipeline.from(
+            Stream.of(NodePropertyStepFactory.createNodePropertyStep(
+                "degree",
+                Map.of("mutateProperty", "degree")
+            )),
+            Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+        );
+
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            new Weights<>(
+                new Matrix(
+                    new double[]{2.0, 1.0, -3.0, -1.0},
+                    1,
+                    4
                 )),
-                Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
-            );
+            Weights.ofVector(0.0)
+        );
 
-            var modelData = ImmutableLogisticRegressionData.of(
-                2,
-                new Weights<>(
-                    new Matrix(
-                        new double[]{2.0, 1.0, -3.0, -1.0},
-                        1,
-                        4
-                    )),
-                Weights.ofVector(0.0)
-            );
+        Model.of(
+            getUsername(),
+            "model",
+            MODEL_TYPE,
+            GraphSchema.empty(),
+            modelData,
+            LinkPredictionTrainConfigImpl.builder()
+                .username(getUsername())
+                .modelName("model")
+                .pipeline("DUMMY")
+                .graphName(GRAPH_NAME)
+                .negativeClassWeight(1.0)
+                .build(),
+            LinkPredictionModelInfo.of(
+                Map.of(),
+                Map.of(),
+                ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
+                pipeline
+            )
+        );
 
-            Model.of(
-                getUsername(),
-                "model",
-                MODEL_TYPE,
-                GraphSchema.empty(),
-                modelData,
-                LinkPredictionTrainConfigImpl.builder()
-                    .username(getUsername())
-                    .modelName("model")
-                    .pipeline("DUMMY")
-                    .graphName(GRAPH_NAME)
-                    .negativeClassWeight(1.0)
-                    .build(),
-                LinkPredictionModelInfo.of(
-                    Map.of(),
-                    Map.of(),
-                    ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
-                    pipeline
-                )
-            );
+        var log = Neo4jProxy.testLog();
+        var taskStore = new GlobalTaskStore();
+        var progressTracker = new InspectableTestProgressTracker(
+            LinkPredictionPredictPipelineExecutor.progressTask(
+                "Link Prediction Predict Pipeline",
+                pipeline,
+                graphStore,
+                config
+            ),
+            log,
+            1,
+            getUsername(),
+            config.jobId(),
+            taskStore
+        );
 
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(
-                LinkPredictionPredictPipelineExecutor.progressTask(
-                    "Link Prediction Predict Pipeline",
-                    pipeline,
-                    graphStore,
-                    config
-                ),
-                log,
-                1,
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
@@ -349,6 +370,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
         });
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test

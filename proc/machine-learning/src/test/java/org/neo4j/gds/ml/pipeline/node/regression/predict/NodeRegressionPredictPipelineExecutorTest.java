@@ -23,9 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -33,7 +33,7 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -126,38 +126,41 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void progressTracking() {
+        var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
+            .username("")
+            .modelName("model")
+            .graphName(GRAPH_NAME)
+            .build();
+
+        var pipeline = NodePropertyPredictPipeline.from(
+            Stream.of(NodePropertyStepFactory.createNodePropertyStep(
+                "testProc",
+                Map.of("mutateProperty", "prop")
+            )),
+            Stream.of(
+                NodeFeatureStep.of("a"),
+                NodeFeatureStep.of("b"),
+                NodeFeatureStep.of("c"),
+                NodeFeatureStep.of("prop")
+            )
+        );
+
+        double[] weights = {1.0, 1.0, -2.0, -1.0};
+        var bias = 3.0;
+        var modelData = createModelData(weights, bias);
+
+        var log = Neo4jProxy.testLog();
+        var taskStore = new GlobalTaskStore();
+        var progressTracker = new InspectableTestProgressTracker(
+            NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
+            log,
+            1,
+            getUsername(),
+            config.jobId(),
+            taskStore
+        );
+
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .username("")
-                .modelName("model")
-                .graphName(GRAPH_NAME)
-                .build();
-
-            var pipeline = NodePropertyPredictPipeline.from(
-                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
-                    "testProc",
-                    Map.of("mutateProperty", "prop")
-                )),
-                Stream.of(
-                    NodeFeatureStep.of("a"),
-                    NodeFeatureStep.of("b"),
-                    NodeFeatureStep.of("c"),
-                    NodeFeatureStep.of("prop")
-                )
-            );
-
-            double[] weights = {1.0, 1.0, -2.0, -1.0};
-            var bias = 3.0;
-            var modelData = createModelData(weights, bias);
-
-            var log = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(
-                NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
-                log,
-                1,
-                EmptyTaskRegistryFactory.INSTANCE
-            );
-
             var pipelineExecutor = new NodeRegressionPredictPipelineExecutor(
                 pipeline,
                 config,
@@ -188,6 +191,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
         });
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test
