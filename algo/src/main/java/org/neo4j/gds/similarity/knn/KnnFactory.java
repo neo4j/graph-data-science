@@ -97,6 +97,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                             sizeOfIntArray(sizeOfOpenHashContainer(sampledK)) * concurrency
                         )
                     )
+                    .add(MemoryEstimations.of("neighbour-consumers", MemoryRange.of(sizeOfInstance(NeighbourConsumers.class))))
                     .build();
             }
         );
