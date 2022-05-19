@@ -159,8 +159,8 @@ For example, given the relationship `(a)-[:EVOLVES_TO { at_level: 16 }]->(b)` an
 [[arrow-relationship-schema]]
 [opts=header,cols="1,1,1,1"]
 |===
-| sourceId  | targetId  | type          | at_level
-| 0         | 1         | "EVOLVES_TO"  | 16
+| sourceNodeId  | targetNodeId  | type          | at_level
+| 0             | 1             | "EVOLVES_TO"  | 16
 |===
 
 The following table describes the node columns with reserved names.
@@ -169,8 +169,8 @@ The following table describes the node columns with reserved names.
 [opts=header,cols="1m,1,1,1,1"]
 |===
 | Name              | Type              | Optional | Nullable   | Description
-| sourceId          | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
-| targetId          | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
+| sourceNodeId      | Integer           | No       | No         | Unique 64-bit source node identifiers. Must be positive values and present in the imported nodes.
+| targetNodeId      | Integer           | No       | No         | Unique 64-bit target node identifiers. Must be positive values and present in the imported nodes.
 | relationshipType  | String or Integer | Yes      | No         | Single relationship type. Either a string literal or a dictionary encoded number.
 |===
 
