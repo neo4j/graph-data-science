@@ -41,6 +41,14 @@ class GdsAstFactory extends AstFactoryAdapter {
         return ImmutableVariable.builder().name(name).build();
     }
 
+
+    @Override
+    public Expression newParameter(
+        InputPosition p, Expression.LeafExpression.Variable v
+    ) {
+        return ImmutableNewParameter.of(v);
+    }
+
     @Override
     public Expression.Literal.DoubleLiteral newDouble(InputPosition p, String image) {
         return ImmutableDoubleLiteral.builder().value(Double.parseDouble(image)).build();

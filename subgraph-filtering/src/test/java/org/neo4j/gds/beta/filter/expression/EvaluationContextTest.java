@@ -77,7 +77,7 @@ public class EvaluationContextTest {
         ValueType valueType,
         List<String> expectedLabels
     ) {
-        var context = new EvaluationContext.NodeEvaluationContext(graphStore);
+        var context = new EvaluationContext.NodeEvaluationContext(graphStore, Map.of());
         context.init(idFunction.of(variable));
         assertThat(context.getProperty(propertyKey, valueType)).isEqualTo(expectedValue);
         assertThat(context.hasLabelsOrTypes(expectedLabels)).isTrue();
@@ -93,14 +93,14 @@ public class EvaluationContextTest {
     @ParameterizedTest
     @MethodSource("nodesNegative")
     void nodeEvaluationContextNegative(String variable, List<String> unExpectedLabels) {
-        var context = new EvaluationContext.NodeEvaluationContext(graphStore);
+        var context = new EvaluationContext.NodeEvaluationContext(graphStore, Map.of());
         context.init(idFunction.of(variable));
         assertThat(context.hasLabelsOrTypes(unExpectedLabels)).isFalse();
     }
 
     @Test
     void relationshipEvaluationContextPositive() {
-        var context = new EvaluationContext.RelationshipEvaluationContext(Map.of("baz", 0));
+        var context = new EvaluationContext.RelationshipEvaluationContext(Map.of("baz", 0), Map.of());
         context.init("REL", new double[]{84});
         assertThat(context.getProperty("baz", ValueType.DOUBLE)).isEqualTo(84);
         assertThat(context.hasLabelsOrTypes(List.of("REL"))).isTrue();
@@ -108,7 +108,7 @@ public class EvaluationContextTest {
 
     @Test
     void relationshipEvaluationContextNegative() {
-        var context = new EvaluationContext.RelationshipEvaluationContext(Map.of());
+        var context = new EvaluationContext.RelationshipEvaluationContext(Map.of(), Map.of());
         context.init("REL");
         assertThat(context.hasLabelsOrTypes(List.of("BAR"))).isFalse();
     }

@@ -93,6 +93,7 @@ public final class GraphStoreFilter {
                 graphStore,
                 expressions.nodeExpression(),
                 config.concurrency(),
+                config.parameters(),
                 executorService,
                 progressTracker
             );
@@ -103,6 +104,7 @@ public final class GraphStoreFilter {
                 inputNodes,
                 filteredNodes.idMap(),
                 config.concurrency(),
+                config.parameters(),
                 executorService,
                 progressTracker
             );

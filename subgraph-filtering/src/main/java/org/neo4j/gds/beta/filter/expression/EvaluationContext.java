@@ -32,6 +32,16 @@ import java.util.Map;
 
 public abstract class EvaluationContext {
 
+    private final Map<String, Object> parameterMap;
+
+    protected EvaluationContext(Map<String, Object> parameterMap) {
+        this.parameterMap = parameterMap;
+    }
+
+    Number resolveParameter(String parameterName) {
+        return (Number) this.parameterMap.get(parameterName);
+    }
+
     abstract double getProperty(String propertyKey, ValueType propertyType);
 
     abstract boolean hasLabelsOrTypes(List<String> labelsOrTypes);
@@ -41,7 +51,11 @@ public abstract class EvaluationContext {
         private final GraphStore graphStore;
         private long nodeId;
 
-        public NodeEvaluationContext(GraphStore graphStore) {
+        public NodeEvaluationContext(
+            GraphStore graphStore,
+            Map<String, Object> parameterMap
+        ) {
+            super(parameterMap);
             this.graphStore = graphStore;
         }
 
@@ -80,7 +94,11 @@ public abstract class EvaluationContext {
 
         private final ObjectIntMap<String> propertyIndices;
 
-        public RelationshipEvaluationContext(Map<String, Integer> propertyIndices) {
+        public RelationshipEvaluationContext(
+            Map<String, Integer> propertyIndices,
+            Map<String, Object> parameterMap
+        ) {
+            super(parameterMap);
             this.propertyIndices = new ObjectIntScatterMap<>();
             propertyIndices.forEach(this.propertyIndices::put);
         }

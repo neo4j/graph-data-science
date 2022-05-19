@@ -22,6 +22,8 @@ package org.neo4j.gds.catalog;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
@@ -33,15 +35,17 @@ import org.opencypher.v9_0.parser.javacc.ParseException;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    public static final String DB = "CREATE (a:A)-[:REL]->(b:B)";
+    public static final String DB = "CREATE (a:A { prop: 1337 })-[:REL { weight: 42.0 }]->(b:B { prop: 0 })";
 
     @BeforeEach
     void setup() throws Exception {
@@ -51,7 +55,9 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
-            .withAnyRelationshipType()
+            .withNodeProperty("prop")
+            .withRelationshipType("REL")
+            .withRelationshipProperty("weight")
             .yields()
         );
     }
@@ -112,7 +118,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             "subgraph"
         ).graphStore();
 
-        assertGraphEquals(fromGdl("(:A)"), subgraphStore.getUnion());
+        assertGraphEquals(fromGdl("(:A { prop: 1337 })"), subgraphStore.getUnion());
     }
 
     @Test
@@ -155,12 +161,46 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Test
     void throwsOnSemanticRelationshipError() {
-        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.weight > 42')";
+        var subGraphQuery = "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:BAR AND r.prop > 42')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
             .getRootCause()
             .isInstanceOf(SemanticErrors.class)
-            .hasMessageContaining("Unknown property `weight`.")
+            .hasMessageContaining("Unknown property `prop`.")
             .hasMessageContaining("Unknown relationship type `BAR`.");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "=, 1",
+        ">, 0"
+    })
+    void shouldResolveParameters(String operator, int expectedRelationships) {
+        var subGraphQuery = formatWithLocale(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'true', 'r:REL AND r.weight %s $weight', { parameters: { weight: $weight } })",
+            operator
+        );
+
+        runQuery(subGraphQuery, Map.of("weight", 42));
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        assertThat(graphStore.relationshipCount()).isEqualTo(expectedRelationships);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        ">=, 2",
+        ">, 1"
+    })
+    void shouldResolveParametersWhenPassedAsConstants(String operator, int expectedNodes) {
+        var subGraphQuery = formatWithLocale(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n.prop %s $threshold', 'true', { parameters: { threshold: 0 } })",
+            operator
+        );
+
+        runQuery(subGraphQuery);
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        assertThat(graphStore.nodeCount()).isEqualTo(expectedNodes);
     }
 }

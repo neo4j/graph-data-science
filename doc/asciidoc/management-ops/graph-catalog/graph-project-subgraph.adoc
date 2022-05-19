@@ -56,6 +56,7 @@ CALL gds.beta.graph.project.subgraph(
 | Name               | Type    | Default              | Optional | Description
 | concurrency        | Integer | 4                    | yes      | The number of concurrent threads used for filtering the graph.
 | jobId              | String  | Generated internally | yes      | An ID that can be provided to more easily track the projection's progress.
+| parameters         | Map     | {}                   | yes      | A map of user-defined query parameters that are passed into the node and relationship filters.
 |===
 
 .Results
@@ -155,6 +156,7 @@ YIELD graphName, nodeCount, relationshipCount, projectMillis
 <4> Project `READS` relationships without any of their properties.
 
 
+[[catalog-graph-project-subgraph-node-filter-example]]
 === Node filtering
 
 [role=query-example]
@@ -250,5 +252,34 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 |===
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers-books"  | "social-graph"   | 3         | 1
+|===
+--
+
+
+=== Using query parameters
+
+Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
+As an example we can rewrite the <<catalog-graph-project-subgraph-node-filter-example, node filter example>> from above using parameters instead of integer literals:
+
+[role=query-example]
+--
+.Create a new graph containing only users of a certain age group:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.project.subgraph(
+  'teenagers-parameterized',
+  'social-graph',
+  'n.age > $lower AND n.age <= $upper',
+  '*',
+  { parameters: { lower: 13, upper: 18 } }
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| graphName                  | fromGraphName    | nodeCount | relationshipCount
+| "teenagers-parameterized"  | "social-graph"   | 2         | 1
 |===
 --

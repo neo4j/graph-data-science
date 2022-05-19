@@ -324,11 +324,6 @@ abstract class AstFactoryAdapter implements ASTFactory<NULL,
     }
 
     @Override
-    public Expression newParameter(InputPosition p, Expression.LeafExpression.Variable v) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public NULL newSingleQuery(List<NULL> nulls) {
         throw new UnsupportedOperationException();
     }
