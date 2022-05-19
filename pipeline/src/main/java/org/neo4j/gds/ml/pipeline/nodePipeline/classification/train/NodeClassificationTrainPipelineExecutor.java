@@ -63,11 +63,7 @@ public class NodeClassificationTrainPipelineExecutor extends PipelineExecutor<
         return Tasks.task(
             taskName,
             new ArrayList<>() {{
-                add(Tasks.iterativeFixed(
-                    "Execute node property steps",
-                    () -> List.of(Tasks.leaf("Step", 10L * nodeCount)),
-                    pipeline.nodePropertySteps().size()
-                ));
+                add(nodePropertyStepTasks(pipeline.nodePropertySteps()));
                 addAll(NodeClassificationTrain.progressTasks(
                     pipeline.splitConfig(),
                     pipeline.numberOfModelSelectionTrials(),

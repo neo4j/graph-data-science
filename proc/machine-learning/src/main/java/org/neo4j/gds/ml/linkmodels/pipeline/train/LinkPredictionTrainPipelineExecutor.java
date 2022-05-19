@@ -88,11 +88,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 "Split relationships",
                 sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
             ));
-            add(Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step", 10 * sizes.featureInputSize())),
-                pipeline.nodePropertySteps().size()
-            ));
+            add(nodePropertyStepTasks(pipeline.nodePropertySteps()));
             addAll(LinkPredictionTrain.progressTasks(
                 relationshipCount,
                 pipeline.splitConfig(),
@@ -101,7 +97,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         }});
     }
 
-    public static MemoryEstimation estimate(ModelCatalog modelCatalog, LinkPredictionTrainingPipeline pipeline, LinkPredictionTrainConfig configuration) {
+    public static MemoryEstimation estimate(
+        ModelCatalog modelCatalog,
+        LinkPredictionTrainingPipeline pipeline,
+        LinkPredictionTrainConfig configuration
+    ) {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
 
         var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());
@@ -218,6 +218,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     @ValueClass
     public interface LinkPredictionTrainPipelineResult {
         Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
+
         TrainingStatistics trainingStatistics();
     }
 }

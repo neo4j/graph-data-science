@@ -173,9 +173,9 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
             var expectedMessages = new ArrayList<>(List.of(
                 "Node Regression Predict Pipeline :: Start",
                 "Node Regression Predict Pipeline :: Execute node property steps :: Start",
-                "Node Regression Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Start",
-                "Node Regression Predict Pipeline :: Execute node property steps :: Step 1 of 1 100%",
-                "Node Regression Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Start",
+                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm 100%",
+                "Node Regression Predict Pipeline :: Execute node property steps :: TestAlgorithm :: Finished",
                 "Node Regression Predict Pipeline :: Execute node property steps :: Finished",
                 "Node Regression Predict Pipeline :: Predict :: Start",
                 "Node Regression Predict Pipeline :: Predict 100%",

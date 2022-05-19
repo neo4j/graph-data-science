@@ -36,7 +36,6 @@ public final class Tasks {
     }
 
     public static Task task(String description, List<Task> children) {
-        assert !children.isEmpty();
         return new Task(description, children);
     }
 

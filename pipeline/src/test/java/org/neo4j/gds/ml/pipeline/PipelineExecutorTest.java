@@ -95,11 +95,12 @@ class PipelineExecutorTest {
     @Test
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
         var log = Neo4jProxy.testLog();
+        var pipeline = new BogusNodePropertyPipeline();
         var pipelineExecutor = new SucceedingPipelineExecutor(
-            new BogusNodePropertyPipeline(),
+            pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
+            new TestProgressTracker(taskTree(pipeline), log, 1, EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatNoException().isThrownBy(pipelineExecutor::compute);
@@ -108,9 +109,9 @@ class PipelineExecutorTest {
             .containsExactly(
                 "FailingPipelineExecutor :: Start",
                 "FailingPipelineExecutor :: Execute node property steps :: Start",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Start",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 100%",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep 100%",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep :: Finished",
                 "FailingPipelineExecutor :: Execute node property steps :: Finished",
                 "FailingPipelineExecutor :: Finished"
             );
@@ -133,11 +134,12 @@ class PipelineExecutorTest {
     @Test
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = Neo4jProxy.testLog();
+        var pipeline = new BogusNodePropertyPipeline();
         var pipelineExecutor = new FailingPipelineExecutor(
-            new BogusNodePropertyPipeline(),
+            pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
-            new TestProgressTracker(taskTree(), log, 1, EmptyTaskRegistryFactory.INSTANCE)
+            new TestProgressTracker(taskTree(pipeline), log, 1, EmptyTaskRegistryFactory.INSTANCE)
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
@@ -146,9 +148,9 @@ class PipelineExecutorTest {
             .containsExactly(
                 "FailingPipelineExecutor :: Start",
                 "FailingPipelineExecutor :: Execute node property steps :: Start",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Start",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 100%",
-                "FailingPipelineExecutor :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep :: Start",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep 100%",
+                "FailingPipelineExecutor :: Execute node property steps :: AddBogusNodePropertyStep :: Finished",
                 "FailingPipelineExecutor :: Execute node property steps :: Finished"
             );
     }
@@ -173,14 +175,10 @@ class PipelineExecutorTest {
     }
 
 
-    private Task taskTree() {
+    private Task taskTree(TrainingPipeline<?> pipeline) {
         return Tasks.task(
             "FailingPipelineExecutor",
-            Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
-                1
-            )
+            PipelineExecutor.nodePropertyStepTasks(pipeline.nodePropertySteps())
         );
     }
 
@@ -195,7 +193,7 @@ class PipelineExecutorTest {
         }
     }
 
-    private class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<? extends FeatureStep>, String> {
+    private static class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<? extends FeatureStep>, String> {
         SucceedingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,

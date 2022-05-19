@@ -30,6 +30,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreValidation;
 
@@ -45,7 +47,7 @@ public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
-> extends Algorithm<RESULT> {
+    > extends Algorithm<RESULT> {
 
     public enum DatasetSplits {
         TRAIN,
@@ -81,7 +83,12 @@ public abstract class PipelineExecutor<
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
-    public static MemoryEstimation estimateNodePropertySteps(ModelCatalog modelCatalog, List<ExecutableNodePropertyStep> nodePropertySteps, List<String> nodeLabels, List<String> relationshipTypes) {
+    public static MemoryEstimation estimateNodePropertySteps(
+        ModelCatalog modelCatalog,
+        List<ExecutableNodePropertyStep> nodePropertySteps,
+        List<String> nodeLabels,
+        List<String> relationshipTypes
+    ) {
         var nodePropertyStepEstimations = nodePropertySteps
             .stream()
             .map(step -> step.estimate(modelCatalog, nodeLabels, relationshipTypes))
@@ -91,6 +98,16 @@ public abstract class PipelineExecutor<
         // Also, theoretically we clean the feature dataset after the node property steps have run, but we never account for this
         // in the memory estimation.
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
+    }
+
+    protected static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps) {
+        return Tasks.task(
+            "Execute node property steps",
+            nodePropertySteps.stream()
+                .map(ExecutableNodePropertyStep::rootTaskName)
+                .map(Tasks::leaf)
+                .collect(Collectors.toList())
+        );
     }
 
     public static void validateTrainingParameterSpace(TrainingPipeline pipeline) {
@@ -160,6 +177,7 @@ public abstract class PipelineExecutor<
     @ValueClass
     public interface GraphFilter {
         Collection<NodeLabel> nodeLabels();
+
         Collection<RelationshipType> relationshipTypes();
     }
 }

@@ -335,9 +335,9 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var expectedMessages = new ArrayList<>(List.of(
                 "Link Prediction Predict Pipeline :: Start",
                 "Link Prediction Predict Pipeline :: Execute node property steps :: Start",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Start",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: Step 1 of 1 100%",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
+                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality 100%",
+                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
                 "Link Prediction Predict Pipeline :: Execute node property steps :: Finished",
                 "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Start",
                 "Link Prediction Predict Pipeline :: Exhaustive link prediction 100%",

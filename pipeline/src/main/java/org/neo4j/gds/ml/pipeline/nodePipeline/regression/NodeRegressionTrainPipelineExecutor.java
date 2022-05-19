@@ -33,7 +33,6 @@ import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineExecutor.NodeRegressionTrainPipelineResult;
@@ -48,11 +47,7 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
         return Tasks.task(
             "Node Regression Train Pipeline",
             new ArrayList<>() {{
-                add(Tasks.iterativeFixed(
-                    "Execute node property steps",
-                    () -> List.of(Tasks.leaf("Step")),
-                    pipeline.nodePropertySteps().size()
-                ));
+                add(nodePropertyStepTasks(pipeline.nodePropertySteps()));
                 addAll(NodeRegressionTrain.progressTasks(
                     pipeline.splitConfig().validationFolds(),
                     pipeline.numberOfModelSelectionTrials()

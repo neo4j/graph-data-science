@@ -23,12 +23,8 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeRegressionTrainPipelineExecutor, NodeRegressionPipelineTrainConfig> {
 
@@ -72,20 +68,6 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             NodeRegressionTrainingPipeline.class
         );
 
-        return Tasks.task(
-            taskName(),
-            new ArrayList<>() {{
-                add(Tasks.iterativeFixed(
-                    "Execute node property steps",
-                    () -> List.of(Tasks.leaf("Step")),
-                    pipeline.nodePropertySteps().size()
-                ));
-                addAll(NodeRegressionTrain.progressTasks(
-                    pipeline.splitConfig().validationFolds(),
-                    pipeline.numberOfModelSelectionTrials()
-                ));
-
-            }}
-        );
+        return NodeRegressionTrainPipelineExecutor.progressTask(pipeline);
     }
 }
