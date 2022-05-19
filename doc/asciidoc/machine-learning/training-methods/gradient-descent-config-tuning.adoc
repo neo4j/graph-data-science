@@ -4,8 +4,9 @@ In order to balance matters such as bias vs variance of the model, and speed vs 
 Each of these are described below.
 
 In Gradient descent based training, we try to find the best weights for our model.
-Each epoch, we process all training examples to first compute the loss and then gradient of the weights.
-These gradients are then used to update the weights. For the update we use the Adam optimizer as described in https://arxiv.org/pdf/1412.6980.pdf.
+In each epoch we process all training examples to compute the loss and the gradient of the weights.
+These gradients are then used to update the weights.
+For the update we use the Adam optimizer as described in https://arxiv.org/pdf/1412.6980.pdf.
 
 Statistics about the training are reported in the neo4j debug log.
 
@@ -14,25 +15,25 @@ Statistics about the training are reported in the neo4j debug log.
 
 This parameter defines the influence of the regularization term in the loss function.
 While the regularization can avoid overfitting, a high value can even lead to underfitting.
+The minimal value is zero, where the regularization term has no effect at all.
 
 
 == Max Epochs
 
-This parameter defines the maximum number of epochs of the training.
-Independent of the models quality, the training will terminate after these many epochs.
-Note, that the training can also stop earlier if the loss converged.
+This parameter defines the maximum number of epochs for the training.
+Independent of the model's quality, the training will terminate after these many epochs.
+Note, that the training can also stop earlier if the loss converged (see <<_patience>> and <<_tolerance>>.
 
 Setting this parameter can be useful to limit the training time for a model.
-A high number of max epochs can lead to overfitting.
+Restricting the computational budget can serve the purpose of regularization and mitigate overfitting, which becomes a risk with a large number of epochs.
 
 
 == Min Epochs
 
-This parameter defines the minimum number of epochs of the training.
-Independent of the models quality, the training will at least run these many epochs.
+This parameter defines the minimum number of epochs for the training.
+Independent of the model's quality, the training will at least run this many epochs.
 
 Setting this parameter can be useful to avoid early stopping, but also increases the minimal training time of a model.
-Restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
 
 
 == Patience
