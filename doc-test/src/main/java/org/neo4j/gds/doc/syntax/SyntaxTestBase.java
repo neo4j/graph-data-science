@@ -29,6 +29,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.neo4j.gds.doc.PartialsIncludeProcessor;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -61,14 +62,15 @@ public abstract class SyntaxTestBase {
 
     @Test
     void runSyntaxTest(SoftAssertions softAssertions, @TempDir File outputDirectory) {
-        asciidoctor.javaExtensionRegistry().includeProcessor(new PartialsIncludeProcessor());
-        asciidoctor.javaExtensionRegistry().postprocessor(syntaxPostProcessor(softAssertions));
+        asciidoctor.javaExtensionRegistry()
+            .includeProcessor(new PartialsIncludeProcessor())
+            .postprocessor(syntaxPostProcessor(softAssertions));
 
         var docFile = adocPath().resolve(adocFile()).toFile();
         assertThat(docFile).exists().canRead();
 
         var options = OptionsBuilder.options()
-            .baseDir(ASCIIDOC_PATH.toFile())
+            .baseDir(ASCIIDOC_PATH.toFile()) // Make sure to set the `baseDir` it is read in `PartialsIncludeProcessor`
             .toDir(outputDirectory) // Make sure we don't write anything in the project.
             .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
 
