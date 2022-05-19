@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.nodeClassification;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -42,11 +41,12 @@ import java.util.Optional;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 
-public class NodeClassificationPredict extends Algorithm<NodeClassificationPredict.NodeClassificationResult> {
+public class NodeClassificationPredict {
 
     private final Classifier classifier;
     private final Features features;
     private final boolean produceProbabilities;
+    private final ProgressTracker progressTracker;
     private final ParallelNodeClassifier predictor;
 
     public NodeClassificationPredict(
@@ -58,11 +58,10 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
         this.classifier = classifier;
         this.features = features;
         this.produceProbabilities = produceProbabilities;
-        this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
 
         this.predictor = new ParallelNodeClassifier(
             classifier,
@@ -134,8 +133,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         return builder.build();
     }
 
-
-    @Override
     public NodeClassificationResult compute() {
         progressTracker.beginSubTask();
         var predictedProbabilities = initProbabilities();
@@ -143,11 +140,6 @@ public class NodeClassificationPredict extends Algorithm<NodeClassificationPredi
         progressTracker.endSubTask();
 
         return NodeClassificationResult.of(predictedClasses, predictedProbabilities);
-    }
-
-    @Override
-    public void release() {
-
     }
 
     private @Nullable HugeObjectArray<double[]> initProbabilities() {
