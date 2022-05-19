@@ -33,12 +33,13 @@ MY DUMMY TASK :: Train best model :: Epoch 5 with loss 0.6128
 MY DUMMY TASK :: Train best model :: converged after 5 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6128.
 MY DUMMY TASK :: Train best model 100%
 MY DUMMY TASK :: Train best model :: Finished
+MY DUMMY TASK :: Evaluate on train data :: Start
+MY DUMMY TASK :: Evaluate on train data 100%
+MY DUMMY TASK :: Evaluate on train data :: Final model metrics on full train set: {F1_class_1=0.8235}
+MY DUMMY TASK :: Evaluate on train data :: Finished
 MY DUMMY TASK :: Evaluate on test data :: Start
-MY DUMMY TASK :: Evaluate on test data 50%
-MY DUMMY TASK :: Evaluate on test data :: Final model metrics on full train set: {F1_class_1=0.8235}
-MY DUMMY TASK :: Evaluate on test data 75%
-MY DUMMY TASK :: Evaluate on test data :: Final model metrics on test set: {F1_class_1=0.7499}
 MY DUMMY TASK :: Evaluate on test data 100%
+MY DUMMY TASK :: Evaluate on test data :: Final model metrics on test set: {F1_class_1=0.7499}
 MY DUMMY TASK :: Evaluate on test data :: Finished
 MY DUMMY TASK :: Retrain best model :: Start
 MY DUMMY TASK :: Retrain best model :: Initial loss 0.6931

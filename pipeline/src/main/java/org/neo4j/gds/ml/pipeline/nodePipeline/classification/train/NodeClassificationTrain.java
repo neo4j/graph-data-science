@@ -159,6 +159,7 @@ public final class NodeClassificationTrain {
                 numberOfModelSelectionTrials
             ),
             ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
+            Tasks.leaf("Evaluate on train data", trainSetSize),
             Tasks.leaf("Evaluate on test data", testSetSize),
             ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
         );
@@ -401,16 +402,18 @@ public final class NodeClassificationTrain {
         );
         progressTracker.endSubTask("Train best model");
 
-        progressTracker.beginSubTask("Evaluate on test data");
-        progressTracker.setSteps(outerSplit.testSet().size() + outerSplit.trainSet().size());
+        progressTracker.beginSubTask("Evaluate on train data");
+        progressTracker.setSteps(outerSplit.trainSet().size());
         registerMetricScores(outerSplit.trainSet(), bestClassifier, trainingStatistics::addOuterTrainScore, progressTracker);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
         progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+        progressTracker.endSubTask("Evaluate on train data");
 
+        progressTracker.beginSubTask("Evaluate on test data");
+        progressTracker.setSteps(outerSplit.testSet().size());
         registerMetricScores(outerSplit.testSet(), bestClassifier, trainingStatistics::addTestScore, progressTracker);
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
-
         progressTracker.endSubTask("Evaluate on test data");
     }
 
