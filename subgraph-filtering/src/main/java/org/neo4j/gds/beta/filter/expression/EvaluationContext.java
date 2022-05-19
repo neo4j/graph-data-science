@@ -38,8 +38,8 @@ public abstract class EvaluationContext {
         this.parameterMap = parameterMap;
     }
 
-    double resolveParameter(String parameterName) {
-        return ((Number) this.parameterMap.get(parameterName)).doubleValue();
+    Number resolveParameter(String parameterName) {
+        return (Number) this.parameterMap.get(parameterName);
     }
 
     abstract double getProperty(String propertyKey, ValueType propertyType);

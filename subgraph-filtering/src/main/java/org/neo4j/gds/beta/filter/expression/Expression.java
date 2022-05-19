@@ -205,10 +205,19 @@ public interface Expression {
             @Override
             LeafExpression.Variable in();
 
+            @Override
+            default ValueType valueType() {
+                return ValueType.UNKNOWN;
+            }
+
             @Value.Derived
             @Override
             default double evaluate(EvaluationContext context) {
-                return context.resolveParameter(in().name());
+                var resolvedParameter = context.resolveParameter(in().name());
+                if (resolvedParameter instanceof Long) {
+                    return resolvedParameter.longValue();
+                }
+                return resolvedParameter.doubleValue();
             }
 
             @Override
@@ -278,7 +287,10 @@ public interface Expression {
                 // It is sufficient to check one of the input types
                 // as validation made sure that the types are equal.
                 if (lhs().valueType() == ValueType.LONG) {
-                    return evaluateLong(Double.doubleToRawLongBits(lhsValue), Double.doubleToRawLongBits(rhsValue));
+                    long convertedRhsValue = rhs().valueType() == ValueType.UNKNOWN
+                        ? (long) rhsValue
+                        : Double.doubleToRawLongBits(rhsValue);
+                    return evaluateLong(Double.doubleToRawLongBits(lhsValue), convertedRhsValue);
                 }
 
                 return evaluateDouble(lhsValue, rhsValue);

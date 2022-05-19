@@ -46,7 +46,7 @@ class GdsAstFactory extends AstFactoryAdapter {
     public Expression newParameter(
         InputPosition p, Expression.LeafExpression.Variable v
     ) {
-        return ImmutableNewParameter.of(v.valueType(), v);
+        return ImmutableNewParameter.of(v);
     }
 
     @Override

@@ -45,7 +45,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class GraphProjectSubgraphProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    public static final String DB = "CREATE (a:A)-[:REL { weight: 42.0 }]->(b:B)";
+    public static final String DB = "CREATE (a:A { prop: 1337 })-[:REL { weight: 42.0 }]->(b:B { prop: 0 })";
 
     @BeforeEach
     void setup() throws Exception {
@@ -55,6 +55,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             .graphProject()
             .withNodeLabel("A")
             .withNodeLabel("B")
+            .withNodeProperty("prop")
             .withRelationshipType("REL")
             .withRelationshipProperty("weight")
             .yields()
@@ -117,7 +118,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
             "subgraph"
         ).graphStore();
 
-        assertGraphEquals(fromGdl("(:A)"), subgraphStore.getUnion());
+        assertGraphEquals(fromGdl("(:A { prop: 1337 })"), subgraphStore.getUnion());
     }
 
     @Test
@@ -184,5 +185,22 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
         var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
         assertThat(graphStore.relationshipCount()).isEqualTo(expectedRelationships);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        ">=, 2",
+        ">, 1"
+    })
+    void shouldResolveParametersWhenPassedAsConstants(String operator, int expectedNodes) {
+        var subGraphQuery = formatWithLocale(
+            "CALL gds.beta.graph.project.subgraph('subgraph', 'graph', 'n.prop %s $threshold', 'true', { parameters: { threshold: 0 } })",
+            operator
+        );
+
+        runQuery(subGraphQuery);
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        assertThat(graphStore.nodeCount()).isEqualTo(expectedNodes);
     }
 }
