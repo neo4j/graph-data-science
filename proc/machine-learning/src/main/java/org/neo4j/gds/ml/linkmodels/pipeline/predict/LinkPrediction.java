@@ -19,20 +19,20 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 
-public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
+public abstract class LinkPrediction {
 
     static final int MIN_NODE_BATCH_SIZE = 10;
     private final Classifier classifier;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
     protected final int concurrency;
+    final ProgressTracker progressTracker;
 
     LinkPrediction(
         Classifier classifier,
@@ -41,15 +41,13 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
         int concurrency,
         ProgressTracker progressTracker
     ) {
-        super(progressTracker);
-
         this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.graph = graph;
         this.concurrency = concurrency;
+        this.progressTracker = progressTracker;
     }
 
-    @Override
     public LinkPredictionResult compute() {
         progressTracker.beginSubTask();
 
@@ -73,9 +71,4 @@ public abstract class LinkPrediction extends Algorithm<LinkPredictionResult> {
         Graph graph,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     );
-
-    @Override
-    public void release() {
-
-    }
 }
