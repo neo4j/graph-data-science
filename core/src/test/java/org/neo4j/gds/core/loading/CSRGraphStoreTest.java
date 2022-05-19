@@ -26,6 +26,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -80,6 +81,19 @@ class CSRGraphStoreTest {
         assertGraphEquals(fromGdl("(), ()-[:R]->()-[:R]->()"), r_graph);
         assertGraphEquals(fromGdl("()-[:T]->()-[:R]->()-[:R]->()"), t_r_graph);
         assertGraphEquals(fromGdl("(), (), (), ()"), none_graph);
+    }
+
+    @Test
+    void shouldPropagateLabelFilterToNodeSchema() {
+        var factory = GdlFactory.of("(:A), (:A), (:B), (:C)");
+        var graphStore = factory.build();
+
+        assertThat(graphStore.schema().nodeSchema().availableLabels())
+            .containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
+
+        var graph = graphStore.getGraph(Set.of(NodeLabel.of("B"), NodeLabel.of("C")));
+        assertThat(graph.schema().nodeSchema().availableLabels())
+            .containsExactlyInAnyOrder(NodeLabel.of("B"), NodeLabel.of("C"));
     }
 
 }
