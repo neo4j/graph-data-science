@@ -29,10 +29,8 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
@@ -182,15 +180,10 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
             .metrics(List.of(RegressionMetrics.MEAN_ABSOLUTE_ERROR))
             .build();
 
-        var log = Neo4jProxy.testLog();
-        var taskStore = new GlobalTaskStore();
         var progressTracker = new InspectableTestProgressTracker(
             NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore.nodeCount()),
-            log,
-            1,
             getUsername(),
-            config.jobId(),
-            taskStore
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -202,7 +195,7 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
                 progressTracker
             ).compute();
 
-            assertThat(log.getMessages(TestLog.WARN))
+            assertThat(progressTracker.log().getMessages(TestLog.WARN))
                 .extracting(removingThreadId())
                 .containsExactly(
                     "Node Regression Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
@@ -211,7 +204,7 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
                     "Proceeding with such small sets might lead to unreliable results."
                 );
 
-            assertThat(log.getMessages(TestLog.INFO))
+            assertThat(progressTracker.log().getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .contains(
                     "Node Regression Train Pipeline :: Train set size is 6",

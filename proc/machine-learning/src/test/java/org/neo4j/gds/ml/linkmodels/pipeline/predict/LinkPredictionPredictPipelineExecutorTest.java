@@ -33,13 +33,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
@@ -139,8 +137,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     )),
                 Weights.ofVector(0.0)
             );
-            var log = Neo4jProxy.testLog();
-            var taskStore = new GlobalTaskStore();
             var progressTracker = new InspectableTestProgressTracker(
                 LinkPredictionPredictPipelineExecutor.progressTask(
                     "Link Prediction Train Pipeline",
@@ -148,11 +144,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     graphStore,
                     config
                 ),
-                log,
-                1,
                 getUsername(),
-                config.jobId(),
-                taskStore
+                config.jobId()
             );
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -323,8 +316,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             )
         );
 
-        var log = Neo4jProxy.testLog();
-        var taskStore = new GlobalTaskStore();
         var progressTracker = new InspectableTestProgressTracker(
             LinkPredictionPredictPipelineExecutor.progressTask(
                 "Link Prediction Predict Pipeline",
@@ -332,11 +323,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 config
             ),
-            log,
-            1,
             getUsername(),
-            config.jobId(),
-            taskStore
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -365,7 +353,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "Link Prediction Predict Pipeline :: Finished"
             ));
 
-            assertThat(log.getMessages(INFO))
+            assertThat(progressTracker.log().getMessages(INFO))
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));

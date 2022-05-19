@@ -30,10 +30,8 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -149,15 +147,10 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
         var bias = 3.0;
         var modelData = createModelData(weights, bias);
 
-        var log = Neo4jProxy.testLog();
-        var taskStore = new GlobalTaskStore();
         var progressTracker = new InspectableTestProgressTracker(
             NodeRegressionPredictPipelineExecutor.progressTask("Node Regression Predict Pipeline", pipeline, graphStore),
-            log,
-            1,
             getUsername(),
-            config.jobId(),
-            taskStore
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -186,7 +179,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 "Node Regression Predict Pipeline :: Finished"
             ));
 
-            assertThat(log.getMessages(INFO))
+            assertThat(progressTracker.log().getMessages(INFO))
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));

@@ -35,13 +35,11 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.metrics.LinkMetric;
@@ -383,24 +381,19 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .negativeClassWeight(1)
             .randomSeed(1337L)
             .build();
-        var log = Neo4jProxy.testLog();
         var relationshipCount = config
             .internalRelationshipTypes(graphStore)
             .stream()
             .mapToLong(graphStore::relationshipCount)
             .sum();
-        var taskStore = new GlobalTaskStore();
         var progressTracker = new InspectableTestProgressTracker(
             LinkPredictionTrainPipelineExecutor.progressTask(
                 "Link Prediction Train Pipeline",
                 pipeline,
                 relationshipCount
             ),
-            log,
-            1,
             getUsername(),
-            config.jobId(),
-            taskStore
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -413,7 +406,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                 progressTracker
             ).compute();
 
-            assertThat(log.getMessages(TestLog.WARN))
+            assertThat(progressTracker.log().getMessages(TestLog.WARN))
                 .extracting(removingThreadId())
                 .containsExactly(
                     "Link Prediction Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 relationship(s). " +
@@ -422,7 +415,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Proceeding with such small sets might lead to unreliable results."
                 );
 
-            assertThat(log.getMessages(TestLog.INFO))
+            assertThat(progressTracker.log().getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .extracting(keepingFixedNumberOfDecimals(4))
                 .contains(

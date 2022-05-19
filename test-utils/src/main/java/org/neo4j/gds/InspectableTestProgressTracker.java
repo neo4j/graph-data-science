@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.logging.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,21 +39,25 @@ import static org.neo4j.gds.core.utils.progress.tasks.Task.UNKNOWN_VOLUME;
 public class InspectableTestProgressTracker extends TaskProgressTracker {
 
     private final TaskStore taskStore;
+    private final TestLog log;
     private final JobId jobId;
     private final String userName;
     private final List<Optional<Task>> taskTrees = new ArrayList<>();
 
-    public InspectableTestProgressTracker(
-        Task baseTask,
-        Log log,
-        int concurrency,
-        String userName, JobId jobId,
-        TaskStore taskStore
-    ) {
-        super(baseTask, log, concurrency, jobId, new LocalTaskRegistryFactory(userName, taskStore), EmptyUserLogRegistryFactory.INSTANCE);
+    public InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId) {
+        this(baseTask, userName, jobId, new GlobalTaskStore(), Neo4jProxy.testLog());
+    }
+
+    private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, TestLog log) {
+        super(baseTask, log, 1, jobId, new LocalTaskRegistryFactory(userName, taskStore), EmptyUserLogRegistryFactory.INSTANCE);
         this.userName = userName;
         this.jobId = jobId;
         this.taskStore = taskStore;
+        this.log = log;
+    }
+
+    public TestLog log() {
+        return log;
     }
 
     @Override

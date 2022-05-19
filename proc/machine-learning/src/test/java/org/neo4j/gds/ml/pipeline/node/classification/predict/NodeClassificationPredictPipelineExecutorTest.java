@@ -33,13 +33,11 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -306,19 +304,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var bias = new double[]{3.0, 0.0};
         var modelData = createClassifierData(weights, bias);
 
-        var log = Neo4jProxy.testLog();
-        var taskStore = new GlobalTaskStore();
         var progressTracker = new InspectableTestProgressTracker(
             NodeClassificationPredictPipelineExecutor.progressTask(
                 "Node Classification Predict Pipeline",
                 pipeline,
                 graphStore
             ),
-            log,
-            1,
             getUsername(),
-            config.jobId(),
-            taskStore
+            config.jobId()
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -348,7 +341,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 "Node Classification Predict Pipeline :: Finished"
             ));
 
-            assertThat(log.getMessages(INFO))
+            assertThat(progressTracker.log().getMessages(INFO))
                 .extracting(removingThreadId())
                 .extracting(replaceTimings())
                 .containsExactly(expectedMessages.toArray(String[]::new));
