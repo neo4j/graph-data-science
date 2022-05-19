@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.doc;
 
 import org.asciidoctor.ast.Document;
 import org.asciidoctor.extension.IncludeProcessor;
@@ -33,7 +33,7 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-final class PartialsIncludeProcessor extends IncludeProcessor {
+public final class PartialsIncludeProcessor extends IncludeProcessor {
 
     @Override
     public boolean handles(String target) {
