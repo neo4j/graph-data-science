@@ -553,9 +553,11 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(nodeLabels);
+        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
         return createGraphFromRelationshipType(
             filteredNodes,
             filteredNodeProperties,
+            nodeSchema,
             relationshipType,
             maybeRelationshipProperty
         );
@@ -568,12 +570,14 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodeProperties> filteredNodeProperties = filterNodeProperties(filteredLabels);
+        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(filteredLabels));
 
         List<CSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
             .map(relationshipType -> createGraphFromRelationshipType(
                 filteredNodes,
                 filteredNodeProperties,
+                nodeSchema,
                 relationshipType,
                 maybeRelationshipProperty
             ))
@@ -596,11 +600,12 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createGraphFromRelationshipType(
         Optional<IdMap> filteredNodes,
         Map<String, NodeProperties> filteredNodeProperties,
+        NodeSchema nodeSchema,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
         var graphSchema = GraphSchema.of(
-            schema().nodeSchema(),
+            nodeSchema,
             schema()
                 .relationshipSchema()
                 .singleTypeAndProperty(relationshipType, maybeRelationshipProperty)
