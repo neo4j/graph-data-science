@@ -48,9 +48,6 @@ public final class KnnNodePropertySpecParser {
      * The single string is parsed as a property name.
      * The list of strings is parsed as a list of property names.
      * The map of string to string is parsed as a map from property names to similarity metrics.
-     *
-     * @param userInput
-     * @return
      */
     public static List<KnnNodePropertySpec> parse(@NotNull Object userInput) {
         if (userInput instanceof String) {

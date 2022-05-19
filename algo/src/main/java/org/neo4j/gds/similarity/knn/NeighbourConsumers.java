@@ -17,29 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+/**
+ * A holder for {@link org.neo4j.gds.similarity.knn.NeighbourConsumer}s. This instrument helps us extend KNN.
+ */
+public interface NeighbourConsumers {
+    /**
+     * A holder for sending data into the void, which is the default behaviour in regular KNN
+     */
+    NeighbourConsumers no_op = nodeId -> (element, priority) -> { /* do nothing */ };
 
-import java.util.concurrent.ExecutorService;
-
-@ValueClass
-public interface FilteredKnnContext {
-
-    @Value.Default
-    default ExecutorService executor() {
-        return Pools.DEFAULT;
-    }
-
-    @Value.Default
-    default ProgressTracker progressTracker() {
-        return ProgressTracker.NULL_TRACKER;
-    }
-
-    static FilteredKnnContext empty() {
-        return ImmutableFilteredKnnContext.builder().build();
-    }
+    NeighbourConsumer get(long nodeId);
 }

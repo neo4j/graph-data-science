@@ -97,12 +97,13 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                             sizeOfIntArray(sizeOfOpenHashContainer(sampledK)) * concurrency
                         )
                     )
+                    .add(MemoryEstimations.of("neighbour-consumers", MemoryRange.of(sizeOfInstance(NeighbourConsumers.class))))
                     .build();
             }
         );
     }
 
-    static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
+    public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
         switch(samplerType) {
             case UNIFORM: {
                 return UniformKnnSampler.memoryEstimation(boundedK);

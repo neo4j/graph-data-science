@@ -110,9 +110,9 @@ class KnnFactoryTest {
         KnnSampler.SamplerType initialSampler,
         MemoryRange actual
     ) {
-        long knnAlgo = /* KNN */ 56;
+        long knnAlgo = /* KNN */ 64;
 
-        long topKNeighborList = /* NL */ 24 + sizeOfLongArray(boundedK * 2);
+        long topKNeighborList = /* NL */ 32 + sizeOfLongArray(boundedK * 2L);
         long topKNeighborsList = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray + nodeCount * topKNeighborList;
 
         long tempNeighborsListMin = /* HOA */ sizeOfHugeArrayInstance + sizeOfHugeArray;
@@ -121,8 +121,10 @@ class KnnFactoryTest {
         var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, boundedK);
         long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(sampledK));
 
-        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;
-        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList;
+        long neighbourConsumers = 8;
+
+        long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList + neighbourConsumers;
+        long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList + neighbourConsumers;
 
         assertEquals(expectedMin, actual.min);
         assertEquals(expectedMax, actual.max);

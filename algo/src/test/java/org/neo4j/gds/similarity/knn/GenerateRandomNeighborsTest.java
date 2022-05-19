@@ -80,7 +80,8 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             k,
             k,
             Partition.of(0, nodeCount),
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            NeighbourConsumers.no_op
         );
 
         generateRandomNeighbors.run();

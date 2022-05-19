@@ -53,10 +53,21 @@ public class Knn extends Algorithm<Knn.Result> {
     private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
     private final SimilarityComputer similarityComputer;
+    private final NeighbourConsumers neighborConsumers;
 
     private long nodePairsConsidered;
 
     public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
+        return createWithDefaultsAndInstrumentation(graph, config, context, NeighbourConsumers.no_op);
+    }
+
+    @NotNull
+    public static Knn createWithDefaultsAndInstrumentation(
+        Graph graph,
+        KnnBaseConfig config,
+        KnnContext context,
+        NeighbourConsumers neighborConsumers
+    ) {
         return new Knn(
             context.progressTracker(),
             graph,
@@ -64,7 +75,8 @@ public class Knn extends Algorithm<Knn.Result> {
             SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             context.executor(),
-            getSplittableRandom(config.randomSeed())
+            getSplittableRandom(config.randomSeed()),
+            neighborConsumers
         );
     }
 
@@ -83,7 +95,8 @@ public class Knn extends Algorithm<Knn.Result> {
             similarityComputer,
             neighborFilterFactory,
             context.executor(),
-            splittableRandom
+            splittableRandom,
+            NeighbourConsumers.no_op
         );
     }
 
@@ -99,7 +112,8 @@ public class Knn extends Algorithm<Knn.Result> {
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
         ExecutorService executorService,
-        SplittableRandom splittableRandom
+        SplittableRandom splittableRandom,
+        NeighbourConsumers neighborConsumers
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -108,6 +122,7 @@ public class Knn extends Algorithm<Knn.Result> {
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
         this.splittableRandom = splittableRandom;
+        this.neighborConsumers = neighborConsumers;
     }
 
     public long nodeCount() {
@@ -202,7 +217,8 @@ public class Knn extends Algorithm<Knn.Result> {
                     k,
                     boundedK,
                     partition,
-                    progressTracker
+                    progressTracker,
+                    neighborConsumers
                 );
             },
             Optional.of(config.minBatchSize())

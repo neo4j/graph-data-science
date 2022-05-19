@@ -261,7 +261,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             .estimate(config)
             .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
-        assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[23 KiB ... 42 KiB]");
+        assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[24 KiB ... 43 KiB]");
     }
 
     static Comparator<PredictedLink> compareWithPrecision(double precision) {

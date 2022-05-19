@@ -30,7 +30,10 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.similarity.knn.KnnSampler;
+import org.neo4j.gds.similarity.knn.NeighborList;
 
 import java.util.List;
 
@@ -54,10 +57,10 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return FilteredKnn.createWithDefaults(
+        return FilteredKnn.create(
             graph,
             configuration,
-            ImmutableFilteredKnnContext
+            ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(Pools.DEFAULT)
@@ -82,7 +85,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
                     .builder(FilteredKnn.class)
                     .add(
                         "top-k-neighbors-list",
-                        HugeObjectArray.memoryEstimation(FilteredNeighborList.memoryEstimation(boundedK))
+                        HugeObjectArray.memoryEstimation(NeighborList.memoryEstimation(boundedK))
                     )
                     .add("old-neighbors", tempListEstimation)
                     .add("new-neighbors", tempListEstimation)
@@ -104,16 +107,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
     }
 
     static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
-        switch(samplerType) {
-            case UNIFORM: {
-                return UniformFilteredKnnSampler.memoryEstimation(boundedK);
-            }
-            case RANDOMWALK: {
-                return RandomWalkFilteredKnnSampler.memoryEstimation(boundedK);
-            }
-            default:
-                throw new IllegalStateException("Invalid FilteredKnnSampler");
-        }
+        return KnnFactory.initialSamplerMemoryEstimation(samplerType, boundedK);
     }
 
     @Override

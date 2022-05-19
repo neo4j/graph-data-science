@@ -39,6 +39,8 @@ final class GenerateRandomNeighbors implements Runnable {
     private final int boundedK;
     private final ProgressTracker progressTracker;
     private final Partition partition;
+    private final NeighbourConsumers neighbourConsumers;
+
     private long neighborsFound;
 
     GenerateRandomNeighbors(
@@ -50,7 +52,8 @@ final class GenerateRandomNeighbors implements Runnable {
         int k,
         int boundedK,
         Partition partition,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        NeighbourConsumers neighbourConsumers
     ) {
         this.sampler = sampler;
         this.random = random;
@@ -62,6 +65,7 @@ final class GenerateRandomNeighbors implements Runnable {
         this.progressTracker = progressTracker;
         this.partition = partition;
         this.neighborsFound = 0;
+        this.neighbourConsumers = neighbourConsumers;
     }
 
     @Override
@@ -80,7 +84,7 @@ final class GenerateRandomNeighbors implements Runnable {
                 l -> neighborFilter.excludeNodePair(nodeId, l)
             );
 
-            var neighbors = new NeighborList(k);
+            var neighbors = new NeighborList(k, neighbourConsumers.get(nodeId));
             for (long candidate : chosen) {
                 neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng, 0.0);
             }

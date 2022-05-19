@@ -17,23 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.knn;
 
-public class FilteredKnnNeighborFilter implements FilteredNeighborFilter {
-    private final long nodeCount;
+/**
+ * During KNN execution, this listener is offered every neighbour we encounter.
+ */
+public interface NeighbourConsumer {
+    NeighbourConsumer devNull = (element, priority) -> { /* do nothing */ };
 
-    public FilteredKnnNeighborFilter(long nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    @Override
-    public boolean excludeNodePair(long firstNodeId, long secondNodeId) {
-        return firstNodeId == secondNodeId;
-    }
-
-    @Override
-    public long lowerBoundOfPotentialNeighbours(long node) {
-        // excluding the node itself
-        return nodeCount - 1;
-    }
+    void offer(long element, double priority);
 }
