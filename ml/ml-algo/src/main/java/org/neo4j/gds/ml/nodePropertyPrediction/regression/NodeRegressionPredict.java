@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.nodePropertyPrediction.regression;
 
-import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -29,11 +28,12 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.Regressor;
 
-public class NodeRegressionPredict extends Algorithm<HugeDoubleArray> {
+public class NodeRegressionPredict {
 
     private final Regressor regressor;
     private final Features features;
     private final int concurrency;
+    private final ProgressTracker progressTracker;
 
     public NodeRegressionPredict(
         Regressor regressor,
@@ -42,11 +42,10 @@ public class NodeRegressionPredict extends Algorithm<HugeDoubleArray> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(progressTracker);
         this.regressor = regressor;
         this.features = features;
         this.concurrency = concurrency;
-        this.terminationFlag = terminationFlag;
+        this.progressTracker = progressTracker;
     }
 
     public static Task progressTask(long nodeCount) {
@@ -54,7 +53,6 @@ public class NodeRegressionPredict extends Algorithm<HugeDoubleArray> {
     }
 
 
-    @Override
     public HugeDoubleArray compute() {
         progressTracker.beginSubTask("Predict");
         var predictedTargets = HugeDoubleArray.newArray(features.size());
@@ -66,10 +64,5 @@ public class NodeRegressionPredict extends Algorithm<HugeDoubleArray> {
         progressTracker.endSubTask("Predict");
 
         return predictedTargets;
-    }
-
-    @Override
-    public void release() {
-
     }
 }
