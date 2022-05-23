@@ -254,6 +254,24 @@ class GraphStoreTest extends BaseTest {
         assertThat(graph).isExactlyInstanceOf(UnionGraph.class);
     }
 
+    @Test
+    void shouldUpdateNodeSchemaAfterLabelFilter() {
+        var graphStore = new StoreLoaderBuilder()
+            .api(db)
+            .addNodeLabels("A", "B")
+            .addRelationshipTypes("T1")
+            .build()
+            .graphStore();
+
+        assertThat(graphStore.schema().nodeSchema().availableLabels())
+            .containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+
+        var graph = graphStore.getGraph("A", "T1", Optional.empty());
+
+        assertThat(graph.schema().nodeSchema().availableLabels())
+            .containsExactlyInAnyOrder(NodeLabel.of("A"));
+    }
+
     @NotNull
     private static List<NodeProjection> nodeProjections() {
         NodeProjection aMapping = NodeProjection.builder()
