@@ -24,6 +24,7 @@ import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter.IdMapFunction;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
@@ -53,6 +54,7 @@ public final class GraphStoreInput implements CompatInput {
     private final int batchSize;
     private final IdMapFunction idMapFunction;
     private final IdMode idMode;
+    private final Capabilities capabilities;
 
     enum IdMode implements IdVisitor {
         MAPPING(IdType.INTEGER, new Groups()) {
@@ -107,6 +109,7 @@ public final class GraphStoreInput implements CompatInput {
         MetaDataStore metaDataStore,
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
+        Capabilities capabilities,
         int batchSize,
         GraphStoreExporter.IdMappingType idMappingType
     ) {
@@ -131,9 +134,9 @@ public final class GraphStoreInput implements CompatInput {
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("The range of original ids specified in the graph exceeds the limit", e);
             }
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, idMappingType, IdMode.MAPPING);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, batchSize, idMappingType, IdMode.MAPPING);
         } else {
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, batchSize, idMappingType, IdMode.ACTUAL);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, batchSize, idMappingType, IdMode.ACTUAL);
         }
     }
 
@@ -141,6 +144,7 @@ public final class GraphStoreInput implements CompatInput {
         MetaDataStore metaDataStore,
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
+        Capabilities capabilities,
         int batchSize,
         IdMapFunction idMapFunction,
         IdMode idMode
@@ -151,6 +155,7 @@ public final class GraphStoreInput implements CompatInput {
         this.batchSize = batchSize;
         this.idMapFunction = idMapFunction;
         this.idMode = idMode;
+        this.capabilities = capabilities;
     }
 
     @Override
@@ -191,6 +196,10 @@ public final class GraphStoreInput implements CompatInput {
 
     public MetaDataStore metaDataStore() {
         return metaDataStore;
+    }
+
+    public Capabilities capabilities() {
+        return capabilities;
     }
 
     abstract static class GraphImporter implements InputIterator {

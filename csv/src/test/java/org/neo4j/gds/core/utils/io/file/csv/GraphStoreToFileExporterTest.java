@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
@@ -414,6 +415,29 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             "relationships_REL_0.csv",
             List.of(
                 List.of("42", "43")
+            )
+        );
+    }
+
+    @Test
+    void shouldExportGraphCapabilities() {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .includeMetaData(true)
+            .build();
+
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run();
+
+        assertCsvFiles(List.of(GRAPH_CAPABILITIES_FILE_NAME));
+
+        assertDataContent(
+            GRAPH_CAPABILITIES_FILE_NAME,
+            List.of(
+                List.of("canWriteToDatabase"),
+                List.of("true")
             )
         );
     }

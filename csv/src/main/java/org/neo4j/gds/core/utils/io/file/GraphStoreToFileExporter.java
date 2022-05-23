@@ -27,6 +27,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
+import org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter;
 import org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor;
@@ -38,6 +39,8 @@ import org.neo4j.gds.core.utils.io.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.input.Collector;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
@@ -79,7 +82,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                     .forEach(label -> builder.addProperty(label, key, ValueType.STRING))
                 );
             return builder.build();
-        }).orElseGet(() -> builder.build());
+        }).orElseGet(builder::build);
 
         return GraphStoreToFileExporter.of(
             graphStore,
@@ -89,6 +92,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
+            () -> new CsvGraphCapabilitiesWriter(exportPath),
             (index) -> new CsvNodeVisitor(
                 exportPath,
                 nodeSchema.union(neoNodeSchema),
@@ -107,6 +111,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
+        Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
@@ -119,6 +124,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 graphInfoVisitorSupplier,
                 nodeSchemaVisitorSupplier,
                 relationshipSchemaVisitorSupplier,
+                graphCapabilitiesWriterSupplier,
                 nodeVisitorSupplier,
                 relationshipVisitorSupplier
             );
@@ -185,6 +191,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
+        private final Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier;
 
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
@@ -194,6 +201,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
+            Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
         ) {
@@ -202,6 +210,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
             this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;
             this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
+            this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
         }
 
         @Override
@@ -210,6 +219,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
             exportRelationshipSchema(graphStoreInput);
+            exportGraphCapabilities(graphStoreInput);
             super.export(graphStoreInput);
         }
 
@@ -266,6 +276,15 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                         });
                     }
                 });
+            }
+        }
+
+        private void exportGraphCapabilities(GraphStoreInput graphStoreInput) {
+            var capabilitiesMapper = graphCapabilitiesWriterSupplier.get();
+            try {
+                capabilitiesMapper.writeCapabilities(graphStoreInput.capabilities());
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
         }
     }
