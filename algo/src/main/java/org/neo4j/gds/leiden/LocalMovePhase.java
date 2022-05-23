@@ -116,7 +116,8 @@ final class LocalMovePhase {
             );
         }
 
-        return new Partition(currentCommunities, communityVolumes, communityCount);
+        var modularity = ModularityComputer.modularity(graph, currentCommunities, gamma);
+        return new Partition(currentCommunities, communityVolumes, communityCount, modularity);
     }
 
     private long findBestCommunity(

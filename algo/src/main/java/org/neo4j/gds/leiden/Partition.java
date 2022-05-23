@@ -26,11 +26,13 @@ class Partition {
     private final HugeLongArray communities;
     private final HugeDoubleArray communityVolumes;
     private final long communityCount;
+    private final double modularity;
 
-    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes, long communityCount) {
+    Partition(HugeLongArray communities, HugeDoubleArray communityVolumes, long communityCount, double modularity) {
         this.communities = communities;
         this.communityVolumes = communityVolumes;
         this.communityCount = communityCount;
+        this.modularity = modularity;
     }
 
     HugeLongArray communities() {
@@ -43,5 +45,9 @@ class Partition {
 
     long communityCount() {
         return communityCount;
+    }
+
+    double modularity() {
+        return modularity;
     }
 }
