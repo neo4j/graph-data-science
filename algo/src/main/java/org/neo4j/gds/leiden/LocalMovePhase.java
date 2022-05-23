@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -97,43 +98,43 @@ final class LocalMovePhase {
     }
 
     public Partition run() {
-        var queue = createQueue();
+        // Use HugeAtomicBitSet instead of queue - gives better runtime.
+        var nodesToProcess = HugeAtomicBitSet.create(graph.nodeCount());
+        nodesToProcess.set(0, graph.nodeCount());
+        
+        while (nodesToProcess.cardinality() > 0) {
+            nodesToProcess.forEachSetBit(nodeId -> {
+                nodesToProcess.flip(nodeId);
+                long currentNodeCommunityId = currentCommunities.get(nodeId);
+                double currentNodeVolume = nodeVolumes.get(nodeId);
 
+                // Remove the current node volume from its community volume
+                communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
 
-        while (!queue.isEmpty()) {
-            long nodeId = queue.remove();
-            long currentNodeCommunityId = currentCommunities.get(nodeId);
-            double currentNodeVolume = nodeVolumes.get(nodeId);
+                communityRelationshipWeights(nodeId);
 
+                // Compute the "modularity" for the current node and current community
+                double currentBestGain =
+                    Math.max(0, encounteredCommunitiesWeights.get(currentNodeCommunityId)) -
+                    currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
 
-            // Remove the current node volume from its community volume
-            communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
+                long bestCommunityId = currentNodeCommunityId;
 
+                bestCommunityId = findBestCommunity(
+                    currentBestGain,
+                    currentNodeVolume,
+                    bestCommunityId
+                );
 
-            communityRelationshipWeights(nodeId);
+                tryToMoveNode(
+                    nodesToProcess,
+                    nodeId,
+                    currentNodeCommunityId,
+                    currentNodeVolume,
+                    bestCommunityId
+                );
 
-            // Compute the "modularity" for the current node and current community
-            double currentBestGain = Math.max(
-                0,
-                encounteredCommunitiesWeights.get(currentNodeCommunityId)
-            ) - currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
-
-
-            long bestCommunityId = currentNodeCommunityId;
-
-            bestCommunityId = findBestCommunity(
-                currentBestGain,
-                currentNodeVolume,
-                bestCommunityId
-            );
-
-            tryToMoveNode(
-                queue,
-                nodeId,
-                currentNodeCommunityId,
-                currentNodeVolume,
-                bestCommunityId
-            );
+            });
         }
 
         return new Partition(currentCommunities, communityVolumes, communityCount, -1);
@@ -171,7 +172,7 @@ final class LocalMovePhase {
     }
 
     private void tryToMoveNode(
-        NodesQueue queue,
+        HugeAtomicBitSet nodesToProcess,
         long nodeId,
         long currentNodeCommunityId,
         double currentNodeVolume,
@@ -186,7 +187,7 @@ final class LocalMovePhase {
                 currentNodeVolume
             );
 
-            visitNeighboursAfterMove(nodeId, queue, bestCommunityId);
+            visitNeighboursAfterMove(nodeId, nodesToProcess, bestCommunityId);
         } else {
             // We didn't move the node => re-add its degree to its current community sum of degrees
             communityVolumes.addTo(currentNodeCommunityId, currentNodeVolume);
@@ -224,26 +225,16 @@ final class LocalMovePhase {
     }
 
     // all neighbours of the node that do not belong to the node’s new community
-    // and that are not yet in the queue are added to the rear of the queue
-    private void visitNeighboursAfterMove(long nodeId, NodesQueue queue, long movedToCommunityId) {
+    // "and that are not yet in the queue are added to the rear of the queue"
+    //   -> this is from the paper, we use a HugeAtomicBitSet which is faster but visit the nodes in different order, doesn't affect the end result.
+    private void visitNeighboursAfterMove(long nodeId, HugeAtomicBitSet nodesToProcess, long movedToCommunityId) {
         graph.forEachRelationship(nodeId, (s, t) -> {
             long tCommunity = currentCommunities.get(t);
-            boolean shouldAddInQueue = !queue.contains(t) && tCommunity != movedToCommunityId;
+            boolean shouldAddInQueue = !nodesToProcess.get(t) && tCommunity != movedToCommunityId;
             if (shouldAddInQueue) {
-                queue.add(t);
+                nodesToProcess.set(t);
             }
             return true;
         });
     }
-
-    private NodesQueue createQueue() {
-        var queue = new NodesQueue(graph.nodeCount());
-
-        graph.forEachNode(nodeId -> {
-            queue.add(nodeId);
-            return true;
-        });
-        return queue;
-    }
-
 }
