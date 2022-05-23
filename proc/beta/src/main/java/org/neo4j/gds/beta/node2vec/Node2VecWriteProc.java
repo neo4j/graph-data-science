@@ -24,20 +24,20 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -46,7 +46,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.beta.node2vec.write", description = Node2VecCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
+public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecResult, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -54,7 +54,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -81,16 +81,16 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecWriteConfig> computeResult,
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new WriteResult.Builder();
+        return new WriteResult.Builder().withLossPerIteration(computeResult.result().lossPerIteration());
     }
 
     @SuppressWarnings("unused")
@@ -102,6 +102,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
         public final long computeMillis;
         public final long writeMillis;
         public final Map<String, Object> configuration;
+        public final List<Double> lossPerIteration;
 
         WriteResult(
             long nodeCount,
@@ -109,7 +110,8 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
             long preProcessingMillis,
             long computeMillis,
             long writeMillis,
-            Map<String, Object> configuration
+            Map<String, Object> configuration,
+            List<Double> lossPerIteration
         ) {
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
@@ -117,9 +119,12 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
             this.computeMillis = computeMillis;
             this.writeMillis = writeMillis;
             this.configuration = configuration;
+            this.lossPerIteration = lossPerIteration;
         }
 
         static class Builder extends AbstractResultBuilder<WriteResult> {
+
+            private List<Double> lossPerIteration;
 
             @Override
             public WriteResult build() {
@@ -129,8 +134,14 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, HugeObjectArray<Float
                     preProcessingMillis,
                     computeMillis,
                     writeMillis,
-                    config.toMap()
+                    config.toMap(),
+                    lossPerIteration
                 );
+            }
+
+            Builder withLossPerIteration(List<Double> lossPerIteration) {
+                this.lossPerIteration = lossPerIteration;
+                return this;
             }
         }
     }

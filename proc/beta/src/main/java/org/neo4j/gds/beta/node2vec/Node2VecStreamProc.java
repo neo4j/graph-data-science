@@ -24,13 +24,12 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.node2vec.stream", description = Node2VecCompanion.DESCRIPTION, executionMode = STREAM)
-public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
+public class Node2VecStreamProc extends StreamProc<Node2Vec, Node2VecResult, Node2VecStreamProc.StreamResult, Node2VecStreamConfig> {
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -53,7 +52,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecStreamConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -81,7 +80,7 @@ public class Node2VecStreamProc extends StreamProc<Node2Vec, HugeObjectArray<Flo
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecResult, Node2VecStreamConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 

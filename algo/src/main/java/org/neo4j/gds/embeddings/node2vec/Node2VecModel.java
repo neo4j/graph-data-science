@@ -31,10 +31,12 @@ import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
+import java.util.ArrayList;
 import java.util.SplittableRandom;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Node2VecModel {
 
@@ -81,9 +83,11 @@ public class Node2VecModel {
         contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
     }
 
-    void train() {
+    Node2VecResult train() {
         progressTracker.beginSubTask();
         var learningRateAlpha = (config.initialLearningRate() - config.minLearningRate()) / config.iterations();
+
+        var lossPerIteration = new ArrayList<Double>();
 
         for (int iteration = 0; iteration < config.iterations(); iteration++) {
             progressTracker.beginSubTask();
@@ -119,13 +123,16 @@ public class Node2VecModel {
             );
 
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+
+            double loss = tasks.stream().mapToDouble(TrainingTask::loss).sum();
+            progressTracker.logMessage(formatWithLocale("Iteration %d with loss %.4f", iteration + 1, loss));
+            lossPerIteration.add(loss);
+
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
-    }
 
-    public HugeObjectArray<FloatVector> getEmbeddings() {
-        return centerEmbeddings;
+        return ImmutableNode2VecResult.of(centerEmbeddings, lossPerIteration);
     }
 
     private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
@@ -157,6 +164,8 @@ public class Node2VecModel {
         private final FloatVector contextGradientBuffer;
         private final int negativeSamplingRate;
         private final float learningRate;
+
+        private double loss;
 
         private TrainingTask(
             HugeObjectArray<FloatVector> centerEmbeddings,
@@ -190,6 +199,9 @@ public class Node2VecModel {
                     trainSample(buffer[0], negativeSampleProducer.next(), false);
                 }
             }
+
+            // FIXME use actual loss from trainSample
+            loss = -1;
         }
 
         private void trainSample(long center, long context, boolean positive) {
@@ -209,6 +221,10 @@ public class Node2VecModel {
 
             addInPlace(centerEmbedding.data(), centerGradientBuffer.data());
             addInPlace(contextEmbedding.data(), contextGradientBuffer.data());
+        }
+
+        public double loss() {
+            return loss;
         }
     }
 

@@ -24,14 +24,13 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.MutatePropertyProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -39,6 +38,7 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -46,7 +46,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.node2vec.mutate", description = Node2VecCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
+public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecResult, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -54,7 +54,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -82,22 +82,23 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected MutateResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig> computeResult,
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new MutateResult.Builder().withLossPerIteration(computeResult.result().lossPerIteration());
     }
 
     public static final class MutateResult extends StandardMutateResult {
 
         public final long nodeCount;
         public final long nodePropertiesWritten;
+        public final List<Double> lossPerIteration;
 
         MutateResult(
             long nodeCount,
@@ -105,14 +106,18 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
             long preProcessingMillis,
             long computeMillis,
             long mutateMillis,
-            Map<String, Object> configuration
+            Map<String, Object> configuration,
+            List<Double> lossPerIteration
         ) {
             super(preProcessingMillis, computeMillis, 0, mutateMillis, configuration);
             this.nodeCount = nodeCount;
             this.nodePropertiesWritten = nodePropertiesWritten;
+            this.lossPerIteration = lossPerIteration;
         }
 
         static class Builder extends AbstractResultBuilder<MutateResult> {
+
+            private List<Double> lossPerIteration;
 
             @Override
             public MutateResult build() {
@@ -122,8 +127,14 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, HugeObjectA
                     preProcessingMillis,
                     computeMillis,
                     writeMillis,
-                    config.toMap()
+                    config.toMap(),
+                    lossPerIteration
                 );
+            }
+
+            Builder withLossPerIteration(List<Double> lossPerIteration) {
+                this.lossPerIteration = lossPerIteration;
+                return this;
             }
         }
     }

@@ -50,7 +50,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @ExtendWith(SoftAssertionsExtension.class)
 class Node2VecTest extends BaseTest {
@@ -88,7 +88,7 @@ class Node2VecTest extends BaseTest {
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().embeddings();
 
         graph.forEachNode(node -> {
                 assertEquals(embeddingDimension, node2Vec.get(node).data().length);
@@ -121,26 +121,31 @@ class Node2VecTest extends BaseTest {
             progressTracker
         ).compute();
 
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: Start"));
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "Node2Vec :: Start",
+                "Node2Vec :: RandomWalk :: Start",
+                "Node2Vec :: RandomWalk :: create walks :: Start",
+                "Node2Vec :: RandomWalk :: create walks 100%",
+                "Node2Vec :: RandomWalk :: create walks :: Finished",
+                "Node2Vec :: RandomWalk :: Finished",
+                "Node2Vec :: train :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 :: Start",
+                "Node2Vec :: train :: iteration 1 of 1 100%",
+                "Node2Vec :: train :: iteration 1 of 1 :: Finished",
+                "Node2Vec :: train :: Finished",
+                "Node2Vec :: Finished"
+            );
 
         if (relationshipWeights) {
-            assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: DegreeCentrality :: Start"));
-            assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished"));
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .contains(
+                "Node2Vec :: RandomWalk :: DegreeCentrality :: Start",
+                "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished"
+            );
         }
-
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks 100%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: create walks :: Finished"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: RandomWalk :: Finished"));
-
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: train :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 100%"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: train :: iteration 1 of 1 :: Finished"));
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: train :: Finished"));
-
-        assertTrue(log.containsMessage(TestLog.INFO, "Node2Vec :: Finished"));
     }
 
     @Test
@@ -200,13 +205,13 @@ class Node2VecTest extends BaseTest {
             graph,
             config,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().embeddings();
 
         var otherEmbeddings = new Node2Vec(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().embeddings();
 
         for (long node = 0; node < graph.nodeCount(); node++) {
             softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));

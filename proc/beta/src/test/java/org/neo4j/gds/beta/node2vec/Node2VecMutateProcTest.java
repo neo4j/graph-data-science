@@ -30,10 +30,9 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -45,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest
     extends Node2VecProcTest<Node2VecMutateConfig>
-    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, HugeObjectArray<FloatVector>> {
+    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, Node2VecResult> {
 
     @BeforeEach
     void loadProcedures() throws Exception {
@@ -55,7 +54,7 @@ class Node2VecMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecResult, Node2VecMutateConfig, ?>> getProcedureClazz() {
         return Node2VecMutateProc.class;
     }
 

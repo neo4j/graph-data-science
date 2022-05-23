@@ -75,7 +75,7 @@ class Node2VecModelTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        node2VecModel.train();
+        var embeddings = node2VecModel.train().embeddings();
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
             .boxed()
@@ -85,9 +85,8 @@ class Node2VecModelTest {
                     .flatMap(nodeId ->
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
-                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
-                                var e2 = node2VecModel
-                                    .getEmbeddings()
+                                var e1 = embeddings.get(nodeId).data();
+                                var e2 = embeddings
                                     .get(random.nextInt(clusterSize) + (clusterId * clusterSize))
                                     .data();
                                 return Intersections.cosine(e1, e2, e1.length);
@@ -112,9 +111,8 @@ class Node2VecModelTest {
                         LongStream.range(0, clusterSize)
                             .mapToObj(ignore -> {
                                 long otherClusterId = (clusterId + random.nextInt(numberOfClusters - 1) + 1) % numberOfClusters;
-                                var e1 = node2VecModel.getEmbeddings().get(nodeId).data();
-                                var e2 = node2VecModel
-                                    .getEmbeddings()
+                                var e1 = embeddings.get(nodeId).data();
+                                var e2 = embeddings
                                     .get(random.nextInt(clusterSize) + (otherClusterId * clusterSize))
                                     .data();
                                 return Intersections.cosine(e1, e2, e1.length);
@@ -169,8 +167,6 @@ class Node2VecModelTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        node2VecModel.train();
-
         var otherNode2VecModel = new Node2VecModel(
             nodeCount,
             config,
@@ -178,11 +174,9 @@ class Node2VecModelTest {
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
         );
-        
-        otherNode2VecModel.train();
 
-        var embeddings = node2VecModel.getEmbeddings();
-        var otherEmbeddings = otherNode2VecModel.getEmbeddings();
+        var embeddings = node2VecModel.train().embeddings();
+        var otherEmbeddings = otherNode2VecModel.train().embeddings();
 
         for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
             assertThat(embeddings.get(nodeId)).isEqualTo(otherEmbeddings.get(nodeId));

@@ -23,10 +23,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
 import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.List;
@@ -52,7 +51,7 @@ class Node2VecStreamProcTest extends Node2VecProcTest<Node2VecStreamConfig> {
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, HugeObjectArray<FloatVector>, Node2VecStreamConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecResult, Node2VecStreamConfig, ?>> getProcedureClazz() {
         return Node2VecStreamProc.class;
     }
 
