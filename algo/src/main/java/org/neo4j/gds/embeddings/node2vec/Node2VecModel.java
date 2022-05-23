@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
@@ -135,7 +136,7 @@ public class Node2VecModel {
         return ImmutableNode2VecResult.of(centerEmbeddings, lossPerIteration);
     }
 
-    private HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
+    private static HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
             nodeCount
@@ -209,12 +210,12 @@ public class Node2VecModel {
             var contextEmbedding = contextEmbeddings.get(context);
 
             float affinity = positive
-                ? centerEmbedding.innerProduct(contextEmbedding)
-                : -centerEmbedding.innerProduct(contextEmbedding);
+                ? -centerEmbedding.innerProduct(contextEmbedding)
+                : centerEmbedding.innerProduct(contextEmbedding);
 
             float scalar = (float) (positive
-                ? 1 / (Math.exp(affinity) + 1)
-                : -1 / (Math.exp(affinity) + 1));
+                ? Sigmoid.sigmoid(affinity)
+                : - Sigmoid.sigmoid(affinity));
 
             scale(contextEmbedding.data(), scalar * learningRate, centerGradientBuffer.data());
             scale(centerEmbedding.data(), scalar * learningRate, contextGradientBuffer.data());
