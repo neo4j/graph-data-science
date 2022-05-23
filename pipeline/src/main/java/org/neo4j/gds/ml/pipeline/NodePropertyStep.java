@@ -67,6 +67,11 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
+    public String rootTaskName() {
+        return callableDefinition.algorithmSpec().algorithmFactory().taskName();
+    }
+
+    @Override
     public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes)  {
         var algoSpec = getAlgorithmSpec(modelCatalog);
 

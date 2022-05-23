@@ -327,9 +327,9 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             var expectedMessages = new ArrayList<>(List.of(
                 "Node Classification Predict Pipeline :: Start",
                 "Node Classification Predict Pipeline :: Execute node property steps :: Start",
-                "Node Classification Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Start",
-                "Node Classification Predict Pipeline :: Execute node property steps :: Step 1 of 1 100%",
-                "Node Classification Predict Pipeline :: Execute node property steps :: Step 1 of 1 :: Finished",
+                "Node Classification Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
+                "Node Classification Predict Pipeline :: Execute node property steps :: DegreeCentrality 100%",
+                "Node Classification Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
                 "Node Classification Predict Pipeline :: Execute node property steps :: Finished",
                 "Node Classification Predict Pipeline :: Node classification predict :: Start",
                 "Node Classification Predict Pipeline :: Node classification predict 100%",

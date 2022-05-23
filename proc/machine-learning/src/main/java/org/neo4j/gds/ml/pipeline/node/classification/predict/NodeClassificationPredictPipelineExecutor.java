@@ -69,12 +69,8 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
-            Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step", 10 * graphStore.getUnion().nodeCount())),
-                pipeline.nodePropertySteps().size()
-            ),
-            NodeClassificationPredict.progressTask(graphStore.getUnion().nodeCount())
+            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
+            NodeClassificationPredict.progressTask(graphStore.nodeCount())
         );
     }
 

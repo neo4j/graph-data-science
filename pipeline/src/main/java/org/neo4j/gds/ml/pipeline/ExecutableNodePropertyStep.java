@@ -43,5 +43,9 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
 
     String procName();
 
+    default String rootTaskName() {
+        return procName();
+    }
+
     MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes);
 }

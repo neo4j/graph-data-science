@@ -184,7 +184,7 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
 
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
-            NodeRegressionTrainPipelineExecutor.progressTask(pipeline),
+            NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE

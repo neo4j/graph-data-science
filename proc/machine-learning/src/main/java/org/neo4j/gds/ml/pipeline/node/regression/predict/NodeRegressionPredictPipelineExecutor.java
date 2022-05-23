@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -63,11 +62,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
-            Tasks.iterativeFixed(
-                "Execute node property steps",
-                () -> List.of(Tasks.leaf("Step")),
-                pipeline.nodePropertySteps().size()
-            ),
+            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
             NodeRegressionPredict.progressTask(graphStore.nodeCount())
         );
     }
