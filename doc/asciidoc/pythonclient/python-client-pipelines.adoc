@@ -35,33 +35,33 @@ Below is a description of the methods on such objects:
 .Node classification pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                  | Arguments                | Return type             | Description
+| Name                  | Arguments                     | Return type             | Description
 | addNodeProperty       | procedure_name: str, +
-                            config: **kwargs       | Series                  | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                            config: **kwargs            | Series                  | <<nodeclassification-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | selectFeatures        | node_properties: +
-                            Union[str, list[str]]  | Series                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
-| configureSplit        | config: **kwargs         | Series                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
+                            Union[str, list[str]]       | Series                  | <<nodeclassification-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit        | config: **kwargs              | Series                  | <<nodeclassification-pipelines-configure-splits, Configure the train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+                            dict[str, any]              | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-                            dict[str, any]         | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
+                            dict[str, any]              | Series                  | <<nodeclassification-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
 | configureAutoTuning   | config: **kwargs
-                                                   | Series                  | <<nodeclassification-pipelines-configure-auto-tuning, Configure the auto-tuning>>.
+                                                        | Series                  | <<nodeclassification-pipelines-configure-auto-tuning, Configure the auto-tuning>>.
 | train                 | G: Graph, +
-                            config: **kwargs       | NCPredictionPipeline, +
+                            config: **kwargs            | NCPredictionPipeline, +
                                                              Series          | <<nodeclassification-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
 | train_estimate        | G: Graph, +
-                            config: **kwargs       | Series                  | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps   | -                        | DataFrame               | Returns the node property steps of the pipeline.
-| feature_properties    | -                        | Series                  | Returns a list of the selected feature properties for the pipeline.
-| split_config          | -                        | Series                  | Returns the configuration set up for train-test splitting of the dataset.
-| parameter_space       | -                        | Series                  | Returns the model parameter space set up for model selection when training.
-| auto_tuning_config    | -                        | Series                  | Returns the configuration set up for auto-tuning.
-| name                  | -                        | str                     | The name of the pipeline as it appears in the pipeline catalog.
-| type                  | -                        | str                     | The type of pipeline.
-| creation_time         | -                        | neo4j.time.Datetime     | Time when the pipeline was created.
-| drop                  | -                        | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                | -                        | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+                            config: **kwargs            | Series                  | <<nodeclassification-pipelines-examples-train-memory-estimation, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                             | DataFrame               | Returns the node property steps of the pipeline.
+| feature_properties    | -                             | Series                  | Returns a list of the selected feature properties for the pipeline.
+| split_config          | -                             | Series                  | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space       | -                             | Series                  | Returns the model parameter space set up for model selection when training.
+| auto_tuning_config    | -                             | Series                  | Returns the configuration set up for auto-tuning.
+| name                  | -                             | str                     | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                             | str                     | The type of pipeline.
+| creation_time         | -                             | neo4j.time.Datetime     | Time when the pipeline was created.
+| drop                  | failIfMissing: Optional[bool] | Series                  | <<pipeline-catalog-drop, Removes the pipeline>> from the GDS Pipeline Catalog.
+| exists                | -                             | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -183,33 +183,33 @@ Below is a description of the methods on such objects:
 .Link prediction pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                  | Arguments              | Return type         | Description
+| Name                  | Arguments                     | Return type         | Description
 | addNodeProperty       | procedure_name: str, +
-                        config: **kwargs         | Series              | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+                        config: **kwargs                | Series              | <<linkprediction-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | addFeature            | feature_type: str, +
-                        config: **kwargs         | Series              | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
-| configureSplit        | config: **kwargs       | Series              | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
+                        config: **kwargs                | Series              | <<linkprediction-adding-features, Add a link feature for model training based on node properties and a feature combiner>>.
+| configureSplit        | config: **kwargs              | Series              | <<linkprediction-configure-splits, Configure the feature-train-test dataset split>>.
 | addLogisticRegression | parameter_space: +
-                          dict[str, any]         | Series              | <<linkprediction-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+                          dict[str, any]                | Series              | <<linkprediction-adding-model-candidates, Add a logistic regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-                          dict[str, any]         | Series              | <<linkprediction-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
+                          dict[str, any]                | Series              | <<linkprediction-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
 | configureAutoTuning   | config: **kwargs
-                                                 | Series              | <<linkprediction-configure-auto-tuning, Configure the auto-tuning>>.
+                                                        | Series              | <<linkprediction-configure-auto-tuning, Configure the auto-tuning>>.
 | train                 | G: Graph, +
 config: **kwargs        | LPPredictionPipeline, +
                                                   Series               | <<linkprediction-pipelines-train, Train the model on the given input graph using given keyword arguments>>.
 | train_estimate        | G: Graph, +
-                        config: **kwargs         | Series              | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps   | -                      | DataFrame           | Returns the node property steps of the pipeline.
-| feature_steps         | -                      | DataFrame           | Returns a list of the selected feature steps for the pipeline.
-| split_config          | -                      | Series              | Returns the configuration set up for feature-train-test splitting of the dataset.
-| parameter_space       | -                      | Series              | Returns the model parameter space set up for model selection when training.
-| auto_tuning_config    | -                      | Series              | Returns the configuration set up for auto-tuning.
-| name                  | -                      | str                 | The name of the pipeline as it appears in the pipeline catalog.
-| type                  | -                      | str                 | The type of pipeline.
-| creation_time         | -                      | neo4j.time.Datetime | Time when the pipeline was created.
-| drop                  | -                      | None                | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                | -                      | bool                | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+                        config: **kwargs                | Series              | <<linkprediction-pipeline-examples-train-estimate, Estimate training the pipeline on the given input graph using given keyword arguments>>.
+| node_property_steps   | -                             | DataFrame           | Returns the node property steps of the pipeline.
+| feature_steps         | -                             | DataFrame           | Returns a list of the selected feature steps for the pipeline.
+| split_config          | -                             | Series              | Returns the configuration set up for feature-train-test splitting of the dataset.
+| parameter_space       | -                             | Series              | Returns the model parameter space set up for model selection when training.
+| auto_tuning_config    | -                             | Series              | Returns the configuration set up for auto-tuning.
+| name                  | -                             | str                 | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                             | str                 | The type of pipeline.
+| creation_time         | -                             | neo4j.time.Datetime | Time when the pipeline was created.
+| drop                  | failIfMissing: Optional[bool] | Series                  | <<pipeline-catalog-drop, Removes the pipeline>> from the GDS Pipeline Catalog.
+| exists                | -                             | bool                | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
@@ -327,31 +327,30 @@ Below is a description of the methods on such objects:
 .Node regression pipeline methods
 [opts="header",cols="2m,2m,2m,3"]
 |===
-| Name                  | Arguments                | Return type             | Description
+| Name                  | Arguments                     | Return type             | Description
 | addNodeProperty       | procedure_name: str, +
-config: **kwargs       | Series                  | <<noderegression-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
+config: **kwargs        | Series                        | <<noderegression-pipelines-adding-node-properties, Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration>>.
 | selectFeatures        | node_properties: +
-Union[str, list[str]]  | Series                  | <<noderegression-pipelines-adding-features, Select node properties to be used as features>>.
-| configureSplit        | config: **kwargs         | Series                  | <<noderegression-pipelines-configure-splits, Configure the train-test dataset split>>.
-| addLinearRegression | parameter_space: +
-dict[str, any]         | Series                  | <<noderegression-pipelines-adding-model-candidates, Add a linear regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+Union[str, list[str]]   | Series                        | <<noderegression-pipelines-adding-features, Select node properties to be used as features>>.
+| configureSplit        | config: **kwargs              | Series                  | <<noderegression-pipelines-configure-splits, Configure the train-test dataset split>>.
+| addLinearRegression   | parameter_space: +
+dict[str, any]          | Series                        | <<noderegression-pipelines-adding-model-candidates, Add a linear regression model configuration to train as a candidate in the model selection phase>>. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-dict[str, any]         | Series                  | <<noderegression-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
-| configureAutoTuning   | config: **kwargs
-| Series                  | <<noderegression-pipelines-configure-auto-tuning, Configure the auto-tuning>>.
+dict[str, any]          | Series                        | <<noderegression-pipelines-adding-model-candidates, Add a random forest model configuration to train as a candidate in the model selection phase>>. footnote:range[]
+| configureAutoTuning   | config: **kwargs              | Series                  | <<noderegression-pipelines-configure-auto-tuning, Configure the auto-tuning>>.
 | train                 | G: Graph, +
-config: **kwargs       | NCPredictionPipeline, +
+config: **kwargs        | NCPredictionPipeline, +
 Series          | <<noderegression-pipelines-train, Train the pipeline on the given input graph using given keyword arguments>>.
-| node_property_steps   | -                        | DataFrame               | Returns the node property steps of the pipeline.
-| feature_properties    | -                        | Series                  | Returns a list of the selected feature properties for the pipeline.
-| split_config          | -                        | Series                  | Returns the configuration set up for train-test splitting of the dataset.
-| parameter_space       | -                        | Series                  | Returns the model parameter space set up for model selection when training.
-| auto_tuning_config    | -                        | Series                  | Returns the configuration set up for auto-tuning.
-| name                  | -                        | str                     | The name of the pipeline as it appears in the pipeline catalog.
-| type                  | -                        | str                     | The type of pipeline.
-| creation_time         | -                        | neo4j.time.Datetime     | Time when the pipeline was created.
-| drop                  | -                        | None                    | Removes the model from the <<pipeline-catalog-ops,GDS Pipeline Catalog>>.
-| exists                | -                        | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
+| node_property_steps   | -                             | DataFrame               | Returns the node property steps of the pipeline.
+| feature_properties    | -                             | Series                  | Returns a list of the selected feature properties for the pipeline.
+| split_config          | -                             | Series                  | Returns the configuration set up for train-test splitting of the dataset.
+| parameter_space       | -                             | Series                  | Returns the model parameter space set up for model selection when training.
+| auto_tuning_config    | -                             | Series                  | Returns the configuration set up for auto-tuning.
+| name                  | -                             | str                     | The name of the pipeline as it appears in the pipeline catalog.
+| type                  | -                             | str                     | The type of pipeline.
+| creation_time         | -                             | neo4j.time.Datetime     | Time when the pipeline was created.
+| drop                  | failIfMissing: Optional[bool] | Series                  | <<pipeline-catalog-drop, Removes the pipeline>> from the GDS Pipeline Catalog.
+| exists                | -                             | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
 There are two main differences when comparing the methods above that map to procedures of the Cypher API:
