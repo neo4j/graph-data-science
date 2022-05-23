@@ -152,8 +152,8 @@ The schema of the result records is identical to the corresponding procedure:
 [opts="header",cols="2,3,5"]
 |===
 |Name             | Type      | Description
-|sourceId         | Integer   | The source node id of the relationship.
-|targetId         | Integer   | The target node id of the relationship.
+|sourceNodeId     | Integer   | The source node id of the relationship.
+|targetNodeId     | Integer   | The target node id of the relationship.
 |relationshipType | String    | The type of the relationship.
 |propertyValue    | Float     | The stored property value.
 |===
@@ -195,6 +195,6 @@ For example, given the relationship `[:REL { foo: 42.0, bar: 13.37 }]` that conn
 .Results
 [opts="header",cols="2,3,5"]
 |===
-| sourceId  | targetId  | relationshipType  | foo  |  bar
-| 0         | 1         | REL               | 42.0 | 13.37
+| sourceNodeId  | targetNodeId  | relationshipType  | foo  |  bar
+| 0             | 1             | REL               | 42.0 | 13.37
 |===
