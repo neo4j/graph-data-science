@@ -631,9 +631,11 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(nodeLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(nodeLabels);
+        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
         return createGraphFromRelationshipType(
             filteredNodes,
             filteredNodeProperties,
+            nodeSchema,
             relationshipType,
             maybeRelationshipProperty
         );
@@ -646,12 +648,14 @@ public class CSRGraphStore implements GraphStore {
     ) {
         Optional<IdMap> filteredNodes = getFilteredIdMap(filteredLabels);
         Map<String, NodePropertyValues> filteredNodeProperties = filterNodeProperties(filteredLabels);
+        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(filteredLabels));
 
         List<CSRGraph> filteredGraphs = relationships.keySet().stream()
             .filter(relationshipTypes::contains)
             .map(relationshipType -> createGraphFromRelationshipType(
                 filteredNodes,
                 filteredNodeProperties,
+                nodeSchema,
                 relationshipType,
                 maybeRelationshipProperty
             ))
@@ -665,9 +669,10 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createNodeOnlyGraph(Collection<NodeLabel> nodeLabels) {
         var filteredNodes = getFilteredIdMap(nodeLabels);
         var filteredNodeProperties = filterNodeProperties(nodeLabels);
+        var nodeSchema = schema().nodeSchema().filter(new HashSet<>(nodeLabels));
 
         var graphSchema = GraphSchema.of(
-            schema().nodeSchema(),
+            nodeSchema,
             RelationshipSchema.empty(),
             schema.graphProperties()
         );
@@ -697,11 +702,12 @@ public class CSRGraphStore implements GraphStore {
     private CSRGraph createGraphFromRelationshipType(
         Optional<IdMap> filteredNodes,
         Map<String, NodePropertyValues> filteredNodeProperties,
+        NodeSchema nodeSchema,
         RelationshipType relationshipType,
         Optional<String> maybeRelationshipProperty
     ) {
         var graphSchema = GraphSchema.of(
-            schema().nodeSchema(),
+            nodeSchema,
             schema()
                 .relationshipSchema()
                 .singleTypeAndProperty(relationshipType, maybeRelationshipProperty),
