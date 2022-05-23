@@ -36,6 +36,10 @@ To identify the graph and the procedure that we want to mirror, the ticket must 
 | configuration     | Map       | The procedure specific configuration.
 |===
 
+The following image shows the client-server interaction for exporting data using node property streaming as an example.
+
+image::arrow/export-protocol.png[Client-server protocol for Arrow export in GDS,align="center"]
+
 
 == Stream a single node property
 
