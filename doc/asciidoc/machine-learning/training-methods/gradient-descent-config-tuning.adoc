@@ -39,23 +39,24 @@ Setting this parameter can be useful to avoid early stopping, but also increases
 == Patience
 
 This parameter defines the maximum number of unproductive consecutive epochs.
-An epoch is unproductive its loss is larger than the lowest loss in the training.
+An epoch is unproductive if it does not improve the training loss by at least a `tolerance` fraction of the current loss.
 
 Assuming the training ran for `minEpochs`, this parameter defines when the training converges.
 
 
 Setting this parameter can lead to a more robust training and avoid early termination similar to `minEpochs`.
-However, a high patience can result in running `maxEpochs`.
+However, a high patience can result in running more epochs than necessary.
 
 In our experience, reasonable values for `patience` are in the range `1` to `3`.
 
 
 == Tolerance
 
-This parameter defines when an epoch is considered unproductive and together with `patience` defines the convergence criteria of the training.
+This parameter defines when an epoch is considered unproductive and together with `patience` defines the convergence criteria for the training.
 An epoch is unproductive if it does not improve the training loss by at least a `tolerance` fraction of the current loss.
-A high tolerance means that epochs are less likely to be unproductive and therefore leads longer training.
-A low tolerance result in stricter training and more likely exceeding the `patience`, hence converging before reaching `maxEpochs`.
+
+A lower tolerance results in more sensitive training with a higher probability to train longer.
+A high tolerance means a less sensitive training and hence resulting in more epochs counted as unproductive.
 
 
 == Learning rate
@@ -64,11 +65,11 @@ When updating the weights, we move in the direction dictated by the Adam optimiz
 How much we move per weights update, you can configure via the `learningRate` parameter.
 
 
-== BatchSize
+== Batch size
 
 This parameter defines how many training examples are grouped in a single batch.
 
 The gradients are computed concurrently on the batches using `concurrency` many threads.
 At the end of an epoch the gradients are summed and scaled before updating the weights.
-The `batchSize` does not affect the model quality, but are very useful to tune for training speed.
-Larger batchSize increases the memory consumption of the computation.
+The `batchSize` does not affect the model quality, but can be used to tune for training speed.
+A larger batchSize increases the memory consumption of the computation.
