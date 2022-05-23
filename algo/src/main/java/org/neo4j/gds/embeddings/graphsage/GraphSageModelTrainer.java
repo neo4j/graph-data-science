@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -60,7 +60,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class GraphSageModelTrainer {
     private final long randomSeed;
     private final boolean useWeights;
-    private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
@@ -78,7 +77,6 @@ public class GraphSageModelTrainer {
         FeatureFunction featureFunction,
         Collection<Weights<Matrix>> labelProjectionWeights
     ) {
-        this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.config = config;
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
@@ -104,7 +102,7 @@ public class GraphSageModelTrainer {
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        var layers = layerConfigsFunction.apply(graph).stream()
+        var layers = config.layerConfigs(firstLayerColumns(config, graph)).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
@@ -133,6 +131,11 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
+
+            if (epoch != 0) {
+                // allow sampling new neighbors
+                Arrays.stream(layers).forEach(Layer::modifySamplingSeed);
+            }
 
             List<BatchTask> tasksForEpoch = extendedBatches
                 .stream()
