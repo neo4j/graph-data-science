@@ -122,6 +122,8 @@ The server manages multiple incoming streams for the same import process.
 In addition to the number of parallel streams, the size of a single record batch can also affect the overall throughput.
 The client has to make sure that node ids are unique across all streams.
 
+NOTE: Sending duplicate node ids will result in an undefined behaviour.
+
 Once all node record batches are sent to the server, the client needs to indicate that node loading is done.
 This is achieved by sending another Flight action with the action type `NODE_LOAD_DONE` and the following JSON document as action body:
 
