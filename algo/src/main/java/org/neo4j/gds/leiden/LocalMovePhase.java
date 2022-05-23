@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.LongDoubleMap;
-import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -44,6 +41,10 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
+    private final HugeLongArray encounteredCommunities;
+    private final HugeDoubleArray encounteredCommunitiesWeights;
+    private long encounteredCommunityCounter = 0;
+
     long swaps;
 
     private long communityCount;
@@ -57,12 +58,18 @@ final class LocalMovePhase {
         long communityCount
     ) {
 
+        var encounteredCommunities = HugeLongArray.newArray(graph.nodeCount());
+        var encounteredCommunitiesWeights = HugeDoubleArray.newArray(graph.nodeCount());
+        encounteredCommunitiesWeights.setAll(c -> -1L);
+
         return new LocalMovePhase(
             graph,
             communityCount,
             seedCommunities,
             nodeVolumes,
             communityVolumes,
+            encounteredCommunities,
+            encounteredCommunitiesWeights,
             gamma
         );
     }
@@ -73,6 +80,8 @@ final class LocalMovePhase {
         HugeLongArray seedCommunities,
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
+        HugeLongArray encounteredCommunities,
+        HugeDoubleArray encounteredCommunitiesWeights,
         double gamma
     ) {
         this.graph = graph;
@@ -81,31 +90,38 @@ final class LocalMovePhase {
         this.gamma = gamma;
         this.nodeVolumes = nodeVolumes;
         this.communityVolumes = communityVolumes;
+        this.encounteredCommunities = encounteredCommunities;
+        this.encounteredCommunitiesWeights = encounteredCommunitiesWeights;
         this.swaps = 0;
+
     }
 
     public Partition run() {
         var queue = createQueue();
+
 
         while (!queue.isEmpty()) {
             long nodeId = queue.remove();
             long currentNodeCommunityId = currentCommunities.get(nodeId);
             double currentNodeVolume = nodeVolumes.get(nodeId);
 
+
             // Remove the current node volume from its community volume
             communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
 
-            var communityRelationshipWeights = communityRelationshipWeights(nodeId);
+
+            communityRelationshipWeights(nodeId);
 
             // Compute the "modularity" for the current node and current community
-            double currentBestGain =
-                communityRelationshipWeights.getOrDefault(currentNodeCommunityId, 0.0) -
-                currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
+            double currentBestGain = Math.max(
+                0,
+                encounteredCommunitiesWeights.get(currentNodeCommunityId)
+            ) - currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
+
 
             long bestCommunityId = currentNodeCommunityId;
 
             bestCommunityId = findBestCommunity(
-                communityRelationshipWeights,
                 currentBestGain,
                 currentNodeVolume,
                 bestCommunityId
@@ -120,21 +136,19 @@ final class LocalMovePhase {
             );
         }
 
-        var modularity = ModularityComputer.modularity(graph, currentCommunities, gamma);
-        return new Partition(currentCommunities, communityVolumes, communityCount, modularity);
+        return new Partition(currentCommunities, communityVolumes, communityCount, -1);
     }
 
     private long findBestCommunity(
-        LongDoubleMap communityRelationshipWeights,
         double currentBestGain,
         double currentNodeVolume,
         long bestCommunityId
     ) {
 
-        for (LongDoubleCursor cursor : communityRelationshipWeights) {
-            long candidateCommunityId = cursor.key;
-            double candidateCommunityRelationshipsWeight = cursor.value;
-
+        for (long i = 0; i < encounteredCommunityCounter; ++i) {
+            long candidateCommunityId = encounteredCommunities.get(i);
+            double candidateCommunityRelationshipsWeight = encounteredCommunitiesWeights.get(candidateCommunityId);
+            encounteredCommunitiesWeights.set(candidateCommunityId, -1);
             // Compute the modularity gain for the candidate community
             double modularityGain =
                 candidateCommunityRelationshipsWeight - currentNodeVolume * communityVolumes.get(candidateCommunityId) * gamma;
@@ -188,20 +202,25 @@ final class LocalMovePhase {
         currentCommunities.set(nodeId, newCommunityId);
         communityVolumes.addTo(newCommunityId, currentNodeVolume);
         swaps++;
-        if(Double.compare(communityVolumes.get(currentNodeCommunityId), 0.0) == 0) {
+        if (Double.compare(communityVolumes.get(currentNodeCommunityId), 0.0) == 0) {
             communityCount--;
         }
     }
 
-    private LongDoubleMap communityRelationshipWeights(long nodeId) {
-        var communityRelationshipWeights = new LongDoubleHashMap();
+    private void communityRelationshipWeights(long nodeId) {
+        encounteredCommunityCounter = 0;
         graph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
             long tCommunity = currentCommunities.get(t);
-            communityRelationshipWeights.addTo(tCommunity, relationshipWeight);
+            if (encounteredCommunitiesWeights.get(tCommunity) < 0) {
+                encounteredCommunities.set(encounteredCommunityCounter, tCommunity);
+                encounteredCommunityCounter++;
+                encounteredCommunitiesWeights.set(tCommunity, relationshipWeight);
+            } else {
+                encounteredCommunitiesWeights.addTo(tCommunity, relationshipWeight);
+            }
 
             return true;
         });
-        return communityRelationshipWeights;
     }
 
     // all neighbours of the node that do not belong to the node’s new community
