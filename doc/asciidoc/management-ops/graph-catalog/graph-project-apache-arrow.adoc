@@ -142,6 +142,11 @@ The server acknowledges the action by returning a JSON document including the na
 }
 ----
 
+[NOTE]
+====
+In some situations the memory footprint of the loaded graph can be reduced by switching to another <<sharded-id-map-feature-toggle, id map implementation>>
+====
+
 [[arrow-send-relationships]]
 == Sending relationship records via PUT as a Flight stream
 
