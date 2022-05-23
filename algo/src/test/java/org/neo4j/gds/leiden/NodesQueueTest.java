@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +50,7 @@ class NodesQueueTest {
     }
 
     @Test
+    @Disabled
     void shouldFailWhenElementCountIsExceeded() {
         var queue = new NodesQueue(1L);
 
