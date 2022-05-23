@@ -115,7 +115,6 @@ final class RefinementPhase {
         workingGraph.forEachNode(nodeId -> {
             boolean isSingleton = singleton.get(nodeId);
             if (isSingleton && isWellConnected(nodeId)) {
-                communityVolumes.set(nodeId, 0);
                 mergeNodeSubset(nodeId, refinedCommunities, singleton, random);
             }
             return true;
