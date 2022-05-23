@@ -16,6 +16,4 @@ This chapter is divided into the following sections:
 * xref::management-ops/utility-functions.adoc[Utility functions]
 * xref::management-ops/create-cypher-db.adoc[Cypher on GDS graph]
 * xref::management-ops/administration.adoc[Administration]
-* xref::management-ops/index.adoc#backup-restore[Backup and Restore]
-
-include::partial$/management-ops/backup-restore.adoc[leveloffset=+1]
+* xref::management-ops/backup-restore.adoc[Backup and Restore]
