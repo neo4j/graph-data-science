@@ -200,7 +200,7 @@ public class GraphSageModelTrainer {
             config.negativeSampleWeight()
         );
 
-        return new BatchTask(lossFunction, weights, progressTracker);
+        return new BatchTask(lossFunction, weights, extendedBatch.length / 3, progressTracker);
     }
 
     private EpochResult trainEpoch(
@@ -223,17 +223,17 @@ public class GraphSageModelTrainer {
 
             // run forward + maybe backward for each Batch
             ParallelUtil.runWithConcurrency(config.concurrency(), sampledBatchTasks, executor);
-            var avgLoss = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).average().orElseThrow();
-            iterationLosses.add(avgLoss);
-            progressTracker.logMessage(formatWithLocale("LOSS: %.10f", avgLoss));
+            var avgLossPerNode = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() / sampledBatchTasks.stream().mapToDouble(BatchTask::batchSize).sum();
+            iterationLosses.add(avgLossPerNode);
+            progressTracker.logMessage(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 
-            if (Math.abs(prevLoss - avgLoss) < config.tolerance()) {
+            if (Math.abs(prevLoss - avgLossPerNode) < config.tolerance()) {
                 converged = true;
                 progressTracker.endSubTask("Iteration");
                 break;
             }
 
-            prevLoss = avgLoss;
+            prevLoss = avgLossPerNode;
 
             var batchedGradients = sampledBatchTasks
                 .stream()
@@ -261,16 +261,19 @@ public class GraphSageModelTrainer {
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
+        private final int batchSize;
         private final ProgressTracker progressTracker;
         private double loss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
             List<Weights<? extends Tensor<?>>> weightVariables,
+            int batchSize,
             ProgressTracker progressTracker
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
+            this.batchSize = batchSize;
             this.progressTracker = progressTracker;
         }
 
@@ -291,6 +294,10 @@ public class GraphSageModelTrainer {
 
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
+        }
+
+        int batchSize() {
+            return batchSize;
         }
     }
 
