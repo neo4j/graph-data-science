@@ -48,6 +48,6 @@ public class Sigmoid<T extends Tensor<T>> extends SingleParentVariable<T, T> {
     }
 
     public static double sigmoid(double x) {
-        return 1 / (1 + Math.pow(Math.E, -x));
+        return 1 / (1 + Math.exp(-x));
     }
 }
