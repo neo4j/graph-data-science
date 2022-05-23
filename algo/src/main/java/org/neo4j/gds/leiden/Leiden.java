@@ -79,7 +79,6 @@ public class Leiden extends Algorithm<LeidenResult> {
 
         var nodeVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
         var communityVolumes = HugeDoubleArray.newArray(workingGraph.nodeCount());
-        initVolumes(nodeVolumes, communityVolumes);
 
         HugeLongArray partition = HugeLongArray.newArray(workingGraph.nodeCount());
         partition.setAll(nodeId -> nodeId);
@@ -89,7 +88,13 @@ public class Leiden extends Algorithm<LeidenResult> {
         boolean didConverge = false;
 
         int iteration;
+
         // move on with refinement -> aggregation -> local move again
+        HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
+        seedCommunities.setAll(v -> v);
+
+        initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        
         for (iteration = 0; iteration < maxIterations; iteration++) {
 
             // 1. LOCAL MOVE PHASE - over the singleton partition
@@ -101,6 +106,9 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             var communitiesCount = localMovePhasePartition.communityCount();
             didConverge = communitiesCount == workingGraph.nodeCount();
+
+            if (localMovePhase.swaps == 0)
+                break;
 
             if (didConverge) {
                 break;
@@ -144,12 +152,17 @@ public class Leiden extends Algorithm<LeidenResult> {
             communityVolumes = communityData.communityVolumes;
             nodeVolumes = communityData.aggregatedNodeSeedVolume;
             communityCount = communityData.communityCount;
-        }
 
-        return LeidenResult.of(dendrograms[iteration - 1], iteration, didConverge);
+            seedCommunities = iteration == 0 ? seedCommunities : dendrograms[iteration - 1];
+        }
+        return LeidenResult.of(seedCommunities, iteration, didConverge);
     }
 
-    private void initVolumes(HugeDoubleArray nodeVolumes, HugeDoubleArray communityVolumes) {
+    private void initVolumes(
+        HugeDoubleArray nodeVolumes,
+        HugeDoubleArray communityVolumes,
+        HugeLongArray seedCommunities
+    ) {
         if (rootGraph.hasRelationshipProperty()) {
             ParallelUtil.parallelForEachNode(
                 rootGraph.nodeCount(),
@@ -157,14 +170,19 @@ public class Leiden extends Algorithm<LeidenResult> {
                 nodeId -> {
                     rootGraph.concurrentCopy().forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                         nodeVolumes.addTo(nodeId, w);
-                        communityVolumes.addTo(nodeId, w);
+                        communityVolumes.addTo(seedCommunities.get(nodeId), w);
                         return true;
                     });
                 }
             );
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-            communityVolumes.setAll(rootGraph::degree);
+
+            rootGraph.forEachNode(nodeId -> {
+                long communityId = seedCommunities.get(nodeId);
+                communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
+                return true;
+            });
         }
     }
 
@@ -173,6 +191,9 @@ public class Leiden extends Algorithm<LeidenResult> {
         int iteration,
         HugeLongArray currentCommunities
     ) {
+
+        assert workingGraph.nodeCount() == currentCommunities.size() : "We messed something....";
+
         dendrograms[iteration] = HugeLongArray.newArray(rootGraph.nodeCount());
         AtomicLong maxCommunityId = new AtomicLong(0L);
         ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
@@ -219,21 +240,22 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeDoubleArray aggregatedCommunitySeedVolume = HugeDoubleArray.newArray(workingGraph.nodeCount());
         HugeDoubleArray aggregatedNodeSeedVolume = HugeDoubleArray.newArray(workingGraph.nodeCount());
         workingGraph.forEachNode(aggregatedCommunityId -> {
-            var refinedCommunityId = workingGraph.toOriginalNodeId(aggregatedCommunityId);
-            long localPhaseCommunity = localPhaseCommunities.get(refinedCommunityId);
-            long aggregatedSeedCommunity;
+            long refinedCommunityId = workingGraph.toOriginalNodeId(aggregatedCommunityId);
+            long localPhaseCommunityId = localPhaseCommunities.get(refinedCommunityId);
+            long aggregatedSeedCommunityId;
+
+            // cache the `aggregatedSeedCommunityId`
+            if (localPhaseCommunityToAggregatedNewId.containsKey(localPhaseCommunityId)) {
+                aggregatedSeedCommunityId = localPhaseCommunityToAggregatedNewId.get(localPhaseCommunityId);
+            } else {
+                aggregatedSeedCommunityId = aggregatedCommunityId;
+                localPhaseCommunityToAggregatedNewId.put(localPhaseCommunityId, aggregatedSeedCommunityId);
+            }
 
             double volumeOfTheAggregatedCommunity = refinedCommunityVolumes.get(refinedCommunityId);
+            aggregatedCommunitySeedVolume.addTo(aggregatedSeedCommunityId, volumeOfTheAggregatedCommunity);
 
-            if (localPhaseCommunityToAggregatedNewId.containsKey(localPhaseCommunity)) {
-                aggregatedSeedCommunity = localPhaseCommunityToAggregatedNewId.get(localPhaseCommunity);
-            } else {
-                aggregatedSeedCommunity = aggregatedCommunityId;
-                localPhaseCommunityToAggregatedNewId.put(localPhaseCommunity, aggregatedSeedCommunity);
-            }
-            aggregatedCommunitySeedVolume.addTo(aggregatedSeedCommunity, volumeOfTheAggregatedCommunity);
-
-            seededCommunitiesForNextIteration.set(aggregatedCommunityId, aggregatedSeedCommunity);
+            seededCommunitiesForNextIteration.set(aggregatedCommunityId, aggregatedSeedCommunityId);
             aggregatedNodeSeedVolume.set(aggregatedCommunityId, volumeOfTheAggregatedCommunity);
             return true;
         });

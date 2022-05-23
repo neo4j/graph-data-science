@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.leiden;
 
-import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 
 class NodesQueue {
 
     private final HugeLongArrayQueue queue;
-    private final BitSet nodeInQueue;
+    private final HugeAtomicBitSet nodeInQueue;
 
     NodesQueue(long nodeCount) {
         this.queue = HugeLongArrayQueue.newQueue(nodeCount);
-        nodeInQueue = new BitSet(nodeCount);
+        nodeInQueue = HugeAtomicBitSet.create(nodeCount);
     }
 
     void add(long nodeId) {

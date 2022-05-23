@@ -44,6 +44,8 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
+    long swaps;
+
     private long communityCount;
 
     static LocalMovePhase create(
@@ -79,6 +81,7 @@ final class LocalMovePhase {
         this.gamma = gamma;
         this.nodeVolumes = nodeVolumes;
         this.communityVolumes = communityVolumes;
+        this.swaps = 0;
     }
 
     public Partition run() {
@@ -89,14 +92,15 @@ final class LocalMovePhase {
             long currentNodeCommunityId = currentCommunities.get(nodeId);
             double currentNodeVolume = nodeVolumes.get(nodeId);
 
-            // Remove the current node degree from its community volume
+            // Remove the current node volume from its community volume
             communityVolumes.addTo(currentNodeCommunityId, -currentNodeVolume);
 
             var communityRelationshipWeights = communityRelationshipWeights(nodeId);
 
             // Compute the "modularity" for the current node and current community
-            double currentBestGain = communityRelationshipWeights.get(currentNodeCommunityId) - currentNodeVolume * communityVolumes.get(
-                currentNodeCommunityId) * gamma;
+            double currentBestGain =
+                communityRelationshipWeights.getOrDefault(currentNodeCommunityId, 0.0) -
+                currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
 
             long bestCommunityId = currentNodeCommunityId;
 
@@ -127,7 +131,7 @@ final class LocalMovePhase {
         long bestCommunityId
     ) {
 
-        for(LongDoubleCursor cursor: communityRelationshipWeights) {
+        for (LongDoubleCursor cursor : communityRelationshipWeights) {
             long candidateCommunityId = cursor.key;
             double candidateCommunityRelationshipsWeight = cursor.value;
 
@@ -183,7 +187,7 @@ final class LocalMovePhase {
     ) {
         currentCommunities.set(nodeId, newCommunityId);
         communityVolumes.addTo(newCommunityId, currentNodeVolume);
-
+        swaps++;
         if(Double.compare(communityVolumes.get(currentNodeCommunityId), 0.0) == 0) {
             communityCount--;
         }
