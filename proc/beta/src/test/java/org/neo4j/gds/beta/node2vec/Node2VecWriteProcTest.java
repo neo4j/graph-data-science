@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
@@ -69,6 +70,21 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
     @Override
     public Node2VecWriteConfig createConfig(CypherMapWrapper userInput) {
         return Node2VecWriteConfig.of(userInput);
+    }
+
+    @Test
+    void returnLossPerIteration() {
+        loadGraph(DEFAULT_GRAPH_NAME);
+        int iterations = 5;
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.node2vec")
+            .writeMode()
+            .addParameter("embeddingDimension", 42)
+            .addParameter("writeProperty", "testProp")
+            .addParameter("iterations", iterations)
+            .yields("lossPerIteration");
+
+        assertCypherResult(query, List.of(Map.of("lossPerIteration", Matchers.hasSize(iterations))));
     }
 
     @Test

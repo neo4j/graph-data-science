@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.beta.node2vec;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgoBaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateNodePropertyTest;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -36,6 +38,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,6 +107,21 @@ class Node2VecMutateProcTest
 
         GraphStore mutatedGraphStore = GraphStoreCatalog.get(AlgoBaseProcTest.TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
         assertMutatedGraph(mutatedGraphStore);
+    }
+
+    @Test
+    void returnLossPerIteration() {
+        loadGraph(DEFAULT_GRAPH_NAME);
+        int iterations = 5;
+        var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds.beta.node2vec")
+            .mutateMode()
+            .addParameter("embeddingDimension", 42)
+            .addParameter("mutateProperty", "testProp")
+            .addParameter("iterations", iterations)
+            .yields("lossPerIteration");
+
+        assertCypherResult(query, List.of(Map.of("lossPerIteration", Matchers.hasSize(iterations))));
     }
 
     private void assertMutatedGraph(GraphStore mutatedGraphStore) {

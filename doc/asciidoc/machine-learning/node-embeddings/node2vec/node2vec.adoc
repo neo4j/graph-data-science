@@ -93,6 +93,7 @@ YIELD
   mutateMillis: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
+  lossPerIteration: List of Float,
   configuration: Map
 ----
 
@@ -106,14 +107,15 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| nodeCount             | Integer | The number of nodes processed.
-| nodePropertiesWritten | Integer | The number of node properties written.
-| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| mutateMillis          | Integer | Milliseconds for adding properties to the projected graph.
-| postProcessingMillis  | Integer | Milliseconds for post-processing of the results.
-| configuration         | Map     | The configuration used for running the algorithm.
+| Name                  | Type          | Description
+| nodeCount             | Integer       | The number of nodes processed.
+| nodePropertiesWritten | Integer       | The number of node properties written.
+| preProcessingMillis   | Integer       | Milliseconds for preprocessing the data.
+| computeMillis         | Integer       | Milliseconds for running the algorithm.
+| mutateMillis          | Integer       | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis  | Integer       | Milliseconds for post-processing of the results.
+| lossPerIteration      | List of Float | The sum of the losses registered per training iteration.
+| configuration         | Map           | The configuration used for running the algorithm.
 |===
 ======
 
@@ -132,6 +134,7 @@ YIELD
   writeMillis: Integer,
   nodeCount: Integer,
   nodePropertiesWritten: Integer,
+  lossPerIteration: List of Float,
   configuration: Map
 ----
 
@@ -145,13 +148,14 @@ include::specific-configuration.adoc[]
 .Results
 [opts="header",cols="1,1,6"]
 |===
-| Name                  | Type    | Description
-| nodeCount             | Integer | The number of nodes processed.
-| nodePropertiesWritten | Integer | The number of node properties written.
-| preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
-| computeMillis         | Integer | Milliseconds for running the algorithm.
-| writeMillis           | Integer | Milliseconds for writing result data back to Neo4j.
-| configuration         | Map     | The configuration used for running the algorithm.
+| Name                  | Type          | Description
+| nodeCount             | Integer       | The number of nodes processed.
+| nodePropertiesWritten | Integer       | The number of node properties written.
+| preProcessingMillis   | Integer       | Milliseconds for preprocessing the data.
+| computeMillis         | Integer       | Milliseconds for running the algorithm.
+| writeMillis           | Integer       | Milliseconds for writing result data back to Neo4j.
+| lossPerIteration      | List of Float | The sum of the losses registered per training iteration.
+| configuration         | Map           | The configuration used for running the algorithm.
 |===
 ======
 ====

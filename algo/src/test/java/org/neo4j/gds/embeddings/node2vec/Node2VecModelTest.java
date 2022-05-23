@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Comparator;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -62,6 +63,7 @@ class Node2VecModelTest {
             .embeddingDimension(10)
             .initialLearningRate(0.05)
             .negativeSamplingRate(1)
+            .iterations(5)
             .concurrency(4)
             .build();
 
@@ -75,7 +77,11 @@ class Node2VecModelTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var embeddings = node2VecModel.train().embeddings();
+        var trainResult = node2VecModel.train();
+
+        assertThat(trainResult.lossPerIteration()).isSortedAccordingTo(Comparator.reverseOrder());
+
+        var embeddings = trainResult.embeddings();
 
         double innerClusterSum = LongStream.range(0, numberOfClusters)
             .boxed()

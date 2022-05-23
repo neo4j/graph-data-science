@@ -39,6 +39,7 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -90,7 +91,13 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecResult, Node2
         ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new WriteResult.Builder().withLossPerIteration(computeResult.result().lossPerIteration());
+        WriteResult.Builder builder = new WriteResult.Builder();
+
+        Optional.ofNullable(computeResult.result())
+            .map(Node2VecModel.Result::lossPerIteration)
+            .ifPresent(builder::withLossPerIteration);
+
+        return builder;
     }
 
     @SuppressWarnings("unused")
