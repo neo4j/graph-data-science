@@ -197,7 +197,7 @@ As a result, there is only one row per relationship which includes all its prope
 For example, given the relationship `[:REL { foo: 42.0, bar: 13.37 }]` that connects a source node with id `0` wit a target node with id `1`, the resulting record schema is as follows:
 
 .Results
-[opts="header",cols="2,3,5"]
+[opts="header",cols="1,1,1,1,1"]
 |===
 | sourceNodeId  | targetNodeId  | relationshipType  | foo  |  bar
 | 0             | 1             | REL               | 42.0 | 13.37
