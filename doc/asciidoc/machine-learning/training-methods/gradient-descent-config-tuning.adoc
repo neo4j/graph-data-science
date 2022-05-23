@@ -1,24 +1,75 @@
 = Tuning the hyperparameters
 
-The parameters `maxEpochs`, `tolerance` and `patience` control for how long the training will run until termination.
-These parameters give ways to limit a computational budget. 
-In general, higher `maxEpochs` and `patience` and lower `tolerance` lead to longer training but higher quality models.
-It is however well-known that restricting the computational budget can serve the purpose of regularization and mitigate overfitting.
+In order to balance matters such as bias vs variance of the model, and speed vs memory consumption of the training, GDS exposes several hyperparameters that one can tune.
+Each of these are described below.
 
-When faced with a heavy training task, a strategy to perform hyperparameter optimization faster is to initially use lower values for the budget-related parameters while exploring better ranges for other general or algorithm-specific parameters.
+In Gradient descent based training, we try to find the best weights for our model.
+In each epoch we process all training examples to compute the loss and the gradient of the weights.
+These gradients are then used to update the weights.
+For the update we use the Adam optimizer as described in https://arxiv.org/pdf/1412.6980.pdf.
 
-More precisely, `maxEpochs` is the maximum number of epochs trained until termination.
-Whether the training exhausted the maximum number of epochs or converged prior is reported in the neo4j debug log.
+Statistics about the training are reported in the neo4j debug log.
 
-As for `patience` and `tolerance`, the former is the maximum number of consecutive epochs that do not improve the training loss at least by a `tolerance` fraction of the current loss.
-After `patience` such unproductive epochs, the training is terminated.
+
+== Penalty
+
+This parameter defines the influence of the regularization term in the loss function.
+While the regularization can avoid overfitting, a high value can even lead to underfitting.
+The minimal value is zero, where the regularization term has no effect at all.
+
+
+== Max Epochs
+
+This parameter defines the maximum number of epochs for the training.
+Independent of the model's quality, the training will terminate after these many epochs.
+Note, that the training can also stop earlier if the loss converged (see <<_patience>> and <<_tolerance>>.
+
+Setting this parameter can be useful to limit the training time for a model.
+Restricting the computational budget can serve the purpose of regularization and mitigate overfitting, which becomes a risk with a large number of epochs.
+
+
+== Min Epochs
+
+This parameter defines the minimum number of epochs for the training.
+Independent of the model's quality, the training will at least run this many epochs.
+
+Setting this parameter can be useful to avoid early stopping, but also increases the minimal training time of a model.
+
+
+== Patience
+
+This parameter defines the maximum number of unproductive consecutive epochs.
+An epoch is unproductive if it does not improve the training loss by at least a `tolerance` fraction of the current loss.
+
+Assuming the training ran for `minEpochs`, this parameter defines when the training converges.
+
+
+Setting this parameter can lead to a more robust training and avoid early termination similar to `minEpochs`.
+However, a high patience can result in running more epochs than necessary.
+
 In our experience, reasonable values for `patience` are in the range `1` to `3`.
 
-It is also possible, via `minEpochs`, to control a minimum number of epochs before the above termination criteria enter into play.
 
-The training algorithm applied to the above algorithms is gradient descent.
-The gradients are computed concurrently on batches of `batchSize` samples using `concurrency` many threads.
-At the end of an epoch the gradients are summed and scaled before updating the weights.
-Therefore `batchSize` and `concurrency` do not affect model quality, but are very useful to tune for training speed.
+== Tolerance
+
+This parameter defines when an epoch is considered unproductive and together with `patience` defines the convergence criteria for the training.
+An epoch is unproductive if it does not improve the training loss by at least a `tolerance` fraction of the current loss.
+
+A lower tolerance results in more sensitive training with a higher probability to train longer.
+A high tolerance means a less sensitive training and hence resulting in more epochs counted as unproductive.
+
+
+== Learning rate
+
 When updating the weights, we move in the direction dictated by the Adam optimizer based on the loss function's gradients.
 How much we move per weights update, you can configure via the `learningRate` parameter.
+
+
+== Batch size
+
+This parameter defines how many training examples are grouped in a single batch.
+
+The gradients are computed concurrently on the batches using `concurrency` many threads.
+At the end of an epoch the gradients are summed and scaled before updating the weights.
+The `batchSize` does not affect the model quality, but can be used to tune for training speed.
+A larger batchSize increases the memory consumption of the computation.
