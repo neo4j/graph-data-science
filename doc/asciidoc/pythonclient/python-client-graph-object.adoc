@@ -111,6 +111,8 @@ There are convenience methods on the graph object that let us extract informatio
 | name                    | -          | str              | The name of the projected graph.
 | node_count              | -          | int              | The node count of the projected graph.
 | relationship_count      | -          | int              | The relationship count of the projected graph.
+| node_labels             | -          | list[str]        | A list of the node labels present in the graph.
+| relationship_types      | -          | list[str]        | A list of the relationship types present in the graph.
 | node_properties         | label: str | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
 | relationship_properties | type: str  | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
 | degree_distribution     | -          | Series           | The average out-degree of generated nodes.
