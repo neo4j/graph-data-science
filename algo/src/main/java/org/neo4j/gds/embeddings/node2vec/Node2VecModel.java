@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
@@ -33,6 +34,7 @@ import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.SplittableRandom;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
@@ -84,7 +86,7 @@ public class Node2VecModel {
         contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
     }
 
-    Node2VecResult train() {
+    Result train() {
         progressTracker.beginSubTask();
         var learningRateAlpha = (config.initialLearningRate() - config.minLearningRate()) / config.iterations();
 
@@ -133,7 +135,7 @@ public class Node2VecModel {
         }
         progressTracker.endSubTask();
 
-        return ImmutableNode2VecResult.of(centerEmbeddings, lossPerIteration);
+        return ImmutableResult.of(centerEmbeddings, lossPerIteration);
     }
 
     private static HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
@@ -244,5 +246,12 @@ public class Node2VecModel {
             System.arraycopy(other.values, 0, values, index, other.index);
             index += other.index;
         }
+    }
+
+    @ValueClass
+    public interface Result {
+        HugeObjectArray<FloatVector> embeddings();
+
+        List<Double> lossPerIteration();
     }
 }

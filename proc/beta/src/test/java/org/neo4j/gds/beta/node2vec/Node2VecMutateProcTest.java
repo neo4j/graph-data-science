@@ -33,8 +33,8 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
+import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -47,7 +47,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class Node2VecMutateProcTest
     extends Node2VecProcTest<Node2VecMutateConfig>
-    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, Node2VecResult> {
+    implements MutateNodePropertyTest<Node2Vec, Node2VecMutateConfig, Node2VecModel.Result> {
 
     @BeforeEach
     void loadProcedures() throws Exception {
@@ -57,7 +57,7 @@ class Node2VecMutateProcTest
     }
 
     @Override
-    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecResult, Node2VecMutateConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, ?>> getProcedureClazz() {
         return Node2VecMutateProc.class;
     }
 

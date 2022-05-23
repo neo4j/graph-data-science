@@ -26,8 +26,8 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
+import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
@@ -46,7 +46,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.beta.node2vec.mutate", description = Node2VecCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecResult, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
+public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecModel.Result, Node2VecMutateProc.MutateResult, Node2VecMutateConfig> {
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -54,7 +54,7 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecRes
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -82,13 +82,13 @@ public class Node2VecMutateProc extends MutatePropertyProc<Node2Vec, Node2VecRes
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected MutateResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computeResult,
+        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return new MutateResult.Builder().withLossPerIteration(computeResult.result().lossPerIteration());

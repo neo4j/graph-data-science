@@ -25,7 +25,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
-import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -63,7 +63,7 @@ class Node2VecWriteProcTest extends Node2VecProcTest<Node2VecWriteConfig> {
         );
     }
 
-    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecResult, Node2VecWriteConfig, ?>> getProcedureClazz() {
+    public Class<? extends AlgoBaseProc<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, ?>> getProcedureClazz() {
         return Node2VecWriteProc.class;
     }
 

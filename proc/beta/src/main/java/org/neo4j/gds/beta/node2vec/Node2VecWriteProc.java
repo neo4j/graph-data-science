@@ -26,7 +26,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.embeddings.node2vec.Node2Vec;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
-import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
+import org.neo4j.gds.embeddings.node2vec.Node2VecModel;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -47,7 +47,7 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 @GdsCallable(name = "gds.beta.node2vec.write", description = Node2VecCompanion.DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecResult, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
+public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecModel.Result, Node2VecWriteProc.WriteResult, Node2VecWriteConfig> {
 
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
@@ -55,7 +55,7 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecResult, Node2
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult = compute(
+        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult = compute(
             graphName,
             configuration
         );
@@ -82,13 +82,13 @@ public class Node2VecWriteProc extends WriteProc<Node2Vec, Node2VecResult, Node2
     }
 
     @Override
-    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
+    protected NodePropertyValues nodeProperties(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult) {
         return Node2VecCompanion.nodeProperties(computationResult);
     }
 
     @Override
     protected AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computeResult,
+        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         WriteResult.Builder builder = new WriteResult.Builder();

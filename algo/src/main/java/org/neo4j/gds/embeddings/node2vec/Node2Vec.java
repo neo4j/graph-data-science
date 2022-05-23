@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.traversal.RandomWalk;
 
-public class Node2Vec extends Algorithm<Node2VecResult> {
+public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
     private final Graph graph;
     private final Node2VecBaseConfig config;
@@ -52,7 +52,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
     }
 
     @Override
-    public Node2VecResult compute() {
+    public Node2VecModel.Result compute() {
         progressTracker.beginSubTask("Node2Vec");
 
         RandomWalk randomWalk = RandomWalk.create(
