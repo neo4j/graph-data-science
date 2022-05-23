@@ -93,21 +93,28 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of the requested size.
      * The concurrency value is assumed to already be validated towards the edition limitation.
      */
-    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, Consumer<T> consumer) {
+    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, TerminationFlag terminationFlag, Consumer<T> consumer) {
         parallelStream(data, concurrency, (Function<T, Void>) t -> {
+            terminationFlag.assertRunning();
             consumer.accept(t);
             return null;
         });
     }
 
+    public static <T extends BaseStream<?, T>> void parallelStreamConsume(T data, int concurrency, Consumer<T> consumer) {
+        parallelStreamConsume(data, concurrency, TerminationFlag.RUNNING_TRUE, consumer);
+    }
+
     public static void parallelForEachNode(Graph graph, int concurrency, LongConsumer consumer) {
-        parallelForEachNode(graph.nodeCount(), concurrency, consumer);
+        parallelForEachNode(graph.nodeCount(), concurrency, TerminationFlag.RUNNING_TRUE, consumer);
     }
 
     public static void parallelForEachNode(long nodeCount, int concurrency, LongConsumer consumer) {
-        parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, (stream) -> {
-            stream.forEach(consumer);
-        });
+        parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, consumer);
+    }
+
+    public static void parallelForEachNode(long nodeCount, int concurrency, TerminationFlag terminationFlag, LongConsumer consumer) {
+        parallelStreamConsume(LongStream.range(0, nodeCount), concurrency, terminationFlag, stream -> stream.forEach(consumer));
     }
 
     /**

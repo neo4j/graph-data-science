@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -94,6 +95,7 @@ class RandomForestRegressorTest {
                 .numberOfSamplesRatio(0.0)
                 .build(),
             Optional.of(42L),
+            TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -118,6 +120,7 @@ class RandomForestRegressorTest {
                 .numberOfDecisionTrees(20)
                 .build(),
             Optional.of(1337L),
+            TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -142,6 +145,7 @@ class RandomForestRegressorTest {
                 .numberOfDecisionTrees(10)
                 .build(),
             Optional.of(1337L),
+            TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
 

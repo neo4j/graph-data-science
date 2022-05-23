@@ -55,6 +55,7 @@ public final class RegressionTrainerFactory {
                     concurrency,
                     (RandomForestRegressorTrainerConfig) config,
                     randomSeed,
+                    terminationFlag,
                     progressTracker
                 );
             }
