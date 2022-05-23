@@ -62,7 +62,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
-            nodePropertyStepTasks(pipeline.nodePropertySteps()),
+            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
             NodeRegressionPredict.progressTask(graphStore.nodeCount())
         );
     }

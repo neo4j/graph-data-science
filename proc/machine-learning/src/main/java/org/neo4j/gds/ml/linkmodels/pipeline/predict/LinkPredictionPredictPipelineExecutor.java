@@ -100,7 +100,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         return Tasks.task(
             taskName,
-            nodePropertyStepTasks(pipeline.nodePropertySteps()),
+            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.relationshipCount()),
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",

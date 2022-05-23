@@ -88,7 +88,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 "Split relationships",
                 sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
             ));
-            add(nodePropertyStepTasks(pipeline.nodePropertySteps()));
+            add(nodePropertyStepTasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
             addAll(LinkPredictionTrain.progressTasks(
                 relationshipCount,
                 pipeline.splitConfig(),

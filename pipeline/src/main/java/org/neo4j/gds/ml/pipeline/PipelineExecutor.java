@@ -100,12 +100,13 @@ public abstract class PipelineExecutor<
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
     }
 
-    protected static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps) {
+    protected static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
+        long volumeEstimation = 10 * featureInputSize;
         return Tasks.task(
             "Execute node property steps",
             nodePropertySteps.stream()
                 .map(ExecutableNodePropertyStep::rootTaskName)
-                .map(Tasks::leaf)
+                .map(taskName -> Tasks.leaf(taskName, volumeEstimation))
                 .collect(Collectors.toList())
         );
     }
