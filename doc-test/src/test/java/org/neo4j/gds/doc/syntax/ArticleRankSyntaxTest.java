@@ -23,6 +23,6 @@ class ArticleRankSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/article-rank/article-rank.adoc";
+        return "pages/algorithms/article-rank.adoc";
     }
 }

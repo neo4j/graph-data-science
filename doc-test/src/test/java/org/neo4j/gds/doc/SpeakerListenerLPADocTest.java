@@ -42,7 +42,7 @@ class SpeakerListenerLPADocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/sllpa/sllpa.adoc";
+        return "pages/algorithms/sllpa.adoc";
     }
 
 }

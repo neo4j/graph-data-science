@@ -36,6 +36,6 @@ class Node2VecDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/node-embeddings/node2vec/node2vec.adoc";
+        return "pages/machine-learning/node-embeddings/node2vec.adoc";
     }
 }

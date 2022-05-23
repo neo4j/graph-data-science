@@ -37,6 +37,6 @@ class SimilarityFunctionsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/similarity-functions/similarity-functions.adoc";
+        return "pages/algorithms/similarity-functions.adoc";
     }
 }

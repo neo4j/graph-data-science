@@ -1,0 +1,599 @@
+[[linkprediction-pipelines]]
+= Link prediction pipelines
+:description: This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: relationships
+
+
+[abstract]
+--
+This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
+--
+
+
+[[linkprediction-pipelines-intro]]
+== Introduction
+
+Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
+More precisely, the input to the machine learning model are _examples_ of node pairs.
+During training, the node pairs are labeled as adjacent or not adjacent.
+
+In GDS, we have Link prediction pipelines which offer an end-to-end workflow, from feature extraction to link prediction.
+The training pipelines reside in the xref::pipeline-catalog/index.adoc[pipeline catalog].
+When a training pipeline is xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[executed], a prediction model is created and stored in the xref::model-catalog/index.adoc[model catalog].
+
+A training pipeline is a sequence of three phases:
+[upperroman]
+. From the graph three sets of node pairs are derived: feature set, training set, test set. The latter two are labeled.
+. The nodes in the graph are augmented with new properties by running a series of steps on the graph with only relationships from the feature set.
+. The train and test sets are used for training a link prediction pipeline. Link features are derived by combining node properties of node pairs.
+
+For the training and test sets, positive examples are xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-splits[selected] from the relationships in the graph.
+The negative examples are sampled from non-adjacent nodes.
+
+One can xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-adding-node-properties[configure] which steps should be included above.
+The steps execute GDS algorithms that create new node properties.
+After configuring the node property steps, one can xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-adding-features[define] how to combine node properties of node pairs into link features.
+The training phase (III) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
+
+After xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training the pipeline], a prediction model is created.
+This model includes the node property steps and link feature steps from the training pipeline and uses them to generate the relevant features for predicting new relationships.
+The prediction model can be applied to infer the probability of the existence of a relationship between two non-adjacent nodes.
+
+NOTE: xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[Prediction] can only be done with a prediction model (not with a training pipeline).
+
+The rest of this page is divided as follows:
+
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-creating-a-pipeline[Creating a pipeline]
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-adding-node-properties[Adding node properties]
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-adding-features[Adding link features]
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-splits[Configuring the relationship splits]
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-model-parameters[Configuring the model parameter space]
+* xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[Training the pipeline]
+* xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[Applying a trained model for prediction]
+
+
+[[linkprediction-creating-a-pipeline]]
+== Creating a pipeline
+
+The first step of building a new pipeline is to create one using `gds.beta.pipeline.linkPrediction.create`.
+This stores a trainable pipeline object in the pipeline catalog of type `Link prediction training pipeline`.
+This represents a configurable pipeline that can later be invoked for training, which in turn creates a trained pipeline.
+The latter is also a model which is stored in the catalog with type `LinkPrediction`.
+
+
+=== Syntax
+
+[.pipeline-create-syntax]
+--
+.Create pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.create(
+  pipelineName: String
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type   | Description
+| pipelineName    | String  | The name of the created pipeline.
+|===
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will create a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.create('pipe')
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| "pipe"   | []                | []
+           | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+           | {RandomForest=[], LogisticRegression=[]}
+|===
+--
+
+This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
+
+
+[[linkprediction-adding-node-properties]]
+== Adding node properties
+
+A link prediction pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the projected graph.
+Such steps producing node properties can be chained one after another and created properties can also be used to xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-adding-features[add features].
+Moreover, the node property steps that are added to the pipeline will be executed both when xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training] a pipeline and when the trained model is xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[applied for prediction].
+
+The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
+The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
+
+For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
+
+
+=== Syntax
+
+[.pipeline-add-node-property-syntax]
+--
+.Add node property syntax
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty(
+  pipelineName: String,
+  procedureName: String,
+  procedureConfiguration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                      | Type    | Description
+| pipelineName              | String  | The name of the pipeline.
+| procedureName             | String  | The name of the procedure to be added to the pipeline.
+| procedureConfiguration    | Map     | The configuration of the procedure, excluding `graphName`, `nodeLabels` and `relationshipTypes`.
+|===
+
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will add a node property step to the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42
+})
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| name     | nodePropertySteps | featureSteps | splitConfig | parameterSpace
+| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, embeddingDimension=256, mutateProperty=embedding}}]
+| []
+| {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
+| {RandomForest=[], LogisticRegression=[]}
+|===
+
+The pipeline will now execute the xref::machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training] a model, and when the trained model is xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[applied for prediction].
+This ensures the `embedding` property can be used as an input for link features.
+--
+
+
+[[linkprediction-adding-features]]
+== Adding link features
+
+A Link Prediction pipeline executes a sequence of steps to compute the features used by a machine learning model.
+A feature step computes a vector of features for given node pairs.
+For each node pair, the results are concatenated into a single _link feature vector_.
+The order of the features in the link feature vector follows the order of the feature steps.
+Like with node property steps, the feature steps are also executed both at xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training] and xref::machine-learning/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[prediction] time.
+The supported methods for obtaining features are described xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-supported-features[below].
+
+
+=== Syntax
+
+[.pipeline-add-feature-syntax]
+--
+.Adding a link feature to a pipeline syntax
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addFeature(
+  pipelineName: String,
+  featureType: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type    | Description
+| pipelineName           | String  | The name of the pipeline.
+| featureType            | String  | The featureType determines the method used for computing the link feature. See xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-supported-features[supported types].
+| configuration          | Map     | Configuration for splitting the relationships.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name              | Type              | Default | Description
+| nodeProperties    | List of String    | no      | The names of the node properties that should be used as input.
+|===
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+
+
+[[linkprediction-supported-features]]
+=== Supported feature types
+
+A feature step can use node properties that exist in the input graph or are added by the pipeline.
+For each node in each potential link, the values of `nodeProperties` are concatenated, in the configured order, into a vector _f_.
+That is, for each potential link the feature vector for the source node, image:equations/linkprediction/linkprediction1.svg[s equals s1 comma s2 comma dot dot dot s d], is combined with the one for the target node, image:equations/linkprediction/linkprediction2.svg[s equals t1 comma t2 comma dot dot dot t d], into a single feature vector _f_.
+
+The supported types of features can then be described as follows:
+
+.Supported feature types
+[opts="header",cols="1,4"]
+|===
+| Feature Type           | Formula / Description
+| L2                     | image:equations/linkprediction/linkprediction3.svg[f equals vector of s1 minus t1 squared comma s2 minus t2 squared comma dot dot dot comma s d minus t d squared]
+| HADAMARD               | image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d]
+| COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
+|===
+
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will add a feature step to the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
+  nodeProperties: ['embedding', 'numberOfPosts']
+}) YIELD featureSteps
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| featureSteps
+| [{name=HADAMARD, config={nodeProperties=[embedding, numberOfPosts]}}]
+|===
+
+When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
+For example, the `embedding` property could be created by the previous example, and we expect `numberOfPosts` to already be present in the in-memory graph used as input, at train and predict time.
+--
+
+
+[[linkprediction-configure-splits]]
+== Configuring the relationship splits
+
+Link Prediction training pipelines manage splitting the relationships into several sets and add sampled negative relationships to some of these sets.
+Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
+
+The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and possibly only yielding `splitConfig`.
+
+The splitting of relationships proceeds internally in the following steps:
+
+1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
+2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships which we refer to as `test-complement` set.[[def-test-complement]]
+* The `test` set contains a `testFraction` fraction of the positive relationships.
+* Random negative relationships are added to the `test` set.
+The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* The negative relationships do not coincide with positive relationships.
+3. The relationships in the `test-complement` set are split into a `train` set and a `feature-input` set.
+* The `train` set contains a `trainFraction` fraction of the `test-complement` set.
+* The `feature-input` set contains `(1-trainFraction)` fraction of the `test-complement` set.
+* Random negative relationships are added to the `train` set.
+The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
+* The negative relationships do not coincide with positive relationships, nor with test relationships.
+
+The sampled positive and negative relationships are given relationship weights of `1.0` and `0.0` respectively so that they can be distinguished.
+
+The `feature-input` graph is used, both in training and testing, for computing node properties and therefore also features which depend on node properties.
+
+The `train` and `test` relationship sets are used for:
+
+* determining the label (positive or negative) for each training or test example
+* identifying the node pair for which link features are to be computed
+
+However, they are not used by the algorithms run in the node property steps.
+The reason for this is that otherwise the model would use the prediction target (existence of a relationship) as a feature.
+
+
+=== Syntax
+
+[.pipeline-configure-split-syntax]
+--
+.Configure the relationship split syntax
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.configureSplit(
+  pipelineName: String,
+  configuration: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: List of Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type    | Description
+| pipelineName    | String  | The name of the pipeline.
+| configuration   | Map     | Configuration for splitting the relationships.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,4"]
+|===
+| Name                  | Type    | Default | Description
+| validationFolds       | Integer | 3       | Number of divisions of the training graph used during xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[model selection].
+| testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
+| trainFraction         | Double  | 0.1     | Fraction of the <<def-test-complement,test-complement set>> reserved for training. Must be in the range (0, 1).
+| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-classimbalance[here].
+|===
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+
+
+=== Example
+
+[role=query-example,group=lp]
+--
+.The following will configure the splitting of the pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
+  testFraction: 0.25,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+YIELD splitConfig
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| splitConfig
+| {negativeSamplingRatio=1.0, testFraction=0.25, validationFolds=3, trainFraction=0.6}
+|===
+
+We now reconfigured the splitting of the pipeline, which will be applied during xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training].
+--
+
+[[linkprediction-configure-model-parameters]]
+== Adding model candidates
+
+A pipeline contains a collection of configurations for model candidates which is initially empty.
+This collection is called the _parameter space_.
+One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
+
+* `gds.beta.pipeline.linkPrediction.addLogisticRegression`
+* `gds.alpha.pipeline.linkPrediction.addRandomForest`
+
+For information about the available training methods in GDS, logistic regression and random forest, see xref::machine-learning/training-methods.adoc[Training methods].
+
+In xref::machine-learning/nodeclassification-pipelines.adoc#nodeclassification-pipelines-train[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
+
+The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
+
+[NOTE]
+====
+At least one model candidate must be added to the pipeline before training it.
+====
+
+
+=== Syntax
+
+
+[.tabbed-example, caption = ]
+====
+[.include-with-logistic-regression]
+======
+[.pipeline-add-lr-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The logistic regression config for a model candidate. The allowed parameters for a model are defined in the next table.
+|===
+
+include::partial$/machine-learning/training-methods/logisticRegressionConfig.adoc[]
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+======
+
+[.include-with-random-forest]
+======
+[.pipeline-add-rf-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.linkPrediction.addRandomForest(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The random forest config for a model candidate. The allowed parameters for a model are defined in the next table.
+|===
+
+include::partial$/machine-learning/training-methods/randomForestConfig.adoc[]
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+======
+====
+
+
+=== Example
+
+We can add multiple model candidates to our pipeline.
+
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a logistic regression model:
+--
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 0.0625})
+YIELD parameterSpace
+--
+
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a random forest model:
+--
+CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 5})
+YIELD parameterSpace
+--
+
+[role=query-example,group=lp]
+--
+.The following will add another logistic regression model:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500})
+YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
+----
+
+.Results
+[opts="header",cols="1, 1"]
+|===
+| randomForestSpace | logisticRegressionSpace
+| [{maxDepth=2147483647, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0625, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}, {maxEpochs=500, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001}]
+|===
+--
+
+The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+Each specified model candidate will be tried out during the model selection in xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-pipelines-train[training].
+
+[NOTE]
+====
+These are somewhat naive examples of how to add and configure model candidates.
+Please see xref::machine-learning/training-methods.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
+====
+
+include::partial$/machine-learning/linkprediction-pipeline/training.adoc[]
+
+include::partial$/machine-learning/linkprediction-pipeline/predict.adoc[]
+
+
+== Appendix
+
+This section details some theoretical concepts related to how link prediction is performed in GDS.
+It's not strictly required reading but can be helpful in improving understanding.
+
+[[linkprediction-pipelines-metrics]]
+=== Metrics
+
+The Link Prediction pipeline in the Neo4j GDS library supports only the Area Under the Precision-Recall Curve metric, abbreviated as AUCPR.
+In order to compute precision and recall we require a set of examples, each of which has a positive or negative label.
+For each example we have also a predicted label.
+Given the true and predicted labels, we can compute precision and recall (for reference, see f.e. https://en.wikipedia.org/wiki/Precision_and_recall#Definition_(classification_context)[Wikipedia]).
+
+Then, to compute the AUCPR, we construct the precision-recall curve, as follows:
+
+- Each prediction is associated with a prediction strength.
+We sort the examples in descending order of prediction strength.
+- For all prediction strengths that occur, we use that strength as a threshold and consider all examples of that strength or higher to be positively labeled.
+- We now compute precision `p` and recall `r` and consider the tuple `(r, p)` as a point on a curve, the precision-recall curve.
+- Finally, the curve is linearly interpolated and the area is computed as a union of trapezoids with corners on the points.
+
+The curve will have a shape that looks something like this:
+
+image::misc/precision-recall-trapezoid.png[precision-recall curve with trapezoid,align="center"]
+
+Note here the blue area which shows one trapezoid under the curve.
+
+The area under the Precision-Recall curve can also be interpreted as an average precision where the average is over different classification thresholds.
+
+
+[[linkprediction-pipelines-classimbalance]]
+=== Class imbalance
+
+Most graphs have far more non-adjacent node pairs than adjacent ones (e.g. sparse graphs).
+Thus, typically we have an issue with _class imbalance_.
+There are multiple strategies to account for imbalanced data.
+In pipeline training procedure, the AUCPR metric is used.
+It is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
+For the metric to appropriately reflect both positive (adjacent node pairs) and negative (non-adjacent node pairs) examples, we provide the ability to both control the ratio of sampling between the classes, and to control the relative weight of classes via `negativeClassWeight`.
+The former is configured by the configuration parameter `negativeSamplingRatio` in xref::machine-learning/linkprediction-pipelines.adoc#linkprediction-configure-splits[configureSplits] when using that procedure to generate the train and test sets.
+Tuning the `negativeClassWeight`, which is explained below, means weighting up or down the false positives when computing precision.
+
+The recommended value for `negativeSamplingRatio` is the _true class ratio_ of the graph, in other words, not applying _undersampling_.
+However, the higher the value, the bigger the test set and thus the time to evaluate.
+The ratio of total probability mass of negative versus positive examples in the test set is approximately `negativeSamplingRatio * negativeClassWeight`.
+Thus, both of these parameters can be adjusted in tandem to trade off evaluation accuracy with speed.
+
+The true class ratio is computed as `(q - r) / r`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
+Please note that the `relationshipCount` reported by the xref::graph-list.adoc[graph list] procedure is the _directed_ count of relationships summed over all existing relationship types.
+Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
+For example, this query will count the number of relationships of type `T` or `R`:
+
+[source, cypher]
+----
+MATCH (a)-[rel:T | R]-(b)
+WHERE a < b
+RETURN count(rel) AS r
+----
+
+When choosing a value for `negativeClassWeight`, two factors should be considered.
+First, the desired ratio of total probability mass of negative versus positive examples in the test set.
+Second, what the ratio of sampled negative examples to positive examples was in the test set.
+To be consistent with _traditional_ evaluation, one should choose parameters so that `negativeSamplingRatio * negativeClassWeight = 1.0`, for example by setting the values to the true class ratio and its reciprocal, or both values to `1.0`.
+
+Alternatively, one can aim for the ratio of total probability weight between the classes to be close to the true class ratio.
+That is, making sure `negativeSamplingRatio * negativeClassWeight` is close to the true class ratio.
+The reported metric (AUCPR) then better reflects the expected precision on unseen highly imbalanced data.
+With this type of evaluation one has to adjust expectations as the metric value then becomes much smaller.

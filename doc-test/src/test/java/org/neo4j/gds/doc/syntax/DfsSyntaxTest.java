@@ -36,6 +36,6 @@ public class DfsSyntaxTest extends SyntaxTestBase {
     
     @Override
     protected String adocFile() {
-        return "algorithms/dfs/dfs.adoc";
+        return "pages/algorithms/dfs.adoc";
     }
 }

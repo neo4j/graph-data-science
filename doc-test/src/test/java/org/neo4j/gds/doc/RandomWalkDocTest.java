@@ -36,6 +36,6 @@ class RandomWalkDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/randomWalk/beta-random-walk.adoc";
+        return "pages/beta-algorithms/random-walk.adoc";
     }
 }

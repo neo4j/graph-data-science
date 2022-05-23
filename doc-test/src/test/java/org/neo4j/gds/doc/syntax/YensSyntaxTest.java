@@ -38,7 +38,7 @@ class YensSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/shortest-path/yens.adoc";
+        return "pages/algorithms/yens.adoc";
     }
 
 }

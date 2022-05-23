@@ -49,7 +49,7 @@ public abstract class DocTestBase extends BaseProcTest {
     @TempDir
     File workDir;
 
-    private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/asciidoc");
+    private static final Path ASCIIDOC_PATH = Paths.get("build/doc-sources/modules/ROOT");
 
     private List<String> beforeEachQueries;
     private List<String> beforeAllQueries;
@@ -73,12 +73,15 @@ public abstract class DocTestBase extends BaseProcTest {
         QueryCollectingTreeProcessor treeProcessor;
         try (var asciidoctor = create()) {
             treeProcessor = new QueryCollectingTreeProcessor();
-            asciidoctor.javaExtensionRegistry().treeprocessor(treeProcessor);
+            asciidoctor.javaExtensionRegistry()
+                .includeProcessor(new PartialsIncludeProcessor())
+                .treeprocessor(treeProcessor);
 
             var docFile = adocPath().resolve(adocFile()).toFile();
             assertThat(docFile).exists().canRead();
 
             var options = OptionsBuilder.options()
+                .baseDir(ASCIIDOC_PATH.toFile()) // Make sure to set the `baseDir` it is read in `PartialsIncludeProcessor`
                 .toDir(workDir) // Make sure we don't write anything in the project.
                 .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
 

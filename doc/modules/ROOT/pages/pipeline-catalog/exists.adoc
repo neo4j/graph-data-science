@@ -1,0 +1,65 @@
+[.beta]
+[[pipeline-catalog-exists]]
+= Checking if a pipeline exists
+
+We can check if a pipeline is available in the catalog by looking up its name.
+
+
+== Syntax
+
+[.pipeline-exists-syntax]
+--
+.Check if a pipeline exists in the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.exists(pipelineName: String)
+YIELD
+    pipelineName: String,
+    pipelineType: String,
+    exists: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name         | Type   | Default | Optional | Description
+| pipelineName | String | n/a     | no       | The name of a pipeline.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name         | Type    | Description
+| pipelineName | String  | The name of a pipeline.
+| pipelineType | String  | The type of the pipeline.
+| exists       | Boolean | True, if the pipeline exists in the pipeline catalog.
+|===
+--
+
+
+== Example
+
+In this section we are going to demonstrate the usage of `gds.beta.pipeline.exists`.
+To exemplify this, we create a xref::machine-learning/nodeclassification-pipelines.adoc[node classification pipeline] and check for its existence.
+
+.Creating a link prediction training pipelines:
+[source, cypher, role=noplay setup-query]
+----
+CALL gds.beta.pipeline.nodeClassification.create('pipe')
+----
+
+[role=query-example]
+--
+.Check if a pipeline exists in the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.exists('pipe')
+----
+
+.Results
+[opts="header"]
+|===
+| pipelineName | pipelineType                            | exists
+| "pipe"       | "Node classification training pipeline" | true
+|===
+--

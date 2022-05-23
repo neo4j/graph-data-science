@@ -1,0 +1,102 @@
+[[python-client-graph-object]]
+= The graph object
+
+In order to utilize most the functionality in GDS, you must first project a graph into the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
+When projecting a graph with the Python client, a client-side reference to the projected graph is returned.
+We call these references `Graph` objects.
+
+Once created, the `Graph` objects can be passed as arguments to other methods in the Python client, for example for running algorithms or training machine learning models.
+Additionally, the `Graph` objects have convenience methods allowing for inspection of the projected graph represented without explicitly involving the graph catalog.
+
+include::partial$/pythonclient/python-client-gds-object.adoc[]
+
+
+== Constructing a graph object
+
+There are several ways of constructing a graph object.
+The simplest way is to do a xref::graph-project.adoc#graph-project-native-syntax[native projection]:
+
+[source,python]
+----
+G, res = gds.graph.project(
+    "my-graph",                 #  Graph name
+    ["MyLabel", "YourLabel"],   #  Node projection
+    "MY_REL_TYPE",              #  Relationship projection
+    concurrency=4               #  Configuration parameters
+)
+----
+
+where `G` is a `Graph` object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
+
+Note that all projection syntax variants are supported by way of specifying a Python `dict` or `list` for the node and relationship projection arguments.
+To specify configuration parameters corresponding to the keys of the procedure's `configuration` map, we give named keyword arguments, like for `concurrency=4` above.
+Read more about this in xref::graph-project.adoc#graph-project-native-syntax[Syntax].
+
+Similarly to Cypher there's also a corresponding `gds.graph.project.estimate` method that can be called in an analogous way.
+
+To get a graph object that represents a graph that has already been projected into the graph catalog, one can call the client-side only `get` method and passing it a name:
+
+[source,python]
+----
+G = gds.graph.get("my-graph")
+----
+
+In addition to those aforementioned there are three more methods that construct graph objects:
+
+* `gds.graph.project.cypher`
+* `gds.beta.graph.subgraph`
+* `gds.beta.graph.generate`
+
+Their Cypher signatures map to Python in much the same way as `gds.graph.project` above.
+
+
+== Inspecting a graph object
+
+There are convenience methods on the graph object that let us extract information about our projected graph.
+
+.Graph object methods
+[opts="header",cols="8m,4m,6m,13"]
+|===
+| Name                    | Arguments  | Return type      | Description
+| name                    | -          | str              | The name of the projected graph.
+| node_count              | -          | int              | The node count of the projected graph.
+| relationship_count      | -          | int              | The relationship count of the projected graph.
+| node_properties         | label: str | list[str]        | A list of the node properties present on the nodes with the node label provided as input.
+| relationship_properties | type: str  | list[str]        | A list of the relationship properties present on the relationships with the relationship type provided as input.
+| degree_distribution     | -          | Series           | The average out-degree of generated nodes.
+| density                 | -          | float            | Density of the graph.
+| size_in_bytes           | -          | int              | Number of bytes used in the Java heap to store the graph.
+| memory_usage            | -          | str              | Human-readable description of `size_in_bytes`.
+| exists                  | -          | bool             | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
+| drop                    | -          | None             | Removes the graph from the GDS Graph Catalog.
+|===
+
+For example, to get the node count and node properties of a graph `G`, we would do the following:
+
+[source,python]
+----
+n = G.node_count()
+props = G.node_properties("MyLabel")
+----
+
+
+== Using a graph object
+
+The primary use case for a graph object is to pass it to algorithms.
+The syntax for doing that follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
+
+include::partial$/pythonclient/python-client-syntax.adoc[]
+
+For example, to run the WCC on a graph `G`, and then drop the graph, do the following:
+
+[source,python]
+----
+G, _ = gds.graph.project(...)
+
+res = gds.wcc.stream(G)
+
+gds.graph.drop(G)  # same as G.drop()
+----
+
+In most Cypher operations where a graph name is required, the graph object is used in the Python client instead.
+In some cases where this does not make sense, such as for `gds.graph.exist()`, where a graph name string is used instead.

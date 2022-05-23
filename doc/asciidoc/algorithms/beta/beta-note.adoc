@@ -1,4 +1,0 @@
-[.beta-symbol]
-[.tier-note]
-This algorithm is in the beta tier.
-For more information on algorithm tiers, see <<algorithms>>.

@@ -1,0 +1,19 @@
+[[algorithms-similarity]]
+= Similarity
+:description: This chapter provides explanations and examples for the similarity algorithms in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This chapter provides explanations and examples for the similarity algorithms in the Neo4j Graph Data Science library.
+--
+
+Similarity algorithms compute the similarity of pairs of nodes based on their neighborhoods or their properties.
+Several similarity metrics can be used to compute a similarity score.
+The Neo4j GDS library includes the following similarity algorithms:
+
+* xref::algorithms/node-similarity.adoc[Node Similarity]
+* xref::algorithms/knn.adoc[K-Nearest Neighbors]
+
+As well as a collection of different xref::algorithms/similarity-functions.adoc[similarity functions] for calculating similarity between arrays of numbers
+
+

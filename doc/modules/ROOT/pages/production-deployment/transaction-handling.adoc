@@ -1,0 +1,56 @@
+[[transaction-handling]]
+= Transaction Handling
+:description: This section describes the usage of transactions during the execution of an algorithm. When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement.
+
+[abstract]
+--
+This section describes the usage of transactions during the execution of an algorithm.
+When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement.
+--
+
+
+[[tx-graph-projection]]
+== During graph projection
+
+During graph projection, new transactions are used that do not inherit the transaction state of the Cypher transaction.
+This means that changes from the Cypher transaction state are not visible to the graph projection transactions.
+
+For example, the following statement will only project an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CREATE (n:MyLabel) // the new node is part of Cypher transaction state
+WITH *
+CALL gds.graph.project('myGraph', 'MyLabel', '*')
+YIELD nodeCount
+RETURN nodeCount
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount
+| 0
+|===
+--
+
+
+[[tx-results-writing]]
+== During results writing
+
+Results from algorithms (node properties, for example) are written to the graph in new transactions.
+The number of transactions used depends on the size of the results and the `writeConcurrency` configuration parameter (for more details, please refer to sections xref::common-usage/running-algos.adoc#running-algos-write[Write] and xref::common-usage/running-algos.adoc#algorithms-syntax-configuration-parameters[Common Configuration parameters]).
+These transactions are committed independently from the Cypher transaction.
+This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
+
+include::partial$/production-deployment/transaction-writing.adoc[leveloffset=+2]
+
+
+[[tx-termination]]
+== Transaction termination
+
+The Cypher transaction can be terminated by either the user or the database system.
+This will eventually terminate all transactions that have been opened during graph projection, algorithm execution, or results writing.
+It is not immediately visible and can take a moment for the transactions to recognize that the Cypher transaction has been terminated.

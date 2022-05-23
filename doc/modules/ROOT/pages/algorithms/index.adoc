@@ -1,0 +1,28 @@
+[[algorithms]]
+= Graph Algorithms
+:description: This chapter describes each of the graph algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
+
+[abstract]
+--
+This chapter describes each of the graph algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
+--
+
+The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
+The algorithms are divided into categories which represent different problem classes.
+The categories are listed in this chapter.
+
+include::partial$/algorithms/algorithm-tiers.adoc[]
+
+This chapter is divided into the following sections:
+
+* xref::algorithms/syntax.adoc[Syntax overview]
+* xref::algorithms/centrality.adoc[Centrality]
+* xref::algorithms/community.adoc[Community detection]
+* xref::algorithms/similarity.adoc[Similarity]
+* xref::algorithms/pathfinding.adoc[Path finding]
+* xref::machine-learning/node-embeddings/index.adoc[Node embeddings]
+* xref::algorithms/linkprediction.adoc[Topological link prediction]
+* xref::algorithms/auxiliary.adoc[Auxiliary procedures]
+* xref::algorithms/pregel-api.adoc[Pregel API]
+
+

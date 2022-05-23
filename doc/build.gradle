@@ -2,10 +2,7 @@ description = 'Neo4j Graph Data Science :: Docs'
 
  task assembleDocs(type: Tar) {
     from(projectDir) {
-        include 'antora/'
-        include 'asciidoc/'
-        include 'docbook/'
-        include 'images/'
+        include 'modules/'
     }
  }
 

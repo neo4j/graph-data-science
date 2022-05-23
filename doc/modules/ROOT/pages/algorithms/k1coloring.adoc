@@ -1,0 +1,321 @@
+[[algorithms-k1coloring]]
+[.beta]
+= K-1 Coloring
+:description: This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
+--
+
+include::partial$/algorithms/beta/beta-note.adoc[]
+
+
+[[algorithms-k1coloring-intro]]
+== Introduction
+
+The K-1 Coloring algorithm assigns a color to every node in the graph, trying to optimize for two objectives:
+
+1. To make sure that every neighbor of a given node has a different color than the node itself.
+2. To use as few colors as possible.
+
+Note that the graph coloring problem is proven to be NP-complete, which makes it intractable on anything but trivial graph sizes.
+For that reason the implemented algorithm is a greedy algorithm.
+Thus it is neither guaranteed that the result is an optimal solution, using as few colors as theoretically possible, nor does it always produce a correct result where no two neighboring nodes have different colors.
+However the precision of the latter can be controlled by the number of iterations this algorithm runs.
+
+For more information on this algorithm, see:
+
+* https://arxiv.org/pdf/1205.3809.pdf[Çatalyürek, Ümit V., et al. "Graph coloring algorithms for multi-core and massively multithreaded architectures."^]
+* https://en.wikipedia.org/wiki/Graph_coloring#Vertex_coloring
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+====
+
+
+[[algorithms-k1coloring-syntax]]
+== Syntax
+
+
+.K-1 Coloring syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.The following describes the API for running the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.stream(graphName: String, configuration: Map)
+YIELD nodeId, color
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type    | Default | Optional | Description
+| graphName     | String  | null    | yes      | The name of an existing graph on which to run the algorithm. If no graph name is provided, the configuration map must contain configuration for creating a graph.
+| configuration | Map     | {}      | yes      | Additional configuration, see below.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                  | Type    | Default                | Optional | Description
+| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| nodeId        | Integer | The ID of the Node
+| color         | Integer | The color of the Node
+|===
+
+======
+[.include-with-stats]
+======
+.The following describes the API for running the algorithm and returning the computation statistics:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.stats(
+    graphName: String,
+    configuration: Map
+)
+YIELD
+    nodeCount,
+    colorCount,
+    ranIterations,
+    didConverge,
+    configuration,
+    preProcessingMillis,
+    computeMillis
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                  | Type    | Default                | Optional | Description
+| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| configuration        | Map     | The configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-mutate]
+======
+.The following describes the API for running the algorithm and mutating the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.mutate(graphName: String, configuration: Map)
+YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, mutateMillis
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+The configuration for the `mutate` mode is similar to the `write` mode.
+Instead of specifying a `writeProperty`, we need to specify a `mutateProperty`.
+Also, specifying `writeConcurrency` is not possible in `mutate` mode.
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| mutateMillis         | Integer | Milliseconds for adding properties to the projected graph.
+| configuration        | Map     | The configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.The following describes the API for running the algorithm and writing results back to Neo4j:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.write(graphName: String, configuration: Map)
+YIELD nodeCount, colorCount, ranIterations, didConverge, configuration, preProcessingMillis, computeMillis, writeMillis
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                                                        | Type    | Default                | Optional | Description
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref::common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency] | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]       | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]       | String  | n/a                    | no       | The node property this procedure writes the color to.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| nodeCount            | Integer | The number of nodes considered.
+| ranIterations        | Integer | The actual number of iterations the algorithm ran.
+| didConverge          | Boolean | An indicator of whether the algorithm found a correct coloring.
+| colorCount           | Integer | The number of colors used.
+| preProcessingMillis  | Integer | Milliseconds for preprocessing the data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| writeMillis          | Integer | Milliseconds for writing result data back to Neo4j.
+| configuration        | Map     | The configuration used for running the algorithm.
+|===
+======
+
+
+====
+
+
+[[algorithms-k1coloring-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE (alice:User {name: 'Alice'}),
+       (bridget:User {name: 'Bridget'}),
+       (charles:User {name: 'Charles'}),
+       (doug:User {name: 'Doug'}),
+
+       (alice)-[:LINK]->(bridget),
+       (alice)-[:LINK]->(charles),
+       (alice)-[:LINK]->(doug),
+       (bridget)-[:LINK]->(charles)
+----
+
+This graph has a super node with name "Alice" that connects to all other nodes.
+It should therefore not be possible for any other node to be assigned the same color as the Alice node.
+
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'User',
+    {
+        LINK : {
+            orientation: 'UNDIRECTED'
+        }
+    }
+)
+----
+We can now go ahead and project a graph with all the `User` nodes and the `LINK` relationships with `UNDIRECTED` orientation.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.graph.project('myGraph', 'Person', 'LIKES')
+----
+
+In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
+
+[role=query-example]
+--
+.Running the K-1 Coloring algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.stream('myGraph')
+YIELD nodeId, color
+RETURN gds.util.asNode(nodeId).name AS name, color
+ORDER BY name
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| name      | color
+| "Alice"   | 0
+| "Bridget" | 1
+| "Charles" | 2
+| "Doug"    | 1
+|===
+--
+
+It is also possible to write the assigned colors back to the database using the `write` mode.
+
+[role=query-example]
+--
+.Running the K-1 Coloring algorithm in write mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.write('myGraph', {writeProperty: 'color'})
+YIELD nodeCount, colorCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| nodeCount | colorCount | ranIterations | didConverge
+| 4         | 3          | 1             | true
+|===
+--
+
+When using `write` mode the procedure will return information about the algorithm execution.
+In this example we return the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.
+
+To instead mutate the in-memory graph with the assigned colors, the `mutate` mode can be used as follows.
+
+[role=query-example]
+--
+.Running the K-1 Coloring algorithm in mutate mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.mutate('myGraph', {mutateProperty: 'color'})
+YIELD nodeCount, colorCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| nodeCount | colorCount | ranIterations | didConverge
+| 4         | 3          | 1             | true
+|===
+--
+
+Similar to the `write` mode, `stats` mode can run the algorithm and return only the execution statistics without persisting the results.
+
+[role=query-example]
+--
+.Running the K-1 Coloring algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.k1coloring.stats('myGraph')
+YIELD nodeCount, colorCount, ranIterations, didConverge
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| nodeCount | colorCount | ranIterations | didConverge
+| 4         | 3          | 1             | true
+|===
+--

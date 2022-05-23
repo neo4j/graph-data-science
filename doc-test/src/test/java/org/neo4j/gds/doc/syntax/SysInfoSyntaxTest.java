@@ -32,6 +32,6 @@ class SysInfoSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "common-usage/debug-sysinfo.adoc";
+        return "pages/common-usage/debug-sysinfo.adoc";
     }
 }

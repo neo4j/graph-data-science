@@ -23,6 +23,6 @@ class PageRankSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/page-rank/page-rank.adoc";
+        return "pages/algorithms/page-rank.adoc";
     }
 }

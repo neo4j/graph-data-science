@@ -1,0 +1,282 @@
+[[algorithms-bfs]]
+= Breadth First Search
+:description: This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
+:entity: relationship
+:result: path in traversal order
+:algorithm: Breadth First Search
+
+[abstract]
+--
+This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
+--
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-bfs-intro]]
+== Introduction
+
+The Breadth First Search algorithm is a graph traversal algorithm that given a start node visits nodes in order of increasing distance, see https://en.wikipedia.org/wiki/Breadth-first_search.
+A related algorithm is the Depth First Search algorithm, xref::algorithms/dfs.adoc[Depth First Search].
+This algorithm is useful for searching when the likelihood of finding the node searched for decreases with distance.
+There are multiple termination conditions supported for the traversal, based on either reaching one of several target nodes, reaching a maximum depth, exhausting a given budget of traversed relationship cost, or just traversing the whole graph.
+The output of the procedure contains information about which nodes were visited and in what order.
+
+[[algorithms-bfs-syntax]]
+== Syntax
+
+.Breadth First Search syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Breadth First Search in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.bfs.stream(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  sourceNode: int,
+  nodeIds: int,
+  path: Path
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+include::partial$/algorithms/common-configuration/common-configuration.adoc[]
+
+include::partial$/algorithms/bfs/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type            | Description
+| sourceNode    | Integer         | The node id of the node where to start the traversal.
+| nodeIds       | List of Integer | The ids of all nodes that were visited during the traversal.
+| path          | Path            | A path containing all the nodes that were visited during the traversal.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Breadth First Search in stream mode:
+[source, cypher, role=noplay]
+----
+CALL gds.bfs.mutate(
+  graphName: string,
+  configuration: map
+)
+YIELD
+  relationshipsWritten: Integer,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution.
+[opts="header",cols="2,1,1m,1,4"]
+|===
+| Name                                                          | Type              | Default | Optional | Description
+| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
+| mutateRelationshipType                                        | String            | n/a     | no       | The relationship type used for the new relationships written to the projected graph.
+|===
+
+include::partial$/algorithms/bfs/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Unused.
+| mutateMillis           | Integer   | Milliseconds for adding relationships to the projected graph.
+| relationshipsWritten   | Integer   | The number of relationships that were added.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+[[algorithms-bfs-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description:
+:image-file: traverse-graph.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+Consider the graph projected by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+       (nA:Node {name: 'A'}),
+       (nB:Node {name: 'B'}),
+       (nC:Node {name: 'C'}),
+       (nD:Node {name: 'D'}),
+       (nE:Node {name: 'E'}),
+
+       (nA)-[:REL]->(nB),
+       (nA)-[:REL]->(nC),
+       (nB)-[:REL]->(nE),
+       (nC)-[:REL]->(nD)
+----
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project('myGraph', 'Node', 'REL')
+----
+
+In the following examples we will demonstrate using the Breadth First Search algorithm on this graph.
+
+
+=== Memory Estimation
+
+:mode: stream
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in stream mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node {name: 'A'})
+CALL gds.bfs.stream.estimate('myGraph', {
+    sourceNode: source
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 5         | 4                 | 536      | 536      | "536 Bytes"
+|===
+--
+
+
+=== Stream
+
+:!stream-details:
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node{name:'A'})
+CALL gds.bfs.stream('myGraph', {
+  sourceNode: source
+})
+YIELD path
+RETURN path
+----
+--
+
+If we do not specify any of the options for early termination, the algorithm will traverse the entire graph.
+In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`:
+
+image::bfs-full-stream-path.svg[Visualization of Breadth First Search stream without early termination conditions ,align="center"]
+
+
+[role=query-example, no-result=true]
+--
+.Running the Breadth First Search algorithm with target nodes:
+[source, cypher, role=noplay]
+----
+MATCH (a:Node{name:'A'}), (d:Node{name:'D'}), (e:Node{name:'E'})
+WITH id(a) AS source, [id(d), id(e)] AS targetNodes
+CALL gds.bfs.stream('myGraph', {
+  sourceNode: source,
+  targetNodes: targetNodes
+})
+YIELD path
+RETURN path
+----
+--
+
+In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`.
+It is notable that the `D` node is not present in the picture, this is because the algorithm reached the target node `E` first and terminated the execution, leaving `D` unvisited.
+
+image::bfs-target-nodes-stream-path.svg[Visualization of Breadth First Search stream with target nodes ,align="center"]
+
+
+[role=query-example, no-result=true]
+--
+.Running the Breadth First Search algorithm with maxDepth:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node{name:'A'})
+CALL gds.bfs.stream('myGraph', {
+  sourceNode: source,
+  maxDepth: 1
+})
+YIELD path
+RETURN path
+----
+--
+
+In the image below we can see the traversal order of the nodes, marked by relationship type `NEXT`.
+Nodes `D` and `E` were not visited since they are at distance 2 from node `A`.
+
+image::bfs-max-depth-stream-path.svg[Visualization of Breadth First Search stream with max depth ,align="center"]
+
+
+=== Mutate
+
+The `mutate` execution mode updates the named graph with new relationships.
+The path returned from the Breadth First Search algorithm is a line graph, where the nodes appear in the order they were visited by the algorithm.
+The relationship type has to be configured using the `mutateRelationshipType` option.
+
+The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
+
+For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+
+Breadth First Search `mutate` supports the same early termination conditions as the `stream` mode.
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Node{name:'A'})
+CALL gds.bfs.mutate('myGraph', {
+  sourceNode: source,
+  mutateRelationshipType: 'BFS'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 4
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with new relationships of type `BFS`.
+
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====

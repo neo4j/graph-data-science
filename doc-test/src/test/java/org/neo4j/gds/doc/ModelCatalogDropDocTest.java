@@ -32,6 +32,6 @@ class ModelCatalogDropDocTest extends ModelCatalogDocTest {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/model-catalog/catalog-model-drop.adoc";
+        return "pages/model-catalog/drop.adoc";
     }
 }

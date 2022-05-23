@@ -38,7 +38,7 @@ class PipelineCatalogExistsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/pipeline-catalog/pipeline-catalog-exists.adoc";
+        return "pages/pipeline-catalog/exists.adoc";
     }
 
     @AfterEach

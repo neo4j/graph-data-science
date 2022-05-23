@@ -1,9 +1,0 @@
-The `write` execution mode updates the Neo4j database with new relationships.
-Each new relationship represents a path from source node to target node.
-The relationship type is configured using the `writeRelationshipType` option.
-The total path cost is stored using the `totalCost` property.
-The intermediate node ids are stored using the `nodeIds` property.
-The accumulated costs to reach an intermediate node are stored using the `costs` property.
-
-
-For more details on the `write` mode in general, see <<running-algos-write>>.

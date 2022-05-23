@@ -48,6 +48,6 @@ class BetweennessCentralityDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/betweenness-centrality/betweenness-centrality.adoc";
+        return "pages/algorithms/betweenness-centrality.adoc";
     }
 }

@@ -1,5 +1,0 @@
-[NOTE]
-====
-In the examples below we will use named graphs and native projections as the norm.
-However, <<catalog-graph-project-cypher, Cypher projections>> can also be used.
-====

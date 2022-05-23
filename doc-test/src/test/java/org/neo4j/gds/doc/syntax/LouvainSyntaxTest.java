@@ -23,6 +23,6 @@ class LouvainSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/louvain/louvain.adoc";
+        return "pages/algorithms/louvain.adoc";
     }
 }
