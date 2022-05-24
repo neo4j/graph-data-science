@@ -40,19 +40,19 @@ model = gds.model.get("my-model")
 There are convenience methods on all model objects that let us extract information about the represented model.
 
 .Model object methods
-[opts="header",cols="5m,4m,6m,14"]
+[opts="header",cols="5m,6m,7m,14"]
 |===
-| Name          | Arguments | Return type         | Description
-| name          | -         | str                 | The name of the model as it appears in the model catalog.
-| type          | -         | str                 | The type of model it is, eg. "graphSage".
-| train_config  | -         | Series              | The configuration used for training the model.
-| graph_schema  | -         | Series              | The schema of the graph on which the model was trained.
-| loaded        | -         | bool                | `True` if the model is <<catalog-model-load, loaded>> in the in-memory model catalog, `False` otherwise.
-| stored        | -         | bool                | `True` if the model is <<catalog-model-store, stored>> on disk, `False` otherwise.
-| creation_time | -         | neo4j.time.Datetime | Time when the model was created.
-| shared        | -         | bool                | `True` if the model is <<catalog-model-publish, shared>> between users, `False` otherwise.
-| exists        | -         | bool                | `True` if the model exists in the GDS Model Catalog, `False` otherwise.
-| drop          | -         | None                | Removes the model from the GDS Model Catalog.
+| Name          | Arguments                     | Return type         | Description
+| name          | -                             | str                 | The name of the model as it appears in the model catalog.
+| type          | -                             | str                 | The type of model it is, eg. "graphSage".
+| train_config  | -                             | Series              | The configuration used for training the model.
+| graph_schema  | -                             | Series              | The schema of the graph on which the model was trained.
+| loaded        | -                             | bool                | `True` if the model is <<catalog-model-load, loaded>> in the in-memory model catalog, `False` otherwise.
+| stored        | -                             | bool                | `True` if the model is <<catalog-model-store, stored>> on disk, `False` otherwise.
+| creation_time | -                             | neo4j.time.Datetime | Time when the model was created.
+| shared        | -                             | bool                | `True` if the model is <<catalog-model-publish, shared>> between users, `False` otherwise.
+| exists        | -                             | bool                | `True` if the model exists in the GDS Model Catalog, `False` otherwise.
+| drop          | failIfMissing: Optional[bool] | Series              | <<catalog-model-drop, Removes the model>> from the GDS Model Catalog.
 |===
 
 For example, to get the train configuration of a model object `model`, we would do the following:
