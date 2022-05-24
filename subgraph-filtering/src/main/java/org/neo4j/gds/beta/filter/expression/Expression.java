@@ -25,6 +25,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
@@ -283,12 +284,17 @@ public interface Expression {
                 // in the graph store, and we already reported this as an error when parsing
                 // the property expression. There is no need to add additional info.
                 if (leftType != rightType && leftType != ValueType.UNKNOWN && rightType != ValueType.UNKNOWN) {
+                    var changeProposal = literalTypeHint(lhs(), rhs())
+                        .map(s -> formatWithLocale(" Try changing the literal to `%s`.", s))
+                        .orElse("");
+
                     return context.withError(SemanticErrors.SemanticError.of(
                         formatWithLocale(
-                            "Incompatible types `%s` and `%s` in binary expression `%s`",
+                            "Incompatible types `%s` and `%s` in binary expression `%s`.%s",
                             leftType,
                             rightType,
-                            prettyString()
+                            prettyString(),
+                            changeProposal
                         )));
                 }
 
@@ -476,6 +482,31 @@ public interface Expression {
             }
         }
     }
+
+    static Optional<String> literalTypeHint(Expression lhs, Expression rhs) {
+        var lhsIsLiteral = lhs instanceof Literal;
+        var rhsIsLiteral = rhs instanceof Literal;
+        if (lhsIsLiteral && rhsIsLiteral || !lhsIsLiteral && !rhsIsLiteral) {
+            return Optional.empty();
+        }
+
+        var lit = lhs instanceof Literal ? lhs : rhs;
+        var nonLit = lhs instanceof Literal ? rhs : lhs;
+
+        var proposedLiteral = Optional.<String>empty();
+
+        if (lit.valueType() == ValueType.DOUBLE && nonLit.valueType() == ValueType.LONG) {
+            var doubleLiteral = (Literal.DoubleLiteral) lit;
+            proposedLiteral = Optional.of(Long.toString((long) doubleLiteral.value()));
+        }
+        if (lit.valueType() == ValueType.LONG && nonLit.valueType() == ValueType.DOUBLE) {
+            var longLiteral = (Literal.LongLiteral) lit;
+            proposedLiteral = Optional.of(Double.toString((double) longLiteral.value()));
+        }
+
+        return proposedLiteral;
+    }
+
 }
 
 
