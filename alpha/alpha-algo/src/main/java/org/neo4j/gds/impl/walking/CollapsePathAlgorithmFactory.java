@@ -20,11 +20,16 @@
 package org.neo4j.gds.impl.walking;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.Collection;
+import java.util.Optional;
+import java.util.Set;
 
 public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<CollapsePath, CollapsePathConfig> {
 
@@ -34,9 +39,11 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
         CollapsePathConfig config,
         ProgressTracker progressTracker
     ) {
+        Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
+
         Graph[] graphs = config.relationshipTypes()
             .stream()
-            .map(relType -> graphStore.getGraph(RelationshipType.of(relType)))
+            .map(relType -> graphStore.getGraph(nodeLabels, Set.of(RelationshipType.of(relType)), Optional.empty()))
             .toArray(Graph[]::new);
 
         return new CollapsePath(graphs, config.allowSelfLoops(), config.concurrency(), Pools.DEFAULT);

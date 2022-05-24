@@ -27,6 +27,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -34,6 +35,7 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
@@ -163,6 +165,71 @@ class CollapsePathTest {
             fromGdl(expected),
             graphStore.getGraph(RelationshipType.of("SAME_DRUG"))
         );
+    }
+
+    @Nested
+    class LabelFiltered {
+
+        @GdlGraph
+        private static final String DB_CYPHER = "CREATE " +
+            " (p1:Person)" +
+            " (p2:Person)" +
+            " (p3:Person)" +
+            " (dog:Dog)" +
+            ",(p1)-[:HAS_FRIEND]->(p2)" +
+            ",(p2)-[:HAS_FRIEND]->(p3)" +
+            ",(p3)-[:HAS_FRIEND]->(dog)";
+
+        @Inject
+        private GraphStore graphStore;
+
+        @Test
+        void shouldComputeForAllNodesWithoutNodeLabelsSpecified() {
+            var relType = "HAS_FRIEND";
+            var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
+
+            // when no `nodeLabels` specified
+            var config = ImmutableCollapsePathConfig.builder()
+                .mutateRelationshipType(mutateRelType.name)
+                .addRelationshipTypes(relType, relType)
+                .allowSelfLoops(false)
+                .build();
+
+            var relationships = new CollapsePathAlgorithmFactory()
+                .build(graphStore, config, ProgressTracker.NULL_TRACKER)
+                .compute();
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), relationships);
+            var resultGraph = graphStore.getGraph(mutateRelType);
+
+            // then two relationships should be created
+            assertThat(resultGraph.relationshipCount()).isEqualTo(2);
+            assertThat(resultGraph.exists(idFunction.of("p1"), idFunction.of("p3"))).isTrue();
+            assertThat(resultGraph.exists(idFunction.of("p2"), idFunction.of("dog"))).isTrue();
+        }
+
+        @Test
+        void shouldComputeForSubsetOfNodesWithNodeLabelsSpecified() {
+            var relType = "HAS_FRIEND";
+            var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
+
+            // when Person is specified for `nodeLabels`
+            var config = ImmutableCollapsePathConfig.builder()
+                .addNodeLabel("Person")
+                .mutateRelationshipType(mutateRelType.name)
+                .addRelationshipTypes(relType, relType)
+                .allowSelfLoops(false)
+                .build();
+
+            var relationships = new CollapsePathAlgorithmFactory()
+                .build(graphStore, config, ProgressTracker.NULL_TRACKER)
+                .compute();
+            graphStore.addRelationshipType(mutateRelType, Optional.empty(), Optional.empty(), relationships);
+            var resultGraph = graphStore.getGraph(mutateRelType);
+
+            // a single relationship is created (there is no Dog)
+            assertThat(resultGraph.relationshipCount()).isEqualTo(1);
+            assertThat(resultGraph.exists(idFunction.of("p1"), idFunction.of("p3"))).isTrue();
+        }
     }
 
 }
