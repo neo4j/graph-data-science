@@ -19,8 +19,15 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 
 @ValueClass
 public interface StaticCapabilities extends Capabilities {
+
+    @Value.Default
+    @Override
+    default boolean canWriteToDatabase() {
+        return true;
+    }
 }
