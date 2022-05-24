@@ -19,19 +19,19 @@
  */
 package org.neo4j.gds.impl.walking;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -113,17 +113,10 @@ class CollapsePathTest {
     void testCreatingRelationships() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        var config = ImmutableCollapsePathConfig
-            .builder()
-            .concurrency(2)
-            .relationshipTypes(List.of("TOOK", "TOOK"))
-            .mutateRelationshipType("SAME_DRUG")
-            .allowSelfLoops(false)
-            .build();
-
         Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
-            config,
+            false,
+            2,
             Pools.DEFAULT
 
         ).compute();
@@ -135,17 +128,10 @@ class CollapsePathTest {
     void testAllowCreatingSelfLoops() {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
-        var config = ImmutableCollapsePathConfig
-            .builder()
-            .concurrency(2)
-            .relationshipTypes(List.of("TOOK", "TOOK"))
-            .mutateRelationshipType("SAME_DRUG")
-            .allowSelfLoops(true)
-            .build();
-
         Relationships relationships = new CollapsePath(
             new Graph[]{tookRel, tookRel},
-            config,
+            true,
+            2,
             Pools.DEFAULT
 
         ).compute();
@@ -155,17 +141,10 @@ class CollapsePathTest {
 
     @Test
     void runWithDifferentRelationshipTypes() {
-        var config = ImmutableCollapsePathConfig
-            .builder()
-            .concurrency(2)
-            .relationshipTypes(List.of("TOOK", "TAKEN_BY"))
-            .mutateRelationshipType("SAME_DRUG")
-            .allowSelfLoops(false)
-            .build();
-
         Relationships relationships = new CollapsePath(
             new Graph[]{tookGraph, takenByGraph},
-            config,
+            false,
+            2,
             Pools.DEFAULT
         ).compute();
 
