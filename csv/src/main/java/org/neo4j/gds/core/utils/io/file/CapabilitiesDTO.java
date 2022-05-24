@@ -25,7 +25,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.StaticCapabilities;
-import org.neo4j.gds.core.utils.io.file.csv.ImmutableCapabilitiesDTO;
 
 @ValueClass
 @Value.Style(builder = "new")

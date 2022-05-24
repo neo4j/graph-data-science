@@ -112,7 +112,7 @@ public final class CsvGraphStoreImporter {
         this.progressTracker = createProgressTracker(fileInput);
         progressTracker.beginSubTask();
         try {
-            importGraph(fileInput);
+            importGraphStore(fileInput);
             graphStoreBuilder.schema(graphSchemaBuilder.build());
             return ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
         } finally {
@@ -140,7 +140,10 @@ public final class CsvGraphStoreImporter {
         return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
-    private void importGraph(FileInput fileInput) {
+    private void importGraphStore(FileInput fileInput) {
+        graphStoreBuilder.databaseId(fileInput.graphInfo().namedDatabaseId());
+        graphStoreBuilder.capabilities(fileInput.capabilities());
+
         var nodes = importNodes(fileInput);
         importRelationships(fileInput, nodes);
     }
@@ -152,13 +155,10 @@ public final class CsvGraphStoreImporter {
         NodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
 
-        GraphInfo graphInfo = fileInput.graphInfo();
-        graphStoreBuilder.databaseId(graphInfo.namedDatabaseId());
-
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
-            .maxOriginalId(graphInfo.maxOriginalId())
+            .maxOriginalId(fileInput.graphInfo().maxOriginalId())
             .concurrency(concurrency)
-            .nodeCount(graphInfo.nodeCount())
+            .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
             .build();
         nodeVisitorBuilder.withNodeSchema(nodeSchema);

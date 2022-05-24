@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.file.CapabilitiesDTO;
+import org.neo4j.gds.core.utils.io.file.ImmutableCapabilitiesDTO;
 
 import java.io.IOException;
 import java.nio.file.Path;

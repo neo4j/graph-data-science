@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -34,6 +35,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.nio.file.Path;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
@@ -90,6 +92,26 @@ class CsvGraphStoreImporterIntegrationTest {
         assertGraphEquals(graphStore.getUnion(), importedGraph);
     }
 
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void shouldImportCapabilities(boolean canWriteToDatabase) {
+        var graphStoreWithCapabilities = GdlFactory.builder()
+            .gdlGraph("()-[]->()")
+            .graphCapabilities(ImmutableStaticCapabilities.of(canWriteToDatabase))
+            .build()
+            .build();
+
+        GraphStoreToFileExporter.csv(graphStoreWithCapabilities, exportConfig(1), graphLocation).run();
+
+        var importer = CsvGraphStoreImporter.create(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run();
+
+        var importedGraphStore = userGraphStore.graphStore();
+
+        assertThat(importedGraphStore.capabilities())
+            .usingRecursiveComparison()
+            .isEqualTo(ImmutableStaticCapabilities.of(canWriteToDatabase));
+    }
 
     private GraphStoreToFileExporterConfig exportConfig(int concurrency) {
         return ImmutableGraphStoreToFileExporterConfig.builder()
