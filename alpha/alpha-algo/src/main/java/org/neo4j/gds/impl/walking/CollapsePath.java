@@ -44,18 +44,21 @@ public class CollapsePath extends Algorithm<Relationships> {
 
     private final Graph[] graphs;
     private final long nodeCount;
-    private final CollapsePathConfig config;
+    private final boolean allowSelfLoops;
+    private final int concurrency;
     private final ExecutorService executorService;
 
     public CollapsePath(
         Graph[] graphs,
-        CollapsePathConfig config,
+        boolean allowSelfLoops,
+        int concurrency,
         ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graphs = graphs;
         this.nodeCount = graphs[0].nodeCount();
-        this.config = config;
+        this.allowSelfLoops = allowSelfLoops;
+        this.concurrency = concurrency;
         this.executorService = executorService;
     }
 
@@ -65,17 +68,17 @@ public class CollapsePath extends Algorithm<Relationships> {
             .nodes(((HugeGraph) graphs[0]).idMap())
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .executorService(executorService)
             .build();
 
-        var traversalConsumer = config.allowSelfLoops()
+        var traversalConsumer = allowSelfLoops
             ? new TraversalConsumer(relImporter, graphs.length)
             : new NoLoopTraversalConsumer(relImporter, graphs.length);
 
         AtomicLong batchOffset = new AtomicLong(0);
 
-        var tasks = ParallelUtil.tasks(config.concurrency(), () -> () -> {
+        var tasks = ParallelUtil.tasks(concurrency, () -> () -> {
             var currentOffset = 0L;
             long[] startNodes = new long[64];
             var localGraphs = new Graph[graphs.length];
@@ -95,7 +98,7 @@ public class CollapsePath extends Algorithm<Relationships> {
                 var multiSourceBFS = TraversalToEdgeMSBFSStrategy.initializeMultiSourceBFS(
                     localGraphs,
                     traversalConsumer,
-                    config.allowSelfLoops(),
+                    allowSelfLoops,
                     startNodes
                 );
 
@@ -104,7 +107,7 @@ public class CollapsePath extends Algorithm<Relationships> {
 
         });
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
 
         return relImporter.build();
     }

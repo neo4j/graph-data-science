@@ -39,7 +39,7 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
             .map(relType -> graphStore.getGraph(RelationshipType.of(relType)))
             .toArray(Graph[]::new);
 
-        return new CollapsePath(graphs, config, Pools.DEFAULT);
+        return new CollapsePath(graphs, config.allowSelfLoops(), config.concurrency(), Pools.DEFAULT);
     }
 
     @Override
