@@ -56,6 +56,49 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
         );
     }
 
+    @Test
+    void shouldExportMultipleGraphProperties() {
+        var graphPropertySchemas = Map.of(
+            "doubleProp", PropertySchema.of("doubleProp", ValueType.DOUBLE),
+            "floatArrayProp", PropertySchema.of("floatArrayProp", ValueType.FLOAT_ARRAY)
+        );
+        try (var graphPropertyVisitor = new CsvGraphPropertyVisitor(
+            tempDir,
+            graphPropertySchemas,
+            new HashSet<>(),
+            0
+        )) {
+            for (int i = 0; i < 4; i++) {
+                graphPropertyVisitor.property("doubleProp", (double) i);
+                graphPropertyVisitor.property("floatArrayProp", new float[] { (float) i, (float) i + 0.1f });
+            }
+        }
+
+        assertCsvFiles(List.of("graph_properties_doubleProp_0.csv", "graph_properties_floatArrayProp_0.csv"));
+        assertHeaderFile("graph_properties_doubleProp_header.csv", Map.of("doubleProp", graphPropertySchemas.get("doubleProp")));
+        assertHeaderFile("graph_properties_floatArrayProp_header.csv", Map.of("floatArrayProp", graphPropertySchemas.get("floatArrayProp")));
+
+        assertDataContent(
+            "graph_properties_doubleProp_0.csv",
+            List.of(
+                List.of("0.0"),
+                List.of("1.0"),
+                List.of("2.0"),
+                List.of("3.0")
+            )
+        );
+
+        assertDataContent(
+            "graph_properties_floatArrayProp_0.csv",
+            List.of(
+                List.of("0.0;0.1"),
+                List.of("1.0;1.1"),
+                List.of("2.0;2.1"),
+                List.of("3.0;3.1")
+            )
+        );
+    }
+
     @Override
     protected List<String> defaultHeaderColumns() {
         return List.of();
