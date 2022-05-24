@@ -20,13 +20,9 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import com.fasterxml.jackson.databind.ObjectWriter;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.loading.StaticCapabilities;
+import org.neo4j.gds.core.utils.io.file.CapabilitiesDTO;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -51,17 +47,5 @@ public class CsvGraphCapabilitiesWriter {
         var capabilitiesDTO = CapabilitiesDTO.from(capabilities);
         var resultFile = fileLocation.toFile();
         this.objectWriter.writeValue(resultFile, capabilitiesDTO);
-    }
-
-    @ValueClass
-    @Value.Style(builder = "new")
-    @JsonSerialize(as = ImmutableCapabilitiesDTO.class)
-    @JsonDeserialize(builder = ImmutableCapabilitiesDTO.Builder.class)
-    interface CapabilitiesDTO extends StaticCapabilities {
-        static CapabilitiesDTO from(Capabilities capabilities) {
-            return new ImmutableCapabilitiesDTO.Builder()
-                .from(capabilities)
-                .build();
-        }
     }
 }

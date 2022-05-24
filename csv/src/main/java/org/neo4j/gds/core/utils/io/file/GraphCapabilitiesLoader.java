@@ -44,7 +44,7 @@ class GraphCapabilitiesLoader {
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         csvMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         var schema = CsvSchema.emptySchema().withHeader().withStrictHeaders(false);
-        this.objectReader = csvMapper.readerFor(CsvGraphCapabilitiesWriter.CapabilitiesDTO.class).with(schema);
+        this.objectReader = csvMapper.readerFor(CapabilitiesDTO.class).with(schema);
     }
 
     Capabilities load() {
