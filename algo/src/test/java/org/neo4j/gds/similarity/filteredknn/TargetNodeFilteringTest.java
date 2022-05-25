@@ -37,14 +37,12 @@ class TargetNodeFilteringTest {
         int thereIsOneNodeInThisFilter = 1;
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
-        Graph graphNotNeededWhenNotSeeding = null;
-        Optional<SimilarityFunction> similarityFunctionNotNeededWhenNotSeeding = Optional.empty();
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
             thereIsOneNodeInThisFilter,
             kIsTwo,
             evenNodesAreTargetNodes,
-            graphNotNeededWhenNotSeeding,
-            similarityFunctionNotNeededWhenNotSeeding
+            null /* not needed when not seeding */,
+            Optional.empty() /* not needed when not seeding */
         );
 
         TargetNodeFilter targetNodeFilter = targetNodeFiltering.get(0);
