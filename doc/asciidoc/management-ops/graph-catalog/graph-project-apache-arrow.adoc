@@ -145,9 +145,9 @@ The server acknowledges the action by returning a JSON document including the na
 
 [NOTE]
 ====
-Node identifiers are represented by 64-Bit signed long values.
-If the input data contains very large node id values, one might observe a high memory footprint for the projected graph.
-In these situations, the memory footprint of the graph can be reduced by switching to another <<sharded-id-map-feature-toggle, id map implementation>>
+Node identifiers are represented by long values in the range of 0 to 2^63.
+If the input node id space is sparse and contains very large node id values, one might observe a high memory footprint for the projected graph.
+In these situations, the memory footprint of the graph could be reduced by switching to another <<sharded-id-map-feature-toggle, id map implementation>>.
 ====
 
 [[arrow-send-relationships]]
