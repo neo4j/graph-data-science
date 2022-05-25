@@ -411,7 +411,10 @@ To get a deterministic result when running the algorithm:
 == Examples
 
 In this section we will show examples of running the KNN algorithm on a concrete graph.
-Consider a graph of Person nodes, with no relationships.
+With the _Uniform sampler_, KNN samples initial neighbors uniformly at random, and doesn't take into account graph topology.
+This means KNN can run on a graph of only nodes, without any relationships.
+Consider the following graph of five disconnected Person nodes.
+
 
 image::example-graphs/knn.svg[Visualization of the example graph,align="center"]
 
