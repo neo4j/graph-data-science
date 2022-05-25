@@ -154,6 +154,35 @@ class ExpressionValidationTest {
             .withMessageContaining(exprString);
     }
 
+    @ParameterizedTest(name = "{0} ({1} vs {2})")
+    @CsvSource(value = {
+        "n.foo > 42,DOUBLE,LONG,literal to `42.0`",
+        "n.foo > 42.0,LONG,DOUBLE,literal to `42`",
+    })
+    void incompatibleTypesWithLiteralHint(
+        String exprString,
+        ValueType lhsType,
+        ValueType rhsType,
+        String literalHint
+    ) throws ParseException {
+        var context = ImmutableValidationContext
+            .builder()
+            .context(NODE)
+            .putAvailableProperty("foo", lhsType)
+            .build();
+
+        var expr = ExpressionParser.parse(exprString, context.availableProperties());
+
+        assertThatExceptionOfType(SemanticErrors.class)
+            .isThrownBy(() -> expr.validate(context).validate())
+            .withMessageContaining("Incompatible types")
+            .withMessageContaining(lhsType.name())
+            .withMessageContaining(rhsType.name())
+            .withMessageContaining("in binary expression")
+            .withMessageContaining(exprString)
+            .withMessageContaining(literalHint);
+    }
+
     @ParameterizedTest(name = "{0} {1}")
     @CsvSource(value = {
         "n.foo,DOUBLE_ARRAY",
