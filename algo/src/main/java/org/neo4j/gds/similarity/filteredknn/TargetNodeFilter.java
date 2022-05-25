@@ -24,6 +24,8 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 
 import java.util.Comparator;
+import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.LongPredicate;
 import java.util.stream.Stream;
@@ -41,20 +43,35 @@ import java.util.stream.Stream;
  * have convinced ourselves that {@link org.neo4j.gds.similarity.knn.Knn} never presents us with such cases. So this
  * data structure suffices.
  */
-public class TargetNodeFilter implements NeighbourConsumer {
-    private final TreeSet<Pair<Double, Long>> priorityQueue = new TreeSet<>(Comparator.reverseOrder());
-
+public final class TargetNodeFilter implements NeighbourConsumer {
+    private final TreeSet<Pair<Double, Long>> priorityQueue;
     private final LongPredicate predicate;
     private final int bound;
 
-    public TargetNodeFilter(LongPredicate predicate, int bound) {
+    /**
+     * @param seeds Optionally seed the priority queue
+     */
+    static TargetNodeFilter create(
+        LongPredicate targetNodePredicate,
+        int bound,
+        Optional<Set<Pair<Double, Long>>> seeds
+    ) {
+        TreeSet<Pair<Double, Long>> priorityQueue = new TreeSet<>(Comparator.reverseOrder());
+
+        seeds.ifPresent(priorityQueue::addAll);
+
+        return new TargetNodeFilter(priorityQueue, targetNodePredicate, bound);
+    }
+
+    private TargetNodeFilter(TreeSet<Pair<Double, Long>> priorityQueue, LongPredicate predicate, int bound) {
+        this.priorityQueue = priorityQueue;
         this.predicate = predicate;
         this.bound = bound;
     }
 
     @Override
     public void offer(long element, double priority) {
-        if (! predicate.test(element)) return;
+        if (!predicate.test(element)) return;
 
         priorityQueue.add(Pair.of(priority, element));
 

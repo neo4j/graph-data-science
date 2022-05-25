@@ -19,12 +19,17 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 import org.neo4j.gds.similarity.knn.NeighbourConsumers;
+import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 import java.util.function.UnaryOperator;
@@ -32,34 +37,80 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public final class TargetNodeFiltering implements NeighbourConsumers {
-    private final HugeObjectArray<TargetNodeFilter> neighbourConsumers;
+    private final HugeObjectArray<TargetNodeFilter> targetNodeFilters;
 
-    static TargetNodeFiltering create(long nodeCount, int k, LongPredicate targetNodePredicate) {
-        HugeObjectArray<TargetNodeFilter> neighbourConsumers = HugeObjectArray.newArray(
-            TargetNodeFilter.class,
-            nodeCount
-        );
+    /**
+     * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
+     */
+    static TargetNodeFiltering create(
+        long nodeCount,
+        int k,
+        LongPredicate targetNodePredicate,
+        Graph graph,
+        Optional<SimilarityFunction> optionalSimilarityFunction
+    ) {
+        var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
 
         for (int i = 0; i < nodeCount; i++) {
-            neighbourConsumers.set(i, new TargetNodeFilter(targetNodePredicate, k));
+            var optionalSeeds = prepareSeeds(graph, targetNodePredicate, k, i, optionalSimilarityFunction);
+            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(targetNodePredicate, k, optionalSeeds);
+
+            neighbourConsumers.set(i, targetNodeFilter);
         }
 
         return new TargetNodeFiltering(neighbourConsumers);
     }
 
-    private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> neighbourConsumers) {
-        this.neighbourConsumers = neighbourConsumers;
+    /**
+     * There are 17 ways to do seeding, this is clearly the dumbest one. It gets us a walking skeleton and let's us
+     * design UI etc. You would describe this as, seed every target node set with the first k target nodes encountered
+     * during a scan.
+     *
+     * A plus feature is, we fill up with k target nodes iff k target nodes can be found. This is of course unsolvable.
+     *
+     * Cons include bias for start of node array, yada yada. Extremely naive solution at this point.
+     *
+     * @param optionalSimilarityFunction An actual similarity function if you want seeds, empty otherwise.
+     */
+    private static Optional<Set<Pair<Double, Long>>> prepareSeeds(
+        Graph graph,
+        LongPredicate targetNodePredicate,
+        int k,
+        int n,
+        Optional<SimilarityFunction> optionalSimilarityFunction
+    ) {
+        if (optionalSimilarityFunction.isEmpty()) return Optional.empty();
+
+        Set<Pair<Double, Long>> seeds = new HashSet<>();
+
+        graph.forEachNode(m -> {
+            if (n == m) return true;
+
+            if (!targetNodePredicate.test(m)) return true;
+
+            double similarityScore = optionalSimilarityFunction.get().computeSimilarity(n, m);
+
+            seeds.add(Pair.of(similarityScore, m));
+
+            return seeds.size() < k;
+        });
+
+        return Optional.of(seeds);
+    }
+
+    private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters) {
+        this.targetNodeFilters = targetNodeFilters;
     }
 
     @Override
-    public NeighbourConsumer get(long nodeId) {
-        return neighbourConsumers.get(nodeId);
+    public TargetNodeFilter get(long nodeId) {
+        return targetNodeFilters.get(nodeId);
     }
 
     Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate) {
         return Stream
             .iterate(
-                neighbourConsumers.initCursor(neighbourConsumers.newCursor()),
+                targetNodeFilters.initCursor(targetNodeFilters.newCursor()),
                 HugeCursor::next,
                 UnaryOperator.identity()
             )

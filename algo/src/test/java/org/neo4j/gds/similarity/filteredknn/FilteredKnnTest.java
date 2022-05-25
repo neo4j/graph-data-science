@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -86,7 +87,7 @@ class FilteredKnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = FilteredKnn.create(graph, knnConfig, knnContext);
+        var knn = FilteredKnn.createWithoutSeeding(graph, knnConfig, knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -141,7 +142,7 @@ class FilteredKnnTest {
                 .sourceNodeFilter(filteredSourceNode)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.create(graph, config, knnContext);
+            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -164,7 +165,7 @@ class FilteredKnnTest {
                 .sourceNodeFilter(List.of(filteredNode1, filteredNode2))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.create(graph, config, knnContext);
+            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -198,7 +199,7 @@ class FilteredKnnTest {
                 .targetNodeFilter(targetNode)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.create(graph, config, knnContext);
+            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -221,7 +222,7 @@ class FilteredKnnTest {
                 .targetNodeFilter(List.of(targetNode1, targetNode2))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.create(graph, config, knnContext);
+            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
             var result = knn.compute();
 
             assertThat(result.similarityResultStream()
@@ -244,18 +245,12 @@ class FilteredKnnTest {
 
         @Test
         void shouldIgnoreDuplicates() {
-            var targetNode1 = idFunction.of("a");
-            var targetNode2 = idFunction.of("b");
-            var targetNode3 = idFunction.of("c");
-            var targetNode4 = idFunction.of("d");
-            var targetNode5 = idFunction.of("e");
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties(List.of("knn"))
                 .topK(42)
-                .targetNodeFilter(List.of(targetNode1, targetNode2, targetNode3, targetNode4, targetNode5))
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = FilteredKnn.create(graph, config, knnContext);
+            var knn = FilteredKnn.createWithoutSeeding(graph, config, knnContext);
             var result = knn.compute();
 
             /*
@@ -272,6 +267,60 @@ class FilteredKnnTest {
                 .forEach(similarityResultList -> assertThat(similarityResultList
                     .stream()
                     .mapToLong(SimilarityResult::targetNodeId)).doesNotHaveDuplicates());
+        }
+    }
+
+    @Nested
+    class TargetNodeFilteringAndSeeding {
+        @GdlGraph
+        private static final String DB_CYPHER =
+            "CREATE" +
+            "  (x { knn: 100.2 } )" +
+            "  (y { knn: 1000.2 } )" +
+            "  (z { knn: 10000.2 } )" +
+            "  (a { knn: 1.2 } )" +
+            ", (b { knn: 1.1 } )" +
+            ", (c { knn: 2.1 } )" +
+            ", (d { knn: 3.1 } )" +
+            ", (e { knn: 4.1 } )";
+
+        /**
+         * Testing seeding at this level is difficult, you rely on a leap and a prayer. Here is a stab at it. If this
+         * becomes unmaintainable, rely on just {@link org.neo4j.gds.similarity.filteredknn.TargetNodeFilteringTest}
+         * instead.
+         */
+        @Test
+        void shouldSeedResultSet() {
+            /*
+             * This is a bit convoluted: seeding will take the first k nodes regardless of score. Consider node a, it
+             * will score very poorly with nodes x, y and z, but x, y and z will be its seeds nonetheless.
+             *
+             * So here we confirm the first three nodes are the undesirables ones, and tacit knowledge says they will
+             * form the seed.
+             */
+            var targetNodeX = idFunction.of("x");
+            var targetNodeY = idFunction.of("y");
+            var targetNodeZ = idFunction.of("z");
+            var targetNodeA = idFunction.of("a");
+            assertThat(targetNodeX).isLessThan(targetNodeY).isLessThan(targetNodeZ).isLessThan(targetNodeA);
+
+            // no target node filter specified -> everything is a target node
+            var config = FilteredKnnBaseConfigImpl.builder()
+                .nodeProperties(List.of("knn"))
+                .topK(4)
+                .build();
+            var knnContext = KnnContext.empty();
+            var knn = FilteredKnn.createWithDefaultSeeding(graph, config, knnContext);
+            var result = knn.compute();
+
+            /*
+             * Now let's look at a and it's highest scoring neighbours. They should _not_ be x, y or z because we know
+             * those will score very poorly, even if those were the seed nodes.
+             */
+            Stream<Long> highestScoringNeighboursOfNodeA = result.similarityResultStream()
+                .filter(sr -> sr.sourceNodeId() == targetNodeA)
+                .map(SimilarityResult::targetNodeId);
+            assertThat(highestScoringNeighboursOfNodeA).doesNotContain(targetNodeX, targetNodeY, targetNodeZ);
         }
     }
 }
