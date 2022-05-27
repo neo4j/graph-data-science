@@ -20,7 +20,7 @@
 | `_gds.util.isInfinite_`
 | xref::graph-catalog-node-ops.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `_gds.util.nodeProperty_`
 | xref::alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `_gds.alpha.ml.oneHotEncoding_`
-| Status of the system                                                      | `gds.debug.sysInfo`
+| xref::common-usage/debug-sysinfo.adoc[Status of the system]    | `gds.debug.sysInfo`
 | xref::management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb`
 | xref::common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
 | Back-up graphs and models to disk | `gds.alpha.backup`
