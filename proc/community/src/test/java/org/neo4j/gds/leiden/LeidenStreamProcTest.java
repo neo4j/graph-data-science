@@ -26,6 +26,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -69,19 +70,43 @@ class LeidenStreamProcTest extends BaseProcTest {
     @Test
     void stream() {
         runQuery("CALL gds.alpha.leiden.stream('leiden')", result -> {
-            assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId");
+            assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();
             while(result.hasNext()) {
                 var next = result.next();
                 assertThat(next.get("nodeId")).isInstanceOf(Long.class);
                 assertThat(next.get("communityId")).isInstanceOf(Long.class);
+                assertThat(next.get("intermediateCommunityIds")).isNull();
                 communities.add((Long) next.get("communityId"));
                 resultRowCount++;
             }
             assertThat(resultRowCount).isEqualTo(8L);
             assertThat(communities).hasSize(2);
-            return  true;
+            return true;
+        });
+    }
+
+    @Test
+    void streamWithIntermediateCommunityIds() {
+        runQuery("CALL gds.alpha.leiden.stream('leiden', {includeIntermediateCommunities: true}) ", result -> {
+            assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
+            long resultRowCount = 0;
+            var communities = new HashSet<Long>();
+            while (result.hasNext()) {
+                var next = result.next();
+                assertThat(next.get("nodeId")).isInstanceOf(Long.class);
+                assertThat(next.get("communityId")).isInstanceOf(Long.class);
+                assertThat(next.get("intermediateCommunityIds")).isInstanceOf(List.class);
+                List<Long> intermediateCommunities = (List<Long>) next.get("intermediateCommunityIds");
+                assertThat(intermediateCommunities).hasSize(2);
+                assertThat(intermediateCommunities.get(1)).isEqualTo((long) next.get("communityId"));
+                communities.add((Long) next.get("communityId"));
+                resultRowCount++;
+            }
+            assertThat(resultRowCount).isEqualTo(8L);
+            assertThat(communities).hasSize(2);
+            return true;
         });
     }
 }
