@@ -49,12 +49,12 @@ In addition to those aforementioned there are three more methods that create gra
 
 Their Cypher signatures map to Python in much the same way as `gds.graph.project` above.
 
-[.enterprise-edition]
+[.alpha]
 == Constructing a graph
 
 Instead of projecting a graph from the Neo4j database it is also possible to construct new graphs using pandas `DataFrames` from the client.
 
-NOTE: To use this feature the <<installation-apache-arrow, Arrow Flight Server>> needs to be enabled.
+NOTE: This feature is a lot faster when the <<installation-apache-arrow, Arrow Flight Server>> is enabled.
 
 [source,python]
 ----
@@ -95,9 +95,10 @@ CREATE
     (d)-[:REL {weight: 42.0}]->(a),
 ----
 
-It is possible to supply more than one data frame, both for nodes and relationships.
-If multiple node dataframes are used, they need to contain distinct node ids across all node data frames.
 The supported format for the node data frames is described in <<arrow-node-columns, Arrow node schema>> and the format for the relationship data frames is described in <<arrow-relationship-columns, Arrow relationship schema>>.
+
+With the <<installation-apache-arrow, Arrow Flight Server> enabled, it is possible to supply more than one data frame, both for nodes and relationships.
+If multiple node dataframes are used, they need to contain distinct node ids across all node data frames.
 
 
 == Inspecting a graph object
