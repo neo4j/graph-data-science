@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
@@ -50,7 +51,8 @@ class KarateTest {
     void leiden(long seed) {
         var gamma = 1.0 / graph.relationshipCount();
         Leiden leiden = new Leiden(graph, 5, gamma, 0.01, seed, 4, ProgressTracker.NULL_TRACKER);
-        var communities = leiden.compute().communities();
+        var leidenResult = leiden.compute();
+        var communities = leidenResult.communities();
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
@@ -68,5 +70,7 @@ class KarateTest {
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a6", "a7", "a11", "a17"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a0")
             );
+        assertThat(leidenResult.modularity()).isCloseTo( 0.41880, Offset.offset(0.0001));
+
     }
 }

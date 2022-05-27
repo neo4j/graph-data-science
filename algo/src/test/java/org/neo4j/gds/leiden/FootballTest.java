@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
@@ -53,7 +54,8 @@ class FootballTest {
     void leiden(long seed) {
         var gamma = 1.0 / graph.relationshipCount();
         Leiden leiden = new Leiden(graph, 5, gamma, 0.01, seed, 1, ProgressTracker.NULL_TRACKER);
-        var communities = leiden.compute().communities();
+        var leidenResult = leiden.compute();
+        var communities = leidenResult.communities();
         var communitiesMap = LongStream
             .range(0, graph.nodeCount())
             .mapToObj(v -> "a" + v)
@@ -72,5 +74,7 @@ class FootballTest {
                 community -> assertThat(community).containsExactlyInAnyOrder("a18", "a81", "a96", "a100", "a103", "a108", "a111", "a112", "a113"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a0")
             );
+        assertThat(leidenResult.modularity()).isCloseTo( 0.60440, Offset.offset(0.0001));
     }
+
 }
