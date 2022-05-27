@@ -181,7 +181,14 @@ public class Leiden extends Algorithm<LeidenResult> {
             seedCommunities = dendrograms[iteration];
             modularity = modularities[iteration];
         }
-        return LeidenResult.of(seedCommunities, iteration, didConverge, dendrograms, modularities, modularity);
+        return LeidenResult.of(
+            seedCommunities,
+            iteration,
+            didConverge,
+            dendrograms,
+            resizeModularitiesArray(iteration),
+            modularity
+        );
     }
 
     private void initVolumes(
@@ -292,11 +299,26 @@ public class Leiden extends Algorithm<LeidenResult> {
             aggregatedNodeSeedVolume.set(aggregatedCommunityId, volumeOfTheAggregatedCommunity);
             return true;
         });
-        return new CommunityData(seededCommunitiesForNextIteration, aggregatedCommunitySeedVolume, aggregatedNodeSeedVolume, localPhaseCommunityToAggregatedNewId.size());
+        return new CommunityData(
+            seededCommunitiesForNextIteration,
+            aggregatedCommunitySeedVolume,
+            aggregatedNodeSeedVolume,
+            localPhaseCommunityToAggregatedNewId.size()
+        );
     }
 
     @Override
     public void release() {
 
+    }
+
+    private double[] resizeModularitiesArray(int iteration) {
+        double[] resizedModularities = new double[iteration];
+        if (iteration < maxIterations) {
+            System.arraycopy(this.modularities, 0, resizedModularities, 0, iteration);
+        } else {
+            return modularities;
+        }
+        return resizedModularities;
     }
 }
