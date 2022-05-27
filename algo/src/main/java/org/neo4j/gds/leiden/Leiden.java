@@ -47,12 +47,14 @@ public class Leiden extends Algorithm<LeidenResult> {
 
     private double[] modularities;
 
-    private final double modularity;
+    private double modularity;
     private final HugeLongArray[] dendrograms;
 
     private final ExecutorService executorService;
     private final int concurrency;
     private final long seed;
+
+    private final double scaleCoefficient;
 
     public Leiden(
         Graph graph,
@@ -69,7 +71,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
-
+        this.scaleCoefficient = 1.0 / graph.relationshipCount();
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -120,6 +122,15 @@ public class Leiden extends Algorithm<LeidenResult> {
                 break;
             }
 
+            modularities[iteration] = ModularityComputer.modularity(
+                workingGraph,
+                partition,
+                communityVolumes,
+                gamma,
+                scaleCoefficient,
+                concurrency,
+                executorService
+            );
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
                 workingGraph,
@@ -168,6 +179,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             communityCount = communityData.communityCount;
 
             seedCommunities = dendrograms[iteration];
+            modularity = modularities[iteration];
         }
         return LeidenResult.of(seedCommunities, iteration, didConverge, dendrograms, modularities, modularity);
     }
