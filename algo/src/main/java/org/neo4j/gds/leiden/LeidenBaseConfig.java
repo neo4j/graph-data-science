@@ -43,4 +43,9 @@ public interface LeidenBaseConfig extends
     default int maxLevels() {
         return 10;
     }
+
+    @Value.Default
+    default boolean includeIntermediateCommunities() {
+        return false;
+    }
 }
