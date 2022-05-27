@@ -31,7 +31,9 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
@@ -76,6 +78,10 @@ public class LeidenMutateSpec  implements AlgorithmSpec<Leiden, LeidenResult, Le
         return new MutateResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
             .withLevels(leidenResult.ranLevels())
             .withDidConverge(leidenResult.didConverge())
+            .withModularities(Arrays.stream(leidenResult.modularities())
+                .boxed()
+                .collect(Collectors.toList()))
+            .withModularity(leidenResult.modularity())
             .withCommunityFunction(leidenResult.communitiesFunction())
             .withConfig(computationResult.config());
     }

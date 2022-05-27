@@ -24,6 +24,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -62,7 +64,10 @@ public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
             var statsResult = statsBuilder
                 .withLevels(leidenResult.ranLevels())
                 .withDidConverge(leidenResult.didConverge())
-                .withCommunityFunction(leidenResult.communitiesFunction())
+                .withModularity(leidenResult.modularity())
+                .withModularities(Arrays.stream(leidenResult.modularities())
+                    .boxed()
+                    .collect(Collectors.toList())).withCommunityFunction(leidenResult.communitiesFunction())
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(computationResult.graph().nodeCount())
