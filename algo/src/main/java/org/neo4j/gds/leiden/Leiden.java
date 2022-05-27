@@ -164,7 +164,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             seedCommunities = dendrograms[iteration];
         }
-        return LeidenResult.of(seedCommunities, iteration, didConverge);
+        return LeidenResult.of(seedCommunities, iteration, didConverge, dendrograms);
     }
 
     private void initVolumes(
