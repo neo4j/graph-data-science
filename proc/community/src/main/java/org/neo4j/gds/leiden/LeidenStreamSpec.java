@@ -57,7 +57,7 @@ public class LeidenStreamSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
             var graph = computationResult.graph();
             var communities = leidenResult.communities();
             return LongStream.range(0, graph.nodeCount())
-                .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), communities.get(nodeId)));
+                .mapToObj(nodeId -> new StreamResult(graph.toOriginalNodeId(nodeId), null, communities.get(nodeId)));
         };
     }
 }
