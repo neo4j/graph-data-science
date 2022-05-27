@@ -129,22 +129,34 @@ public class GraphSageModelTrainer {
         var prevEpochLoss = Double.NaN;
         int epochs = config.epochs();
 
+        // if each batch is used more than once, we cache the tasks, otherwise we compute them lazily
+        boolean createBatchTasksEagerly = config.batchesPerIteration(graph.nodeCount()) * config.maxIterations() > extendedBatches.size();
+
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
 
-            if (epoch != 0) {
+            if (epoch > 1) {
                 // allow sampling new neighbors
                 Arrays.stream(layers).forEach(Layer::modifySamplingSeed);
             }
 
-            List<BatchTask> tasksForEpoch = extendedBatches
-                .stream()
-                .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
-                .collect(Collectors.toList());
+            Supplier<List<BatchTask>> batchTaskSampler;
+            if (createBatchTasksEagerly) {
+                List<BatchTask> tasksForEpoch = extendedBatches
+                    .stream()
+                    .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
+                    .collect(Collectors.toList());
 
-            Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
-                .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
-                .collect(Collectors.toList());
+                batchTaskSampler = () -> IntStream
+                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
+                    .collect(Collectors.toList());
+            } else {
+                batchTaskSampler = () -> IntStream
+                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .mapToObj(__ -> createBatchTask(extendedBatches.get(random.nextInt(extendedBatches.size())), graph, features, layers, weights))
+                    .collect(Collectors.toList());
+            }
 
             var epochResult = trainEpoch(batchTaskSampler, weights, prevEpochLoss);
             List<Double> epochLosses = epochResult.losses();
