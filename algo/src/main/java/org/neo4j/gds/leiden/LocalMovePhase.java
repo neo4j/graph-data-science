@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -99,12 +98,11 @@ final class LocalMovePhase {
 
     public Partition run() {
         // Use HugeAtomicBitSet instead of queue - gives better runtime.
-        var nodesToProcess = HugeAtomicBitSet.create(graph.nodeCount());
-        nodesToProcess.set(0, graph.nodeCount());
+        var nodesToVisit = new NodesToVisit(graph.nodeCount());
         
-        while (nodesToProcess.cardinality() > 0) {
-            nodesToProcess.forEachSetBit(nodeId -> {
-                nodesToProcess.flip(nodeId);
+        while (nodesToVisit.hasMoreNodes()) {
+            nodesToVisit.visitRemainingNodes(nodeId -> {
+                nodesToVisit.markAsVisited(nodeId);
                 long currentNodeCommunityId = currentCommunities.get(nodeId);
                 double currentNodeVolume = nodeVolumes.get(nodeId);
 
@@ -127,7 +125,7 @@ final class LocalMovePhase {
                 );
 
                 tryToMoveNode(
-                    nodesToProcess,
+                    nodesToVisit,
                     nodeId,
                     currentNodeCommunityId,
                     currentNodeVolume,
@@ -172,7 +170,7 @@ final class LocalMovePhase {
     }
 
     private void tryToMoveNode(
-        HugeAtomicBitSet nodesToProcess,
+        NodesToVisit nodesToProcess,
         long nodeId,
         long currentNodeCommunityId,
         double currentNodeVolume,
@@ -227,12 +225,12 @@ final class LocalMovePhase {
     // all neighbours of the node that do not belong to the node’s new community
     // "and that are not yet in the queue are added to the rear of the queue"
     //   -> this is from the paper, we use a HugeAtomicBitSet which is faster but visit the nodes in different order, doesn't affect the end result.
-    private void visitNeighboursAfterMove(long nodeId, HugeAtomicBitSet nodesToProcess, long movedToCommunityId) {
+    private void visitNeighboursAfterMove(long nodeId, NodesToVisit nodesToProcess, long movedToCommunityId) {
         graph.forEachRelationship(nodeId, (s, t) -> {
             long tCommunity = currentCommunities.get(t);
-            boolean shouldAddInQueue = !nodesToProcess.get(t) && tCommunity != movedToCommunityId;
+            boolean shouldAddInQueue = nodesToProcess.visited(t) && tCommunity != movedToCommunityId;
             if (shouldAddInQueue) {
-                nodesToProcess.set(t);
+                nodesToProcess.markForVisiting(t);
             }
             return true;
         });
