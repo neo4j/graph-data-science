@@ -39,6 +39,10 @@ public interface LeidenResult {
 
     HugeLongArray[] dendrograms();
 
+    double[] modularities();
+
+    double modularity();
+
     default long[] getIntermediateCommunities(long nodeId) {
         var dendrograms = dendrograms();
         int levels = ranLevels();
@@ -59,9 +63,11 @@ public interface LeidenResult {
         HugeLongArray communities,
         int ranLevels,
         boolean didConverge,
-        @Nullable HugeLongArray[] dendrograms
+        @Nullable HugeLongArray[] dendrograms,
+        double[] modularities,
+        double modularity
     ) {
-        return ImmutableLeidenResult.of(communities, ranLevels, didConverge, dendrograms);
+        return ImmutableLeidenResult.of(communities, ranLevels, didConverge, dendrograms, modularities, modularity);
     }
 
 }

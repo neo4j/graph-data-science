@@ -45,6 +45,9 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final double gamma;
     private final double theta;
 
+    private double[] modularities;
+
+    private final double modularity;
     private final HugeLongArray[] dendrograms;
 
     private final ExecutorService executorService;
@@ -72,6 +75,8 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.concurrency = concurrency;
 
         this.dendrograms = new HugeLongArray[maxIterations];
+        this.modularities = new double[maxIterations];
+        this.modularity = 0d;
     }
 
     @Override
@@ -164,7 +169,7 @@ public class Leiden extends Algorithm<LeidenResult> {
 
             seedCommunities = dendrograms[iteration];
         }
-        return LeidenResult.of(seedCommunities, iteration, didConverge, dendrograms);
+        return LeidenResult.of(seedCommunities, iteration, didConverge, dendrograms, modularities, modularity);
     }
 
     private void initVolumes(
