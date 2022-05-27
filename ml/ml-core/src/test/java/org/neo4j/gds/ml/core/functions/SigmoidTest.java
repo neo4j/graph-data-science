@@ -57,11 +57,11 @@ class SigmoidTest extends ComputationGraphBaseTest implements FiniteDifferenceTe
 
         Variable<Vector> sigmoid = new Sigmoid<>(p);
 
-        var expected = new Vector(new double[]{
-            (1 / (1 + Math.pow(Math.E, -14))),
-            (1 / (1 + Math.pow(Math.E, -5))),
-            (1 / (1 + Math.pow(Math.E, -36)))
-        });
+        var expected = new Vector(
+            (1 / (1 + Math.exp(-14))),
+            (1 / (1 + Math.exp(-5))),
+            (1 / (1 + Math.exp(-36)))
+        );
 
         assertThat(ctx.forward(sigmoid)).isEqualTo(expected);
     }

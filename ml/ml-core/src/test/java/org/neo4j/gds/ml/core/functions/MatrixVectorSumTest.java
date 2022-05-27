@@ -66,8 +66,8 @@ class MatrixVectorSumTest extends ComputationGraphBaseTest implements FiniteDiff
         ctx.backward(broadcastSum);
 
         assertThat(ctx.gradient(weights)).isEqualTo(ctx.gradient(matrixVectorSum));
-        Vector expectedGradient = new Vector(0.11164164207429665, 0.04764316902227213, 0.017997943884047476);
-        assertThat(ctx.gradient(vector)).isEqualTo(expectedGradient);
+        Vector expectedGradient = new Vector(0.11164164, 0.04764316, 0.01799794);
+        assertThat(ctx.gradient(vector)).matches(actual -> actual.equals(expectedGradient, 1e-8));
     }
 
     @Test
