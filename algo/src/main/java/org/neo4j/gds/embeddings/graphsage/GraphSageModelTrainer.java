@@ -137,7 +137,7 @@ public class GraphSageModelTrainer {
 
             if (epoch > 1) {
                 // allow sampling new neighbors
-                Arrays.stream(layers).forEach(Layer::modifySamplingSeed);
+                Arrays.stream(layers).forEach(Layer::modifyRandomState);
             }
 
             Supplier<List<BatchTask>> batchTaskSampler;

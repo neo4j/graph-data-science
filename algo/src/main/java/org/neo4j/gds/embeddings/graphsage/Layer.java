@@ -36,6 +36,10 @@ public interface Layer {
         return sampler().randomState();
     }
 
+    default void modifyRandomState() {
+        sampler().changeRandomState();
+    }
+
     NeighborhoodSampler sampler();
 
     default List<Weights<? extends Tensor<?>>> weights() {
@@ -44,9 +48,5 @@ public interface Layer {
 
     default LongStream neighborhoodFunction(Graph graph, long nodeId) {
         return sampler().sample(graph, nodeId, sampleSize());
-    }
-
-    default void modifySamplingSeed() {
-        sampler().changeRandomState();
     }
 }
