@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 
@@ -37,14 +36,14 @@ public interface LeidenResult {
 
     boolean didConverge();
 
-    HugeLongArray[] dendrograms();
+    LeidenDendrogramManager dendrogramManager();
 
     double[] modularities();
 
     double modularity();
 
     default long[] getIntermediateCommunities(long nodeId) {
-        var dendrograms = dendrograms();
+        var dendrograms = dendrogramManager().getAllDendrograms();
         int levels = ranLevels();
         long[] communities = new long[levels];
         for (int i = 0; i < levels; i++) {
@@ -63,11 +62,18 @@ public interface LeidenResult {
         HugeLongArray communities,
         int ranLevels,
         boolean didConverge,
-        @Nullable HugeLongArray[] dendrograms,
+        LeidenDendrogramManager dendrogramManager,
         double[] modularities,
         double modularity
     ) {
-        return ImmutableLeidenResult.of(communities, ranLevels, didConverge, dendrograms, modularities, modularity);
+        return ImmutableLeidenResult.of(
+            communities,
+            ranLevels,
+            didConverge,
+            dendrogramManager,
+            modularities,
+            modularity
+        );
     }
 
 }

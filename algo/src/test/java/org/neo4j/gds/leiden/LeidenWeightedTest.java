@@ -70,6 +70,7 @@ class LeidenWeightedTest {
             maxLevels,
             1.0,
             0.01,
+            true,
             19L,
             4,
             ProgressTracker.NULL_TRACKER

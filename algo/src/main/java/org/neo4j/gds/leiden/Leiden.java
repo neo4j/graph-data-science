@@ -49,7 +49,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private double[] modularities;
 
     private double modularity;
-    private final HugeLongArray[] dendrograms;
+    private final LeidenDendrogramManager dendrogramManager;
 
     private final ExecutorService executorService;
     private final int concurrency;
@@ -61,6 +61,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         int maxIterations,
         double initialGamma,
         double theta,
+        boolean includeIntermediateCommunities,
         long seed,
         int concurrency,
         ProgressTracker progressTracker
@@ -74,8 +75,12 @@ public class Leiden extends Algorithm<LeidenResult> {
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
+        this.dendrogramManager = new LeidenDendrogramManager(
+            graph.nodeCount(),
+            maxIterations,
+            includeIntermediateCommunities
+        );
 
-        this.dendrograms = new HugeLongArray[maxIterations];
         this.modularities = new double[maxIterations];
         this.modularity = 0d;
     }
@@ -154,12 +159,11 @@ public class Leiden extends Algorithm<LeidenResult> {
             var refinedCommunityVolumes = refinedPhasePartition.communityVolumes();
             var dendrogramResult = buildDendrogram(workingGraph, currentDendrogram, refinedPartition);
             currentDendrogram = dendrogramResult.dendrogram();
-
-            dendrograms[iteration] = HugeLongArray.newArray(rootGraph.nodeCount());
+            dendrogramManager.prepareNextLevel(iteration);
             for (long v = 0; v < rootGraph.nodeCount(); v++) {
                 var currentRefinedCommunityId = currentDendrogram.get(v);
                 var actualCommunityId = partition.get(currentRefinedCommunityId);
-                dendrograms[iteration].set(v, actualCommunityId);
+                dendrogramManager.set(v, actualCommunityId);
             }
 
             // 3 CREATE NEW GRAPH
@@ -185,14 +189,14 @@ public class Leiden extends Algorithm<LeidenResult> {
             nodeVolumes = communityData.aggregatedNodeSeedVolume;
             communityCount = communityData.communityCount;
 
-            seedCommunities = dendrograms[iteration];
+            seedCommunities = dendrogramManager.getCurrent();
             modularity = modularities[iteration];
         }
         return LeidenResult.of(
             seedCommunities,
             iteration,
             didConverge,
-            dendrograms,
+            dendrogramManager,
             resizeModularitiesArray(iteration),
             modularity
         );

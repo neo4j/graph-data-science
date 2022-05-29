@@ -32,6 +32,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             configuration.maxLevels(),
             configuration.gamma(),
             configuration.theta(),
+            configuration.includeIntermediateCommunities(),
             configuration.randomSeed().orElse(0L),
             configuration.concurrency(),
             progressTracker
