@@ -73,7 +73,11 @@ public interface SimilarityComputer {
     ) {
         switch (properties.valueType()) {
             case LONG:
-                return ofLongProperty(properties);
+                return ofLongProperty(
+                    name,
+                    properties,
+                    defaultSimilarityMetric
+                );
             case DOUBLE:
                 return ofDoubleProperty(properties);
             case DOUBLE_ARRAY:
@@ -107,8 +111,15 @@ public interface SimilarityComputer {
         return new DoublePropertySimilarityComputer(nodePropertyValues);
     }
 
-    static SimilarityComputer ofLongProperty(NodePropertyValues nodePropertyValues) {
-        return new LongPropertySimilarityComputer(nodePropertyValues);
+    static SimilarityComputer ofLongProperty(String name, NodePropertyValues properties, SimilarityMetric metric) {
+        switch (metric) {
+            case HAMMING_DISTANCE:
+                return new LongPropertySimilarityComputer(properties, HammingDistance::longMetric);
+            case NORMALIZED_ABSOLUTE_DIFFERENCE:
+                return new LongPropertySimilarityComputer(properties, NormalizedAbsoluteDifference::longMetric);
+            default:
+                throw unsupportedSimilarityMetric(name, properties.valueType(), metric);
+        }
     }
 
     static SimilarityComputer ofFloatArrayProperty(String name, NodePropertyValues properties, SimilarityMetric metric) {
