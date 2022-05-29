@@ -63,7 +63,7 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
 
     public static MemoryEstimation adjacencyListEstimation(long avgDegree, long nodeCount) {
         return MemoryEstimations
-            .builder(CompressedAdjacencyList.class)
+            .builder(UncompressedAdjacencyList.class)
             .fixed("pages", listSize(avgDegree, nodeCount))
             .perNode("degrees", HugeIntArray::memoryEstimation)
             .perNode("offsets", HugeLongArray::memoryEstimation)
