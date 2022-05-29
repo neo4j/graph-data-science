@@ -69,7 +69,9 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
         return MemoryEstimations.builder(Louvain.class)
             .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
-                ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder().from(graphDimensions);
+                ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions
+                    .builder()
+                    .from(graphDimensions);
 
                 GraphDimensions sparseDimensions = dimensionsBuilder.build();
 
@@ -96,7 +98,7 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * config.maxLevels()
+                HugeLongArray.memoryEstimation(nodeCount) * (config.includeIntermediateCommunities() ? config.maxLevels() : 2)
             ))
             .build();
     }
