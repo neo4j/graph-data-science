@@ -75,7 +75,9 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.schema.IndexCapability;
 import org.neo4j.internal.schema.IndexOrder;
+import org.neo4j.internal.schema.IndexValueCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
@@ -96,6 +98,7 @@ import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.ValueGroup;
 
 import java.io.IOException;
@@ -491,5 +494,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
         DatabaseManager<DatabaseContext> databaseManager = dependencyResolver.resolveDependency(DatabaseManager.class);
         return databaseManager.registeredDatabases().keySet();
+    }
+
+    @Override
+    public boolean isNotNumericIndex(IndexCapability indexCapability) {
+        return indexCapability.valueCapability(ValueCategory.NUMBER) != IndexValueCapability.YES;
     }
 }

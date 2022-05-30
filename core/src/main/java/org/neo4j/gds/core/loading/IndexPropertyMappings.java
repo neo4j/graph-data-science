@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -32,8 +33,6 @@ import org.neo4j.graphdb.schema.Schema;
 import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.internal.kernel.api.SchemaReadCore;
 import org.neo4j.internal.schema.IndexDescriptor;
-import org.neo4j.internal.schema.IndexValueCapability;
-import org.neo4j.values.storable.ValueCategory;
 
 import java.util.List;
 import java.util.Map;
@@ -141,7 +140,7 @@ final class IndexPropertyMappings {
         }
 
         // not a numeric index
-        if (index.getCapability().valueCapability(ValueCategory.NUMBER) != IndexValueCapability.YES) {
+        if (Neo4jProxy.isNotNumericIndex(index.getCapability())) {
             return false;
         }
 

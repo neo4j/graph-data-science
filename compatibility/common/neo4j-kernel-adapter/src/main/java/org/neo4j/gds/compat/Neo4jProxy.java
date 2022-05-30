@@ -53,6 +53,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.schema.IndexCapability;
 import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
@@ -368,6 +369,10 @@ public final class Neo4jProxy {
 
     public static Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
         return IMPL.registeredDatabases(dependencyResolver);
+    }
+
+    public static boolean isNotNumericIndex(IndexCapability indexCapability) {
+        return IMPL.isNotNumericIndex(indexCapability);
     }
 
     private Neo4jProxy() {
