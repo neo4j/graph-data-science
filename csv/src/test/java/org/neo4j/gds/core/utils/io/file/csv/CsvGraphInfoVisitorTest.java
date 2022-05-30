@@ -34,7 +34,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportGraphInfo() {
-        NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
+        NamedDatabaseId namedDatabaseId = new TestDatabaseIdRepository().getByName("test").get();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
         graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, relationshipTypeCounts));
