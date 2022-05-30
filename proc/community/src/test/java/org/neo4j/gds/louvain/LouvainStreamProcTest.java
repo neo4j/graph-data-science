@@ -26,6 +26,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,6 +58,30 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> {
         });
         assertCommunities(actualCommunities, RESULT);
     }
+
+    @Test
+    void testStreamConsecutiveIds() {
+        @Language("Cypher") String query = GdsCypher.call("myGraph")
+            .algo("louvain")
+            .streamMode()
+            .addParameter("consecutiveIds", true)
+            .yields("nodeId", "communityId", "intermediateCommunityIds");
+
+        var communityMap = new HashSet<Long>();
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQueryWithRowConsumer(query, row -> {
+            int id = row.getNumber("nodeId").intValue();
+            long community = row.getNumber("communityId").longValue();
+            communityMap.add(community);
+            assertNull(row.get("intermediateCommunityIds"));
+            actualCommunities.add(id, community);
+        });
+        assertCommunities(actualCommunities, RESULT);
+        assertThat(communityMap).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
+
+    }
+
 
     @Test
     void testStreamCommunities() {
