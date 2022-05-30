@@ -79,7 +79,7 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         int n,
         Optional<SimilarityFunction> optionalSimilarityFunction
     ) {
-        if (optionalSimilarityFunction.isEmpty()) return Optional.empty();
+        if (optionalSimilarityFunction.isEmpty()) { return Optional.empty(); }
 
         Set<Pair<Double, Long>> seeds = new HashSet<>();
 
