@@ -60,7 +60,7 @@ NOTE: To use this feature the <<installation-apache-arrow, Arrow Flight Server>>
 ----
 nodes = pandas.DataFrame(
     "nodeId": [0, 1, 2, 3],
-    "label":  ["A", "B", "C", "A"],
+    "labels":  ["A", "B", "C", "A"],
     "prop1": [42, 1337, 8, 0],
     "otherProperty": [0.1, 0.2, 0.3, 0.4]
 )
@@ -68,7 +68,7 @@ nodes = pandas.DataFrame(
 relationships = pandas.DataFrame(
     "sourceId": [0, 1, 2, 3],
     "targetId": [1, 2, 3, 0],
-    "type": ["REL", "REL", "REL", "REL"],
+    "relationshipType": ["REL", "REL", "REL", "REL"],
     "weight": [0.0, 0.0, 0.1, 42.0]
 )
 
