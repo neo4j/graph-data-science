@@ -31,7 +31,7 @@ class CsvNamedDatabaseIdVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportDatabaseId() {
-        NamedDatabaseId namedDatabaseId = TestDatabaseIdRepository.randomNamedDatabaseId();
+        NamedDatabaseId namedDatabaseId = new TestDatabaseIdRepository().getByName("test").get();
         CsvNamedDatabaseIdVisitor databaseIdVisitor = new CsvNamedDatabaseIdVisitor(tempDir);
         databaseIdVisitor.export(namedDatabaseId);
         databaseIdVisitor.close();
