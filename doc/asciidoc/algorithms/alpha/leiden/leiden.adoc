@@ -56,7 +56,8 @@ CALL gds.alpha.leiden.stream(
 )
 YIELD
   nodeId: Integer,
-  communityId: Integer
+  communityId: Integer,
+  intermediateCommunityIds: List of Integer
 ----
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
@@ -71,6 +72,7 @@ include::specific-configuration.adoc[]
 | Name                      | Type      | Description
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID of the final level.
+| intermediateCommunityIds  | List of Integer | Community IDs for each level. `Null` if `includeIntermediateCommunities` is set to false.
 |===
 ======
 
@@ -89,6 +91,8 @@ YIELD
   postProcessingMillis: Integer,
   communityCount: Integer,
   ranLevels: Integer,
+  modularity: Float,
+  modularities: List of Float,
   nodeCount: Integer,
   didConverge: Boolean,
   communityDistribution: Map,
@@ -105,13 +109,15 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                  | Type      | Description
-| nodeCount             | Integer   | The number of nodes in the graph.
-| ranLevels             | Integer   | The number of levels the algorithm actually ran.
-| didConverge           | Boolean   | Indicates if the algorithm converged.
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
 | communityCount        | Integer   | The number of communities found.
+| ranLevels             | Integer   | The number of levels the algorithm actually ran.
+| modularity            | Float     | The final modularity score.
+| modularities          | List of Float | The modularity scores for each level.
+| nodeCount             | Integer   | The number of nodes in the graph.
+| didConverge           | Boolean   | Indicates if the algorithm converged.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
@@ -133,6 +139,8 @@ YIELD
   postProcessingMillis: Integer,
   communityCount: Integer,
   ranLevels: Integer,
+  modularity: Float,
+  modularities: List of Float,
   nodeCount: Integer,
   didConverge: Integer,
   nodePropertiesWritten: Integer,
@@ -150,14 +158,16 @@ include::specific-configuration.adoc[]
 [opts="header",cols="1,1,6"]
 |===
 | Name                   | Type      | Description
-| nodeCount              | Integer   | Indicates if the algorithm converged.
-| ranLevels              | Integer   | The number of levels the algorithm actually ran.
-| didConverge            | Boolean   | Indicates if the algorithm converged.
 | preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
 | computeMillis          | Integer   | Milliseconds for running the algorithm.
 | mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
 | communityCount         | Integer   | The number of communities found.
+| ranLevels              | Integer   | The number of levels the algorithm actually ran.
+| modularity            | Float     | The final modularity score.
+| modularities          | List of Float | The modularity scores for each level.
+| nodeCount              | Integer   | Indicates if the algorithm converged.
+| didConverge            | Boolean   | Indicates if the algorithm converged.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration          | Map       | The configuration used for running the algorithm.
