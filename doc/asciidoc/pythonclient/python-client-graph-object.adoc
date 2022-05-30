@@ -54,8 +54,6 @@ Their Cypher signatures map to Python in much the same way as `gds.graph.project
 
 Instead of projecting a graph from the Neo4j database it is also possible to construct new graphs using pandas `DataFrames` from the client.
 
-NOTE: This feature is a lot faster when the <<installation-apache-arrow, Arrow Flight Server>> is enabled.
-
 [source,python]
 ----
 nodes = pandas.DataFrame(
@@ -97,8 +95,17 @@ CREATE
 
 The supported format for the node data frames is described in <<arrow-node-columns, Arrow node schema>> and the format for the relationship data frames is described in <<arrow-relationship-columns, Arrow relationship schema>>.
 
-With the <<installation-apache-arrow, Arrow Flight Server> enabled, it is possible to supply more than one data frame, both for nodes and relationships.
+
+[.enterprise-edition]
+=== Arrow flight server support
+
+The `construct` method can utilize the <<installation-apache-arrow, Arrow Flight Server>> of GDS if it's enabled.
+This in particular means that:
+
+* The construction of the graph is greatly sped up,
+* It is possible to supply more than one data frame, both for nodes and relationships.
 If multiple node dataframes are used, they need to contain distinct node ids across all node data frames.
+* Prior to the `construct` call, a call to `GraphDataScience.set_database` must have been made to explicitly specify which Neo4j database should be targeted.
 
 
 == Inspecting a graph object
