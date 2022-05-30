@@ -81,7 +81,7 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
     ) {
         if (optionalSimilarityFunction.isEmpty()) { return Optional.empty(); }
 
-        Set<Pair<Double, Long>> seeds = new HashSet<>();
+        Set<Pair<Double, Long>> seeds = prepareSeedSet(k);
 
         graph.forEachNode(m -> {
             if (n == m) return true;
@@ -96,6 +96,16 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         });
 
         return Optional.of(seeds);
+    }
+
+    /**
+     * Ensuring the @{@link java.util.HashSet} never needs to resize
+     */
+    @NotNull
+    private static Set<Pair<Double, Long>> prepareSeedSet(int k) {
+        float defaultLoadFactor = 0.75f; // java.util.HashMap.DEFAULT_LOAD_FACTOR
+        int initialCapacity = (int) (k / defaultLoadFactor); // see treatise in @HashMap JavaDoc
+        return new HashSet<>(initialCapacity, defaultLoadFactor);
     }
 
     private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters) {
