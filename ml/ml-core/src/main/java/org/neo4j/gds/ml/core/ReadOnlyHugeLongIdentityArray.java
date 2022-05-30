@@ -21,6 +21,8 @@ package org.neo4j.gds.ml.core;
 
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
+import java.util.stream.LongStream;
+
 public class ReadOnlyHugeLongIdentityArray implements ReadOnlyHugeLongArray {
 
     private final long size;
@@ -37,5 +39,10 @@ public class ReadOnlyHugeLongIdentityArray implements ReadOnlyHugeLongArray {
     @Override
     public long size() {
         return this.size;
+    }
+
+    @Override
+    public long[] toArray() {
+        return LongStream.range(0, size).toArray();
     }
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.function.Function;
 
@@ -38,7 +39,7 @@ public class FractionSplitter {
         return (long) (nodeCount * trainFraction);
     }
 
-    public TrainingExamplesSplit split(HugeLongArray ids, double trainFraction) {
+    public TrainingExamplesSplit split(ReadOnlyHugeLongArray ids, double trainFraction) {
         long trainSize = trainSize(ids.size(), trainFraction);
         long testSize = ids.size() - trainSize;
         var train = initHLA(trainSize, ids::get);
@@ -46,10 +47,10 @@ public class FractionSplitter {
         return TrainingExamplesSplit.of(train, test);
     }
 
-    private HugeLongArray initHLA(long size, Function<Long, Long> transform) {
+    private ReadOnlyHugeLongArray initHLA(long size, Function<Long, Long> transform) {
         var array = HugeLongArray.newArray(size);
         array.setAll(transform::apply);
-        return array;
+        return ReadOnlyHugeLongArray.of(array);
     }
 
 }

@@ -22,9 +22,7 @@ package org.neo4j.gds.ml.nodePropertyPrediction;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.TreeSet;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,8 +34,6 @@ class NodeSplitterTest {
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
             numberOfExamples,
-            id -> id % 4,
-            new TreeSet<>(List.of(0L, 1L, 2L, 3L)),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -53,8 +49,6 @@ class NodeSplitterTest {
         assertThat(splits.outerSplit())
             .matches(outerSplits -> outerSplits.testSet().size() == numberOfExamples * testFraction)
             .matches(outerSplits -> outerSplits.trainSet().size() == numberOfExamples * (1 - testFraction));
-
-        assertThat(splits.innerSplits()).hasSize(validationFolds);
     }
 
     boolean isSorted(long... elements) {

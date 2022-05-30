@@ -132,8 +132,6 @@ public final class LinkPredictionTrain {
 
         var trainingStatistics = new TrainingStatistics(config.metrics());
 
-        var validationSplits = trainValidationSplits(trainRelationshipIds, trainData.labels());
-
         var modelCandidates = new RandomSearch(
             pipeline.trainingParameterSpace(),
             pipeline.numberOfModelSelectionTrials(),
@@ -144,9 +142,11 @@ public final class LinkPredictionTrain {
             progressTracker,
             terminationFlag,
             config.metrics(),
+            pipeline.splitConfig().validationFolds(),
+            config.randomSeed(),
             (trainSet, modelParameters, metricsHandler) -> trainModel(
                 trainData,
-                ReadOnlyHugeLongArray.of(trainSet),
+                trainSet,
                 modelParameters,
                 ProgressTracker.NULL_TRACKER,
                 metricsHandler
@@ -154,13 +154,13 @@ public final class LinkPredictionTrain {
             (evaluationSet, classifier, scoreConsumer) -> computeTrainMetric(
                 trainData,
                 classifier,
-                ReadOnlyHugeLongArray.of(evaluationSet),
+                evaluationSet,
                 scoreConsumer,
                 ProgressTracker.NULL_TRACKER
             )
         );
 
-        crossValidation.selectModel(validationSplits, trainingStatistics, modelCandidates);
+        crossValidation.selectModel(trainRelationshipIds, trainData.labels()::get, new TreeSet<>(classIdMap.originalIdsList()),  trainingStatistics, modelCandidates);
 
         // train best model on the entire training graph
         progressTracker.beginSubTask("Train best model");

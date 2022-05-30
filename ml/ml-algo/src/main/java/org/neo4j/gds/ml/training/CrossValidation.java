@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.ml.training;
 
+import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -30,10 +31,13 @@ import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
+import java.util.SortedSet;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -43,6 +47,8 @@ public class CrossValidation<MODEL_TYPE> {
 
     private final TerminationFlag terminationFlag;
     private final List<Metric> metrics;
+    private final int validationFolds;
+    private final Optional<Long> randomSeed;
     private final ModelTrainer<MODEL_TYPE> modelTrainer;
     private final ModelEvaluator<MODEL_TYPE> modelEvaluator;
 
@@ -58,18 +64,36 @@ public class CrossValidation<MODEL_TYPE> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         List<Metric> metrics,
+        int validationFolds,
+        Optional<Long> randomSeed,
         ModelTrainer<MODEL_TYPE> modelTrainer,
         ModelEvaluator<MODEL_TYPE> modelEvaluator
     ) {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.metrics = metrics;
+        this.validationFolds = validationFolds;
+        this.randomSeed = randomSeed;
         this.modelTrainer = modelTrainer;
         this.modelEvaluator = modelEvaluator;
     }
 
-    public void selectModel(List<TrainingExamplesSplit> validationSplits, TrainingStatistics trainingStatistics, Iterator<TrainerConfig> modelCandidates) {
+    public void selectModel(
+        ReadOnlyHugeLongArray outerTrainSet,
+        LongToLongFunction targets,
+        SortedSet<Long> distinctTargets,
+        TrainingStatistics trainingStatistics,
+        Iterator<TrainerConfig> modelCandidates
+    ) {
         progressTracker.beginSubTask("Select best model");
+
+        List<TrainingExamplesSplit> validationSplits = new StratifiedKFoldSplitter(
+            validationFolds,
+            outerTrainSet,
+            targets,
+            randomSeed,
+            distinctTargets
+        ).splits();
 
         int trial = 0;
         while (modelCandidates.hasNext()) {
@@ -79,7 +103,11 @@ public class CrossValidation<MODEL_TYPE> {
             terminationFlag.assertRunning();
 
             var modelParams = modelCandidates.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
+            progressTracker.logMessage(formatWithLocale(
+                "Method: %s, Parameters: %s",
+                modelParams.method(),
+                modelParams.toMap()
+            ));
 
             var validationStatsBuilder = new ModelStatsBuilder(validationSplits.size());
             var trainStatsBuilder = new ModelStatsBuilder(validationSplits.size());
@@ -134,11 +162,11 @@ public class CrossValidation<MODEL_TYPE> {
 
     @FunctionalInterface
     public interface ModelTrainer<MODEL> {
-        MODEL train(HugeLongArray trainSet, TrainerConfig modelParameters, ModelSpecificMetricsHandler metricsHandler);
+        MODEL train(ReadOnlyHugeLongArray trainSet, TrainerConfig modelParameters, ModelSpecificMetricsHandler metricsHandler);
     }
 
     @FunctionalInterface
     public interface ModelEvaluator<MODEL> {
-        void evaluate(HugeLongArray evaluationSet, MODEL model, MetricConsumer scoreConsumer);
+        void evaluate(ReadOnlyHugeLongArray evaluationSet, MODEL model, MetricConsumer scoreConsumer);
     }
 }

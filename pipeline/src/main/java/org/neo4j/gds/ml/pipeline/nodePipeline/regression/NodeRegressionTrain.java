@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -129,8 +128,6 @@ public final class NodeRegressionTrain {
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
             features.size(),
-            id -> 0L,
-            new TreeSet<>(List.of(0L)),
             progressTracker
         ).split(
             splitConfig.testFraction(),
@@ -148,6 +145,8 @@ public final class NodeRegressionTrain {
             progressTracker,
             terminationFlag,
             metrics,
+            splitConfig.validationFolds(),
+            trainConfig.randomSeed(),
             (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER),
             this::registerMetricScores
         );
@@ -158,7 +157,7 @@ public final class NodeRegressionTrain {
             trainConfig.randomSeed()
         );
 
-        crossValidation.selectModel(splits.innerSplits(), trainingStatistics, modelCandidates);
+        crossValidation.selectModel(splits.outerSplit().trainSet(), id -> 0L, new TreeSet<>(List.of(0L)),  trainingStatistics, modelCandidates);
 
         evaluateBestModel(splits.outerSplit(), trainingStatistics);
 
@@ -168,7 +167,7 @@ public final class NodeRegressionTrain {
     }
 
     private void registerMetricScores(
-        HugeLongArray evaluationSet,
+        ReadOnlyHugeLongArray evaluationSet,
         Regressor regressor,
         MetricConsumer scoreConsumer
     ) {
@@ -212,7 +211,7 @@ public final class NodeRegressionTrain {
         progressTracker.endSubTask("Evaluate on test data");
     }
 
-    private Regressor retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
+    private Regressor retrainBestModel(ReadOnlyHugeLongArray trainSet, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("Retrain best model");
         var retrainedRegressor = trainModel(trainSet, bestParameters, progressTracker);
         progressTracker.endSubTask("Retrain best model");
@@ -221,7 +220,7 @@ public final class NodeRegressionTrain {
     }
 
     private Regressor trainModel(
-        HugeLongArray trainSet,
+        ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
         ProgressTracker customProgressTracker
     ) {
@@ -233,7 +232,7 @@ public final class NodeRegressionTrain {
             trainConfig.randomSeed()
         );
 
-        return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
+        return trainer.train(features, targets, trainSet);
     }
 
 }

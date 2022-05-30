@@ -220,7 +220,7 @@ public final class NodeClassificationTrain {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
         Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
-        HugeLongArray labels = labelsAndClassCounts.labels();
+        var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classCounts.keys());
         var classificationMetrics = classificationMetrics(metrics);
@@ -277,8 +277,6 @@ public final class NodeClassificationTrain {
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
             features.size(),
-            targets::get,
-            new TreeSet<>(classCounts.keys()),
             progressTracker
         ).split(
             splitConfig.testFraction(),
@@ -294,6 +292,8 @@ public final class NodeClassificationTrain {
             progressTracker,
             terminationFlag,
             metrics,
+            splitConfig.validationFolds(),
+            trainConfig.randomSeed(),
             (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER, metricsHandler),
             (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
         );
@@ -304,7 +304,7 @@ public final class NodeClassificationTrain {
             trainConfig.randomSeed()
         );
 
-        crossValidation.selectModel(nodeSplits.innerSplits(), trainingStatistics, modelCandidates);
+        crossValidation.selectModel(nodeSplits.outerSplit().trainSet(), targets::get, new TreeSet<>(classCounts.keys()), trainingStatistics, modelCandidates);
 
         evaluateBestModel(nodeSplits.outerSplit(), trainingStatistics);
 
@@ -314,7 +314,7 @@ public final class NodeClassificationTrain {
     }
 
     private void registerMetricScores(
-        HugeLongArray evaluationSet,
+        ReadOnlyHugeLongArray evaluationSet,
         Classifier classifier,
         MetricConsumer scoreConsumer,
         ProgressTracker customProgressTracker
@@ -361,7 +361,7 @@ public final class NodeClassificationTrain {
         progressTracker.endSubTask("Evaluate on test data");
     }
 
-    private Classifier retrainBestModel(HugeLongArray trainSet, TrainerConfig bestParameters) {
+    private Classifier retrainBestModel(ReadOnlyHugeLongArray trainSet, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("Retrain best model");
         var retrainedClassifier = trainModel(
             trainSet,
@@ -375,7 +375,7 @@ public final class NodeClassificationTrain {
     }
 
     private Classifier trainModel(
-        HugeLongArray trainSet,
+        ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
         ProgressTracker customProgressTracker,
         ModelSpecificMetricsHandler metricsHandler
@@ -391,7 +391,7 @@ public final class NodeClassificationTrain {
             metricsHandler
         );
 
-        return trainer.train(features, targets, ReadOnlyHugeLongArray.of(trainSet));
+        return trainer.train(features, targets, trainSet);
     }
 
 }

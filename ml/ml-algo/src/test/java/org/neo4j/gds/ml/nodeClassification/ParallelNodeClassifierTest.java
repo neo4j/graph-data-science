@@ -29,6 +29,7 @@ import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
@@ -108,7 +109,7 @@ class ParallelNodeClassifierTest {
 
     @Test
     void testOnEvaluationSet(SoftAssertions softly) {
-        var evaluationSet = HugeLongArray.of(4, 7, 13, 17, 1);
+        var evaluationSet = ReadOnlyHugeLongArray.of(4, 7, 13, 17, 1);
         HugeLongArray predictions = predictor.predict(evaluationSet);
         HugeLongArray parallelPredictions = parallelPredictor.predict(evaluationSet);
 

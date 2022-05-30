@@ -19,10 +19,19 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.jetbrains.annotations.TestOnly;
+
 public interface ReadOnlyHugeLongArray {
     long get(long index);
 
     long size();
+
+    @TestOnly
+    long[] toArray();
+
+    static ReadOnlyHugeLongArray of(long... values) {
+        return of(HugeLongArray.of(values));
+    }
 
     static ReadOnlyHugeLongArray of(HugeLongArray hla) {
         return new ReadOnlyHugeLongArray() {
@@ -34,6 +43,11 @@ public interface ReadOnlyHugeLongArray {
             @Override
             public long size() {
                 return hla.size();
+            }
+
+            @Override
+            public long[] toArray() {
+                return hla.toArray();
             }
         };
     }

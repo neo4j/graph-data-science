@@ -19,39 +19,29 @@
  */
 package org.neo4j.gds.ml.nodePropertyPrediction;
 
-import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
-import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.SortedSet;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
-public class NodeSplitter {
+public final class NodeSplitter {
 
     private final long numberOfExamples;
-    private final LongToLongFunction targets;
-    private final SortedSet<Long> distinctTargets;
     private final ProgressTracker progressTracker;
 
     public NodeSplitter(
         long numberOfExamples,
-        LongToLongFunction targets,
-        SortedSet<Long> distinctTargets,
         ProgressTracker progressTracker
     ) {
         this.numberOfExamples = numberOfExamples;
-        this.targets = targets;
-        this.distinctTargets = distinctTargets;
         this.progressTracker = progressTracker;
     }
 
@@ -60,7 +50,7 @@ public class NodeSplitter {
         allTrainingExamples.setAll(i -> i);
 
         ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(randomSeed));
-        var outerSplit = new FractionSplitter().split(allTrainingExamples, 1 - testFraction);
+        var outerSplit = new FractionSplitter().split(ReadOnlyHugeLongArray.of(allTrainingExamples), 1 - testFraction);
 
         warnForSmallNodeSets(
             outerSplit.trainSet().size(),
@@ -69,22 +59,12 @@ public class NodeSplitter {
             progressTracker
         );
 
-        List<TrainingExamplesSplit> innerSplits = new StratifiedKFoldSplitter(
-            validationFolds,
-            ReadOnlyHugeLongArray.of(outerSplit.trainSet()),
-            targets,
-            randomSeed,
-            distinctTargets
-        ).splits();
-
-
-        return ImmutableNodeSplits.of(allTrainingExamples, outerSplit, innerSplits);
+        return ImmutableNodeSplits.of(ReadOnlyHugeLongArray.of(allTrainingExamples), outerSplit);
     }
 
     @ValueClass
     public interface NodeSplits {
-        HugeLongArray allTrainingExamples();
+        ReadOnlyHugeLongArray allTrainingExamples();
         TrainingExamplesSplit outerSplit();
-        List<TrainingExamplesSplit> innerSplits();
     }
 }

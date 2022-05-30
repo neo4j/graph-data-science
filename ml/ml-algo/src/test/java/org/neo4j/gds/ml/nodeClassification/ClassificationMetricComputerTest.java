@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
@@ -97,7 +98,7 @@ class ClassificationMetricComputerTest {
             features,
             targets,
             multiSet,
-            HugeLongArray.of(0, 1, 2, 3),
+            ReadOnlyHugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
             TerminationFlag.RUNNING_TRUE,
