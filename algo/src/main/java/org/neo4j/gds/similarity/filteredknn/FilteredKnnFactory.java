@@ -57,7 +57,8 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return FilteredKnn.create(
+        // we revisit this when integrating with ui
+        return FilteredKnn.createWithoutSeeding(
             graph,
             configuration,
             ImmutableKnnContext

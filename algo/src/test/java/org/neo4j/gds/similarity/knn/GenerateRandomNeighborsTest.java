@@ -70,11 +70,13 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
             SimilarityMetric.LONG_PROPERTY_METRIC
         );
 
+        SimilarityFunction similarityFunction = new SimilarityFunction(similarityComputer);
+
         var random = new SplittableRandom();
         var generateRandomNeighbors = new GenerateRandomNeighbors(
             new UniformKnnSampler(random, nodeCount),
             random,
-            similarityComputer,
+            similarityFunction,
             new KnnNeighborFilter(nodeCount),
             allNeighbors,
             k,

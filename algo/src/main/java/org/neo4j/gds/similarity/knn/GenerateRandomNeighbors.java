@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.knn;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.SplittableRandom;
 
@@ -32,7 +31,7 @@ import java.util.SplittableRandom;
 final class GenerateRandomNeighbors implements Runnable {
     private final KnnSampler sampler;
     private final SplittableRandom random;
-    private final SimilarityComputer computer;
+    private final SimilarityFunction similarityFunction;
     private final NeighborFilter neighborFilter;
     private final HugeObjectArray<NeighborList> neighbors;
     private final int k;
@@ -46,7 +45,7 @@ final class GenerateRandomNeighbors implements Runnable {
     GenerateRandomNeighbors(
         KnnSampler sampler,
         SplittableRandom random,
-        SimilarityComputer computer,
+        SimilarityFunction similarityFunction,
         NeighborFilter neighborFilter,
         HugeObjectArray<NeighborList> neighbors,
         int k,
@@ -57,7 +56,7 @@ final class GenerateRandomNeighbors implements Runnable {
     ) {
         this.sampler = sampler;
         this.random = random;
-        this.computer = computer;
+        this.similarityFunction = similarityFunction;
         this.neighborFilter = neighborFilter;
         this.neighbors = neighbors;
         this.k = k;
@@ -71,7 +70,7 @@ final class GenerateRandomNeighbors implements Runnable {
     @Override
     public void run() {
         var rng = random;
-        var computer = this.computer;
+        var similarityFunction = this.similarityFunction;
         var k = this.k;
         var boundedK = this.boundedK;
         var neighborFilter = this.neighborFilter;
@@ -86,7 +85,8 @@ final class GenerateRandomNeighbors implements Runnable {
 
             var neighbors = new NeighborList(k, neighbourConsumers.get(nodeId));
             for (long candidate : chosen) {
-                neighbors.add(candidate, computer.safeSimilarity(nodeId, candidate), rng, 0.0);
+                double similarity = similarityFunction.computeSimilarity(nodeId, candidate);
+                neighbors.add(candidate, similarity, rng, 0.0);
             }
 
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);

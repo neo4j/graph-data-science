@@ -22,12 +22,14 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.similarity.SimilarityResult;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TargetNodeFilterTest {
     @Test
     void shouldPrioritiseTargetNodes() {
-        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 3);
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 3, Optional.empty());
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -42,7 +44,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyKeepTopK() {
-        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 2);
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 2, Optional.empty());
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -56,7 +58,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyIncludeTargetNodes() {
-        TargetNodeFilter consumer = new TargetNodeFilter(l -> false, 3);
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> false, 3, Optional.empty());
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -67,7 +69,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldIgnoreExactDuplicates() {
-        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 4);
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty());
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -86,7 +88,7 @@ class TargetNodeFilterTest {
      */
     @Test
     void shouldAllowDuplicateElementsWithNewPriorities() {
-        TargetNodeFilter consumer = new TargetNodeFilter(l -> true, 4);
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty());
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);

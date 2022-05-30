@@ -24,6 +24,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
+import org.neo4j.gds.similarity.knn.SimilarityFunction;
+
+import java.util.Optional;
 
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
@@ -37,17 +40,36 @@ import org.neo4j.gds.similarity.knn.KnnContext;
  */
 public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
     /**
-     * This is KNN instrumented with neighbour consumers
+     * This is KNN instrumented with neighbour consumers and similarity function
      */
     private final Knn delegate;
 
     private final TargetNodeFiltering targetNodeFiltering;
     private final NodeFilter sourceNodeFilter;
 
-    public static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+    public static FilteredKnn createWithoutSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+        return create(graph, config, context, Optional.empty());
+    }
+
+    // a bit speculative, but we imagine this being used as entrypoint for seeding
+    public static FilteredKnn createWithDefaultSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
+        var similarityFunction = Knn.defaultSimilarityFunction(graph, config.nodeProperties());
+
+        return create(graph, config, context, Optional.of(similarityFunction));
+    }
+
+    /**
+     * Subtle here, but if you do not provide a similarity function, we won't seed; however, we will immediately create
+     * a default similarity function to use for KNN. Meaning, passing in the default similarity function is not the same
+     * as leaving it empty, only nearly
+     *
+     * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
+     */
+    static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context, Optional<SimilarityFunction> optionalSimilarityFunction) {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
-        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.boundedK(graph.nodeCount()), targetNodeFilter);
-        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering);
+        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.boundedK(graph.nodeCount()), targetNodeFilter, graph, optionalSimilarityFunction);
+        var similarityFunction = optionalSimilarityFunction.orElse(Knn.defaultSimilarityFunction(graph, config.nodeProperties()));
+        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering, similarityFunction);
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
         return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
