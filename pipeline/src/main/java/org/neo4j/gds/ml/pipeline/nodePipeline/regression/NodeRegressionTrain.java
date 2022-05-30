@@ -29,8 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
-import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
+import org.neo4j.gds.ml.metrics.MetricConsumer;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -40,13 +39,14 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
-import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
+import org.neo4j.gds.ml.training.CrossValidation;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -70,11 +70,7 @@ public final class NodeRegressionTrain {
 
         return List.of(
             Tasks.leaf("Shuffle and Split", validationFolds * trainSetSize + testSetSize),
-            Tasks.iterativeFixed(
-                "Select best model",
-                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
-                numberOfModelSelectionTrials
-            ),
+            CrossValidation.progressTask(splitConfig.validationFolds(), numberOfModelSelectionTrials, trainSetSize),
             ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
             Tasks.leaf("Evaluate on test data", testSetSize),
             ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
@@ -111,7 +107,7 @@ public final class NodeRegressionTrain {
         );
     }
 
-    NodeRegressionTrain(
+    private NodeRegressionTrain(
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
         Features features,
@@ -145,9 +141,25 @@ public final class NodeRegressionTrain {
         terminationFlag.assertRunning();
         progressTracker.endSubTask("Shuffle and Split");
 
-        var trainingStatistics = new TrainingStatistics(List.copyOf(trainConfig.metrics()));
+        List<Metric> metrics = List.copyOf(trainConfig.metrics());
+        var trainingStatistics = new TrainingStatistics(metrics);
 
-        selectBestModel(splits.innerSplits(), trainingStatistics);
+        CrossValidation<Regressor> crossValidation = new CrossValidation<>(
+            progressTracker,
+            terminationFlag,
+            metrics,
+            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER),
+            this::registerMetricScores
+        );
+
+        Iterator<TrainerConfig> modelCandidates = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            trainConfig.randomSeed()
+        );
+
+        crossValidation.selectModel(splits.innerSplits(), trainingStatistics, modelCandidates);
+
         evaluateBestModel(splits.outerSplit(), trainingStatistics);
 
         var retrainedModel = retrainBestModel(splits.allTrainingExamples(), trainingStatistics.bestParameters());
@@ -155,69 +167,10 @@ public final class NodeRegressionTrain {
         return ImmutableNodeRegressionTrainResult.of(retrainedModel, trainingStatistics);
     }
 
-    private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask("Select best model");
-
-        var hyperParameterOptimizer = new RandomSearch(
-            pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
-            trainConfig.randomSeed()
-        );
-
-        int trial = 0;
-        while (hyperParameterOptimizer.hasNext()) {
-            terminationFlag.assertRunning();
-
-            progressTracker.beginSubTask("Trial");
-            progressTracker.setSteps(nodeSplits.size());
-
-            var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-
-            var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
-
-            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                var trainSet = nodeSplit.trainSet();
-                var validationSet = nodeSplit.testSet();
-
-                var regressor = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER);
-
-                registerMetricScores(validationSet, regressor, validationStatsBuilder::update);
-                registerMetricScores(trainSet, regressor, trainStatsBuilder::update);
-
-                progressTracker.logSteps(1);
-            }
-
-            var candidateStats = ModelCandidateStats.of(
-                modelParams,
-                trainStatsBuilder.build(),
-                validationStatsBuilder.build()
-            );
-            trainingStatistics.addCandidateStats(candidateStats);
-
-            progressTracker.logMessage(formatWithLocale(
-                "Main validation metric (%s): %.4f",
-                trainingStatistics.evaluationMetric(),
-                trainingStatistics.getMainMetric(trial)
-            ));
-            progressTracker.logMessage(formatWithLocale("Validation metrics: %s",
-                trainingStatistics.validationMetricsAvg(trial)
-            ));
-            progressTracker.logMessage(formatWithLocale("Training metrics: %s",
-                trainingStatistics.trainMetricsAvg(trial)
-            ));
-
-            trial++;
-            progressTracker.endSubTask("Trial");
-        }
-        progressTracker.endSubTask("Select best model");
-    }
-
     private void registerMetricScores(
         HugeLongArray evaluationSet,
         Regressor regressor,
-        BiConsumer<Metric, Double> scoreConsumer
+        MetricConsumer scoreConsumer
     ) {
         var localPredictions = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(
@@ -235,7 +188,7 @@ public final class NodeRegressionTrain {
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );
 
-        trainConfig.metrics().forEach(metric -> scoreConsumer.accept(metric, metric.compute(localTargets, localPredictions)));
+        trainConfig.metrics().forEach(metric -> scoreConsumer.consume(metric, metric.compute(localTargets, localPredictions)));
     }
 
     private void evaluateBestModel(

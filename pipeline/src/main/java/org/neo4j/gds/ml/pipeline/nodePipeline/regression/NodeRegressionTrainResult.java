@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.pipeline.TrainingStatistics;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 
 @ValueClass
 public interface NodeRegressionTrainResult {

@@ -33,9 +33,8 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.neo4j.gds.ml.metrics.ModelCandidateStats;
+import org.neo4j.gds.ml.metrics.MetricConsumer;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
-import org.neo4j.gds.ml.metrics.ModelStatsBuilder;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
@@ -50,17 +49,18 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
-import org.neo4j.gds.ml.pipeline.TrainingStatistics;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
+import org.neo4j.gds.ml.training.CrossValidation;
+import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.function.BiConsumer;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -73,7 +73,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeClassificationTrain {
 
-    private final NodeClassificationPipelineTrainConfig config;
+    private final NodeClassificationPipelineTrainConfig trainConfig;
     private final NodeClassificationTrainingPipeline pipeline;
     private final Features features;
     private final HugeLongArray targets;
@@ -153,11 +153,7 @@ public final class NodeClassificationTrain {
 
         return List.of(
             Tasks.leaf("Shuffle and split", validationFolds * trainSetSize + testSetSize),
-            Tasks.iterativeFixed(
-                "Select best model",
-                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
-                numberOfModelSelectionTrials
-            ),
+            CrossValidation.progressTask(validationFolds, numberOfModelSelectionTrials, trainSetSize),
             ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
             Tasks.leaf("Evaluate on train data", trainSetSize),
             Tasks.leaf("Evaluate on test data", testSetSize),
@@ -267,7 +263,7 @@ public final class NodeClassificationTrain {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.pipeline = pipeline;
-        this.config = config;
+        this.trainConfig = config;
         this.features = features;
         this.targets = labels;
         this.classIdMap = classIdMap;
@@ -287,14 +283,29 @@ public final class NodeClassificationTrain {
         ).split(
             splitConfig.testFraction(),
             splitConfig.validationFolds(),
-            config.randomSeed()
+            trainConfig.randomSeed()
         );
 
         progressTracker.endSubTask("Shuffle and split");
 
-        var trainingStatistics = new TrainingStatistics(List.copyOf(metrics));
+        var trainingStatistics = new TrainingStatistics(metrics);
 
-        selectBestModel(nodeSplits.innerSplits(), trainingStatistics);
+        CrossValidation<Classifier> crossValidation = new CrossValidation<>(
+            progressTracker,
+            terminationFlag,
+            metrics,
+            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER, metricsHandler),
+            (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
+        );
+
+        Iterator<TrainerConfig> modelCandidates = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            trainConfig.randomSeed()
+        );
+
+        crossValidation.selectModel(nodeSplits.innerSplits(), trainingStatistics, modelCandidates);
+
         evaluateBestModel(nodeSplits.outerSplit(), trainingStatistics);
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
@@ -302,77 +313,10 @@ public final class NodeClassificationTrain {
         return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics);
     }
 
-    private void selectBestModel(List<TrainingExamplesSplit> nodeSplits, TrainingStatistics trainingStatistics) {
-        progressTracker.beginSubTask("Select best model");
-
-        var hyperParameterOptimizer = new RandomSearch(
-            pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
-            config.randomSeed()
-        );
-
-        int trial = 0;
-        while (hyperParameterOptimizer.hasNext()) {
-            progressTracker.beginSubTask("Trial");
-            progressTracker.setSteps(nodeSplits.size());
-            var modelParams = hyperParameterOptimizer.next();
-            progressTracker.logMessage(formatWithLocale("Method: %s, Parameters: %s", modelParams.method(), modelParams.toMap()));
-
-            var validationStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
-            var trainStatsBuilder = new ModelStatsBuilder(nodeSplits.size());
-            var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
-
-            for (TrainingExamplesSplit nodeSplit : nodeSplits) {
-                var trainSet = nodeSplit.trainSet();
-                var validationSet = nodeSplit.testSet();
-
-                var classifier = trainModel(trainSet, modelParams, ProgressTracker.NULL_TRACKER, metricsHandler);
-
-                registerMetricScores(validationSet, classifier, validationStatsBuilder::update, ProgressTracker.NULL_TRACKER);
-                registerMetricScores(trainSet, classifier, trainStatsBuilder::update, ProgressTracker.NULL_TRACKER);
-
-                progressTracker.logSteps(1);
-            }
-
-            var candidateStats = ModelCandidateStats.of(
-                modelParams,
-                trainStatsBuilder.build(),
-                validationStatsBuilder.build()
-            );
-            trainingStatistics.addCandidateStats(candidateStats);
-
-            var validationStats = trainingStatistics.validationMetricsAvg(trial);
-            var trainStats = trainingStatistics.trainMetricsAvg(trial);
-            double mainMetric = trainingStatistics.getMainMetric(trial);
-
-            progressTracker.logMessage(formatWithLocale(
-                "Main validation metric (%s): %.4f",
-                trainingStatistics.evaluationMetric(),
-                mainMetric
-            ));
-            progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
-            progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
-
-            trial++;
-
-            progressTracker.endSubTask("Trial");
-        }
-
-        int bestTrial = trainingStatistics.getBestTrialIdx() + 1;
-        double bestTrialScore = trainingStatistics.getBestTrialScore();
-        progressTracker.logMessage(formatWithLocale(
-            "Best trial was Trial %d with main validation metric %.4f",
-            bestTrial,
-            bestTrialScore
-        ));
-
-        progressTracker.endSubTask("Select best model");
-    }
-
     private void registerMetricScores(
         HugeLongArray evaluationSet,
         Classifier classifier,
-        BiConsumer<Metric, Double> scoreConsumer,
+        MetricConsumer scoreConsumer,
         ProgressTracker customProgressTracker
     ) {
         var trainMetricComputer = ClassificationMetricComputer.forEvaluationSet(
@@ -381,12 +325,12 @@ public final class NodeClassificationTrain {
             classCounts,
             evaluationSet,
             classifier,
-            config.concurrency(),
+            trainConfig.concurrency(),
             terminationFlag,
             customProgressTracker
         );
         // currently no specific metrics are evaluated on test
-        classificationMetrics.forEach(metric -> scoreConsumer.accept(metric, trainMetricComputer.score(metric)));
+        classificationMetrics.forEach(metric -> scoreConsumer.consume(metric, trainMetricComputer.score(metric)));
     }
 
     private void evaluateBestModel(
@@ -441,8 +385,8 @@ public final class NodeClassificationTrain {
             classIdMap,
             terminationFlag,
             customProgressTracker,
-            config.concurrency(),
-            config.randomSeed(),
+            trainConfig.concurrency(),
+            trainConfig.randomSeed(),
             false,
             metricsHandler
         );
