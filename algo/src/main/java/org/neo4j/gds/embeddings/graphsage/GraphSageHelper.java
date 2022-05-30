@@ -61,7 +61,7 @@ public final class GraphSageHelper {
 
     private GraphSageHelper() {}
 
-    public static Variable<Matrix> embeddingsComputationGraph(
+    static Variable<Matrix> embeddingsComputationGraph(
         List<SubGraph> subGraphs,
         Layer[] layers,
         Variable<Matrix> batchedFeaturesExtractor
@@ -80,7 +80,7 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    public static List<SubGraph> subGraphsPerLayer(Graph graph, boolean useWeights, long[] nodeIds, Layer[] layers) {
+    static List<SubGraph> subGraphsPerLayer(Graph graph, boolean useWeights, long[] nodeIds, Layer[] layers) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
@@ -217,11 +217,8 @@ public final class GraphSageHelper {
         return FeatureExtraction.extract(graph, extractors, features);
     }
 
-    public static List<FeatureExtractor> featureExtractors(Graph graph, GraphSageTrainConfig config) {
-        return FeatureExtraction.propertyExtractors(
-            graph,
-            config.featureProperties()
-        );
+    static List<FeatureExtractor> featureExtractors(Graph graph, GraphSageTrainConfig config) {
+        return FeatureExtraction.propertyExtractors(graph, config.featureProperties());
     }
 
     public static MultiLabelFeatureExtractors multiLabelFeatureExtractors(

@@ -274,16 +274,16 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                87.34,
+                87.33,
                 80.75,
-                74.07,
-                93.12,
-                96.36,
-                80.50,
-                77.31,
-                99.70,
-                83.60,
-                83.60
+                72.93,
+                81.91,
+                85.15,
+                77.36,
+                75.76,
+                90.22,
+                77.16,
+                71.55
                 }, Offset.offset(0.05)
             );
     }
@@ -306,7 +306,7 @@ class GraphSageModelTrainerTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0.01, true, 8",
+        "0.01, true, 3",
         "1.0, false, 10"
     })
     void batchesPerIteration(double batchSamplingRatio, boolean expectedConvergence, int expectedRanEpochs) {

@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -47,7 +48,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -60,7 +60,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class GraphSageModelTrainer {
     private final long randomSeed;
     private final boolean useWeights;
-    private final Function<Graph, List<LayerConfig>> layerConfigsFunction;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
@@ -78,7 +77,6 @@ public class GraphSageModelTrainer {
         FeatureFunction featureFunction,
         Collection<Weights<Matrix>> labelProjectionWeights
     ) {
-        this.layerConfigsFunction = graph -> config.layerConfigs(firstLayerColumns(config, graph));
         this.config = config;
         this.featureFunction = featureFunction;
         this.labelProjectionWeights = labelProjectionWeights;
@@ -104,7 +102,7 @@ public class GraphSageModelTrainer {
     }
 
     public ModelTrainResult train(Graph graph, HugeObjectArray<double[]> features) {
-        var layers = layerConfigsFunction.apply(graph).stream()
+        var layers = config.layerConfigs(firstLayerColumns(config, graph)).stream()
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
@@ -117,16 +115,10 @@ public class GraphSageModelTrainer {
 
         var batchSampler = new BatchSampler(graph);
 
-        var batchTasks = batchSampler
-            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed)
-            .stream()
-            .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
-            .collect(Collectors.toList());
+        List<long[]> extendedBatches = batchSampler
+            .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed);
 
         var random = new Random(randomSeed);
-        Supplier<List<BatchTask>> batchTaskSampler = () -> IntStream.range(0, config.batchesPerIteration(graph.nodeCount()))
-            .mapToObj(__ -> batchTasks.get(random.nextInt(batchTasks.size())))
-            .collect(Collectors.toList());
 
         progressTracker.endSubTask("Prepare batches");
 
@@ -137,8 +129,35 @@ public class GraphSageModelTrainer {
         var prevEpochLoss = Double.NaN;
         int epochs = config.epochs();
 
+        // if each batch is used more than once, we cache the tasks, otherwise we compute them lazily
+        boolean createBatchTasksEagerly = config.batchesPerIteration(graph.nodeCount()) * config.maxIterations() > extendedBatches.size();
+
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
+
+            if (epoch > 1) {
+                // allow sampling new neighbors
+                Arrays.stream(layers).forEach(Layer::modifyRandomState);
+            }
+
+            Supplier<List<BatchTask>> batchTaskSampler;
+            if (createBatchTasksEagerly) {
+                List<BatchTask> tasksForEpoch = extendedBatches
+                    .stream()
+                    .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
+                    .collect(Collectors.toList());
+
+                batchTaskSampler = () -> IntStream
+                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
+                    .collect(Collectors.toList());
+            } else {
+                batchTaskSampler = () -> IntStream
+                    .range(0, config.batchesPerIteration(graph.nodeCount()))
+                    .mapToObj(__ -> createBatchTask(extendedBatches.get(random.nextInt(extendedBatches.size())), graph, features, layers, weights))
+                    .collect(Collectors.toList());
+            }
+
             var epochResult = trainEpoch(batchTaskSampler, weights, prevEpochLoss);
             List<Double> epochLosses = epochResult.losses();
             iterationLossesPerEpoch.add(epochLosses);
@@ -152,6 +171,9 @@ public class GraphSageModelTrainer {
         return ModelTrainResult.of(iterationLossesPerEpoch, converged, layers);
     }
 
+    /**
+     * sampling the neighbor subgraph for each layer + constructing the loss function
+     */
     private BatchTask createBatchTask(
         long[] extendedBatch,
         Graph graph,

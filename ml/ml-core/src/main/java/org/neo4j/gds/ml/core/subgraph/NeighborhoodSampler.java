@@ -67,6 +67,10 @@ public class NeighborhoodSampler {
         return this.randomSeed;
     }
 
+    public void changeRandomState() {
+        this.randomSeed++;
+    }
+
     public OptionalLong sampleOne(Graph graph, long nodeId) {
         return sample(graph, nodeId, 1).findFirst();
     }

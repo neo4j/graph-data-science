@@ -61,14 +61,14 @@ public final class LayerFactory {
                     rows,
                     cols,
                     activationFunction.weightInitBound(rows, cols),
-                    randomSeed
+                    randomSeed + 1
                 );
 
                 Weights<Matrix> neighborsWeights = generateWeights(
                     rows,
                     rows,
                     activationFunction.weightInitBound(rows, rows),
-                    randomSeed
+                    randomSeed + 2
                 );
 
                 Weights<Vector> bias = new Weights<>(Vector.create(0D, rows));
