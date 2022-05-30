@@ -88,7 +88,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final IdMap nodes;
 
-    protected final Map<RelationshipType, Relationships.Topology> relationships;
+    private final Map<RelationshipType, Relationships.Topology> relationships;
 
     private final Map<RelationshipType, RelationshipPropertyStore> relationshipProperties;
 
