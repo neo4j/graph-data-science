@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.randomforest;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -55,17 +56,20 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
     private final RandomForestRegressorTrainerConfig config;
     private final int concurrency;
     private final SplittableRandom random;
+    private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
     public RandomForestRegressorTrainer(
         int concurrency,
         RandomForestRegressorTrainerConfig config,
         Optional<Long> randomSeed,
+        TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
         this.config = config;
         this.concurrency = concurrency;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
+        this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
     }
 
@@ -132,7 +136,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 

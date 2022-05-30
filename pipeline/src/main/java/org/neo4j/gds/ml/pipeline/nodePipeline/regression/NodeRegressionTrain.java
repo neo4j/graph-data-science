@@ -133,6 +133,7 @@ public final class NodeRegressionTrain {
             trainConfig.randomSeed()
         );
 
+        terminationFlag.assertRunning();
         progressTracker.endSubTask("Shuffle and Split");
 
         var trainingStatistics = new TrainingStatistics(List.copyOf(trainConfig.metrics()));
@@ -156,6 +157,8 @@ public final class NodeRegressionTrain {
 
         int trial = 0;
         while (hyperParameterOptimizer.hasNext()) {
+            terminationFlag.assertRunning();
+
             progressTracker.beginSubTask("Trial");
 
             var modelParams = hyperParameterOptimizer.next();
@@ -212,6 +215,8 @@ public final class NodeRegressionTrain {
             trainConfig.concurrency(),
             idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
         );
+
+        terminationFlag.assertRunning();
 
         HugeDoubleArray localTargets = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(

@@ -34,6 +34,7 @@ public class NodeRegressionPredict {
     private final Features features;
     private final int concurrency;
     private final ProgressTracker progressTracker;
+    private final TerminationFlag terminationFlag;
 
     public NodeRegressionPredict(
         Regressor regressor,
@@ -46,6 +47,7 @@ public class NodeRegressionPredict {
         this.features = features;
         this.concurrency = concurrency;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public static Task progressTask(long nodeCount) {
@@ -59,6 +61,7 @@ public class NodeRegressionPredict {
         ParallelUtil.parallelForEachNode(
             features.size(),
             concurrency,
+            terminationFlag,
             id -> predictedTargets.set(id, regressor.predict(features.get(id)))
         );
         progressTracker.endSubTask("Predict");
