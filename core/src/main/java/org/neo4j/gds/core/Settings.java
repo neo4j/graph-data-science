@@ -70,8 +70,8 @@ public final class Settings {
         return GraphDatabaseSettings.neo4j_home;
     }
 
-    public static Setting<String> recordFormat() {
-        return GraphDatabaseSettings.record_format;
+    public static Setting<?> recordFormat() {
+        return Neo4jProxy.recordFormatSetting();
     }
 
     public static Setting<Boolean> udc() {
@@ -99,10 +99,6 @@ public final class Settings {
 
     public static Setting<Long> transactionStateMaxOffHeapMemory() {
         return GraphDatabaseSettings.tx_state_max_off_heap_memory;
-    }
-
-    public static Setting<Boolean> allowUpgrade() {
-        return GraphDatabaseSettings.allow_upgrade;
     }
 
     public static Setting<Path> storeInternalLogPath() {

@@ -25,7 +25,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
 import org.neo4j.internal.batchimport.IndexConfig;
 
@@ -64,7 +63,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Configuration.Ignore
     @SuppressWarnings("immutables:untype")
     default String recordFormat() {
-        return Settings.recordFormat().defaultValue();
+        return Neo4jProxy.recordFormatName(Neo4jProxy.recordFormatSetting().defaultValue());
     }
 
     @Value.Default

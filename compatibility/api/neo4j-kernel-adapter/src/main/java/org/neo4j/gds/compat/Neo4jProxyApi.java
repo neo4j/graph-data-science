@@ -227,4 +227,8 @@ public interface Neo4jProxyApi {
     Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver);
 
     boolean isNotNumericIndex(IndexCapability indexCapability);
+
+    Setting<?> recordFormatSetting();
+
+    String recordFormatName(Object recordFormat);
 }

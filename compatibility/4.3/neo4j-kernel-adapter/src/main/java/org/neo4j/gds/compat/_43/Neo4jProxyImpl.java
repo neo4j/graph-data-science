@@ -500,4 +500,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public boolean isNotNumericIndex(IndexCapability indexCapability) {
         return indexCapability.valueCapability(ValueCategory.NUMBER) != IndexValueCapability.YES;
     }
+
+    @Override
+    public Setting<?> recordFormatSetting() {
+        return GraphDatabaseSettings.record_format;
+    }
+
+    @Override
+    public String recordFormatName(Object recordFormat) {
+        return (String) recordFormat;
+    }
 }

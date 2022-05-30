@@ -375,6 +375,14 @@ public final class Neo4jProxy {
         return IMPL.isNotNumericIndex(indexCapability);
     }
 
+    public static Setting<?> recordFormatSetting() {
+        return IMPL.recordFormatSetting();
+    }
+
+    public static String recordFormatName(Object recordFormat) {
+        return IMPL.recordFormatName(recordFormat);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }
