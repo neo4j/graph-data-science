@@ -25,13 +25,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.ConsecutiveIdsConfigTest;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -62,6 +64,31 @@ class LouvainStreamProcTest extends LouvainProcTest<LouvainStreamConfig> impleme
         });
         assertCommunities(actualCommunities, RESULT);
     }
+
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")
+    void testStreamConsecutiveIds(GdsCypher.QueryBuilder queryBuilder, String testCaseName) {
+        @Language("Cypher") String query = queryBuilder
+            .algo("louvain")
+            .streamMode()
+            .addParameter("consecutiveIds", true)
+            .yields("nodeId", "communityId", "intermediateCommunityIds");
+
+        var communityMap = new HashSet<Long>();
+
+        List<Long> actualCommunities = new ArrayList<>();
+        runQueryWithRowConsumer(query, row -> {
+            int id = row.getNumber("nodeId").intValue();
+            long community = row.getNumber("communityId").longValue();
+            communityMap.add(community);
+            assertNull(row.get("intermediateCommunityIds"));
+            actualCommunities.add(id, community);
+        });
+        assertCommunities(actualCommunities, RESULT);
+        assertThat(communityMap).hasSize(3).containsExactlyInAnyOrder(0L, 1L, 2L);
+
+    }
+
 
     @ParameterizedTest(name = "{1}")
     @MethodSource("org.neo4j.gds.louvain.LouvainProcTest#graphVariations")

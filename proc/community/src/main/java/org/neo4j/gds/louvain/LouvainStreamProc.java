@@ -83,6 +83,12 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
 
+            boolean consecutiveIds = computationResult
+                .config()
+                .consecutiveIds();
+
+            var nodeProperties = (computationResult.isGraphEmpty() || !consecutiveIds) ? null : nodeProperties((computationResult));
+
             return LongStream
                 .range(0, graph.nodeCount())
                 .boxed()
@@ -90,10 +96,16 @@ public class LouvainStreamProc extends StreamProc<Louvain, Louvain, LouvainStrea
                     boolean includeIntermediateCommunities = computationResult
                         .config()
                         .includeIntermediateCommunities();
+
                     Louvain louvain = computationResult.result();
                     long[] communities = includeIntermediateCommunities ? louvain.getCommunities(nodeId) : null;
-
-                    return new StreamResult(graph.toOriginalNodeId(nodeId), communities, louvain.getCommunity(nodeId));
+                    long communityId = consecutiveIds ? nodeProperties.longValue(
+                        nodeId) : louvain.getCommunity(nodeId);
+                    return new StreamResult(
+                        graph.toOriginalNodeId(nodeId),
+                        communities,
+                        communityId
+                    );
                 });
         });
     }
