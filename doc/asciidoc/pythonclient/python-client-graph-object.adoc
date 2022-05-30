@@ -106,7 +106,7 @@ If multiple node dataframes are used, they need to contain distinct node ids acr
 There are convenience methods on the graph object that let us extract information about our projected graph.
 
 .Graph object methods
-[opts="header",cols="9m,6m,7m,13"]
+[opts="header",cols="9m,6m,7m,13", role="no-break"]
 |===
 | Name                    | Arguments                     | Return type         | Description
 | name                    | -                             | str                 | The name of the projected graph.
