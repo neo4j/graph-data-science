@@ -383,6 +383,10 @@ public final class Neo4jProxy {
         return IMPL.recordFormatName(recordFormat);
     }
 
+    public static BoltTransactionRunner boltTransactionRunner() {
+        return IMPL.boltTransactionRunner();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

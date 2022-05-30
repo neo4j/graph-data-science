@@ -231,4 +231,6 @@ public interface Neo4jProxyApi {
     Setting<?> recordFormatSetting();
 
     String recordFormatName(Object recordFormat);
+
+    BoltTransactionRunner<?, ?> boltTransactionRunner();
 }

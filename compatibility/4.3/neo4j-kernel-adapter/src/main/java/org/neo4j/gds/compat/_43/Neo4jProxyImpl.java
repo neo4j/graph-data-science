@@ -29,6 +29,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.database.DatabaseContext;
 import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -509,5 +510,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public String recordFormatName(Object recordFormat) {
         return (String) recordFormat;
+    }
+
+    @Override
+    public BoltTransactionRunner<?, ?> boltTransactionRunner() {
+        return new BoltTransactionRunnerImpl();
     }
 }

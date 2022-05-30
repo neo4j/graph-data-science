@@ -85,6 +85,7 @@ ext {
 
 def neo_deps = [
     'annotations',
+    'neo4j-bolt',
     'neo4j-collections',
     'neo4j-command-line',
     'neo4j-common',
