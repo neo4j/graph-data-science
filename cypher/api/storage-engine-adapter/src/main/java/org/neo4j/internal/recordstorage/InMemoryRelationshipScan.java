@@ -29,7 +29,10 @@ public class InMemoryRelationshipScan extends BaseRecordScan<AbstractInMemoryRel
         return cursor.scanRange(start, stopInclusive);
     }
 
-    @Override
+    boolean scanBatch(long sizeHint, AbstractInMemoryRelationshipScanCursor cursor) {
+        return super.scanBatch(sizeHint, cursor);
+    }
+
     public boolean scanBatch(int sizeHint, AbstractInMemoryRelationshipScanCursor cursor) {
         return super.scanBatch(sizeHint, cursor);
     }

@@ -25,6 +25,8 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
 import org.neo4j.token.TokenHolders;
 
+import java.io.IOException;
+
 public class InMemoryCountsStoreImpl extends AbstractInMemoryCountStore {
 
     public InMemoryCountsStoreImpl(
@@ -38,6 +40,11 @@ public class InMemoryCountsStoreImpl extends AbstractInMemoryCountStore {
     public void start(
         CursorContext cursorContext, MemoryTracker memoryTracker
     ) {
+
+    }
+
+    @Override
+    public void checkpoint(CursorContext cursorContext) throws IOException {
 
     }
 }

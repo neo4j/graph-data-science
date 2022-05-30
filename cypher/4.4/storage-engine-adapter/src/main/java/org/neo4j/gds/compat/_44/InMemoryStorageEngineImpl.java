@@ -30,6 +30,8 @@ import org.neo4j.gds.storageengine.InMemoryTransactionStateVisitor;
 import org.neo4j.internal.diagnostics.DiagnosticsLogger;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.kernel.KernelVersion;
+import org.neo4j.kernel.impl.api.InjectedNLIUpgradeCallback;
 import org.neo4j.kernel.impl.store.stats.StoreEntityCounters;
 import org.neo4j.lock.LockTracer;
 import org.neo4j.lock.ResourceLocker;
@@ -47,6 +49,7 @@ import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
@@ -137,6 +140,18 @@ public final class InMemoryStorageEngineImpl extends AbstractInMemoryStorageEngi
     @Override
     public void forceClose() {
         shutdown();
+    }
+
+    @Override
+    public void flushAndForce(CursorContext cursorContext) {
+
+    }
+
+    @Override
+    public List<StorageCommand> createUpgradeCommands(
+        KernelVersion versionToUpgradeTo, InjectedNLIUpgradeCallback injectedNLIUpgradeCallback
+    ) {
+        return null;
     }
 
     @Override

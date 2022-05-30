@@ -27,8 +27,6 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.token.TokenHolders;
 import org.neo4j.token.api.TokenNotFoundException;
 
-import java.io.IOException;
-
 public abstract class AbstractInMemoryCountStore implements CountsStore {
 
     private final GraphStore graphStore;
@@ -65,11 +63,6 @@ public abstract class AbstractInMemoryCountStore implements CountsStore {
     ) {
         // TODO: this is quite wrong
         return graphStore.relationshipCount();
-    }
-
-    @Override
-    public void checkpoint(CursorContext cursorContext) throws IOException {
-
     }
 
     @Override
