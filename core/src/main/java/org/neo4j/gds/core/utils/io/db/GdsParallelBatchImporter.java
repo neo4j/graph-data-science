@@ -35,6 +35,9 @@ import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
+import org.neo4j.io.pagecache.PageCache;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
 import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
@@ -61,6 +64,8 @@ public final class GdsParallelBatchImporter {
     private final ExecutionMonitor executionMonitor;
 
     private final FileSystemAbstraction fs;
+    private final PageCache pageCache;
+    private final CursorContextFactory cursorContextFactory;
     private final LogService logService;
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
@@ -74,12 +79,16 @@ public final class GdsParallelBatchImporter {
         var dependencyResolver = db.getDependencyResolver();
         var dbms = dependencyResolver.resolveDependency(DatabaseManagementService.class);
         var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
+        var pageCache = dependencyResolver.resolveDependency(PageCache.class);
+        var cursorContextFactory = dependencyResolver.resolveDependency(CursorContextFactory.class);
         var logService = dependencyResolver.resolveDependency(LogService.class);
         var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
+            pageCache,
+            cursorContextFactory,
             dbms,
             fs,
             logService,
@@ -96,12 +105,16 @@ public final class GdsParallelBatchImporter {
         var db = (GraphDatabaseAPI) dbms.database(SYSTEM_DATABASE_NAME);
         var dependencyResolver = db.getDependencyResolver();
         var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
+        var pageCache = dependencyResolver.resolveDependency(PageCache.class);
+        var cursorContextFactory = dependencyResolver.resolveDependency(CursorContextFactory.class);
         var logService = dependencyResolver.resolveDependency(LogService.class);
         var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
+            pageCache,
+            cursorContextFactory,
             dbms,
             fs,
             logService,
@@ -113,6 +126,8 @@ public final class GdsParallelBatchImporter {
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ExecutionMonitor executionMonitor,
+        PageCache pageCache,
+        CursorContextFactory cursorContextFactory,
         DatabaseManagementService dbms,
         FileSystemAbstraction fs,
         LogService logService,
@@ -121,6 +136,8 @@ public final class GdsParallelBatchImporter {
         this.config = config;
         this.log = log;
         this.executionMonitor = executionMonitor;
+        this.pageCache = pageCache;
+        this.cursorContextFactory = cursorContextFactory;
         this.dbms = dbms;
         this.fs = fs;
         this.logService = logService;
@@ -215,6 +232,7 @@ public final class GdsParallelBatchImporter {
         Collector collector,
         JobScheduler jobScheduler
     ) {
+        var recordDatabaseLayout = RecordDatabaseLayout.of(databaseConfig);
         return Neo4jProxy.instantiateBatchImporter(
             BatchImporterFactory.withHighestPriority(),
             databaseLayout,
@@ -225,7 +243,14 @@ public final class GdsParallelBatchImporter {
             executionMonitor,
             AdditionalInitialIds.EMPTY,
             databaseConfig,
-            RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
+            RecordFormatSelector.selectForStoreOrConfigForNewDbs(
+                databaseConfig,
+                recordDatabaseLayout,
+                fs,
+                pageCache,
+                logService.getInternalLogProvider(),
+                cursorContextFactory
+            ),
             jobScheduler,
             collector
         );
