@@ -80,10 +80,11 @@ include::specific-train-configuration.adoc[]
 .Metrics collected during training
 [opts="header",cols="2m,1,6"]
 |===
-| Name        | Type    | Description
-| ranEpochs   | Integer | The number of ran epochs during training.
-| epochLosses | List    | Ordered list of the losses after each epoch.
-| didConverge | Boolean | Indicates if the training has converged.
+| Name                  | Type                     | Description
+| ranEpochs             | Integer                  | The number of ran epochs during training.
+| epochLosses           | List                     | The average loss per node after each epoch.
+| iterationLossPerEpoch | List of List of Float    | The average loss per node after each iteration for each epoch.
+| didConverge           | Boolean                  | Indicates if the training has converged.
 |===
 
 ======
