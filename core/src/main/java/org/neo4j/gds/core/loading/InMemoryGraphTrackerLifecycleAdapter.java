@@ -19,24 +19,27 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
-import org.neo4j.dbms.database.DatabaseContext;
-import org.neo4j.dbms.database.DatabaseManager;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.event.DatabaseEventContext;
 import org.neo4j.graphdb.event.DatabaseEventListener;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
+
+import java.util.Set;
 
 public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
     private final DatabaseManagementService dbms;
-    private final DatabaseManager<DatabaseContext> databaseManager;
+    private final Set<NamedDatabaseId> registeredDatabases;
 
     InMemoryGraphTrackerLifecycleAdapter(
         DatabaseManagementService dbms,
-        DatabaseManager<DatabaseContext> databaseManager
+        DependencyResolver dependencyResolver
     ) {
         this.dbms = dbms;
-        this.databaseManager = databaseManager;
+        this.registeredDatabases = Neo4jProxy.registeredDatabases(dependencyResolver);
     }
 
     @Override
@@ -70,8 +73,7 @@ public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter imple
     }
 
     private void databaseIsShuttingDown(String databaseName) {
-        var databaseIds = databaseManager.registeredDatabases().keySet();
-        var namedDatabaseId = databaseIds
+        var namedDatabaseId = registeredDatabases
             .stream()
             .filter(id -> id.name().equals(databaseName))
             .findFirst()

@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
@@ -68,6 +69,7 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public interface Neo4jProxyApi {
 
@@ -220,4 +222,6 @@ public interface Neo4jProxyApi {
         LogProvider logProvider,
         PageCacheTracer pageCacheTracer
     );
+
+    Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver);
 }

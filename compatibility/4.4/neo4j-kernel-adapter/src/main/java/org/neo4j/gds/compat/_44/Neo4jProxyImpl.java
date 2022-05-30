@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.compat._44;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.dbms.database.DatabaseContext;
+import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
@@ -102,6 +105,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -485,5 +489,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             NullLogService.getInstance().getInternalLogProvider(),
             PageCacheTracer.NULL
         );
+    }
+
+    @Override
+    public Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
+        DatabaseManager<DatabaseContext> databaseManager = dependencyResolver.resolveDependency(DatabaseManager.class);
+        return databaseManager.registeredDatabases().keySet();
     }
 }

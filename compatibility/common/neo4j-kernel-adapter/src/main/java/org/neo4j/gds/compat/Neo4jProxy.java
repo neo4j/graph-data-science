@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
@@ -72,6 +73,7 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 @SuppressForbidden(reason = "This is the best we can do at the moment")
 public final class Neo4jProxy {
@@ -362,6 +364,10 @@ public final class Neo4jProxy {
         PageCacheTracer pageCacheTracer
     ) {
         return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logProvider, pageCacheTracer);
+    }
+
+    public static Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
+        return IMPL.registeredDatabases(dependencyResolver);
     }
 
     private Neo4jProxy() {
