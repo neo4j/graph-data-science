@@ -73,6 +73,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class TestSupport {
 
+    public static final boolean CI =
+        System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null;
+
     private TestSupport() {}
 
     public static Stream<Orientation> allDirectedProjections() {

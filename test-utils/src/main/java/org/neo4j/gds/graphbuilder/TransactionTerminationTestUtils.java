@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphbuilder;
 
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
@@ -56,7 +57,7 @@ public final class TransactionTerminationTestUtils {
         long terminationDelay = terminatedAt - terminationTime.get();
         long terminationDelayMillis = TimeUnit.NANOSECONDS.toMillis(terminationDelay);
 
-        if (System.getenv("TEAMCITY_VERSION") != null || System.getenv("CI") != null || System.getenv("BUILD_ID") != null) {
+        if (TestSupport.CI) {
             maxDelayMillis *= CI_SMEAR;
             if (maxDelayMillis < 0) {
                 maxDelayMillis = Long.MAX_VALUE;
