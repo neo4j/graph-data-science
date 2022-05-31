@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import com.carrotsearch.hppc.LongArrayList;
+import org.apache.commons.lang3.function.TriFunction;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -29,13 +30,10 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
+import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnFactory;
-import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.similarity.knn.NeighborList;
-
-import java.util.List;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
@@ -45,7 +43,20 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<FilteredKnn, CONFIG> {
     private static final String FILTERED_KNN_TASK_NAME = "Filtered KNN";
 
-    private static final String KNN_BASE_TASK_NAME = "FilteredKnn";
+    private final TriFunction<Graph, CONFIG, KnnContext, FilteredKnn> unseededFilteredKnnSupplier;
+    private final TriFunction<Graph, CONFIG, KnnContext, FilteredKnn> seededFilteredKnnSupplier;
+
+    public FilteredKnnFactory() {
+        this(FilteredKnn::createWithoutSeeding, FilteredKnn::createWithDefaultSeeding);
+    }
+
+    FilteredKnnFactory(
+        TriFunction<Graph, CONFIG, KnnContext, FilteredKnn> unseededFilteredKnnSupplier,
+        TriFunction<Graph, CONFIG, KnnContext, FilteredKnn> seededFilteredKnnSupplier
+    ) {
+        this.unseededFilteredKnnSupplier = unseededFilteredKnnSupplier;
+        this.seededFilteredKnnSupplier = seededFilteredKnnSupplier;
+    }
 
     @Override
     public String taskName() {
@@ -53,21 +64,18 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
     }
 
     @Override
-    public FilteredKnn build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        // we revisit this when integrating with ui
-        return FilteredKnn.createWithoutSeeding(
-            graph,
-            configuration,
-            ImmutableKnnContext
-                .builder()
-                .progressTracker(progressTracker)
-                .executor(Pools.DEFAULT)
-                .build()
-        );
+    public FilteredKnn build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        KnnContext knnContext = ImmutableKnnContext
+            .builder()
+            .progressTracker(progressTracker)
+            .executor(Pools.DEFAULT)
+            .build();
+
+        if (configuration.seedTargetNodes()) {
+            return seededFilteredKnnSupplier.apply(graph, configuration, knnContext);
+        }
+
+        return unseededFilteredKnnSupplier.apply(graph, configuration, knnContext);
     }
 
     @Override

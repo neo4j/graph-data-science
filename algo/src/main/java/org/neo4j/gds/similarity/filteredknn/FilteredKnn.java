@@ -38,7 +38,7 @@ import java.util.Optional;
  *
  * In both cases the source or target node set can be actual specified nodes, or it could be all nodes with a label.
  */
-public final class FilteredKnn extends Algorithm<FilteredKnnResult> {
+public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     /**
      * This is KNN instrumented with neighbour consumers and similarity function
      */
