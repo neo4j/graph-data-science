@@ -128,7 +128,7 @@ public class Node2VecModel {
             ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
 
             double loss = tasks.stream().mapToDouble(TrainingTask::lossSum).sum();
-            progressTracker.logMessage(formatWithLocale("Loss %.4f", loss));
+            progressTracker.logInfo(formatWithLocale("Loss %.4f", loss));
             lossPerIteration.add(loss);
 
             progressTracker.endSubTask();

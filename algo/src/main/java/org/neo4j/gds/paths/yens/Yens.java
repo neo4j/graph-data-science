@@ -208,7 +208,7 @@ public final class Yens extends Algorithm<DijkstraResult> {
     }
 
     private Optional<PathResult> computeDijkstra(long sourceNode) {
-        progressTracker.logMessage(formatWithLocale("Dijkstra for spur node %d", sourceNode));
+        progressTracker.logInfo(formatWithLocale("Dijkstra for spur node %d", sourceNode));
         return dijkstra.compute().findFirst();
     }
 

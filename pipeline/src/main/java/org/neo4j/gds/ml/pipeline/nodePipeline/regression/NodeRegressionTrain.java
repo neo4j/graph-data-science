@@ -212,11 +212,11 @@ public final class NodeRegressionTrain {
 
         registerMetricScores(outerSplit.trainSet(), bestRegressor, trainingStatistics::addOuterTrainScore);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
-        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+        progressTracker.logInfo(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         registerMetricScores(outerSplit.testSet(), bestRegressor, trainingStatistics::addTestScore);
         var testMetrics = trainingStatistics.winningModelTestMetrics();
-        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
+        progressTracker.logInfo(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
         progressTracker.endSubTask("Evaluate on test data");
     }

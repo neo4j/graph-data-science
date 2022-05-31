@@ -174,7 +174,7 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logMessage(String message) {
+    public void logInfo(String message) {
         taskProgressLogger.logMessage(":: " + message);
     }
 

@@ -60,7 +60,7 @@ public interface ProgressTracker {
 
     void logWarning(String message);
 
-    void logMessage(String message);
+    void logInfo(String message);
 
     void release();
 
@@ -136,7 +136,7 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void logMessage(String message) {
+        public void logInfo(String message) {
 
         }
 

@@ -220,7 +220,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
             trainedTree = decisionTree.train(bootstrappedDataset());
 
-            progressTracker.logMessage(
+            progressTracker.logInfo(
                 formatWithLocale(
                     "trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),

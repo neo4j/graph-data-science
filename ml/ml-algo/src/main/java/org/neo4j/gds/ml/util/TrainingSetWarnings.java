@@ -38,8 +38,8 @@ public final class TrainingSetWarnings {
     }
 
     private static void warnForSmallSets(long trainSetSize, long testSetSize, long validationFolds, String elementType, ProgressTracker progressTracker) {
-        progressTracker.logMessage("Train set size is " + trainSetSize);
-        progressTracker.logMessage("Test set size is " + testSetSize);
+        progressTracker.logInfo("Train set size is " + trainSetSize);
+        progressTracker.logInfo("Test set size is " + testSetSize);
 
         if (testSetSize < RECOMMENDED_MIN_ELEMENTS_PER_SET) {
             progressTracker.logWarning(formatWithLocale(
@@ -60,4 +60,3 @@ public final class TrainingSetWarnings {
         }
     }
 }
-

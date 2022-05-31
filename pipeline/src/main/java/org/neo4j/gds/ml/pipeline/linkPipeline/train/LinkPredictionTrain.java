@@ -165,14 +165,14 @@ public final class LinkPredictionTrain {
         progressTracker.endSubTask("Compute train metrics");
 
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
-        progressTracker.logMessage(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
+        progressTracker.logInfo(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
         progressTracker.beginSubTask("Evaluate on test data");
         computeTestMetric(classifier, trainingStatistics);
         progressTracker.endSubTask("Evaluate on test data");
 
         var testMetrics = trainingStatistics.winningModelTestMetrics();
-        progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
+        progressTracker.logInfo(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
         return ImmutableLinkPredictionTrainResult.of(classifier, trainingStatistics);
     }

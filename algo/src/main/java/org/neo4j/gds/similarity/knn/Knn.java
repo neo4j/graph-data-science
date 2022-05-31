@@ -608,15 +608,15 @@ public class Knn extends Algorithm<Knn.Result> {
     }
 
     private void logInitTime(long ms) {
-        progressTracker.logMessage(formatWithLocale("Graph init took %d ms", ms));
+        progressTracker.logInfo(formatWithLocale("Graph init took %d ms", ms));
     }
 
     private void logIterationTime(int iteration, long ms) {
-        progressTracker.logMessage(formatWithLocale("Graph iteration %d took %d ms", iteration, ms));
+        progressTracker.logInfo(formatWithLocale("Graph iteration %d took %d ms", iteration, ms));
     }
 
     private void logOverallTime(long ms) {
-        progressTracker.logMessage(formatWithLocale("Graph execution took %d ms", ms));
+        progressTracker.logInfo(formatWithLocale("Graph execution took %d ms", ms));
     }
 
     @ValueClass

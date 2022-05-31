@@ -293,7 +293,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 predictionsCache
             ));
 
-            progressTracker.logMessage(
+            progressTracker.logInfo(
                 formatWithLocale(
                     "Trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),

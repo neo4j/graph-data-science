@@ -107,7 +107,7 @@ public class CrossValidation<MODEL_TYPE> {
             terminationFlag.assertRunning();
 
             var modelParams = modelCandidates.next();
-            progressTracker.logMessage(formatWithLocale(
+            progressTracker.logInfo(formatWithLocale(
                 "Method: %s, Parameters: %s",
                 modelParams.method(),
                 modelParams.toMap()
@@ -140,13 +140,13 @@ public class CrossValidation<MODEL_TYPE> {
             var trainStats = trainingStatistics.trainMetricsAvg(trial);
             double mainMetric = trainingStatistics.getMainMetric(trial);
 
-            progressTracker.logMessage(formatWithLocale(
+            progressTracker.logInfo(formatWithLocale(
                 "Main validation metric (%s): %.4f",
                 trainingStatistics.evaluationMetric(),
                 mainMetric
             ));
-            progressTracker.logMessage(formatWithLocale("Validation metrics: %s", validationStats));
-            progressTracker.logMessage(formatWithLocale("Training metrics: %s", trainStats));
+            progressTracker.logInfo(formatWithLocale("Validation metrics: %s", validationStats));
+            progressTracker.logInfo(formatWithLocale("Training metrics: %s", trainStats));
 
             trial++;
 
@@ -155,7 +155,7 @@ public class CrossValidation<MODEL_TYPE> {
 
         int bestTrial = trainingStatistics.getBestTrialIdx() + 1;
         double bestTrialScore = trainingStatistics.getBestTrialScore();
-        progressTracker.logMessage(formatWithLocale(
+        progressTracker.logInfo(formatWithLocale(
             "Best trial was Trial %d with main validation metric %.4f",
             bestTrial,
             bestTrialScore

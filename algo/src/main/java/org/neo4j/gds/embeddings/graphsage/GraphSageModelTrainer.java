@@ -225,7 +225,7 @@ public class GraphSageModelTrainer {
             ParallelUtil.runWithConcurrency(config.concurrency(), sampledBatchTasks, executor);
             var avgLossPerNode = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() / sampledBatchTasks.stream().mapToDouble(BatchTask::batchSize).sum();
             iterationLosses.add(avgLossPerNode);
-            progressTracker.logMessage(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
+            progressTracker.logInfo(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 
             if (Math.abs(prevLoss - avgLossPerNode) < config.tolerance()) {
                 converged = true;

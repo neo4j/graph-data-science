@@ -57,7 +57,7 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
      * Log a info message to the Neo4j log
      */
     public void logMessage(String message) {
-        progressTracker.logMessage(message);
+        progressTracker.logInfo(message);
     }
 
     /**
