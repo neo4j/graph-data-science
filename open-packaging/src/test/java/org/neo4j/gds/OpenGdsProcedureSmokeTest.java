@@ -70,6 +70,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.kmeans.stats",
         "gds.alpha.kmeans.stream",
 
+        "gds.alpha.knn.filtered.stream",
+
         "gds.alpha.maxkcut.mutate",
         "gds.alpha.maxkcut.mutate.estimate",
         "gds.alpha.maxkcut.stream",
