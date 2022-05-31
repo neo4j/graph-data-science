@@ -309,6 +309,8 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
+.1+<.^| Filtered KNN
+| `gds.alpha.knn.filtered.stream`
 .3+<.^| Leiden
 | `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
