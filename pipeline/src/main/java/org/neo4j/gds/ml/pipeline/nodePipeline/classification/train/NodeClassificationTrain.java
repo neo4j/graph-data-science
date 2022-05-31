@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -299,7 +300,7 @@ public final class NodeClassificationTrain {
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER, metricsHandler),
+            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, LogLevel.DEBUG, metricsHandler),
             (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
         );
 
@@ -346,7 +347,7 @@ public final class NodeClassificationTrain {
         var bestClassifier = trainModel(
             outerSplit.trainSet(),
             trainingStatistics.bestParameters(),
-            progressTracker,
+            LogLevel.INFO,
             ModelSpecificMetricsHandler.of(metrics, trainingStatistics::addTestScore)
         );
         progressTracker.endSubTask("Train best model");
@@ -371,7 +372,7 @@ public final class NodeClassificationTrain {
         var retrainedClassifier = trainModel(
             trainSet,
             bestParameters,
-            progressTracker,
+            LogLevel.INFO,
             ModelSpecificMetricsHandler.NOOP
         );
         progressTracker.endSubTask("Retrain best model");
@@ -382,14 +383,15 @@ public final class NodeClassificationTrain {
     private Classifier trainModel(
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        ProgressTracker customProgressTracker,
+        LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
             terminationFlag,
-            customProgressTracker,
+            progressTracker,
+            messageLogLevel,
             trainConfig.concurrency(),
             trainConfig.randomSeed(),
             false,

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
@@ -42,6 +43,7 @@ public final class ClassifierTrainerFactory {
         LocalIdMap classIdMap,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
+        LogLevel messageLogLevel,
         int concurrency,
         Optional<Long> randomSeed,
         boolean reduceClassCount,
@@ -55,7 +57,8 @@ public final class ClassifierTrainerFactory {
                     classIdMap,
                     reduceClassCount,
                     terminationFlag,
-                    progressTracker
+                    progressTracker,
+                    messageLogLevel
                 );
             }
             case RandomForestClassification: {
@@ -65,6 +68,7 @@ public final class ClassifierTrainerFactory {
                     (RandomForestClassifierTrainerConfig) config,
                     randomSeed,
                     progressTracker,
+                    messageLogLevel,
                     terminationFlag,
                     metricsHandler
                 );

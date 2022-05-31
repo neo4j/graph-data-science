@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -46,17 +47,20 @@ import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 public class Training {
     private final GradientDescentConfig config;
     private final ProgressTracker progressTracker;
+    private final LogLevel messageLogLevel;
     private final long trainSize;
     private final TerminationFlag terminationFlag;
 
     public Training(
         GradientDescentConfig config,
         ProgressTracker progressTracker,
+        LogLevel messageLogLevel,
         long trainSize,
         TerminationFlag terminationFlag
     ) {
         this.config = config;
         this.progressTracker = progressTracker;
+        this.messageLogLevel = messageLogLevel;
         this.trainSize = trainSize;
         this.terminationFlag = terminationFlag;
     }
@@ -99,7 +103,7 @@ public class Training {
         var consumers = executeBatches(concurrency, objective, queueSupplier.get());
         var prevWeightGradients = avgWeightGradients(consumers);
         var initialLoss = totalLoss(consumers);
-        progressTracker.logInfo(StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
+        progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
             // each loop represents one epoch
             terminationFlag.assertRunning();
@@ -110,14 +114,14 @@ public class Training {
             double loss = totalLoss(consumers);
             losses.add(loss);
             stopper.registerLoss(loss);
-            progressTracker.logInfo(StringFormatting.formatWithLocale(
+            progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale(
                 "Epoch %d with loss %s",
                 losses.size(),
                 loss
             ));
         }
 
-        progressTracker.logInfo(StringFormatting.formatWithLocale(
+        progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale(
             "%s after %d out of %d epochs. Initial loss: %s, Last loss: %s.%s",
             stopper.converged() ? "converged" : "terminated",
             losses.size(),

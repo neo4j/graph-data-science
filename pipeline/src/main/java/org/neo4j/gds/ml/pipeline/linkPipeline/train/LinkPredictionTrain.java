@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -148,7 +149,7 @@ public final class LinkPredictionTrain {
             trainData,
             trainRelationshipIds,
             trainingStatistics.bestParameters(),
-            progressTracker,
+            LogLevel.INFO,
             ModelSpecificMetricsHandler.of(config.metrics(), trainingStatistics::addTestScore)
         );
         progressTracker.endSubTask("Train best model");
@@ -198,7 +199,7 @@ public final class LinkPredictionTrain {
                 trainData,
                 trainSet,
                 modelParameters,
-                ProgressTracker.NULL_TRACKER,
+                LogLevel.DEBUG,
                 metricsHandler
             ),
             (evaluationSet, classifier, scoreConsumer) -> computeTrainMetric(
@@ -224,14 +225,15 @@ public final class LinkPredictionTrain {
         FeaturesAndLabels featureAndLabels,
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        ProgressTracker customProgressTracker,
+        LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
             terminationFlag,
-            customProgressTracker,
+            progressTracker,
+            messageLogLevel,
             config.concurrency(),
             config.randomSeed(),
             true,

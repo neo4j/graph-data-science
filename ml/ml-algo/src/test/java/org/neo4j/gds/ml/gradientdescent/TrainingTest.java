@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -52,8 +53,8 @@ class TrainingTest {
             .maxEpochs(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L, TerminationFlag.RUNNING_TRUE);
-        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, 100L, TerminationFlag.RUNNING_TRUE);
+        var training = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, TerminationFlag.RUNNING_TRUE);
+        var singleThreadedTraining = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, TerminationFlag.RUNNING_TRUE);
 
         var objective = new TestTrainingObjective();
         var singleThreadedObjective = new TestTrainingObjective();
@@ -76,7 +77,7 @@ class TrainingTest {
             .maxEpochs(10)
             .build();
 
-        var training = new Training(config, ProgressTracker.NULL_TRACKER, 100L, terminationFlag);
+        var training = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, terminationFlag);
 
         var objective = new TestTrainingObjective();
 

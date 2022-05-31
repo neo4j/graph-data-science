@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
@@ -114,6 +115,7 @@ class RandomForestClassifierTest {
                 .build(),
             Optional.of(42L),
             ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -145,6 +147,7 @@ class RandomForestClassifierTest {
                 .build(),
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -177,6 +180,7 @@ class RandomForestClassifierTest {
                 .build(),
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
@@ -208,6 +212,7 @@ class RandomForestClassifierTest {
                 .build(),
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.ignoringResult(List.of(OUT_OF_BAG_ERROR))
         );
@@ -233,6 +238,7 @@ class RandomForestClassifierTest {
                 .build(),
             Optional.of(1337L),
             ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             ModelSpecificMetricsHandler.NOOP
         );
