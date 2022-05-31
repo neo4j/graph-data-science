@@ -106,9 +106,4 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     public void release() {
         delegate.release();
     }
-
-    @Override
-    public void assertRunning() {
-        delegate.assertRunning();
-    }
 }

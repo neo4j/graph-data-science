@@ -150,7 +150,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     public Stream<SimilarityResult> computeToStream() {
         // Create a filter for which nodes to compare and calculate the neighborhood for each node
         prepare();
-        assertRunning();
+        terminationFlag.assertRunning();
 
         // Compute similarities
         if (config.hasTopN() && !config.hasTopK()) {
@@ -172,7 +172,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         if (config.hasTopK() && !config.hasTopN()) {
             prepare();
-            assertRunning();
+            terminationFlag.assertRunning();
 
             TopKMap topKMap = config.isParallel()
                 ? computeTopKMapParallel()
@@ -431,7 +431,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private LongStream checkProgress(LongStream stream) {
         return stream.peek(node -> {
             if ((node & BatchingProgressLogger.MAXIMUM_LOG_INTERVAL) == 0) {
-                assertRunning();
+                terminationFlag.assertRunning();
             }
         });
     }

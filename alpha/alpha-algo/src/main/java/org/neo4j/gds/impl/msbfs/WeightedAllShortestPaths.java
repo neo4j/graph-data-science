@@ -132,13 +132,13 @@ public class WeightedAllShortestPaths extends MSBFSASPAlgorithm {
         @Override
         public void run() {
             int startNode;
-            while (outputStreamOpen && running() && (startNode = counter.getAndIncrement()) < nodeCount) {
+            while (outputStreamOpen && terminationFlag.running() && (startNode = counter.getAndIncrement()) < nodeCount) {
                 compute(startNode);
                 for (int i = 0; i < nodeCount; i++) {
                     var result = AllShortestPathsStream.result(
-                            graph.toOriginalNodeId(startNode),
-                            graph.toOriginalNodeId(i),
-                            distance[i]
+                        graph.toOriginalNodeId(startNode),
+                        graph.toOriginalNodeId(i),
+                        distance[i]
                     );
                     try {
                         resultQueue.put(result);

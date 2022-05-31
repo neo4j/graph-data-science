@@ -57,7 +57,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         long startNodeId,
         long k,
         ProgressTracker progressTracker
-) {
+    ) {
         super(progressTracker);
         this.idMap = idMap;
         this.graph = graph;
@@ -85,7 +85,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         HugeLongPriorityQueue priorityQueue = minMax == Prim.MAX_OPERATOR ? HugeLongPriorityQueue.min(parentSize) : HugeLongPriorityQueue.max(
             parentSize);
         progressTracker.beginSubTask(parentSize);
-        for (long i = 0; i < parentSize && running(); i++) {
+        for (long i = 0; i < parentSize && terminationFlag.running(); i++) {
             long p = parent.get(i);
             if (p == -1) {
                 continue;
@@ -96,7 +96,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         progressTracker.endSubTask();
         progressTracker.beginSubTask(k - 1);
         // remove k-1 relationships
-        for (long i = 0; i < k - 1 && running(); i++) {
+        for (long i = 0; i < k - 1 && terminationFlag.running(); i++) {
             long cutNode = priorityQueue.pop();
             parent.set(cutNode, -1);
             progressTracker.logProgress();

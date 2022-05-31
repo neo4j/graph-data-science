@@ -118,7 +118,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             for (;;) {
                 // take start node from the queue
                 long startNodeId = nodeQueue.getAndIncrement();
-                if (startNodeId >= nodeCount || !running()) {
+                if (startNodeId >= nodeCount || !terminationFlag.running()) {
                     return;
                 }
                 // check whether the node is part of the subset

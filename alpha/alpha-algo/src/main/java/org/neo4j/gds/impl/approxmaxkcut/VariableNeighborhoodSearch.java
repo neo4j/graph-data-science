@@ -28,7 +28,7 @@ import org.neo4j.gds.impl.approxmaxkcut.localsearch.LocalSearch;
 
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicLongArray;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 
 class VariableNeighborhoodSearch {
 
@@ -66,7 +66,7 @@ class VariableNeighborhoodSearch {
         this.neighborCardinalities = new AtomicLongArray(config.k());
     }
 
-    AtomicLongArray compute(int candidateIdx, AtomicLongArray currentCardinalities, Supplier<Boolean> running) {
+    AtomicLongArray compute(int candidateIdx, AtomicLongArray currentCardinalities, BooleanSupplier running) {
         var bestCandidateSolution = candidateSolutions[candidateIdx];
         var bestCardinalities = currentCardinalities;
         var bestCost = costs[candidateIdx];
@@ -75,7 +75,7 @@ class VariableNeighborhoodSearch {
 
         progressTracker.beginSubTask();
 
-        while ((currentOrder < config.vnsMaxNeighborhoodOrder()) && running.get()) {
+        while ((currentOrder < config.vnsMaxNeighborhoodOrder()) && running.getAsBoolean()) {
             boolean perturbSuccess = true;
             bestCandidateSolution.copyTo(neighborSolution, graph.nodeCount());
             copyCardinalities(bestCardinalities, neighborCardinalities);

@@ -143,10 +143,10 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
 
         var currentVolume = nodeCount;
         while (ranIterations < maxIterations && !nodesToColor.isEmpty()) {
-            assertRunning();
+            terminationFlag.assertRunning();
             runColoring(currentVolume);
 
-            assertRunning();
+            terminationFlag.assertRunning();
             runValidation(currentVolume);
 
             ++ranIterations;

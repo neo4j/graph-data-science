@@ -152,18 +152,27 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCut.CutResult> {
             );
         }
 
-        for (int i = 1; (i <= config.iterations()) && running(); i++) {
+        for (int i = 1; (i <= config.iterations()) && terminationFlag.running(); i++) {
             var currCandidateSolution = candidateSolutions[currIdx];
             var currCost = costs[currIdx];
 
             placeNodesRandomly.compute(currCandidateSolution, currentCardinalities);
 
-            if (!running()) break;
+            if (!terminationFlag.running()) break;
 
             if (config.vnsMaxNeighborhoodOrder() > 0) {
-                currentCardinalities = variableNeighborhoodSearch.compute(currIdx, currentCardinalities, this::running);
+                currentCardinalities = variableNeighborhoodSearch.compute(
+                    currIdx,
+                    currentCardinalities,
+                    terminationFlag::running
+                );
             } else {
-                localSearch.compute(currCandidateSolution, currCost, currentCardinalities, this::running);
+                localSearch.compute(
+                    currCandidateSolution,
+                    currCost,
+                    currentCardinalities,
+                    terminationFlag::running
+                );
             }
 
             // Store the newly computed candidate solution if it was better than the previous. Then reuse the previous data
