@@ -70,7 +70,7 @@ class KarateTest {
                 community -> assertThat(community).containsExactlyInAnyOrder("a5", "a6", "a7", "a11", "a17"),
                 community -> assertThat(community).containsExactlyInAnyOrder("a0")
             );
-        assertThat(leidenResult.modularity()).isCloseTo( 0.41880, Offset.offset(0.0001));
+        assertThat(leidenResult.modularity()).isCloseTo(0.41880, Offset.offset(1e-3));
 
     }
 }

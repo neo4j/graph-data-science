@@ -82,8 +82,7 @@ final class ModularityComputer {
             ), Optional.empty()
         );
         ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
-        modularity(workingGraph,communities,gamma);
-        
+
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, workingGraph.nodeCount()),
             concurrency,
@@ -100,8 +99,7 @@ final class ModularityComputer {
         );
         //we do not have the self-loops from  previous merges so we settle from calculating the outside edges between relationships
         //from that and the total sum of weights in communityVolumes we can calculate all inside edges
-
-
+        
         return modularity * coefficient;
     }
 
