@@ -247,9 +247,9 @@ ORDER BY name ASC
 | "Alice"   | 2
 | "Bridget" | 2
 | "Charles" | 2
-| "Doug"    | 4
-| "Mark"    | 4
-| "Michael" | 4
+| "Doug"    | 5
+| "Mark"    | 5
+| "Michael" | 5
 |===
 --
 
