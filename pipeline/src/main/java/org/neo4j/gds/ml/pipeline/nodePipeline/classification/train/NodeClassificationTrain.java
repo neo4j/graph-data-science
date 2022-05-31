@@ -58,6 +58,7 @@ import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -151,14 +152,13 @@ public final class NodeClassificationTrain {
         long testSetSize = splitConfig.testSetSize(nodeCount);
         int validationFolds = splitConfig.validationFolds();
 
-        return List.of(
-            Tasks.leaf("Shuffle and split", validationFolds * trainSetSize + testSetSize),
-            CrossValidation.progressTask(validationFolds, numberOfModelSelectionTrials, trainSetSize),
-            ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
-            Tasks.leaf("Evaluate on train data", trainSetSize),
-            Tasks.leaf("Evaluate on test data", testSetSize),
-            ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
-        );
+        var tasks = new ArrayList<>(CrossValidation.progressTasks(validationFolds, numberOfModelSelectionTrials, trainSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on train data", trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
+
+        return tasks;
     }
 
     @NotNull
@@ -272,8 +272,6 @@ public final class NodeClassificationTrain {
     }
 
     public NodeClassificationTrainResult compute() {
-        progressTracker.beginSubTask("Shuffle and split");
-
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
             features.size(),
@@ -283,8 +281,6 @@ public final class NodeClassificationTrain {
             splitConfig.validationFolds(),
             trainConfig.randomSeed()
         );
-
-        progressTracker.endSubTask("Shuffle and split");
 
         var trainingStatistics = new TrainingStatistics(metrics);
 

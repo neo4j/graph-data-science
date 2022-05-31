@@ -54,6 +54,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -100,17 +101,24 @@ public final class LinkPredictionTrain {
         int numberOfModelSelectionTrials
     ) {
         var sizes = splitConfig.expectedSetSizes(relationshipCount);
-        return List.of(
-            Tasks.leaf("Extract train features", sizes.trainSize() * 3),
-            CrossValidation.progressTask(splitConfig.validationFolds(), numberOfModelSelectionTrials, sizes.trainSize()),
-            ClassifierTrainer.progressTask("Train best model", sizes.trainSize() * 5),
-            Tasks.leaf("Compute train metrics", sizes.trainSize()),
-            Tasks.task(
+
+        var tasks = new ArrayList<Task>();
+        tasks.add(Tasks.leaf("Extract train features", sizes.trainSize() * 3));
+        tasks.addAll(CrossValidation.progressTasks(
+            splitConfig.validationFolds(),
+            numberOfModelSelectionTrials,
+            sizes.trainSize()
+        ));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", sizes.trainSize() * 5));
+        tasks.add(Tasks.leaf("Compute train metrics", sizes.trainSize()));
+        tasks.add(Tasks.task(
                 "Evaluate on test data",
                 Tasks.leaf("Extract test features", sizes.testSize() * 3),
                 Tasks.leaf("Compute test metrics", sizes.testSize())
             )
         );
+
+        return tasks;
     }
 
     @Deprecated

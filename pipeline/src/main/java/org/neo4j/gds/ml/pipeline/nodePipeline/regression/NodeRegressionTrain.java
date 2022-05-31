@@ -43,6 +43,7 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
@@ -67,13 +68,12 @@ public final class NodeRegressionTrain {
         long testSetSize = splitConfig.testSetSize(nodeCount);
         int validationFolds = splitConfig.validationFolds();
 
-        return List.of(
-            Tasks.leaf("Shuffle and Split", validationFolds * trainSetSize + testSetSize),
-            CrossValidation.progressTask(splitConfig.validationFolds(), numberOfModelSelectionTrials, trainSetSize),
-            ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize),
-            Tasks.leaf("Evaluate on test data", testSetSize),
-            ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount)
-        );
+        var tasks = new ArrayList<>(CrossValidation.progressTasks(validationFolds, numberOfModelSelectionTrials, trainSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
+        tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
+        tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
+
+        return tasks;
     }
 
     public static NodeRegressionTrain create(
@@ -123,8 +123,6 @@ public final class NodeRegressionTrain {
     }
 
     public NodeRegressionTrainResult compute() {
-        progressTracker.beginSubTask("Shuffle and Split");
-
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
             features.size(),
@@ -136,7 +134,6 @@ public final class NodeRegressionTrain {
         );
 
         terminationFlag.assertRunning();
-        progressTracker.endSubTask("Shuffle and Split");
 
         List<Metric> metrics = List.copyOf(trainConfig.metrics());
         var trainingStatistics = new TrainingStatistics(metrics);

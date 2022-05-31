@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
@@ -47,7 +48,7 @@ class CrossValidationTest {
         TestLog log = Neo4jProxy.testLog();
 
         TestProgressTracker progressTracker = new TestProgressTracker(
-            CrossValidation.progressTask(3, 2, 4),
+            Tasks.task("test", CrossValidation.progressTasks(3, 2, 4)),
             log,
             3,
             EmptyTaskRegistryFactory.INSTANCE
@@ -66,6 +67,7 @@ class CrossValidationTest {
             (evaluationSet, model, scoreConsumer) -> { scoreConsumer.consume(F1_MACRO, 0); }
         );
 
+        progressTracker.beginSubTask("test");
         crossValidation.selectModel(
             ReadOnlyHugeLongArray.of(0, 1, 3, 7),
             (LongToLongFunction) longParameter -> 0,
@@ -73,31 +75,37 @@ class CrossValidationTest {
             trainingStatistics,
             List.<TrainerConfig>of(new TestTrainerConfig("a"), new TestTrainerConfig("b")).iterator()
         );
+        progressTracker.endSubTask("test");
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .containsExactly(
-                "Select best model :: Start",
-                "Select best model :: Trial 1 of 2 :: Start",
-                "Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {name=a}",
-                "Select best model :: Trial 1 of 2 33%",
-                "Select best model :: Trial 1 of 2 66%",
-                "Select best model :: Trial 1 of 2 100%",
-                "Select best model :: Trial 1 of 2 :: Main validation metric (F1_MACRO): 0.0000",
-                "Select best model :: Trial 1 of 2 :: Validation metrics: {F1_MACRO=0.0}",
-                "Select best model :: Trial 1 of 2 :: Training metrics: {F1_MACRO=0.0}",
-                "Select best model :: Trial 1 of 2 :: Finished",
-                "Select best model :: Trial 2 of 2 :: Start",
-                "Select best model :: Trial 2 of 2 :: Method: RandomForest, Parameters: {name=b}",
-                "Select best model :: Trial 2 of 2 33%",
-                "Select best model :: Trial 2 of 2 66%",
-                "Select best model :: Trial 2 of 2 100%",
-                "Select best model :: Trial 2 of 2 :: Main validation metric (F1_MACRO): 0.0000",
-                "Select best model :: Trial 2 of 2 :: Validation metrics: {F1_MACRO=0.0}",
-                "Select best model :: Trial 2 of 2 :: Training metrics: {F1_MACRO=0.0}",
-                "Select best model :: Trial 2 of 2 :: Finished",
-                "Select best model :: Best trial was Trial 1 with main validation metric 0.0000",
-                "Select best model :: Finished"
+                "test :: Start",
+                "test :: Create validation folds :: Start",
+                "test :: Create validation folds 100%",
+                "test :: Create validation folds :: Finished",
+                "test :: Select best model :: Start",
+                "test :: Select best model :: Trial 1 of 2 :: Start",
+                "test :: Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {name=a}",
+                "test :: Select best model :: Trial 1 of 2 33%",
+                "test :: Select best model :: Trial 1 of 2 66%",
+                "test :: Select best model :: Trial 1 of 2 100%",
+                "test :: Select best model :: Trial 1 of 2 :: Main validation metric (F1_MACRO): 0.0000",
+                "test :: Select best model :: Trial 1 of 2 :: Validation metrics: {F1_MACRO=0.0}",
+                "test :: Select best model :: Trial 1 of 2 :: Training metrics: {F1_MACRO=0.0}",
+                "test :: Select best model :: Trial 1 of 2 :: Finished",
+                "test :: Select best model :: Trial 2 of 2 :: Start",
+                "test :: Select best model :: Trial 2 of 2 :: Method: RandomForest, Parameters: {name=b}",
+                "test :: Select best model :: Trial 2 of 2 33%",
+                "test :: Select best model :: Trial 2 of 2 66%",
+                "test :: Select best model :: Trial 2 of 2 100%",
+                "test :: Select best model :: Trial 2 of 2 :: Main validation metric (F1_MACRO): 0.0000",
+                "test :: Select best model :: Trial 2 of 2 :: Validation metrics: {F1_MACRO=0.0}",
+                "test :: Select best model :: Trial 2 of 2 :: Training metrics: {F1_MACRO=0.0}",
+                "test :: Select best model :: Trial 2 of 2 :: Finished",
+                "test :: Select best model :: Best trial was Trial 1 with main validation metric 0.0000",
+                "test :: Select best model :: Finished",
+                "test :: Finished"
             );
     }
 

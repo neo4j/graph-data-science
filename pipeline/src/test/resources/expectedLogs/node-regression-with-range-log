@@ -1,9 +1,9 @@
 MY CONTEXT :: Start
-MY CONTEXT :: Shuffle and Split :: Start
-MY CONTEXT :: Shuffle and Split :: Train set size is 6
-MY CONTEXT :: Shuffle and Split :: Test set size is 7
-MY CONTEXT :: Shuffle and Split 100%
-MY CONTEXT :: Shuffle and Split :: Finished
+MY CONTEXT :: Train set size is 6
+MY CONTEXT :: Test set size is 7
+MY CONTEXT :: Create validation folds :: Start
+MY CONTEXT :: Create validation folds 100%
+MY CONTEXT :: Create validation folds :: Finished
 MY CONTEXT :: Select best model :: Start
 MY CONTEXT :: Select best model :: Trial 1 of 2 :: Start
 MY CONTEXT :: Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=3, minSplitSize=2, minLeafSize=1}

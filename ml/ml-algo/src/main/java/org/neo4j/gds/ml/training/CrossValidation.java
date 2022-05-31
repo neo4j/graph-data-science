@@ -52,11 +52,14 @@ public class CrossValidation<MODEL_TYPE> {
     private final ModelTrainer<MODEL_TYPE> modelTrainer;
     private final ModelEvaluator<MODEL_TYPE> modelEvaluator;
 
-    public static Task progressTask(int validationFolds, int numberOfModelSelectionTrials, long trainSetSize) {
-        return Tasks.iterativeFixed(
-            "Select best model",
-            () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
-            numberOfModelSelectionTrials
+    public static List<Task> progressTasks(int validationFolds, int numberOfModelSelectionTrials, long trainSetSize) {
+        return List.of(
+            Tasks.leaf("Create validation folds", Math.max((long) (0.5 * trainSetSize), 1)),
+            Tasks.iterativeFixed(
+                "Select best model",
+                () -> List.of(Tasks.leaf("Trial", 5 * validationFolds * trainSetSize)),
+                numberOfModelSelectionTrials
+            )
         );
     }
 
@@ -85,8 +88,7 @@ public class CrossValidation<MODEL_TYPE> {
         TrainingStatistics trainingStatistics,
         Iterator<TrainerConfig> modelCandidates
     ) {
-        progressTracker.beginSubTask("Select best model");
-
+        progressTracker.beginSubTask("Create validation folds");
         List<TrainingExamplesSplit> validationSplits = new StratifiedKFoldSplitter(
             validationFolds,
             outerTrainSet,
@@ -94,7 +96,9 @@ public class CrossValidation<MODEL_TYPE> {
             randomSeed,
             distinctTargets
         ).splits();
+        progressTracker.endSubTask("Create validation folds");
 
+        progressTracker.beginSubTask("Select best model");
         int trial = 0;
         while (modelCandidates.hasNext()) {
             progressTracker.beginSubTask("Trial");

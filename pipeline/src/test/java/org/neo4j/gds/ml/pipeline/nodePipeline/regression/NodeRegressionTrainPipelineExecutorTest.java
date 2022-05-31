@@ -202,17 +202,17 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(log.getMessages(TestLog.WARN))
                 .extracting(removingThreadId())
                 .containsExactly(
-                    "Node Regression Train Pipeline :: Shuffle and Split :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
+                    "Node Regression Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
                     "Proceeding with such a small set might lead to unreliable results.",
-                    "Node Regression Train Pipeline :: Shuffle and Split :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
+                    "Node Regression Train Pipeline :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
                     "Proceeding with such small sets might lead to unreliable results."
                 );
 
             assertThat(log.getMessages(TestLog.INFO))
                 .extracting(removingThreadId())
                 .contains(
-                    "Node Regression Train Pipeline :: Shuffle and Split :: Train set size is 6",
-                    "Node Regression Train Pipeline :: Shuffle and Split :: Test set size is 3"
+                    "Node Regression Train Pipeline :: Train set size is 6",
+                    "Node Regression Train Pipeline :: Test set size is 3"
                 );
         });
     }

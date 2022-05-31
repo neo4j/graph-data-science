@@ -1,9 +1,9 @@
 MY DUMMY TASK :: Start
-MY DUMMY TASK :: Shuffle and split :: Start
-MY DUMMY TASK :: Shuffle and split :: Train set size is 10
-MY DUMMY TASK :: Shuffle and split :: Test set size is 5
-MY DUMMY TASK :: Shuffle and split 100%
-MY DUMMY TASK :: Shuffle and split :: Finished
+MY DUMMY TASK :: Train set size is 10
+MY DUMMY TASK :: Test set size is 5
+MY DUMMY TASK :: Create validation folds :: Start
+MY DUMMY TASK :: Create validation folds 100%
+MY DUMMY TASK :: Create validation folds :: Finished
 MY DUMMY TASK :: Select best model :: Start
 MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Start
 MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Method: LogisticRegression, Parameters: {batchSize=100, minEpochs=1, patience=1, maxEpochs=100, tolerance=0.001, learningRate=0.001, penalty=0.0019}
