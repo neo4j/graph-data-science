@@ -27,7 +27,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -48,15 +47,6 @@ public class FilteredKnnStreamProc extends StreamProc<FilteredKnn, FilteredKnnRe
     ) {
         var computationResult = compute(graphName, configuration);
         return computationResultConsumer().consume(computationResult, executionContext());
-    }
-
-    @Procedure(value = "gds.alpha.knn.filtered.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
-    public Stream<MemoryEstimateResult> estimate(
-        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
-        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
-    ) {
-        return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Override
