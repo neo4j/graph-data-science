@@ -464,7 +464,6 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: Compute train metrics :: Finished",
                     "Link Prediction Train Pipeline :: Evaluate on test data :: Start",
                     "Link Prediction Train Pipeline :: Evaluate on test data :: Extract test features :: Start",
-                    "Link Prediction Train Pipeline :: Evaluate on test data :: Extract test features 50%",
                     "Link Prediction Train Pipeline :: Evaluate on test data :: Extract test features 100%",
                     "Link Prediction Train Pipeline :: Evaluate on test data :: Extract test features :: Finished",
                     "Link Prediction Train Pipeline :: Evaluate on test data :: Compute test metrics :: Start",
@@ -490,7 +489,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(28_792, 899_032)),
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(22_488, 696_728)),
             Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_136)),
             Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_136))
         );
@@ -520,7 +519,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .estimate(graphDimensions, config.concurrency())
             .memoryUsage();
 
-        assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
+        assertMemoryRange(actualRange, expectedRange);
     }
 
     @Test

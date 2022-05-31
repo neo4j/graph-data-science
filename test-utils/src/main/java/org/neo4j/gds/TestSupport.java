@@ -265,6 +265,10 @@ public final class TestSupport {
         assertMemoryRange(actual, expected, expected);
     }
 
+    public static void assertMemoryRange(MemoryRange actual, MemoryRange expected) {
+        assertMemoryRange(actual, expected.min, expected.max);
+    }
+
     public static void assertMemoryRange(MemoryRange actual, long expectedMin, long expectedMax) {
         assertThat(actual)
             .withFailMessage(

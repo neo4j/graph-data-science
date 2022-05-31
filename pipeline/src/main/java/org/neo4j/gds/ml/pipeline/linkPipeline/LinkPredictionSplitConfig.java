@@ -177,11 +177,13 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     @Value.Derived
     @Configuration.Ignore
     default ExpectedSetSizes expectedSetSizes(long relationshipCount) {
-        long positiveTestSetSize = (long) (relationshipCount * testFraction());
+        // division by 2 as the input is undirected but the selected relationships are directed
+        long positiveTestSetSize = (long) (relationshipCount * testFraction() / 2);
         long testSetSize = (long) (positiveTestSetSize * (1 + negativeSamplingRatio()));
-        long testComplementSize = relationshipCount - positiveTestSetSize;
+        long testComplementSize = (long) (relationshipCount * (1 - testFraction()));
 
-        long positiveTrainSetSize = (long) (testComplementSize * trainFraction());
+        // division by 2 as the input is undirected but the selected relationships are directed
+        long positiveTrainSetSize = (long) (testComplementSize * trainFraction() / 2);
         long trainSetSize = (long) (positiveTrainSetSize * (1 + negativeSamplingRatio()));
         long featureInputSize = (long) (testComplementSize * (1 - trainFraction()));
         long foldSize = trainSetSize / validationFolds();

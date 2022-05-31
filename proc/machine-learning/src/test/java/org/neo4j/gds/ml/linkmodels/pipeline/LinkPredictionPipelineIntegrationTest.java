@@ -134,6 +134,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         var topN = 4;
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 1})");
@@ -182,6 +183,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         var topN = 4;
 
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
         runQuery("CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {" +
