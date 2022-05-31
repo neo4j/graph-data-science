@@ -19,18 +19,19 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.SourceNodesConfig;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.List;
 import java.util.Random;
@@ -79,9 +80,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     @Override
     public Stream<long[]> compute() {
         progressTracker.beginSubTask("RandomWalk");
-        int timeout = 100;
-        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
-        long[] TOMB = new long[0];
 
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
             ? cumulativeWeights()::get
@@ -93,31 +91,13 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
             : NextNodeSupplier.ListNodeSupplier.of(config, graph);
 
-        var tasks = IntStream
-            .range(0, config.concurrency())
-            .mapToObj(i ->
-                RandomWalkTask.of(
-                    nextNodeSupplier,
-                    cumulativeWeightSupplier,
-                    graph.concurrentCopy(),
-                    config,
-                    walks,
-                    randomSeed,
-                    progressTracker
-                )).collect(Collectors.toList());
+        var terminationFlag = new ExternalTerminationFlag(this.terminationFlag);
 
-        progressTracker.beginSubTask("create walks");
-        new Thread(() -> {
-            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, terminationFlag, Pools.DEFAULT);
-            try {
-                progressTracker.endSubTask("create walks");
-                progressTracker.endSubTask("RandomWalk");
-                walks.put(TOMB);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-        }).start();
-        return StreamSupport.stream(new QueueBasedSpliterator<>(walks, TOMB, terminationFlag, timeout), false);
+        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
+        long[] TOMB = new long[0];
+
+        startWalkers(terminationFlag, cumulativeWeightSupplier, randomSeed, nextNodeSupplier, walks, TOMB);
+        return walksQueueConsumer(terminationFlag, TOMB, walks);
     }
 
     private DegreeCentrality.DegreeFunction cumulativeWeights() {
@@ -136,7 +116,100 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     }
 
     @Override
-    public void release() { }
+    public void release() {}
+
+    private void startWalkers(
+        TerminationFlag terminationFlag,
+        RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
+        long randomSeed,
+        NextNodeSupplier nextNodeSupplier,
+        BlockingQueue<long[]> walks,
+        long[] TOMB
+    ) {
+        var tasks = IntStream
+            .range(0, this.config.concurrency())
+            .mapToObj(i ->
+                RandomWalkTask.of(
+                    nextNodeSupplier,
+                    cumulativeWeightSupplier,
+                    this.graph.concurrentCopy(),
+                    this.config,
+                    walks,
+                    randomSeed,
+                    this.progressTracker,
+                    terminationFlag
+                )).collect(Collectors.toList());
+
+        Pools.newThread(() -> tasksRunner(
+                this.config.concurrency(),
+                this.progressTracker,
+                terminationFlag,
+                TOMB,
+                walks,
+                tasks
+            ))
+            .start();
+    }
+
+    private static void tasksRunner(
+        int concurrency,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag,
+        long[] tombstone,
+        BlockingQueue<long[]> walks,
+        Iterable<? extends Runnable> tasks
+    ) {
+        progressTracker.beginSubTask("create walks");
+        try {
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .terminationFlag(terminationFlag)
+                .mayInterruptIfRunning(true)
+                .run();
+            walks.put(tombstone);
+        } catch (TransactionTerminatedException ignored) {
+            // ParallelUtil will interrupt the threads because we set mayInterruptIfRunning to true
+            // We swallow the exception to avoid any scary logs.
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
+            // ParallelUtil will interrupt the threads because we set mayInterruptIfRunning to true
+            // We swallow the exception to avoid any scary logs.
+        } finally {
+            progressTracker.endSubTask("create walks");
+            progressTracker.endSubTask("RandomWalk");
+        }
+    }
+
+    private static Stream<long[]> walksQueueConsumer(
+        ExternalTerminationFlag terminationFlag,
+        long[] tombstone,
+        BlockingQueue<long[]> walks
+    ) {
+        int timeoutInSeconds = 100;
+        var queueConsumer = new QueueBasedSpliterator<>(walks, tombstone, terminationFlag, timeoutInSeconds);
+        return StreamSupport
+            .stream(queueConsumer, false)
+            .onClose(terminationFlag::stop);
+    }
+
+    private static final class ExternalTerminationFlag implements TerminationFlag {
+        private volatile boolean running = true;
+        private final TerminationFlag inner;
+
+        ExternalTerminationFlag(TerminationFlag inner) {
+            this.inner = inner;
+        }
+
+        @Override
+        public boolean running() {
+            return this.running && this.inner.running();
+        }
+
+        void stop() {
+            this.running = false;
+        }
+    }
 
     private static final class RandomWalkTask implements Runnable {
 
@@ -145,9 +218,9 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         private final BlockingQueue<long[]> walks;
         private final NextNodeSupplier nextNodeSupplier;
         private final long[][] buffer;
-        private final MutableInt bufferPosition;
         private final long randomSeed;
         private final ProgressTracker progressTracker;
+        private final TerminationFlag terminationFlag;
         private final RandomWalkBaseConfig config;
         private final RandomWalkSampler sampler;
 
@@ -158,7 +231,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             RandomWalkBaseConfig config,
             BlockingQueue<long[]> walks,
             long randomSeed,
-            ProgressTracker progressTracker
+            ProgressTracker progressTracker,
+            TerminationFlag terminationFlag
         ) {
             var maxProbability = Math.max(Math.max(1 / config.returnFactor(), 1.0), 1 / config.inOutFactor());
             var normalizedReturnProbability = (1 / config.returnFactor()) / maxProbability;
@@ -175,7 +249,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 normalizedInOutProbability,
                 graph,
                 randomSeed,
-                progressTracker
+                progressTracker,
+                terminationFlag
             );
         }
 
@@ -189,7 +264,8 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             double normalizedInOutProbability,
             Graph graph,
             long randomSeed,
-            ProgressTracker progressTracker
+            ProgressTracker progressTracker,
+            TerminationFlag terminationFlag
         ) {
             this.nextNodeSupplier = nextNodeSupplier;
             this.graph = graph;
@@ -197,6 +273,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             this.walks = walks;
             this.randomSeed = randomSeed;
             this.progressTracker = progressTracker;
+            this.terminationFlag = terminationFlag;
             this.sampler = new RandomWalkSampler(
                 cumulativeWeightSupplier,
                 config.walkLength(),
@@ -208,12 +285,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             );
 
             this.buffer = new long[1000][];
-            this.bufferPosition = new MutableInt(0);
         }
 
         @Override
         public void run() {
             long nodeId;
+            int bufferLength = 0;
 
             while (true) {
                 nodeId = nextNodeSupplier.nextNode();
@@ -230,11 +307,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 var walksPerNode = config.walksPerNode();
 
                 for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
-                    buffer[bufferPosition.getAndIncrement()] = sampler.walk(nodeId);
-
-                    if (bufferPosition.getValue() == buffer.length) {
-                        if (!flushBuffer()) {
-                            return;
+                    buffer[bufferLength++] = sampler.walk(nodeId);
+                    if (bufferLength == buffer.length) {
+                        var shouldStop = flushBuffer(bufferLength);
+                        bufferLength = 0;
+                        if (!shouldStop) {
+                            break;
                         }
                     }
                 }
@@ -242,21 +320,23 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 progressTracker.logProgress();
             }
 
-            flushBuffer();
+            flushBuffer(bufferLength);
         }
 
-        private boolean flushBuffer() {
-            try {
-                var bufferLength = bufferPosition.getValue();
-                for (int i = 0; i < bufferLength; i++) {
-                    walks.put(buffer[i]);
+        // returns false if execution should be stopped, otherwise true
+        private boolean flushBuffer(int bufferLength) {
+            bufferLength = Math.min(bufferLength, this.buffer.length);
+
+            for (int i = 0; i < bufferLength && terminationFlag.running(); i++) {
+                try {
+                    walks.put(this.buffer[i]);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return false;
                 }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return false;
             }
-            bufferPosition.setValue(0);
-            return true;
+
+            return terminationFlag.running();
         }
     }
 

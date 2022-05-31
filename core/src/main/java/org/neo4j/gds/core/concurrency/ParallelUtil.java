@@ -384,23 +384,6 @@ public final class ParallelUtil {
             .run();
     }
 
-    /**
-     * @see org.neo4j.gds.core.concurrency.RunWithConcurrency
-     */
-    public static void runWithConcurrency(
-        int concurrency,
-        Iterable<? extends Runnable> tasks,
-        TerminationFlag terminationFlag,
-        @Nullable ExecutorService executor
-    ) {
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .terminationFlag(terminationFlag)
-            .executor(executor)
-            .run();
-    }
-
     static void runWithConcurrency(RunWithConcurrency params) {
         runWithConcurrency(
             params.concurrency(),
