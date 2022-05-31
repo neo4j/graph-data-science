@@ -220,11 +220,6 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     }
 
     @Override
-    public AllRelationshipsScan allRelationshipScan() {
-        return new InMemoryRelationshipScan();
-    }
-
-    @Override
     public void close() {
         assert !closed;
         closed = true;
@@ -243,5 +238,9 @@ public abstract class AbstractInMemoryStorageReader implements StorageReader {
     protected boolean nodeExists(long id) {
         var originalId = graphStore.nodes().toOriginalNodeId(id);
         return graphStore.nodes().contains(originalId);
+    }
+
+    public abstract static class AbstractAllRelationshipScan extends BaseRecordScan<AbstractInMemoryRelationshipScanCursor> implements AllRelationshipsScan {
+
     }
 }

@@ -1,27 +1,14 @@
 /*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
- *
- * This file is part of Neo4j.
- *
- * Neo4j is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * This file contains proprietary code that is only available via a commercial license from Neo4j.
+ * For more information, see https://neo4j.com/contact-us/
  */
-package org.neo4j.gds.compat;
+package org.neo4j.internal.recordstorage;
 
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.storageengine.InMemoryRelationshipCursor;
-import org.neo4j.internal.recordstorage.InMemoryRelationshipScan;
+import org.neo4j.internal.recordstorage.AbstractInMemoryStorageReader.AbstractAllRelationshipScan;
 import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
@@ -76,7 +63,7 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         }
 
         highMark = maxRelationshipId;
-        return ((InMemoryRelationshipScan) scan).scanBatch(sizeHint, this);
+        return ((AbstractAllRelationshipScan) scan).scanBatch(sizeHint, this);
     }
 
     public boolean scanRange(long start, long stop) {

@@ -32,6 +32,7 @@ import org.neo4j.internal.schema.SchemaDescriptor;
 import org.neo4j.internal.schema.constraints.IndexBackedConstraintDescriptor;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.memory.MemoryTracker;
+import org.neo4j.storageengine.api.AllRelationshipsScan;
 import org.neo4j.storageengine.api.StorageNodeCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipScanCursor;
@@ -118,5 +119,20 @@ public class InMemoryStorageReader44 extends AbstractInMemoryStorageReader {
         SchemaDescriptor descriptor, IndexType type
     ) {
         return null;
+    }
+
+    @Override
+    public AllRelationshipsScan allRelationshipScan() {
+        return new AbstractAllRelationshipScan() {
+            @Override
+            boolean scanRange(AbstractInMemoryRelationshipScanCursor cursor, long start, long stopInclusive) {
+                return cursor.scanRange(start, stopInclusive);
+            }
+
+            @Override
+            public boolean scanBatch(int sizeHint, AbstractInMemoryRelationshipScanCursor cursor) {
+                return super.scanBatch(sizeHint, cursor);
+            }
+        };
     }
 }
