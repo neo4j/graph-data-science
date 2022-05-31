@@ -512,6 +512,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public void setAllowUpgrades(Config.Builder configBuilder, boolean value) {
+        configBuilder.set(GraphDatabaseSettings.allow_upgrade, value);
+    }
+
+    @Override
     public Setting<?> recordFormatSetting() {
         return GraphDatabaseSettings.record_format;
     }
@@ -529,5 +534,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
         return connectorPortRegister.getLocalAddress("bolt");
+    }
+
+    @Override
+    public <T> T recordFormatSelector(
+        Config databaseConfig,
+        FileSystemAbstraction fs,
+        LogProvider internalLogProvider,
+        DependencyResolver dependencyResolver
+    ) {
+        return (T) RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
     }
 }

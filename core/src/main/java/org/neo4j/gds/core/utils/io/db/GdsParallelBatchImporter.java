@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.db;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -35,12 +36,8 @@ import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
-import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
-import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Log;
@@ -63,9 +60,8 @@ public final class GdsParallelBatchImporter {
     private final Log log;
     private final ExecutionMonitor executionMonitor;
 
+    private final DependencyResolver dependencyResolver;
     private final FileSystemAbstraction fs;
-    private final PageCache pageCache;
-    private final CursorContextFactory cursorContextFactory;
     private final LogService logService;
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
@@ -79,17 +75,14 @@ public final class GdsParallelBatchImporter {
         var dependencyResolver = db.getDependencyResolver();
         var dbms = dependencyResolver.resolveDependency(DatabaseManagementService.class);
         var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
-        var pageCache = dependencyResolver.resolveDependency(PageCache.class);
-        var cursorContextFactory = dependencyResolver.resolveDependency(CursorContextFactory.class);
         var logService = dependencyResolver.resolveDependency(LogService.class);
         var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
-            pageCache,
-            cursorContextFactory,
             dbms,
+            dependencyResolver,
             fs,
             logService,
             databaseConfig
@@ -105,17 +98,14 @@ public final class GdsParallelBatchImporter {
         var db = (GraphDatabaseAPI) dbms.database(SYSTEM_DATABASE_NAME);
         var dependencyResolver = db.getDependencyResolver();
         var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
-        var pageCache = dependencyResolver.resolveDependency(PageCache.class);
-        var cursorContextFactory = dependencyResolver.resolveDependency(CursorContextFactory.class);
         var logService = dependencyResolver.resolveDependency(LogService.class);
         var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
-            pageCache,
-            cursorContextFactory,
             dbms,
+            dependencyResolver,
             fs,
             logService,
             databaseConfig
@@ -126,9 +116,8 @@ public final class GdsParallelBatchImporter {
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ExecutionMonitor executionMonitor,
-        PageCache pageCache,
-        CursorContextFactory cursorContextFactory,
         DatabaseManagementService dbms,
+        DependencyResolver dependencyResolver,
         FileSystemAbstraction fs,
         LogService logService,
         Config databaseConfig
@@ -136,18 +125,17 @@ public final class GdsParallelBatchImporter {
         this.config = config;
         this.log = log;
         this.executionMonitor = executionMonitor;
-        this.pageCache = pageCache;
-        this.cursorContextFactory = cursorContextFactory;
         this.dbms = dbms;
+        this.dependencyResolver = dependencyResolver;
         this.fs = fs;
         this.logService = logService;
-        this.databaseConfig = Config
+        var configBuilder = Config
             .newBuilder()
             .fromConfig(databaseConfig)
             .set(Settings.neo4jHome(), databaseConfig.get(Settings.neo4jHome()))
-            .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory))
-            .set(Settings.recordFormat(), config.recordFormat())
-            .set(Settings.allowUpgrade(), true)
+            .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
+        this.databaseConfig = Neo4jProxy.setAllowUpgrades(configBuilder, true)
+            .set(Neo4jProxy.recordFormatSetting(), config.recordFormat())
             .build();
     }
 
@@ -232,7 +220,6 @@ public final class GdsParallelBatchImporter {
         Collector collector,
         JobScheduler jobScheduler
     ) {
-        var recordDatabaseLayout = RecordDatabaseLayout.of(databaseConfig);
         return Neo4jProxy.instantiateBatchImporter(
             BatchImporterFactory.withHighestPriority(),
             databaseLayout,
@@ -243,13 +230,11 @@ public final class GdsParallelBatchImporter {
             executionMonitor,
             AdditionalInitialIds.EMPTY,
             databaseConfig,
-            RecordFormatSelector.selectForStoreOrConfigForNewDbs(
+            Neo4jProxy.recordFormatSelector(
                 databaseConfig,
-                recordDatabaseLayout,
                 fs,
-                pageCache,
                 logService.getInternalLogProvider(),
-                cursorContextFactory
+                dependencyResolver
             ),
             jobScheduler,
             collector

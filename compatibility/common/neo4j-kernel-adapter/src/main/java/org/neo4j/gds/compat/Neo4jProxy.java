@@ -374,6 +374,11 @@ public final class Neo4jProxy {
         return IMPL.isNotNumericIndex(indexCapability);
     }
 
+    public static Config.Builder setAllowUpgrades(Config.Builder configBuilder, boolean value) {
+        IMPL.setAllowUpgrades(configBuilder, value);
+        return configBuilder;
+    }
+
     public static Setting<?> recordFormatSetting() {
         return IMPL.recordFormatSetting();
     }
@@ -388,6 +393,15 @@ public final class Neo4jProxy {
 
     public static HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
         return IMPL.getLocalBoltAddress(connectorPortRegister);
+    }
+
+    public static <T> T recordFormatSelector(
+        Config databaseConfig,
+        FileSystemAbstraction fs,
+        LogProvider internalLogProvider,
+        DependencyResolver dependencyResolver
+    ) {
+        return IMPL.recordFormatSelector(databaseConfig, fs, internalLogProvider, dependencyResolver);
     }
 
     private Neo4jProxy() {

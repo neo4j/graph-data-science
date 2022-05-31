@@ -230,6 +230,8 @@ public interface Neo4jProxyApi {
 
     boolean isNotNumericIndex(IndexCapability indexCapability);
 
+    void setAllowUpgrades(Config.Builder configBuilder, boolean value);
+
     Setting<?> recordFormatSetting();
 
     String recordFormatName(Object recordFormat);
@@ -237,4 +239,11 @@ public interface Neo4jProxyApi {
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 
     HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister);
+
+    <T> T recordFormatSelector(
+        Config databaseConfig,
+        FileSystemAbstraction fs,
+        LogProvider internalLogProvider,
+        DependencyResolver dependencyResolver
+    );
 }
