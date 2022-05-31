@@ -23,6 +23,7 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.database.DatabaseContext;
@@ -56,6 +57,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexQueryConstraints;
@@ -522,5 +524,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return new BoltTransactionRunnerImpl();
+    }
+
+    @Override
+    public HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
+        return connectorPortRegister.getLocalAddress("bolt");
     }
 }

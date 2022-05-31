@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
@@ -37,6 +38,7 @@ import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexReadSession;
@@ -380,8 +382,12 @@ public final class Neo4jProxy {
         return IMPL.recordFormatName(recordFormat);
     }
 
-    public static BoltTransactionRunner boltTransactionRunner() {
+    public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return IMPL.boltTransactionRunner();
+    }
+
+    public static HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
+        return IMPL.getLocalBoltAddress(connectorPortRegister);
     }
 
     private Neo4jProxy() {

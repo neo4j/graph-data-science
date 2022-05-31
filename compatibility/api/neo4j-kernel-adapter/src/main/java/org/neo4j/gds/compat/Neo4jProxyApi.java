@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.graphdb.Node;
@@ -35,6 +36,7 @@ import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.IndexReadSession;
@@ -233,4 +235,6 @@ public interface Neo4jProxyApi {
     String recordFormatName(Object recordFormat);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
+
+    HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister);
 }
