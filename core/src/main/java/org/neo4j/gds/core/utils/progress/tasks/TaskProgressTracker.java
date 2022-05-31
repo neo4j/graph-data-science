@@ -163,19 +163,21 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
-    public void logDebug(String message) {
-        taskProgressLogger.logDebug(":: " + message);
-    }
-
-    @Override
-    public void logWarning(String message) {
-        userLogRegistry.addWarningToLog(baseTask, message);
-        taskProgressLogger.logWarning(":: " + message);
-    }
-
-    @Override
-    public void logInfo(String message) {
-        taskProgressLogger.logMessage(":: " + message);
+    public void logMessage(LogLevel level, String message) {
+        switch (level) {
+            case WARNING:
+                userLogRegistry.addWarningToLog(baseTask, message);
+                taskProgressLogger.logWarning(":: " + message);
+                break;
+            case INFO:
+                taskProgressLogger.logMessage(":: " + message);
+                break;
+            case DEBUG:
+                taskProgressLogger.logDebug(":: " + message);
+                break;
+            default:
+                throw new IllegalStateException("Unknown log level " + level);
+        }
     }
 
     @Override

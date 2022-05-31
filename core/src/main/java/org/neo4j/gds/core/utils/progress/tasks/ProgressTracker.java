@@ -56,11 +56,19 @@ public interface ProgressTracker {
     @Deprecated
     void setVolume(long volume);
 
-    void logDebug(String message);
+    default void logDebug(String message) {
+        logMessage(LogLevel.DEBUG, message);
+    }
 
-    void logWarning(String message);
+    default void logWarning(String message) {
+        logMessage(LogLevel.WARNING, message);
+    }
 
-    void logInfo(String message);
+    default void logInfo(String message) {
+        logMessage(LogLevel.INFO, message);
+    }
+
+    void logMessage(LogLevel level, String message);
 
     void release();
 
@@ -126,17 +134,7 @@ public interface ProgressTracker {
         }
 
         @Override
-        public void logDebug(String message) {
-
-        }
-
-        @Override
-        public void logWarning(String message) {
-
-        }
-
-        @Override
-        public void logInfo(String message) {
+        public void logMessage(LogLevel level, String message) {
 
         }
 
