@@ -404,6 +404,10 @@ public final class Neo4jProxy {
         return IMPL.recordFormatSelector(databaseConfig, fs, internalLogProvider, dependencyResolver);
     }
 
+    public static NamedDatabaseId randomDatabaseId() {
+        return IMPL.randomDatabaseId();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

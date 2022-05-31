@@ -20,8 +20,8 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ class CsvNamedDatabaseIdVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportDatabaseId() {
-        NamedDatabaseId namedDatabaseId = new TestDatabaseIdRepository().getByName("test").get();
+        NamedDatabaseId namedDatabaseId = Neo4jProxy.randomDatabaseId();
         CsvNamedDatabaseIdVisitor databaseIdVisitor = new CsvNamedDatabaseIdVisitor(tempDir);
         databaseIdVisitor.export(namedDatabaseId);
         databaseIdVisitor.close();

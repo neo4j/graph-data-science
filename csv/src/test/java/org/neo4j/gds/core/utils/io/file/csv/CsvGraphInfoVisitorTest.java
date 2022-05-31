@@ -21,9 +21,9 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
 import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +34,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportGraphInfo() {
-        NamedDatabaseId namedDatabaseId = new TestDatabaseIdRepository().getByName("test").get();
+        NamedDatabaseId namedDatabaseId = Neo4jProxy.randomDatabaseId();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
         graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, relationshipTypeCounts));

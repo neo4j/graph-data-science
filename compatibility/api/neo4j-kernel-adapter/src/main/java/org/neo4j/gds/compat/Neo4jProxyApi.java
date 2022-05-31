@@ -246,4 +246,6 @@ public interface Neo4jProxyApi {
         LogProvider internalLogProvider,
         DependencyResolver dependencyResolver
     );
+
+    NamedDatabaseId randomDatabaseId();
 }

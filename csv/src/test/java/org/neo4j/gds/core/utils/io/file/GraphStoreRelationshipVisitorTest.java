@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -33,7 +34,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.kernel.database.TestDatabaseIdRepository;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -132,7 +132,7 @@ class GraphStoreRelationshipVisitorTest {
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
             .nodes(expectedGraph)
-            .databaseId(new TestDatabaseIdRepository().getByName("test").get())
+            .databaseId(Neo4jProxy.randomDatabaseId())
             .concurrency(1)
             .build()
             .getUnion();

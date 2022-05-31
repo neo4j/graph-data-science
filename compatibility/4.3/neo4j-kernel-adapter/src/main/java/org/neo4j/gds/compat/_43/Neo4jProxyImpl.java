@@ -88,6 +88,7 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
 import org.neo4j.kernel.impl.store.MetaDataStore;
 import org.neo4j.kernel.impl.store.RecordStore;
@@ -110,6 +111,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -540,5 +542,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         DependencyResolver dependencyResolver
     ) {
         return (T) RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
+    }
+
+    @Override
+    public NamedDatabaseId randomDatabaseId() {
+        return new TestDatabaseIdRepository().getByName(UUID.randomUUID().toString()).get();
     }
 }
