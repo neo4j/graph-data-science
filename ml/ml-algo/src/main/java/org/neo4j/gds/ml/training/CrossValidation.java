@@ -117,16 +117,21 @@ public class CrossValidation<MODEL_TYPE> {
             var trainStatsBuilder = new ModelStatsBuilder(validationSplits.size());
             var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
 
+            int fold = 1;
             for (TrainingExamplesSplit split : validationSplits) {
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
+                progressTracker.logDebug("Starting fold " + fold + " training");
                 var trainedModel = modelTrainer.train(trainSet, modelParams, metricsHandler);
+                progressTracker.logDebug("Finished fold " + fold + " training");
 
                 modelEvaluator.evaluate(validationSet, trainedModel, validationStatsBuilder::update);
                 modelEvaluator.evaluate(trainSet, trainedModel, trainStatsBuilder::update);
 
                 progressTracker.logSteps(1);
+
+                fold++;
             }
 
             var candidateStats = ModelCandidateStats.of(
