@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline;
+package org.neo4j.gds.ml.training;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
-import org.neo4j.gds.ml.training.TrainingStatistics;
 
 import java.util.ArrayList;
 import java.util.List;
