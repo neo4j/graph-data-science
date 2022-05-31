@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -35,6 +36,8 @@ import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter.GR
 
 public class GraphCapabilitiesLoaderTest {
 
+    private static final CsvMapper CSV_MAPPER = new CsvMapper();
+
     @TempDir
     Path exportDir;
 
@@ -49,7 +52,7 @@ public class GraphCapabilitiesLoaderTest {
         );
         FileUtils.writeLines(graphCapabilitiesFile, lines);
 
-        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir);
+        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir, CSV_MAPPER);
         var capabilities = capabilitiesLoader.load();
 
         var booleanAssert = assertThat(capabilities.canWriteToDatabase());
@@ -62,7 +65,7 @@ public class GraphCapabilitiesLoaderTest {
 
     @Test
     void shouldLoadDefaultCapabilitiesForMissingFile() {
-        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir);
+        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir, CSV_MAPPER);
         var capabilities = capabilitiesLoader.load();
 
         assertThat(capabilities).isEqualTo(ImmutableStaticCapabilities.builder().build());
@@ -73,7 +76,7 @@ public class GraphCapabilitiesLoaderTest {
         var graphCapabilitiesFile = exportDir.resolve(GRAPH_CAPABILITIES_FILE_NAME).toFile();
         FileUtils.writeLines(graphCapabilitiesFile, List.of("an-unknown-feature", "foo"));
 
-        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir);
+        var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir, CSV_MAPPER);
         var capabilities = capabilitiesLoader.load();
 
         assertThat(capabilities)

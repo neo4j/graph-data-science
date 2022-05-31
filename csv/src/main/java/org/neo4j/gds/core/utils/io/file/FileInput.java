@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
@@ -53,6 +54,8 @@ import java.util.stream.Stream;
 
 public final class FileInput implements CompatInput {
 
+    private static final CsvMapper CSV_MAPPER = new CsvMapper();
+
     private final Path importPath;
     private final String userName;
     private final GraphInfo graphInfo;
@@ -63,10 +66,10 @@ public final class FileInput implements CompatInput {
     FileInput(Path importPath) {
         this.importPath = importPath;
         this.userName = new UserInfoLoader(importPath).load();
-        this.graphInfo = new GraphInfoLoader(importPath).load();
+        this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
-        this.capabilities = new GraphCapabilitiesLoader(importPath).load();
+        this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
     }
 
     @Override

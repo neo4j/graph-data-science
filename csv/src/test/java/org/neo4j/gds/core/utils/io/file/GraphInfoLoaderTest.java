@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -36,6 +37,8 @@ import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INF
 
 class GraphInfoLoaderTest {
 
+    private static final CsvMapper CSV_MAPPER = new CsvMapper();
+
     @Test
     void shouldLoadGraphInfo(@TempDir Path exportDir) throws IOException {
         var uuid = UUID.randomUUID();
@@ -48,7 +51,7 @@ class GraphInfoLoaderTest {
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
-        var graphInfoLoader = new GraphInfoLoader(exportDir);
+        var graphInfoLoader = new GraphInfoLoader(exportDir, CSV_MAPPER);
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo).isNotNull();
@@ -77,7 +80,7 @@ class GraphInfoLoaderTest {
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
-        var graphInfoLoader = new GraphInfoLoader(exportDir);
+        var graphInfoLoader = new GraphInfoLoader(exportDir, CSV_MAPPER);
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo.relationshipTypeCounts()).isEmpty();

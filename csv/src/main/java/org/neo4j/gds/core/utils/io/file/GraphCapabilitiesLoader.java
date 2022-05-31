@@ -38,9 +38,9 @@ class GraphCapabilitiesLoader {
     private final Path capabilitiesPath;
     private final ObjectReader objectReader;
 
-    GraphCapabilitiesLoader(Path csvDirectory) {
+    GraphCapabilitiesLoader(Path csvDirectory, CsvMapper csvMapper) {
         this.capabilitiesPath = csvDirectory.resolve(CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME);
-        var csvMapper = new CsvMapper();
+
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         csvMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
         var schema = CsvSchema.emptySchema().withHeader().withStrictHeaders(false);
