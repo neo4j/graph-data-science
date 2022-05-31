@@ -76,4 +76,16 @@ class OverlapSimilarityComputer implements MetricSimilarityComputer {
         double similarity = top / Math.min(bottom1, bottom2);
         return similarity >= similarityCutoff ? similarity : Double.NaN;
     }
+
+    static class Builder implements MetricSimilarityComputerBuilder {
+        @Override
+        public MetricSimilarityComputer build(double similarityCutoff) {
+            return new OverlapSimilarityComputer(similarityCutoff);
+        }
+
+        @Override
+        public String render() {
+            return "OVERLAP";
+        }
+    }
 }

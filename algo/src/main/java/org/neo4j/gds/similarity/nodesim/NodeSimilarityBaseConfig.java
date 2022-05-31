@@ -47,8 +47,10 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Value.Default
-    default String similarityMetric() {
-        return NodeSimilarityMetric.JACCARD.name();
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#render")
+    default MetricSimilarityComputer.MetricSimilarityComputerBuilder similarityMetric() {
+        return new JaccardSimilarityComputer.Builder();
     }
 
     @Value.Default

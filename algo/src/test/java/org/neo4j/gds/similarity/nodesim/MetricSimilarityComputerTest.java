@@ -19,7 +19,16 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-public enum NodeSimilarityMetric {
-    JACCARD,
-    OVERLAP
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+class MetricSimilarityComputerTest {
+
+    @Test
+    void shouldThrowOnWrongMetric2() {
+        assertThatThrownBy(() -> MetricSimilarityComputer.parse("ovErLaPPPPP"))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("ovErLaPPPPP is not a valid metric");
+    }
 }

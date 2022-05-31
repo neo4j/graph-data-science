@@ -21,12 +21,30 @@ package org.neo4j.gds.similarity.nodesim;
 
 import java.util.Locale;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public interface MetricSimilarityComputer {
     double computeSimilarity(long[] vector1, long[] vector2);
 
     double computeWeightedSimilarity(long[] vector1, long[] vector2, double[] weights1, double[] weights2);
 
-    static NodeSimilarityMetric valueOf(String userInput) {
+    static MetricSimilarityComputerBuilder parse(Object userInput) {
+        if (userInput instanceof MetricSimilarityComputerBuilder) {
+            return (MetricSimilarityComputerBuilder) userInput;
+        }
+        if (userInput instanceof String) {
+            return create(valueOf((String) userInput));
+        }
+        throw new IllegalArgumentException(
+            formatWithLocale("Unsupported input type: Expected String but received %s.", userInput.getClass().getSimpleName())
+        );
+    }
+
+    static String render(MetricSimilarityComputerBuilder input) {
+        return input.render();
+    }
+
+    private static NodeSimilarityMetric valueOf(String userInput) {
         String userInputInCaps = userInput.toUpperCase(Locale.ROOT);
         if (userInputInCaps.equals("JACCARD")) {
             return NodeSimilarityMetric.JACCARD;
@@ -37,15 +55,17 @@ public interface MetricSimilarityComputer {
         }
     }
 
-    static MetricSimilarityComputer create(NodeSimilarityMetric metric, double similarityCutoff) {
+    private static MetricSimilarityComputerBuilder create(NodeSimilarityMetric metric) {
         if (metric == NodeSimilarityMetric.JACCARD) {
-            return new JaccardSimilarityComputer(similarityCutoff);
+            return new JaccardSimilarityComputer.Builder();
         } else {
-            return new OverlapSimilarityComputer(similarityCutoff);
+            return new OverlapSimilarityComputer.Builder();
         }
 
     }
+
+    interface MetricSimilarityComputerBuilder {
+        MetricSimilarityComputer build(double similarityCutoff);
+        String render();
+    }
 }
-
-
-

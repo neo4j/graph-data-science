@@ -79,5 +79,15 @@ public class JaccardSimilarityComputer implements MetricSimilarityComputer {
         double similarity = min / max;
         return similarity >= similarityCutoff ? similarity : Double.NaN;
     }
-}
 
+    static class Builder implements MetricSimilarityComputerBuilder {
+        public MetricSimilarityComputer build(double similarityCutoff) {
+            return new JaccardSimilarityComputer(similarityCutoff);
+        }
+
+        @Override
+        public String render() {
+            return "JACCARD";
+        }
+    }
+}

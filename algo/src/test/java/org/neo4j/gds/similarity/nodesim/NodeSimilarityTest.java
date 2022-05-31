@@ -59,8 +59,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
@@ -854,21 +852,6 @@ final class NodeSimilarityTest {
     }
 
     @Test
-    void shouldThrowOnWrongMetric() {
-
-        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new NodeSimilarity(
-            naturalGraph,
-            configBuilder().similarityMetric("ovErLaPPPPP").build(),
-            1,
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
-        ));
-
-        assertTrue(exception.getMessage().contains("ovErLaPPPPP is not a valid metric"));
-
-    }
-
-    @Test
     void shouldGiveCorrectResultsWithOverlap() {
         var gdl =
             "CREATE" +
@@ -887,7 +870,7 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().similarityMetric("ovErLaP").build(),
+            configBuilder().similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
             1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -902,7 +885,7 @@ final class NodeSimilarityTest {
 
         nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().relationshipWeightProperty("LIKES").similarityMetric("ovErLaP").build(),
+            configBuilder().relationshipWeightProperty("LIKES").similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
             1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER

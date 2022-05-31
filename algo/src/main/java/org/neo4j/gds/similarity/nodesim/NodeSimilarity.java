@@ -81,8 +81,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
 
-        var metric = MetricSimilarityComputer.valueOf(config.similarityMetric());
-        this.similarityComputer = MetricSimilarityComputer.create(metric, config.similarityCutoff());
+        var metricBuilder = config.similarityMetric();
+        this.similarityComputer = metricBuilder.build(config.similarityCutoff());
     }
 
     @Override
