@@ -43,12 +43,13 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends GraphAlgorithmFactory<FilteredKnn, CONFIG> {
+    private static final String FILTERED_KNN_TASK_NAME = "Filtered KNN";
 
     private static final String KNN_BASE_TASK_NAME = "FilteredKnn";
 
     @Override
     public String taskName() {
-        return KNN_BASE_TASK_NAME;
+        return FILTERED_KNN_TASK_NAME;
     }
 
     @Override
@@ -94,7 +95,9 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
                     .add("new-reverse-neighbors", tempListEstimation)
                     .fixed(
                         "initial-random-neighbors (per thread)",
-                        initialSamplerMemoryEstimation(configuration.initialSampler(), boundedK).times(concurrency)
+                        KnnFactory
+                            .initialSamplerMemoryEstimation(configuration.initialSampler(), boundedK)
+                            .times(concurrency)
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
@@ -107,28 +110,8 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
         );
     }
 
-    static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
-        return KnnFactory.initialSamplerMemoryEstimation(samplerType, boundedK);
-    }
-
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return knnTaskTree(graph, config);
-    }
-
-    public static Task knnTaskTree(Graph graph, FilteredKnnBaseConfig config) {
-        return Tasks.task(
-            KNN_BASE_TASK_NAME,
-            Tasks.leaf("Initialize random neighbors", graph.nodeCount()),
-            Tasks.iterativeDynamic(
-                "Iteration",
-                () -> List.of(
-                    Tasks.leaf("Split old and new neighbors", graph.nodeCount()),
-                    Tasks.leaf("Reverse old and new neighbors", graph.nodeCount()),
-                    Tasks.leaf("Join neighbors", graph.nodeCount())
-                ),
-                config.maxIterations()
-            )
-        );
+        return KnnFactory.knnTaskTree(graph, config);
     }
 }
