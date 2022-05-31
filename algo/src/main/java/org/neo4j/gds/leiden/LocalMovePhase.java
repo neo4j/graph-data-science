@@ -116,12 +116,10 @@ final class LocalMovePhase {
                     Math.max(0, encounteredCommunitiesWeights.get(currentNodeCommunityId)) -
                     currentNodeVolume * communityVolumes.get(currentNodeCommunityId) * gamma;
 
-                long bestCommunityId = currentNodeCommunityId;
-
-                bestCommunityId = findBestCommunity(
+                long bestCommunityId = findBestCommunity(
                     currentBestGain,
                     currentNodeVolume,
-                    bestCommunityId
+                    currentNodeCommunityId
                 );
 
                 tryToMoveNode(

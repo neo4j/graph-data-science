@@ -111,10 +111,7 @@ public class Leiden extends Algorithm<LeidenResult> {
             var communitiesCount = localMovePhasePartition.communityCount();
             didConverge = communitiesCount == workingGraph.nodeCount();
 
-            if (localMovePhase.swaps == 0)
-                break;
-
-            if (didConverge) {
+            if (localMovePhase.swaps == 0 || didConverge) {
                 break;
             }
 
