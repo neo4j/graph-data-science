@@ -380,7 +380,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -393,7 +393,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -428,7 +428,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -441,7 +441,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -479,7 +479,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -492,7 +492,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -529,7 +529,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -542,7 +542,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -581,7 +581,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -594,7 +594,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -635,8 +635,8 @@ public final class ParallelUtil {
         );
     }
 
-     /**
-     * Try to run all tasks for their side-effects using at most
+    /**
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -649,7 +649,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -693,7 +693,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -706,7 +706,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -750,7 +750,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -763,7 +763,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -808,7 +808,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -821,7 +821,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -872,7 +872,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -885,7 +885,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -936,7 +936,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -949,7 +949,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -996,7 +996,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -1009,7 +1009,7 @@ public final class ParallelUtil {
      * the tasks lazily upon iteration, not all elements might actually be
      * created.
      * <p>
-     * The calling thread will be always blocked during the execution of the tasks
+     * The calling thread will always be blocked during the execution of the tasks
      * and is not available for scheduling purposes. If the calling thread is
      * {@link Thread#interrupt() interrupted} during the execution, running tasks
      * are cancelled and not-yet-started tasks are abandoned.
@@ -1056,7 +1056,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -1123,7 +1123,7 @@ public final class ParallelUtil {
     }
 
     /**
-     * Try to run all tasks for their side-effects using at most
+     * Try to run all tasks for their side effects using at most
      * {@code concurrency} threads at once.
      * <p>
      * If the concurrency is 1 or less, or there is only a single task, or the
@@ -1189,10 +1189,34 @@ public final class ParallelUtil {
     }
 
     private static void runWithConcurrency(
-        final int concurrency,
-        final Iterator<? extends Runnable> tasks,
-        final long waitNanos,
-        final long maxWaitRetries,
+        int concurrency,
+        Iterator<? extends Runnable> tasks,
+        long waitNanos,
+        long maxWaitRetries,
+        final TerminationFlag terminationFlag,
+        final ExecutorService executor
+    ) {
+        runWithConcurrency(concurrency, tasks, waitNanos, maxWaitRetries, false, terminationFlag, executor);
+    }
+
+    public static void runWithConcurrency(RunWithConcurrency params) {
+        runWithConcurrency(
+            params.concurrency(),
+            params.tasks(),
+            params.waitNanos(),
+            params.maxWaitRetries(),
+            params.mayInterruptIfRunning(),
+            params.terminationFlag(),
+            params.executor()
+        );
+    }
+
+    private static void runWithConcurrency(
+        int concurrency,
+        Iterator<? extends Runnable> tasks,
+        long waitNanos,
+        long maxWaitRetries,
+        boolean mayInterruptIfRunning,
         final TerminationFlag terminationFlag,
         final ExecutorService executor
     ) {
@@ -1264,17 +1288,18 @@ public final class ParallelUtil {
         } catch (InterruptedException e) {
             error = error == null ? e : ExceptionUtil.chain(e, error);
         } finally {
-            finishRunWithConcurrency(completionService, error);
+            finishRunWithConcurrency(mayInterruptIfRunning, completionService, error);
         }
     }
 
     private static void finishRunWithConcurrency(
+        boolean mayInterruptIfRunning,
         final CompletionService completionService,
         final Throwable error
     ) {
         // cancel all regardless of done flag because we could have aborted
         // from the termination flag
-        completionService.cancelAll();
+        completionService.cancelAll(mayInterruptIfRunning);
         if (error != null) {
             ExceptionUtil.throwIfUnchecked(error);
             throw new RuntimeException(error);
@@ -1424,32 +1449,35 @@ public final class ParallelUtil {
             }
         }
 
-        void cancelAll() {
-            stopFuturesAndStopScheduling(running);
-            stopFutures(completionQueue);
+        void cancelAll(boolean mayInterruptIfRunning) {
+            stopFuturesAndStopScheduling(running, mayInterruptIfRunning);
+            stopFutures(completionQueue, mayInterruptIfRunning);
         }
 
         private boolean canSubmit() {
             return pool == null || pool.getActiveCount() < availableConcurrency;
         }
 
-        private void stopFutures(final Collection<Future<Void>> futures) {
+        private void stopFutures(final Collection<Future<Void>> futures, boolean mayInterruptIfRunning) {
             for (Future<Void> future : futures) {
-                future.cancel(false);
+                future.cancel(mayInterruptIfRunning);
             }
             futures.clear();
         }
 
-        private void stopFuturesAndStopScheduling(final Collection<Future<Void>> futures) {
+        private void stopFuturesAndStopScheduling(
+            final Collection<Future<Void>> futures,
+            boolean mayInterruptIfRunning
+        ) {
             if (pool == null) {
-                stopFutures(futures);
+                stopFutures(futures, mayInterruptIfRunning);
                 return;
             }
             for (Future<Void> future : futures) {
                 if (future instanceof Runnable) {
                     pool.remove((Runnable) future);
                 }
-                future.cancel(false);
+                future.cancel(mayInterruptIfRunning);
             }
             futures.clear();
             pool.purge();
