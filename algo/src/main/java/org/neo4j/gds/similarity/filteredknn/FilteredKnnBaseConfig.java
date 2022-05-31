@@ -46,6 +46,11 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
         return NodeFilterSpec.noOp;
     }
 
+    @Value.Default
+    default boolean seedTargetNodes() {
+        return false;
+    }
+
     @Configuration.GraphStoreValidationCheck
     default void validateSourceNodeFilter(
         GraphStore graphStore,
