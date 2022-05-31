@@ -47,6 +47,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final NodeSimilarityBaseConfig config;
 
     private final ExecutorService executorService;
+    private final int concurrency;
     private final BitSet nodeFilter;
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> vectors;
@@ -55,15 +56,26 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final boolean weighted;
 
+    public static NodeSimilarity create(
+        Graph graph,
+        NodeSimilarityBaseConfig config,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
+        return new NodeSimilarity(graph, config, config.concurrency(), executorService, progressTracker);
+    }
+
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityBaseConfig config,
+        int concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
+        this.concurrency = concurrency;
         this.config = config;
         this.executorService = executorService;
         this.nodeFilter = new BitSet(graph.nodeCount());
@@ -135,7 +147,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
-                config.concurrency(),
+                concurrency,
                 executorService
             ).build(similarities);
         }
@@ -207,7 +219,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
-            loggableAndTerminatableNodeStream(), config.concurrency(), stream -> stream
+            loggableAndTerminatableNodeStream(), concurrency, stream -> stream
                 .boxed()
                 .flatMap(this::computeSimilaritiesForNode)
         );
@@ -248,7 +260,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         );
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminatableNodeStream(),
-            config.concurrency(),
+            concurrency,
             stream -> stream
                 .forEach(node1 -> {
                     long[] vector1 = vectors.get(node1);
@@ -345,7 +357,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private long calculateWorkload() {
         long workload = nodesToCompare * nodesToCompare;
-        if (config.concurrency() == 1) {
+        if (concurrency == 1) {
             workload = workload / 2;
         }
         return workload;

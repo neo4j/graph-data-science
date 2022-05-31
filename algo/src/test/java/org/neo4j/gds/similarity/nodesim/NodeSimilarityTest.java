@@ -291,7 +291,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
+            configBuilder().relationshipWeightProperty("prop").build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -312,7 +313,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            configBuilder().build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -333,7 +335,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).build(),
+            configBuilder().topN(1).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -354,7 +357,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).bottomN(1).build(),
+            configBuilder().bottomN(1).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -376,7 +380,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().topK(1).concurrency(concurrency).build(),
+            configBuilder().topK(1).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -398,10 +403,10 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder()
-                .concurrency(concurrency)
                 .topK(10)
                 .bottomK(1)
                 .build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -431,7 +436,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
+            configBuilder().similarityCutoff(0.1).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -455,7 +461,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().degreeCutoff(2).concurrency(concurrency).build(),
+            configBuilder().degreeCutoff(2).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -477,7 +484,8 @@ final class NodeSimilarityTest {
     void shouldComputeForUndirectedGraphs(int concurrency) {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             undirectedGraph,
-            configBuilder().concurrency(concurrency).build(),
+            configBuilder().build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -490,7 +498,8 @@ final class NodeSimilarityTest {
     void shouldComputeForUnionGraphs() {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             naturalGraph,
-            configBuilder().concurrency(1).build(),
+            configBuilder().build(),
+            1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -498,7 +507,8 @@ final class NodeSimilarityTest {
 
         nodeSimilarity = new NodeSimilarity(
             naturalUnionGraph,
-            configBuilder().concurrency(1).build(),
+            configBuilder().build(),
+            1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -514,7 +524,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            configBuilder().build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -564,10 +575,10 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             configBuilder()
-                .concurrency(concurrency)
                 .topK(100)
                 .topN(1)
                 .build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -607,7 +618,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).topN(1).build(),
+            configBuilder().topN(1).build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -635,7 +647,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(concurrency).build(),
+            configBuilder().build(),
+            concurrency,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -657,7 +670,8 @@ final class NodeSimilarityTest {
             IllegalArgumentException.class,
             () -> new NodeSimilarity(
                 undirectedGraph,
-                configBuilder().concurrency(concurrency).build(),
+                configBuilder().build(),
+                concurrency,
                 Pools.DEFAULT,
                 ProgressTracker.NULL_TRACKER
             ).computeToStream()
@@ -805,7 +819,7 @@ final class NodeSimilarityTest {
     @ValueSource(ints = {1,2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
+        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
         TestLog log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
@@ -818,6 +832,7 @@ final class NodeSimilarityTest {
         new NodeSimilarity(
             graph,
             config,
+            concurrency,
             Pools.DEFAULT,
             progressTracker
         ).compute().streamResult().count();
@@ -843,7 +858,8 @@ final class NodeSimilarityTest {
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> new NodeSimilarity(
             naturalGraph,
-            configBuilder().concurrency(1).similarityMetric("ovErLaPPPPP").build(),
+            configBuilder().similarityMetric("ovErLaPPPPP").build(),
+            1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         ));
@@ -871,7 +887,8 @@ final class NodeSimilarityTest {
 
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().concurrency(1).similarityMetric("ovErLaP").build(),
+            configBuilder().similarityMetric("ovErLaP").build(),
+            1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -885,7 +902,8 @@ final class NodeSimilarityTest {
 
         nodeSimilarity = new NodeSimilarity(
             graph,
-            configBuilder().relationshipWeightProperty("LIKES").concurrency(1).similarityMetric("ovErLaP").build(),
+            configBuilder().relationshipWeightProperty("LIKES").similarityMetric("ovErLaP").build(),
+            1,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );

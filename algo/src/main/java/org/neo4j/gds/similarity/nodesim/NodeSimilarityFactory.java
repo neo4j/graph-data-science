@@ -48,7 +48,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new NodeSimilarity(graph, configuration, Pools.DEFAULT, progressTracker);
+        return new NodeSimilarity(graph, configuration, configuration.concurrency(), Pools.DEFAULT, progressTracker);
     }
 
     @Override
