@@ -55,6 +55,7 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.DEBUG;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
@@ -255,7 +256,12 @@ class NodeRegressionTrainTest {
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
-            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log"));
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-info"));
+
+        assertThat(testLog.getMessages(DEBUG))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals(4))
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-debug"));
     }
 
     @ParameterizedTest
