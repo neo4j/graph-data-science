@@ -62,12 +62,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        return new NodeSimilarity(graph, config, config.concurrency(), executorService, progressTracker);
+        var similarityComputer = config.similarityMetric().build(config.similarityCutoff());
+        return new NodeSimilarity(graph, config, similarityComputer, config.concurrency(), executorService, progressTracker);
     }
 
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityBaseConfig config,
+        MetricSimilarityComputer similarityComputer,
         int concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -77,12 +79,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
         this.concurrency = concurrency;
         this.config = config;
+        this.similarityComputer = similarityComputer;
         this.executorService = executorService;
         this.nodeFilter = new BitSet(graph.nodeCount());
         this.weighted = config.hasRelationshipWeightProperty();
-
-        var metricBuilder = config.similarityMetric();
-        this.similarityComputer = metricBuilder.build(config.similarityCutoff());
     }
 
     @Override

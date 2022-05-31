@@ -54,10 +54,9 @@ class NodeSimilarityTerminationTest extends BaseTest {
             .build()
             .generate();
 
-        NodeSimilarity nodeSimilarity = new NodeSimilarity(
+        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
             graph,
-            NodeSimilarityTest.configBuilder().build(),
-            1,
+            NodeSimilarityTest.configBuilder().concurrency(1).build(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
