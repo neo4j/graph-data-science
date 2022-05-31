@@ -67,7 +67,7 @@ public class DFS extends Algorithm<HugeLongArray> {
         visited.set(startNodeId);
 
         long resultIndex = 0L;
-        while (!nodes.isEmpty() && running()) {
+        while (!nodes.isEmpty() && terminationFlag.running()) {
             final long source = sources.pop();
             final long node = nodes.pop();
             final double weight = weights.pop();
@@ -97,7 +97,7 @@ public class DFS extends Algorithm<HugeLongArray> {
                         nodes.push(t);
                         weights.push(aggregatorFunction.apply(s, t, weight));
                     }
-                    return running();
+                    return terminationFlag.running();
                 }
             );
         }

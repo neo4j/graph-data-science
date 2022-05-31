@@ -129,7 +129,7 @@ public class SccAlgorithm extends Algorithm<HugeLongArray> {
     }
 
     private boolean compute(long nodeId) {
-        if (!running()) {
+        if (!terminationFlag.running()) {
             return false;
         }
         if (index.get(nodeId) != -1) {

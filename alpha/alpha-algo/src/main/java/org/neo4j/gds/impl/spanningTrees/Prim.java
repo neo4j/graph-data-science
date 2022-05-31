@@ -84,7 +84,7 @@ public class Prim extends Algorithm<SpanningTree> {
         cost.put(startNodeId, 0.0);
         queue.add(startNodeId, -1.0);
         int effectiveNodeCount = 0;
-        while (!queue.isEmpty() && running()) {
+        while (!queue.isEmpty() && terminationFlag.running()) {
             int node = queue.pop();
             if (visited.get(node)) {
                 continue;

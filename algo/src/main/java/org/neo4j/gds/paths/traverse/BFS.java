@@ -195,7 +195,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         );
         int bfsTaskListSize = bfsTaskList.size();
         long currentDepth = 0;
-        while (running()) {
+        while (terminationFlag.running()) {
             if (currentDepth == maximumDepth) {
                 break;
             }
@@ -209,7 +209,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
             var previousTraversedNodesLength = traversedNodesLength.get();
             int numberOfFinishedTasks = 0;
             int numberOfTasksWithChunks = countTasksWithChunks(bfsTaskList);
-            while (numberOfFinishedTasks != numberOfTasksWithChunks && running()) {
+            while (numberOfFinishedTasks != numberOfTasksWithChunks && terminationFlag.running()) {
                 int minimumTaskIndex = -1;
                 for (int bfsTaskIndex = 0; bfsTaskIndex < bfsTaskListSize; ++bfsTaskIndex) {
                     var currentBfsTask = bfsTaskList.get(bfsTaskIndex);

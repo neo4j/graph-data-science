@@ -150,7 +150,7 @@ public final class IntersectingTriangleCount extends Algorithm<IntersectingTrian
         @Override
         public void run() {
             long node;
-            while ((node = queue.getAndIncrement()) < graph.nodeCount() && running()) {
+            while ((node = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
                 if (graph.degree(node) <= config.maxDegree()) {
                     intersect.intersectAll(node, this);
                 } else {

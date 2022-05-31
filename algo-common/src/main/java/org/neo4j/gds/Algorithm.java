@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public abstract class Algorithm<RESULT> implements TerminationFlag {
+public abstract class Algorithm<RESULT> {
     protected final ProgressTracker progressTracker;
 
     protected TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
@@ -49,10 +49,5 @@ public abstract class Algorithm<RESULT> implements TerminationFlag {
 
     public ProgressTracker getProgressTracker() {
         return this.progressTracker;
-    }
-
-    @Override
-    public boolean running() {
-        return terminationFlag.running();
     }
 }
