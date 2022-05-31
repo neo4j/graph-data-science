@@ -28,8 +28,6 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
-import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
@@ -303,23 +301,6 @@ class TrainingStatisticsTest {
         assertThat(_4_10.max).isEqualTo(4 * _1_10.max - 3 * overheadForOneStatsMap);
         assertThat(_1_10.max).isEqualTo(2 * _1_05.max - overheadForOneStatsMap);
         assertThat(_4_10.max).isEqualTo(2 * _4_05.max - overheadForOneStatsMap);
-    }
-
-    private static final class TestTrainerConfig implements TrainerConfig {
-
-        private final String name;
-
-        private TestTrainerConfig(String name) {this.name = name;}
-
-        @Override
-        public Map<String, Object> toMap() {
-            return Map.of("name", name);
-        }
-
-        @Override
-        public TrainingMethod method() {
-            return TrainingMethod.RandomForestClassification;
-        }
     }
 
 }
