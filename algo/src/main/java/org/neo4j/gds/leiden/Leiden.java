@@ -204,7 +204,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray currentCommunities
     ) {
 
-        assert workingGraph.nodeCount() == currentCommunities.size() : "We messed something....";
+        assert workingGraph.nodeCount() == currentCommunities.size() : "The sizes of the graph and communities should match";
 
         var dendrogram = HugeLongArray.newArray(rootGraph.nodeCount());
         AtomicLong maxCommunityId = new AtomicLong(0L);
