@@ -71,10 +71,7 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
 
     INFO customInfo();
 
-    @Value.Default
-    default Optional<Path> fileLocation() {
-        return Optional.empty();
-    }
+    Optional<Path> fileLocation();
 
     @Value.Derived
     default boolean loaded() {
