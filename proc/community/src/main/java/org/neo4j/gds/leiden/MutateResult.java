@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Map;
 
 public final class MutateResult extends StatsResult {
@@ -42,6 +43,8 @@ public final class MutateResult extends StatsResult {
         long mutateMillis,
         long nodePropertiesWritten,
         @Nullable Map<String, Object> communityDistribution,
+        List<Double> modularities,
+        double modularity,
         Map<String, Object> configuration
     ) {
         super(
@@ -50,6 +53,8 @@ public final class MutateResult extends StatsResult {
             nodeCount,
             communityCount,
             communityDistribution,
+            modularity,
+            modularities,
             preProcessingMillis,
             computeMillis,
             postProcessingMillis,
@@ -63,6 +68,9 @@ public final class MutateResult extends StatsResult {
 
         long levels = -1;
         boolean didConverge = false;
+
+        double modularity;
+        List<Double> modularities;
 
         Builder(
             ProcedureCallContext context,
@@ -81,6 +89,16 @@ public final class MutateResult extends StatsResult {
             return this;
         }
 
+        Builder withModularity(double modularity) {
+            this.modularity = modularity;
+            return this;
+        }
+
+        Builder withModularities(List<Double> modularities) {
+            this.modularities = modularities;
+            return this;
+        }
+
         @Override
         protected MutateResult buildResult() {
             return new MutateResult(
@@ -94,6 +112,8 @@ public final class MutateResult extends StatsResult {
                 mutateMillis,
                 nodePropertiesWritten,
                 communityHistogramOrNull(),
+                modularities,
+                modularity,
                 config.toMap()
             );
         }

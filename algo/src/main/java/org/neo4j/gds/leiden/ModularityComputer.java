@@ -20,8 +20,16 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
+
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.LongStream;
 
 final class ModularityComputer {
 
@@ -51,5 +59,82 @@ final class ModularityComputer {
             modularity += (ec - Kc * Kc * gamma);
         }
         return modularity * coefficient;
+    }
+
+    static double modularity(
+        Graph workingGraph,
+        HugeLongArray communities,
+        HugeDoubleArray communityVolumes,
+        double gamma,
+        double coefficient,
+        int concurrency,
+        ExecutorService executorService
+    ) {
+        HugeAtomicDoubleArray relationshipsOutsideCommunity = HugeAtomicDoubleArray.newArray(workingGraph.nodeCount());
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            workingGraph.nodeCount(),
+            partition -> new OutsideRelationshipCalculator(
+                partition,
+                workingGraph,
+                relationshipsOutsideCommunity,
+                communities
+            ), Optional.empty()
+        );
+        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+
+        double modularity = ParallelUtil.parallelStream(
+            LongStream.range(0, workingGraph.nodeCount()),
+            concurrency,
+            nodeStream ->
+                nodeStream
+                    .mapToDouble(communityId -> {
+                        double oc = relationshipsOutsideCommunity.get(communityId);
+                        double Kc = communityVolumes.get(communityId);
+                        double ec = Kc - oc;
+                        return ec - Kc * Kc * gamma;
+                    })
+                    .reduce(Double::sum)
+                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
+        );
+        //we do not have the self-loops from  previous merges so we settle from calculating the outside edges between relationships
+        //from that and the total sum of weights in communityVolumes we can calculate all inside edges
+        
+        return modularity * coefficient;
+    }
+
+    static class OutsideRelationshipCalculator implements Runnable {
+        private final Partition partition;
+        private final Graph localGraph;
+        private final HugeAtomicDoubleArray relationshipsOutsideCommunity;
+        private final HugeLongArray communities;
+
+        OutsideRelationshipCalculator(
+            Partition partition,
+            Graph graph,
+            HugeAtomicDoubleArray relationshipsOutsideCommunity,
+            HugeLongArray communities
+        ) {
+            this.partition = partition;
+            this.localGraph = graph.concurrentCopy();
+            this.relationshipsOutsideCommunity = relationshipsOutsideCommunity;
+            this.communities = communities;
+        }
+
+        @Override
+        public void run() {
+            long startNode = partition.startNode();
+            long endNode = startNode + partition.nodeCount();
+            for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
+                long communityId = communities.get(nodeId);
+                localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
+                    long tCommunityId = communities.get(t);
+                    if (tCommunityId != communityId) {
+                        relationshipsOutsideCommunity.getAndAdd(communityId, w);
+                    }
+                    return true;
+                });
+            }
+        }
     }
 }

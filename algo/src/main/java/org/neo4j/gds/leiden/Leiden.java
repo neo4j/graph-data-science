@@ -45,11 +45,16 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final double gamma;
     private final double theta;
 
+    private double[] modularities;
+
+    private double modularity;
     private final HugeLongArray[] dendrograms;
 
     private final ExecutorService executorService;
     private final int concurrency;
     private final long seed;
+
+    private final double scaleCoefficient;
 
     public Leiden(
         Graph graph,
@@ -66,12 +71,14 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
-
+        this.scaleCoefficient = 1.0 / graph.relationshipCount();
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
 
         this.dendrograms = new HugeLongArray[maxIterations];
+        this.modularities = new double[maxIterations];
+        this.modularity = 0d;
     }
 
     @Override
@@ -115,6 +122,15 @@ public class Leiden extends Algorithm<LeidenResult> {
                 break;
             }
 
+            modularities[iteration] = ModularityComputer.modularity(
+                workingGraph,
+                partition,
+                communityVolumes,
+                gamma,
+                scaleCoefficient,
+                concurrency,
+                executorService
+            );
             // 2 REFINE
             var refinementPhase = RefinementPhase.create(
                 workingGraph,
@@ -163,8 +179,16 @@ public class Leiden extends Algorithm<LeidenResult> {
             communityCount = communityData.communityCount;
 
             seedCommunities = dendrograms[iteration];
+            modularity = modularities[iteration];
         }
-        return LeidenResult.of(seedCommunities, iteration, didConverge);
+        return LeidenResult.of(
+            seedCommunities,
+            iteration,
+            didConverge,
+            dendrograms,
+            resizeModularitiesArray(iteration),
+            modularity
+        );
     }
 
     private void initVolumes(
@@ -275,11 +299,26 @@ public class Leiden extends Algorithm<LeidenResult> {
             aggregatedNodeSeedVolume.set(aggregatedCommunityId, volumeOfTheAggregatedCommunity);
             return true;
         });
-        return new CommunityData(seededCommunitiesForNextIteration, aggregatedCommunitySeedVolume, aggregatedNodeSeedVolume, localPhaseCommunityToAggregatedNewId.size());
+        return new CommunityData(
+            seededCommunitiesForNextIteration,
+            aggregatedCommunitySeedVolume,
+            aggregatedNodeSeedVolume,
+            localPhaseCommunityToAggregatedNewId.size()
+        );
     }
 
     @Override
     public void release() {
 
+    }
+
+    private double[] resizeModularitiesArray(int iteration) {
+        double[] resizedModularities = new double[iteration];
+        if (iteration < maxIterations) {
+            System.arraycopy(this.modularities, 0, resizedModularities, 0, iteration);
+        } else {
+            return modularities;
+        }
+        return resizedModularities;
     }
 }

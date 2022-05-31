@@ -19,13 +19,24 @@
  */
 package org.neo4j.gds.leiden;
 
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 public final class StreamResult {
 
     public final long nodeId;
     public final long communityId;
+    public final List<Long> intermediateCommunityIds;
 
-    StreamResult(long nodeId, long communityId) {
+    StreamResult(long nodeId, @Nullable long[] intermediateCommunityIds, long communityId) {
         this.nodeId = nodeId;
+        this.intermediateCommunityIds = intermediateCommunityIds == null ? null : Arrays
+            .stream(intermediateCommunityIds)
+            .boxed()
+            .collect(Collectors.toList());
         this.communityId = communityId;
     }
 }

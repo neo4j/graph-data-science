@@ -23,6 +23,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Map;
 
 public class StatsResult extends StandardStatsResult {
@@ -31,6 +32,8 @@ public class StatsResult extends StandardStatsResult {
     public final long nodeCount;
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
+    public final double modularity;
+    public final List<Double> modularities;
 
     StatsResult(
         long ranLevels,
@@ -38,6 +41,8 @@ public class StatsResult extends StandardStatsResult {
         long nodeCount,
         long communityCount,
         Map<String, Object> communityDistribution,
+        double modularity,
+        List<Double> modularities,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -49,12 +54,16 @@ public class StatsResult extends StandardStatsResult {
         this.nodeCount = nodeCount;
         this.communityCount = communityCount;
         this.communityDistribution = communityDistribution;
+        this.modularities = modularities;
+        this.modularity = modularity;
     }
 
     static class StatsBuilder extends AbstractCommunityResultBuilder<StatsResult> {
 
         long levels = -1;
         boolean didConverge = false;
+        double modularity;
+        List<Double> modularities;
 
         StatsBuilder(ProcedureCallContext context, int concurrency) {
             super(context, concurrency);
@@ -62,6 +71,16 @@ public class StatsResult extends StandardStatsResult {
 
         StatsBuilder withLevels(long levels) {
             this.levels = levels;
+            return this;
+        }
+
+        StatsBuilder withModularity(double modularity) {
+            this.modularity = modularity;
+            return this;
+        }
+
+        StatsBuilder withModularities(List<Double> modularities) {
+            this.modularities = modularities;
             return this;
         }
 
@@ -78,6 +97,8 @@ public class StatsResult extends StandardStatsResult {
                 nodeCount,
                 maybeCommunityCount.orElse(0L),
                 communityHistogramOrNull(),
+                modularity,
+                modularities,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,

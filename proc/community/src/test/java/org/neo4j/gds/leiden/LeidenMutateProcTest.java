@@ -26,6 +26,8 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
@@ -83,6 +85,8 @@ class LeidenMutateProcTest  extends BaseProcTest {
                     "nodeCount",
                     "communityCount",
                     "postProcessingMillis",
+                    "modularity",
+                    "modularities",
                     "configuration"
                 );
 
@@ -102,7 +106,10 @@ class LeidenMutateProcTest  extends BaseProcTest {
                     .as("nodePropertiesWritten")
                     .isEqualTo(8);
 
-
+                assertThat(resultRow.get("modularities"))
+                    .asInstanceOf(LIST).hasSize((int) (long) resultRow.get("ranLevels"));
+                assertThat(resultRow.get("modularity"))
+                    .asInstanceOf(DOUBLE);
                 assertThat(resultRow.get("communityCount"))
                     .asInstanceOf(LONG)
                     .isGreaterThanOrEqualTo(1);
