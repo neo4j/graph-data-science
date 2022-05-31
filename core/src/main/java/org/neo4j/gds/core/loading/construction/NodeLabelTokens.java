@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
@@ -35,15 +36,18 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class NodeLabelTokens {
 
     public static @NotNull NodeLabelToken of(@Nullable Object nodeLabels) {
-        return Objects.requireNonNullElseGet(ofNullable(nodeLabels), () -> {
+        var nodeLabelToken = ofNullable(nodeLabels);
+        if (nodeLabelToken == null) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Could not represent a value of type[%s] as nodeLabels: %s",
                 nodeLabels.getClass(),
                 nodeLabels
             ));
-        });
+        }
+        return nodeLabelToken;
     }
 
+    @Contract("null -> !null")
     public static @Nullable NodeLabelToken ofNullable(@Nullable Object nodeLabels) {
         if (nodeLabels == null) {
             return empty();
@@ -77,7 +81,7 @@ public final class NodeLabelTokens {
         return new Array<>(nodeLabels, Function.identity());
     }
 
-    public static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
+    static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
         return new Singleton<>(nodeLabel, Function.identity());
     }
 
@@ -157,7 +161,7 @@ public final class NodeLabelTokens {
     }
 
     private static final class Array<T> implements NodeLabelToken {
-        private final T[] nodeLabels;
+        private final @NotNull T[] nodeLabels;
 
         private final Function<T, NodeLabel> toNodeLabel;
 
@@ -185,21 +189,34 @@ public final class NodeLabelTokens {
         public String[] getStrings() {
             return Arrays.stream(nodeLabels).map(toNodeLabel).map(NodeLabel::name).toArray(String[]::new);
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Array<?> array = (Array<?>) o;
+            return Arrays.equals(nodeLabels, array.nodeLabels);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(nodeLabels);
+        }
     }
 
     private static final class JavaList<T> implements NodeLabelToken {
-        private final List<T> nodeLabels;
+        private final @NotNull List<T> nodeLabels;
 
         private final Function<T, NodeLabel> toNodeLabel;
 
-        private JavaList(List<T> nodeLabels, Function<T, NodeLabel> toNodeLabel) {
+        private JavaList(@NotNull List<T> nodeLabels, Function<T, NodeLabel> toNodeLabel) {
             this.nodeLabels = nodeLabels;
             this.toNodeLabel = toNodeLabel;
         }
 
         @Override
         public boolean isEmpty() {
-            return nodeLabels == null || nodeLabels.isEmpty();
+            return nodeLabels.isEmpty();
         }
 
         @Override
@@ -215,6 +232,19 @@ public final class NodeLabelTokens {
         @Override
         public String[] getStrings() {
             return nodeLabels.stream().map(toNodeLabel).map(NodeLabel::name).toArray(String[]::new);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            JavaList<?> javaList = (JavaList<?>) o;
+            return nodeLabels.equals(javaList.nodeLabels);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(nodeLabels);
         }
     }
 
@@ -245,6 +275,19 @@ public final class NodeLabelTokens {
         @Override
         public String[] getStrings() {
             return new String[]{item.name};
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            Singleton<?> singleton = (Singleton<?>) o;
+            return item.equals(singleton.item);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(item);
         }
     }
 
