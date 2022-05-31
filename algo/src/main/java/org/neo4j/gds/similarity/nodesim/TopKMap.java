@@ -36,7 +36,7 @@ import java.util.stream.StreamSupport;
 
 public class TopKMap {
 
-    private final BitSet nodeFilter;
+    private final BitSet sourceNodes;
 
     static MemoryEstimation memoryEstimation(long nodes, int topK) {
         return MemoryEstimations.builder(TopKMap.class)
@@ -53,14 +53,14 @@ public class TopKMap {
 
     TopKMap(
         long items,
-        BitSet nodeFilter,
+        BitSet sourceNodes,
         int topK,
         Comparator<SimilarityResult> comparator
     ) {
-        this.nodeFilter = nodeFilter;
+        this.sourceNodes = sourceNodes;
         int boundedTopK = (int) Math.min(topK, items);
         topKLists = HugeObjectArray.newArray(TopKList.class, items);
-        topKLists.setAll(node1 -> nodeFilter.get(node1)
+        topKLists.setAll(node1 -> sourceNodes.get(node1)
             ? new TopKList(comparator.equals(SimilarityResult.ASCENDING)
                 ? BoundedLongPriorityQueue.min(boundedTopK)
                 : BoundedLongPriorityQueue.max(boundedTopK)
@@ -77,7 +77,7 @@ public class TopKMap {
     }
 
     long similarityPairCount() {
-        SetBitsIterable longs = new SetBitsIterable(nodeFilter);
+        SetBitsIterable longs = new SetBitsIterable(sourceNodes);
         PrimitiveIterator.OfLong iterator = longs.iterator();
 
         long size = 0L;
@@ -89,7 +89,7 @@ public class TopKMap {
     }
 
     public void forEach(BoundedLongLongPriorityQueue.Consumer consumer) {
-        SetBitsIterable items = new SetBitsIterable(nodeFilter);
+        SetBitsIterable items = new SetBitsIterable(sourceNodes);
         items.stream().forEach(element1 -> {
             BoundedLongPriorityQueue queue = topKLists.get(element1).queue;
             PrimitiveIterator.OfLong node2Iterator = queue.elements().iterator();
@@ -101,7 +101,7 @@ public class TopKMap {
     }
 
     public Stream<SimilarityResult> stream() {
-        return new SetBitsIterable(nodeFilter).stream()
+        return new SetBitsIterable(sourceNodes).stream()
             .boxed()
             .flatMap(node1 -> topKLists.get(node1).stream(node1));
     }
