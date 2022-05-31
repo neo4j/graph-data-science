@@ -33,7 +33,7 @@ import java.util.function.LongToDoubleFunction;
 
 public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
-    private static final String HISTOGRAM_ERROR_KEY = "Error";
+    static final String HISTOGRAM_ERROR_KEY = "Error";
 
     private final int concurrency;
     private final boolean buildHistogram;
@@ -85,14 +85,26 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
         var logScaler = scaler == ScalarScaler.Variant.LOG;
         if (buildHistogram && centralityFunction != null) {
             if (logScaler) {
-                logScalerHistogramError();
+                this.histogramError.put(HISTOGRAM_ERROR_KEY, "Unable to create histogram when using scaler of type " + ScalarScaler.Variant.LOG);
             } else {
-                return Optional.of(CentralityStatistics.histogram(
-                    nodeCount,
-                    centralityFunction,
-                    Pools.DEFAULT,
-                    concurrency
-                ));
+                try {
+                    return Optional.of(CentralityStatistics.histogram(
+                        nodeCount,
+                        centralityFunction,
+                        Pools.DEFAULT,
+                        concurrency
+                    ));
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    // waiting for: https://github.com/HdrHistogram/HdrHistogram/issues/190 to be resolved
+                    if (e.getMessage().contains("is out of bounds for histogram, current covered range")) {
+                        this.histogramError.put(
+                            HISTOGRAM_ERROR_KEY,
+                            "Unable to create histogram due to range of scores exceeding implementation limits."
+                        );
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
         return Optional.empty();
@@ -101,9 +113,4 @@ public abstract class AbstractCentralityResultBuilder<WRITE_RESULT> extends Abst
     private Map<String, Object> centralityHistogramResult(Optional<DoubleHistogram> maybeHistogram) {
         return maybeHistogram.map(HistogramUtils::centralitySummary).orElse(histogramError);
     }
-
-    private void logScalerHistogramError() {
-        this.histogramError.put(HISTOGRAM_ERROR_KEY, "Unable to create histogram when using scaler of type " + ScalarScaler.Variant.LOG);
-    }
-
 }
