@@ -35,6 +35,7 @@ import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
@@ -85,7 +86,6 @@ import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -95,6 +95,7 @@ import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.logging.internal.NullLogService;
@@ -129,8 +130,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public void cacheDatabaseId(DatabaseIdRepository.Caching databaseIdRepository, NamedDatabaseId namedDatabaseId) {
-        databaseIdRepository.getById(namedDatabaseId.databaseId());
+    public void cacheDatabaseId(GraphDatabaseAPI db) {
+        var databaseManager = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManager.class);
+        var databaseIdRepository = databaseManager.databaseIdRepository();
+        databaseIdRepository.getById(db.databaseId().databaseId());
     }
 
     @Override

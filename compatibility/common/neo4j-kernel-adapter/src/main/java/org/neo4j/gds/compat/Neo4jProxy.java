@@ -60,11 +60,11 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.database.DatabaseIdRepository;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
@@ -113,11 +113,8 @@ public final class Neo4jProxy {
     }
 
     @TestOnly
-    public static void cacheDatabaseId(
-        DatabaseIdRepository.Caching databaseIdRepository,
-        NamedDatabaseId namedDatabaseId
-    ) {
-        IMPL.cacheDatabaseId(databaseIdRepository, namedDatabaseId);
+    public static void cacheDatabaseId(GraphDatabaseAPI db) {
+        IMPL.cacheDatabaseId(db);
     }
 
     public static AccessMode accessMode(CustomAccessMode customAccessMode) {

@@ -132,7 +132,7 @@ class GraphStoreRelationshipVisitorTest {
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
             .nodes(expectedGraph)
-            .databaseId(TestDatabaseIdRepository.randomNamedDatabaseId())
+            .databaseId(new TestDatabaseIdRepository().getByName("test").get())
             .concurrency(1)
             .build()
             .getUnion();
