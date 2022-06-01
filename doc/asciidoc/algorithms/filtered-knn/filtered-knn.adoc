@@ -18,7 +18,7 @@ This section describes the Filtered K-Nearest Neighbors (Filtered KNN) algorithm
 [[algorithms-filtered-knn-intro]]
 == Introduction
 
-The Filtered K-Nearest Neighbors algorithm extends our beloved <<algorithms-knn, K-Nearest Neighbors>> algorithm with filtering on source nodes, target nodes or both. You should familiarise yourself with the K-Nearest Neighbors algorithm separately.
+The Filtered K-Nearest Neighbors algorithm extends our popular <<algorithms-knn, K-Nearest Neighbors>> algorithm with filtering on source nodes, target nodes or both. You should familiarise yourself with the K-Nearest Neighbors algorithm separately.
 
 === Filterings
 
@@ -52,9 +52,9 @@ Just like for the source node filter, a target nodes filter can be in either of 
 
 A further use case for target node filtering is that you absolutely want to produce _k_ results. You want to fill a fixed size bucket with relationships, you hope that there are enough high scoring relationships found by the K-Nearest Neighbors algorithm, but as an insurance policy we can seed your result set with arbitrary relationships to "guarantee" a full bucket of _k_ results.
 
-Just like the K-Nearest Neighbors algorithm is not guaranteed to find _k_ results, the Filtered K-Nearest Neighbors algorithm is not strictly guaranteed to find _k_ results either. But you will increase your odds massively if you employ seeing. In fact, with seeding, the _only_ time you would _not_ get _k_ results is when there literally are not _k_ target nodes in your graph, a very degenerate use case indeed.
+Just like the K-Nearest Neighbors algorithm is not guaranteed to find _k_ results, the Filtered K-Nearest Neighbors algorithm is not strictly guaranteed to find _k_ results either. But you will increase your odds massively if you employ seeing. In fact, with seeding, the _only_ time you would _not_ get _k_ results is when there are not _k_ target nodes in your graph.
 
-Now, the _quality_ of the arbitrary padding results is, well, arbitrary. Something to be aware of.
+Now, the _quality_ of the arbitrary padding results is unknown. Something to be aware of.
 
 Seeding is a boolean property you switch on or off (default).
 
