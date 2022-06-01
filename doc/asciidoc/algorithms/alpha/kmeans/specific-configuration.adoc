@@ -1,9 +1,4 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name              | Type      | Default   | Optional  | Description
 | nodeProperty      | String    | n/a       | no        | A node property to be used by the algorithm.
 | k                 | Integer   | 10        | yes       | Number of desired clusters.
 | maxIterations     | Integer   | 10        | yes       | The maximum number of iterations of K-Means to run.
 | deltaThreshold    | Float     | 0.05      | yes       | Value as a percentage to determine when to stop early. If fewer  than 'deltaThreshold * \|nodes\|'  nodes change their cluster , the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).
-|===

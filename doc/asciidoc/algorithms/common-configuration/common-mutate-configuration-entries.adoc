@@ -1,8 +1,3 @@
-.General configuration for algorithm execution on a named graph.
-[opts="header",cols="3,2,3m,2,8"]
-|===
-| Name                                                          | Type        | Default                | Optional | Description
-
 ifeval::["{modelType}" != ""]
 | modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
 endif::[]
@@ -29,4 +24,3 @@ ifeval::["{entity}" == "pregel"]
 endif::[]
 
 | <<common-configuration-jobid, jobId>>                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.
-|===

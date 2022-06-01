@@ -112,9 +112,13 @@ CALL gds.alpha.scaleProperties.stream(
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -144,9 +148,13 @@ CALL gds.alpha.scaleProperties.mutate(
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../common-configuration/common-mutate-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]

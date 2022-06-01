@@ -1,6 +1,1 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                  | Type    | Default | Optional | Description
 | triangleCountProperty | String  | n/a     | Yes      | Node property that contains pre-computed triangle count.
-|===

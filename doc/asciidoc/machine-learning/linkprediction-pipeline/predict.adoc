@@ -50,7 +50,7 @@ YIELD
 
 include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-// not reusing common-configuration/common-mutate-configuration-named-graph.adoc as mutateProperty has a default
+// not reusing common-configuration/common-mutate-configuration-entries.adoc as mutateProperty has a default
 .Configuration
 [opts="header",cols="1,1,2m,1,5"]
 |===
@@ -61,9 +61,8 @@ include::../../algorithms/common-configuration/common-parameters-named-graph.ado
 | <<common-configuration-concurrency,concurrency>>              | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
 | mutateRelationshipType                                        | String            | n/a               | no       | The relationship type used for the new relationships written to the projected graph.
 | mutateProperty                                                | String            | 'probability'     | yes      | The relationship property in the GDS graph to which the result is written.
-|===
-
 include::specific-predict-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -98,9 +97,13 @@ YIELD
 
 include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-predict-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]

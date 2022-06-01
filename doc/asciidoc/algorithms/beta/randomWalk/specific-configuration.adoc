@@ -1,7 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,2m,1,4"]
-|===
-| Name                                                                              | Type            | Default           | Optional | Description
 | sourceNodes                                                                       | List of Integer | List of all nodes | yes      | The list of nodes from which to do a random walk.
 | walkLength                                                                        | Integer         | 80                | yes      | The number of steps in a single random walk.
 | walksPerNode                                                                      | Integer         | 10                | yes      | The number of random walks generated for each node.
@@ -10,4 +6,3 @@
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>>  | String          | null              | yes      | Name of the relationship property to use as weights to influence the probabilities of the random walks. The weights need to be >= 0. If unspecified, the algorithm runs unweighted.
 | randomSeed                                                                        | Integer         | random            | yes      | Seed value for the random number generator used to generate the random walks.
 | walkBufferSize                                                                    | Integer         | 1000              | yes      | The number of random walks to complete before starting training.
-|===

@@ -52,12 +52,11 @@ YIELD
 
 include::../../common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../common-configuration/common-mutate-configuration-named-graph.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
 |===
-| Name                          | Type           | Default         | Optional  | Description
+| Name          | Type   | Default | Optional | Description
+include::../../common-configuration/common-mutate-configuration-entries.adoc[]
 | holdoutFraction               | Float          | n/a             | no        | The fraction of all relationships being used as holdout set.
 | negativeSamplingRatio         | Float          | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
 | holdoutRelationshipType       | String         | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.

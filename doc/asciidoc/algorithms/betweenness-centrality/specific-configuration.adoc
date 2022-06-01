@@ -1,7 +1,2 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name          | Type    | Default    | Optional | Description
 | samplingSize  | Integer | node count | yes      | The number of source nodes to consider for computing centrality scores.
 | samplingSeed  | Integer | null       | yes      | The seed value for the random number generator that selects start nodes.
-|===

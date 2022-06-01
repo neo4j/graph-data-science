@@ -1,8 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                      | Type    | Default | Optional | Description
 | hitsIterations            | Integer | n/a     | no       | The number of hits iterations to run. The number of pregel iterations will be equal to `hitsIterations * 4 + 1`
 | authProperty              | String  | "auth"  | yes      | The name that is used for the auth property when using `STREAM`, `MUTATE` or `WRITE` modes.
 | hubProperty               | String  | "hub"   | yes      | The name that is used for the hub property when using `STREAM`, `MUTATE` or `WRITE` modes.
-|===

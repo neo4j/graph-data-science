@@ -1,7 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                                                                             | Type     | Default | Optional | Description
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String   | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | <<common-configuration-seed-property,seedProperty>>                              | String   | n/a     | yes      | Used to set the initial community for a node. The property value needs to be a number.
 | maxLevels                                                                        | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
@@ -10,4 +6,3 @@
 | includeIntermediateCommunities                                                   | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
 | consecutiveIds                                                                   | Boolean  | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory). Cannot be used in combination with the `includeIntermediateCommunities` flag.
 | minCommunitySize                                                                 | Integer  | 0       | yes      | Only community ids of communities with a size greater than or equal to the given value are written to Neo4j.
-|===

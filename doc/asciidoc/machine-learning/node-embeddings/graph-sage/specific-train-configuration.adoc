@@ -1,7 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="2,1,1m,1,3"]
-|===
-| Name                                                                             | Type          | Default   | Optional | Description
 | modelName                                                                        | String        | n/a       | no       | The name of the model to train, must not exist in the Model Catalog.
 | featureProperties                                                                | List of String  | n/a       | no       | The names of the node properties that should be used as input features. All property names must exist in the projected graph and be of type Float or List of Float.
 | embeddingDimension                                                               | Integer       | 64        | yes      | The dimension of the generated node embeddings as well as their hidden layer representations.
@@ -19,4 +15,3 @@
 | negativeSampleWeight                                                             | Integer       | 20        | yes      | The weight of the negative samples. Higher values increase the impact of negative samples in the loss.
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String        | null      | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | randomSeed                                                                       | Integer       | random    | yes      | A random seed which is used to control the randomness in computing the embeddings.
-|===

@@ -1,7 +1,2 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1,1,4"]
-|===
-| Name                      | Type    | Default | Optional | Description
 | maxIterations             | Integer | n/a     | no       | Maximum number of iterations to run.
 | minAssociationStrength    | String  | 0.2     | yes      | Minimum influence required for a community to retain a node.
-|===

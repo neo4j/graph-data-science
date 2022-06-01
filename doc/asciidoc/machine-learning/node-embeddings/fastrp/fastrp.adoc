@@ -194,9 +194,13 @@ CALL gds.fastRP.stream(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header"]
@@ -225,9 +229,13 @@ CALL gds.fastRP.stats(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -261,9 +269,13 @@ CALL gds.fastRP.mutate(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header"]
@@ -298,9 +310,13 @@ CALL gds.fastRP.write(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header"]

@@ -1,12 +1,5 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                                                                             | Type     | Default | Optional | Description
 | <<common-configuration-relationship-weight-property,relationshipWeightProperty>> | String   | null    | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | maxLevels                                                                        | Integer  | 10      | yes      | The maximum number of levels in which the graph is clustered and then condensed.
-| gamma                                                                            | Float    | 1.0     | yes      | Resolution parameter used when computing the modularity. Internally the value is divided by the number of relationships for an unweighted graph, or the sum of weights of all relationships otherwise.
+| gamma                                                                            | Float    | 1.0     | yes      | Resolution parameter used when computing the modularity. Internally the value is divided by the number of relationships for an unweighted graph, or the sum of weights of all relationships otherwise. footnote:[Higher resolutions lead to more communities, while lower resolutions lead to fewer communities.]
 | theta                                                                            | Float     | 0.01   | yes      | Controls the randomness while breaking a community into smaller ones.
 | includeIntermediateCommunities                                                   | Boolean  | false   | yes      | Indicates whether to write intermediate communities. If set to false, only the final community is persisted.
-|===
-
-NOTE: Higher resolutions lead to more communities, while lower resolutions lead to fewer communities.

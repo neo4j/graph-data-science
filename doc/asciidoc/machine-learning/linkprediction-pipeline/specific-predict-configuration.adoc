@@ -1,7 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="2,1,1m,1,4"]
-|===
-| Name                                                                       | Type    | Default   | Optional | Description
 | sampleRate                                                                 | Float   | n/a       | no       | Sample rate to determine how many links are considered for each node. If set to 1, all possible links are considered, i.e., exhaustive search. Otherwise, a <<algorithms-knn, kNN-based>> approximate search will be used. Value must be between 0 (exclusive) and 1 (inclusive).
 | topN footnote:exhaus[Only applicable in the exhaustive search.]            | Integer | n/a       | no       | Limit on predicted relationships to output.
 | threshold  footnote:exhaus[]                                               | Float   | 0.0       | yes      | Minimum predicted probability on relationships to output.
@@ -11,4 +7,3 @@
 | randomJoins footnote:approx[]                                              | Integer | 10        | yes      | Between every iteration, how many attempts are being made to connect new node neighbors based on random selection.
 | <<algorithms-knn-introduction-sampling, initialSampler>> footnote:approx[] | String  | "uniform" | yes      | The method used to sample the first `k` random neighbors for each node. "uniform" and "randomWalk", both case-insensitive, are valid inputs.
 | randomSeed  footnote:approx[]                                              | Integer | n/a       | yes      | The seed value to control the randomness of the algorithm. Note that `concurrency` must be set to 1 when setting this parameter.
-|===

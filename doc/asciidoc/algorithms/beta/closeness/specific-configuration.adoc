@@ -1,6 +1,1 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name              | Type    | Default | Optional | Description
 | useWassermanFaust | Boolean | false   | yes      | Use the improved Wasserman-Faust formula for closeness computation.
-|===

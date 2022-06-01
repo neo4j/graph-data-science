@@ -55,9 +55,13 @@ CALL gds.beta.graphSage.train(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-train-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="2m,1,6"]
@@ -104,9 +108,13 @@ CALL gds.beta.graphSage.stream(
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -137,9 +145,13 @@ YIELD
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -174,9 +186,13 @@ YIELD
 
 include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
 
-include::../../../algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
-
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../../../algorithms/common-configuration/common-write-configuration-entries.adoc[]
 include::specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
