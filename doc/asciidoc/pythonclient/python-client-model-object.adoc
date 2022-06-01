@@ -33,6 +33,11 @@ To get a model object that represents a model that has already been trained and 
 model = gds.model.get("my-model")
 ----
 
+[NOTE]
+====
+The `get` method does not use any tier prefix because it is not associated to any tier. It only exists in the client and does not have a corresponding Cypher procedure.
+====
+
 
 [[python-client-model-object-inspecting]]
 == Inspecting a model object
