@@ -150,17 +150,17 @@ In this section we will show examples of running the Filtered K-Nearest Neighbor
 
 Recall that KNN can run on a graph of only nodes, without any relationships.
 
-Consider the following graph of five disconnected Person nodes, some of whom are Cool.
+Consider the following graph of five disconnected Person nodes, some of whom are Vegan.
 
 image::example-graphs/knn.svg[Visualization of the example graph,align="center"]
 
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (alice:Person:Cool {name: 'Alice', age: 24, lotteryNumbers: [1, 3], embedding: [1.0, 3.0]})
-CREATE (bob:Person:Cool {name: 'Bob', age: 73, lotteryNumbers: [1, 2, 3], embedding: [2.1, 1.6]})
+CREATE (alice:Person:Vegan {name: 'Alice', age: 24, lotteryNumbers: [1, 3], embedding: [1.0, 3.0]})
+CREATE (bob:Person:Vegan {name: 'Bob', age: 73, lotteryNumbers: [1, 2, 3], embedding: [2.1, 1.6]})
 CREATE (carol:Person {name: 'Carol', age: 24, lotteryNumbers: [3], embedding: [1.5, 3.1]})
-CREATE (dave:Person:Cool {name: 'Dave', age: 48, lotteryNumbers: [2, 4], embedding: [0.6, 0.2]})
-CREATE (eve:Person:Cool {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.8, 2.7]});
+CREATE (dave:Person:Vegan {name: 'Dave', age: 48, lotteryNumbers: [2, 4], embedding: [0.6, 0.2]})
+CREATE (eve:Person:Vegan {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embedding: [1.8, 2.7]});
 ----
 
 In the example, we want to use the Filtered K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
@@ -177,8 +177,8 @@ CALL gds.graph.project(
             label: 'Person',
             properties: ['age','lotteryNumbers','embedding']
         },
-        Cool: {
-            label: 'Cool',
+        Vegan: {
+            label: 'Vegan',
             properties: ['age']
         }
     },
@@ -200,7 +200,7 @@ include::../shared/examples-stream-intro.adoc[]
 CALL gds.alpha.knn.filtered.stream('myGraph', {
     topK: 1,
     nodeProperties: ['age'],
-    sourceNodeFilter: 'Cool',
+    sourceNodeFilter: 'Vegan',
     // The following parameters are set to produce a deterministic result
     randomSeed: 1337,
     concurrency: 1,
