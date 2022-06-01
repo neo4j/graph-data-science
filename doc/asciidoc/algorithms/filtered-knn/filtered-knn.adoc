@@ -18,9 +18,9 @@ This section describes the Filtered K-Nearest Neighbors (Filtered KNN) algorithm
 [[algorithms-filtered-knn-intro]]
 == Introduction
 
-The Filtered K-Nearest Neighbors algorithm extends our popular <<algorithms-knn, K-Nearest Neighbors>> algorithm with filtering on source nodes, target nodes or both. You should familiarise yourself with the K-Nearest Neighbors algorithm separately.
+The Filtered K-Nearest Neighbors algorithm extends our popular <<algorithms-knn, K-Nearest Neighbors>> algorithm with filtering on source nodes, target nodes or both.
 
-=== Filterings
+=== Types of Filtering
 
 We are in a world of source nodes, target nodes and the relationship between them that hold a _similarity score_ or _distance_.
 
