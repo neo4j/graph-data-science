@@ -72,10 +72,10 @@ public final class ColoringStep implements Runnable {
                 }
 
                 colors.set(nodeId, nextColor);
-
-                progressTracker.logProgress();
             }
         });
+
+        progressTracker.logProgress(partition.nodeCount());
     }
 
     private void resetForbiddenColors() {

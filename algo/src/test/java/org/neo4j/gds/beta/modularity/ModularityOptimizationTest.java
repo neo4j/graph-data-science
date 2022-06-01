@@ -30,6 +30,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -174,12 +175,18 @@ class ModularityOptimizationTest {
 
         compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
 
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains(":: Start"));
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("color nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Start"));
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains("validate nodes 1 of " + K1COLORING_MAX_ITERATIONS + " :: Finished"));
-        assertThat(log.getMessages(INFO)).anyMatch(s -> s.contains(":: Finished"));
+        assertThat(log.getMessages(INFO))
+            .extracting(Extractors.removingThreadId())
+            .contains(
+                "ModularityOptimization :: Start",
+                "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Start",
+                "ModularityOptimization :: initialization :: K1Coloring :: color nodes 1 of 5 :: Finished",
+                "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Start",
+                "ModularityOptimization :: initialization :: K1Coloring :: validate nodes 1 of 5 :: Finished",
+                "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Start",
+                "ModularityOptimization :: compute modularity :: optimizeForColor 1 of 5 :: Finished",
+                "ModularityOptimization :: Finished"
+            );
     }
 
     @ParameterizedTest

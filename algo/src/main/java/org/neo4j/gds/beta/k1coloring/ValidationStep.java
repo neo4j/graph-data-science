@@ -66,9 +66,9 @@ final class ValidationStep implements Runnable {
 
                     return true;
                 });
-
-                progressTracker.logProgress();
             }
         });
+
+        progressTracker.logProgress(partition.nodeCount());
     }
 }

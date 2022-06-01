@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -76,6 +77,8 @@ final class ModularityOptimizationTask implements Runnable {
     @Override
     public void run() {
         LongDoubleMap reuseCommunityInfluences = new LongDoubleHashMap(50);
+        var relationshipsProcessed = new MutableLong();
+
         partition.consume(nodeId -> {
             if (colors.get(nodeId) != color) {
                 return;
@@ -138,7 +141,10 @@ final class ModularityOptimizationTask implements Runnable {
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
-            progressTracker.logProgress(degree);
+
+            relationshipsProcessed.add(degree);
         });
+
+        progressTracker.logProgress(relationshipsProcessed.longValue());
     }
 }
