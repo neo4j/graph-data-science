@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
@@ -42,7 +43,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final Graph rootGraph;
 
     private final int maxIterations;
-    private final double gamma;
+    private double gamma;
     private final double theta;
 
     private double[] modularities;
@@ -54,7 +55,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final int concurrency;
     private final long seed;
 
-    private final double modularityScaleCoefficient;
+    private double modularityScaleCoefficient;
 
     public Leiden(
         Graph graph,
@@ -71,7 +72,6 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
-        this.modularityScaleCoefficient = 1.0 / graph.relationshipCount();
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -102,7 +102,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
         seedCommunities.setAll(v -> v);
 
-        initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        initVolumesAndGamme(nodeVolumes, communityVolumes, seedCommunities);
 
         HugeLongArray currentDendrogram = null;
 
@@ -191,7 +191,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private void initVolumes(
+    private void initVolumesAndGamme(
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         HugeLongArray seedCommunities
@@ -208,9 +208,17 @@ public class Leiden extends Algorithm<LeidenResult> {
                     });
                 }
             );
+            DoubleAdder weightToDivide = new DoubleAdder();
+            rootGraph.forEachNode(nodeId -> {
+                weightToDivide.add(nodeVolumes.get(nodeId));
+                return true;
+            });
+            gamma /= weightToDivide.doubleValue();
+            modularityScaleCoefficient = 1.0 / weightToDivide.doubleValue();
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-
+            gamma /= rootGraph.relationshipCount();
+            modularityScaleCoefficient = 1.0 / rootGraph.relationshipCount();
             rootGraph.forEachNode(nodeId -> {
                 long communityId = seedCommunities.get(nodeId);
                 communityVolumes.addTo(communityId, rootGraph.degree(nodeId));

@@ -44,12 +44,12 @@ class ModularityComputerTest {
         "  (a2:Node)," +
         "  (a3:Node)," +
         "  (a4:Node)," +
-        "  (a5:Node)," +                            //inside edges
-        "  (a6:Node)," +                         //  1 3
-        "  (a7:Node)," +                        //  [0,0]
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +    //  [1,0]
-        "  (a0)-[:R {weight: 1.0}]->(a2)," +    //  [2,0]
-        "  (a0)-[:R {weight: 1.0}]->(a3)," +    //  [
+        "  (a5:Node)," +
+        "  (a6:Node)," +
+        "  (a7:Node)," +
+        "  (a0)-[:R {weight: 1.0}]->(a1)," +
+        "  (a0)-[:R {weight: 1.0}]->(a2)," +
+        "  (a0)-[:R {weight: 1.0}]->(a3)," +
         "  (a0)-[:R {weight: 1.0}]->(a4)," +
         "  (a2)-[:R {weight: 1.0}]->(a3)," +
         "  (a2)-[:R {weight: 1.0}]->(a4)," +

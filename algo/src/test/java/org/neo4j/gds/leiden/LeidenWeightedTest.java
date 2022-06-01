@@ -68,7 +68,7 @@ class LeidenWeightedTest {
         Leiden leiden = new Leiden(
             graph,
             maxLevels,
-            1.0 / graph.relationshipCount(),
+            1.0,
             0.01,
             19L,
             4,

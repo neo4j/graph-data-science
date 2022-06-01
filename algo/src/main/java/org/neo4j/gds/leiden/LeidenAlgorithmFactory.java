@@ -27,12 +27,10 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
     @Override
     public Leiden build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
 
-        double gamma = configuration.gamma() / graph.relationshipCount();
-
         return new Leiden(
             graph,
             configuration.maxLevels(),
-            gamma,
+            configuration.gamma(),
             configuration.theta(),
             configuration.randomSeed().orElse(0L),
             configuration.concurrency(),
