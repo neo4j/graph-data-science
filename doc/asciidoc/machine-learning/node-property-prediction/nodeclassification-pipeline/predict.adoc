@@ -37,7 +37,7 @@ YIELD
   predictedProbabilities: List of Float
 ----
 
-include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
@@ -75,7 +75,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters.adoc[]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -115,7 +115,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../../algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]

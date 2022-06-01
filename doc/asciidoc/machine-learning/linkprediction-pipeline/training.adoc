@@ -44,7 +44,7 @@ CALL gds.beta.pipeline.linkPrediction.train(
   configuration: Map
 ----
 
-include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="1,1,1m,1,4"]

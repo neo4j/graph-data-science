@@ -48,7 +48,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters.adoc[]
 
 // not reusing common-configuration/common-mutate-configuration-entries.adoc as mutateProperty has a default
 .Configuration
@@ -95,7 +95,7 @@ YIELD
   probability: Float
 ----
 
-include::../../algorithms/common-configuration/common-parameters-named-graph.adoc[]
+include::../../algorithms/common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]

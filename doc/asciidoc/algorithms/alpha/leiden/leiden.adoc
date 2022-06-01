@@ -60,7 +60,7 @@ YIELD
   intermediateCommunityIds: List of Integer
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
@@ -103,7 +103,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
@@ -156,7 +156,7 @@ YIELD
   configuration: Map
 ----
 
-include::../../common-configuration/common-parameters-named-graph.adoc[]
+include::../../common-configuration/common-parameters.adoc[]
 
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
