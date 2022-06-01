@@ -163,6 +163,11 @@ public class TaskProgressTracker implements ProgressTracker {
     }
 
     @Override
+    public long currentVolume() {
+        return requireCurrentTask().volume();
+    }
+
+    @Override
     public void logMessage(LogLevel level, String message) {
         switch (level) {
             case WARNING:

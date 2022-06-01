@@ -56,6 +56,12 @@ public interface ProgressTracker {
     @Deprecated
     void setVolume(long volume);
 
+    /**
+     * Returns the task volume of the currently running task or
+     * {@link Task#UNKNOWN_VOLUME} if no task volume is set.
+     */
+    long currentVolume();
+
     default void logDebug(String message) {
         logMessage(LogLevel.DEBUG, message);
     }
@@ -121,6 +127,11 @@ public interface ProgressTracker {
 
         @Override
         public void setVolume(long volume) {
+        }
+
+        @Override
+        public long currentVolume() {
+            return Task.UNKNOWN_VOLUME;
         }
 
         @Override

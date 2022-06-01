@@ -50,6 +50,11 @@ public class LeafTask extends Task {
     }
 
     @Override
+    public long volume() {
+        return this.volume;
+    }
+
+    @Override
     public void logProgress(long value) {
         currentProgress.add(value);
     }
