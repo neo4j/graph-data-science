@@ -63,7 +63,7 @@ class CrossValidationTest {
             metrics,
             3,
             Optional.empty(),
-            (trainSet, modelParameters, metricsHandler) -> 0L,
+            (trainSet, modelParameters, metricsHandler, messageLogLevel) -> 0L,
             (evaluationSet, model, scoreConsumer) -> { scoreConsumer.consume(F1_MACRO, 0); }
         );
 

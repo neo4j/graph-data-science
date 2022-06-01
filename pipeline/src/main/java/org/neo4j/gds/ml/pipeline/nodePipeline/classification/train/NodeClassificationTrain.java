@@ -300,8 +300,18 @@ public final class NodeClassificationTrain {
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, LogLevel.DEBUG, metricsHandler),
-            (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
+            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(
+                trainSet,
+                config,
+                messageLogLevel,
+                metricsHandler
+            ),
+            (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(
+                evaluationSet,
+                classifier,
+                scoreConsumer,
+                ProgressTracker.NULL_TRACKER
+            )
         );
 
         var modelCandidates = new RandomSearch(

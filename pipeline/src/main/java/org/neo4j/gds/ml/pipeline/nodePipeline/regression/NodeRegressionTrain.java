@@ -158,7 +158,7 @@ public final class NodeRegressionTrain {
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, LogLevel.DEBUG),
+            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(trainSet, config, messageLogLevel),
             this::registerMetricScores
         );
 
