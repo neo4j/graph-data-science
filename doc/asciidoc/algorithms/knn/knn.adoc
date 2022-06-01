@@ -4,6 +4,7 @@
 :entity: relationship
 :result: similarity score
 :algorithm: K-Nearest Neighbors
+:knnSpecificConfigurationTableTitle: Algorithm specific configuration
 
 [abstract]
 --

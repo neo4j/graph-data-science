@@ -1,5 +1,5 @@
 
-.Algorithm specific configuration
+[caption='',title='{table-caption} {counter:table-number}. {knnSpecificConfigurationTableTitle}']
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                             | Type            | Default   | Optional | Description
