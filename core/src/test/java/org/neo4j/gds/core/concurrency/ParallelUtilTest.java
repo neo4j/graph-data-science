@@ -72,10 +72,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStream;
 import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 import static org.neo4j.gds.utils.ExceptionUtil.throwIfUnchecked;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class ParallelUtilTest {
 
@@ -296,7 +296,12 @@ final class ParallelUtilTest {
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
         try {
-            tasks.run(t -> ParallelUtil.runWithConcurrency(4, t, 100, pool));
+            tasks.run(t -> RunWithConcurrency.builder()
+                .concurrency(4)
+                .tasks(t)
+                .maxWaitRetries(100)
+                .executor(pool)
+                .run());
         } catch (Exception e) {
             assertThat(e.getMessage()).contains("Attempted to submit tasks");
         }
@@ -353,8 +358,14 @@ final class ParallelUtilTest {
                 AtomicReference<Throwable> thrownException = new AtomicReference<>();
                 AtomicBoolean running = new AtomicBoolean(true);
                 TerminationFlag isRunning = running::get;
-                final Thread thread = new Thread(() -> tasks.run(t ->
-                    ParallelUtil.runWithConcurrency(2, t, isRunning, pool)));
+                var thread = Pools.newThread(() -> tasks.run(t ->
+                    RunWithConcurrency.builder()
+                        .concurrency(2)
+                        .tasks(t)
+                        .terminationFlag(isRunning)
+                        .executor(pool)
+                        .run()
+                ));
 
                 thread.setUncaughtExceptionHandler((t, e) -> thrownException.set(e));
                 thread.start();
@@ -378,13 +389,13 @@ final class ParallelUtilTest {
         when(pool.getActiveCount()).thenReturn(Integer.MAX_VALUE);
         Tasks tasks = new Tasks(5, 10);
         try {
-            tasks.run(t -> ParallelUtil.runWithConcurrency(
-                    4,
-                    t,
-                    10,
-                    5,
-                    TimeUnit.MILLISECONDS,
-                    pool));
+            tasks.run(t -> RunWithConcurrency.builder()
+                .concurrency(4)
+                .tasks(t)
+                .maxWaitRetries(10)
+                .waitTime(5, TimeUnit.MILLISECONDS)
+                .executor(pool)
+                .run());
         } catch (IllegalThreadStateException e) {
             assertThat(e.getMessage()).contains("Attempted to submit tasks");
         }

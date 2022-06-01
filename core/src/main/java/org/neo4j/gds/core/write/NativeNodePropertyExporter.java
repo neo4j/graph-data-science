@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeProperties;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -189,14 +190,13 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
                 });
             }
         );
-        ParallelUtil.runWithConcurrency(
-            concurrency,
-            runnables,
-            Integer.MAX_VALUE,
-            10L,
-            TimeUnit.MICROSECONDS,
-            terminationFlag,
-            executorService
-        );
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(runnables)
+            .maxWaitRetries(Integer.MAX_VALUE)
+            .waitTime(10L, TimeUnit.MICROSECONDS)
+            .terminationFlag(terminationFlag)
+            .executor(executorService)
+            .run();
     }
 }
