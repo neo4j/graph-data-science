@@ -19,20 +19,18 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.train;
 
-import org.assertj.core.api.SoftAssertions;
-import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 
 import java.util.List;
 
-@ExtendWith(SoftAssertionsExtension.class)
+import static org.neo4j.gds.TestSupport.assertMemoryRange;
+
 class RelationshipSplitterTest {
 
     @Test
-    void estimateWithDifferentTestFraction(SoftAssertions softly) {
+    void estimateWithDifferentTestFraction() {
         var splitConfigBuilder = LinkPredictionSplitConfigImpl.builder()
             .trainFraction(0.3)
             .validationFolds(3)
@@ -42,10 +40,7 @@ class RelationshipSplitterTest {
         var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
             .estimate(splitConfig.expectedGraphDimensions(100, 1_000), 4);
 
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(35_840));
-
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_800, 35_840));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
         actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
@@ -53,13 +48,11 @@ class RelationshipSplitterTest {
 
         // higher testFraction -> lower estimation as test-complement is smaller
         // the test_complement is kept until the end of all splitting
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(32_944));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(19_152, 32_912));
     }
 
     @Test
-    void estimateWithDifferentTrainFraction(SoftAssertions softly) {
+    void estimateWithDifferentTrainFraction() {
         var splitConfigBuilder = LinkPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
             .validationFolds(3)
@@ -69,21 +62,17 @@ class RelationshipSplitterTest {
         var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
             .estimate(splitConfig.expectedGraphDimensions(100, 1_000), 4);
 
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(34_240));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_200, 34_240));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
         actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
             .estimate(splitConfig.expectedGraphDimensions(100, 1_000), 4);
 
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(40_944));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_184, 40_944));
     }
 
     @Test
-    void estimateWithDifferentNegativeSampling(SoftAssertions softly) {
+    void estimateWithDifferentNegativeSampling() {
         var splitConfigBuilder = LinkPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
             .trainFraction(0.3)
@@ -93,16 +82,12 @@ class RelationshipSplitterTest {
         var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
             .estimate(splitConfig.expectedGraphDimensions(100, 1_000), 4);
 
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(35_344));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27184, 35_344));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
         actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, List.of("*"))
             .estimate(splitConfig.expectedGraphDimensions(100, 1_000), 4);
 
-        softly.assertThat(actualEstimation.memoryUsage())
-            .withFailMessage("Got %d", actualEstimation.memoryUsage().min)
-            .isEqualTo(MemoryRange.of(59_824));
+        assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(39424, 59_824));
     }
 }

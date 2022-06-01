@@ -48,7 +48,7 @@ class LinkPredictionSplitConfigTest {
 
         assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
             .hasMessageContaining("The specified `testFraction` is too high for the current graph. " +
-                                  "The test-complement set would have 1 relationship(s) but it must have at least 3.");
+                                  "The test-complement set would have 0 relationship(s) but it must have at least 3.");
     }
 
     @Test
@@ -78,7 +78,7 @@ class LinkPredictionSplitConfigTest {
     @Test
     void shouldThrowOnEmptyFeatureInputSet() {
         var config = LinkPredictionSplitConfigImpl.builder()
-            .testFraction(0.1)
+            .testFraction(0.2)
             .trainFraction(0.99)
             .build();
 

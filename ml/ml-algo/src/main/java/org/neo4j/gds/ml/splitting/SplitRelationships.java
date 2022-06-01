@@ -40,8 +40,6 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
     }
 
     static MemoryEstimation estimate(SplitRelationshipsMutateConfig configuration) {
-        // Whether the graph is undirected or directed is only relevant for the splitting
-
         // we cannot assume any compression of the relationships
         var pessimisticSizePerRel = configuration.hasRelationshipWeightProperty()
             ? Double.BYTES + 2 * Long.BYTES
@@ -53,10 +51,12 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
                 var negativeRelCount = positiveRelCount * configuration.negativeSamplingRatio();
                 long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
 
-                return MemoryRange.of(selectedRelCount * pessimisticSizePerRel);
+                // Whether the graph is undirected or directed
+                return MemoryRange.of(selectedRelCount / 2, selectedRelCount).times(pessimisticSizePerRel);
             })
             .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
                 long remainingRelCount = (long) (graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * (1 - configuration.holdoutFraction()));
+                // remaining relationships are always undirected
                 return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
             })
             .build();

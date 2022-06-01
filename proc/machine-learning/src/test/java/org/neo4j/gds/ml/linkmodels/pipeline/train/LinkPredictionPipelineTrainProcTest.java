@@ -147,6 +147,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void trainAModel() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe1')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe1', {validationFolds: 2})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe1', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe1', 'L2', {nodeProperties: ['pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe1', {penalty: 1})");
@@ -216,6 +217,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
     @Test
     void trainOnNodeLabelFilteredGraph() {
         runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe4')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe4', {validationFolds: 2})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe4', 'pageRank', {mutateProperty: 'pr'})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe4', 'L2', {nodeProperties: ['array', 'pr']})");
         runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe4', {penalty: 1})");
@@ -224,8 +226,8 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         Object expectedMetrics = Map.of("AUCPR", Map.of(
             "outerTrain", 1.0,
             "test", 1.0,
-            "validation", Map.of("min", 0.0, "avg", 0.3333333333333333, "max", 1.0),
-            "train", Map.of("min", 0.0, "avg", 0.6666666666666666, "max", 1.0)
+            "validation", Map.of("min", 0.0, "avg", 0.5, "max", 1.0),
+            "train", Map.of("min", 0.0, "avg", 0.5, "max", 1.0)
         ));
 
         assertCypherResult(
@@ -352,7 +354,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             db,
             query,
             Map.of("graphName", GRAPH_NAME),
-            MemoryRange.of(17_208, 526_808),
+            MemoryRange.of(16_696, 510_616),
             16,
             42
         );
@@ -405,7 +407,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
     private LogisticRegressionData modelData(String trainedModelName) {
         Stream<Model<?, ?, ?>> allModels = modelCatalog.getAllModels();
-        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals(trainedModelName)).findFirst().get();
+        Model<?, ?, ?> model = allModels.filter(m -> m.name().equals(trainedModelName)).findFirst().orElseThrow();
         return (LogisticRegressionData) model.data();
     }
 }
