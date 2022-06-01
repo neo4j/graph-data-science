@@ -129,7 +129,7 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
     @Override
     public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
         this.progressTracker.endSubTask();
-        this.progressTracker.logMessage(additionalInformation);
+        this.progressTracker.logInfo(additionalInformation);
     }
 
     @Override
