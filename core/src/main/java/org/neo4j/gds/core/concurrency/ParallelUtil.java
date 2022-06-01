@@ -259,7 +259,11 @@ public final class ParallelUtil {
                 iterators,
                 it -> importer.newImporter(nodeOffset.getAndAdd(batchSize), it)
             );
-            runWithConcurrency(concurrency, importers, executor);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(importers)
+                .executor(executor)
+                .run();
         }
     }
 
@@ -367,21 +371,6 @@ public final class ParallelUtil {
         }
 
         return futures;
-    }
-
-    /**
-     * @see org.neo4j.gds.core.concurrency.RunWithConcurrency
-     */
-    public static void runWithConcurrency(
-        int concurrency,
-        Iterable<? extends Runnable> tasks,
-        @Nullable ExecutorService executor
-    ) {
-        RunWithConcurrency.builder()
-            .concurrency(concurrency)
-            .tasks(tasks)
-            .executor(executor)
-            .run();
     }
 
     static void runWithConcurrency(RunWithConcurrency params) {

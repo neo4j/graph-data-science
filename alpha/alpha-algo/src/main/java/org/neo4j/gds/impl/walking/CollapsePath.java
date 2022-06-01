@@ -26,7 +26,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -106,7 +106,10 @@ public class CollapsePath extends Algorithm<Relationships> {
 
         });
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
 
         return relImporter.build();
     }

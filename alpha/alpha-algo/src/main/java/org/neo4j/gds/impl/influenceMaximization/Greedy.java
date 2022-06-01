@@ -22,7 +22,7 @@ package org.neo4j.gds.impl.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
@@ -94,7 +94,11 @@ public class Greedy extends Algorithm<Greedy> {
             spreads.clear();
 
             tasks.forEach(task -> task.setSeedSetNodes(seedSetNodes.keys().toArray()));
-            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .executor(executorService)
+                .run();
 
             highestScore = spreads.cost(spreads.top());
             highestNode = spreads.pop();

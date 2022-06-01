@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -45,7 +45,11 @@ final class StdScore extends ScalarScaler {
             partition -> new ComputeSumAndSquaredSum(partition, properties),
             Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executor)
+            .run();
 
         // calculate global metrics
         var squaredSum = tasks.stream().mapToDouble(ComputeSumAndSquaredSum::squaredSum).sum();
@@ -55,7 +59,7 @@ final class StdScore extends ScalarScaler {
         // (Σ(pᵢ²) + Σ(avg²) - 2avgΣ(pᵢ)) / N =
         // (Σ(pᵢ²) + Navg² - 2avgΣ(pᵢ)) / N =
         // (Σ(pᵢ²) + avg(Navg - 2Σ(pᵢ)) / N
-         var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
+        var variance = (squaredSum + avg * (nodeCount * avg - 2 * sum)) / nodeCount;
         var std = Math.sqrt(variance);
 
         if (Math.abs(std) < CLOSE_TO_ZERO) {

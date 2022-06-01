@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -43,7 +43,11 @@ final class Max extends ScalarScaler {
             partition -> new ComputeAbsMax(partition, properties),
             Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executor)
+            .run();
 
         var absMax = tasks.stream().mapToDouble(ComputeAbsMax::absMax).max().orElse(0);
 

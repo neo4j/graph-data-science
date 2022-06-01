@@ -23,7 +23,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
@@ -171,7 +171,10 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             (index) -> new ElementImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
-        ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(config.writeConcurrency())
+            .tasks(tasks)
+            .run();
     }
 
     private void exportRelationships(GraphStoreInput graphStoreInput) {
@@ -183,7 +186,10 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             (index) -> new ElementImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
-        ParallelUtil.runWithConcurrency(config.writeConcurrency(), tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(config.writeConcurrency())
+            .tasks(tasks)
+            .run();
     }
 
     private static final class FullGraphStoreToFileExporter extends GraphStoreToFileExporter {

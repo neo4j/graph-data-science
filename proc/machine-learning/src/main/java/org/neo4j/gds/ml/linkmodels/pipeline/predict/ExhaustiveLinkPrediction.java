@@ -21,8 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -93,7 +92,10 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             Optional.of(MIN_NODE_BATCH_SIZE)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
 
         long linksConsidered = tasks.stream().mapToLong(LinkPredictionScoreByIdsConsumer::linksConsidered).sum();
         return new ExhaustiveLinkPredictionResult(predictionQueue, linksConsidered);

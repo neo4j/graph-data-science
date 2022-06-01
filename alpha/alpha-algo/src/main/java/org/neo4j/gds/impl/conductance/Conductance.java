@@ -27,7 +27,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.HugeSparseDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -138,7 +138,11 @@ public class Conductance extends Algorithm<Conductance.Result> {
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .executor(executor)
+            .run();
 
         progressTracker.endSubTask();
 
@@ -209,7 +213,10 @@ public class Conductance extends Algorithm<Conductance.Result> {
             progressTracker.logProgress(endOffset - startOffset);
         });
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .run();
 
         progressTracker.endSubTask();
 
@@ -260,7 +267,10 @@ public class Conductance extends Algorithm<Conductance.Result> {
             progressTracker.logProgress(endOffset - startOffset);
         });
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .run();
 
         progressTracker.endSubTask();
 

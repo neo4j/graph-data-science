@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -91,7 +91,11 @@ public final class EmbeddingUtils {
             Optional.empty()
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
     }
 
     private static class RelationshipValidator implements Runnable {

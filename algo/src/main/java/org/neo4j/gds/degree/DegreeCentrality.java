@@ -24,7 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -160,7 +160,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .executor(executor)
+            .run();
         return degrees::get;
     }
 
@@ -172,7 +176,11 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(config.minBatchSize())
         );
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .executor(executor)
+            .run();
         return degrees::get;
     }
 

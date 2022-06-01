@@ -20,7 +20,7 @@
 package org.neo4j.gds.impl.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -90,7 +90,11 @@ class PlaceNodesRandomly {
             Optional.of(config.minBatchSize())
         );
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .executor(executor)
+            .run();
         progressTracker.endSubTask();
     }
 

@@ -33,6 +33,7 @@ import org.neo4j.gds.beta.k1coloring.K1Coloring;
 import org.neo4j.gds.beta.k1coloring.K1ColoringFactory;
 import org.neo4j.gds.beta.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -294,11 +295,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     private void optimizeForColor(long currentColor) {
         // run optimization tasks for every node
-        ParallelUtil.runWithConcurrency(
-            concurrency,
-            createModularityOptimizationTasks(currentColor),
-            executor
-        );
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(createModularityOptimizationTasks(currentColor))
+            .executor(executor)
+            .run();
 
         // swap old and new communities
         nextCommunities.copyTo(currentCommunities, nodeCount);
