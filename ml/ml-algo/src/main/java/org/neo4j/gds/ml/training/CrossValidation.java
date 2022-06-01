@@ -165,12 +165,12 @@ public class CrossValidation<MODEL_TYPE> {
     }
 
     @FunctionalInterface
-    public interface ModelTrainer<MODEL> {
-        MODEL train(ReadOnlyHugeLongArray trainSet, TrainerConfig modelParameters, ModelSpecificMetricsHandler metricsHandler);
+    public interface ModelTrainer<MODEL_TYPE> {
+        MODEL_TYPE train(ReadOnlyHugeLongArray trainSet, TrainerConfig modelParameters, ModelSpecificMetricsHandler metricsHandler);
     }
 
     @FunctionalInterface
-    public interface ModelEvaluator<MODEL> {
-        void evaluate(ReadOnlyHugeLongArray evaluationSet, MODEL model, MetricConsumer scoreConsumer);
+    public interface ModelEvaluator<MODEL_TYPE> {
+        void evaluate(ReadOnlyHugeLongArray evaluationSet, MODEL_TYPE model, MetricConsumer scoreConsumer);
     }
 }
