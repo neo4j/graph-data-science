@@ -53,11 +53,11 @@ class GraphSageEmbeddingsGeneratorTest {
 
     private static final String MODEL_NAME = "graphSageModel";
 
-    @GdlGraph
+    @GdlGraph(graphNamePrefix = "weighted")
     private static final String GDL = GraphSageTestGraph.GDL;
 
     @Inject
-    private Graph graph;
+    private Graph weightedGraph;
 
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
@@ -67,13 +67,14 @@ class GraphSageEmbeddingsGeneratorTest {
             .embeddingDimension(EMBEDDING_DIMENSION)
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
+            .relationshipWeightProperty("times")
             .build();
 
-        var features = GraphSageHelper.initializeSingleLabelFeatures(graph, config);
+        var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, config);
 
         var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
-        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(weightedGraph, features);
 
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             result.layers(),
@@ -85,12 +86,12 @@ class GraphSageEmbeddingsGeneratorTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(graph, features);
+        HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(weightedGraph, features);
 
         assertNotNull(embeddings);
-        assertEquals(graph.nodeCount(), embeddings.size());
+        assertEquals(weightedGraph.nodeCount(), embeddings.size());
 
-        LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
+        LongStream.range(0, weightedGraph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
 
     @ParameterizedTest
@@ -102,10 +103,11 @@ class GraphSageEmbeddingsGeneratorTest {
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(EMBEDDING_DIMENSION)
             .projectedFeatureDimension(5)
+            .relationshipWeightProperty("times")
             .build();
 
         var trainer = new MultiLabelGraphSageTrain(
-            graph,
+            weightedGraph,
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -124,16 +126,17 @@ class GraphSageEmbeddingsGeneratorTest {
         );
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
-            graph,
-            GraphSageHelper.initializeMultiLabelFeatures(graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, config)
+            weightedGraph,
+            GraphSageHelper.initializeMultiLabelFeatures(
+                weightedGraph,
+                GraphSageHelper.multiLabelFeatureExtractors(weightedGraph, config)
             )
         );
 
         assertNotNull(embeddings);
-        assertEquals(graph.nodeCount(), embeddings.size());
+        assertEquals(weightedGraph.nodeCount(), embeddings.size());
 
-        LongStream.range(0, graph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
+        LongStream.range(0, weightedGraph.nodeCount()).forEach(n -> assertEquals(EMBEDDING_DIMENSION, embeddings.get(n).length));
     }
 
     @Test

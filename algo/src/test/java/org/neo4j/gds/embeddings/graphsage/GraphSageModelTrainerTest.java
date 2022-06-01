@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -44,6 +45,7 @@ import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -70,7 +72,11 @@ class GraphSageModelTrainerTest {
     private final String MODEL_NAME = "graphSageModel";
 
     @Inject
-    private Graph graph;
+    private GraphStore graphStore;
+
+    private Graph weightedGraph;
+
+    private Graph unweightedGraph;
     @Inject
     private Graph arrayGraph;
     private HugeObjectArray<double[]> features;
@@ -79,7 +85,10 @@ class GraphSageModelTrainerTest {
 
     @BeforeEach
     void setUp() {
-        long nodeCount = graph.nodeCount();
+        weightedGraph = graphStore.getUnion();
+        unweightedGraph = graphStore.getGraph(graphStore.nodeLabels(), graphStore.relationshipTypes(), Optional.empty());
+
+        long nodeCount = graphStore.nodeCount();
         features = HugeObjectArray.newArray(double[].class, nodeCount);
 
         Random random = new Random(19L);
@@ -103,7 +112,12 @@ class GraphSageModelTrainerTest {
 
         var trainModel = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
-        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(graph, features);
+        var maybeWeights = useRelationshipWeight ? Optional.of("times") : Optional.<String>empty();
+
+        GraphSageModelTrainer.ModelTrainResult result = trainModel.train(
+            graphStore.getGraph(graphStore.nodeLabels(), graphStore.relationshipTypes(), maybeWeights),
+            features
+        );
 
         Layer[] layers = result.layers();
         assertThat(layers)
@@ -126,9 +140,12 @@ class GraphSageModelTrainerTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void trainsWithPoolAggregator(boolean useRelationshipWeight) {
+        Graph graph = unweightedGraph;
         if (useRelationshipWeight) {
             configBuilder.relationshipWeightProperty("times");
+            graph = weightedGraph;
         }
+
         var config = configBuilder
             .aggregator(AggregatorType.POOL)
             .modelName(MODEL_NAME)
@@ -212,7 +229,7 @@ class GraphSageModelTrainerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var trainResult = trainer.train(graph, features);
+        var trainResult = trainer.train(unweightedGraph, features);
 
         var metrics = trainResult.metrics();
         assertThat(metrics.didConverge()).isFalse();
@@ -226,16 +243,16 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                    15.66,
-                    14.31,
-                    14.21,
-                    14.33,
-                    14.87,
-                    14.81,
-                    14.79,
-                    16.05,
-                    14.21,
-                    14.21
+                17.33,
+                16.01,
+                15.27,
+                16.21,
+                16.43,
+                15.35,
+                15.13,
+                17.40,
+                15.03,
+                14.83
                 }, Offset.offset(0.05)
             );
     }
@@ -260,12 +277,12 @@ class GraphSageModelTrainerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var trainResult = trainer.train(graph, features);
+        var trainResult = trainer.train(unweightedGraph, features);
 
         var metrics = trainResult.metrics();
-        assertThat(metrics.didConverge()).isFalse();
-        assertThat(metrics.ranEpochs()).isEqualTo(10);
-        assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
+        assertThat(metrics.didConverge()).isTrue();
+        assertThat(metrics.ranEpochs()).isEqualTo(7);
+        assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 51);
 
         var metricsMap =  metrics.toMap().get("metrics");
         assertThat(metricsMap).isInstanceOf(Map.class);
@@ -274,16 +291,13 @@ class GraphSageModelTrainerTest {
         assertThat(epochLosses).isInstanceOf(List.class);
         assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                17.46,
-                16.15,
-                14.58,
-                16.38,
-                17.03,
+                17.47,
+                15.28,
+                14.49,
+                18.85,
+                19.50,
                 15.47,
-                15.15,
-                18.04,
-                15.43,
-                14.31
+                17.33
                 }, Offset.offset(0.05)
             );
     }
@@ -296,7 +310,7 @@ class GraphSageModelTrainerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var trainResult = trainer.train(graph, features);
+        var trainResult = trainer.train(unweightedGraph, features);
 
         var trainMetrics = trainResult.metrics();
         assertThat(trainMetrics.didConverge()).isTrue();
@@ -306,8 +320,8 @@ class GraphSageModelTrainerTest {
 
     @ParameterizedTest
     @CsvSource({
-        "0.01, true, 2",
-        "1.0, false, 10"
+        "0.01, false, 10",
+        "1.0, true, 7"
     })
     void batchesPerIteration(double batchSamplingRatio, boolean expectedConvergence, int expectedRanEpochs) {
         var trainer = new GraphSageModelTrainer(
@@ -326,7 +340,7 @@ class GraphSageModelTrainerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var trainResult = trainer.train(graph, features);
+        var trainResult = trainer.train(unweightedGraph, features);
 
         var trainMetrics = trainResult.metrics();
         assertThat(trainMetrics.didConverge()).isEqualTo(expectedConvergence);
@@ -346,8 +360,8 @@ class GraphSageModelTrainerTest {
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
         var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
-        var result = trainer.train(graph, features);
-        var otherResult = otherTrainer.train(graph, features);
+        var result = trainer.train(unweightedGraph, features);
+        var otherResult = otherTrainer.train(unweightedGraph, features);
 
         assertThat(result).usingRecursiveComparison().isEqualTo(otherResult);
     }
@@ -366,8 +380,8 @@ class GraphSageModelTrainerTest {
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
         var otherTrainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);
 
-        var result = trainer.train(graph, features);
-        var otherResult = otherTrainer.train(graph, features);
+        var result = trainer.train(unweightedGraph, features);
+        var otherResult = otherTrainer.train(unweightedGraph, features);
 
         // Needs deterministic weights updates
         assertThat(result).usingRecursiveComparison().withComparatorForType(new DoubleComparator(1e-10), Double.class).isEqualTo(otherResult);

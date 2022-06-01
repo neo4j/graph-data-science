@@ -106,6 +106,8 @@ public class GraphSageModelTrainer {
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
+        assert graph.hasRelationshipProperty() == useWeights : "Weight property of graph and config needs to match.";
+
         var weights = new ArrayList<Weights<? extends Tensor<?>>>(labelProjectionWeights);
         for (Layer layer : layers) {
             weights.addAll(layer.weights());
