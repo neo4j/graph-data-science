@@ -157,11 +157,23 @@ The structure of `modelInfo` is:
 <9> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
-[Note]
+[NOTE]
 ====
 In <6>-<8>, if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
 The `OUT_OF_BAG_ERROR` is only reported in <9> as validation metric and only if the model is RandomForest.
 ====
+
+[NOTE]
+====
+In addition to the data the procedure yields, there's a fair amount of information about the training that's being sent to the Neo4j database's logs as the procedure progresses.
+
+For example, how well each model candidates perform is logged with `info` log level and thus end up the `neo4j.log` file of the database.
+
+Some information is only logged with `debug` log level, and thus end up in the `debug.log` file of the database.
+An example of this is training method specific metadata - such as per epoch loss for logistic regression - during model candidate training (in the model selection phase).
+Please note that this particular data is not yielded by the procedure call.
+====
+
 
 [[nodeclassification-pipelines-examples-train]]
 == Example

@@ -61,7 +61,6 @@ include::../../algorithms/common-configuration/common-parameters-named-graph.ado
 | <<common-configuration-jobid, jobId>>                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
-
 .Results
 [opts="header",cols="1,1,6"]
 |===
@@ -130,12 +129,23 @@ The structure of `modelInfo` is:
 <7> The `validation` entry summarizes the metric results over the `validation` set.
 --
 
-
-[Note]
+[NOTE]
 ====
 In <4>-<6>, if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
 The `OUT_OF_BAG_ERROR` is only reported in <7> as validation metric and only if the model is RandomForest.
 ====
+
+[NOTE]
+====
+In addition to the data the procedure yields, there's a fair amount of information about the training that's being sent to the Neo4j database's logs as the procedure progresses.
+
+For example, how well each model candidates perform is logged with `info` log level and thus end up the `neo4j.log` file of the database.
+
+Some information is only logged with `debug` log level, and thus end up in the `debug.log` file of the database.
+An example of this is training method specific metadata - such as per epoch loss for logistic regression - during model candidate training (in the model selection phase).
+Please note that this particular data is not yielded by the procedure call.
+====
+
 
 == Example
 
@@ -262,5 +272,4 @@ RETURN
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 5` (and defaults filled for remaining parameters) was selected, and has a score of `0.58` on the test set.
 The score computed as the <<linkprediction-pipelines-metrics, AUCPR>> metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
-
 --
