@@ -72,9 +72,27 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             graph,
             config,
             similarityComputer,
-            config.sourceNodeFilter().toNodeFilter(graph),
-            config.targetNodeFilter().toNodeFilter(graph),
             config.concurrency(),
+            executorService,
+            progressTracker
+        );
+    }
+
+    public NodeSimilarity(
+        Graph graph,
+        NodeSimilarityBaseConfig config,
+        MetricSimilarityComputer similarityComputer,
+        int concurrency,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) {
+        this(
+            graph,
+            config,
+            similarityComputer,
+            NodeFilter.noOp,
+            NodeFilter.noOp,
+            concurrency,
             executorService,
             progressTracker
         );

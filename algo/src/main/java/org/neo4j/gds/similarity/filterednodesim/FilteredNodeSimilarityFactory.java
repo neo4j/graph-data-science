@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.filterednodesim;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
@@ -31,15 +31,18 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
+import org.neo4j.gds.similarity.nodesim.TopKMap;
+import org.neo4j.gds.similarity.nodesim.TopNList;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends GraphAlgorithmFactory<NodeSimilarity, CONFIG> {
+public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarityBaseConfig> extends GraphAlgorithmFactory<NodeSimilarity, CONFIG> {
 
     @Override
     public String taskName() {
-        return "NodeSimilarity";
+        return "FilteredNodeSimilarity";
     }
 
     @Override
@@ -53,6 +56,8 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             graph,
             configuration,
             similarityComputer,
+            configuration.sourceNodeFilter().toNodeFilter(graph),
+            configuration.targetNodeFilter().toNodeFilter(graph),
             configuration.concurrency(),
             Pools.DEFAULT,
             progressTracker
@@ -79,14 +84,14 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             )
             .add("weights",
                 MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                int averageDegree = dimensions.nodeCount() == 0
-                    ? 0
-                    : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
-                long averageVectorSize = sizeOfDoubleArray(averageDegree);
-                return MemoryEstimations.builder(HugeObjectArray.class)
-                    .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
-                    .build();
-            }));
+                    int averageDegree = dimensions.nodeCount() == 0
+                        ? 0
+                        : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
+                    long averageVectorSize = sizeOfDoubleArray(averageDegree);
+                    return MemoryEstimations.builder(HugeObjectArray.class)
+                        .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
+                        .build();
+                }));
         if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",

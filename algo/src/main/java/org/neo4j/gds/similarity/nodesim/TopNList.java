@@ -31,7 +31,7 @@ import java.util.stream.StreamSupport;
 
 public class TopNList {
 
-    static MemoryEstimation memoryEstimation(int topN) {
+    public static MemoryEstimation memoryEstimation(int topN) {
         return MemoryEstimations.builder(TopNList.class)
             .add("queue", BoundedLongLongPriorityQueue.memoryEstimation(topN))
             .build();

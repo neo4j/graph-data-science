@@ -38,7 +38,7 @@ public class TopKMap {
 
     private final BitSet sourceNodes;
 
-    static MemoryEstimation memoryEstimation(long nodes, int topK) {
+    public static MemoryEstimation memoryEstimation(long nodes, int topK) {
         return MemoryEstimations.builder(TopKMap.class)
             .add("topK lists",
                 MemoryEstimations.builder("topK lists", TopKList.class)

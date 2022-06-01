@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.similarity.filterednodesim;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -62,11 +62,11 @@ class FilteredNodeSimilarityTest {
     void should() {
         var sourceNodeFilter = List.of(0L, 1L, 2L);
 
-        var config = ImmutableNodeSimilarityStreamConfig.builder()
+        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .build();
 
-        var nodeSimilarity = new NodeSimilarityFactory<>().build(
+        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
@@ -93,12 +93,12 @@ class FilteredNodeSimilarityTest {
     void shouldSurviveIoannisObjections() {
         var sourceNodeFilter = List.of(3L);
 
-        var config = ImmutableNodeSimilarityStreamConfig.builder()
+        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
             .build();
 
-        var nodeSimilarity = new NodeSimilarityFactory<>().build(
+        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
@@ -125,14 +125,14 @@ class FilteredNodeSimilarityTest {
     void shouldSurviveIoannisFurtherObjections() {
         var sourceNodeFilter = List.of(3L);
 
-        var config = ImmutableNodeSimilarityStreamConfig.builder()
+        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
             .topK(0)
             .topN(10)
             .build();
 
-        var nodeSimilarity = new NodeSimilarityFactory<>().build(
+        var nodeSimilarity = new FilteredNodeSimilarityFactory<>().build(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
