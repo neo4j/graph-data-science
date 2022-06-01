@@ -29,12 +29,14 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
+import org.neo4j.gds.core.utils.io.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.utils.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.utils.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.preconditions.ClusterRestrictions;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -72,12 +74,25 @@ public class GraphStoreExportProc extends BaseProc {
 
                 validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
 
+                var progressTracker = new TaskProgressTracker(
+                    ProgressTrackerExecutionMonitor.progressTask(
+                        graphStore.nodeCount(),
+                        graphStore.relationshipCount()
+                    ),
+                    log,
+                    exportConfig.writeConcurrency(),
+                    exportConfig.jobId(),
+                    taskRegistryFactory,
+                    userLogRegistryFactory
+                );
+
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
                     api,
                     exportConfig,
                     neoNodeProperties(exportConfig, graphStore),
-                    log
+                    log,
+                    progressTracker
                 );
 
                 var start = System.nanoTime();
