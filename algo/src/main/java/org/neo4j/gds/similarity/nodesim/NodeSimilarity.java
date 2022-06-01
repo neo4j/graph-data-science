@@ -171,7 +171,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             vectorComputer.reset(degree);
 
             if (degree >= config.degreeCutoff()) {
-                nodesToCompare++;
                 nodeFilter.set(node);
 
                 progressTracker.logProgress(graph.degree(node));
@@ -188,6 +187,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             progressTracker.logProgress(graph.degree(node));
             return null;
         });
+        nodesToCompare = nodeFilter.cardinality();
         progressTracker.endSubTask();
     }
 
