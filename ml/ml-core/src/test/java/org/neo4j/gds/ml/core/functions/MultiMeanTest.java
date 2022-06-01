@@ -139,7 +139,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
 
         var userEmbeddings = Constant.matrix(new double[] {
             1, 1, 1, // u1
@@ -175,7 +175,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
             .streamRelationships(nodeId, 0.0D)
             .mapToLong(RelationshipCursor::targetId);
-        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph, true);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
 
         var weights = new Weights<>(new Matrix(new double[] {
             1, 1, 1, // u1

@@ -62,11 +62,11 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
     @Override
     public GraphSageResult compute() {
         Layer[] layers = model.data().layers();
-        GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
+
+        var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             layers,
             config.batchSize(),
             config.concurrency(),
-            model.trainConfig().isWeighted(),
             model.data().featureFunction(),
             executor,
             progressTracker

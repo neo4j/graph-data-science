@@ -54,14 +54,13 @@ public final class SubGraph implements BatchNeighbors {
     public static List<SubGraph> buildSubGraphs(
         long[] batchNodeIds,
         List<NeighborhoodFunction> neighborhoodFunctions,
-        Graph graph,
-        boolean useWeights
+        Graph graph
     ) {
         List<SubGraph> result = new ArrayList<>();
         long[] previousNodes = batchNodeIds;
 
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
-            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph, useWeights);
+            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph);
             result.add(lastGraph);
             // the next Subgraph needs to consider all nodes included in the last subgraph
             previousNodes = lastGraph.originalNodeIds;
@@ -69,11 +68,7 @@ public final class SubGraph implements BatchNeighbors {
         return result;
     }
 
-    public static SubGraph buildSubGraph(long[] nodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
-        return buildSubGraph(nodeIds, neighborhoodFunction, graph, false);
-    }
-
-    public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph, boolean useWeights) {
+    public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
         int[][] adjacency = new int[batchNodeIds.length][];
         int[] batchedNodeIds = new int[batchNodeIds.length];
 
@@ -102,7 +97,7 @@ public final class SubGraph implements BatchNeighbors {
             adjacency[nodeOffset] = neighborInternalIds;
         }
 
-        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph, useWeights));
+        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph));
     }
 
     @Override
@@ -137,8 +132,8 @@ public final class SubGraph implements BatchNeighbors {
         return relationshipWeightsFunction.weight(originalNodeIds[src], originalNodeIds[trg]);
     }
 
-    private static RelationshipWeights relationshipWeightFunction(Graph graph, boolean useWeights) {
-        return useWeights ? graph::relationshipProperty : RelationshipWeights.UNWEIGHTED;
+    public static RelationshipWeights relationshipWeightFunction(Graph graph) {
+        return graph.hasRelationshipProperty() ? graph::relationshipProperty : RelationshipWeights.UNWEIGHTED;
     }
 
 }

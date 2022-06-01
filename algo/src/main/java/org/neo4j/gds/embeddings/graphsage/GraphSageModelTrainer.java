@@ -53,13 +53,11 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.embeddingsComputationGraph;
-import static org.neo4j.gds.ml.core.RelationshipWeights.UNWEIGHTED;
 import static org.neo4j.gds.ml.core.tensor.TensorFunctions.averageTensors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GraphSageModelTrainer {
     private final long randomSeed;
-    private final boolean useWeights;
     private final FeatureFunction featureFunction;
     private final Collection<Weights<Matrix>> labelProjectionWeights;
     private final ExecutorService executor;
@@ -82,7 +80,6 @@ public class GraphSageModelTrainer {
         this.labelProjectionWeights = labelProjectionWeights;
         this.executor = executor;
         this.progressTracker = progressTracker;
-        this.useWeights = config.hasRelationshipWeightProperty();
         this.randomSeed = config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong());
     }
 
@@ -106,7 +103,7 @@ public class GraphSageModelTrainer {
             .map(LayerFactory::createLayer)
             .toArray(Layer[]::new);
 
-        assert graph.hasRelationshipProperty() == useWeights : "Weight property of graph and config needs to match.";
+        assert graph.hasRelationshipProperty() == config.hasRelationshipWeightProperty() : "Weight property of graph and config needs to match.";
 
         var weights = new ArrayList<Weights<? extends Tensor<?>>>(labelProjectionWeights);
         for (Layer layer : layers) {
@@ -185,7 +182,7 @@ public class GraphSageModelTrainer {
     ) {
         var localGraph = graph.concurrentCopy();
 
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, useWeights, extendedBatch, layers);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,
@@ -196,7 +193,7 @@ public class GraphSageModelTrainer {
         Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
 
         GraphSageLoss lossFunction = new GraphSageLoss(
-            useWeights ? localGraph::relationshipProperty : UNWEIGHTED,
+            SubGraph.relationshipWeightFunction(localGraph),
             embeddingVariable,
             extendedBatch,
             config.negativeSampleWeight()

@@ -37,7 +37,6 @@ public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final int batchSize;
     private final int concurrency;
-    private final boolean isWeighted;
     private final FeatureFunction featureFunction;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
@@ -46,7 +45,6 @@ public class GraphSageEmbeddingsGenerator {
         Layer[] layers,
         int batchSize,
         int concurrency,
-        boolean isWeighted,
         FeatureFunction featureFunction,
         ExecutorService executor,
         ProgressTracker progressTracker
@@ -54,7 +52,6 @@ public class GraphSageEmbeddingsGenerator {
         this.layers = layers;
         this.batchSize = batchSize;
         this.concurrency = concurrency;
-        this.isWeighted = isWeighted;
         this.featureFunction = featureFunction;
         this.executor = executor;
         this.progressTracker = progressTracker;
@@ -93,7 +90,6 @@ public class GraphSageEmbeddingsGenerator {
         return () -> {
             List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(
                 graph,
-                isWeighted,
                 partition.stream().toArray(),
                 layers
             );

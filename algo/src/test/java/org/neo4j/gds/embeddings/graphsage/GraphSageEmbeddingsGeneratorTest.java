@@ -80,7 +80,6 @@ class GraphSageEmbeddingsGeneratorTest {
             result.layers(),
             config.batchSize(),
             config.concurrency(),
-            config.isWeighted(),
             new SingleLabelFeatureFunction(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -119,7 +118,6 @@ class GraphSageEmbeddingsGeneratorTest {
             model.data().layers(),
             config.batchSize(),
             config.concurrency(),
-            config.isWeighted(),
             model.data().featureFunction(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -172,7 +170,6 @@ class GraphSageEmbeddingsGeneratorTest {
             model.data().layers(),
             config.batchSize(),
             config.concurrency(),
-            config.isWeighted(),
             model.data().featureFunction(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER

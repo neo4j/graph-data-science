@@ -80,13 +80,13 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    static List<SubGraph> subGraphsPerLayer(Graph graph, boolean useWeights, long[] nodeIds, Layer[] layers) {
+    static List<SubGraph> subGraphsPerLayer(Graph graph, long[] nodeIds, Layer[] layers) {
         List<NeighborhoodFunction> neighborhoodFunctions = Arrays
             .stream(layers)
             .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
             .collect(Collectors.toList());
         Collections.reverse(neighborhoodFunctions);
-        return SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph, useWeights);
+        return SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
     }
 
     public static MemoryEstimation embeddingsEstimation(
