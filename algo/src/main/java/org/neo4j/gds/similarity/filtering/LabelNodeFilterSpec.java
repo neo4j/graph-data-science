@@ -33,4 +33,9 @@ public class LabelNodeFilterSpec implements NodeFilterSpec {
     public NodeFilter toNodeFilter(IdMap idMap) {
         return LabelNodeFilter.create(labelString, idMap);
     }
+
+    @Override
+    public String render() {
+        return "NodeFilter[label=" + labelString + "]";
+    }
 }

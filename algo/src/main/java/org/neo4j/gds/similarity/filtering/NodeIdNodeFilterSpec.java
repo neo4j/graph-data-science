@@ -36,11 +36,8 @@ public class NodeIdNodeFilterSpec implements NodeFilterSpec {
         return NodeIdNodeFilter.create(nodeIds, idMap);
     }
 
-    /**
-     * Needed only to satisfy ProcedureSignatureGuard
-     */
     @Override
-    public String toString() {
-        return nodeIds.toString();
+    public String render() {
+        return "NodeFilter" + nodeIds.toString();
     }
 }

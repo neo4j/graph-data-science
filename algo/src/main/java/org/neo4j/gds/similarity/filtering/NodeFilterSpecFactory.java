@@ -112,4 +112,7 @@ public final class NodeFilterSpecFactory {
         ));
     }
 
+    public static String render(NodeFilterSpec spec) {
+        return spec.render();
+    }
 }

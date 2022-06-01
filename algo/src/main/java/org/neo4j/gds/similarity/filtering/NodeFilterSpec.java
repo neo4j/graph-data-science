@@ -35,5 +35,17 @@ import org.neo4j.gds.api.IdMap;
 public interface NodeFilterSpec {
     NodeFilter toNodeFilter(IdMap idMap);
 
-    NodeFilterSpec noOp = (idMap) -> NodeFilter.noOp;
+    NodeFilterSpec noOp = new NodeFilterSpec() {
+        @Override
+        public NodeFilter toNodeFilter(IdMap idMap) {
+            return NodeFilter.noOp;
+        }
+
+        @Override
+        public String render() {
+            return "NodeFilter[NoOp]";
+        }
+    };
+
+    String render();
 }

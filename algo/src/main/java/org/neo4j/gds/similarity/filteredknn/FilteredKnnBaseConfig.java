@@ -37,12 +37,14 @@ public interface FilteredKnnBaseConfig extends KnnBaseConfig {
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec sourceNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
     @Value.Default
     @Configuration.ConvertWith("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec targetNodeFilter() {
         return NodeFilterSpec.noOp;
     }
