@@ -373,9 +373,9 @@ public final class ParallelUtil {
      * @see org.neo4j.gds.core.concurrency.RunWithConcurrency
      */
     public static void runWithConcurrency(
-        final int concurrency,
-        final Iterable<? extends Runnable> tasks,
-        final ExecutorService executor
+        int concurrency,
+        Iterable<? extends Runnable> tasks,
+        @Nullable ExecutorService executor
     ) {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
@@ -388,10 +388,10 @@ public final class ParallelUtil {
      * @see org.neo4j.gds.core.concurrency.RunWithConcurrency
      */
     public static void runWithConcurrency(
-        final int concurrency,
-        final Iterable<? extends Runnable> tasks,
-        final TerminationFlag terminationFlag,
-        final ExecutorService executor
+        int concurrency,
+        Iterable<? extends Runnable> tasks,
+        TerminationFlag terminationFlag,
+        @Nullable ExecutorService executor
     ) {
         RunWithConcurrency.builder()
             .concurrency(concurrency)
@@ -423,9 +423,10 @@ public final class ParallelUtil {
         long maxWaitRetries,
         boolean mayInterruptIfRunning,
         TerminationFlag terminationFlag,
-        ExecutorService executor
+        @Nullable ExecutorService executor
     ) {
-        if (!forceUsageOfExecutor && (concurrency == 1 || !canRunInParallel(executor))) {
+        // Params validation ensures that `forceUsageOfExecutor==true && canRunInParallel(executor)==false` cannot happen
+        if (!canRunInParallel(executor) || (concurrency <= 1 && !forceUsageOfExecutor)) {
             while (tasks.hasNext()) {
                 Runnable task = tasks.next();
                 terminationFlag.assertRunning();
