@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.ExtensionType;
@@ -36,12 +35,10 @@ public class InMemoryGraphTrackerExtensionFactory extends ExtensionFactory<InMem
 
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new InMemoryGraphTrackerLifecycleAdapter(dependencies.dbms(), dependencies.dependencyResolver());
+        return new InMemoryGraphTrackerLifecycleAdapter(dependencies.dbms());
     }
 
     public interface Dependencies {
         DatabaseManagementService dbms();
-
-        DependencyResolver dependencyResolver();
     }
 }

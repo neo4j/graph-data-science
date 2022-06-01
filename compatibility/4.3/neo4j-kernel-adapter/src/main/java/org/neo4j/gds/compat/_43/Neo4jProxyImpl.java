@@ -27,7 +27,6 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.dbms.database.DatabaseContext;
 import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.BoltTransactionRunner;
@@ -110,7 +109,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -496,12 +494,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             NullLogService.getInstance().getInternalLogProvider(),
             PageCacheTracer.NULL
         );
-    }
-
-    @Override
-    public Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
-        DatabaseManager<DatabaseContext> databaseManager = dependencyResolver.resolveDependency(DatabaseManager.class);
-        return databaseManager.registeredDatabases().keySet();
     }
 
     @Override

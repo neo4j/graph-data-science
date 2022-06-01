@@ -72,7 +72,6 @@ import org.neo4j.scheduler.JobScheduler;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Set;
 
 public interface Neo4jProxyApi {
 
@@ -225,8 +224,6 @@ public interface Neo4jProxyApi {
         LogProvider logProvider,
         PageCacheTracer pageCacheTracer
     );
-
-    Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver);
 
     boolean isNotNumericIndex(IndexCapability indexCapability);
 

@@ -19,27 +19,24 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.event.DatabaseEventContext;
 import org.neo4j.graphdb.event.DatabaseEventListener;
 import org.neo4j.kernel.database.NamedDatabaseId;
+import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
-public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
+class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
     private final DatabaseManagementService dbms;
-    private final Set<NamedDatabaseId> registeredDatabases;
+    private final Map<String, NamedDatabaseId> databaseIdMapping;
 
-    InMemoryGraphTrackerLifecycleAdapter(
-        DatabaseManagementService dbms,
-        DependencyResolver dependencyResolver
-    ) {
+    InMemoryGraphTrackerLifecycleAdapter(DatabaseManagementService dbms) {
         this.dbms = dbms;
-        this.registeredDatabases = Neo4jProxy.registeredDatabases(dependencyResolver);
+        this.databaseIdMapping = new HashMap<>();
     }
 
     @Override
@@ -64,22 +61,21 @@ public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter imple
 
     // The @override is missing for compatibility reasons
     public void databaseCreate(DatabaseEventContext eventContext) {
-
+        var databaseName = eventContext.getDatabaseName();
+        var db = (GraphDatabaseAPI) dbms.database(databaseName);
+        databaseIdMapping.put(databaseName, db.databaseId());
     }
 
     // The @override is missing for compatibility reasons
     public void databaseDrop(DatabaseEventContext eventContext) {
-
+        databaseIdMapping.remove(eventContext.getDatabaseName());
     }
 
     private void databaseIsShuttingDown(String databaseName) {
-        var namedDatabaseId = registeredDatabases
-            .stream()
-            .filter(id -> id.name().equals(databaseName))
-            .findFirst()
-            .orElseThrow(() -> new DatabaseNotFoundException(databaseName));
-
-        GraphStoreCatalog.removeAllLoadedGraphs(namedDatabaseId);
+        if (!databaseIdMapping.containsKey(databaseName)) {
+            throw new DatabaseNotFoundException(databaseName);
+        }
+        GraphStoreCatalog.removeAllLoadedGraphs(databaseIdMapping.get(databaseName));
     }
 
     @Override

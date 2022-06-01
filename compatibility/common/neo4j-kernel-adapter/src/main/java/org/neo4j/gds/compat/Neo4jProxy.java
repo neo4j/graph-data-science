@@ -76,7 +76,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.Set;
 
 @SuppressForbidden(reason = "This is the best we can do at the moment")
 public final class Neo4jProxy {
@@ -364,10 +363,6 @@ public final class Neo4jProxy {
         PageCacheTracer pageCacheTracer
     ) {
         return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logProvider, pageCacheTracer);
-    }
-
-    public static Set<NamedDatabaseId> registeredDatabases(DependencyResolver dependencyResolver) {
-        return IMPL.registeredDatabases(dependencyResolver);
     }
 
     public static boolean isNotNumericIndex(IndexCapability indexCapability) {
