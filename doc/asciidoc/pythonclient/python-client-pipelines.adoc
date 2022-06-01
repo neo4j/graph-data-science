@@ -451,3 +451,15 @@ catalog_contains_pipe = gds.beta.pipeline.exists(pipe)
 
 gds.beta.model.drop(pipe)  # same as pipe.drop()
 ----
+
+A pipeline object that has already been created and is present in the pipeline catalog can be retrieved calling the `get` method with its name:
+
+[source,python]
+----
+pipeline = gds.pipeline.get("node_pipeline")
+----
+
+[NOTE]
+====
+The `get` method does not use any tier prefix because it is not associated to any tier. It only exists in the client and does not have a corresponding Cypher procedure.
+====
