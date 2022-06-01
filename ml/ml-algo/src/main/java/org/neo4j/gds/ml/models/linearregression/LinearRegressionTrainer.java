@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.linearregression;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.gradientdescent.Training;
@@ -35,18 +36,21 @@ public final class LinearRegressionTrainer implements RegressorTrainer {
     private final int concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
+    private final LogLevel messageLogLevel;
     private final LinearRegressionTrainConfig trainConfig;
 
     public LinearRegressionTrainer(
         int concurrency,
         LinearRegressionTrainConfig config,
         TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        LogLevel messageLogLevel
     ) {
         this.concurrency = concurrency;
         this.trainConfig = config;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
+        this.messageLogLevel = messageLogLevel;
     }
 
     @Override
@@ -54,7 +58,7 @@ public final class LinearRegressionTrainer implements RegressorTrainer {
         var objective = new LinearRegressionObjective(features, targets, trainConfig.penalty());
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 
-        var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
+        var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
         training.train(objective, queueSupplier, concurrency);
 
         return new LinearRegressor(objective.modelData());

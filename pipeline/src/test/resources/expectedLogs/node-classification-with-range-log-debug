@@ -1,0 +1,38 @@
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Starting fold 1 training
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Initial loss 0.6931
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 1 with loss 0.6376
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 2 with loss 0.5922
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 3 with loss 0.5565
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 4 with loss 0.5302
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 5 with loss 0.5126
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 6 with loss 0.5029
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 7 with loss 0.5004
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 8 with loss 0.5031
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: converged after 8 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.5031.
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished fold 1 training
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Starting fold 2 training
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Initial loss 0.6931
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 1 with loss 0.6780
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 2 with loss 0.6730
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Epoch 3 with loss 0.6758
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: converged after 3 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6758.
+MY DUMMY TASK :: Select best model :: Trial 1 of 2 :: Finished fold 2 training
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Starting fold 1 training
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Initial loss 0.6931
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 1 with loss 0.6376
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 2 with loss 0.5922
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 3 with loss 0.5565
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 4 with loss 0.5302
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 5 with loss 0.5126
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 6 with loss 0.5029
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 7 with loss 0.5004
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 8 with loss 0.5031
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: converged after 8 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.5031.
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished fold 1 training
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Starting fold 2 training
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Initial loss 0.6931
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 1 with loss 0.6780
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 2 with loss 0.6730
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Epoch 3 with loss 0.6758
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: converged after 3 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.6758.
+MY DUMMY TASK :: Select best model :: Trial 2 of 2 :: Finished fold 2 training

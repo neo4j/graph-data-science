@@ -60,6 +60,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.compat.TestLog.DEBUG;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
@@ -452,7 +453,12 @@ class NodeClassificationTrainTest {
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
-            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-with-range-log"));
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-with-range-log-info"));
+
+        assertThat(testLog.getMessages(DEBUG))
+            .extracting(removingThreadId())
+            .extracting(keepingFixedNumberOfDecimals(4))
+            .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-with-range-log-debug"));
     }
 
     @ParameterizedTest

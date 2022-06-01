@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -45,6 +46,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     private final TerminationFlag terminationFlag;
     private final LocalIdMap classIdMap;
     private final boolean reduceClassCount;
+    private final LogLevel messageLogLevel;
     private final int concurrency;
 
     public static MemoryEstimation memoryEstimation(
@@ -86,7 +88,8 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         LocalIdMap classIdMap,
         boolean reduceClassCount,
         TerminationFlag terminationFlag,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        LogLevel messageLogLevel
     ) {
         this.concurrency = concurrency;
         this.trainConfig = trainConfig;
@@ -94,6 +97,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.reduceClassCount = reduceClassCount;
+        this.messageLogLevel = messageLogLevel;
     }
 
     @Override
@@ -103,7 +107,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
             : standard(features.featureDimension(), classIdMap);
         var classifier = LogisticRegressionClassifier.from(data);
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
-        var training = new Training(trainConfig, progressTracker, trainSet.size(), terminationFlag);
+        var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 
         training.train(objective, queueSupplier, concurrency);

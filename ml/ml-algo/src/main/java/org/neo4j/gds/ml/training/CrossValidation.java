@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.training;
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -117,16 +118,21 @@ public class CrossValidation<MODEL_TYPE> {
             var trainStatsBuilder = new ModelStatsBuilder(validationSplits.size());
             var metricsHandler = ModelSpecificMetricsHandler.of(metrics, validationStatsBuilder);
 
+            int fold = 1;
             for (TrainingExamplesSplit split : validationSplits) {
                 var trainSet = split.trainSet();
                 var validationSet = split.testSet();
 
-                var trainedModel = modelTrainer.train(trainSet, modelParams, metricsHandler);
+                progressTracker.logDebug("Starting fold " + fold + " training");
+                var trainedModel = modelTrainer.train(trainSet, modelParams, metricsHandler, LogLevel.DEBUG);
+                progressTracker.logDebug("Finished fold " + fold + " training");
 
                 modelEvaluator.evaluate(validationSet, trainedModel, validationStatsBuilder::update);
                 modelEvaluator.evaluate(trainSet, trainedModel, trainStatsBuilder::update);
 
                 progressTracker.logSteps(1);
+
+                fold++;
             }
 
             var candidateStats = ModelCandidateStats.of(
@@ -166,7 +172,12 @@ public class CrossValidation<MODEL_TYPE> {
 
     @FunctionalInterface
     public interface ModelTrainer<MODEL_TYPE> {
-        MODEL_TYPE train(ReadOnlyHugeLongArray trainSet, TrainerConfig modelParameters, ModelSpecificMetricsHandler metricsHandler);
+        MODEL_TYPE train(
+            ReadOnlyHugeLongArray trainSet,
+            TrainerConfig modelParameters,
+            ModelSpecificMetricsHandler metricsHandler,
+            LogLevel messageLogLevel
+        );
     }
 
     @FunctionalInterface

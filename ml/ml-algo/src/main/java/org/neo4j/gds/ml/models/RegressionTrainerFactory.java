@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainer;
@@ -38,6 +39,7 @@ public final class RegressionTrainerFactory {
         TrainerConfig config,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
+        LogLevel messageLogLevel,
         int concurrency,
         Optional<Long> randomSeed
     ) {
@@ -47,7 +49,8 @@ public final class RegressionTrainerFactory {
                     concurrency,
                     (LinearRegressionTrainConfig) config,
                     terminationFlag,
-                    progressTracker
+                    progressTracker,
+                    messageLogLevel
                 );
             }
             case RandomForestRegression: {
@@ -56,7 +59,8 @@ public final class RegressionTrainerFactory {
                     (RandomForestRegressorTrainerConfig) config,
                     randomSeed,
                     terminationFlag,
-                    progressTracker
+                    progressTracker,
+                    messageLogLevel
                 );
             }
             default:

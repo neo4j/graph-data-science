@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
@@ -44,7 +45,8 @@ class LinearRegressionTrainerTest {
             4,
             LinearRegressionTrainConfig.DEFAULT,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         Features features = FeaturesFactory.wrap(List.of(

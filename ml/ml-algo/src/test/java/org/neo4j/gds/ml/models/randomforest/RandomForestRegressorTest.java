@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -96,7 +97,8 @@ class RandomForestRegressorTest {
                 .build(),
             Optional.of(42L),
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
@@ -121,7 +123,8 @@ class RandomForestRegressorTest {
                 .build(),
             Optional.of(1337L),
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         var randomForestRegressor = randomForestTrainer.train(allFeatureVectors, targets, trainSet);
@@ -146,7 +149,8 @@ class RandomForestRegressorTest {
                 .build(),
             Optional.of(1337L),
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES / 2);

@@ -27,6 +27,7 @@ import org.neo4j.gds.TestLocalIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
@@ -55,7 +56,8 @@ class LogisticRegressionTrainerTest {
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         double[][] features = new double[5][3];
@@ -95,7 +97,8 @@ class LogisticRegressionTrainerTest {
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         double[][] features = new double[20_000][3];
@@ -129,7 +132,8 @@ class LogisticRegressionTrainerTest {
             fourClassIdMap(),
             false,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         var random = new Random(42L);
@@ -174,7 +178,8 @@ class LogisticRegressionTrainerTest {
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         double[][] features = new double[5][3];
@@ -209,7 +214,8 @@ class LogisticRegressionTrainerTest {
             fourClassIdMap(),
             true,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
 
         double[][] features = new double[5][3];
@@ -268,7 +274,8 @@ class LogisticRegressionTrainerTest {
             TestLocalIdMap.identityMapOf(0),
             false,
             TerminationFlag.RUNNING_TRUE,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            LogLevel.INFO
         );
     }
 

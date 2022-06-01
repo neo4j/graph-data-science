@@ -24,6 +24,7 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -157,7 +158,7 @@ public final class NodeRegressionTrain {
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER),
+            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(trainSet, config, messageLogLevel),
             this::registerMetricScores
         );
 
@@ -205,7 +206,7 @@ public final class NodeRegressionTrain {
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), progressTracker);
+        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), LogLevel.INFO);
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask("Evaluate on test data");
@@ -223,7 +224,7 @@ public final class NodeRegressionTrain {
 
     private Regressor retrainBestModel(ReadOnlyHugeLongArray trainSet, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedRegressor = trainModel(trainSet, bestParameters, progressTracker);
+        var retrainedRegressor = trainModel(trainSet, bestParameters, LogLevel.INFO);
         progressTracker.endSubTask("Retrain best model");
 
         return retrainedRegressor;
@@ -232,12 +233,13 @@ public final class NodeRegressionTrain {
     private Regressor trainModel(
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
-        ProgressTracker customProgressTracker
+        LogLevel messageLogLevel
     ) {
         var trainer = RegressionTrainerFactory.create(
             trainerConfig,
             terminationFlag,
-            customProgressTracker,
+            progressTracker,
+            messageLogLevel,
             trainConfig.concurrency(),
             trainConfig.randomSeed()
         );

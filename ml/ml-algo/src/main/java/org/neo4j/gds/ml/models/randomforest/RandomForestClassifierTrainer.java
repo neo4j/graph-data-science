@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
+import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
@@ -65,6 +66,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private final int concurrency;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
+    private final LogLevel messageLogLevel;
     private final TerminationFlag terminationFlag;
     private Optional<Double> outOfBagError = Optional.empty();
     private final ModelSpecificMetricsHandler metricsHandler;
@@ -75,6 +77,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         RandomForestClassifierTrainerConfig config,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker,
+        LogLevel messageLogLevel,
         TerminationFlag terminationFlag,
         ModelSpecificMetricsHandler metricsHandler
     ) {
@@ -83,6 +86,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         this.concurrency = concurrency;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
+        this.messageLogLevel = messageLogLevel;
         this.terminationFlag = terminationFlag;
         this.metricsHandler = metricsHandler;
     }
@@ -158,6 +162,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 impurityCriterion,
                 trainSet,
                 progressTracker,
+                messageLogLevel,
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
@@ -208,6 +213,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
         private final ProgressTracker progressTracker;
+        private final LogLevel messageLogLevel;
         private final AtomicInteger numberOfTreesTrained;
 
         TrainDecisionTreeTask(
@@ -221,6 +227,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,
             ProgressTracker progressTracker,
+            LogLevel messageLogLevel,
             AtomicInteger numberOfTreesTrained
         ) {
             this.maybePredictions = maybePredictions;
@@ -233,6 +240,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             this.impurityCriterion = impurityCriterion;
             this.trainSet = trainSet;
             this.progressTracker = progressTracker;
+            this.messageLogLevel = messageLogLevel;
             this.numberOfTreesTrained = numberOfTreesTrained;
         }
 
@@ -293,7 +301,8 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 predictionsCache
             ));
 
-            progressTracker.logInfo(
+            progressTracker.logMessage(
+                messageLogLevel,
                 formatWithLocale(
                     "Trained decision tree %d out of %d",
                     numberOfTreesTrained.incrementAndGet(),
