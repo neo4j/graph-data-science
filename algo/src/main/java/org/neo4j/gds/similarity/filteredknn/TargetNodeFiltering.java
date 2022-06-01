@@ -72,16 +72,16 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
      *
      * Cons include bias for start of node array, yada yada. Extremely naive solution at this point.
      *
-     * @param optionalSimilarityFunction An actual similarity function if you want seeds, empty otherwise.
+     * @param similarityFunction An actual similarity function if you want seeds, empty otherwise.
      */
     private static Optional<Set<Pair<Double, Long>>> prepareSeeds(
         Graph graph,
         LongPredicate targetNodePredicate,
         int k,
         int n,
-        Optional<SimilarityFunction> optionalSimilarityFunction
+        Optional<SimilarityFunction> similarityFunction
     ) {
-        if (optionalSimilarityFunction.isEmpty()) { return Optional.empty(); }
+        if (similarityFunction.isEmpty()) { return Optional.empty(); }
 
         Set<Pair<Double, Long>> seeds = prepareSeedSet(k);
 
@@ -90,7 +90,7 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
 
             if (!targetNodePredicate.test(m)) return true;
 
-            double similarityScore = optionalSimilarityFunction.get().computeSimilarity(n, m);
+            double similarityScore = similarityFunction.get().computeSimilarity(n, m);
 
             seeds.add(Pair.of(similarityScore, m));
 
