@@ -17,10 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.filtering;
 
-import java.util.function.LongPredicate;
+import org.neo4j.gds.api.IdMap;
 
-interface NodeFilter extends LongPredicate {
-    NodeFilter noOp = (nodeId) -> true;
+public class LabelNodeFilterSpec implements NodeFilterSpec {
+
+    private final String labelString;
+
+    LabelNodeFilterSpec(String labelString) {
+        this.labelString = labelString;
+    }
+
+    @Override
+    public NodeFilter toNodeFilter(IdMap idMap) {
+        return LabelNodeFilter.create(labelString, idMap);
+    }
 }

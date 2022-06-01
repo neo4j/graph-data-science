@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 
 import java.util.stream.Stream;
 

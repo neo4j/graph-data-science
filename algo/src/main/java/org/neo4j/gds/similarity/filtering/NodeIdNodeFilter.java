@@ -17,30 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.filtering;
 
 import org.neo4j.gds.api.IdMap;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
-public class NodeIdNodeFilterSpec implements NodeFilterSpec {
+public final class NodeIdNodeFilter implements NodeFilter {
+
+    public static NodeIdNodeFilter create(Set<Long> externalNodeIds, IdMap idMap) {
+        var mappedNodeIds = externalNodeIds.stream().map(idMap::toMappedNodeId).collect(Collectors.toSet());
+        return new NodeIdNodeFilter(mappedNodeIds);
+    }
 
     private final Set<Long> nodeIds;
 
-    NodeIdNodeFilterSpec(Set<Long> nodeIds) {
+    private NodeIdNodeFilter(Set<Long> nodeIds) {
         this.nodeIds = nodeIds;
     }
 
     @Override
-    public NodeFilter toNodeFilter(IdMap idMap) {
-        return NodeIdNodeFilter.create(nodeIds, idMap);
-    }
-
-    /**
-     * Needed only to satisfy ProcedureSignatureGuard
-     */
-    @Override
-    public String toString() {
-        return nodeIds.toString();
+    public boolean test(long nodeId) {
+        return nodeIds.contains(nodeId);
     }
 }

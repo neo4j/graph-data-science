@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.filteredknn;
+package org.neo4j.gds.similarity.filtering;
 
 import org.neo4j.gds.api.IdMap;
 
@@ -32,7 +32,7 @@ import org.neo4j.gds.api.IdMap;
  * The spec is created using {@link NodeFilterSpecFactory#create(Object)} and the {@link NodeFilter} is then created
  * using {@link NodeFilterSpec#toNodeFilter(org.neo4j.gds.api.IdMap)}.
  */
-interface NodeFilterSpec {
+public interface NodeFilterSpec {
     NodeFilter toNodeFilter(IdMap idMap);
 
     NodeFilterSpec noOp = (idMap) -> NodeFilter.noOp;
