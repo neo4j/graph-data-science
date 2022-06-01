@@ -140,35 +140,7 @@ public final class LinkPredictionTrain {
 
         var trainingStatistics = new TrainingStatistics(config.metrics());
 
-        var modelCandidates = new RandomSearch(
-            pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
-            config.randomSeed()
-        );
-
-        var crossValidation = new CrossValidation<>(
-            progressTracker,
-            terminationFlag,
-            config.metrics(),
-            pipeline.splitConfig().validationFolds(),
-            config.randomSeed(),
-            (trainSet, modelParameters, metricsHandler) -> trainModel(
-                trainData,
-                trainSet,
-                modelParameters,
-                ProgressTracker.NULL_TRACKER,
-                metricsHandler
-            ),
-            (evaluationSet, classifier, scoreConsumer) -> computeTrainMetric(
-                trainData,
-                classifier,
-                evaluationSet,
-                scoreConsumer,
-                ProgressTracker.NULL_TRACKER
-            )
-        );
-
-        crossValidation.selectModel(trainRelationshipIds, trainData.labels()::get, new TreeSet<>(classIdMap.originalIdsList()),  trainingStatistics, modelCandidates);
+        findBestModelCandidate(trainData, trainRelationshipIds, trainingStatistics);
 
         // train best model on the entire training graph
         progressTracker.beginSubTask("Train best model");
@@ -203,6 +175,48 @@ public final class LinkPredictionTrain {
         progressTracker.logMessage(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
         return ImmutableLinkPredictionTrainResult.of(classifier, trainingStatistics);
+    }
+
+    private void findBestModelCandidate(
+        FeaturesAndLabels trainData,
+        ReadOnlyHugeLongArray trainRelationshipIds,
+        TrainingStatistics trainingStatistics
+    ) {
+        var modelCandidates = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            config.randomSeed()
+        );
+
+        var crossValidation = new CrossValidation<>(
+            progressTracker,
+            terminationFlag,
+            config.metrics(),
+            pipeline.splitConfig().validationFolds(),
+            config.randomSeed(),
+            (trainSet, modelParameters, metricsHandler) -> trainModel(
+                trainData,
+                trainSet,
+                modelParameters,
+                ProgressTracker.NULL_TRACKER,
+                metricsHandler
+            ),
+            (evaluationSet, classifier, scoreConsumer) -> computeTrainMetric(
+                trainData,
+                classifier,
+                evaluationSet,
+                scoreConsumer,
+                ProgressTracker.NULL_TRACKER
+            )
+        );
+
+        crossValidation.selectModel(
+            trainRelationshipIds,
+            trainData.labels()::get,
+            new TreeSet<>(classIdMap.originalIdsList()),
+            trainingStatistics,
+            modelCandidates
+        );
     }
 
     @NotNull

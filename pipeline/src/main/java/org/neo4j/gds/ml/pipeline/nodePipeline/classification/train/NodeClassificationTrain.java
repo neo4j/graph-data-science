@@ -59,7 +59,6 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.LongUnaryOperator;
@@ -284,29 +283,39 @@ public final class NodeClassificationTrain {
 
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        CrossValidation<Classifier> crossValidation = new CrossValidation<>(
-            progressTracker,
-            terminationFlag,
-            metrics,
-            splitConfig.validationFolds(),
-            trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER, metricsHandler),
-            (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
-        );
-
-        Iterator<TrainerConfig> modelCandidates = new RandomSearch(
-            pipeline.trainingParameterSpace(),
-            pipeline.numberOfModelSelectionTrials(),
-            trainConfig.randomSeed()
-        );
-
-        crossValidation.selectModel(nodeSplits.outerSplit().trainSet(), targets::get, new TreeSet<>(classCounts.keys()), trainingStatistics, modelCandidates);
+        findBestModelCandidate(nodeSplits.outerSplit().trainSet(), trainingStatistics);
 
         evaluateBestModel(nodeSplits.outerSplit(), trainingStatistics);
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
         return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics);
+    }
+
+    private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, TrainingStatistics trainingStatistics) {
+        var crossValidation = new CrossValidation<>(
+            progressTracker,
+            terminationFlag,
+            metrics,
+            pipeline.splitConfig().validationFolds(),
+            trainConfig.randomSeed(),
+            (trainSet, config, metricsHandler) -> trainModel(trainSet, config, ProgressTracker.NULL_TRACKER, metricsHandler),
+            (evaluationSet, classifier, scoreConsumer) -> registerMetricScores(evaluationSet, classifier, scoreConsumer, ProgressTracker.NULL_TRACKER)
+        );
+
+        var modelCandidates = new RandomSearch(
+            pipeline.trainingParameterSpace(),
+            pipeline.numberOfModelSelectionTrials(),
+            trainConfig.randomSeed()
+        );
+
+        crossValidation.selectModel(
+            trainNodeIds,
+            targets::get,
+            new TreeSet<>(classCounts.keys()),
+            trainingStatistics,
+            modelCandidates
+        );
     }
 
     private void registerMetricScores(
