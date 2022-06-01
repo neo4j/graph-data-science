@@ -54,7 +54,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final int concurrency;
     private final long seed;
 
-    private final double scaleCoefficient;
+    private final double modularityScaleCoefficient;
 
     public Leiden(
         Graph graph,
@@ -71,7 +71,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         this.gamma = gamma;
         this.theta = theta;
         this.seed = seed;
-        this.scaleCoefficient = 1.0 / graph.relationshipCount();
+        this.modularityScaleCoefficient = 1.0 / graph.relationshipCount();
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -127,7 +127,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 partition,
                 communityVolumes,
                 gamma,
-                scaleCoefficient,
+                modularityScaleCoefficient,
                 concurrency,
                 executorService
             );
