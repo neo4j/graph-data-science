@@ -157,7 +157,7 @@ class StratifiedKFoldSplitterTest {
         return counts;
     }
 
-    private Multiset<Long> classCountsForSet(HugeLongArray idSet, HugeLongArray targets) {
+    private Multiset<Long> classCountsForSet(ReadOnlyHugeLongArray idSet, HugeLongArray targets) {
         var counts = new Multiset<Long>();
 
         for (long i = 0; i < idSet.size(); i++) {

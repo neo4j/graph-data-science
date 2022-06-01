@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
@@ -54,7 +55,7 @@ public class ParallelNodeClassifier {
         this.progressTracker = progressTracker;
     }
 
-    public HugeLongArray predict(HugeLongArray evaluationSet) {
+    public HugeLongArray predict(ReadOnlyHugeLongArray evaluationSet) {
         return predict(evaluationSet.size(), evaluationSet::get, null);
     }
 

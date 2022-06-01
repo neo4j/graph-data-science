@@ -20,14 +20,14 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 @ValueClass
 public interface TrainingExamplesSplit {
-    HugeLongArray trainSet();
-    HugeLongArray testSet();
+    ReadOnlyHugeLongArray trainSet();
+    ReadOnlyHugeLongArray testSet();
 
-    static TrainingExamplesSplit of(HugeLongArray trainSet, HugeLongArray testSet) {
+    static TrainingExamplesSplit of(ReadOnlyHugeLongArray trainSet, ReadOnlyHugeLongArray testSet) {
         return ImmutableTrainingExamplesSplit.of(trainSet, testSet);
     }
 }

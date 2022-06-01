@@ -23,6 +23,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.models.Classifier;
@@ -59,7 +60,7 @@ public final class ClassificationMetricComputer {
         Features features,
         HugeLongArray labels,
         Multiset<Long> classCounts,
-        HugeLongArray evaluationSet,
+        ReadOnlyHugeLongArray evaluationSet,
         Classifier classifier,
         int concurrency,
         TerminationFlag terminationFlag,
@@ -81,7 +82,7 @@ public final class ClassificationMetricComputer {
         );
     }
 
-    private static HugeLongArray makeLocalTargets(HugeLongArray nodeIds, HugeLongArray targets) {
+    private static HugeLongArray makeLocalTargets(ReadOnlyHugeLongArray nodeIds, HugeLongArray targets) {
         var localTargets = HugeLongArray.newArray(nodeIds.size());
 
         localTargets.setAll(i -> targets.get(nodeIds.get(i)));

@@ -17,14 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
+package org.neo4j.gds.ml.training;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.ml.models.TrainerConfig;
+import org.neo4j.gds.ml.models.TrainingMethod;
 
-@ValueClass
-public interface NodeClassificationTrainResult {
-    Classifier classifier();
-    TrainingStatistics trainingStatistics();
+import java.util.Map;
+
+final class TestTrainerConfig implements TrainerConfig {
+
+    final String name;
+
+    TestTrainerConfig(String name) {this.name = name;}
+
+    @Override
+    public Map<String, Object> toMap() {
+        return Map.of("name", name);
+    }
+
+    @Override
+    public TrainingMethod method() {
+        return TrainingMethod.RandomForestClassification;
+    }
 }

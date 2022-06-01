@@ -17,26 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.linkPipeline.train;
+package org.neo4j.gds.ml.metrics;
 
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-
-public class ReadOnlyHugeDoubleToLongArrayWrapper implements ReadOnlyHugeLongArray {
-
-    private final HugeDoubleArray array;
-
-    ReadOnlyHugeDoubleToLongArrayWrapper(HugeDoubleArray array) {
-        this.array = array;
-    }
-
-    @Override
-    public long get(long index) {
-        return (long) array.get(index);
-    }
-
-    @Override
-    public long size() {
-        return array.size();
-    }
+@FunctionalInterface
+public interface MetricConsumer {
+    void consume(Metric metric, double value);
 }
