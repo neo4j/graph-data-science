@@ -45,15 +45,18 @@ import org.neo4j.internal.helpers.collection.Iterables;
 
 import java.time.Clock;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
 public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
 
-    // The absolute volume per stage. Set to 0 at the beginning of a stage.
-    private final AtomicLong stageVolume;
+    // The total task volume per stage.
+    // Set to 0 at the beginning of a stage.
+    private final AtomicLong stageProgressTotal;
+    // The progressed task volume per stage.
+    // Set to 0 at the beginning of a stage.
+    private final AtomicLong stageProgressCurrent;
 
     private final ProgressTracker progressTracker;
 
@@ -81,7 +84,8 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
     public ProgressTrackerExecutionMonitor(ProgressTracker progressTracker, Clock clock, long time, TimeUnit unit) {
         super(clock, time, unit);
         this.progressTracker = progressTracker;
-        this.stageVolume = new AtomicLong(0);
+        this.stageProgressTotal = new AtomicLong(0);
+        this.stageProgressCurrent = new AtomicLong(0);
     }
 
     @Override
@@ -92,7 +96,8 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
 
     @Override
     public void start(StageExecution execution) {
-        this.stageVolume.set(0);
+        this.stageProgressTotal.set(0);
+        this.stageProgressCurrent.set(0);
 
         var neoStores = this.dependencyResolver.resolveDependency(BatchingNeoStores.class);
         var relationshipRecordIdCount = neoStores.getRelationshipStore().getHighId();
@@ -110,12 +115,15 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
             default:
                 this.progressTracker.beginSubTask(execution.getStageName());
         }
+
+        if (this.progressTracker.currentVolume() != Task.UNKNOWN_VOLUME) {
+            this.stageProgressTotal.set(this.progressTracker.currentVolume());
+        }
     }
 
     @Override
     public void end(StageExecution execution, long totalTimeMillis) {
         this.progressTracker.endSubTask(execution.getStageName());
-        System.out.println("[end] " + " stage = " + execution + " progress = " + progressFromBatches(execution));
     }
 
     @Override
@@ -126,26 +134,22 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
 
     @Override
     public void check(StageExecution execution) {
-        statistics(execution).ifPresentOrElse(
-            s -> this.progressTracker.logProgress(s.asLong() - this.stageVolume.getAndSet(s.asLong())),
-            () -> {
-                long totalProgress = progressFromBatches(execution);
-                this.progressTracker.logProgress(totalProgress - this.stageVolume.getAndSet(totalProgress));
-            }
-        );
+        // Cap the total to not produce percentages > 100.
+        var progress = Math.min(progress(execution), this.stageProgressTotal.get());
+        this.progressTracker.logProgress(progress - this.stageProgressCurrent.getAndSet(progress));
     }
 
-    private static long progressFromBatches(StageExecution execution) {
-        var doneBatches = Iterables.last(execution.steps()).stats().stat(Keys.done_batches).asLong();
-        var batchSize = execution.getConfig().batchSize();
-        return doneBatches * batchSize;
-    }
-
-    private static Optional<Stat> statistics(StageExecution execution) {
+    private static long progress(StageExecution execution) {
         return StreamSupport
             .stream(execution.steps().spliterator(), false)
             .map(step -> step.stats().stat(Keys.progress))
             .filter(Objects::nonNull)
-            .findFirst();
+            .map(Stat::asLong)
+            .findFirst()
+            .orElseGet(() -> {
+                var doneBatches = Iterables.last(execution.steps()).stats().stat(Keys.done_batches).asLong();
+                var batchSize = execution.getConfig().batchSize();
+                return doneBatches * batchSize;
+            });
     }
 }
