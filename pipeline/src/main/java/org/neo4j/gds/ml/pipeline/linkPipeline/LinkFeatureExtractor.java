@@ -20,8 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -103,7 +102,11 @@ public final class LinkFeatureExtractor {
             relationshipOffset += partition.totalDegree();
         }
 
-        ParallelUtil.runWithConcurrency(concurrency, linkFeatureWriters, terminationFlag, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(linkFeatureWriters)
+            .terminationFlag(terminationFlag)
+            .run();
 
         return FeaturesFactory.wrap(linkFeatures);
     }

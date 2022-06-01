@@ -20,8 +20,7 @@
 package org.neo4j.gds.ml.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -140,7 +139,11 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                 numberOfTreesTrained
             )
         ).collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .terminationFlag(terminationFlag)
+            .run();
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
