@@ -1,0 +1,10 @@
+[NOTE]
+====
+In addition to the data the procedure yields, there's a fair amount of information about the training that's being sent to the Neo4j database's logs as the procedure progresses.
+
+For example, how well each model candidates perform is logged with `info` log level and thus end up the `neo4j.log` file of the database.
+
+Some information is only logged with `debug` log level, and thus end up in the `debug.log` file of the database.
+An example of this is training method specific metadata - such as per epoch loss for logistic regression - during model candidate training (in the model selection phase).
+Please note that this particular data is not yielded by the procedure call.
+====
