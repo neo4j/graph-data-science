@@ -70,6 +70,12 @@ dbms.ssl.policy.https.private_key=private.key
 dbms.ssl.policy.https.public_certificate=public.crt
 ----
 
+[NOTE]
+====
+It is currently not possible to use a certificate where the private key is protected by a password.
+Such a certificate can be used to secure Neo4j.
+For Arrow Flight, only certificates with a password-less private key are accepted.
+====
 
 == Monitoring
 
