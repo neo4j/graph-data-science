@@ -48,13 +48,14 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         int k,
         LongPredicate targetNodePredicate,
         Graph graph,
-        Optional<SimilarityFunction> optionalSimilarityFunction
+        Optional<SimilarityFunction> optionalSimilarityFunction,
+        double similarityCutoff
     ) {
         var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
 
         for (int i = 0; i < nodeCount; i++) {
             var optionalSeeds = prepareSeeds(graph, targetNodePredicate, k, i, optionalSimilarityFunction);
-            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(targetNodePredicate, k, optionalSeeds);
+            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(targetNodePredicate, k, optionalSeeds, similarityCutoff);
 
             neighbourConsumers.set(i, targetNodeFilter);
         }

@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 /**
  * This target node filter evaluates and stores incoming elements (neighbours) with their priority (score). We sort
- * elements by priority, descending.
+ * elements by priority, descending. We respect similarity cutoff _unless_ a seed was supplied.
  *
  * For now it is a simple, bounded priority queue backed by a {@link java.util.TreeSet}. We handle duplicates, in the
  * sense that _exact_ pairs of element and priority, that already exist in the queue, are not added twice - this happens
@@ -47,6 +47,8 @@ public final class TargetNodeFilter implements NeighbourConsumer {
     private final TreeSet<Pair<Double, Long>> priorityQueue;
     private final LongPredicate predicate;
     private final int bound;
+    private final boolean seeded;
+    private final double similarityCutoff;
 
     /**
      * @param seeds Optionally seed the priority queue
@@ -54,23 +56,34 @@ public final class TargetNodeFilter implements NeighbourConsumer {
     static TargetNodeFilter create(
         LongPredicate targetNodePredicate,
         int bound,
-        Optional<Set<Pair<Double, Long>>> seeds
+        Optional<Set<Pair<Double, Long>>> seeds,
+        double similarityCutoff
     ) {
         TreeSet<Pair<Double, Long>> priorityQueue = new TreeSet<>(Comparator.reverseOrder());
 
         seeds.ifPresent(priorityQueue::addAll);
 
-        return new TargetNodeFilter(priorityQueue, targetNodePredicate, bound);
+        return new TargetNodeFilter(priorityQueue, seeds.isPresent(), similarityCutoff, targetNodePredicate, bound);
     }
 
-    private TargetNodeFilter(TreeSet<Pair<Double, Long>> priorityQueue, LongPredicate predicate, int bound) {
+    TargetNodeFilter(
+        TreeSet<Pair<Double, Long>> priorityQueue,
+        boolean seeded,
+        double similarityCutoff,
+        LongPredicate predicate,
+        int bound
+    ) {
         this.priorityQueue = priorityQueue;
+        this.seeded = seeded;
+        this.similarityCutoff = similarityCutoff;
         this.predicate = predicate;
         this.bound = bound;
     }
 
     @Override
     public void offer(long element, double priority) {
+        if (!seeded && priority < similarityCutoff) return;
+
         if (!predicate.test(element)) return;
 
         priorityQueue.add(Pair.of(priority, element));

@@ -37,12 +37,14 @@ class TargetNodeFilteringTest {
         int thereIsOneNodeInThisFilter = 1;
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
+        double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
             thereIsOneNodeInThisFilter,
             kIsTwo,
             evenNodesAreTargetNodes,
             null /* not needed when not seeding */,
-            Optional.empty() /* not needed when not seeding */
+            Optional.empty(),  /* not needed when not seeding */
+            noSimilarityCutoff
         );
 
         TargetNodeFilter targetNodeFilter = targetNodeFiltering.get(0);
@@ -84,12 +86,14 @@ class TargetNodeFilteringTest {
                 return 2.71;
             }
         });
+        double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
             thereIsOneNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
             graphWithAtLeastKNodes,
-            weSeedWithLowScores
+            weSeedWithLowScores,
+            noSimilarityCutoff
         );
 
         // we only offer three high quality nodes
@@ -133,12 +137,14 @@ class TargetNodeFilteringTest {
                 return 2.71;
             }
         });
+        double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
             thereIsOneNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
             graphWithAtLeastKNodes,
-            weSeedWithLowScores
+            weSeedWithLowScores,
+            noSimilarityCutoff
         );
 
         // this is only the seeds

@@ -19,17 +19,19 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TargetNodeFilterTest {
     @Test
     void shouldPrioritiseTargetNodes() {
-        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 3, Optional.empty());
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 3, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -44,7 +46,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyKeepTopK() {
-        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 2, Optional.empty());
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 2, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -58,7 +60,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyIncludeTargetNodes() {
-        TargetNodeFilter consumer = TargetNodeFilter.create(l -> false, 3, Optional.empty());
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> false, 3, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -69,7 +71,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldIgnoreExactDuplicates() {
-        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty());
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -88,7 +90,7 @@ class TargetNodeFilterTest {
      */
     @Test
     void shouldAllowDuplicateElementsWithNewPriorities() {
-        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty());
+        TargetNodeFilter consumer = TargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -100,6 +102,41 @@ class TargetNodeFilterTest {
             new SimilarityResult(117, 87, 2.71),
             new SimilarityResult(117, 42, 1.61),
             new SimilarityResult(117, 42, 1.41)
+        );
+    }
+
+    @Test
+    void shouldIgnoreLowScoringNodes() {
+        TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(l -> true, 3, Optional.empty(), 2);
+
+        targetNodeFilter.offer(23, 3.14);
+        targetNodeFilter.offer(42, 1.61);
+        targetNodeFilter.offer(87, 2.71);
+        targetNodeFilter.offer(56, 1.41);
+
+        assertThat(targetNodeFilter.asSimilarityStream(117)).containsExactly(
+            new SimilarityResult(117, 23, 3.14),
+            new SimilarityResult(117, 87, 2.71)
+        );
+    }
+
+    @Test
+    void shouldNotIgnoreLowScoringNodesWhenSeeded() {
+        Set<Pair<Double, Long>> seeds = Set.of(
+            Pair.of(0.001, 256L),
+            Pair.of(0.002, 512L),
+            Pair.of(0.003, 384L)
+        );
+
+        TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(l -> true, 3, Optional.of(seeds), 2);
+
+        targetNodeFilter.offer(23, 3.14);
+        targetNodeFilter.offer(42, 1.61);
+
+        assertThat(targetNodeFilter.asSimilarityStream(117)).containsExactly(
+            new SimilarityResult(117, 23, 3.14),
+            new SimilarityResult(117, 42, 1.61),
+            new SimilarityResult(117, 384, 0.003)
         );
     }
 }
