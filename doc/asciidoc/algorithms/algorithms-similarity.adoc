@@ -12,6 +12,7 @@ The Neo4j GDS library includes the following similarity algorithms:
 
 * <<algorithms-node-similarity, Node Similarity>>
 * <<algorithms-knn, K-Nearest Neighbors>>
+* <<algorithms-filtered-knn, Filtered K-Nearest Neighbors>>
 
 As well as a collection of different <<similarity-functions, similarity functions>> for calculating similarity between arrays of numbers
 
@@ -19,6 +20,6 @@ include::node-similarity/node-similarity.adoc[leveloffset=+1]
 
 include::knn/knn.adoc[leveloffset=+1]
 
+include::filtered-knn/filtered-knn.adoc[leveloffset=+1]
+
 include::similarity-functions/similarity-functions.adoc[leveloffset=+1]
-
-
