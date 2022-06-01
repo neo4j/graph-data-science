@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.batch;
 
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
@@ -87,8 +87,12 @@ public abstract class BatchQueue {
     public void parallelConsume(int concurrency, List<? extends Consumer<Batch>> consumers, TerminationFlag terminationFlag) {
         assert consumers.size() == concurrency;
 
-        var tasks = consumers.stream().map(ConsumerTask::new).collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
+        var tasks = consumers.stream().map(ConsumerTask::new);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .terminationFlag(terminationFlag)
+            .run();
     }
 
     public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier, TerminationFlag terminationFlag) {

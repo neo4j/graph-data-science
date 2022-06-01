@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -202,17 +203,14 @@ public final class MultiSourceBFS implements Runnable {
     public void run(int concurrency, ExecutorService executor) {
         final int threads = numberOfThreads();
         var bfss = allSourceBfss(threads);
-        if (!ParallelUtil.canRunInParallel(executor)) {
-            // fallback to sequentially running all MS-BFS instances
-            executor = null;
-        }
-        ParallelUtil.runWithConcurrency(
-                concurrency,
-                bfss,
-                threads << 2,
-                100L,
-                TimeUnit.MICROSECONDS,
-                executor);
+
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(bfss)
+            .maxWaitRetries((long) threads << 2)
+            .waitTime(100L, TimeUnit.MICROSECONDS)
+            .executor(executor)
+            .run();
     }
 
     /**
