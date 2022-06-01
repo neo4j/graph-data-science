@@ -175,8 +175,8 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             // no useful assertion on the actual content
             assertThat(result.next()).isNotNull();
 
-            // after the first result, we still have 4 threads running
-            assertThat(pool.getActiveCount()).isEqualTo(concurrency);
+            // after the first result, we have at least one thread still running
+            assertThat(pool.getActiveCount()).isBetween(1, concurrency);
 
             // we have no more result
             assertThat(result).isExhausted();
