@@ -53,6 +53,8 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             graph,
             configuration,
             similarityComputer,
+            configuration.sourceNodeFilter().toNodeFilter(graph),
+            configuration.targetNodeFilter().toNodeFilter(graph),
             configuration.concurrency(),
             Pools.DEFAULT,
             progressTracker

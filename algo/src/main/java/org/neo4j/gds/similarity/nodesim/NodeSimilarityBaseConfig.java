@@ -23,6 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -57,6 +58,18 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     @Configuration.IntegerRange(min = 1)
     default int degreeCutoff() {
         return 1;
+    }
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    default NodeFilterSpec sourceNodeFilter() {
+        return NodeFilterSpec.noOp;
+    }
+
+    @Value.Default
+    @Configuration.ConvertWith("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
+    default NodeFilterSpec targetNodeFilter() {
+        return NodeFilterSpec.noOp;
     }
 
     @Value.Default

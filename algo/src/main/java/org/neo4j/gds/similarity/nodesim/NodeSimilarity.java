@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -48,6 +49,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private final BitSet sourceNodes;
     private final BitSet targetNodes;
+    private final NodeFilter sourceNodeFilter;
+    private final NodeFilter targetNodeFilter;
 
     private final ExecutorService executorService;
     private final int concurrency;
@@ -65,13 +68,24 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         ProgressTracker progressTracker
     ) {
         var similarityComputer = config.similarityMetric().build(config.similarityCutoff());
-        return new NodeSimilarity(graph, config, similarityComputer, config.concurrency(), executorService, progressTracker);
+        return new NodeSimilarity(
+            graph,
+            config,
+            similarityComputer,
+            config.sourceNodeFilter().toNodeFilter(graph),
+            config.targetNodeFilter().toNodeFilter(graph),
+            config.concurrency(),
+            executorService,
+            progressTracker
+        );
     }
 
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityBaseConfig config,
         MetricSimilarityComputer similarityComputer,
+        NodeFilter sourceNodeFilter,
+        NodeFilter targetNodeFilter,
         int concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -79,6 +93,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         super(progressTracker);
         this.graph = graph;
         this.sortVectors = graph.schema().relationshipSchema().availableTypes().size() > 1;
+        this.sourceNodeFilter = sourceNodeFilter;
+        this.targetNodeFilter = targetNodeFilter;
         this.concurrency = concurrency;
         this.config = config;
         this.similarityComputer = similarityComputer;
@@ -174,9 +190,14 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             vectorComputer.reset(degree);
 
             if (degree >= config.degreeCutoff()) {
-                sourceNodes.set(node);
-                targetNodes.set(node);
+                if (sourceNodeFilter.test(node)) {
+                    sourceNodes.set(node);
+                }
+                if (targetNodeFilter.test(node)) {
+                    targetNodes.set(node);
+                }
 
+                // TODO: we don't need to do the rest of the prepare for a node that isn't going to be used in the computation
                 progressTracker.logProgress(graph.degree(node));
                 vectorComputer.forEachRelationship(node);
                 if (weighted) {
