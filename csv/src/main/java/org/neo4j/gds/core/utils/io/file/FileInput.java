@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
@@ -30,6 +31,7 @@ import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
+import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.file.csv.CsvImportUtil;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
@@ -52,18 +54,22 @@ import java.util.stream.Stream;
 
 public final class FileInput implements CompatInput {
 
+    private static final CsvMapper CSV_MAPPER = new CsvMapper();
+
     private final Path importPath;
     private final String userName;
     private final GraphInfo graphInfo;
     private final NodeSchema nodeSchema;
     private final RelationshipSchema relationshipSchema;
+    private final Capabilities capabilities;
 
     FileInput(Path importPath) {
         this.importPath = importPath;
         this.userName = new UserInfoLoader(importPath).load();
-        this.graphInfo = new GraphInfoLoader(importPath).load();
+        this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
+        this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
     }
 
     @Override
@@ -115,6 +121,10 @@ public final class FileInput implements CompatInput {
 
     public RelationshipSchema relationshipSchema() {
         return relationshipSchema;
+    }
+
+    public Capabilities capabilities() {
+        return capabilities;
     }
 
     abstract static class FileImporter<

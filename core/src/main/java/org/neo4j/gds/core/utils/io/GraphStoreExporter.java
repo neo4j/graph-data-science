@@ -104,6 +104,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
             metaDataStore,
             nodeStore,
             relationshipStore,
+            graphStore.capabilities(),
             config.batchSize(),
             idMappingType()
         );

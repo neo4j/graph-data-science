@@ -45,10 +45,9 @@ public class GraphInfoLoader {
     private final Path graphInfoPath;
     private final ObjectReader objectReader;
 
-    public GraphInfoLoader(Path csvDirectory) {
+    public GraphInfoLoader(Path csvDirectory, CsvMapper csvMapper) {
         this.graphInfoPath = csvDirectory.resolve(CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME);
 
-        CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
         objectReader = csvMapper.readerFor(GraphInfoLine.class).with(schema);

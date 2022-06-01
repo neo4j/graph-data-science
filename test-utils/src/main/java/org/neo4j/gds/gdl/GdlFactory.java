@@ -44,6 +44,7 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.ImmutableRelationshipsAndProperties;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -97,7 +98,8 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<String> userName,
         Optional<String> graphName,
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
-        Optional<LongSupplier> nodeIdFunction
+        Optional<LongSupplier> nodeIdFunction,
+        Optional<Capabilities> graphCapabilities
     ) {
         var config = graphProjectConfig.isEmpty()
             ? ImmutableGraphProjectFromGdlConfig.builder()
@@ -121,19 +123,22 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var graphDimensions = GraphDimensionsGdlReader.of(gdlHandler);
 
-        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId);
+        // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
+        var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(true));
+
+        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId, capabilities);
     }
 
     private GdlFactory(
         GDLHandler gdlHandler,
         GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
-        NamedDatabaseId databaseId
+        NamedDatabaseId databaseId,
+        Capabilities capabilities
     ) {
         super(
             graphProjectConfig,
-            // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
-            ImmutableStaticCapabilities.of(true),
+            capabilities,
             GraphLoaderContext.NULL_CONTEXT,
             graphDimensions
         );

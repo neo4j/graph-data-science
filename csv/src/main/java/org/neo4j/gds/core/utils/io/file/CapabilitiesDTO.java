@@ -17,17 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.core.utils.io.file;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.StaticCapabilities;
 
 @ValueClass
-public interface StaticCapabilities extends Capabilities {
-
-    @Value.Default
-    @Override
-    default boolean canWriteToDatabase() {
-        return true;
+@Value.Style(builder = "new")
+@JsonSerialize(as = ImmutableCapabilitiesDTO.class)
+@JsonDeserialize(builder = ImmutableCapabilitiesDTO.Builder.class)
+public interface CapabilitiesDTO extends StaticCapabilities {
+    static CapabilitiesDTO from(Capabilities capabilities) {
+        return new ImmutableCapabilitiesDTO.Builder()
+            .from(capabilities)
+            .build();
     }
 }
