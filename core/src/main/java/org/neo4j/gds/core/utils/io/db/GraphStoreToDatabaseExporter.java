@@ -20,23 +20,12 @@
 package org.neo4j.gds.core.utils.io.db;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.io.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Collectors;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
@@ -46,7 +35,6 @@ import java.util.concurrent.TimeUnit;
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
     private final GdsParallelBatchImporter parallelBatchImporter;
-    private final ProgressTracker progressTracker;
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
@@ -84,8 +72,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             config.executionMonitorCheckMillis(),
             TimeUnit.MILLISECONDS
         );
-        this.parallelBatchImporter = new GdsParallelBatchImporter(api, config, log, executionMonitor);
-        this.progressTracker = progressTracker;
+        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(api, config, log, executionMonitor);
     }
 
     @Override

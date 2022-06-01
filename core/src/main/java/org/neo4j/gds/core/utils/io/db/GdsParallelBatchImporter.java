@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.db;
 
+import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatInput;
@@ -51,6 +52,7 @@ import java.nio.file.Files;
 import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
+import static org.neo4j.kernel.database.NamedDatabaseId.SYSTEM_DATABASE_NAME;
 
 public class GdsParallelBatchImporter {
 
@@ -63,20 +65,54 @@ public class GdsParallelBatchImporter {
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
 
-    public GdsParallelBatchImporter(
+    public static GdsParallelBatchImporter fromDb(
         GraphDatabaseAPI db,
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ExecutionMonitor executionMonitor
     ) {
+        var dependencyResolver = db.getDependencyResolver();
+        var dbms = dependencyResolver.resolveDependency(DatabaseManagementService.class);
+        return new GdsParallelBatchImporter(
+            dependencyResolver,
+            config,
+            log,
+            executionMonitor,
+            dbms
+        );
+    }
+
+    public static GdsParallelBatchImporter fromDbms(
+        DatabaseManagementService dbms,
+        GraphStoreToDatabaseExporterConfig config,
+        Log log,
+        ExecutionMonitor executionMonitor
+    ) {
+        var db = (GraphDatabaseAPI) dbms.database(SYSTEM_DATABASE_NAME);
+        return new GdsParallelBatchImporter(
+            db.getDependencyResolver(),
+            config,
+            log,
+            executionMonitor,
+            dbms
+        );
+    }
+
+    private GdsParallelBatchImporter(
+        DependencyResolver dependencyResolver,
+        GraphStoreToDatabaseExporterConfig config,
+        Log log,
+        ExecutionMonitor executionMonitor,
+        DatabaseManagementService dbms
+    ) {
         this.config = config;
         this.log = log;
         this.executionMonitor = executionMonitor;
 
-        this.fs = db.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
-        this.logService = db.getDependencyResolver().resolveDependency(LogService.class);
-        this.databaseConfig = Config.newBuilder().fromConfig(db.getDependencyResolver().resolveDependency(Config.class)).build();
-        this.dbms = db.getDependencyResolver().resolveDependency(DatabaseManagementService.class);
+        this.fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
+        this.logService = dependencyResolver.resolveDependency(LogService.class);
+        this.databaseConfig = Config.newBuilder().fromConfig(dependencyResolver.resolveDependency(Config.class)).build();
+        this.dbms = dbms;
 
         databaseConfig.set(Settings.recordFormat(), config.recordFormat());
         databaseConfig.set(Settings.allowUpgrade(), true);
