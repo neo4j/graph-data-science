@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -67,10 +66,9 @@ class FilteredNodeSimilarityTest {
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .build();
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var nodeSimilarity = new NodeSimilarityFactory<>().build(
             graph,
             config,
-            Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -87,6 +85,40 @@ class FilteredNodeSimilarityTest {
             .filter(res -> !sourceNodeFilter.contains(res.node2))
             .count();
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
+
+        nodeSimilarity.release();
+    }
+
+    @Test
+    void shouldSurviveIoannisObjections() {
+        var sourceNodeFilter = List.of(3L);
+
+        var config = ImmutableNodeSimilarityStreamConfig.builder()
+            .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
+            .concurrency(1)
+            .build();
+
+        var nodeSimilarity = new NodeSimilarityFactory<>().build(
+            graph,
+            config,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        // no results for nodes that are not specified in the node filter -- nice
+        var noOfResultsWithSourceNodeOutsideOfFilter = nodeSimilarity
+            .computeToStream()
+            .filter(res -> !sourceNodeFilter.contains(res.node1))
+            .count();
+        assertThat(noOfResultsWithSourceNodeOutsideOfFilter).isEqualTo(0L);
+
+        // nodes outside of the node filter are not present as target nodes either -- not nice
+        var noOfResultsWithTargetNodeOutSideOfFilter = nodeSimilarity
+            .computeToStream()
+            .filter(res -> !sourceNodeFilter.contains(res.node2))
+            .count();
+        assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
+
+        nodeSimilarity.computeToStream().forEach(res -> System.out.printf("%d,%d %f%n", res.node1, res.node2, res.similarity));
 
         nodeSimilarity.release();
     }

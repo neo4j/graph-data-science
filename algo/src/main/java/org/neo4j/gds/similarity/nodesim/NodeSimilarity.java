@@ -258,19 +258,35 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         loggableAndTerminatableSourceNodeStream()
             .forEach(node1 -> {
                 long[] vector1 = vectors.get(node1);
-                targetNodesStream(node1 + 1)
-                    .forEach(node2 -> {
-                        double similarity = weighted
-                            ?
-                            computeWeightedSimilarity(
-                                vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
-                            )
-                            : computeSimilarity(vector1, vectors.get(node2));
-                        if (!Double.isNaN(similarity)) {
-                            topKMap.put(node1, node2, similarity);
-                            topKMap.put(node2, node1, similarity);
-                        }
-                    });
+                if (sourceNodeFilter.equals(NodeFilter.noOp)) {
+                    targetNodesStream(node1 + 1)
+                        .forEach(node2 -> {
+                            double similarity = weighted
+                                ?
+                                computeWeightedSimilarity(
+                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                )
+                                : computeSimilarity(vector1, vectors.get(node2));
+                            if (!Double.isNaN(similarity)) {
+                                topKMap.put(node1, node2, similarity);
+                                topKMap.put(node2, node1, similarity);
+                            }
+                        });
+                } else {
+                    targetNodesStream()
+                        .filter(node2 -> node1 != node2)
+                        .forEach(node2 -> {
+                            double similarity = weighted
+                                ?
+                                computeWeightedSimilarity(
+                                    vector1, vectors.get(node2), weights.get(node1), weights.get(node2)
+                                )
+                                : computeSimilarity(vector1, vectors.get(node2));
+                            if (!Double.isNaN(similarity)) {
+                                topKMap.put(node1, node2, similarity);
+                            }
+                        });
+                }
             });
         progressTracker.endSubTask();
         return topKMap;
