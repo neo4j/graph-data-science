@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
@@ -188,7 +189,7 @@ public interface RunWithConcurrency {
      * The default executor is {@link org.neo4j.gds.core.concurrency.Pools#DEFAULT}.
      */
     @Value.Default
-    default ExecutorService executor() {
+    default @Nullable ExecutorService executor() {
         return Pools.DEFAULT;
     }
 
@@ -242,8 +243,8 @@ public interface RunWithConcurrency {
 
     @Value.Check
     default void validate() {
-        if (concurrency() < 1) {
-            throw new IllegalArgumentException("[concurrency] must be at least 1, but got " + concurrency());
+        if (concurrency() < 0) {
+            throw new IllegalArgumentException("[concurrency] must be at least 0, but got " + concurrency());
         }
         if (waitTime() < 0) {
             throw new IllegalArgumentException("[waitTime] must be at least 0, but got " + waitTime());
