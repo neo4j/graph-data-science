@@ -150,6 +150,13 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
                 : Collector.EMPTY;
 
+            var executionMonitor = new ProgressTrackerExecutionMonitor(
+                this.progressTracker,
+                Clock.system(ZoneId.systemDefault()),
+                config.executionMonitorCheckMillis(),
+                TimeUnit.MILLISECONDS
+            );
+
             var importer = Neo4jProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
