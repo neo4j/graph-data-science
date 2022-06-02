@@ -43,7 +43,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final Graph rootGraph;
 
     private final int maxIterations;
-    private double gamma;
+    private final double initialGamma;
     private final double theta;
 
     private double[] modularities;
@@ -55,12 +55,11 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final int concurrency;
     private final long seed;
 
-    private double modularityScaleCoefficient;
 
     public Leiden(
         Graph graph,
         int maxIterations,
-        double gamma,
+        double initialGamma,
         double theta,
         long seed,
         int concurrency,
@@ -69,7 +68,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         super(progressTracker);
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
-        this.gamma = gamma;
+        this.initialGamma = initialGamma;
         this.theta = theta;
         this.seed = seed;
         // TODO: Pass these two as parameters
@@ -102,14 +101,22 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
         seedCommunities.setAll(v -> v);
 
-        initVolumesAndGamme(nodeVolumes, communityVolumes, seedCommunities);
+        double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        double gamma = this.initialGamma * modularityScaleCoefficient;
 
         HugeLongArray currentDendrogram = null;
 
         for (iteration = 0; iteration < maxIterations; iteration++) {
 
             // 1. LOCAL MOVE PHASE - over the singleton partition
-            var localMovePhase = LocalMovePhase.create(workingGraph, partition, nodeVolumes, communityVolumes, gamma, communityCount);
+            var localMovePhase = LocalMovePhase.create(
+                workingGraph,
+                partition,
+                nodeVolumes,
+                communityVolumes,
+                gamma,
+                communityCount
+            );
             var localMovePhasePartition = localMovePhase.run();
 
             partition = localMovePhasePartition.communities();
@@ -191,7 +198,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private void initVolumesAndGamme(
+    private double initVolumes(
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         HugeLongArray seedCommunities
@@ -213,17 +220,15 @@ public class Leiden extends Algorithm<LeidenResult> {
                 weightToDivide.add(nodeVolumes.get(nodeId));
                 return true;
             });
-            gamma /= weightToDivide.doubleValue();
-            modularityScaleCoefficient = 1.0 / weightToDivide.doubleValue();
+            return 1.0 / weightToDivide.doubleValue();
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-            gamma /= rootGraph.relationshipCount();
-            modularityScaleCoefficient = 1.0 / rootGraph.relationshipCount();
             rootGraph.forEachNode(nodeId -> {
                 long communityId = seedCommunities.get(nodeId);
                 communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
                 return true;
             });
+            return 1.0 / rootGraph.relationshipCount();
         }
     }
 

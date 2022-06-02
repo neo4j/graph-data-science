@@ -52,7 +52,7 @@ class FootballTest {
     @ParameterizedTest
     @ValueSource(longs = {99999, 25, 323, 405, 58, 61, 7, 8123, 94, 19})
     void leiden(long seed) {
-        var gamma = 1.0; // graph.relationshipCount();
+        var gamma = 1.0;
         Leiden leiden = new Leiden(graph, 5, gamma, 0.01, seed, 1, ProgressTracker.NULL_TRACKER);
         var leidenResult = leiden.compute();
         var communities = leidenResult.communities();
