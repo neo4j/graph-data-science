@@ -28,12 +28,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
 
-public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
+public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, RandomSeedConfig {
 
     @Configuration.IntegerRange(min = 1)
     @Override
