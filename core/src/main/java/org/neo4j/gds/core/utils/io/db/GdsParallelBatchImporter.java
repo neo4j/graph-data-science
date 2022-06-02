@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.utils.io.db;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatInput;
@@ -54,7 +53,7 @@ import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITAB
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
 
-public class GdsParallelBatchImporter {
+public final class GdsParallelBatchImporter {
 
     private final GraphStoreToDatabaseExporterConfig config;
     private final Log log;
@@ -73,12 +72,17 @@ public class GdsParallelBatchImporter {
     ) {
         var dependencyResolver = db.getDependencyResolver();
         var dbms = dependencyResolver.resolveDependency(DatabaseManagementService.class);
+        var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
+        var logService = dependencyResolver.resolveDependency(LogService.class);
+        var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
-            dependencyResolver,
             config,
             log,
             executionMonitor,
-            dbms
+            dbms,
+            fs,
+            logService,
+            databaseConfig
         );
     }
 
@@ -89,33 +93,42 @@ public class GdsParallelBatchImporter {
         ExecutionMonitor executionMonitor
     ) {
         var db = (GraphDatabaseAPI) dbms.database(SYSTEM_DATABASE_NAME);
+        var dependencyResolver = db.getDependencyResolver();
+        var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
+        var logService = dependencyResolver.resolveDependency(LogService.class);
+        var databaseConfig = dependencyResolver.resolveDependency(Config.class);
         return new GdsParallelBatchImporter(
-            db.getDependencyResolver(),
             config,
             log,
             executionMonitor,
-            dbms
+            dbms,
+            fs,
+            logService,
+            databaseConfig
         );
     }
 
     private GdsParallelBatchImporter(
-        DependencyResolver dependencyResolver,
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ExecutionMonitor executionMonitor,
-        DatabaseManagementService dbms
+        DatabaseManagementService dbms,
+        FileSystemAbstraction fs,
+        LogService logService,
+        Config databaseConfig
     ) {
         this.config = config;
         this.log = log;
         this.executionMonitor = executionMonitor;
-
-        this.fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
-        this.logService = dependencyResolver.resolveDependency(LogService.class);
-        this.databaseConfig = Config.newBuilder().fromConfig(dependencyResolver.resolveDependency(Config.class)).build();
         this.dbms = dbms;
-
-        databaseConfig.set(Settings.recordFormat(), config.recordFormat());
-        databaseConfig.set(Settings.allowUpgrade(), true);
+        this.fs = fs;
+        this.logService = logService;
+        this.databaseConfig = Config
+            .newBuilder()
+            .fromConfig(databaseConfig)
+            .set(Settings.recordFormat(), config.recordFormat())
+            .set(Settings.allowUpgrade(), true)
+            .build();
     }
 
     public void writeDatabase(CompatInput compatInput, boolean startDatabase) {
