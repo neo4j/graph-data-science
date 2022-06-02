@@ -42,6 +42,6 @@ class FilteredKnnDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/filtered-knn/filtered-knn.adoc";
+        return "algorithms/alpha/filtered-knn/filtered-knn.adoc";
     }
 }
