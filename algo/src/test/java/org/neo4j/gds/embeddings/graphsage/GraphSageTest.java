@@ -143,9 +143,7 @@ class GraphSageTest {
         );
         GraphSage.GraphSageResult compute = graphSage.compute();
         for (int i = 0; i < orphanGraph.nodeCount() - 1; i++) {
-            Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> {
-                assertThat(embeddingValue).isNotNaN();
-            });
+            Arrays.stream(compute.embeddings().get(i)).forEach(embeddingValue -> assertThat(embeddingValue).isNotNaN());
         }
     }
 
@@ -192,6 +190,7 @@ class GraphSageTest {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
             .addFeatureProperties("f1")
+            .relationshipWeightProperty("weight")
             .build();
 
         var graphSageTrain = new GraphSageTrainAlgorithmFactory().build(

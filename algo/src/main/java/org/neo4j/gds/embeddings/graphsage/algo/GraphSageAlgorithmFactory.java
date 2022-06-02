@@ -66,8 +66,12 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             configuration.modelName()
         );
 
-        if(model.trainConfig().hasRelationshipWeightProperty()) {
+        if(model.trainConfig().isWeighted()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+        }
+
+        if (!model.trainConfig().isWeighted() && graph.hasRelationshipProperty()) {
+            throw new IllegalStateException("Model was trained without relationship weights. Expected an unweighted graph");
         }
 
         return new GraphSage(

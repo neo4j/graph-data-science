@@ -49,7 +49,7 @@ class MultiLabelGraphSageTrainTest {
 
     private static final int PROJECTED_FEATURE_SIZE = 5;
 
-    @GdlGraph
+    @GdlGraph(graphNamePrefix = "weighted")
     private static final String GDL = GraphSageTestGraph.GDL;
 
     @GdlGraph(graphNamePrefix = "missingArray")
@@ -80,7 +80,7 @@ class MultiLabelGraphSageTrainTest {
         "  (n0)-[:T]->(n1)";
 
     @Inject
-    TestGraph graph;
+    TestGraph weightedGraph;
 
     @Inject
     TestGraph missingArrayGraph;
@@ -95,7 +95,7 @@ class MultiLabelGraphSageTrainTest {
     @MethodSource("featureSizes")
     void shouldRunWithDifferentProjectedFeatureSizes(String name, GraphSageTrainConfig config) {
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
-            graph,
+            weightedGraph,
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -110,10 +110,11 @@ class MultiLabelGraphSageTrainTest {
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .modelName("foo")
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
+            .relationshipWeightProperty("times")
             .build();
 
         var multiLabelGraphSageTrain = new MultiLabelGraphSageTrain(
-            graph,
+            weightedGraph,
             config,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -136,10 +137,11 @@ class MultiLabelGraphSageTrainTest {
             .activationFunction(ActivationFunction.SIGMOID)
             .embeddingDimension(64)
             .modelName(modelName)
+            .relationshipWeightProperty("times")
             .build();
 
         var graphSageTrain = new MultiLabelGraphSageTrain(
-            graph,
+            weightedGraph,
             graphSageTrainConfig,
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
@@ -221,6 +223,7 @@ class MultiLabelGraphSageTrainTest {
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
+            .relationshipWeightProperty("times")
             .modelName("foo");
         return Stream.of(
             Arguments.of(

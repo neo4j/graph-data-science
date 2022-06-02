@@ -140,12 +140,10 @@ class SubGraphBuilderTest {
 
     @Test
     void shouldBuildMultipleSubGraphs() {
-
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(
             new long[]{0L, 1L, 2L},
             List.of(neighborhoodFunction, neighborhoodFunction),
-            graph,
-            false
+            graph
         );
 
         int[] expectedAdjA = new int[] {1, 3, 4};
