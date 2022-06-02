@@ -156,7 +156,7 @@ public final class GdsParallelBatchImporter {
             lifeSupport.start();
 
             var input = Neo4jProxy.batchInputFrom(compatInput);
-            var batchImporter = getBatchImporter(databaseLayout, logService, collector, jobScheduler);
+            var batchImporter = instantiateBatchImporter(databaseLayout, logService, collector, jobScheduler);
             batchImporter.doImport(input);
             log.info(formatWithLocale("Database import finished after %s ms", importTimer.stop().getDuration()));
 
@@ -206,7 +206,7 @@ public final class GdsParallelBatchImporter {
             : Collector.EMPTY;
     }
 
-    private BatchImporter getBatchImporter(
+    private BatchImporter instantiateBatchImporter(
         DatabaseLayout databaseLayout,
         LogService logService,
         Collector collector,
