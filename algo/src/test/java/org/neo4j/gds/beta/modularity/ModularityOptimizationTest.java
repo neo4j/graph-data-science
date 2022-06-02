@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
@@ -62,7 +63,7 @@ class ModularityOptimizationTest {
 
     private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
 
-    @GdlGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +
@@ -78,15 +79,7 @@ class ModularityOptimizationTest {
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(c)" +
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
         ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
-        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)" +
-
-        ", (a)<-[:TYPE_IN {weight: 0.01}]-(b)" +
-        ", (a)<-[:TYPE_IN {weight: 5.0}]-(e)" +
-        ", (a)<-[:TYPE_IN {weight: 5.0}]-(f)" +
-        ", (b)<-[:TYPE_IN {weight: 5.0}]-(c)" +
-        ", (b)<-[:TYPE_IN {weight: 5.0}]-(d)" +
-        ", (c)<-[:TYPE_IN {weight: 0.01}]-(e)" +
-        ", (f)<-[:TYPE_IN {weight: 0.01}]-(d)";
+        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)";
 
     @Inject
     private TestGraph graph;
@@ -252,7 +245,7 @@ class ModularityOptimizationTest {
     private Graph unweightedGraph() {
         return graphStore.getGraph(
             NodeLabel.listOf("Node"),
-            RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
+            RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
     }

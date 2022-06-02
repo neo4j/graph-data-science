@@ -42,8 +42,7 @@ final class ModularityOptimizationTask implements Runnable {
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
     private final HugeDoubleArray cumulativeNodeWeights;
-    private final HugeDoubleArray nodeCommunityInfluences;
-    private final HugeAtomicDoubleArray communityWeights;
+    private final ModularityOptimizationModularity modularityOptimizationModularity;
     private final HugeAtomicDoubleArray communityWeightUpdates;
 
     ModularityOptimizationTask(
@@ -55,9 +54,8 @@ final class ModularityOptimizationTask implements Runnable {
         HugeLongArray currentCommunities,
         HugeLongArray nextCommunities,
         HugeDoubleArray cumulativeNodeWeights,
-        HugeDoubleArray nodeCommunityInfluences,
-        HugeAtomicDoubleArray communityWeights,
         HugeAtomicDoubleArray communityWeightUpdates,
+        ModularityOptimizationModularity modularityOptimizationModularity,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
@@ -65,11 +63,10 @@ final class ModularityOptimizationTask implements Runnable {
         this.localGraph = graph.concurrentCopy();
         this.currentCommunities = currentCommunities;
         this.nextCommunities = nextCommunities;
-        this.communityWeights = communityWeights;
+        this.modularityOptimizationModularity = modularityOptimizationModularity;
         this.communityWeightUpdates = communityWeightUpdates;
         this.totalNodeWeight = totalNodeWeight;
         this.cumulativeNodeWeights = cumulativeNodeWeights;
-        this.nodeCommunityInfluences = nodeCommunityInfluences;
         this.colors = colors;
         this.progressTracker = progressTracker;
     }
@@ -101,7 +98,8 @@ final class ModularityOptimizationTask implements Runnable {
                 if (s == t) {
                     selfWeight.add(w);
                 }
-                long targetCommunity = currentCommunities.get(t);
+                long targetCommunity = (colors.get(t) < colors.get(s)) ? nextCommunities.get(t) : currentCommunities.get(
+                    t);
                 communityInfluences.addTo(targetCommunity, w);
                 return true;
             });
@@ -111,7 +109,7 @@ final class ModularityOptimizationTask implements Runnable {
             double maxGain = 0.0;
             double eix = communityInfluences.get(currentCommunity) - selfWeight.doubleValue();
             double cumulativeNodeWeight = cumulativeNodeWeights.get(nodeId);
-            double ax = communityWeights.get(currentCommunity) - cumulativeNodeWeight;
+            double ax = modularityOptimizationModularity.getCommunityWeight(currentCommunity) - cumulativeNodeWeight;
             double eiy;
             double ay;
 
@@ -120,7 +118,7 @@ final class ModularityOptimizationTask implements Runnable {
                 communityCandidate = cursor.key;
 
                 if (currentCommunity != communityCandidate) {
-                    ay = communityWeights.get(communityCandidate);
+                    ay = modularityOptimizationModularity.getCommunityWeight(communityCandidate);
                     eiy = cursor.value;
                     currentGain =
                         (eiy - eix) / totalNodeWeight
@@ -136,12 +134,16 @@ final class ModularityOptimizationTask implements Runnable {
                 }
             }
 
-            nodeCommunityInfluences.set(nodeId, communityInfluences.get(nextCommunity));
 
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
-
+            modularityOptimizationModularity.processMove(
+                currentCommunity,
+                nextCommunity,
+                communityInfluences.get(currentCommunity),
+                communityInfluences.get(nextCommunity)
+            );
             relationshipsProcessed.add(degree);
         });
 
