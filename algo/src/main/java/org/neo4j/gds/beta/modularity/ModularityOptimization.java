@@ -225,7 +225,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         var doubleTotalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
 
-        totalNodeWeight = doubleTotalNodeWeight / 2.0;
+        totalNodeWeight = doubleTotalNodeWeight;
         currentCommunities.copyTo(nextCommunities, nodeCount);
     }
 

@@ -231,7 +231,10 @@ public final class Louvain extends Algorithm<Louvain> {
         });
 
         terminationFlag.assertRunning();
-
+        double scaleCoefficient = 1.0;
+        if (workingGraph.isUndirected()) {
+            scaleCoefficient /= 2.0;
+        }
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build().idMap();
         RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -241,6 +244,7 @@ public final class Louvain extends Algorithm<Louvain> {
             .executorService(executorService)
             .build();
 
+        double finalScaleCoefficient = scaleCoefficient;
         var relationshipCreators = PartitionUtils.rangePartition(
             concurrency,
             workingGraph.nodeCount(),
@@ -249,6 +253,7 @@ public final class Louvain extends Algorithm<Louvain> {
                     relationshipsBuilder,
                     modularityOptimization,
                     workingGraph.concurrentCopy(),
+                    finalScaleCoefficient,
                     partition
                 ),
             Optional.empty()
@@ -310,17 +315,21 @@ public final class Louvain extends Algorithm<Louvain> {
 
         private final Partition partition;
 
+        private final double scaleCoefficient;
+
 
         private RelationshipCreator(
             RelationshipsBuilder relationshipsBuilder,
             ModularityOptimization modularityOptimization,
             RelationshipIterator relationshipIterator,
+            double scaleCoefficient,
             Partition partition
         ) {
             this.relationshipsBuilder = relationshipsBuilder;
             this.modularityOptimization = modularityOptimization;
             this.relationshipIterator = relationshipIterator;
             this.partition = partition;
+            this.scaleCoefficient = scaleCoefficient;
         }
 
         @Override
@@ -328,7 +337,17 @@ public final class Louvain extends Algorithm<Louvain> {
             partition.consume(nodeId -> {
                 long communityId = modularityOptimization.getCommunityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
-                    relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
+                    if (source == target) {
+                        relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
+                    } else {
+                        relationshipsBuilder.add(
+                            communityId,
+                            modularityOptimization.getCommunityId(target),
+                            property * scaleCoefficient
+                        );
+
+                    }
+
                     return true;
                 });
             });

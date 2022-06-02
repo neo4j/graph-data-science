@@ -121,9 +121,9 @@ final class ModularityOptimizationTask implements Runnable {
                     ay = modularityOptimizationModularity.getCommunityWeight(communityCandidate);
                     eiy = cursor.value;
                     currentGain =
-                        (eiy - eix) / totalNodeWeight
+                        (eiy - eix) / (totalNodeWeight / 2.0)
                         + (2 * cumulativeNodeWeight * ax - 2 * cumulativeNodeWeight * ay) / Math.pow(
-                            2 * totalNodeWeight,
+                            totalNodeWeight,
                             2
                         );
 
@@ -142,7 +142,8 @@ final class ModularityOptimizationTask implements Runnable {
                 currentCommunity,
                 nextCommunity,
                 communityInfluences.get(currentCommunity),
-                communityInfluences.get(nextCommunity)
+                communityInfluences.get(nextCommunity),
+                selfWeight.getValue()
             );
             relationshipsProcessed.add(degree);
         });

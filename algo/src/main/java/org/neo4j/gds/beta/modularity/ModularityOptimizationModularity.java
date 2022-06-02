@@ -47,7 +47,8 @@ interface ModularityOptimizationModularity {
         long oldCommunity,
         long nextCommunity,
         double oldInfluence,
-        double newInfluence
+        double newInfluence,
+        double selfWeight
     );
 
     void processSeedContribution(long communityId, double weight);
@@ -81,11 +82,12 @@ class ModularityOptimizationUndirectedModularity implements ModularityOptimizati
         long oldCommunity,
         long nextCommunity,
         double oldInfluence,
-        double newInfluence
+        double newInfluence,
+        double selfWeight
     ) {
         if (oldCommunity != nextCommunity) {
-            globalCommunityInfluences.getAndAdd(oldCommunity, -2 * oldInfluence);
-            globalCommunityInfluences.getAndAdd(nextCommunity, 2 * newInfluence);
+            globalCommunityInfluences.getAndAdd(oldCommunity, -2 * oldInfluence + selfWeight);
+            globalCommunityInfluences.getAndAdd(nextCommunity, 2 * newInfluence + selfWeight);
         }
 
     }
@@ -127,7 +129,7 @@ class ModularityOptimizationUndirectedModularity implements ModularityOptimizati
                     .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
 
-        return (ex / (2 * totalWeight)) - (ax / (Math.pow(2 * totalWeight, 2)));
+        return (ex / (totalWeight)) - (ax / (Math.pow(totalWeight, 2)));
     }
 }
 
@@ -169,7 +171,8 @@ class ModularityOptimizationDirectedModularity implements ModularityOptimization
         long oldCommunity,
         long nextCommunity,
         double oldInfluence,
-        double newInfluence
+        double newInfluence,
+        double selfWeight
     ) {
 
     }
