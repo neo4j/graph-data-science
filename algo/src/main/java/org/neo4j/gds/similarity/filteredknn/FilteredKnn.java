@@ -28,6 +28,7 @@ import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Filtered KNN is the same as ordinary KNN, _but_ we allow users to regulate final output in two ways.
@@ -105,5 +106,13 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     @Override
     public void release() {
         delegate.release();
+    }
+
+    long nodeCount() {
+        return delegate.nodeCount();
+    }
+
+    ExecutorService executorService() {
+        return delegate.executorService();
     }
 }
