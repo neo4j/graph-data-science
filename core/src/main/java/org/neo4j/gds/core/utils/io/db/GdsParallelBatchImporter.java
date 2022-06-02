@@ -49,10 +49,10 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 
+import static org.neo4j.configuration.GraphDatabaseSettings.SYSTEM_DATABASE_NAME;
 import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
-import static org.neo4j.kernel.database.NamedDatabaseId.SYSTEM_DATABASE_NAME;
 
 public class GdsParallelBatchImporter {
 
