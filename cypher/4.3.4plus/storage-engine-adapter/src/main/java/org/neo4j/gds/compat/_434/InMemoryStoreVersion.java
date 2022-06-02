@@ -35,4 +35,14 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     public StoreVersion latest() {
         return this;
     }
+
+    @Override
+    public String storeVersion() {
+        return STORE_VERSION;
+    }
+
+    @Override
+    public boolean isCompatibleWith(StoreVersion otherVersion) {
+        return otherVersion.storeVersion().equals(storeVersion());
+    }
 }

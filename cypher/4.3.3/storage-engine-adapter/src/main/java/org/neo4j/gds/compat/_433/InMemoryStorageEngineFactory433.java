@@ -56,6 +56,7 @@ import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.StoreVersion;
 import org.neo4j.storageengine.api.StoreVersionCheck;
 import org.neo4j.storageengine.api.TransactionIdStore;
+import org.neo4j.storageengine.migration.RollingUpgradeCompatibility;
 import org.neo4j.storageengine.migration.SchemaRuleMigrationAccess;
 import org.neo4j.storageengine.migration.StoreMigrationParticipant;
 import org.neo4j.token.TokenHolders;
@@ -70,6 +71,11 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
     public static final String IN_MEMORY_STORAGE_ENGINE_NAME_43 = "in-memory-433";
 
     private final InMemoryMetaDataProviderImpl metadataProvider = new InMemoryMetaDataProviderImpl();
+
+    @Override
+    public RollingUpgradeCompatibility rollingUpgradeCompatibility() {
+        return null;
+    }
 
     @Override
     public StorageEngine instantiate(

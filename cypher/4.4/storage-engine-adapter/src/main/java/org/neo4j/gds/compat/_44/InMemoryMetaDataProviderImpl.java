@@ -24,8 +24,11 @@ import org.neo4j.internal.recordstorage.AbstractTransactionIdStore;
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
+import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.StoreId;
 import org.neo4j.storageengine.api.TransactionId;
+
+import java.util.Optional;
 
 public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvider {
     private final InMemoryTransactionIdStoreImpl transactionIdStore;
@@ -33,6 +36,11 @@ public class InMemoryMetaDataProviderImpl extends AbstractInMemoryMetaDataProvid
     InMemoryMetaDataProviderImpl() {
         super(new InMemoryLogVersionRepository());
         this.transactionIdStore = new InMemoryTransactionIdStoreImpl();
+    }
+
+    @Override
+    public Optional<ExternalStoreId> getExternalStoreId() {
+        return Optional.of(this.externalStoreId);
     }
 
     @Override

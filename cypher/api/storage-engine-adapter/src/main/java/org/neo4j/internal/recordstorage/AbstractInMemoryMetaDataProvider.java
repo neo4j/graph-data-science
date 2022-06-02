@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvider {
-    private final ExternalStoreId externalStoreId;
+    protected final ExternalStoreId externalStoreId;
     protected final AbstractInMemoryLogVersionRepository logVersionRepository;
 
     protected AbstractInMemoryMetaDataProvider(AbstractInMemoryLogVersionRepository logVersionRepository) {
@@ -56,11 +56,6 @@ public abstract class AbstractInMemoryMetaDataProvider implements MetadataProvid
     @Override
     public long getCheckpointLogVersion() {
         return this.logVersionRepository.getCheckpointLogVersion();
-    }
-
-    @Override
-    public Optional<ExternalStoreId> getExternalStoreId() {
-        return Optional.of(this.externalStoreId);
     }
 
     @Override

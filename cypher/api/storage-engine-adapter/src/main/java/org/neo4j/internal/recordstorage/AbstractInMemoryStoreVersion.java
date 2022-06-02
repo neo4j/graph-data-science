@@ -28,11 +28,6 @@ public abstract class AbstractInMemoryStoreVersion implements StoreVersion {
     public static final String STORE_VERSION = "gds-experimental";
 
     @Override
-    public String storeVersion() {
-        return STORE_VERSION;
-    }
-
-    @Override
     public boolean hasCapability(Capability capability) {
         return false;
     }
@@ -47,9 +42,5 @@ public abstract class AbstractInMemoryStoreVersion implements StoreVersion {
     @Override
     public String introductionNeo4jVersion() {
         return "foo";
-    }
-    @Override
-    public boolean isCompatibleWith(StoreVersion otherVersion) {
-        return otherVersion.storeVersion().equals(storeVersion());
     }
 }

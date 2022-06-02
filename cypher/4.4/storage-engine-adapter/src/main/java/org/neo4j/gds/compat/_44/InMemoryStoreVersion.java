@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._44;
 
 import org.neo4j.internal.recordstorage.AbstractInMemoryStoreVersion;
+import org.neo4j.storageengine.api.StoreVersion;
 
 import java.util.Optional;
 
@@ -33,5 +34,15 @@ public class InMemoryStoreVersion extends AbstractInMemoryStoreVersion {
     @Override
     public String latestStoreVersion() {
         return getClass().getSimpleName();
+    }
+
+    @Override
+    public String storeVersion() {
+        return STORE_VERSION;
+    }
+
+    @Override
+    public boolean isCompatibleWith(StoreVersion otherVersion) {
+        return otherVersion.storeVersion().equals(storeVersion());
     }
 }
