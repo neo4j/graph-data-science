@@ -16,6 +16,26 @@
         <!-- Exclude the generated Protobuf classes -->
         <Package name="~.*.proto" />
     </Match>
+    <Match>
+        <!-- Exclude the generated collection classes -->
+        <Class name="~.*\.Son.*" />
+    </Match>
+
+    <!-- Exclude bugs in all test classes except Junit-related bugs -->
+    <Match>
+        <Class name="~.*\.*Test.*" />
+        <Not>
+            <Bug code="IJU" />
+        </Not>
+    </Match>
+
+    <!-- Exclude bugs in all benchmark classes -->
+    <Match>
+        <Or>
+            <Class name="~.*\.*Benchmark.*" />
+            <Class name="com.neo4j.gds.bench.RunSafely"/>
+        </Or>
+    </Match>
 
     <!--
         The following classes are being generated but
@@ -29,6 +49,9 @@
     </Match>
     <Match>
         <Class name="~org.neo4j.gds.PropertyMappings" />
+    </Match>
+    <Match>
+        <Class name="~org.neo4j.gds.ConfigWithComponentSizeImpl" />
     </Match>
 
 
@@ -327,6 +350,11 @@
     <!-- Test for floating point equality -->
     <Match>
         <Bug pattern="FE_FLOATING_POINT_EQUALITY"/>
+    </Match>
+
+    <!-- Using floating-point variables should not be used as loop counters -->
+    <Match>
+        <Bug pattern="FL_FLOATS_AS_LOOP_COUNTERS" />
     </Match>
 
     <!-- Non-transient non-serializable instance field in serializable class -->
@@ -664,6 +692,29 @@
         <Bug pattern="SSCU_SUSPICIOUS_SHADED_CLASS_USE"/>
     </Match>
 
+    <!-- This is a required pattern for e.g. the Arrow flight producer -->
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_RUNTIMEEXCEPTION"/>
+    </Match>
+    <!-- Classes where throwing an Exception is the only option -->
+    <Match>
+        <Bug pattern="THROWS_METHOD_THROWS_CLAUSE_BASIC_EXCEPTION"/>
+    </Match>
+
+    <!-- Calling an overridable method in a constructor may result in the use of uninitialized data. -->
+    <Match>
+        <Bug pattern="MC_OVERRIDABLE_METHOD_CALL_IN_CONSTRUCTOR"/>
+    </Match>
+
+    <!-- Exposing internal structure is fine for the following cases -->
+    <Match>
+        <Or>
+            <Class name="org.neo4j.gds.core.utils.progress.EmptyTaskStore" />
+            <Class name="org.neo4j.gds.core.utils.warnings.EmptyUserLogStore" />
+            <Class name="org.neo4j.gds.AbstractNodeProjection" />
+        </Or>
+        <Bug code="MS" />
+    </Match>
 
     <!--
         Match for specific rules in specific classes
