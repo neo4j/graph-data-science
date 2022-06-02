@@ -161,7 +161,7 @@ CREATE
   (:City {name: 'Xánthi', coordinates: [41.13488, 24.888]});
 ----
 
-This graph is composed of various _City_ nodes, in three global locations - United Kingdom, Sweden and The Balkans.
+This graph is composed of various _City_ nodes, in three global locations - United Kingdom, Sweden and the Balkan region in Europe.
 
 We can now project the graph and store it in the graph catalog.
 We load the `City` node label with `coordinates` node property.
@@ -182,7 +182,7 @@ CALL gds.graph.project(
 )
 ----
 
-In the following examples we will demonstrate using the Leiden algorithm on this graph.
+In the following examples we will demonstrate using the K-Means algorithm on this graph to find communities of cities that are close to each other geographically.
 
 [[alpha-algorithms-k-means-examples-stream]]
 === Stream
