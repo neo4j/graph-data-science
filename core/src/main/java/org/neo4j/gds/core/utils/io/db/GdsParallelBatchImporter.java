@@ -126,6 +126,7 @@ public final class GdsParallelBatchImporter {
         this.databaseConfig = Config
             .newBuilder()
             .fromConfig(databaseConfig)
+            .set(Settings.neo4jHome(), databaseConfig.get(Settings.neo4jHome()))
             .set(Settings.recordFormat(), config.recordFormat())
             .set(Settings.allowUpgrade(), true)
             .build();
