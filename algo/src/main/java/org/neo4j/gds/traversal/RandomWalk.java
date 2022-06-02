@@ -31,7 +31,6 @@ import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
-import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.List;
 import java.util.Random;
@@ -160,24 +159,21 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         Iterable<? extends Runnable> tasks
     ) {
         progressTracker.beginSubTask("create walks");
+
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .terminationFlag(terminationFlag)
+            .mayInterruptIfRunning(true)
+            .run();
+
+        progressTracker.endSubTask("create walks");
+        progressTracker.endSubTask("RandomWalk");
+
         try {
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .terminationFlag(terminationFlag)
-                .mayInterruptIfRunning(true)
-                .run();
             walks.put(tombstone);
-        } catch (TransactionTerminatedException ignored) {
-            // ParallelUtil will interrupt the threads because we set mayInterruptIfRunning to true
-            // We swallow the exception to avoid any scary logs.
-        } catch (InterruptedException interrupted) {
+        } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
-            // ParallelUtil will interrupt the threads because we set mayInterruptIfRunning to true
-            // We swallow the exception to avoid any scary logs.
-        } finally {
-            progressTracker.endSubTask("create walks");
-            progressTracker.endSubTask("RandomWalk");
         }
     }
 
