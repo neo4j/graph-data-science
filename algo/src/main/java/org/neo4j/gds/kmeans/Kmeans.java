@@ -47,6 +47,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private final int dimensions;
     private final KmeansIterationStopper kmeansIterationStopper;
 
+    private final int restarts;
+
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
@@ -57,6 +59,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             config.k(),
             config.concurrency(),
             config.maxIterations(),
+            config.restarts(),
             config.deltaThreshold(),
             nodeProperties,
             getSplittableRandom(config.randomSeed())
@@ -71,6 +74,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         int k,
         int concurrency,
         int maxIterations,
+        int restarts,
         double deltaThreshold,
         NodePropertyValues nodePropertyValues,
         SplittableRandom random
@@ -89,6 +93,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             maxIterations,
             graph.nodeCount()
         );
+        this.restarts = restarts;
 
     }
 
