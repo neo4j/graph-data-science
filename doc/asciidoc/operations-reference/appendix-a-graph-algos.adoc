@@ -321,4 +321,6 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
 | `gds.alpha.nodeSimilarity.filtered.stream`
 | `gds.alpha.nodeSimilarity.filtered.stream.estimate`
+| `gds.alpha.nodeSimilarity.filtered.write`
+| `gds.alpha.nodeSimilarity.filtered.write.estimate`
 |===

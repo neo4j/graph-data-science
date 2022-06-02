@@ -91,6 +91,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.nodeSimilarity.filtered.mutate.estimate",
         "gds.alpha.nodeSimilarity.filtered.stream",
         "gds.alpha.nodeSimilarity.filtered.stream.estimate",
+        "gds.alpha.nodeSimilarity.filtered.write",
+        "gds.alpha.nodeSimilarity.filtered.write.estimate",
 
         "gds.beta.pipeline.linkPrediction.addFeature",
         "gds.beta.pipeline.linkPrediction.addNodeProperty",
