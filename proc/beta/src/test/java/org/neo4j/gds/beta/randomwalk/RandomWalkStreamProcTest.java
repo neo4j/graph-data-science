@@ -163,22 +163,24 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             .addParameter("concurrency", concurrency)
             .yields("nodeIds", "path");
 
-        // limit the result to 1 element, terminating the stream after that
-        query += " RETURN nodeIds, path LIMIT 1";
+        // limit the result to 2 elements, terminating the stream after that
+        query += " RETURN nodeIds, path LIMIT 2";
 
         runQueryWithResultConsumer(query, result -> {
             // we might not have started the procedure
             assertThat(pool.getActiveCount()).isBetween(0, concurrency);
 
+            // we have the first result available
             assertThat(result).hasNext();
+
             // no useful assertion on the actual content
             assertThat(result.next()).isNotNull();
 
             // after the first result, we have at least one thread still running
             assertThat(pool.getActiveCount()).isBetween(1, concurrency);
 
-            // we have no more result
-            assertThat(result).isExhausted();
+            // we have one more result, but we will close the stream before consuming it
+            assertThat(result).hasNext();
         });
 
         // after closing the result, the running threads should be interrupted
