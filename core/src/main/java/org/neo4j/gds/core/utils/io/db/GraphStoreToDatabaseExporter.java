@@ -24,9 +24,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
+import org.neo4j.gds.core.utils.io.ProgressTrackerExecutionMonitor;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -51,6 +54,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
@@ -62,14 +66,16 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
     private final FileSystemAbstraction fs;
     private final Log log;
     private final Config databaseConfig;
+    private final ProgressTracker progressTracker;
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config,
-        Log log
+        Log log,
+        ProgressTracker progressTracker
     ) {
-        return of(graphStore, api, config, Optional.empty(), log);
+        return of(graphStore, api, config, Optional.empty(), log, progressTracker);
     }
 
     public static GraphStoreToDatabaseExporter of(
@@ -77,9 +83,10 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
-        Log log
+        Log log,
+        ProgressTracker progressTracker
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties, log);
+        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties, log, progressTracker);
     }
 
     private GraphStoreToDatabaseExporter(
@@ -87,13 +94,15 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         GraphDatabaseAPI api,
         GraphStoreToDatabaseExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
-        Log log
+        Log log,
+        ProgressTracker progressTracker
     ) {
         super(graphStore, config, neoNodeProperties);
         this.databaseLayout = api.databaseLayout().getNeo4jLayout().databaseLayout(config.dbName());
         this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
         this.log = log;
         this.databaseConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+        this.progressTracker = progressTracker;
     }
 
     @Override
@@ -140,6 +149,13 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
                 : Collector.EMPTY;
 
+            var executionMonitor = new ProgressTrackerExecutionMonitor(
+                this.progressTracker,
+                ClockService.clock(),
+                config.executionMonitorCheckMillis(),
+                TimeUnit.MILLISECONDS
+            );
+
             var importer = Neo4jProxy.instantiateBatchImporter(
                 BatchImporterFactory.withHighestPriority(),
                 databaseLayout,
@@ -147,7 +163,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
                 PageCacheTracer.NULL,
                 config.toBatchImporterConfig(),
                 logService,
-                Neo4jProxy.invisibleExecutionMonitor(),
+                executionMonitor,
                 AdditionalInitialIds.EMPTY,
                 databaseConfig,
                 RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
