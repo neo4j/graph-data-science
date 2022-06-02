@@ -264,7 +264,6 @@ CALL gds.beta.pipeline.nodeClassification.train('myGraph', {
   modelName: 'nc-pipeline-model',
   targetProperty: 'class',
   randomSeed: 42,
-  concurrency:1,
   metrics: ['F1_WEIGHTED', 'OUT_OF_BAG_ERROR']
 }) YIELD modelInfo, modelSelectionStats
 RETURN
