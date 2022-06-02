@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -37,7 +38,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private static final int UNASSIGNED = -1;
 
-    private final HugeIntArray communities;
+    private HugeIntArray bestCommunities;
     private final Graph graph;
     private final int k;
     private final int concurrency;
@@ -85,7 +86,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.k = k;
         this.concurrency = concurrency;
         this.random = random;
-        this.communities = HugeIntArray.newArray(graph.nodeCount());
+        this.bestCommunities = HugeIntArray.newArray(graph.nodeCount());
         this.nodePropertyValues = nodePropertyValues;
         this.dimensions = nodePropertyValues.doubleArrayValue(0).length;
         this.kmeansIterationStopper = new KmeansIterationStopper(
@@ -103,62 +104,90 @@ public class Kmeans extends Algorithm<KmeansResult> {
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
-            communities.setAll(v -> (int) v);
+            bestCommunities.setAll(v -> (int) v);
             progressTracker.endSubTask();
-            return ImmutableKmeansResult.of(communities);
+            return ImmutableKmeansResult.of(bestCommunities);
         }
         long nodeCount = graph.nodeCount();
 
-        ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
+        var currentCommunities = HugeIntArray.newArray(nodeCount);
+        double bestDistance = Double.POSITIVE_INFINITY;
+        bestCommunities.setAll(v -> UNASSIGNED);
 
-        communities.setAll(v -> UNASSIGNED);
-
-        var tasks = PartitionUtils.rangePartition(
-            concurrency,
-            nodeCount,
-            partition -> KmeansTask.createTask(
-                clusterManager,
-                nodePropertyValues,
-                communities,
-                k,
-                dimensions,
-                partition,
-                progressTracker
-            ),
-            Optional.of((int) nodeCount / concurrency)
-        );
-        int numberOfTasks = tasks.size();
-
-        assert numberOfTasks <= concurrency;
-
-        //Initialization do initial center computation and assignment
-        //Temporary:
         KmeansSampler sampler = new KmeansUniformSampler();
-        List<Long> initialCenterIds = sampler.sampleClusters(random, nodePropertyValues, nodeCount, k);
-        clusterManager.initializeCenters(initialCenterIds);
 
-        //
-        int iteration = 0;
-        while (true) {
-            long swaps = 0;
-            //assign each node to a center
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .executor(executorService)
-                .run();
+        for (int restartIteration = 0; restartIteration < restarts; ++restartIteration) {
+            ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
+            currentCommunities.setAll(v -> UNASSIGNED);
 
-            for (KmeansTask task : tasks) {
-                swaps += task.getSwaps();
+            var tasks = PartitionUtils.rangePartition(
+                concurrency,
+                nodeCount,
+                partition -> KmeansTask.createTask(
+                    clusterManager,
+                    nodePropertyValues,
+                    currentCommunities,
+                    k,
+                    dimensions,
+                    partition,
+                    progressTracker
+                ),
+                Optional.of((int) nodeCount / concurrency)
+            );
+            int numberOfTasks = tasks.size();
+
+            assert numberOfTasks <= concurrency;
+
+            //Initialization do initial center computation and assignment
+            //Temporary:
+
+            List<Long> initialCenterIds = sampler.sampleClusters(random, nodePropertyValues, nodeCount, k);
+            clusterManager.initializeCenters(initialCenterIds);
+
+            //
+            int iteration = 0;
+            while (true) {
+                long swaps = 0;
+                //assign each node to a center
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executorService)
+                    .run();
+
+                for (KmeansTask task : tasks) {
+                    swaps += task.getSwaps();
+                }
+                if (kmeansIterationStopper.shouldQuit(swaps, ++iteration)) {
+                    break;
+                }
+                recomputeCenters(clusterManager, tasks);
             }
-            if (kmeansIterationStopper.shouldQuit(swaps, ++iteration)) {
-                break;
+            if (restartIteration > 1) {
+                for (KmeansTask task : tasks) {
+                    task.switchToDistanceCalculation();
+                }
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executorService)
+                    .run();
+                double distanceFromClusterCentre = 0;
+                for (KmeansTask task : tasks) {
+                    distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
+                }
+                if (distanceFromClusterCentre < bestDistance) {
+                    bestDistance = distanceFromClusterCentre;
+                    ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
+                        bestCommunities.set(v, currentCommunities.get(v));
+                    });
+                }
+            } else {
+                bestCommunities = currentCommunities;
             }
-            recomputeCenters(clusterManager, tasks);
-
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(communities);
+        return ImmutableKmeansResult.of(bestCommunities);
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {
