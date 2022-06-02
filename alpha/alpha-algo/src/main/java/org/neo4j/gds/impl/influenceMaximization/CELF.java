@@ -22,7 +22,7 @@ package org.neo4j.gds.impl.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
@@ -104,7 +104,11 @@ public class CELF extends Algorithm<CELF> {
             runner.setSeedSetNodes(new long[0]);
             tasks.add(runner);
         }
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
 
         //Add the node with the highest spread to the seed set
         highestScore = spreads.cost(spreads.top());

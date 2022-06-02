@@ -20,7 +20,7 @@
 package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -43,7 +43,11 @@ final class L1Norm extends ScalarScaler {
             partition -> new ComputeAbsoluteSum(partition, properties),
             Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executor)
+            .run();
 
         var absoluteSum = tasks.stream().mapToDouble(ComputeAbsoluteSum::sum).sum();
 
@@ -60,7 +64,7 @@ final class L1Norm extends ScalarScaler {
     }
 
     static class ComputeAbsoluteSum extends AggregatesComputer {
-        
+
         private double sum;
 
         ComputeAbsoluteSum(Partition partition, NodePropertyValues property) {

@@ -244,7 +244,11 @@ final class ParallelUtilTest {
         int threads = 4;
         withPool(threads, pool -> {
             final Tasks ts = new Tasks(tasks, 0);
-            ParallelUtil.runWithConcurrency(concurrency, ts, pool);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(ts)
+                .executor(pool)
+                .run();
             assertTrue(ts.maxRunning() <= concurrency);
             assertEquals(tasks, ts.started());
             assertEquals(tasks, ts.requested());
@@ -257,16 +261,36 @@ final class ParallelUtilTest {
             ExecutorService deadPool = Executors.newFixedThreadPool(4);
             deadPool.shutdown();
             List<Consumer<Tasks>> runs = asList(
-                    // null pool
-                    t -> ParallelUtil.runWithConcurrency(8, t, null),
-                    // terminated pool
-                    t -> ParallelUtil.runWithConcurrency(8, t, deadPool),
-                    // single task
-                    t -> ParallelUtil.runWithConcurrency(8, t.sized(1), pool),
-                    // concurrency = 1
-                    t -> ParallelUtil.runWithConcurrency(1, t, pool),
-                    // concurrency = 0
-                    t -> ParallelUtil.runWithConcurrency(0, t, pool)
+                // null pool
+                t -> RunWithConcurrency.builder()
+                    .concurrency(8)
+                    .tasks(t)
+                    .executor(null)
+                    .run(),
+                // terminated pool
+                t -> RunWithConcurrency.builder()
+                    .concurrency(8)
+                    .tasks(t)
+                    .executor(deadPool)
+                    .run(),
+                // single task
+                t -> RunWithConcurrency.builder()
+                    .concurrency(8)
+                    .tasks(t.sized(1))
+                    .executor(pool)
+                    .run(),
+                // concurrency = 1
+                t -> RunWithConcurrency.builder()
+                    .concurrency(1)
+                    .tasks(t)
+                    .executor(pool)
+                    .run(),
+                // concurrency = 0
+                t -> RunWithConcurrency.builder()
+                    .concurrency(0)
+                    .tasks(t)
+                    .executor(pool)
+                    .run()
             );
 
             for (Consumer<Tasks> run : runs) {
@@ -283,7 +307,11 @@ final class ParallelUtilTest {
     void shouldSubmitAtMostConcurrencyTasksRunSequentially() {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(4, 10);
-            tasks.run(t -> ParallelUtil.runWithConcurrency(2, t, pool));
+            tasks.run(t -> RunWithConcurrency.builder()
+                .concurrency(2)
+                .tasks(t)
+                .executor(pool)
+                .run());
             assertEquals(4, tasks.started());
             assertTrue(tasks.maxRunning() <= 2);
             assertEquals(4, tasks.requested());
@@ -325,8 +353,11 @@ final class ParallelUtilTest {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(6, 10);
             Collection<RemainingAssertions> assertions = new ConcurrentLinkedQueue<>();
-            final Thread thread = new Thread(() -> tasks.run(t ->
-                    ParallelUtil.runWithConcurrency(2, t, pool)));
+            final Thread thread = new Thread(() -> tasks.run(t -> RunWithConcurrency.builder()
+                .concurrency(2)
+                .tasks(t)
+                .executor(pool)
+                .run()));
             thread.setUncaughtExceptionHandler((t, e) -> {
                 assertions.add(new RemainingAssertions(
                     "java.lang.InterruptedException", e.getMessage()
@@ -415,7 +446,10 @@ final class ParallelUtilTest {
             },
             counter::incrementAndGet
         );
-        assertThatThrownBy(() -> ParallelUtil.runWithConcurrency(4, tasks, Pools.DEFAULT))
+        assertThatThrownBy(() -> RunWithConcurrency.builder()
+            .concurrency(4)
+            .tasks(tasks)
+            .run())
             .isInstanceOf(RuntimeException.class)
             .hasMessage("bubu");
         assertThat(counter.get()).isEqualTo(2);
@@ -438,7 +472,10 @@ final class ParallelUtilTest {
         }
 
         try {
-            ParallelUtil.runWithConcurrency(7, tasks, Pools.DEFAULT);
+            RunWithConcurrency.builder()
+                .concurrency(7)
+                .tasks(tasks)
+                .run();
 
             fail("it should have thrown");
         } catch (RuntimeException oneOfTheTwentyThree) {

@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -186,7 +187,11 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
             )
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, steps, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(steps)
+            .executor(executor)
+            .run();
         progressTracker.endSubTask();
     }
 
@@ -206,7 +211,11 @@ public class K1Coloring extends Algorithm<HugeLongArray> {
             progressTracker
         )).collect(Collectors.toList());
 
-        ParallelUtil.runWithConcurrency(concurrency, steps, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(steps)
+            .executor(executor)
+            .run();
         this.nodesToColor = nextNodesToColor;
         progressTracker.endSubTask();
     }

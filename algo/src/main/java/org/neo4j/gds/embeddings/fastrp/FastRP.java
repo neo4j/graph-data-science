@@ -23,8 +23,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -185,7 +184,10 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
             ),
             Optional.of(minBatchSize)
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
 
         progressTracker.endSubTask();
     }
@@ -197,7 +199,10 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         var tasks = partitions.stream()
             .map(AddInitialStateToEmbeddingTask::new)
             .collect(Collectors.toList());
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
         progressTracker.endSubTask();
     }
 
@@ -221,7 +226,10 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
                         firstIteration
                     )
                 ).collect(Collectors.toList());
-            ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .run();
 
             progressTracker.endSubTask();
         }

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -74,7 +74,11 @@ public class GraphSageEmbeddingsGenerator {
             partition -> createEmbeddings(graph, partition, features, result)
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executor)
+            .run();
 
         progressTracker.endSubTask();
 

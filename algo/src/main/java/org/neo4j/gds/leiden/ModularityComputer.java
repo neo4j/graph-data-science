@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
@@ -81,7 +82,11 @@ final class ModularityComputer {
                 communities
             ), Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, workingGraph.nodeCount()),
@@ -99,7 +104,7 @@ final class ModularityComputer {
         );
         //we do not have the self-loops from  previous merges so we settle from calculating the outside edges between relationships
         //from that and the total sum of weights in communityVolumes we can calculate all inside edges
-        
+
         return modularity * coefficient;
     }
 

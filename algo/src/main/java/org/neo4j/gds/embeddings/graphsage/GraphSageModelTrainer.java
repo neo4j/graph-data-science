@@ -23,7 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -221,8 +221,14 @@ public class GraphSageModelTrainer {
             var sampledBatchTasks = sampledBatchTaskSupplier.get();
 
             // run forward + maybe backward for each Batch
-            ParallelUtil.runWithConcurrency(config.concurrency(), sampledBatchTasks, executor);
-            var avgLossPerNode = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() / sampledBatchTasks.stream().mapToDouble(BatchTask::batchSize).sum();
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(sampledBatchTasks)
+                .executor(executor)
+                .run();
+            var avgLossPerNode =
+                sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() /
+                sampledBatchTasks.stream().mapToDouble(BatchTask::batchSize).sum();
             iterationLosses.add(avgLossPerNode);
             progressTracker.logInfo(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 

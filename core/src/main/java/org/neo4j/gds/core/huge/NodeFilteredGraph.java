@@ -32,8 +32,7 @@ import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -155,7 +154,10 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
             partition -> new RelationshipCounter(concurrentCopy(), partition),
             Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
+            .tasks(tasks)
+            .run();
 
         this.relationshipCount = tasks.stream().mapToLong(RelationshipCounter::relationshipCount).sum();
     }

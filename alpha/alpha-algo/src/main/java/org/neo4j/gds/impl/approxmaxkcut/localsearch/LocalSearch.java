@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicByteArray;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeByteArray;
@@ -122,7 +122,11 @@ public class LocalSearch {
                     )
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
-            ParallelUtil.runWithConcurrency(config.concurrency(), nodeToCommunityWeightTasks, executor);
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(nodeToCommunityWeightTasks)
+                .executor(executor)
+                .run();
             progressTracker.endSubTask();
 
             swapStatus.setAll(SwapForLocalImprovements.NodeSwapStatus.UNTOUCHED);
@@ -143,7 +147,11 @@ public class LocalSearch {
                     )
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
-            ParallelUtil.runWithConcurrency(config.concurrency(), swapTasks, executor);
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(swapTasks)
+                .executor(executor)
+                .run();
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
@@ -162,7 +170,11 @@ public class LocalSearch {
                 )
             ).collect(Collectors.toList());
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(config.concurrency(), costTasks, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(costTasks)
+            .executor(executor)
+            .run();
         progressTracker.endSubTask();
 
         progressTracker.endSubTask();

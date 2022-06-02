@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -137,7 +137,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
         while (true) {
             long swaps = 0;
             //assign each node to a center
-            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .executor(executorService)
+                .run();
 
             for (KmeansTask task : tasks) {
                 swaps += task.getSwaps();

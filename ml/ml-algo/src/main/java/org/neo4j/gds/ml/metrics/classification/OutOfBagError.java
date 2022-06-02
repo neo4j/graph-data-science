@@ -20,8 +20,7 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -89,7 +88,10 @@ public final class OutOfBagError implements Metric {
             Optional.empty()
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
 
         if (totalOutOfAnyBagVectors.longValue() == 0L) {
             return 0;

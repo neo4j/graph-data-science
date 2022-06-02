@@ -22,7 +22,7 @@ package org.neo4j.gds.betweenness;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.BitSetIterator;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
@@ -103,7 +103,11 @@ public interface SelectionStrategy {
                     }
                 })).collect(Collectors.toList());
 
-            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .executor(executorService)
+                .run();
 
             return maxDegree.get();
         }
@@ -151,7 +155,11 @@ public interface SelectionStrategy {
                     }
                 }).collect(Collectors.toList());
 
-            ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .executor(executorService)
+                .run();
 
             long actualSelectedNodes = selectionSize.get();
 

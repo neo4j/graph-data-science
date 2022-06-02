@@ -116,7 +116,8 @@ final class LinkFeaturesAndLabelsExtractor {
                     if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
                         globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
                     } else {
-                        throw new IllegalArgumentException(formatWithLocale("Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Label should be either `1` or `0`. But got %f for relationship (%d, %d)",
                             weight,
                             src,
                             trg

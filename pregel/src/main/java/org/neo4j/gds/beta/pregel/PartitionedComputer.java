@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -70,7 +70,11 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
 
     @Override
     public void runIteration() {
-        ParallelUtil.runWithConcurrency(concurrency, computeSteps, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(computeSteps)
+            .executor(executorService)
+            .run();
     }
 
     @Override

@@ -25,7 +25,7 @@ import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
@@ -148,7 +148,11 @@ public class RelationshipsBuilder {
 
         var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks(mapper);
 
-        ParallelUtil.runWithConcurrency(concurrency, adjacencyListBuilderTasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(adjacencyListBuilderTasks)
+            .executor(executorService)
+            .run();
 
         var adjacencyListsWithProperties = singleTypeRelationshipImporter.build();
         var adjacencyList = adjacencyListsWithProperties.adjacency();

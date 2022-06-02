@@ -20,8 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -125,7 +124,10 @@ public class Node2VecModel {
                 }
             );
 
-            ParallelUtil.runWithConcurrency(config.concurrency(), tasks, Pools.DEFAULT);
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(tasks)
+                .run();
 
             double loss = tasks.stream().mapToDouble(TrainingTask::lossSum).sum();
             progressTracker.logInfo(formatWithLocale("Loss %.4f", loss));

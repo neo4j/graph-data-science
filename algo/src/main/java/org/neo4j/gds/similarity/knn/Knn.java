@@ -26,6 +26,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.HugeCursor;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
@@ -188,7 +189,11 @@ public class Knn extends Algorithm<Knn.Result> {
                     ),
                     Optional.of(config.minBatchSize())
                 );
-                ParallelUtil.runWithConcurrency(config.concurrency(), neighborFilterTasks, this.executorService);
+                RunWithConcurrency.builder()
+                    .concurrency(config.concurrency())
+                    .tasks(neighborFilterTasks)
+                    .executor(this.executorService)
+                    .run();
             }
             this.progressTracker.endSubTask();
 
@@ -235,7 +240,11 @@ public class Knn extends Algorithm<Knn.Result> {
             Optional.of(config.minBatchSize())
         );
 
-        ParallelUtil.runWithConcurrency(config.concurrency(), randomNeighborGenerators, this.executorService);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(randomNeighborGenerators)
+            .executor(this.executorService)
+            .run();
 
         this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
@@ -328,7 +337,11 @@ public class Knn extends Algorithm<Knn.Result> {
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(concurrency, neighborsJoiners, this.executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(neighborsJoiners)
+            .executor(this.executorService)
+            .run();
         progressTracker.endSubTask();
 
         this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();

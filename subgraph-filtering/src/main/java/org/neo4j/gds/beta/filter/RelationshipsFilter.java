@@ -32,7 +32,7 @@ import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -182,7 +182,11 @@ final class RelationshipsFilter {
             Optional.empty()
         );
 
-        ParallelUtil.runWithConcurrency(concurrency, relationshipFilterTasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(relationshipFilterTasks)
+            .executor(executorService)
+            .run();
 
         var relationships = relationshipsBuilder.buildAll();
         var topology = relationships.get(0).topology();
