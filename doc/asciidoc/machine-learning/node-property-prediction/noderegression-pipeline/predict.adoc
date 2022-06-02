@@ -2,6 +2,7 @@
 = Applying a trained model for prediction
 :modelType: NodeRegression
 :entity: node
+:result: predicted property
 
 In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.
 After <<noderegression-pipelines-train, training>>, the produced, runnable model is of type `{modelType}` and resides in the <<model-catalog-ops, model catalog>>.
