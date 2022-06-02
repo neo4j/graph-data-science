@@ -308,6 +308,8 @@ class FilteredKnnTest {
             var config = FilteredKnnBaseConfigImpl.builder()
                 .nodeProperties(List.of("knn"))
                 .topK(4)
+                .randomSeed(87L)
+                .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
             var knn = FilteredKnn.createWithDefaultSeeding(graph, config, knnContext);
