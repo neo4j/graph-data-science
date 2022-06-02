@@ -35,7 +35,7 @@ import org.neo4j.gds.extension.TestGraph;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class ModularityComputerTest {
+class WeightedModularityComputerTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
@@ -47,19 +47,19 @@ class ModularityComputerTest {
         "  (a5:Node)," +
         "  (a6:Node)," +
         "  (a7:Node)," +
-        "  (a0)-[:R {weight: 1.0}]->(a1)," +
-        "  (a0)-[:R {weight: 1.0}]->(a2)," +
-        "  (a0)-[:R {weight: 1.0}]->(a3)," +
-        "  (a0)-[:R {weight: 1.0}]->(a4)," +
-        "  (a2)-[:R {weight: 1.0}]->(a3)," +
-        "  (a2)-[:R {weight: 1.0}]->(a4)," +
-        "  (a3)-[:R {weight: 1.0}]->(a4)," +
-        "  (a1)-[:R {weight: 1.0}]->(a5)," +
-        "  (a1)-[:R {weight: 1.0}]->(a6)," +
-        "  (a1)-[:R {weight: 1.0}]->(a7)," +
-        "  (a5)-[:R {weight: 1.0}]->(a6)," +
-        "  (a5)-[:R {weight: 1.0}]->(a7)," +
-        "  (a6)-[:R {weight: 1.0}]->(a7)";
+        "  (a0)-[:R {weight: 4.0}]->(a1)," +
+        "  (a0)-[:R {weight: 4.0}]->(a2)," +
+        "  (a0)-[:R {weight: 4.0}]->(a3)," +
+        "  (a0)-[:R {weight: 4.0}]->(a4)," +
+        "  (a2)-[:R {weight: 4.0}]->(a3)," +
+        "  (a2)-[:R {weight: 4.0}]->(a4)," +
+        "  (a3)-[:R {weight: 4.0}]->(a4)," +
+        "  (a1)-[:R {weight: 4.0}]->(a5)," +
+        "  (a1)-[:R {weight: 4.0}]->(a6)," +
+        "  (a1)-[:R {weight: 4.0}]->(a7)," +
+        "  (a5)-[:R {weight: 4.0}]->(a6)," +
+        "  (a5)-[:R {weight: 4.0}]->(a7)," +
+        "  (a6)-[:R {weight: 4.0}]->(a7)";
 
     //HugeLongArray.of(1, 1, 1, 3, 3, 3, 1, 3);
     @Inject
@@ -74,15 +74,15 @@ class ModularityComputerTest {
         var localCommunities = HugeLongArray.of(0, 1, 0, 0, 0, 1, 1, 1);
         var communityVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         graph.forEachNode(v -> {
-            communityVolumes.addTo(localCommunities.get(v), graph.degree(v));
+            communityVolumes.addTo(localCommunities.get(v), 4 * graph.degree(v));
             return true;
         });
         double modularity = ModularityComputer.modularity(
             graph,
             localCommunities,
             communityVolumes,
-            1.0 / graph.relationshipCount(),
-            1.0 / graph.relationshipCount(),
+            1.0 / (4.0 * graph.relationshipCount()),
+            1.0 / (4.0 * graph.relationshipCount()),
             4,
             Pools.DEFAULT
         );
@@ -94,7 +94,7 @@ class ModularityComputerTest {
         var localCommunities = HugeLongArray.of(0, 1, 0, 0, 0, 1, 1, 1);
         var communityVolumes = HugeDoubleArray.newArray(graph.nodeCount());
         graph.forEachNode(v -> {
-            communityVolumes.addTo(localCommunities.get(v), graph.degree(v));
+            communityVolumes.addTo(localCommunities.get(v), 4 * graph.degree(v));
             return true;
         });
         var aggregateGraph = new GraphAggregationPhase(
@@ -112,8 +112,8 @@ class ModularityComputerTest {
             aggregateGraph,
             localCommunitiesCondensed,
             communityVolumes2,
-            1.0 / graph.relationshipCount(),
-            1.0 / graph.relationshipCount(),
+            1.0 / (4 * graph.relationshipCount()),
+            1.0 / (4 * graph.relationshipCount()),
             4,
             Pools.DEFAULT
         );

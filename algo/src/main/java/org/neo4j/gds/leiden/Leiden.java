@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.DoubleAdder;
 
 //TODO: take care of potential issues w. self-loops
 
@@ -42,7 +43,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final Graph rootGraph;
 
     private final int maxIterations;
-    private final double gamma;
+    private final double initialGamma;
     private final double theta;
 
     private double[] modularities;
@@ -54,12 +55,11 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final int concurrency;
     private final long seed;
 
-    private final double scaleCoefficient;
 
     public Leiden(
         Graph graph,
         int maxIterations,
-        double gamma,
+        double initialGamma,
         double theta,
         long seed,
         int concurrency,
@@ -68,10 +68,9 @@ public class Leiden extends Algorithm<LeidenResult> {
         super(progressTracker);
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
-        this.gamma = gamma;
+        this.initialGamma = initialGamma;
         this.theta = theta;
         this.seed = seed;
-        this.scaleCoefficient = 1.0 / graph.relationshipCount();
         // TODO: Pass these two as parameters
         this.executorService = Pools.DEFAULT;
         this.concurrency = concurrency;
@@ -102,14 +101,22 @@ public class Leiden extends Algorithm<LeidenResult> {
         HugeLongArray seedCommunities = HugeLongArray.newArray(rootGraph.nodeCount());
         seedCommunities.setAll(v -> v);
 
-        initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        double modularityScaleCoefficient = initVolumes(nodeVolumes, communityVolumes, seedCommunities);
+        double gamma = this.initialGamma * modularityScaleCoefficient;
 
         HugeLongArray currentDendrogram = null;
 
         for (iteration = 0; iteration < maxIterations; iteration++) {
 
             // 1. LOCAL MOVE PHASE - over the singleton partition
-            var localMovePhase = LocalMovePhase.create(workingGraph, partition, nodeVolumes, communityVolumes, gamma, communityCount);
+            var localMovePhase = LocalMovePhase.create(
+                workingGraph,
+                partition,
+                nodeVolumes,
+                communityVolumes,
+                gamma,
+                communityCount
+            );
             var localMovePhasePartition = localMovePhase.run();
 
             partition = localMovePhasePartition.communities();
@@ -127,7 +134,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 partition,
                 communityVolumes,
                 gamma,
-                scaleCoefficient,
+                modularityScaleCoefficient,
                 concurrency,
                 executorService
             );
@@ -191,7 +198,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         );
     }
 
-    private void initVolumes(
+    private double initVolumes(
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         HugeLongArray seedCommunities
@@ -208,14 +215,20 @@ public class Leiden extends Algorithm<LeidenResult> {
                     });
                 }
             );
+            DoubleAdder weightToDivide = new DoubleAdder();
+            rootGraph.forEachNode(nodeId -> {
+                weightToDivide.add(nodeVolumes.get(nodeId));
+                return true;
+            });
+            return 1.0 / weightToDivide.doubleValue();
         } else {
             nodeVolumes.setAll(rootGraph::degree);
-
             rootGraph.forEachNode(nodeId -> {
                 long communityId = seedCommunities.get(nodeId);
                 communityVolumes.addTo(communityId, rootGraph.degree(nodeId));
                 return true;
             });
+            return 1.0 / rootGraph.relationshipCount();
         }
     }
 
