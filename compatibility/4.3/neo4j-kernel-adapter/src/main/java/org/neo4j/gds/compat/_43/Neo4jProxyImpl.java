@@ -25,6 +25,7 @@ import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -285,7 +286,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         IndexOrder indexOrder,
         boolean needsValues,
         CompatIndexQuery query
-    ) throws Exception {
+    ) throws KernelException {
         var indexQueryConstraints = indexOrder == IndexOrder.NONE
             ? IndexQueryConstraints.unordered(needsValues)
             : IndexQueryConstraints.constrained(indexOrder, needsValues);

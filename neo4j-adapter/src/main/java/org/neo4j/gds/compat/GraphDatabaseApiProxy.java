@@ -21,6 +21,7 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -58,14 +59,15 @@ public final class GraphDatabaseApiProxy {
         return resolver.resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
     }
 
-    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws Exception {
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
+        KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
         }
     }
 
-    public static void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws Exception {
+    public static void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerFunction(clazz);
@@ -73,7 +75,7 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws
-        Exception {
+        KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
