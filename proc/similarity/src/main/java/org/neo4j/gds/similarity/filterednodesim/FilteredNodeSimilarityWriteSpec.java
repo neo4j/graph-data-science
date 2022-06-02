@@ -26,9 +26,7 @@ import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
@@ -38,9 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
-import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.write", description = DeltaStepping.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,

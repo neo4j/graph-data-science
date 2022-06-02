@@ -316,7 +316,7 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`
-.4+<.^| Filtered NodeSimilarity
+.6+<.^| Filtered NodeSimilarity
 | `gds.alpha.nodeSimilarity.filtered.mutate`
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
 | `gds.alpha.nodeSimilarity.filtered.stream`

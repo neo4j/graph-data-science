@@ -43,8 +43,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.write", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
+@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_RELATIONSHIP)
 public class FilteredNodeSimilarityWriteProc extends WriteRelationshipsProc<
     NodeSimilarity,
     NodeSimilarityResult,
@@ -52,7 +53,7 @@ public class FilteredNodeSimilarityWriteProc extends WriteRelationshipsProc<
     FilteredNodeSimilarityWriteConfig
     > {
 
-    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.write", mode = READ)
+    @Procedure(value = "gds.alpha.nodeSimilarity.filtered.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<SimilarityWriteResult> write(
         @Name(value = "graphName") String graphName,
