@@ -21,11 +21,9 @@ package org.neo4j.gds.beta.closeness;
 
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
 public interface ClosenessCentralityMutateConfig extends ClosenessCentralityConfig, MutatePropertyConfig {
 

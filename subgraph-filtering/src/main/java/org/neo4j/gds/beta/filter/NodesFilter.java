@@ -31,6 +31,7 @@ import org.neo4j.gds.api.NodePropertyStore;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
@@ -89,7 +90,11 @@ final class NodesFilter {
         );
 
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(concurrency, tasks, executorService);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
         progressTracker.endSubTask();
 
         var idMapAndProperties = nodesBuilder.build();

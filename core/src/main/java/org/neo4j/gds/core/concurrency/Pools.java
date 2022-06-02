@@ -30,16 +30,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public final class Pools {
 
+    private static final String THREAD_NAME_PREFIX = "gds";
+    private static final ThreadFactory DEFAULT_THREAD_FACTORY = NamedThreadFactory.daemon(THREAD_NAME_PREFIX);
+
     public static final ExecutorService DEFAULT = createDefaultPool();
     public static final ExecutorService DEFAULT_SINGLE_THREAD_POOL = createSingleThreadPool("algo");
-
-    static final String THREAD_NAME_PREFIX = "gds";
 
     private Pools() {
         throw new UnsupportedOperationException();
@@ -53,13 +55,21 @@ public final class Pools {
             30L,
             TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(poolSizes.corePoolSize() * 50),
-            NamedThreadFactory.daemon(THREAD_NAME_PREFIX),
+            DEFAULT_THREAD_FACTORY,
             new CallerBlocksPolicy()
         );
     }
 
     public static ExecutorService createSingleThreadPool(String threadPrefix) {
         return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon(threadPrefix));
+    }
+
+    public static ForkJoinPool createForkJoinPool(int concurrency) {
+        return new ForkJoinPool(concurrency, FJ_WORKER_THREAD_FACTORY, null, false);
+    }
+
+    public static Thread newThread(Runnable code) {
+        return DEFAULT_THREAD_FACTORY.newThread(code);
     }
 
     static class CallerBlocksPolicy implements RejectedExecutionHandler {
@@ -88,13 +98,9 @@ public final class Pools {
         }
     }
 
-    public static final ForkJoinPool.ForkJoinWorkerThreadFactory FJ_WORKER_THREAD_FACTORY = pool -> {
+    private static final ForkJoinPool.ForkJoinWorkerThreadFactory FJ_WORKER_THREAD_FACTORY = pool -> {
         var worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
         worker.setName(Pools.THREAD_NAME_PREFIX + "-forkjoin-" + worker.getPoolIndex());
         return worker;
     };
-
-    public static ForkJoinPool createForkJoinPool(int concurrency) {
-        return new ForkJoinPool(concurrency, FJ_WORKER_THREAD_FACTORY, null, false);
-    }
 }

@@ -85,7 +85,7 @@ public final class Louvain extends Algorithm<Louvain> {
         long oldNodeCount = rootGraph.nodeCount();
         for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
 
-            assertRunning();
+            terminationFlag.assertRunning();
 
             ModularityOptimization modularityOptimization = runModularityOptimization(
                 workingGraph,
@@ -188,14 +188,14 @@ public final class Louvain extends Algorithm<Louvain> {
             .concurrency(config.concurrency())
             .build();
 
-        assertRunning();
+        terminationFlag.assertRunning();
 
         workingGraph.forEachNode((nodeId) -> {
             nodesBuilder.addNode(modularityOptimization.getCommunityId(nodeId));
             return true;
         });
 
-        assertRunning();
+        terminationFlag.assertRunning();
 
         Orientation orientation = rootGraph.isUndirected() ? Orientation.UNDIRECTED : Orientation.NATURAL;
         IdMap idMap = nodesBuilder.build().idMap();

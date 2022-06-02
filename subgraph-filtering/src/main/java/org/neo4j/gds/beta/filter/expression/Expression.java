@@ -31,6 +31,7 @@ import java.util.Set;
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
+@SuppressWarnings("immutables:subtype")
 public interface Expression {
     double TRUE = 1.0D;
     double FALSE = 0.0D;
@@ -105,7 +106,6 @@ public interface Expression {
         }
 
         @ValueClass
-        @SuppressWarnings("immutables:subtype")
         interface Property extends UnaryExpression {
 
             String propertyKey();
@@ -152,7 +152,6 @@ public interface Expression {
         }
 
         @ValueClass
-        @SuppressWarnings("immutables:subtype")
         interface HasLabelsOrTypes extends UnaryExpression {
             List<String> labelsOrTypes();
 

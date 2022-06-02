@@ -139,7 +139,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         public final void run() {
             try {
                 int node;
-                while ((node = queue.getAndIncrement()) < nodeCount && running()) {
+                while ((node = queue.getAndIncrement()) < nodeCount && terminationFlag.running()) {
                     evaluateNode(node);
                     progressTracker.logProgress();
                 }

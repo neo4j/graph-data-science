@@ -83,7 +83,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         SpanningTree spanningTree = prim.compute();
         int[] parent = spanningTree.parent;
         progressTracker.beginSubTask(parent.length);
-        for (int i = 0; i < parent.length && running(); i++) {
+        for (int i = 0; i < parent.length && terminationFlag.running(); i++) {
             int p = parent[i];
             if (p == -1) {
                 continue;
@@ -94,7 +94,7 @@ public class KSpanningTree extends Algorithm<SpanningTree> {
         progressTracker.endSubTask();
         progressTracker.beginSubTask(k - 1);
         // remove k-1 relationships
-        for (int i = 0; i < k - 1 && running(); i++) {
+        for (int i = 0; i < k - 1 && terminationFlag.running(); i++) {
             int cutNode = priorityQueue.pop();
             parent[cutNode] = -1;
             progressTracker.logProgress();

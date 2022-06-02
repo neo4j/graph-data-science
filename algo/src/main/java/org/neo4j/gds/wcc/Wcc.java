@@ -45,6 +45,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.utils.TerminationFlag.RUN_CHECK_NODE_COUNT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 /**
@@ -192,7 +193,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
                 partition,
                 components,
                 progressTracker,
-                this
+                terminationFlag
             ))
             .collect(Collectors.toList());
 
@@ -240,7 +241,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
                 largestComponent,
                 components,
                 progressTracker,
-                this
+                terminationFlag
             ))
             .collect(Collectors.toList());
         ParallelUtil.run(tasks, executor);
@@ -269,7 +270,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             for (long node = offset; node < end; node++) {
                 compute(node);
                 if (node % RUN_CHECK_NODE_COUNT == 0) {
-                    assertRunning();
+                    terminationFlag.assertRunning();
                 }
 
                 progressTracker.logProgress(graph.degree(node));

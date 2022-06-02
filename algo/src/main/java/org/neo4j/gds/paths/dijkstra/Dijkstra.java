@@ -189,7 +189,7 @@ public final class Dijkstra extends Algorithm<DijkstraResult> {
     private PathResult next(TraversalPredicate traversalPredicate, ImmutablePathResult.Builder pathResultBuilder) {
         var relationshipId = new MutableInt();
 
-        while (!queue.isEmpty() && running() && traversalState != EMIT_AND_STOP) {
+        while (!queue.isEmpty() && terminationFlag.running() && traversalState != EMIT_AND_STOP) {
             var node = queue.pop();
             var cost = queue.cost(node);
             visited.set(node);

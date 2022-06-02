@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongArray;
-import java.util.function.Supplier;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 
 public class LocalSearch {
@@ -98,14 +98,14 @@ public class LocalSearch {
         HugeByteArray candidateSolution,
         HugeAtomicDoubleArray cost,
         AtomicLongArray cardinalities,
-        Supplier<Boolean> running
+        BooleanSupplier running
     ) {
         var change = new AtomicBoolean(true);
 
         progressTracker.beginSubTask();
 
         progressTracker.beginSubTask();
-        while (change.get() && running.get()) {
+        while (change.get() && running.getAsBoolean()) {
             nodeToCommunityWeights.setAll(0.0D);
             var nodeToCommunityWeightTasks = degreePartition.stream()
                 .map(partition ->
