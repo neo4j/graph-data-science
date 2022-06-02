@@ -131,8 +131,8 @@ The structure of `modelInfo` is:
 
 [NOTE]
 ====
-In <4>-<6>, if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
-The `OUT_OF_BAG_ERROR` is only reported in <7> as validation metric and only if the model is RandomForest.
+In (4)-(6), if the metric is `OUT_OF_BAG_ERROR`, these statistics are not reported.
+The `OUT_OF_BAG_ERROR` is only reported in (7) as validation metric and only if the model is RandomForest.
 ====
 
 include::../pipeline-training-logging-note.adoc[]
