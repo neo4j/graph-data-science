@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
@@ -52,8 +53,6 @@ import org.neo4j.logging.log4j.LogConfig;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.time.Clock;
-import java.time.ZoneId;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -152,7 +151,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
 
             var executionMonitor = new ProgressTrackerExecutionMonitor(
                 this.progressTracker,
-                Clock.system(ZoneId.systemDefault()),
+                ClockService.clock(),
                 config.executionMonitorCheckMillis(),
                 TimeUnit.MILLISECONDS
             );
