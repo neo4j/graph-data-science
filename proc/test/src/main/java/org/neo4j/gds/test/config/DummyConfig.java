@@ -20,10 +20,8 @@
 package org.neo4j.gds.test.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 @Configuration
-@ValueClass
 public interface DummyConfig extends AlgoBaseConfig {
 }

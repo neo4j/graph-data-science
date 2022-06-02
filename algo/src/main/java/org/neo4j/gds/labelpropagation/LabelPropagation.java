@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -126,7 +127,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
         progressTracker.beginSubTask();
         while (ranIterations < config.maxIterations()) {
             progressTracker.beginSubTask();
-            ParallelUtil.runWithConcurrency(config.concurrency(), stepRunners, 1L, MICROSECONDS, terminationFlag, executor);
+            RunWithConcurrency.builder()
+                .concurrency(config.concurrency())
+                .tasks(stepRunners)
+                .waitTime(1L, MICROSECONDS)
+                .terminationFlag(terminationFlag)
+                .executor(executor)
+                .run();
             ++ranIterations;
             didConverge = stepRunners.stream().allMatch(StepRunner::didConverge);
             progressTracker.endSubTask();
@@ -168,7 +175,13 @@ public class LabelPropagation extends Algorithm<LabelPropagation> {
             tasks.add(task);
         }
         progressTracker.beginSubTask();
-        ParallelUtil.runWithConcurrency(config.concurrency(), tasks, 1, MICROSECONDS, terminationFlag, executor);
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .waitTime(1, MICROSECONDS)
+            .terminationFlag(terminationFlag)
+            .executor(executor)
+            .run();
         progressTracker.endSubTask();
         return tasks;
     }

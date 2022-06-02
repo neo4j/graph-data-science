@@ -47,6 +47,7 @@ interface RandomWalkProbabilities {
             .build();
     }
 
+    @SuppressWarnings("immutables:incompat")
     class Builder {
 
         private final long nodeCount;
