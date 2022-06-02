@@ -28,22 +28,31 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MemoryEstimateTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.SourceNodesConfigTest;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import org.neo4j.graphdb.Path;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.LockSupport;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assumptions.assumeThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
@@ -126,6 +135,72 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
             AtomicInteger indexInPath = new AtomicInteger(0);
             path.nodes().forEach(node -> assertEquals(node.getId(), nodes.get(indexInPath.getAndIncrement())));
         }
+    }
+
+    @Test
+    void shouldStopWhenStreamIsNotLongerConsumed() {
+        var pool = (ThreadPoolExecutor) Pools.DEFAULT;
+        assumeThat(pool.getActiveCount()).as("Test requires that no other threads are currently running").isEqualTo(0);
+
+        // re-setup with a larger graph
+        GraphStoreCatalog.removeAllLoadedGraphs();
+        for (int i = 0; i < 10; i++) {
+            runQuery(DB_CYPHER);
+        }
+        runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .loadEverything(Orientation.UNDIRECTED)
+            .yields());
+
+        // concurrency must be > 1 to move the tasks to new threads
+        // walkBufferSize must be small to get threads to block on flushBuffer steps
+        var concurrency = 4;
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds", "beta", "randomWalk")
+            .streamMode()
+            .addParameter("walksPerNode", 10)
+            .addParameter("walkLength", 10)
+            .addParameter("walkBufferSize", 1)
+            .addParameter("concurrency", concurrency)
+            .yields("nodeIds", "path");
+
+        // limit the result to 2 elements, terminating the stream after that
+        query += " RETURN nodeIds, path LIMIT 2";
+
+        runQueryWithResultConsumer(query, result -> {
+            // we might not have started the procedure
+            assertThat(pool.getActiveCount()).isBetween(0, concurrency);
+
+            // we have the first result available
+            assertThat(result).hasNext();
+
+            // no useful assertion on the actual content
+            assertThat(result.next()).isNotNull();
+
+            // after the first result, we have at least one thread still running
+            assertThat(pool.getActiveCount()).isBetween(1, concurrency);
+
+            // we have one more result, but we will close the stream before consuming it
+            assertThat(result).hasNext();
+        });
+
+        // after closing the result, the running threads should be interrupted
+        // though it is not entirely deterministic when that will happen.
+        // We'll loop for "5" seconds, and failing if the threads are still running after that
+        // On CI, we wait a bit longer
+        long timeoutInSeconds = 5 * (TestSupport.CI ? 5 : 1);
+        var deadline = Instant.now().plus(timeoutInSeconds, ChronoUnit.SECONDS);
+
+        while (Instant.now().isBefore(deadline)) {
+            if (pool.getActiveCount() == 0) {
+                break;
+            }
+
+            LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(100));
+        }
+
+        // we're done or fail the test
+        assertThat(pool.getActiveCount()).isEqualTo(0);
     }
 
     @Test

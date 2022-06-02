@@ -22,8 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -125,13 +124,18 @@ final class LinkFeaturesAndLabelsExtractor {
                     }
                     return true;
                 }));
-                progressTracker.logSteps(partition.totalDegree());
-            }
+                    progressTracker.logSteps(partition.totalDegree());
+                }
             );
             relationshipOffset.add(partition.totalDegree());
         }
 
-        ParallelUtil.runWithConcurrency(concurrency, tasks, terminationFlag, Pools.DEFAULT);
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .terminationFlag(terminationFlag)
+            .run();
+
         return globalLabels;
     }
 }
