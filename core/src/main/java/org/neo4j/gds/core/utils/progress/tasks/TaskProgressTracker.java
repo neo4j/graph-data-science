@@ -164,7 +164,7 @@ public class TaskProgressTracker implements ProgressTracker {
 
     @Override
     public long currentVolume() {
-        return requireCurrentTask().volume();
+        return requireCurrentTask().getProgress().volume();
     }
 
     @Override

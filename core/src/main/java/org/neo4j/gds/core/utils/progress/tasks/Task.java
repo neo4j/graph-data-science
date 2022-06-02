@@ -130,13 +130,6 @@ public class Task {
         ));
     }
 
-    public long volume() {
-        throw new UnsupportedOperationException(formatWithLocale(
-            "Should only be called on a leaf task, but task `%s` is not a leaf",
-            description
-        ));
-    }
-
     public void logProgress() {
         logProgress(1);
     }
