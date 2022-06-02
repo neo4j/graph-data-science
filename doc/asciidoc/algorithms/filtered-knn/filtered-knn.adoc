@@ -123,9 +123,14 @@ CALL gds.alpha.knn.filtered.stream(
   similarity: Float
 ----
 
-include::../common-configuration/common-parameters-named-graph.adoc[]
+include::../common-configuration/common-parameters.adoc[]
 
-include::../common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::../common-configuration/common-stream-stats-configuration-entries.adoc[]
+|===
 
 :knnSpecificConfigurationTableTitle: KNN specific configuration
 include::../knn/knn-specific-algo-config.adoc[]
