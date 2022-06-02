@@ -28,6 +28,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
@@ -79,6 +81,9 @@ public interface ExecutionContext {
 
     @Nullable
     RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder();
+
+    @Nullable
+    RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder();
 
     @Value.Lazy
     default NamedDatabaseId databaseId() {
@@ -146,6 +151,11 @@ public interface ExecutionContext {
 
         @Override
         public @Nullable RelationshipStreamExporterBuilder<? extends RelationshipStreamExporter> relationshipStreamExporterBuilder() {
+            return null;
+        }
+
+        @Override
+        public @Nullable RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder() {
             return null;
         }
 
