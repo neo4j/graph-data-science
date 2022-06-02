@@ -305,13 +305,13 @@ include::../algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.influenceMaximization.celf.stream`
 .1+<.^| <<alpha-algorithms-conductance, Conductance>>
 | `gds.alpha.conductance.stream`
-.3+<.^| Kmeans
+.3+<.^| <<alpha-algorithms-k-means, Kmeans>>
 | `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
-.1+<.^| Filtered KNN
+.1+<.^| <<algorithms-filtered-knn, Filtered KNN>>
 | `gds.alpha.knn.filtered.stream`
-.3+<.^| Leiden
+.3+<.^| <<algorithms-leiden, Leiden>>
 | `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`

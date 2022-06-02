@@ -20,6 +20,6 @@ include::node-similarity/node-similarity.adoc[leveloffset=+1]
 
 include::knn/knn.adoc[leveloffset=+1]
 
-include::filtered-knn/filtered-knn.adoc[leveloffset=+1]
+include::alpha/filtered-knn/filtered-knn.adoc[leveloffset=+1]
 
 include::similarity-functions/similarity-functions.adoc[leveloffset=+1]

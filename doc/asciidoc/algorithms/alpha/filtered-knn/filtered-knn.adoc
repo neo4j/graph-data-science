@@ -103,7 +103,7 @@ Seeding can be enabled with the `seedTargetNodes` configuration parameter. It de
 [[algorithms-filtered-knn-syntax]]
 == Syntax
 
-include::../shared/syntax-intro-named-graph.adoc[]
+include::../../shared/syntax-intro-named-graph.adoc[]
 
 .Filtered K-Nearest Neighbors syntax per mode
 [.tabbed-example, caption = ]
@@ -123,17 +123,17 @@ CALL gds.alpha.knn.filtered.stream(
   similarity: Float
 ----
 
-include::../common-configuration/common-parameters.adoc[]
+include::../../common-configuration/common-parameters.adoc[]
 
 .General configuration for algorithm execution on a named graph.
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::../common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::../../common-configuration/common-stream-stats-configuration-entries.adoc[]
 |===
 
 :knnSpecificConfigurationTableTitle: KNN specific configuration
-include::../knn/knn-specific-algo-config.adoc[]
+include::../../knn/knn-specific-algo-config.adoc[]
 
 include::filtered-knn-specific-algo-config.adoc[]
 
@@ -170,7 +170,7 @@ CREATE (eve:Person:Vegan {name: 'Eve', age: 67, lotteryNumbers: [1, 5], embeddin
 
 In the example, we want to use the Filtered K-Nearest Neighbors algorithm to compare people based on either their age or a combination on all provided properties.
 
-include::../shared/examples-named-native-note.adoc[]
+include::../../shared/examples-named-native-note.adoc[]
 
 .The following statement will project the graph and store it in the graph catalog.
 [source,cypher,role=noplay graph-project-query]
@@ -195,7 +195,7 @@ CALL gds.graph.project(
 [[algorithms-filtered-knn-examples-stream]]
 === Filtering source nodes
 
-include::../shared/examples-stream-intro.adoc[]
+include::../../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
@@ -236,7 +236,7 @@ Notice that because Carol is not Vegan, she is not included in the result set - 
 [[algorithms-filtered-knn-examples-stream-2]]
 === Filtering and seeding target nodes
 
-include::../shared/examples-stream-intro.adoc[]
+include::../../shared/examples-stream-intro.adoc[]
 
 [role=query-example]
 --
