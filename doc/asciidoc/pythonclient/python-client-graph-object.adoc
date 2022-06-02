@@ -115,24 +115,24 @@ There are convenience methods on the graph object that let us extract informatio
 .Graph object methods
 [opts="header",cols="9m,6m,7m,13", role="no-break"]
 |===
-| Name                    | Arguments                     | Return type         | Description
-| name                    | -                             | str                 | The name of the projected graph.
-| database                | -                             | str                 | Name of the database in which the graph has been projected.
-| node_count              | -                             | int                 | The node count of the projected graph.
-| relationship_count      | -                             | int                 | The relationship count of the projected graph.
-| node_labels             | -                             | list[str]           | A list of the node labels present in the graph.
-| relationship_types      | -                             | list[str]           | A list of the relationship types present in the graph.
-| node_properties         | label: str                    | list[str]           | A list of the node properties present on the nodes with the node label provided as input.
-| relationship_properties | type: str                     | list[str]           | A list of the relationship properties present on the relationships with the relationship type provided as input.
-| degree_distribution     | -                             | Series              | The average out-degree of generated nodes.
-| density                 | -                             | float               | Density of the graph.
-| size_in_bytes           | -                             | int                 | Number of bytes used in the Java heap to store the graph.
-| memory_usage            | -                             | str                 | Human-readable description of `size_in_bytes`.
-| exists                  | -                             | bool                | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
-| drop                    | failIfMissing: Optional[bool] | Series              | <<catalog-graph-drop, Removes the graph>> from the GDS Graph Catalog.
-| configuration           | -                             | Series              | The configuration used to project the graph in memory.
-| creation_time           | -                             | neo4j.time.Datetime | Time when the graph was projected.
-| modification_time       | -                             | neo4j.time.Datetime | Time when the graph was last modified.
+| Name                    | Arguments                     | Return type              | Description
+| name                    | -                             | str                      | The name of the projected graph.
+| database                | -                             | str                      | Name of the database in which the graph has been projected.
+| node_count              | -                             | int                      | The node count of the projected graph.
+| relationship_count      | -                             | int                      | The relationship count of the projected graph.
+| node_labels             | -                             | list[str]                | A list of the node labels present in the graph.
+| relationship_types      | -                             | list[str]                | A list of the relationship types present in the graph.
+| node_properties         | label: Optional[str]          | Union[Series, list[str]] | If label argument given, returns a list of the properties present on the nodes with the provided node label. Otherwise, returns a `Series` mapping every node label to a list of the properties present on nodes with that label.
+| relationship_properties | type: Optional[str]           | Union[Series, list[str]] | If type argument given, returns a list of the properties present on the relationships with the provided relationship type. Otherwise, returns a `Series` mapping every relationship type to a list of the properties present on relationships with that type.
+| degree_distribution     | -                             | Series                   | The average out-degree of generated nodes.
+| density                 | -                             | float                    | Density of the graph.
+| size_in_bytes           | -                             | int                      | Number of bytes used in the Java heap to store the graph.
+| memory_usage            | -                             | str                      | Human-readable description of `size_in_bytes`.
+| exists                  | -                             | bool                     | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
+| drop                    | failIfMissing: Optional[bool] | Series                   | <<catalog-graph-drop, Removes the graph>> from the GDS Graph Catalog.
+| configuration           | -                             | Series                   | The configuration used to project the graph in memory.
+| creation_time           | -                             | neo4j.time.Datetime      | Time when the graph was projected.
+| modification_time       | -                             | neo4j.time.Datetime      | Time when the graph was last modified.
 |===
 
 For example, to get the node count and node properties of a graph `G`, we would do the following:
