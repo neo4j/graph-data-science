@@ -104,6 +104,7 @@ import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.storable.ValueGroup;
@@ -527,6 +528,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
         return connectorPortRegister.getLocalAddress("bolt");
+    }
+
+    @Override
+    public SslPolicyLoader createSllPolicyLoader(
+        FileSystemAbstraction fileSystem,
+        Config config,
+        LogProvider logProvider
+    ) {
+        return SslPolicyLoader.create(config, logProvider);
     }
 
     @Override

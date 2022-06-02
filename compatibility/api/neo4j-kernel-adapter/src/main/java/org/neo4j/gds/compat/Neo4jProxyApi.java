@@ -69,6 +69,7 @@ import org.neo4j.logging.LogProvider;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
+import org.neo4j.ssl.config.SslPolicyLoader;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -236,6 +237,12 @@ public interface Neo4jProxyApi {
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 
     HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister);
+
+    SslPolicyLoader createSllPolicyLoader(
+        FileSystemAbstraction fileSystem,
+        Config config,
+        LogProvider logProvider
+    );
 
     <T> T recordFormatSelector(
         Config databaseConfig,
