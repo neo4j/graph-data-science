@@ -357,6 +357,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private double calculateModularity() {
+        modularityOptimizationModularity.registerCommunities(currentCommunities);
         return modularityOptimizationModularity.getModularity();
     }
 

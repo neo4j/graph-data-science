@@ -21,8 +21,12 @@ package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Optional;
 import java.util.stream.LongStream;
 
 interface ModularityOptimizationModularity {
@@ -43,15 +47,17 @@ interface ModularityOptimizationModularity {
 
     double getCommunityWeight(long communityId);
 
-    void processMove(
+    default void processMove(
         long oldCommunity,
         long nextCommunity,
         double oldInfluence,
         double newInfluence,
         double selfWeight
-    );
+    ) {}
 
-    void processSeedContribution(long communityId, double weight);
+    default void registerCommunities(HugeLongArray communities) {}
+
+    default void processSeedContribution(long communityId, double weight) {}
 
 }
 
@@ -100,7 +106,6 @@ class ModularityOptimizationUndirectedModularity implements ModularityOptimizati
     @Override
     public void communityWeightUpdate(long communityId, double weight) {
         communityWeights.update(communityId, agg -> agg + weight);
-
     }
 
     @Override
@@ -137,17 +142,45 @@ class ModularityOptimizationDirectedModularity implements ModularityOptimization
 
     private final Graph graph;
     private double totalWeight;
-
+    private final HugeAtomicDoubleArray communityWeights;
+    private HugeLongArray communities;
     private final int concurrency;
 
 
     ModularityOptimizationDirectedModularity(Graph graph, int concurrency) {
         this.graph = graph;
         this.concurrency = concurrency;
+        this.communityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount());
     }
 
     public double getModularity() {
-        return 0;
+        HugeAtomicDoubleArray insideRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> new InsideRelationshipCalculator(
+                partition,
+                graph,
+                insideRelationships,
+                communities
+            ), Optional.empty()
+        );
+        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        double modularity = ParallelUtil.parallelStream(
+            LongStream.range(0, graph.nodeCount()),
+            concurrency,
+            nodeStream ->
+                nodeStream
+                    .mapToDouble(communityId -> {
+                        double ec = insideRelationships.get(communityId);
+                        double Kc = communityWeights.get(communityId);
+                        return ec - Kc * Kc * (1.0 / totalWeight);
+                    })
+                    .reduce(Double::sum)
+                    .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
+        );
+        return modularity * (1.0 / totalWeight);
     }
 
     @Override
@@ -158,27 +191,17 @@ class ModularityOptimizationDirectedModularity implements ModularityOptimization
 
     @Override
     public void communityWeightUpdate(long communityId, double weight) {
-
+        communityWeights.update(communityId, agg -> agg + weight);
     }
 
     @Override
     public double getCommunityWeight(long communityId) {
-        return 0;
+        return communityWeights.get(communityId);
     }
 
     @Override
-    public void processMove(
-        long oldCommunity,
-        long nextCommunity,
-        double oldInfluence,
-        double newInfluence,
-        double selfWeight
-    ) {
-
+    public void registerCommunities(HugeLongArray communities) {
+        this.communities = communities;
     }
 
-    @Override
-    public void processSeedContribution(long communityId, double weight) {
-
-    }
 }
