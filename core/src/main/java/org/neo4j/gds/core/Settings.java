@@ -20,7 +20,6 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
@@ -33,8 +32,6 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
-
-import static org.neo4j.configuration.SettingImpl.newBuilder;
 
 public final class Settings {
 
@@ -72,10 +69,6 @@ public final class Settings {
 
     public static Setting<?> recordFormat() {
         return Neo4jProxy.recordFormatSetting();
-    }
-
-    public static Setting<Boolean> udc() {
-        return newBuilder("dbms.udc.enabled", SettingValueParsers.BOOL, true).build();
     }
 
     @ValueClass
