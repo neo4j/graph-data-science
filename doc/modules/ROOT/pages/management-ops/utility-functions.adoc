@@ -1,4 +1,5 @@
 
+
 [[utility-functions]]
 = Utility functions
 :description: This section provides explanations and examples for each of the utility functions in the Neo4j Graph Data Science library.
@@ -30,7 +31,7 @@ RETURN gds.version() AS version
 [opts="header"]
 |===
 | version
-| "2.1.0-alpha04"
+| "2.1.0"
 |===
 --
 
