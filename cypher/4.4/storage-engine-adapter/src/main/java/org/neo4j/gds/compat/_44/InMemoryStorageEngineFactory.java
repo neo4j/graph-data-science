@@ -66,6 +66,7 @@ import org.neo4j.token.TokenHolders;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @ServiceProvider
@@ -132,7 +133,27 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
         CursorContext cursorContext,
         UUID uuid
     ) {
-        MetaDataStore.getDatabaseIdUuid(pageCache, RecordDatabaseLayout.convert(databaseLayout).metadataStore(), databaseLayout.getDatabaseName(), cursorContext);
+        MetaDataStore.getDatabaseIdUuid(
+            pageCache,
+            RecordDatabaseLayout.convert(databaseLayout).metadataStore(),
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
+    }
+
+    @Override
+    public Optional<UUID> databaseIdUuid(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext
+    ) {
+        return MetaDataStore.getDatabaseIdUuid(
+            pageCache,
+            databaseLayout.metadataStore(),
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
     }
 
     @Override

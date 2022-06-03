@@ -64,6 +64,8 @@ import org.neo4j.token.TokenHolders;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @ServiceProvider
 public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngineFactory {
@@ -123,6 +125,21 @@ public class InMemoryStorageEngineFactory433 extends AbstractInMemoryStorageEngi
     @Override
     public String name() {
         return IN_MEMORY_STORAGE_ENGINE_NAME_43;
+    }
+
+    @Override
+    public Optional<UUID> databaseIdUuid(
+        FileSystemAbstraction fs,
+        DatabaseLayout databaseLayout,
+        PageCache pageCache,
+        CursorContext cursorContext
+    ) {
+        return MetaDataStore.getDatabaseIdUuid(
+            pageCache,
+            databaseLayout.metadataStore(),
+            databaseLayout.getDatabaseName(),
+            cursorContext
+        );
     }
 
     @Override
