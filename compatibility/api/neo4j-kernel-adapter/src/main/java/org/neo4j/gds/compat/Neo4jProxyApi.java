@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -155,7 +156,7 @@ public interface Neo4jProxyApi {
         IndexOrder indexOrder,
         boolean needsValues,
         CompatIndexQuery query
-    ) throws Exception;
+    ) throws KernelException;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
 

@@ -83,7 +83,10 @@ public final class LayerFactory {
                     randomSeed
                 );
             default:
-                throw new RuntimeException(formatWithLocale("Aggregator: %s is unknown", layerConfig.aggregatorType()));
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Aggregator: %s is unknown",
+                    layerConfig.aggregatorType()
+                ));
         }
     }
 

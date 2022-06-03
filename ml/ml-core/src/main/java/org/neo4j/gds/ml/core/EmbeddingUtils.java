@@ -125,7 +125,7 @@ public final class EmbeddingUtils {
                 Double.NaN,
                 (sourceNodeId, targetNodeId, property) -> {
                     if (!validator.test(property)) {
-                        throw new RuntimeException(
+                        throw new IllegalStateException(
                             formatWithLocale(
                                 "Found an invalid relationship weight between nodes `%d` and `%d` with the property value of `%f`. %s",
                                 partitionLocalGraph.toOriginalNodeId(sourceNodeId),

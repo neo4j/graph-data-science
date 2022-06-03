@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
@@ -237,7 +238,7 @@ public final class Neo4jProxy {
         IndexOrder indexOrder,
         boolean needsValues,
         CompatIndexQuery query
-    ) throws Exception {
+    ) throws KernelException {
         IMPL.nodeIndexSeek(dataRead, index, cursor, indexOrder, needsValues, query);
     }
 
