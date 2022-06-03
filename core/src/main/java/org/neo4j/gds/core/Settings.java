@@ -67,10 +67,6 @@ public final class Settings {
         return GraphDatabaseSettings.neo4j_home;
     }
 
-    public static Setting<?> recordFormat() {
-        return Neo4jProxy.recordFormatSetting();
-    }
-
     @ValueClass
     public interface PageCacheMemorySetting<T> {
         Setting<T> setting();

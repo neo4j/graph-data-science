@@ -230,9 +230,9 @@ public interface Neo4jProxyApi {
 
     void setAllowUpgrades(Config.Builder configBuilder, boolean value);
 
-    Setting<?> recordFormatSetting();
+    String defaultRecordFormatSetting();
 
-    String recordFormatName(Object recordFormat);
+    void configureRecordFormat(Config.Builder configBuilder, String recordFormat);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
 
@@ -244,7 +244,8 @@ public interface Neo4jProxyApi {
         LogProvider logProvider
     );
 
-    <T> T recordFormatSelector(
+    RecordFormats recordFormatSelector(
+        String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
         LogProvider internalLogProvider,

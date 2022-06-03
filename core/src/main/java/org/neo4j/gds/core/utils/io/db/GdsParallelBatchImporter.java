@@ -129,14 +129,17 @@ public final class GdsParallelBatchImporter {
         this.dependencyResolver = dependencyResolver;
         this.fs = fs;
         this.logService = logService;
+
         var configBuilder = Config
             .newBuilder()
             .fromConfig(databaseConfig)
             .set(Settings.neo4jHome(), databaseConfig.get(Settings.neo4jHome()))
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
-        this.databaseConfig = Neo4jProxy.setAllowUpgrades(configBuilder, true)
-            .set(Neo4jProxy.recordFormatSetting(), config.recordFormat())
-            .build();
+
+        Neo4jProxy.setAllowUpgrades(configBuilder, true);
+        Neo4jProxy.configureRecordFormat(configBuilder, config.recordFormat());
+
+        this.databaseConfig = configBuilder.build();
     }
 
     public void writeDatabase(CompatInput compatInput, boolean startDatabase) {
@@ -231,6 +234,7 @@ public final class GdsParallelBatchImporter {
             AdditionalInitialIds.EMPTY,
             databaseConfig,
             Neo4jProxy.recordFormatSelector(
+                config.dbName(),
                 databaseConfig,
                 fs,
                 logService.getInternalLogProvider(),

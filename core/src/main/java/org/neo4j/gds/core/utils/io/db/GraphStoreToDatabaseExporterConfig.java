@@ -63,7 +63,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Configuration.Ignore
     @SuppressWarnings("immutables:untype")
     default String recordFormat() {
-        return Neo4jProxy.recordFormatName(Neo4jProxy.recordFormatSetting().defaultValue());
+        return Neo4jProxy.defaultRecordFormatSetting();
     }
 
     @Value.Default

@@ -508,13 +508,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public Setting<?> recordFormatSetting() {
-        return GraphDatabaseSettings.record_format;
+    public String defaultRecordFormatSetting() {
+        return GraphDatabaseSettings.record_format.defaultValue();
     }
 
     @Override
-    public String recordFormatName(Object recordFormat) {
-        return (String) recordFormat;
+    public void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
+        configBuilder.set(GraphDatabaseSettings.record_format, recordFormat);
     }
 
     @Override
@@ -537,13 +537,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public <T> T recordFormatSelector(
+    public RecordFormats recordFormatSelector(
+        String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
         LogProvider internalLogProvider,
         DependencyResolver dependencyResolver
     ) {
-        return (T) RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
+        return RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
     }
 
     @Override

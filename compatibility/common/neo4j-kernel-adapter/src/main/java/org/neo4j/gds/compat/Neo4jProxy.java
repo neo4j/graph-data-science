@@ -370,17 +370,16 @@ public final class Neo4jProxy {
         return IMPL.isNotNumericIndex(indexCapability);
     }
 
-    public static Config.Builder setAllowUpgrades(Config.Builder configBuilder, boolean value) {
+    public static void setAllowUpgrades(Config.Builder configBuilder, boolean value) {
         IMPL.setAllowUpgrades(configBuilder, value);
-        return configBuilder;
     }
 
-    public static Setting<?> recordFormatSetting() {
-        return IMPL.recordFormatSetting();
+    public static String defaultRecordFormatSetting() {
+        return IMPL.defaultRecordFormatSetting();
     }
 
-    public static String recordFormatName(Object recordFormat) {
-        return IMPL.recordFormatName(recordFormat);
+    public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
+        IMPL.configureRecordFormat(configBuilder, recordFormat);
     }
 
     public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
@@ -399,13 +398,14 @@ public final class Neo4jProxy {
         return IMPL.createSllPolicyLoader(fileSystem, config, logProvider);
     }
 
-    public static <T> T recordFormatSelector(
+    public static RecordFormats recordFormatSelector(
+        String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
         LogProvider internalLogProvider,
         DependencyResolver dependencyResolver
     ) {
-        return IMPL.recordFormatSelector(databaseConfig, fs, internalLogProvider, dependencyResolver);
+        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, internalLogProvider, dependencyResolver);
     }
 
     public static NamedDatabaseId randomDatabaseId() {
