@@ -40,7 +40,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -65,7 +65,6 @@ public class SysInfoProc {
         return debugValues(properties, Runtime.getRuntime(), config);
     }
 
-    @SuppressWarnings("unused")
     public static final class DebugValue {
         public final String key;
         public final Object value;
@@ -237,22 +236,27 @@ public class SysInfoProc {
         builder.add(value("containerized", containerized));
     }
 
-    private static void configInfo(Config config, Stream.Builder<DebugValue> builder) {
+    private static void configInfo(Config config, Consumer<DebugValue> builder) {
         builder.accept(configVal(config, Settings.procedureUnrestricted(), s -> String.join(",", s)));
-        builder.accept(configVal(config, Settings.pageCacheMemory()));
         builder.accept(configVal(config, Settings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available
-        SysInfoProc.<Long>safeGetSetting("dbms.tx_state.max_off_heap_memory", config)
-            .ifPresent(s -> builder.accept(configVal(config, s)));
-        SysInfoProc.<Long>safeGetSetting("dbms.memory.off_heap.max_size", config)
-            .ifPresent(s -> builder.accept(configVal(config, s)));
-        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.global_max_size", config)
-            .ifPresent(s -> builder.accept(configVal(config, s)));
-        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.datababase_max_size", config)
-            .ifPresent(s -> builder.accept(configVal(config, s)));
-        SysInfoProc.<Long>safeGetSetting("dbms.memory.transaction.max_size", config)
-            .ifPresent(s -> builder.accept(configVal(config, s)));
+
+        trySetting("dbms.memory.pagecache.size", config, builder);
+        trySetting("server.memory.pagecache.size", config, builder);
+
+        trySetting("dbms.tx_state.max_off_heap_memory", config, builder);
+        trySetting("dbms.memory.off_heap.max_size", config, builder);
+        trySetting("server.memory.off_heap.max_size", config, builder);
+
+        trySetting("dbms.memory.transaction.global_max_size", config, builder);
+        trySetting("dbms.memory.transaction.total.max", config, builder);
+
+        trySetting("dbms.memory.transaction.datababase_max_size", config, builder);
+        trySetting("db.memory.transaction.total.max", config, builder);
+
+        trySetting("dbms.memory.transaction.max_size", config, builder);
+        trySetting("db.memory.transaction.max", config, builder);
     }
 
     private static DebugValue configVal(Configuration config, Setting<?> setting) {
@@ -270,11 +274,11 @@ public class SysInfoProc {
         return humanReadable(bytes);
     }
 
-    private static <T> Optional<Setting<T>> safeGetSetting(String name, Config config) {
+    private static void trySetting(String name, Config config, Consumer<DebugValue> builder) {
         try {
-            return Optional.of((Setting<T>) config.getSetting(name));
-        } catch (IllegalArgumentException notFound) {
-            return Optional.empty();
+            var setting = config.getSetting(name);
+            builder.accept(configVal(config, setting));
+        } catch (IllegalArgumentException ignored) {
         }
     }
 }

@@ -70,9 +70,6 @@ class SysInfoProcTest extends BaseProcTest {
         var isTrue = new Condition<>(Boolean.TRUE::equals, "true");
         var isFalse = new Condition<>(Boolean.FALSE::equals, "false");
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
-        var maxOffHeap40 = new Condition<>("dbms.tx_state.max_off_heap_memory"::equals, "max off-heap setting on 4.0");
-        var maxOffHeap41 = new Condition<>("dbms.memory.off_heap.max_size"::equals, "max off-heap setting on 4.1");
-        var is1337 = new Condition<>(Long.valueOf(1337L)::equals, "1337");
 
         assertThat(result)
             .hasSizeGreaterThanOrEqualTo(42) // this is actually the min number of entries :)
@@ -115,9 +112,9 @@ class SysInfoProcTest extends BaseProcTest {
             .hasEntrySatisfying("vmCompiler", isNotNull)
             .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
-            .containsEntry("dbms.memory.pagecache.size", Settings.pageCacheMemoryValue("42M"))
-            .containsEntry("dbms.tx_state.memory_allocation", "ON_HEAP")
-            .hasEntrySatisfying(anyOf(maxOffHeap40, maxOffHeap41), is1337);
+            .containsEntry(Settings.pageCacheMemory().name(), Settings.pageCacheMemoryValue("42M"))
+            .containsEntry(Settings.transactionStateAllocation().name(), "ON_HEAP")
+            .containsEntry(Settings.transactionStateMaxOffHeapMemory().name(), 1337L);
     }
 
     @Test
