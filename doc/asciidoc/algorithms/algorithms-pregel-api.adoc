@@ -430,6 +430,31 @@ public abstract class PregelContext<CONFIG extends PregelConfig> {
 }
 ----
 
+
+[[algorithms-pregel-api-id-mapping]]
+=== Node id space translation
+
+Some algorithms require nodes as input from the user.
+For example, a shortest path algorithm needs to know about the start and the end node.
+In GDS, there are two node id spaces: the original id space and the internal id space.
+The original id space are the node ids of the graph the in-memory graph has been projected from.
+Typically, these are Neo4j node identifiers.
+The internal id space represents the node ids of the in-memory graph and is always a consecutive space starting at id `0`.
+A Pregel computation uses the internal node id space, e.g., `ComputeContext#nodeId()` returns the internal id of the currently processed node.
+In order to translate from the original to the internal node id space and vice versa, all context classes provide the following methods:
+
+.Methods to translate between id spaces which can be used in all Pregel contexts
+[source, java]
+----
+// All contexts inherit from PregelContext
+public abstract class PregelContext<CONFIG extends PregelConfig> {
+    // Maps the given internal node to its original counterpart.
+    public long toOriginalNodeId(long internalNodeId);
+    // Maps the given original node to its internal counterpart.
+    public long toInternalNodeId(long originalNodeId);
+}
+----
+
 [[algorithms-pregel-api-procedure]]
 == Run Pregel via Cypher
 
