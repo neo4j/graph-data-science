@@ -39,6 +39,9 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     static final String DISTANCE = "DISTANCE";
 
+    // Stores the internal node if of the user-defined source node id.
+    private volatile long startNodeId;
+
     @Override
     public PregelSchema schema(SingleSourceShortestPathPregelConfig config) {
         return new PregelSchema.Builder().add(DISTANCE, ValueType.LONG).build();
@@ -46,7 +49,8 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     @Override
     public void init(InitContext<SingleSourceShortestPathPregelConfig> context) {
-        if (context.nodeId() == context.config().startNode()) {
+        if (context.nodeId() == context.toInternalId(context.config().startNode())) {
+            this.startNodeId = context.toInternalId(context.config().startNode());
             context.setNodeValue(DISTANCE, 0);
         } else {
             context.setNodeValue(DISTANCE, Long.MAX_VALUE);
@@ -55,10 +59,8 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     @Override
     public void compute(ComputeContext<SingleSourceShortestPathPregelConfig> context, Messages messages) {
-        if (context.isInitialSuperstep()) {
-            if (context.nodeId() == context.config().startNode()) {
-                context.sendToNeighbors(1);
-            }
+        if (context.isInitialSuperstep() && context.nodeId() == this.startNodeId) {
+            context.sendToNeighbors(1);
         } else {
             // This is basically the same message passing as WCC (except the new message)
             long newDistance = context.longNodeValue(DISTANCE);

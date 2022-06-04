@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
@@ -37,33 +38,36 @@ import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.DIST
 @GdlExtension
 class SingleSourceShortestPathPregelAlgoTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 42)
     private static final String TEST_GRAPH =
-            "CREATE" +
-            "  (a:Node)" +
-            ", (b:Node)" +
-            ", (c:Node)" +
-            ", (d:Node)" +
-            ", (e:Node)" +
-            ", (f:Node)" +
-            ", (g:Node)" +
-            ", (h:Node)" +
-            ", (i:Node)" +
-            // {J}
-            ", (j:Node)" +
-            // {A, B, C, D}
-            ", (a)-[:TYPE]->(b)" +
-            ", (b)-[:TYPE]->(c)" +
-            ", (c)-[:TYPE]->(d)" +
-            ", (a)-[:TYPE]->(c)" +
-            // {E, F, G}
-            ", (e)-[:TYPE]->(f)" +
-            ", (f)-[:TYPE]->(g)" +
-            // {H, I}
-            ", (i)-[:TYPE]->(h)";
+        "CREATE" +
+        "  (a:Node)" +
+        ", (b:Node)" +
+        ", (c:Node)" +
+        ", (d:Node)" +
+        ", (e:Node)" +
+        ", (f:Node)" +
+        ", (g:Node)" +
+        ", (h:Node)" +
+        ", (i:Node)" +
+        // {J}
+        ", (j:Node)" +
+        // {A, B, C, D}
+        ", (a)-[:TYPE]->(b)" +
+        ", (b)-[:TYPE]->(c)" +
+        ", (c)-[:TYPE]->(d)" +
+        ", (a)-[:TYPE]->(c)" +
+        // {E, F, G}
+        ", (e)-[:TYPE]->(f)" +
+        ", (f)-[:TYPE]->(g)" +
+        // {H, I}
+        ", (i)-[:TYPE]->(h)";
 
     @Inject
     private TestGraph graph;
+
+    @Inject
+    IdFunction idFunction;
 
     @Test
     void runSSSP() {
@@ -72,7 +76,7 @@ class SingleSourceShortestPathPregelAlgoTest {
         var config = ImmutableSingleSourceShortestPathPregelConfig.builder()
             .maxIterations(maxIterations)
             .isAsynchronous(true)
-            .startNode(0)
+            .startNode(idFunction.of("a"))
             .build();
 
         var pregelJob = Pregel.create(
