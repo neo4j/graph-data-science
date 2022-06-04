@@ -87,9 +87,28 @@ public class MasterComputeContext<CONFIG extends PregelConfig> extends PregelCon
     }
 
     /**
+     * Returns the corresponding node id in the original graph for the given internal node id.
+     *
+     * @param internalNodeId a node id in the in-memory graph
+     */
+    public long toOriginalId(long internalNodeId) {
+        return graph.toOriginalNodeId(internalNodeId);
+    }
+
+    /**
+     * Returns the corresponding node id in the internal graph for the given original node id.
+     *
+     * @param originalNodeId a node id in the original graph
+     */
+    public long toInternalId(long originalNodeId) {
+        return graph.toMappedNodeId(originalNodeId);
+    }
+
+    /**
      * Accepts a consumer function that is called for every node in the graph.
      * The consumer receives one node id at the time.
      * If the consumer returns true, the next node is passed in. Otherwise the iteration stops.
+     *
      * @param consumer
      */
     public void forEachNode(LongPredicate consumer) {

@@ -113,6 +113,31 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
     }
 
     /**
+     * Returns the corresponding node id in the original graph for the current node id.
+     */
+    public long toOriginalId() {
+        return toOriginalId(nodeId());
+    }
+
+    /**
+     * Returns the corresponding node id in the original graph for the given internal node id.
+     *
+     * @param internalNodeId a node id in the in-memory graph
+     */
+    public long toOriginalId(long internalNodeId) {
+        return internalNodeId;
+    }
+
+    /**
+     * Returns the corresponding node id in the internal graph for the given original node id.
+     *
+     * @param originalNodeId a node id in the original graph
+     */
+    public long toInternalId(long originalNodeId) {
+        return originalNodeId;
+    }
+
+    /**
      * Calls the consumer for each neighbor of the currently processed node.
      */
     public void forEachNeighbor(LongConsumer targetConsumer) {

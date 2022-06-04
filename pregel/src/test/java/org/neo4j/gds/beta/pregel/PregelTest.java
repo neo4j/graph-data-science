@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.GdlBuilder;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
@@ -55,6 +56,7 @@ import org.neo4j.gds.extension.TestGraph;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -439,6 +441,64 @@ class PregelTest {
                 2242160L
             )
         );
+    }
+
+    @Test
+    void testIdMapping() {
+        var idSupplier = new AtomicLong(42);
+        var graph = new GdlBuilder()
+            .gdl("(a)")
+            .idSupplier(idSupplier::getAndIncrement)
+            .build();
+
+        var originalId = graph.toOriginalNodeId("a");
+        assertThat(originalId).isEqualTo(42);
+
+        var ranInit = new AtomicBoolean(false);
+        var ranCompute = new AtomicBoolean(false);
+        var ranMaster = new AtomicBoolean(false);
+
+        Pregel.create(
+            graph,
+            ImmutablePregelConfig.builder().maxIterations(1).build(),
+            new PregelComputation<>() {
+
+                @Override
+                public PregelSchema schema(PregelConfig config) {
+                    return new PregelSchema.Builder().add("foo", ValueType.LONG).build();
+                }
+
+                @Override
+                public void init(InitContext<PregelConfig> context) {
+                    assertThat(context.toOriginalId()).isEqualTo(originalId);
+                    assertThat(context.toOriginalId(context.nodeId())).isEqualTo(originalId);
+                    assertThat(context.toInternalId(originalId)).isEqualTo(context.nodeId());
+                    ranInit.set(true);
+                }
+
+                @Override
+                public void compute(ComputeContext<PregelConfig> context, Messages messages) {
+                    assertThat(context.toOriginalId()).isEqualTo(originalId);
+                    assertThat(context.toOriginalId(context.nodeId())).isEqualTo(originalId);
+                    assertThat(context.toInternalId(originalId)).isEqualTo(context.nodeId());
+                    ranCompute.set(true);
+                }
+
+                @Override
+                public boolean masterCompute(MasterComputeContext<PregelConfig> context) {
+                    assertThat(context.toOriginalId(0)).isEqualTo(originalId);
+                    assertThat(context.toInternalId(originalId)).isEqualTo(0);
+                    ranMaster.set(true);
+                    return true;
+                }
+            },
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).run();
+
+        assertThat(ranInit.get()).isTrue();
+        assertThat(ranCompute.get()).isTrue();
+        assertThat(ranMaster.get()).isTrue();
     }
 
     @ParameterizedTest
