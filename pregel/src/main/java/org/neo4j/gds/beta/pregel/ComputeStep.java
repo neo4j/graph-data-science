@@ -67,6 +67,14 @@ public interface ComputeStep<CONFIG extends PregelConfig, ITERATOR extends Messa
         return graph().degree(nodeId);
     }
 
+    default long toOriginalNodeId(long internalNodeId) {
+        return graph().toOriginalNodeId(internalNodeId);
+    }
+
+    default long toInternalNodeId(long originalNodeId) {
+        return graph().toMappedNodeId(originalNodeId);
+    }
+
     default void voteToHalt(long nodeId) {
         voteBits().set(nodeId);
     }

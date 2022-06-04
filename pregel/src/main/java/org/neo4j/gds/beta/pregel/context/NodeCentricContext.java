@@ -125,7 +125,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param internalNodeId a node id in the in-memory graph
      */
     public long toOriginalId(long internalNodeId) {
-        return internalNodeId;
+        return computeStep.toOriginalNodeId(internalNodeId);
     }
 
     /**
@@ -134,7 +134,7 @@ public abstract class NodeCentricContext<CONFIG extends PregelConfig> extends Pr
      * @param originalNodeId a node id in the original graph
      */
     public long toInternalId(long originalNodeId) {
-        return originalNodeId;
+        return computeStep.toInternalNodeId(originalNodeId);
     }
 
     /**
