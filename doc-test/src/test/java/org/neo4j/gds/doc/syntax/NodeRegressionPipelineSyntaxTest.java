@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.doc.syntax;
 
+import org.junit.jupiter.api.Disabled;
+
 import java.util.List;
 
+@Disabled("Until we figure out how to handle xref macros")
 class NodeRegressionPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
