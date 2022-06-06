@@ -80,7 +80,7 @@
 *** xref:beta-algorithms/random-walk.adoc[]
 *** xref:algorithms/bfs.adoc[]
 *** xref:algorithms/dfs.adoc[]
-** xref:machine-learning/node-embeddings.adoc[]
+** xref:machine-learning/node-embeddings/index.adoc[]
 *** xref:machine-learning/node-embeddings/fastrp.adoc[]
 *** xref:machine-learning/node-embeddings/graph-sage.adoc[]
 *** xref:machine-learning/node-embeddings/node2vec.adoc[]
