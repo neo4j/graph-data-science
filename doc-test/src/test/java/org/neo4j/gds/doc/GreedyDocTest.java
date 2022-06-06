@@ -28,7 +28,7 @@ import java.util.List;
 class GreedyDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 

@@ -67,6 +67,9 @@ project(':cypher-test').projectDir = file('cypher/cypher-test')
 include('doc')
 project(':doc').projectDir = file('doc')
 
+include('doc-test-tools')
+project(':doc-test-tools').projectDir = file('doc-test-tools')
+
 include('doc-test')
 project(':doc-test').projectDir = file('doc-test')
 

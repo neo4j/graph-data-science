@@ -38,10 +38,6 @@ import java.util.List;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 
 @ExtendWith(SoftAssertionsExtension.class)
 public abstract class SyntaxTestBase {
@@ -66,7 +62,7 @@ public abstract class SyntaxTestBase {
             .includeProcessor(new PartialsIncludeProcessor())
             .postprocessor(syntaxPostProcessor(softAssertions));
 
-        var docFile = adocPath().resolve(adocFile()).toFile();
+        var docFile = adocPath().toFile();
         assertThat(docFile).exists().canRead();
 
         var options = OptionsBuilder.options()
@@ -79,15 +75,15 @@ public abstract class SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
+            SyntaxModeMeta.of(SyntaxMode.STREAM),
+            SyntaxModeMeta.of(SyntaxMode.STATS),
+            SyntaxModeMeta.of(SyntaxMode.MUTATE),
+            SyntaxModeMeta.of(SyntaxMode.WRITE)
         );
     }
 
     Path adocPath() {
-        return ASCIIDOC_PATH;
+        return ASCIIDOC_PATH.resolve(adocFile());
     }
 
     protected abstract String adocFile();

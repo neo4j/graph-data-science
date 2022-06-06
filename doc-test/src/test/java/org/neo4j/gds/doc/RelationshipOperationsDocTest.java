@@ -31,7 +31,7 @@ import java.util.List;
 final class RelationshipOperationsDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 

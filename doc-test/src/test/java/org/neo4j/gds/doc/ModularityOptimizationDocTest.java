@@ -30,7 +30,7 @@ import java.util.List;
 class ModularityOptimizationDocTest extends DocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 

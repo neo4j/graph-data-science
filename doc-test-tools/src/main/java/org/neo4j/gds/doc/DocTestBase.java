@@ -57,10 +57,8 @@ public abstract class DocTestBase extends BaseProcTest {
 
     protected abstract String adocFile();
 
-    protected abstract List<Class<?>> procedures();
-
     Path adocPath() {
-        return ASCIIDOC_PATH;
+        return ASCIIDOC_PATH.resolve(adocFile());
     }
 
     @BeforeEach
@@ -77,7 +75,7 @@ public abstract class DocTestBase extends BaseProcTest {
                 .includeProcessor(new PartialsIncludeProcessor())
                 .treeprocessor(treeProcessor);
 
-            var docFile = adocPath().resolve(adocFile()).toFile();
+            var docFile = adocPath().toFile();
             assertThat(docFile).exists().canRead();
 
             var options = OptionsBuilder.options()
@@ -131,11 +129,13 @@ public abstract class DocTestBase extends BaseProcTest {
         });
     }
 
-    List<Class<?>> functions() {
+    protected abstract List<Class<?>> procedures();
+
+    protected List<Class<?>> functions() {
         return List.of();
     }
 
-    List<Class<?>> aggregationFunctions() {
+    protected List<Class<?>> aggregationFunctions() {
         return List.of();
     }
 
