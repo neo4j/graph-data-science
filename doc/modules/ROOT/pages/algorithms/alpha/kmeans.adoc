@@ -1,0 +1,294 @@
+[[alpha-algorithms-k-means]]
+[.alpha]
+= K-Means Clustering
+:description: This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: cluster
+:algorithm: K-Means
+
+
+[abstract]
+--
+This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-k-means-intro]]
+== Introduction
+
+K-Means clustering is an unsupervised learning algorithm that is used to solve clustering problems.
+It follows a simple procedure of classifying a given data set into a number of clusters, defined by the parameter `k`.
+The clusters are then positioned as points and all observations or data points are associated with the nearest cluster, computed, adjusted and then the process starts over using the new adjustments until a desired result is reached.
+
+For more information on this algorithm, see:
+
+* https://en.wikipedia.org/wiki/K-means_clustering
+
+
+[[algorithms-k-means-syntax]]
+== Syntax
+
+
+.K-Means syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run K-Means in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  communityId: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                      | Type      | Description
+| nodeId                    | Integer   | Node ID.
+| communityId               | Integer   | The community ID.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run K-Means in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
+| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run K-Means in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
+====
+
+
+[[alpha-algorithms-k-means-examples]]
+== Examples
+
+:algorithm-name: K-Means
+:graph-description: cities
+:image-file: cities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source,cypher,role=noplay setup-query]
+----
+CREATE
+  (:City {name: 'Surbiton', coordinates: [51.39148, -0.29825]}),
+  (:City {name: 'Liverpool', coordinates: [53.41058, -2.97794]}),
+  (:City {name: 'Kingston upon Thames', coordinates: [51.41259, -0.2974]}),
+  (:City {name: 'Sliven', coordinates: [42.68583, 26.32917]}),
+  (:City {name: 'Solna', coordinates: [59.36004, 18.00086]}),
+  (:City {name: 'Örkelljunga', coordinates: [56.28338, 13.27773]}),
+  (:City {name: 'Malmö', coordinates: [55.60587, 13.00073]}),
+  (:City {name: 'Xánthi', coordinates: [41.13488, 24.888]});
+----
+
+This graph is composed of various _City_ nodes, in three global locations - United Kingdom, Sweden and the Balkan region in Europe.
+
+We can now project the graph and store it in the graph catalog.
+We load the `City` node label with `coordinates` node property.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source,cypher,role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'cities',
+    {
+      City: {
+        properties: 'coordinates'
+      }
+    },
+    '*'
+)
+----
+
+In the following examples we will demonstrate using the K-Means algorithm on this graph to find communities of cities that are close to each other geographically.
+
+[[alpha-algorithms-k-means-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.stream('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  randomSeed: 42
+})
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY communityId, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name                  | communityId
+|"Kingston upon Thames" | 0
+|"Liverpool"            | 0
+|"Surbiton"             | 0
+|"Sliven"               | 1
+|"Xánthi"               | 1
+|"Malmö"                | 2
+|"Solna"                | 2
+|"Örkelljunga"          | 2
+|===
+--
+
+In the example above we can see that the cities are geographically clustered together.
+
+
+[[alpha-algorithms-k-means-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-k-means-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.stats('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  randomSeed: 42
+})
+YIELD communityDistribution
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| communityDistribution
+| { "p99": 3, "min": 2, "max": 3, "mean": 2.6666666666666665, "p90": 3, "p50": 3, "p999": 3, "p95": 3, "p75": 3 }
+|===
+--
+
+
+[[algorithms-leiden-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example, no-result=true]
+--
+.The following will run the algorithm and store the results in `cities` graph:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.mutate('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  randomSeed: 42,
+  mutateProperty: 'kmeans'
+})
+YIELD communityDistribution
+----
+
+.Results
+[opts="header"]
+|===
+| communityDistribution
+| { "p99": 3, "min": 2, "max": 3, "mean": 2.6666666666666665, "p90": 3, "p50": 3, "p999": 3, "p95": 3, "p75": 3 }
+|===
+--
+
+In `mutate` mode, only a single row is returned by the procedure.
+The result is written to the GDS in-memory graph instead of the Neo4j database.

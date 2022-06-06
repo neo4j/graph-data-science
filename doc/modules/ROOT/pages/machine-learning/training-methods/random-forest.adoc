@@ -1,0 +1,109 @@
+[[machine-learning-training-methods-random-forest]]
+[.alpha]
+= Random forest
+
+Random forest is a popular supervised machine learning method for classification and regression that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
+To train the random forest is to train each of its decision trees independently.
+Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.
+
+The idea is that the difference in how each decision tree is trained will help avoid overfitting which is not uncommon when just training a single decision tree on the entire training set.
+The approach of combining several predictors (in this case decision trees) is also known as _ensemble learning_, and using different parts of the training set for each predictor is often referred to as _bootstrap aggregating_ or _bagging_.
+
+
+== Classification
+
+For classification, a random forest prediction is made by simply taking a majority vote of its decision trees' predictions.
+The impurity criteria available for computing the potential of a node split in decision tree classifier training in GDS are https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity] (default) and https://en.wikipedia.org/wiki/Entropy_(information_theory)[Entropy].
+
+Random forest classification is available for the training of xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[node classification] and xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[link prediction] pipelines.
+
+
+== Regression
+
+For regression, a random forest prediction is made by simply taking the average of its decision trees' predictions.
+The impurity criterion used for computing the potential of a node split in decision tree regressor training in GDS is https://en.wikipedia.org/wiki/Mean_squared_error[Mean squared error].
+
+Random forest regression is available for the training of node regression pipelines.
+
+
+== Tuning the hyperparameters
+
+In order to balance matters such as bias vs variance of the model, and speed vs memory consumption of the training, GDS exposes several hyperparameters that one can tune.
+Each of these are described below.
+
+
+=== Number of decision trees
+
+This parameter sets the number of decision trees that will be part of the random forest.
+
+Having a too small number of trees could mean that the model will overfit to some parts of the dataset.
+
+A larger number of trees will in general mean that the training takes longer, and the memory consumption will be higher.
+
+
+=== Max features ratio
+
+For each node split in a decision tree, a set of features of the feature vectors are considered.
+The number of such features considered is the `maxFeaturesRatio` multiplied by the total number of features.
+If the number of features to be considered are fewer than the total number of features, a subset of all features are sampled (without replacement).
+This is sometimes referred to as _feature bagging_.
+
+A high (close to 1.0) max features ratio means that the training will take longer as there are more options for how to split nodes in the decision trees.
+It will also mean that each decision tree will be better at predictions over the training set.
+While this is positive in some sense, it might also mean that each decision tree will overfit on the training set.
+
+
+=== Max depth
+
+This parameter sets the maximum depth of the decision trees in the random forest.
+
+A high maximum depth means that the training might take longer, as more node splits might need to be considered.
+The memory footprint of the produced prediction model might also be higher since the trees simply may be larger (deeper).
+
+A deeper decision tree may be able to better fit to the training set, but that may also mean that it overfits.
+
+
+=== Min leaf size
+
+This parameter sets the minimum number of training samples required to be present in a leaf node of a decision tree.
+
+A large leaf size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
+It will likely also mean that the training and prediction will be faster, since probably the trees will contain fewer nodes.
+
+
+=== Min split size
+
+This parameter sets the minimum number of training samples required to be present in a node of a decision tree in order for it to be split during training.
+To split a node means to continue the tree construction process to add further children below the node.
+
+A large split size means less specialization on the training set, and thus possibly worse performance on the training set, but possibly avoiding overfitting.
+It will likely also mean that the training and prediction will be faster, since probably fewer node splits will be considered, and thus the trees will contain fewer nodes.
+
+
+=== Number of samples ratio
+
+Each decision tree in the random forest is trained using a subset of the training set.
+This subset is sampled with replacement, meaning that a feature vector of the training may be sampled several times for a single decision tree.
+The number of training samples for each decision tree is the `numberOfSamplesRatio` multiplied by the total number of samples in the training set.
+
+A high ratio will likely imply better generalization for each decision tree, but not necessarily so for the random forest overall.
+Training will also take longer as more feature vectors will need to be considered in each node split of each decision tree.
+
+The special value of 0.0 is used to indicate no sampling.
+In this case all feature vectors of the training set will be used for training by every decision tree in the random forest.
+
+
+=== Criterion (Classification only)
+
+When deciding how to split a node in a decision tree, potential splits are evaluated using an _impurity criterion_.
+The lower the combined impurity of the two potential child nodes, the better the split is deemed to be.
+For random forest classification in GDS, there are two options, specified via the `criterion` configuration parameter, for such impurity criteria:
+
+* Gini impurity:
+** A measure of how often a randomly chosen element from the set would be incorrectly labeled if it was randomly labeled according to the distribution of labels in the set
+** Selected to use via the string `"GINI"`
+* Entropy:
+** An information theoretic measure of the amount of uncertainty in a set
+** Selected to use via the string `"ENTROPY"`
+
+It's hard to say apriori which criterion is best for a particular problem, but in general using Gini impurity will imply faster training since using Entropy requires computing logarithms.

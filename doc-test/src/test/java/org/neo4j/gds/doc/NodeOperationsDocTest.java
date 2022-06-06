@@ -52,7 +52,7 @@ final class NodeOperationsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-catalog-node-ops.adoc";
+        return "pages/graph-catalog-node-ops.adoc";
     }
 
 }

@@ -1,0 +1,4 @@
+ifeval::["{modelType}" != ""]
+| modelName                                                     | String   | n/a     | no       | The name of a {modelType} model in the model catalog.
+endif::[]
+include::partial$/algorithms/common-configuration/common-configuration-entries.adoc[]

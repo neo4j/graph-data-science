@@ -40,6 +40,6 @@ class DfsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/dfs/dfs.adoc";
+        return "pages/algorithms/dfs.adoc";
     }
 }

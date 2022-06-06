@@ -1,0 +1,6 @@
+.Random Forest Classification configuration
+[opts="header",cols="3,4,5m,2,7"]
+|===
+include::partial$/machine-learning/training-methods/random-forest-common-config.adoc[]
+| criterion | String | "GINI" | yes | The impurity criterion used to evaluate potential node splits during decision tree training. Valid options are `"GINI"` and `"ENTROPY"` (both case-insensitive).
+|===

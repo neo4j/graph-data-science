@@ -38,7 +38,7 @@ class FastRPKnnDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "end-to-end-examples/fastrp-knn-example.adoc";
+        return "pages/end-to-end-examples/fastrp-knn-example.adoc";
     }
 
 }

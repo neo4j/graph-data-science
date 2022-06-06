@@ -1,0 +1,18 @@
+[[node-property-prediction]]
+= Node property prediction
+:description: This chapter provides explanations and examples for the node property prediction pipelines in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This chapter provides explanations and examples for the node property prediction pipelines in the Neo4j Graph Data Science library.
+--
+
+Node property prediction pipelines provide an end-to-end workflow for predicting either discrete labels or numerical values for nodes with supervised machine learning.
+The Neo4j Graph Data Science library support the following node property prediction pipelines:
+
+* Beta
+** xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node classification pipelines]
+* Alpha
+** xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[Node regression pipelines]
+
+

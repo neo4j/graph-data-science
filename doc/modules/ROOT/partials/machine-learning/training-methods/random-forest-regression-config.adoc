@@ -1,0 +1,5 @@
+.Random Forest Regression configuration
+[opts="header",cols="3,4,5m,2,7"]
+|===
+include::partial$/machine-learning/training-methods/random-forest-common-config.adoc[]
+|===

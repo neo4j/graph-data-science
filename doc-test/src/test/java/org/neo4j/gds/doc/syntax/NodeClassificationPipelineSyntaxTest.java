@@ -41,6 +41,6 @@ class NodeClassificationPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/node-property-prediction/nodeclassification-pipeline/nodeclassification.adoc";
+        return "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc";
     }
 }

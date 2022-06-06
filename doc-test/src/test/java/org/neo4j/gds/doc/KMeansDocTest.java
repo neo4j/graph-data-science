@@ -46,7 +46,7 @@ class KMeansDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/kmeans/kmeans.adoc";
+        return "pages/algorithms/alpha/kmeans.adoc";
     }
 
 }

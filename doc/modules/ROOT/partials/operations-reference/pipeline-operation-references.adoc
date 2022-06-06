@@ -1,0 +1,14 @@
+[[appendix-a-pipeline-ops]]
+== Pipeline Catalog
+
+=== Beta Tier
+
+.List of all beta pipeline catalog operations in the GDS library.
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+| Description                                                | Operation
+| xref::pipeline-catalog/exists.adoc[Check if a pipeline exists]    | `gds.beta.pipeline.exists`
+| xref::pipeline-catalog/drop.adoc[Remove a pipeline from memory]   | `gds.beta.pipeline.drop`
+| xref::pipeline-catalog/list.adoc[List pipelines]                  | `gds.beta.pipeline.list`
+|===

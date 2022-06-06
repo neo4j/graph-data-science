@@ -46,7 +46,7 @@ class DeltaSingleSourceDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/shortest-path/delta-single-source.adoc";
+        return "pages/algorithms/delta-single-source.adoc";
     }
 
 }

@@ -1,0 +1,554 @@
+[[algorithms-betweenness-centrality]]
+= Betweenness Centrality
+:description: This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
+:entity: node
+:result: centrality
+:algorithm: Betweenness Centrality
+
+[abstract]
+--
+This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
+--
+
+:directed:
+:undirected:
+:homogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-betweenness-centrality-intro]]
+== Introduction
+
+Betweenness centrality is a way of detecting the amount of influence a node has over the flow of information in a graph.
+It is often used to find nodes that serve as a bridge from one part of a graph to another.
+
+The algorithm calculates unweighted shortest paths between all pairs of nodes in a graph.
+Each node receives a score, based on the number of shortest paths that pass through the node.
+Nodes that more frequently lie on shortest paths between other nodes will have higher betweenness centrality scores.
+
+The GDS implementation is based on https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Brandes' approximate algorithm^] for unweighted graphs.
+The implementation requires _O(n + m)_ space and runs in _O(n * m)_ time, where _n_ is the number of nodes and _m_ the number of relationships in the graph.
+
+For more information on this algorithm, see:
+
+* https://www.eecs.wsu.edu/~assefaw/CptS580-06/papers/brandes01centrality.pdf[A Faster Algorithm for Betweenness Centrality^]
+* https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Centrality Estimation in Large Networks^]
+* http://moreno.ss.uci.edu/23.pdf[A Set of Measures of Centrality Based on Betweenness^]
+
+[NOTE]
+====
+Running this algorithm requires sufficient memory availability.
+Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+====
+
+
+[[algorithms-betweenness-centrality-considerations]]
+== Considerations and sampling
+
+The Betweenness Centrality algorithm can be very resource-intensive to compute.
+https://www.uni-konstanz.de/mmsp/pubsys/publishedFiles/BrPi07.pdf[Brandes' approximate algorithm^] computes single-source shortest paths (SSSP) for a set of source nodes.
+When all nodes are selected as source nodes, the algorithm produces an exact result.
+However, for large graphs this can potentially lead to very long runtimes.
+Thus, approximating the results by computing the SSSPs for only a subset of nodes can be useful.
+In GDS we refer to this technique as _sampling_, where the size of the source node set is the _sampling size_.
+
+There are two things to consider when executing the algorithm on large graphs:
+
+* A higher parallelism leads to higher memory consumption as each thread executes SSSPs for a subset of source nodes sequentially.
+** In the worst case, a single SSSP requires the whole graph to be duplicated in memory.
+* A higher sampling size leads to more accurate results, but also to a potentially much longer execution time.
+
+Changing the values of the configuration parameters `concurrency` and `samplingSize`, respectively, can help to manage these considerations.
+
+
+[[algorithms-betweenness-centrality-sampling-strategies]]
+=== Sampling strategies
+
+Brandes defines several strategies for selecting source nodes.
+The GDS implementation is based on the random degree selection strategy, which selects nodes with a probability proportional to their degree.
+The idea behind this strategy is that such nodes are likely to lie on many shortest paths in the graph and thus have a higher contribution to the betweenness centrality score.
+
+
+[[algorithms-betweenness-centrality-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Betweenness Centrality syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Betweenness Centrality in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stream(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  nodeId: Integer,
+  score: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/betweenness-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name   | Type    | Description
+| nodeId | Integer | Node ID.
+| score  | Float   | Betweenness Centrality score.
+|===
+======
+
+
+[.include-with-stats]
+======
+.Run Betweenness Centrality in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/betweenness-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-mutate]
+======
+.Run Betweenness Centrality in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/betweenness-centrality/specific-configuration.adoc[]
+|===
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| mutateMillis           | Integer   | Milliseconds for adding properties to the in-memory graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the in-memory graph.
+| configuration          | Map       | Configuration used for running the algorithm.
+|===
+======
+
+
+[.include-with-write]
+======
+.Run Betweenness Centrality in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  centralityDistribution: Map,
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  writeMillis: Integer,
+  nodePropertiesWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/betweenness-centrality/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| centralityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of centrality values.
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis   | Integer   | Milliseconds for computing the statistics.
+| writeMillis            | Integer   | Milliseconds for writing result data back.
+| nodePropertiesWritten  | Integer   | Number of properties written to Neo4j.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+
+
+======
+
+====
+
+
+[[algorithms-betweenness-centrality-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: social network
+:image-file: betweenness_centrality.png
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:User {name: 'Alice'}),
+  (bob:User {name: 'Bob'}),
+  (carol:User {name: 'Carol'}),
+  (dan:User {name: 'Dan'}),
+  (eve:User {name: 'Eve'}),
+  (frank:User {name: 'Frank'}),
+  (gale:User {name: 'Gale'}),
+
+  (alice)-[:FOLLOWS]->(carol),
+  (bob)-[:FOLLOWS]->(carol),
+  (carol)-[:FOLLOWS]->(dan),
+  (carol)-[:FOLLOWS]->(eve),
+  (dan)-[:FOLLOWS]->(frank),
+  (eve)-[:FOLLOWS]->(frank),
+  (frank)-[:FOLLOWS]->(gale);
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for algorithm execution.
+We do this using a native projection targeting the `User` nodes and the `FOLLOWS` relationships.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project('myGraph', 'User', 'FOLLOWS')
+----
+
+In the following examples we will demonstrate using the Betweenness Centrality algorithm on this graph.
+
+
+[[algorithms-betweenness-centrality-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 7                 | 2912     | 2912     | "2912 Bytes"
+|===
+--
+
+As is discussed in xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-considerations[Considerations and sampling] we can configure the memory requirements using the `concurrency` configuration parameter.
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.write.estimate('myGraph', { writeProperty: 'betweenness', concurrency: 1 })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 7         | 7                 | 848      | 848      | "848 Bytes"
+|===
+--
+
+Here we can note that the estimated memory requirements were lower than when running with the default concurrency setting.
+Similarly, using a higher value will increase the estimated memory requirements.
+
+
+[[algorithms-betweenness-centrality-examples-stream]]
+=== Stream
+
+:stream-details: For example, we can order the results to find the nodes with the highest betweenness centrality.
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stream('myGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 8.0
+| "Dan"   | 3.0
+| "Eve"   | 3.0
+| "Frank" | 5.0
+| "Gale"  | 0.0
+|===
+--
+
+We note that the 'Carol' node has the highest score, followed by the 'Frank' node.
+Studying the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples[example graph] we can see that these nodes are in bottleneck positions in the graph.
+The 'Carol' node connects the 'Alice' and 'Bob' nodes to all other nodes, which increases its score.
+In particular, the shortest path from 'Alice' or 'Bob' to any other reachable node passes through 'Carol'.
+Similarly, all shortest paths that lead to the 'Gale' node passes through the 'Frank' node.
+Since 'Gale' is reachable from each other node, this causes the score for 'Frank' to be high.
+
+Conversely, there are no shortest paths that pass through either of the nodes 'Alice', 'Bob' or 'Gale' which causes their betweenness centrality score to be zero.
+
+
+[[algorithms-betweenness-centrality-examples-stats]]
+=== Stats
+
+:stats-details: In particular, Betweenness Centrality returns the minimum, maximum and sum of all centrality scores.
+:stats-syntax: algorithms-betweenness-centrality-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `stats` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stats('myGraph')
+YIELD centralityDistribution
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore
+| 0.0          | 2.714292253766741
+|===
+--
+
+Comparing this to the results we saw in the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples-stream[stream example], we can find our minimum and maximum values from the table.
+It is worth noting that unless the graph has a particular shape involving a directed cycle, the minimum score will almost always be zero.
+
+
+[[algorithms-betweenness-centrality-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.mutate('myGraph', { mutateProperty: 'betweenness' })
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 2.714292253766741          | 7
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, the graph 'myGraph' now has a node property `betweenness` which stores the betweenness centrality score for each node.
+To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+
+
+[[algorithms-betweenness-centrality-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.write('myGraph', { writeProperty: 'betweenness' })
+YIELD centralityDistribution, nodePropertiesWritten
+RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean AS meanScore, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| minimumScore | meanScore                  | nodePropertiesWritten
+| 0.0          | 2.714292253766741          | 7
+|===
+--
+
+The returned result is the same as in the `stats` example.
+Additionally, each of the seven nodes now has a new property `betweenness` in the Neo4j database, containing the betweenness centrality score for that node.
+
+
+[[algorithms-betweenness-centrality-examples-sampling]]
+=== Sampling
+
+Betweenness Centrality can be very resource-intensive to compute.
+To help with this, it is possible to approximate the results using a sampling technique.
+The configuration parameters `samplingSize` and `samplingSeed` are used to control the sampling.
+We illustrate this on our example graph by approximating Betweenness Centrality with a sampling size of two.
+The seed value is an arbitrary integer, where using the same value will yield the same results between different runs of the procedure.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode with a sampling size of two:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stream('myGraph', {samplingSize: 2, samplingSeed: 0})
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 4.0
+| "Dan"   | 2.0
+| "Eve"   | 2.0
+| "Frank" | 2.0
+| "Gale"  | 0.0
+|===
+--
+
+Here we can see that the 'Carol' node has the highest score, followed by a three-way tie between the 'Dan', 'Eve', and 'Frank' nodes.
+We are only sampling from two nodes, where the probability of a node being picked for the sampling is proportional to its outgoing degree.
+The 'Carol' node has the maximum degree and is the most likely to be picked.
+The 'Gale' node has an outgoing degree of zero and is very unlikely to be picked.
+The other nodes all have the same probability to be picked.
+
+With our selected sampling seed of 0, we seem to have selected either of the 'Alice' and 'Bob' nodes, as well as the 'Carol' node.
+We can see that because either of 'Alice' and 'Bob' would add four to the score of the 'Carol' node, and each of 'Alice', 'Bob', and 'Carol' adds one to all of 'Dan', 'Eve', and 'Frank'.
+
+To increase the accuracy of our approximation, the sampling size could be increased.
+In fact, setting the `samplingSize` to the node count of the graph (seven, in our case) will produce exact results.
+
+
+[[algorithms-betweenness-centrality-examples-undirected]]
+=== Undirected
+
+Betweenness Centrality can also be run on undirected graphs.
+To illustrate this, we will project our example graph using the `UNDIRECTED` orientation.
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myUndirectedGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project('myUndirectedGraph', 'User', {FOLLOWS: {orientation: 'UNDIRECTED'}})
+----
+
+Now we can run Betweenness Centrality on our undirected graph.
+The algorithm automatically figures out that the graph is undirected.
+
+
+[WARNING]
+Running the algorithm on an undirected graph is about twice as computationally intensive compared to a directed graph.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode on the undirected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.betweenness.stream('myUndirectedGraph')
+YIELD nodeId, score
+RETURN gds.util.asNode(nodeId).name AS name, score
+ORDER BY name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name    | score
+| "Alice" | 0.0
+| "Bob"   | 0.0
+| "Carol" | 9.5
+| "Dan"   | 3.0
+| "Eve"   | 3.0
+| "Frank" | 5.5
+| "Gale"  | 0.0
+|===
+--
+
+The central nodes now have slightly higher scores, due to the fact that there are more shortest paths in the graph, and these are more likely to pass through the central nodes.
+The 'Dan' and 'Eve' nodes retain the same centrality scores as in the directed case.

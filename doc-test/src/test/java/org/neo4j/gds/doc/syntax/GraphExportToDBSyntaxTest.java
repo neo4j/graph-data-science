@@ -32,6 +32,6 @@ class GraphExportToDBSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-export-database.adoc";
+        return "partials/management-ops/graph-catalog/graph-export-database.adoc";
     }
 }

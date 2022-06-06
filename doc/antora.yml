@@ -1,0 +1,12 @@
+name: graph-data-science
+title: Neo4j Graph Data Science
+version: '2.1-preview'
+start_page: ROOT:index.adoc
+nav:
+- modules/ROOT/content-nav.adoc
+asciidoc:
+  attributes:
+    neo4j-version: '4.1'
+    neo4j-version-exact: '4.1.1'
+    neo4j-buildnumber: '4.1'
+    docs-version: '2.1'

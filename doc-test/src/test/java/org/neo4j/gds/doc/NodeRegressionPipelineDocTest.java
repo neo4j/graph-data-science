@@ -63,6 +63,6 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "machine-learning/node-property-prediction/noderegression-pipeline/noderegression.adoc";
+        return "pages/machine-learning/node-property-prediction/noderegression-pipelines/index.adoc";
     }
 }

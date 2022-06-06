@@ -23,6 +23,6 @@ class ClosenessCentralitySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/closeness/closeness-centrality.adoc";
+        return "pages/algorithms/closeness-centrality.adoc";
     }
 }

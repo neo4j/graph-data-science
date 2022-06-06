@@ -1,5 +1,0 @@
-.Random Forest Regression configuration
-[opts="header",cols="3,4,5m,2,7"]
-|===
-include::random-forest-common-config.adoc[]
-|===

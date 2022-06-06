@@ -44,6 +44,6 @@ class ScalePropertiesDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/scale-properties/scale-properties.adoc";
+        return "pages/alpha-algorithms/scale-properties.adoc";
     }
 }

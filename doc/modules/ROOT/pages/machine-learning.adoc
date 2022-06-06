@@ -1,0 +1,26 @@
+[[machine-learning]]
+= Machine learning
+:description: This chapter provides explanations and examples for the supervised machine learning in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This chapter provides explanations and examples for the supervised machine learning in the Neo4j Graph Data Science library.
+--
+
+In GDS, our pipelines offer an end-to-end workflow, from feature extraction to training and applying machine learning models.
+Pipelines can be inspected through the xref::pipeline-catalog/index.adoc[Pipeline catalog].
+The trained models can then be accessed via the xref::model-catalog/index.adoc[Model catalog] and used to make predictions about your graph.
+
+To help with building the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
+
+* xref::machine-learning/pre-processing.adoc[Pre-processing]
+* xref::machine-learning/training-methods/index.adoc[Training methods]
+
+The Neo4j GDS library includes the following pipelines to train and apply machine learning models, grouped by quality tier:
+
+* Beta
+** xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node Classification Pipelines]
+** xref::machine-learning/linkprediction-pipelines/index.adoc[Link Prediction Pipelines]
+
+* Alpha
+** xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[Node Regression Pipelines]

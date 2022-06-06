@@ -1,0 +1,53 @@
+[[common-usage]]
+= Common usage
+:description: This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library.
+--
+
+The GDS library usage pattern is typically split in two phases: development and production.
+In the development phase the goal is to establish a workflow of useful algorithms.
+In order to do this, the system must be configured, graph projections must be defined, and algorithms must be selected.
+It is typical to make use of the memory estimation features of the library.
+This enables you to successfully configure your system to handle the amount of data to be processed.
+There are two kinds of resources to keep in mind: the projected graph and the algorithm data structures.
+
+In the production phase, the system would be configured appropriately to successfully run the desired algorithms.
+The sequence of operations would normally be to project a graph, run one or more algorithms on it, and consume results.
+
+The below image illustrates an overview of standard operation of the GDS library:
+
+image::projected-graph-model.png[width="850px"]
+
+[NOTE]
+====
+The GDS library runs its procedures greedily in terms of system resources. That means that each procedure will try to use:
+
+* as much memory as it needs (see xref::common-usage/memory-estimation.adoc[Memory estimation])
+* as many CPU cores as it needs (not exceeding the limits of the `concurrency` it's configured to run with)
+
+Concurrently running procedures share the resources of the system hosting the DBMS and as such may affect each other's performance.
+To get an overview of the status of the system you can use the xref::common-usage/monitoring-system.adoc[System monitor procedure].
+====
+
+The more detail on each individual operation, see the corresponding section:
+
+1. xref::management-ops/graph-catalog-ops.adoc[Graph Catalog]
+2. xref::common-usage/projecting-graphs.adoc[Projecting graphs]
+3. xref::common-usage/running-algos.adoc[Running algorithms]
+
+
+In this chapter, we will go through these aspects and guide you towards the most useful operations.
+
+This chapter is divided into the following sections:
+
+* xref::common-usage/memory-estimation.adoc[Memory Estimation]
+* xref::common-usage/projecting-graphs.adoc[Projecting graphs]
+* xref::common-usage/running-algos.adoc[Running algorithms]
+* xref::common-usage/logging.adoc[Logging]
+* xref::common-usage/monitoring-system.adoc[Monitoring system]
+* xref::common-usage/debug-sysinfo.adoc[System Information]
+
+

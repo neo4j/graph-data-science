@@ -37,6 +37,6 @@ class LeidenSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/leiden/leiden.adoc";
+        return "pages/algorithms/alpha/leiden.adoc";
     }
 }

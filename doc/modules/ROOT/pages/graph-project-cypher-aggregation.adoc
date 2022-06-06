@@ -1,0 +1,557 @@
+[[catalog-graph-project-cypher-aggregation]]
+= Projecting graphs using Cypher Aggregation
+:description: This section details projecting GDS graphs using `Cypher` aggregations.
+
+[abstract]
+--
+This section details projecting GDS graphs using `Cypher` aggregations.
+--
+
+
+A projected graph can be stored in the catalog under a user-defined name.
+Using that name, the graph can be referred to by any algorithm in the library.
+This allows multiple algorithms to use the same graph without having to project it on each algorithm run.
+
+Using Cypher aggregations is a more flexible and expressive approach with diminished focus on performance compared to the xref::graph-project.adoc[native projections].
+Cypher projections are primarily recommended for the development phase (see xref::common-usage/index.adoc[Common usage]).
+
+[NOTE]
+--
+There is also a way to generate a random graph, see xref::alpha-algorithms/graph-generation.adoc[Graph Generation] documentation for more details.
+--
+
+[NOTE]
+--
+The projected graph will reside in the catalog until:
+
+- the graph is dropped using xref::graph-drop.adoc[gds.graph.drop]
+- the Neo4j database from which the graph was projected is stopped or dropped
+- the Neo4j database management system is stopped.
+--
+
+
+[[graph-project-cypher-aggregation-syntax]]
+== Syntax
+
+A Cypher aggregation is used in a query as an aggregation over the relationships that are being projected.
+It takes three mandatory arguments: `graphName`, `sourceNode` and `targetNode`.
+In addition, the optional `sourceNodeProperties`, `targetNodeProperties`, and `relationshipProperties` parameters allows us to project properties.
+
+[.graph-project-cypher-aggregation-syntax]
+--
+[source, cypher, role=noplay]
+----
+RETURN gds.alpha.graph.project(
+    graphName: String,
+    sourceNode: Node or Integer,
+    targetNode: Node or Integer,
+    nodesConfig: Map,
+    relationshipConfig: Map
+) YIELD
+    graphName: String,
+    nodeCount: Integer,
+    relationshipCount: Integer,
+    projectMillis: Integer
+----
+
+.Parameters
+[opts="header",cols="1,1,8"]
+|===
+| Name               | Optional | Description
+| graphName          | no       | The name under which the graph is stored in the catalog.
+| sourceNode         | no       | The source node of the relationship. Must not be null.
+| targetNode         | yes      | The target node of the relationship. The targetNode can be null (for example due to an `OPTIONAL MATCH`), in which case the source node is projected as an unconnected node.
+| nodesConfig        | yes      | Properties and Labels configuration for the source and target nodes.
+| relationshipConfig | yes      | Properties and Type configuration for the relationship.
+|===
+
+.Results
+[opts="header",cols="2,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name under which the graph is stored in the catalog.
+| nodeCount              | Integer  | The number of nodes stored in the projected graph.
+| relationshipCount      | Integer  | The number of relationships stored in the projected graph.
+| projectMillis          | Integer  | Milliseconds for projecting the graph.
+|===
+--
+
+NOTE: To get information about a stored graph, such as its schema, one can use xref::graph-list.adoc[gds.graph.list].
+
+
+[[graph-project-cypher-aggregation-examples]]
+== Examples
+
+In order to demonstrate the GDS Cypher Aggregation we are going to create a small social network graph in Neo4j.
+The example graph looks like this:
+
+image::example-graphs/graph-project-example.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (florentin:Person { name: 'Florentin', age: 16 }),
+  (adam:Person { name: 'Adam', age: 18 }),
+  (veselin:Person { name: 'Veselin', age: 20, ratings: [5.0] }),
+  (hobbit:Book { name: 'The Hobbit', isbn: 1234, numberOfPages: 310, ratings: [1.0, 2.0, 3.0, 4.5] }),
+  (frankenstein:Book { name: 'Frankenstein', isbn: 4242, price: 19.99 }),
+
+  (florentin)-[:KNOWS { since: 2010 }]->(adam),
+  (florentin)-[:KNOWS { since: 2018 }]->(veselin),
+  (florentin)-[:READ { numberOfPages: 4 }]->(hobbit),
+  (florentin)-[:READ { numberOfPages: 42 }]->(hobbit),
+  (adam)-[:READ { numberOfPages: 30 }]->(hobbit),
+  (veselin)-[:READ]->(frankenstein)
+----
+
+
+[[graph-project-cypher-aggregation-example-single-label-type]]
+=== Simple graph
+
+A simple graph is a graph with only one node label and relationship type, i.e., a monopartite graph.
+We are going to start with demonstrating how to load a simple graph by projecting only the `Person` node label and `KNOWS` relationship type.
+
+[role=query-example]
+--
+.Project `Person` nodes and `KNOWS` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.alpha.graph.project('persons', source, target) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1m"]
+|===
+| graph     | nodes | rels
+| "persons" | 3     | 2
+|===
+--
+
+==== Graph with unconnected nodes
+
+In order to project nodes that are not connected, we can use an `OPTIONAL MATCH`.
+To demonstrate we are projecting all nodes, where some might be connected with the `KNOWS` relationship type.
+
+[role=query-example]
+--
+.Project all nodes and `KNOWS` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source) OPTIONAL MATCH (source)-[r:KNOWS]->(target)
+WITH gds.alpha.graph.project('persons', source, target) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1m"]
+|===
+| graph     | nodes | rels
+| "persons" | 5     | 2
+|===
+--
+
+
+=== Arbitrary source and target ID values
+
+So far, the examples showed how to project a graph based on existing nodes.
+It is also possible to pass INTEGER values directly.
+
+[role=query-example]
+--
+.Project arbitrary id values:
+[source, cypher, role=noplay]
+----
+UNWIND [ [42, 84], [13, 37], [19, 84] ] AS sourceAndTarget
+WITH sourceAndTarget[0] AS source, sourceAndTarget[1] AS target
+WITH gds.alpha.graph.project('arbitrary', source, target) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1m"]
+|===
+| graph       | nodes | rels
+| "arbitrary" | 5     | 3
+|===
+--
+
+[NOTE]
+--
+The projected graph does not know that the IDs did not originate from an existing node.
+Any procedure that interacts with the underlying db (such as the `.write` procedures)
+will likely produce wrong results or trigger exceptions.
+--
+
+
+=== Multi-graph
+
+A multi-graph is a graph with multiple node labels and relationship types.
+
+To retain the label when we load multiple node labels, we can add a `sourceNodeLabels` key and a `targetNodeLabels` key to the fourth `nodesConfig` parameter.
+-- To retain the type information when we load multiple relationship types, we can add a `relationshipType` key to the fifth `relationshipConfig` parameter.
+
+[role=query-example]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)
+WHERE source:Person OR source:Book
+OPTIONAL MATCH (source)-[r:KNOWS|READ]->(target)
+WHERE target:Person OR target:Book
+WITH gds.alpha.graph.project(
+  'personsAndBooks',
+  source,
+  target,
+  {
+    sourceNodeLabels: labels(source),
+    targetNodeLabels: labels(target)
+  },
+  {
+    relationshipType: type(r)
+  }
+) AS g
+RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1m,1m"]
+|===
+| graph             | nodes  | rels
+| "personsAndBooks" | 5      | 6
+|===
+--
+
+The value for `sourceNodeLabels` or `targetNodeLabels` can be one of the following:
+
+.*NodeLabels key
+[opts="header", cols="1,1,1m"]
+|===
+| type           | example                     | description
+| List of String | `labels(s)` or `['A', 'B']` | Associate all labels in that list with the source or target node
+| String         | `'A'`                       | Associate that label with the source or target node
+| Boolean        | `true`                      | Associate all labels of the source or target node; same as `labels(s)`
+| Boolean        | `false`                     | Don't load any label information for the source or target node; same as if `nodeLabels` was missing
+|===
+
+
+The value for `relationshipType` must be a `String`:
+
+.relationshipType key
+[opts="header", cols="1,1,1m"]
+|===
+| type           | example            | description
+| String         | `type(r)` or `'A'` | Associate that type with the relationship
+|===
+
+
+=== Relationship orientation
+
+The native projection supports specifying an orientation per relationship type.
+The Cypher Aggregation will treat every relationship returned by the relationship query as if it was in `NATURAL` orientation.
+It is thus not possible to project graphs in `UNDIRECTED` or `REVERSE` orientation when Cypher projections are used.
+
+[NOTE]
+--
+Some algorithms require that the graph was loaded with `UNDIRECTED` orientation.
+These algorithms can not be used with a graph projected by a Cypher Aggregation.
+--
+
+
+[[node-properties-example]]
+=== Node properties
+
+To load node properties, we add a map of all properties for the source and target nodes.
+Thereby, we use the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_] function to specify the default value, if the node does not have the property.
+
+The properties for the source node are specified as `sourceNodeProperties` key in the fourth `nodesConfig` parameter.
+The properties for the target node are specified as `targetNodeProperties` key in the fourth `nodesConfig` parameter.
+
+[role=query-example, group=cypher-aggregation-node-properties]
+--
+.Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:KNOWS|READ]->(target)
+WHERE source:Book OR source:Person
+WITH gds.alpha.graph.project(
+  'graphWithProperties',
+  source,
+  target,
+  {
+    sourceNodeProperties: source { age: coalesce(source.age, 18), price: coalesce(source.price, 5.0), .ratings },
+    targetNodeProperties: target { age: coalesce(target.age, 18), price: coalesce(target.price, 5.0), .ratings }
+  }
+) as g
+RETURN g.graphName AS graph , g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                 | nodes  | rels
+| "graphWithProperties" | 5      | 6
+|===
+--
+
+The projected `graphWithProperties` graph contains five nodes and six relationships.
+In a Cypher Aggregation every node will get the same properties, which means you can't have node-specific properties.
+For instance in the example above the `Person` nodes will also get `ratings` and `price` properties, while `Book` nodes get the `age` property.
+
+Further, the `price` property has a default value of `5.0`.
+Not every book has a price specified in the example graph.
+In the following we check if the price was correctly projected:
+
+[role=query-example, group=cypher-aggregation-node-properties]
+--
+.Verify the ratings property of Adam in the projected graph:
+[source, cypher, role=noplay]
+----
+MATCH (n:Book)
+RETURN n.name AS name, gds.util.nodeProperty('graphWithProperties', id(n), 'price') AS price
+ORDER BY price
+----
+
+.Results
+[opts="header", cols="1,1"]
+|===
+| name          | price
+| "The Hobbit"  | 5.0
+| "Frankenstein"| 19.99
+|===
+--
+
+We can see, that the price was projected with the Hobbit having the default price of 5.0.
+
+
+[[cypher-aggregation-relationship-properties]]
+=== Relationship properties
+
+Analogous to node properties, we can project relationship properties using the fifth parameter.
+If we only want to project relationship properties and not any node properties or labels, we must provide a `{}` value for the nodesConfig parameter.
+
+[role=query-example, group=cypher-aggregation-rel-properties]
+--
+.Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:READ]->(target)
+WITH gds.alpha.graph.project(
+  'readWithProperties',
+  source,
+  target,
+  {},
+  { properties: r { .numberOfPages } }
+) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                | nodes  | rels
+| "readWithProperties" | 5      | 4
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` was correctly loaded.
+
+[role=query-example, group=cypher-aggregation-rel-properties]
+--
+.Stream the relationship property `numberOfPages` from the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+| "Veselin"   |  "Frankenstein"      | NaN
+|===
+--
+
+We can see, that the `numberOfPages` are loaded. The default property value is `Double.Nan` and can be changed as in the previous example xref::graph-project-cypher-aggregation.adoc#node-properties-example[Node properties] by using the Cypher function https://neo4j.com/docs/cypher-manual/current/functions/scalar/#functions-coalesce[_coalesce()_].
+
+
+=== Parallel relationships
+
+The Property Graph Model in Neo4j supports parallel relationships, i.e., multiple relationships between two nodes.
+By default, GDS preserves the parallel relationships.
+For some algorithms, we want the projected graph to contain at most one relationship between two nodes.
+
+The simplest way to achieve relationship deduplication is to use the `DISTINCT` operator in the relationship query.
+Alternatively, we can aggregate the parallel relationship by using the https://neo4j.com/docs/cypher-manual/current/functions/aggregating/#functions-count[_count()_] function and store the count as a relationship property.
+
+[role=query-example, group=cypher-aggregation-count-aggregate]
+--
+.Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:READ]->(target)
+WITH source, target, count(r) AS numberOfReads
+WITH gds.alpha.graph.project('readCount', source, target, {}, { properties: { numberOfReads: numberOfReads } }) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph       | nodes  | rels
+| "readCount" | 5      | 3
+|===
+--
+
+Next, we will verify that the `READ` relationships were correctly aggregated.
+
+[role=query-example, group=cypher-aggregation-count-aggregate]
+--
+.Stream the relationship property `numberOfReads` of the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfReads
+ORDER BY numberOfReads DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfReads
+| "Florentin" |  "The Hobbit"        | 2.0
+| "Adam"      |  "The Hobbit"        | 1.0
+| "Veselin"   |  "Frankenstein"      | 1.0
+|===
+--
+
+We can see, that the two READ relationships between Florentin and the Hobbit result in `2` numberOfReads.
+
+
+=== Parallel relationships with properties
+
+For graphs with relationship properties we can also use other aggregations documented in the https://neo4j.com/docs/cypher-manual/current/functions/aggregating/[Cypher Manual].
+
+[role=query-example, group=cypher-aggregation-sum-aggregate]
+--
+.Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:READ]->(target)
+WITH source, target, sum(r.numberOfPages) AS numberOfPages
+WITH gds.alpha.graph.project('readSums', source, target, {}, { properties: { numberOfPages: numberOfPages } }) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph      | nodes  | rels
+| "readSums" | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` were correctly aggregated.
+
+[role=query-example, group=cypher-aggregation-sum-aggregate]
+--
+.Stream the relationship property `numberOfPages` of the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY numberOfPages DESC, person
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Florentin" |  "The Hobbit"        | 46.0
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Veselin"   |  "Frankenstein"      | 0.0
+|===
+--
+
+We can see, that the two `READ` relationships between Florentin and the Hobbit sum up to `46` numberOfPages.
+
+
+=== Projecting filtered Neo4j graphs
+
+Cypher-projections allow us to specify the graph to project in a more fine-grained way.
+The following examples will demonstrate how to filter out `READ` relationships if they do not have a `numberOfPages` property.
+
+[role=query-example, group=cypher-aggregation-rel-filtering-properties]
+--
+.Project `Person` and `Book` nodes and `READ` relationships where `numberOfPages` is present:
+[source, cypher, role=noplay]
+----
+MATCH (source) OPTIONAL MATCH (source)-[r:READ]->(target)
+WHERE r.numberOfPages IS NOT NULL
+WITH gds.alpha.graph.project('existingNumberOfPages', source, target, {}, { properties: r { .numberOfPages } }) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| graph                   | nodes  | rels
+| "existingNumberOfPages" | 5      | 3
+|===
+--
+
+Next, we will verify that the relationship property `numberOfPages` was correctly loaded.
+
+[role=query-example, group=cypher-aggregation-rel-filtering-properties]
+--
+.Stream the relationship property `numberOfPages` from the projected graph:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.streamRelationshipProperty('existingNumberOfPages', 'numberOfPages')
+YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
+RETURN
+  gds.util.asNode(sourceNodeId).name AS person,
+  gds.util.asNode(targetNodeId).name AS book,
+  numberOfPages
+ORDER BY person ASC, numberOfPages DESC
+----
+
+.Results
+[opts="header", cols="1,1,1"]
+|===
+| person      | book                 | numberOfPages
+| "Adam"      |  "The Hobbit"        | 30.0
+| "Florentin" |  "The Hobbit"        | 42.0
+| "Florentin" |  "The Hobbit"        | 4.0
+|===
+--
+
+If we compare the results to the ones from xref::graph-project-cypher-aggregation.adoc#cypher-aggregation-relationship-properties[Relationship properties], we can see that using `IS NOT NULL` is filtering out the relationship from Veselin to the book Frankenstein.
+This functionality is only expressible with xref::graph-project.adoc[native projections] by projecting a xref::graph-project-subgraph.adoc[subgraph].

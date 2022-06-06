@@ -39,7 +39,7 @@ class GraphExistsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-exists.adoc";
+        return "pages/graph-exists.adoc";
     }
 
 }

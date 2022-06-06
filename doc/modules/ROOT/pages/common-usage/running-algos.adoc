@@ -1,0 +1,136 @@
+[[running-algos]]
+= Running algorithms
+:description: This section describes the common execution modes for algorithms: `stream`, `stats`, `mutate` and `write`.
+
+[abstract]
+--
+This section describes the common execution modes for algorithms: `stream`, `stats`, `mutate` and `write`.
+--
+
+All algorithms are exposed as Neo4j procedures.
+They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
+
+For a detailed guide on the syntax to run algorithms, please see the xref::algorithms/syntax.adoc[Syntax overview] section.
+In short, algorithms are run using one of the execution modes `stream`, `stats`, `mutate` or `write`, which we cover in this chapter.
+
+The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
+For more on how transactions are used, see xref::production-deployment/transaction-handling.adoc[Transaction Handling].
+
+
+[[running-algos-stream]]
+== Stream
+
+The `stream` mode will return the results of the algorithm computation as Cypher result rows.
+This is similar to how standard Cypher reading queries operate.
+
+The returned data can be a node ID and a computed value for the node (such as a Page Rank score, or WCC componentId), or two node IDs and a computed value for the node pair (such as a Node Similarity similarity score).
+
+If the graph is very large, the result of a `stream` mode computation will also be very large.
+Using the `ORDER BY` and `LIMIT` subclauses in the Cypher query could be useful to support 'top N'-style use cases.
+
+
+[[running-algos-stats]]
+== Stats
+
+The `stats` mode returns statistical results for the algorithm computation like counts or percentile distributions.
+A statistical summary of the computation is returned as a single Cypher result row.
+The direct results of the algorithm are not available when using the `stats` mode.
+This mode forms the basis of the `mutate` and `write` execution modes but does not attempt to make any modifications or updates anywhere.
+
+
+[[running-algos-mutate]]
+== Mutate
+
+The `mutate` mode will write the results of the algorithm computation back to the projected graph.
+Note that the specified `mutateProperty` value must not exist in the projected graph beforehand.
+This enables running multiple algorithms on the same projected graph without writing results to Neo4j in-between algorithm executions.
+
+This execution mode is especially useful in three scenarios:
+
+* Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
+* Algorithm results can be written altogether (see xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[write node properties] and xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[write relationships]).
+* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `xref::graph-catalog-node-ops.adoc#utility-functions-catalog[gds.util.nodeProperty]`).
+
+A statistical summary of the computation is returned similar to the `stats` mode.
+Mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
+
+
+[[running-algos-write]]
+== Write
+
+The `write` mode will write the results of the algorithm computation back to the Neo4j database.
+This is similar to how standard Cypher writing queries operate.
+A statistical summary of the computation is returned similar to the `stats` mode.
+This is the only execution mode that will attempt to make modifications to the Neo4j database.
+
+The written data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
+The `write` mode can be very useful for use cases where the algorithm results would be inspected multiple times by separate queries since the computational results are handled entirely by the library.
+
+In order for the results from a `write` mode computation to be used by another algorithm, a new graph must be projected from the Neo4j database with the updated graph.
+
+[[algorithms-syntax-configuration-parameters]]
+== Common Configuration parameters
+
+All algorithms allow adjustment of their runtime characteristics through a set of configuration parameters.
+Although some parameters are algorithm-specific, many are shared between algorithms and execution modes.
+
+[NOTE]
+To learn more about algorithm specific parameters and to find out if an algorithm supports a certain parameter, please consult the algorithm-specific documentation page.
+
+.List of the most commonly accepted configuration parameters
+[[common-configuration-concurrency]]
+concurrency - Integer::
+Controls the parallelism with which the algorithm is executed.
+By default this value is set to 4.
+For more details on the concurrency settings and limitations please see xref::installation/System-requirements.adoc#system-requirements-cpu[the CPU section] of the System Requirements.
+
+[[common-configuration-node-labels]]
+nodeLabels - List of String::
+If the graph, on which the algorithm is run, was projected with multiple node label projections, this parameter can be used to select only a subset of the projected labels.
+The algorithm will only consider nodes with the selected labels.
+
+[[common-configuration-relationship-types]]
+relationshipTypes - List of String::
+If the graph, on which the algorithm is run, was projected with multiple relationship type projections, this parameter can be used to select only a subset of the projected types.
+The algorithm will only consider relationships with the selected types.
+
+[[common-configuration-node-weight-property]]
+nodeWeightProperty - String::
+In algorithms that support node weights this parameter defines the node property that contains the weights.
+
+[[common-configuration-relationship-weight-property]]
+relationshipWeightProperty - String::
+In algorithms that support relationship weights this parameter defines the relationship property that contains the weights.
+The specified property is required to exist in the specified graph on all specified xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
+The values must be numeric, and some algorithms may have additional value restrictions, such as requiring only positive weights.
+
+[[common-configuration-max-iterations]]
+maxIterations - Integer::
+For iterative algorithms this parameter controls the maximum number of iterations.
+
+[[common-configuration-tolerance]]
+tolerance - Float::
+Many iterative algorithms accept the tolerance parameter.
+It controls the minimum delta between two iterations.
+If the delta is less than the tolerance value, the algorithm is considered converged and stops.
+
+[[common-configuration-seed-property]]
+seedProperty - String::
+Some algorithms can be calculated incrementally.
+This means that results from a previous execution can be taken into account, even though the graph has changed.
+The `seedProperty` parameter defines the node property that contains the seed value.
+Seeding can speed up computation and write times.
+
+[[common-configuration-write-property]]
+writeProperty - String::
+In `write` mode this parameter sets the name of the node or relationship property to which results are written.
+If the property already exists, existing values will be overwritten.
+
+[[common-configuration-write-concurrency]]
+writeConcurrency - Integer::
+In `write` mode this parameter controls the parallelism of write operations.
+The Default is `concurrency`
+
+[[common-configuration-jobid]]
+jobId - String::
+An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's xref::common-usage/logging.adoc[logging capabilities].

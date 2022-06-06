@@ -23,6 +23,6 @@ class LocalClusteringCoefficientSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/local-clustering-coefficient/local-clustering-coefficient.adoc";
+        return "pages/algorithms/local-clustering-coefficient.adoc";
     }
 }

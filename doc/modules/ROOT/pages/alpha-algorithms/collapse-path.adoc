@@ -1,0 +1,167 @@
+[[algorithms-collapse-path]]
+[.alpha]
+= Collapse Path
+:description: This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
+
+[abstract]
+--
+This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
+--
+
+
+[[algorithms-collapse-path-intro]]
+== Introduction
+
+The Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal.
+In other words, the path between the start node and the end node is collapsed into a single relationship (a direct path).
+The algorithm is intended to support the creation of monopartite graphs required by many graph algorithms.
+
+The main input for the algorithm is a list of relationship types.
+Starting from every node in the specified graph, these relationship types are traversed one after the other using the order specified in the configuration.
+Only nodes reached after traversing every relationship type specified are used as end nodes.
+Exactly one directed relationship is created for every pair of nodes for which at least one path from start to end node exists.
+
+
+[[algorithms-collapse-path-syntax]]
+== Syntax
+
+.Collapse Path syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-mutate]
+======
+.Run Collapse Path in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.collapsePath.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.General configuration for algorithm execution on a named graph.
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name              | Type     | Default | Optional | Description
+| nodeLabels        | List of String | ['*']   | yes      | Filter the named graph using the given node labels.
+| concurrency       | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
+|===
+
+include::partial$/algorithms/alpha/collapse-path/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                  | Type      | Description
+| preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the projected graph.
+| relationshipsWritten  | Integer   | The number of relationships created by the algorithm.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+====
+
+[[algorithms-collapse-path-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (Dan:Person),
+  (Annie:Person),
+  (Matt:Person),
+  (Jeff:Person),
+
+  (Guitar:Instrument),
+  (Flute:Instrument),
+
+  (Dan)-[:PLAYS]->(Guitar),
+  (Annie)-[:PLAYS]->(Guitar),
+
+  (Matt)-[:PLAYS]->(Flute),
+  (Jeff)-[:PLAYS]->(Flute)
+----
+
+In this example we want to create a relationship, called `PLAYS_SAME_INSTRUMENT`, between `Person` nodes that play the same instrument.
+To achieve that we have to traverse a path specified by the following Cypher pattern:
+
+[source, cypher, role=noplay]
+----
+(p1:Person)-[:PLAYS]->(:Instrument)-[:PLAYED_BY]->(p2:Person)
+----
+
+In our source graph only the `PLAYS` relationship type exists.
+The `PLAYED_BY` relationship type can be created by loading the `PLAYS` relationship type in `REVERSE` direction.
+The following query will project such a graph:
+
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'persons',
+  ['Person', 'Instrument'],
+  {
+    PLAYS: {
+      type: 'PLAYS',
+      orientation: 'NATURAL'
+    },
+    PLAYED_BY: {
+      type: 'PLAYS',
+      orientation: 'REVERSE'
+    }
+})
+----
+
+Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in the `relationshipTypes` option.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.collapsePath.mutate(
+  'persons',
+  {
+    relationshipTypes: ['PLAYS', 'PLAYED_BY'],
+    allowSelfLoops: false,
+    mutateRelationshipType: 'PLAYS_SAME_INSTRUMENT'
+  }
+) YIELD relationshipsWritten
+----
+
+[opts=header]
+.Results
+|===
+| relationshipsWritten
+| 4
+|===
+--
+
+.The mutated graph will look like the following graph when filtered by the `PLAYS_SAME_INSTRUMENT` relationship
+[source, cypher, role=noplay]
+----
+CREATE
+  (Dan:Person),
+  (Annie:Person),
+  (Matt:Person),
+  (Jeff:Person),
+
+  (Guitar:Instrument),
+  (Flute:Instrument),
+
+  (Dan)-[:PLAYS_SAME_INSTRUMENT]->(Annie),
+  (Annie)-[:PLAYS_SAME_INSTRUMENT]->(Dan),
+
+  (Matt)-[:PLAYS_SAME_INSTRUMENT]->(Jeff),
+  (Jeff)-[:PLAYS_SAME_INSTRUMENT]->(Matt)
+----

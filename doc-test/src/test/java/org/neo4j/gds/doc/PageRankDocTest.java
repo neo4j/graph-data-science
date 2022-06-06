@@ -48,7 +48,7 @@ class PageRankDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/page-rank/page-rank.adoc";
+        return "pages/algorithms/page-rank.adoc";
     }
 
 }

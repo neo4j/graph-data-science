@@ -1,0 +1,261 @@
+[[algorithms-delta-single-source]]
+= Delta-Stepping Single-Source Shortest Path
+:description: This section describes the Delta-Stepping Shortest Path algorithm in the Neo4j Graph Data Science library.
+:entity: source-target-pair
+:result: shortest path
+:algorithm: Delta-Stepping
+:source-target: false
+:procedure-name: pass:q[gds.allShortestPaths.delta]
+
+[abstract]
+--
+This section describes the Delta-Stepping Shortest Path algorithm in the Neo4j Graph Data Science library.
+--
+
+:directed:
+:undirected:
+:homogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-delta-single-source-intro]]
+== Introduction
+
+The Delta-Stepping Shortest Path algorithm computes all shortest paths between a source node and all reachable nodes in the graph.
+The algorithm supports weighted graphs with positive relationship weights.
+To compute the shortest path between a source and a single target node, xref::algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
+
+In contrast to xref::algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source], the Delta-Stepping algorithm is a distance correcting algorithm.
+This property allows it to traverse the graph in parallel.
+The algorithm is guaranteed to always find the shortest path between a source node and a target node.
+However, if multiple shortest paths exist between two nodes, the algorithm is not guaranteed to return the same path in each computation.
+
+The GDS implementation is based on [1] and incorporates the bucket fusion optimization discussed in [2].
+The algorithm implementation is executed using multiple threads which can be defined in the procedure configuration.
+
+For more information on this algorithm, see:
+
+1. https://dl.acm.org/doi/10.1016/S0196-6774%2803%2900076-2[Ulrich Meyer and Peter Sanders. "δ-stepping: a parallelizable shortest path algorithm."^]
+2. https://arxiv.org/abs/1911.07260[Yunming Zhang, Ajay Brahmakshatriya, Xinyi Chen, Laxman Dhulipala, Shoaib Kamil, Saman Amarasinghe, and Julian Shun. "Optimizing ordered graph algorithms with GraphIt."^]
+
+
+[[algorithms-delta-single-source-syntax]]
+== Syntax
+
+include::partial$/algorithms/shortest-path/path-syntax.adoc[]
+
+
+=== Delta
+
+The `delta` parameter defines a range which is used to group nodes with the same tentative distance to the start node.
+The ranges are also called buckets.
+In each iteration of the algorithm, the non-empty bucket with the smallest tentative distance is processed in parallel.
+The `delta` parameter is the main tuning knob for the algorithm and controls the workload that can be processed in parallel.
+Generally, for power-law graphs, where many nodes can be reached within a few hops, a small delta (e.g. `2`) is recommended.
+For high-diameter graphs, e.g. transport networks, a high delta value (e.g. `10000`) is recommended.
+Note, that the value might vary depending on the graph topology and the value range of relationship properties.
+
+
+[[algorithms-delta-single-source-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: transport network
+:image-file: dijkstra.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Location {name: 'A'}),
+       (b:Location {name: 'B'}),
+       (c:Location {name: 'C'}),
+       (d:Location {name: 'D'}),
+       (e:Location {name: 'E'}),
+       (f:Location {name: 'F'}),
+       (a)-[:ROAD {cost: 50}]->(b),
+       (a)-[:ROAD {cost: 50}]->(c),
+       (a)-[:ROAD {cost: 100}]->(d),
+       (b)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 40}]->(d),
+       (c)-[:ROAD {cost: 80}]->(e),
+       (d)-[:ROAD {cost: 30}]->(e),
+       (d)-[:ROAD {cost: 80}]->(f),
+       (e)-[:ROAD {cost: 40}]->(f);
+----
+
+This graph builds a transportation network with roads between locations.
+Like in the real world, the roads in the graph have different lengths.
+These lengths are represented by the `cost` relationship property.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'Location',
+    'ROAD',
+    {
+        relationshipProperties: 'cost'
+    }
+)
+----
+
+In the following example we will demonstrate the use of the {algorithm} Shortest Path algorithm using this graph.
+
+
+[[algorithms-delta-single-source-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm in write mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.delta.write.estimate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6         | 9                 | 368      | 576      | "[368 Bytes \... 576 Bytes]"
+|===
+--
+
+
+[[algorithms-delta-single-source-examples-stream]]
+=== Stream
+
+:!stream-details:
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.delta.stream('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    delta: 3.0
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(path) as path
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs                             | path
+| 0     | "A"            | "A"            | 0.0       | [A]             | [0.0]                             | [Node[0]]
+| 1     | "A"            | "B"            | 50.0      | [A, B]          | [0.0, 50.0]                       | [Node[0], Node[1]]
+| 2     | "A"            | "C"            | 50.0      | [A, C]          | [0.0, 50.0]                       | [Node[0], Node[2]]
+| 3     | "A"            | "D"            | 90.0      | [A, B, D]       | [0.0, 50.0, 90.0]                 | [Node[0], Node[1], Node[3]]
+| 4     | "A"            | "E"            | 120.0     | [A, B, D, E]    | [0.0, 50.0, 90.0, 120.0]          | [Node[0], Node[1], Node[3], Node[4]]
+| 5     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]   | [Node[0], Node[1], Node[3], Node[4], Node[5]]
+|===
+--
+
+The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
+It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
+This can be verified in the xref::algorithms/delta-single-source.adoc#algorithms-delta-single-source-examples[example graph].
+Cypher Path objects can be returned by the `path` return field.
+The Path objects contain the node objects and virtual relationships which have a `cost` property.
+
+[[algorithms-delta-single-source-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shortest-path/path-examples-mutate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `mutate` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.delta.mutate('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    mutateRelationshipType: 'PATH'
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 6
+|===
+--
+
+After executing the above query, the in-memory graph will be updated with new relationships of type `PATH`.
+The new relationships will store a single property `totalCost`.
+
+[NOTE]
+====
+The relationships produced are always directed, even if the input graph is undirected.
+====
+
+
+[[algorithms-delta-single-source-examples-write]]
+=== Write
+
+include::partial$/algorithms/shortest-path/path-examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'})
+CALL gds.allShortestPaths.delta.write('myGraph', {
+    sourceNode: source,
+    relationshipWeightProperty: 'cost',
+    writeRelationshipType: 'PATH',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 6
+|===
+--
+
+The above query will write 6 relationships of type `PATH` back to Neo4j.
+The relationships store three properties describing the path: `totalCost`, `nodeIds` and `costs`.
+
+[NOTE]
+====
+The relationships written are always directed, even if the input graph is undirected.
+====

@@ -1,0 +1,228 @@
+[[noderegression-pipelines-train]]
+= Training the pipeline
+
+The train mode, `gds.alpha.pipeline.nodeRegression.train`, is responsible for data splitting, feature extraction, model selection, training and storing a model for future use.
+Running this mode results in a regression model of type `NodeRegression`, which is then stored in the xref::model-catalog/index.adoc[model catalog].
+The regression model can be xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[applied] on a graph to predict property values for new nodes.
+
+More precisely, the training proceeds as follows:
+
+. Apply `nodeLabels` and `relationshipType` filters to the graph.
+. Apply the node property steps, added according to xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[Adding node properties], on the whole graph.
+. Select node properties to be used as features, as specified in xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[Adding features].
+. Split the input graph into two parts: the train graph and the test graph. This is described in xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configuring the node splits].
+These graphs are internally managed and exist only for the duration of the training.
+. Split the nodes in the train graph using stratified k-fold cross-validation.
+The number of folds `k` can be configured as described in xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configuring the node splits].
+. Each model candidate defined in the xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[parameter space] is trained on each train set and evaluated on the respective validation set for every fold. The evaluation uses the specified primary metric.
+. Choose the best performing model according to the highest average score for the primary metric.
+. Retrain the winning model on the entire train graph.
+. Evaluate the performance of the winning model on the whole train graph as well as the test graph.
+. Retrain the winning model on the entire original graph.
+. Register the winning model in the xref::model-catalog/index.adoc[Model Catalog].
+
+NOTE: The above steps describe what the procedure does logically.
+The actual steps as well as their ordering in the implementation may differ.
+
+NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
+
+[[noderegression-pipeline-metrics]]
+== Metrics
+
+The Node Regression model in the Neo4j GDS library supports the following evaluation metrics:
+
+* `MEAN_SQUARED_ERROR`
+* `ROOT_MEAN_SQUARED_ERROR`
+* `MEAN_ABSOLUTE_ERROR`
+
+More than one metric can be specified during training but only the first specified -- the `primary` one -- is used for evaluation, the results of all are present in the train results.
+
+== Syntax
+
+[.include-with-train]
+--
+.Run Node Regression in train mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.train(
+  graphName: String,
+  configuration: Map
+) YIELD
+  trainMillis: Integer,
+  modelInfo: Map,
+  modelSelectionStats: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                                                          | Type              | Default              | Optional | Description
+| pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
+| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
+| targetProperty                                                | String            | n/a                  | no       | The target property of the node. Must be of type Integer or Float.
+| metrics                                                       | List of String    | n/a                  | no       | xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc#noderegression-pipeline-metrics[Metrics] used to evaluate the models.
+| randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
+| modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
+| xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| trainMillis   | Integer | Milliseconds used for training.
+| modelInfo               | Map     | Information about the training and the winning model.
+| modelSelectionStats     | Map     | Statistics about evaluated metrics for all model candidates.
+| configuration | Map     | Configuration used for the train procedure.
+|===
+
+The `modelInfo` can also be retrieved at a later time by using the xref::model-catalog/list.adoc[Model List Procedure].
+The `modelInfo` return field has the following algorithm-specific subfields:
+
+.Model info fields
+[opts="header",cols="1,1,6"]
+|===
+| Name                    | Type            | Description
+| bestParameters          | Map             | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics                 | Map             | Map from metric description to evaluated metrics for the winning model over the subsets of the data, see below.
+| pipeline                | Map             | The pipeline used to generate and select the node features.
+|===
+
+The structure of `modelInfo` is:
+
+[listing]
+----
+{
+    bestParameters: Map,        // <1>
+    pipeline: Map               // <2>
+    metrics: {                  // <3>
+        <METRIC_NAME>: {        // <4>
+            test: Float,        // <5>
+            outerTrain: Float,  // <6>
+            train: {            // <7>
+                avg: Float,
+                max: Float,
+                min: Float,
+            },
+            validation: {       // <8>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            }
+        }
+    }
+}
+----
+<1> The best scoring model candidate configuration.
+<2> The pipeline used to generate and select the node features
+<3> The `metrics` map contains an entry for each metric description, and the corresponding results for that metric.
+<4> A metric name specified in the configuration of the procedure, e.g., `F1_MACRO` or `RECALL(class=4)`.
+<5> Numeric value for the evaluation of the winning model on the test set.
+<6> Numeric value for the evaluation of the winning model on the outer train set.
+<7> The `train` entry summarizes the metric results over the `train` set.
+<8> The `validation` entry summarizes the metric results over the `validation` set.
+--
+
+include::partial$/machine-learning/pipeline-training-logging-note.adoc[]
+
+== Example
+
+In this section we will show examples of running a Node Regression training pipeline on a concrete graph.
+The intention is to illustrate what the results look like and to provide a guide in how to make use of the model in a real setting.
+We will do this on a small graph of a handful of nodes representing houses.
+In our example we want to predict the `price` of a house.
+The example graph looks like this:
+
+image::example-graphs/node_property_pipeline_graph.svg[align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query, group=nc]
+----
+CREATE
+  (:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], price: 99.99}),
+  (:House {color: 'Red', sizePerStory: [15.5, 23.6, 100.0], price: 149.99}),
+  (:House {color: 'Blue', sizePerStory: [11.3, 35.1, 22.0], price: 77.77}),
+  (:House {color: 'Green', sizePerStory: [23.2, 55.1, 0.0], price: 80.80}),
+  (:House {color: 'Gray', sizePerStory: [34.3, 24.0, 0.0],  price: 57.57}),
+  (:House {color: 'Black', sizePerStory: [71.66, 55.0, 0.0], price: 140.14}),
+  (:House {color: 'White', sizePerStory: [11.1, 111.0, 0.0], price: 122.22}),
+  (:House {color: 'Teal', sizePerStory: [80.8, 0.0, 0.0], price: 80.80}),
+  (:House {color: 'Beige', sizePerStory: [106.2, 0.0, 0.0], price: 110.11}),
+  (:House {color: 'Magenta', sizePerStory: [99.9, 0.0, 0.0], price: 100.00}),
+  (:House {color: 'Purple', sizePerStory: [56.5, 0.0, 0.0], price: 60.00}),
+  (:UnknownHouse {color: 'Pink', sizePerStory: [23.2, 55.1, 56.1]}),
+  (:UnknownHouse {color: 'Tan', sizePerStory: [22.32, 102.0, 0.0]}),
+  (:UnknownHouse {color: 'Yellow', sizePerStory: [39.0, 0.0, 0.0]});
+----
+
+With the graph in Neo4j we can now project it into the graph catalog to prepare it for the pipeline execution.
+We do this using a native projection targeting the `House` and `UnknownHouse` labels.
+We will also project the `sizeOfStory` property to use as a model feature, and the `price` property to use as a target feature.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-project-query, group=nr]
+----
+CALL gds.graph.project('myGraph', {
+    House: { properties: ['sizePerStory', 'price'] },
+    UnknownHouse: { properties: 'sizePerStory' }
+  },
+  '*'
+)
+----
+
+
+[[noderegression-pipelines-examples-train]]
+=== Train
+
+In the following examples we will demonstrate running the Node Regression training pipeline on this graph.
+We will train a model to predict the price of a house, based on its `sizePerStory` property.
+The configuration of the pipeline is the result of running the examples on the previous page:
+
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-create[Create]
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-add-node-property[Add node properties]
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-select-features[Select features]
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-configure-split[Configure split]
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-add-model-candidates[Adding model candidates]
+. xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-examples-autotuning[Configure autotuning]
+
+
+[role=query-example, group=nr]
+--
+.The following will train a model using a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeRegression.train('myGraph', {
+  pipeline: 'pipe',
+  nodeLabels: ['House'],
+  modelName: 'nr-pipeline-model',
+  targetProperty: 'price',
+  randomSeed: 42,
+  concurrency: 1,
+  metrics: ['MEAN_SQUARED_ERROR']
+}) YIELD modelInfo
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.MEAN_SQUARED_ERROR.train.avg AS avgTrainScore,
+  modelInfo.metrics.MEAN_SQUARED_ERROR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.MEAN_SQUARED_ERROR.test AS testScore
+----
+
+.Results
+[opts="header", cols="6, 2, 2, 2"]
+|===
+| winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
+| {maxDepth=2147483647, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0} | 1227.8052857714285 | 1568.8735900000001 | 1996.408637333333
+|===
+
+Here we can observe that the `RandomForest` candidate with 5 decision trees performed the best in the training phase.
+Notice that this is just a toy example on a very small graph.
+In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
+--
