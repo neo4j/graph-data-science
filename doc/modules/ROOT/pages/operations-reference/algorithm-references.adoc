@@ -309,9 +309,10 @@ include::partial$/algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
-.2+<.^| xref::algorithms/alpha/filtered-knn.adoc[Filtered KNN]
+.3+<.^| xref::algorithms/alpha/filtered-knn.adoc[Filtered KNN]
 | `gds.alpha.knn.filtered.mutate`
 | `gds.alpha.knn.filtered.stream`
+| `gds.alpha.knn.filtered.write`
 .3+<.^| xref::algorithms/alpha/leiden.adoc[Leiden]
 | `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
