@@ -13,6 +13,9 @@ Time to upgrade!
 [opts=header]
 |===
 | Neo4j Graph Data Science | Neo4j version
+.2+<.^|`2.2`
+| `4.4`
+| `4.3`
 .2+<.^|`2.1`
 | `4.4`
 | `4.3`
