@@ -31,10 +31,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
-class KmeansMutateProcTest  extends BaseProcTest {
+class KmeansMutateProcTest extends BaseProcTest {
 
     @Neo4jGraph
-    static final @Language("Cypher") String DB_CYPHER =
+    @Language("Cypher")
+    static final String DB_CYPHER =
         "CREATE" +
         " (a:Node { weights: [0.0]})" +
         ",(b:Node { weights: [0.1]})" +
