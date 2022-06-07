@@ -19,54 +19,22 @@
  */
 package org.neo4j.gds.core.utils.io.db;
 
-import org.neo4j.configuration.Config;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.io.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.Collectors;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.kernel.lifecycle.LifeSupport;
-import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLogProvider;
-import org.neo4j.logging.internal.LogService;
-import org.neo4j.logging.internal.NullLogService;
-import org.neo4j.logging.internal.SimpleLogService;
-import org.neo4j.logging.log4j.Log4jLogProvider;
-import org.neo4j.logging.log4j.LogConfig;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.internal.batchimport.input.BadCollector.UNLIMITED_TOLERANCE;
-import static org.neo4j.kernel.impl.scheduler.JobSchedulerFactory.createScheduler;
-
 public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<GraphStoreToDatabaseExporterConfig> {
 
-    private final DatabaseLayout databaseLayout;
-    private final FileSystemAbstraction fs;
-    private final Log log;
-    private final Config databaseConfig;
-    private final ProgressTracker progressTracker;
+    private final GdsParallelBatchImporter parallelBatchImporter;
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
@@ -98,84 +66,18 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         ProgressTracker progressTracker
     ) {
         super(graphStore, config, neoNodeProperties);
-        this.databaseLayout = api.databaseLayout().getNeo4jLayout().databaseLayout(config.dbName());
-        this.fs = api.getDependencyResolver().resolveDependency(FileSystemAbstraction.class);
-        this.log = log;
-        this.databaseConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
-        this.progressTracker = progressTracker;
+        var executionMonitor = new ProgressTrackerExecutionMonitor(
+            progressTracker,
+            ClockService.clock(),
+            config.executionMonitorCheckMillis(),
+            TimeUnit.MILLISECONDS
+        );
+        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(api, config, log, executionMonitor);
     }
 
     @Override
     public void export(GraphStoreInput graphStoreInput) {
-        DIRECTORY_IS_WRITABLE.validate(databaseLayout.databaseDirectory());
-        DIRECTORY_IS_WRITABLE.validate(databaseLayout.getTransactionLogsDirectory());
-
-        var lifeSupport = new LifeSupport();
-
-        try {
-            if (config.force()) {
-                fs.deleteRecursively(databaseLayout.databaseDirectory());
-                fs.deleteRecursively(databaseLayout.getTransactionLogsDirectory());
-            }
-
-            LogService logService;
-            if (config.enableDebugLog()) {
-                var storeInternalLogPath = databaseConfig.get(Settings.storeInternalLogPath());
-                var neo4jLoggerContext = LogConfig.createBuilder(fs, storeInternalLogPath, Level.INFO).build();
-                var simpleLogService = new SimpleLogService(
-                    NullLogProvider.getInstance(),
-                    new Log4jLogProvider(neo4jLoggerContext)
-                );
-                logService = lifeSupport.add(simpleLogService);
-            } else {
-                logService = NullLogService.getInstance();
-            }
-            var jobScheduler = lifeSupport.add(createScheduler());
-
-            lifeSupport.start();
-
-            Input input = Neo4jProxy.batchInputFrom(graphStoreInput);
-
-            var metaDataPath = databaseLayout.metadataStore();
-            var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-            if (dbExists) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The database [%s] already exists. The graph export procedure can only create new databases.",
-                    config.dbName()
-                ));
-            }
-
-            var collector = config.useBadCollector()
-                ? Collectors.badCollector(new LoggingOutputStream(log), UNLIMITED_TOLERANCE)
-                : Collector.EMPTY;
-
-            var executionMonitor = new ProgressTrackerExecutionMonitor(
-                this.progressTracker,
-                ClockService.clock(),
-                config.executionMonitorCheckMillis(),
-                TimeUnit.MILLISECONDS
-            );
-
-            var importer = Neo4jProxy.instantiateBatchImporter(
-                BatchImporterFactory.withHighestPriority(),
-                databaseLayout,
-                fs,
-                PageCacheTracer.NULL,
-                config.toBatchImporterConfig(),
-                logService,
-                executionMonitor,
-                AdditionalInitialIds.EMPTY,
-                databaseConfig,
-                RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider()),
-                jobScheduler,
-                collector
-            );
-            importer.doImport(input);
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        } finally {
-            lifeSupport.shutdown();
-        }
+        parallelBatchImporter.writeDatabase(graphStoreInput, false);
     }
 
     @Override
