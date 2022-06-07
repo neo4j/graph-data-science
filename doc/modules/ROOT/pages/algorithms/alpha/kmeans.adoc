@@ -149,6 +149,50 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 |===
 ======
 
+
+[.include-with-write]
+======
+.Run K-Means in write mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.kmeans.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodePropertiesWritten: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type      | Description
+| preProcessingMillis    | Integer   | Milliseconds for preprocessing the data.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| writeMillis            | Integer   | Milliseconds for adding properties to the Neo4j database.
+| postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration          | Map       | The configuration used for running the algorithm.
+|===
+======
+
 ====
 
 
