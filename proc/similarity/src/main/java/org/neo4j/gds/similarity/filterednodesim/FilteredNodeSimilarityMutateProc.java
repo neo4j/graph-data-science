@@ -19,19 +19,11 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityMutateResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -42,13 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.mutate", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class FilteredNodeSimilarityMutateProc  extends AlgoBaseProc<
-    NodeSimilarity,
-    NodeSimilarityResult,
-    FilteredNodeSimilarityMutateConfig,
-    SimilarityMutateResult
-    > {
+public class FilteredNodeSimilarityMutateProc  extends BaseProc {
 
     @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate", mode = READ)
     @Description(DESCRIPTION)
@@ -72,20 +58,5 @@ public class FilteredNodeSimilarityMutateProc  extends AlgoBaseProc<
             new FilteredNodeSimilarityMutateSpec(),
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public AlgorithmFactory<?, NodeSimilarity, FilteredNodeSimilarityMutateConfig> algorithmFactory() {
-        return new NodeSimilarityFactory<>();
-    }
-
-    @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig, Stream<SimilarityMutateResult>> computationResultConsumer() {
-            return new FilteredNodeSimilarityMutateSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected FilteredNodeSimilarityMutateConfig newConfig(String username, CypherMapWrapper userInput) {
-            return FilteredNodeSimilarityMutateConfig.of(userInput);
     }
 }

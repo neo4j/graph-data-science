@@ -19,18 +19,11 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResultConsumer;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
+import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,16 +31,9 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.stream", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
-public class FilteredNodeSimilarityStreamProc extends AlgoBaseProc<
-    NodeSimilarity,
-    NodeSimilarityResult,
-    FilteredNodeSimilarityStreamConfig,
-    SimilarityResult
-    > {
+public class FilteredNodeSimilarityStreamProc extends BaseProc {
 
     static final String DESCRIPTION =
         "The Filtered Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
@@ -77,20 +63,5 @@ public class FilteredNodeSimilarityStreamProc extends AlgoBaseProc<
             new FilteredNodeSimilarityStreamSpec(),
             executionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public AlgorithmFactory<?, NodeSimilarity, FilteredNodeSimilarityStreamConfig> algorithmFactory() {
-        return new FilteredNodeSimilarityStreamSpec().algorithmFactory();
-    }
-
-    @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return new FilteredNodeSimilarityStreamSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected FilteredNodeSimilarityStreamConfig newConfig(String username, CypherMapWrapper config) {
-        return new FilteredNodeSimilarityStreamSpec().newConfigFunction().apply(username, config);
     }
 }

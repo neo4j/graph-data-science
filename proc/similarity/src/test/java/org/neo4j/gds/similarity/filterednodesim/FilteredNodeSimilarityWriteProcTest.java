@@ -121,6 +121,7 @@ class FilteredNodeSimilarityWriteProcTest extends BaseProcTest {
                     .asInstanceOf(LONG)
                     .as("computeMillis")
                     .isGreaterThanOrEqualTo(0);
+                // TODO: postProcessingMillis is not getting set
 //                assertThat(resultRow.get("postProcessingMillis"))
 //                    .asInstanceOf(LONG)
 //                    .as("postProcessingMillis")
