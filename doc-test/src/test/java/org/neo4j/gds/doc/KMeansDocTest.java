@@ -24,6 +24,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.kmeans.KmeansMutateProc;
 import org.neo4j.gds.kmeans.KmeansStatsProc;
 import org.neo4j.gds.kmeans.KmeansStreamProc;
+import org.neo4j.gds.kmeans.KmeansWriteProc;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ class KMeansDocTest extends DocTestBase {
             KmeansStreamProc.class,
             KmeansStatsProc.class,
             KmeansMutateProc.class,
+            KmeansWriteProc.class,
             GraphProjectProc.class
         );
     }
