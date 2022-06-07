@@ -132,4 +132,17 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
                 .flatMap(Function.identity())
             );
     }
+
+    long numberOfSimilarityPairs(LongPredicate sourceNodePredicate) {
+        return Stream
+            .iterate(
+                targetNodeFilters.initCursor(targetNodeFilters.newCursor()),
+                HugeCursor::next,
+                UnaryOperator.identity()
+            )
+            .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                .filter(index -> sourceNodePredicate.test(index + cursor.base))
+                .mapToLong(index -> cursor.array[index].size())
+            ).sum();
+    }
 }
