@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.io.db;
 
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -127,6 +128,7 @@ public final class GdsParallelBatchImporter {
             .newBuilder()
             .fromConfig(databaseConfig)
             .set(Settings.neo4jHome(), databaseConfig.get(Settings.neo4jHome()))
+            .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory))
             .set(Settings.recordFormat(), config.recordFormat())
             .set(Settings.allowUpgrade(), true)
             .build();
