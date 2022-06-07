@@ -320,9 +320,11 @@ include::partial$/algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`
 | `gds.alpha.leiden.write`
-.6+<.^| Filtered NodeSimilarity
+.8+<.^| Filtered NodeSimilarity
 | `gds.alpha.nodeSimilarity.filtered.mutate`
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`
+| `gds.alpha.nodeSimilarity.filtered.stats`
+| `gds.alpha.nodeSimilarity.filtered.stats.estimate`
 | `gds.alpha.nodeSimilarity.filtered.stream`
 | `gds.alpha.nodeSimilarity.filtered.stream.estimate`
 | `gds.alpha.nodeSimilarity.filtered.write`
