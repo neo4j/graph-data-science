@@ -36,6 +36,8 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -53,7 +55,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
 import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
+import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
+@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.mutate", description = DESCRIPTION, executionMode = ExecutionMode.MUTATE_RELATIONSHIP)
 public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,

@@ -19,21 +19,16 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.WriteRelationshipsProc;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.core.write.RelationshipExporter;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ExecutionMode;
-import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -45,13 +40,10 @@ import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStr
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_RELATIONSHIP)
-public class FilteredNodeSimilarityWriteProc extends WriteRelationshipsProc<
-    NodeSimilarity,
-    NodeSimilarityResult,
-    SimilarityWriteResult,
-    FilteredNodeSimilarityWriteConfig
-    > {
+public class FilteredNodeSimilarityWriteProc extends BaseProc {
+
+    @Context
+    public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -78,26 +70,6 @@ public class FilteredNodeSimilarityWriteProc extends WriteRelationshipsProc<
     }
 
     @Override
-    public AlgorithmFactory<?, NodeSimilarity, FilteredNodeSimilarityWriteConfig> algorithmFactory() {
-        return new FilteredNodeSimilarityFactory<>();
-    }
-
-    @Override
-    public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
-        return new FilteredNodeSimilarityWriteSpec().computationResultConsumer();
-    }
-
-    @Override
-    protected FilteredNodeSimilarityWriteConfig newConfig(String username, CypherMapWrapper userInput) {
-        return FilteredNodeSimilarityWriteConfig.of(userInput);
-    }
-
-    @Override
-    protected Stream<SimilarityWriteResult> write(ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig> computationResult) {
-        return computationResultConsumer().consume(computationResult, executionContext());
-    }
-
-    @Override
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
@@ -112,5 +84,4 @@ public class FilteredNodeSimilarityWriteProc extends WriteRelationshipsProc<
             .relationshipExporterBuilder(relationshipExporterBuilder)
             .build();
     }
-
 }

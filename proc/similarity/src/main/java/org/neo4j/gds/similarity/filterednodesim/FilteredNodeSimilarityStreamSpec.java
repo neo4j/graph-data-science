@@ -21,6 +21,8 @@ package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
+import org.neo4j.gds.executor.ExecutionMode;
+import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
@@ -28,6 +30,9 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+
+@GdsCallable(name = "gds.alpha.nodeSimilarity.filtered.stream", description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
