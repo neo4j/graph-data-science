@@ -336,3 +336,34 @@ YIELD communityDistribution
 
 In `mutate` mode, only a single row is returned by the procedure.
 The result is written to the GDS in-memory graph instead of the Neo4j database.
+
+
+[[algorithms-leiden-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and write the results back to Neo4j:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.write('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  randomSeed: 42,
+  writeProperty: 'kmeans'
+})
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 8
+|===
+--
+
+In `write` mode, only a single row is returned by the procedure.
+The result is written to the Neo4j database instead of the GDS in-memory graph.
