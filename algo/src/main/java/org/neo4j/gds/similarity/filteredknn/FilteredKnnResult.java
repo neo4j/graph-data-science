@@ -40,6 +40,13 @@ public abstract class FilteredKnnResult {
         return neighbourConsumers.asSimilarityResultStream(sourceNodeFilter);
     }
 
+    public long numberOfSimilarityPairs() {
+        TargetNodeFiltering neighbourConsumers = neighbourConsumers();
+        NodeFilter sourceNodeFilter = sourceNodeFilter();
+
+        return neighbourConsumers.numberOfSimilarityPairs(sourceNodeFilter);
+    }
+
     // ***
     // Below is for internal use only
     // ***

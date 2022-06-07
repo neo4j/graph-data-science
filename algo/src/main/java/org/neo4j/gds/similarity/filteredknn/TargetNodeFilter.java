@@ -97,4 +97,11 @@ public final class TargetNodeFilter implements NeighbourConsumer {
     Stream<SimilarityResult> asSimilarityStream(long nodeId) {
         return priorityQueue.stream().map(p -> new SimilarityResult(nodeId, p.getRight(), p.getLeft()));
     }
+
+    /**
+     * As part of an instrumentation of KNN this is a handy utility.
+     */
+    long size() {
+        return priorityQueue.size();
+    }
 }
