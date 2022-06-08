@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.models.Features;
 
@@ -27,7 +28,7 @@ import org.neo4j.gds.ml.models.Features;
 interface FeaturesAndLabels {
     Features features();
 
-    HugeLongArray labels();
+    HugeIntArray labels();
 
     default long size() {
         return features().size();

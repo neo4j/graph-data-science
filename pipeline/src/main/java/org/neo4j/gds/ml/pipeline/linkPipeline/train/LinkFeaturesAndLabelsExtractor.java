@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -92,14 +93,14 @@ final class LinkFeaturesAndLabelsExtractor {
         return ImmutableFeaturesAndLabels.of(features, labels);
     }
 
-    private static HugeLongArray extractLabels(
+    private static HugeIntArray extractLabels(
         Graph graph,
         long numberOfTargets,
         int concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        var globalLabels = HugeLongArray.newArray(numberOfTargets);
+        var globalLabels = HugeIntArray.newArray(numberOfTargets);
         var partitions = PartitionUtils.degreePartition(
             graph,
             concurrency,
@@ -115,7 +116,7 @@ final class LinkFeaturesAndLabelsExtractor {
                 var localGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> localGraph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
                     if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
-                        globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
+                        globalLabels.set(currentRelationshipOffset.getAndIncrement(), (int) weight);
                     } else {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Label should be either `1` or `0`. But got %f for relationship (%d, %d)",

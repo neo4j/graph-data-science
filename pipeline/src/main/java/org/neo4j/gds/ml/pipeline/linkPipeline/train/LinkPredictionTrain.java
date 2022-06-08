@@ -230,8 +230,7 @@ public final class LinkPredictionTrain {
         LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
-        // FIXME map them once during the extraction
-        var intLabels = HugeIntArray.of(Arrays.stream(featureAndLabels.labels().toArray()).mapToInt(classIdMap::toMapped).toArray());
+        var intLabels = featureAndLabels.labels();
 
         return ClassifierTrainerFactory.create(
             trainerConfig,
