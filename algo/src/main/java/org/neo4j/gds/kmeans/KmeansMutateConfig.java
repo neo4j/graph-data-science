@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @ValueClass
 @Configuration
+@SuppressWarnings("immutables:subtype")
 public interface KmeansMutateConfig extends KmeansBaseConfig, MutatePropertyConfig {
 
     static KmeansMutateConfig of(CypherMapWrapper userInput) {
