@@ -34,13 +34,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.procedure.Mode.WRITE;
 
 public class LeidenWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
-    @Procedure(value = "gds.alpha.leiden.write", mode = READ)
+    @Procedure(value = "gds.alpha.leiden.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
