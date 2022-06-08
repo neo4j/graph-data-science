@@ -186,6 +186,62 @@ include::partial$/algorithms/alpha/leiden/specific-configuration.adoc[]
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
+
+
+[.include-with-write]
+======
+.Run Leiden in write mode on a named graph.
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.leiden.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  preProcessingMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  communityCount: Integer,
+  ranLevels: Integer,
+  modularity: Float,
+  modularities: List of Float,
+  nodeCount: Integer,
+  didConverge: Integer,
+  nodePropertiesWritten: Integer,
+  communityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/leiden/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type          | Description
+| preProcessingMillis    | Integer       | Milliseconds for preprocessing the data.
+| computeMillis          | Integer       | Milliseconds for running the algorithm.
+| writeMillis            | Integer       | Milliseconds for adding properties to the projected graph.
+| postProcessingMillis   | Integer       | Milliseconds for computing percentiles and community count.
+| communityCount         | Integer       | The number of communities found.
+| ranLevels              | Integer       | The number of levels the algorithm actually ran.
+| modularity             | Float         | The final modularity score.
+| modularities           | List of Float | The modularity scores for each level.
+| nodeCount              | Integer       | Indicates if the algorithm converged.
+| didConverge            | Boolean       | Indicates if the algorithm converged.
+| nodePropertiesWritten  | Integer       | Number of properties added to the Neo4j database.
+| communityDistribution  | Map           | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| configuration          | Map           | The configuration used for running the algorithm.
+|===
+======
 ====
 
 [[algorithms-leiden-examples]]
