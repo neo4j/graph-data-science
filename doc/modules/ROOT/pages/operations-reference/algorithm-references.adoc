@@ -305,10 +305,11 @@ include::partial$/algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.influenceMaximization.celf.stream`
 .1+<.^| xref::algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
-.3+<.^| xref::algorithms/alpha/kmeans.adoc[Kmeans]
+.4+<.^| xref::algorithms/alpha/kmeans.adoc[Kmeans]
 | `gds.alpha.kmeans.mutate`
 | `gds.alpha.kmeans.stats`
 | `gds.alpha.kmeans.stream`
+| `gds.alpha.kmeans.write`
 .4+<.^| xref::algorithms/alpha/filtered-knn.adoc[Filtered KNN]
 | `gds.alpha.knn.filtered.mutate`
 | `gds.alpha.knn.filtered.stats`
