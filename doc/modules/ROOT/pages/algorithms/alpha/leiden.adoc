@@ -384,6 +384,34 @@ In `mutate` mode, only a single row is returned by the procedure.
 The result contains meta information, like the number of identified communities.
 The result is written to the GDS in-memory graph instead of the Neo4j database.
 
+
+[[algorithms-leiden-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm and store the results in the Neo4j database:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.leiden.write('myGraph', { writeProperty: 'communityId', randomSeed: 19 })
+YIELD communityCount, nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| communityCount | nodePropertiesWritten
+| 2              | 6
+|===
+--
+
+In `write` mode, only a single row is returned by the procedure.
+The result contains meta information, like the number of identified communities.
+The result is written to the Neo4j database instead of the GDS in-memory graph.
+
+
 [[algorithms-leiden-examples-stream-weighted]]
 === Weighted
 

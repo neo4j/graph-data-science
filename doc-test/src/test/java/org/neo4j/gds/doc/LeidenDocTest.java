@@ -24,6 +24,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.leiden.LeidenMutateProc;
 import org.neo4j.gds.leiden.LeidenStatsProc;
 import org.neo4j.gds.leiden.LeidenStreamProc;
+import org.neo4j.gds.leiden.LeidenWriteProc;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ class LeidenDocTest extends DocTestBase {
             LeidenStreamProc.class,
             LeidenStatsProc.class,
             LeidenMutateProc.class,
+            LeidenWriteProc.class,
             GraphProjectProc.class
         );
     }
