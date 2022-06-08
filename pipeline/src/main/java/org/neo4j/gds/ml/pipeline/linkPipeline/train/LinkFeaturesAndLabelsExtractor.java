@@ -112,7 +112,8 @@ final class LinkFeaturesAndLabelsExtractor {
             var startRelationshipOffset = relationshipOffset.getValue();
             tasks.add(() -> {
                 var currentRelationshipOffset = new MutableLong(startRelationshipOffset);
-                partition.consume(nodeId -> graph.concurrentCopy().forEachRelationship(nodeId, -10, (src, trg, weight) -> {
+                var localGraph = graph.concurrentCopy();
+                partition.consume(nodeId -> localGraph.forEachRelationship(nodeId, -10, (src, trg, weight) -> {
                     if (weight == EdgeSplitter.NEGATIVE || weight == EdgeSplitter.POSITIVE) {
                         globalLabels.set(currentRelationshipOffset.getAndIncrement(), (long) weight);
                     } else {
