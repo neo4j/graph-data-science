@@ -37,11 +37,11 @@ class KmeansWriteProcTest extends BaseProcTest {
     @Language("Cypher")
     static final String DB_CYPHER =
         "CREATE" +
-        " (a:Node { weights: [0.0]})" +
-        ",(b:Node { weights: [0.1]})" +
-        ",(c:Node { weights: [0.2]})" +
-        ",(d:Node { weights: [0.3]})" +
-        ",(e:Node { weights: [0.4]})";
+        "  (a:Node {weights: [0.0]})" +
+        ", (b:Node {weights: [0.1]})" +
+        ", (c:Node {weights: [0.2]})" +
+        ", (d:Node {weights: [0.3]})" +
+        ", (e:Node {weights: [0.4]})";
 
     @BeforeEach
     void setUp() throws Exception {
