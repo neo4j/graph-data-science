@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.metrics.classification;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -68,7 +68,7 @@ public final class OutOfBagError implements Metric {
     public static double evaluate(
         ReadOnlyHugeLongArray trainSet,
         LocalIdMap classMapping,
-        HugeLongArray expectedLabels,
+        HugeIntArray expectedLabels,
         int concurrency,
         HugeAtomicLongArray predictions
     ) {
@@ -105,7 +105,7 @@ public final class OutOfBagError implements Metric {
         LocalIdMap classMapping,
         ReadOnlyHugeLongArray trainSet,
         HugeAtomicLongArray predictions,
-        HugeLongArray expectedLabels,
+        HugeIntArray expectedLabels,
         LongAdder totalMistakes,
         LongAdder totalOutOfAnyBagVectors
     ) {
@@ -135,7 +135,7 @@ public final class OutOfBagError implements Metric {
 
                 // The ith feature vector was in at least one out-of-bag dataset.
                 numOutOfAnyBagVectors++;
-                if (classMapping.toOriginal(maxClassIdx) != expectedLabels.get(trainSet.get(i))) {
+                if (maxClassIdx != expectedLabels.get(trainSet.get(i))) {
                     numMistakes++;
                 }
             }

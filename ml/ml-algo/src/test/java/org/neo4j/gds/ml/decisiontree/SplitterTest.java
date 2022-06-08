@@ -25,9 +25,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
@@ -42,16 +42,15 @@ class SplitterTest {
 
     private static final long NUM_SAMPLES = 10;
     private static final int NUM_FEATURES = 2;
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private final FeatureBagger featureBagger = new FeatureBagger(new SplittableRandom(42), NUM_FEATURES, 1.0);
     private GiniIndex giniIndexLoss;
     private Features features;
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
+        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
 
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(
             double[].class,
@@ -74,7 +73,7 @@ class SplitterTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
+        giniIndexLoss = new GiniIndex(allLabels, 2);
     }
 
     private static Stream<Arguments> bestSplitParams() {

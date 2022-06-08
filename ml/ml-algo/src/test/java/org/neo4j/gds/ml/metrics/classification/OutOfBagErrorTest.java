@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.LongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -35,7 +36,7 @@ class OutOfBagErrorTest {
         double outOfBagError = OutOfBagError.evaluate(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(1L)),
             LocalIdMap.of(0),
-            HugeLongArray.of(0),
+            HugeIntArray.of(0),
             4,
             HugeAtomicLongArray.newArray(1, LongPageCreator.identity(1))
         );

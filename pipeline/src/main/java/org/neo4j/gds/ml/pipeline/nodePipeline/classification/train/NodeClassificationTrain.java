@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -60,6 +61,7 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.LongUnaryOperator;
@@ -408,7 +410,10 @@ public final class NodeClassificationTrain {
             metricsHandler
         );
 
-        return trainer.train(features, targets, trainSet);
+        // FIXME map them once during the extraction
+        var intTargets = HugeIntArray.of(Arrays.stream(targets.toArray()).mapToInt(classIdMap::toMapped).toArray());
+
+        return trainer.train(features, intTargets, trainSet);
     }
 
 }

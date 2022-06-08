@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -41,16 +42,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DecisionTreeClassifierTest {
 
     private static final long NUM_SAMPLES = 10;
+    // FIXME remove this
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private Features features;
     private GiniIndex giniIndexLoss;
     private Entropy entropyLoss;
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
+        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
 
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(
             double[].class,
@@ -73,18 +75,18 @@ class DecisionTreeClassifierTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        giniIndexLoss = GiniIndex.fromOriginalLabels(allLabels, CLASS_MAPPING);
-        entropyLoss = Entropy.fromOriginalLabels(allLabels, CLASS_MAPPING);
+        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING.size());
+        entropyLoss = new Entropy(allLabels, CLASS_MAPPING.size());
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
-                Arguments.of(new double[]{8.0, 0.0}, 42, 1),
-                Arguments.of(new double[]{3.0, 0.0}, 1337, 1),
-                Arguments.of(new double[]{0.0, 4.0}, 42, 2),
-                Arguments.of(new double[]{3.0, 0.0}, 1337, 100),
-                Arguments.of(new double[]{0.0, 4.0}, 42, 100)
+                Arguments.of(new double[]{8.0, 0.0}, 1, 1),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 1),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 2),
+                Arguments.of(new double[]{3.0, 0.0}, 0, 100),
+                Arguments.of(new double[]{0.0, 4.0}, 1, 100)
             ),
             () -> Stream.of(Arguments.of(2), Arguments.of(4)),
             () -> Stream.of(Arguments.of(true), Arguments.of(false))
@@ -119,7 +121,7 @@ class DecisionTreeClassifierTest {
 
         var decisionTreePredict = decisionTree.train(featureVectors);
 
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(expectedPrediction));
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(expectedPrediction);
     }
 
     @Test
@@ -145,7 +147,7 @@ class DecisionTreeClassifierTest {
         var featureVector = new double[]{8.0, 0.0};
 
         var decisionTreePredict = decisionTree.train(featureVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42));
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1);
 
         decisionTree = new DecisionTreeClassifierTrainer(
             giniIndexLoss,
@@ -157,7 +159,7 @@ class DecisionTreeClassifierTest {
         );
 
         decisionTreePredict = decisionTree.train(featureVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(1337));
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(0);
     }
 
     @Test
@@ -183,7 +185,7 @@ class DecisionTreeClassifierTest {
         );
 
         var decisionTreePredict = decisionTree.train(sampledVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(1337L));
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(0);
 
         var mutableOtherSampledVectors = HugeLongArray.newArray(1);
         mutableOtherSampledVectors.set(0, features.size() - 1);
@@ -199,7 +201,7 @@ class DecisionTreeClassifierTest {
         );
 
         decisionTreePredict = decisionTree.train(otherSampledVectors);
-        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(CLASS_MAPPING.toMapped(42L));
+        assertThat(decisionTreePredict.predict(featureVector)).isEqualTo(1);
     }
 
     @ParameterizedTest

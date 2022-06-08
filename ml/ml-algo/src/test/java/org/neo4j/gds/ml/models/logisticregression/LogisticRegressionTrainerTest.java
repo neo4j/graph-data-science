@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
@@ -37,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticRegressionTrainerTest {
 
-    private static final HugeLongArray FOUR_CLASSES = HugeLongArray.of(2, 0, 0, 2, 7, -75);
+    private static final HugeIntArray FOUR_CLASSES = HugeIntArray.of(0, 1, 1, 0, 2, 3);
 
     private static LocalIdMap fourClassIdMap() {
         var idMap = new LocalIdMap();
@@ -248,12 +249,12 @@ class LogisticRegressionTrainerTest {
         // same training
         var classifier1 = trainer().train(
             TestFeatures.singleConstant(1.0),
-            HugeLongArray.of(0),
+            HugeIntArray.of(0),
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0))
         );
         var classifier2 = trainer().train(
             TestFeatures.singleConstant(1.0),
-            HugeLongArray.of(0),
+            HugeIntArray.of(0),
             ReadOnlyHugeLongArray.of(HugeLongArray.of(0, 0, 0))
         );
 

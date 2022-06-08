@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 
@@ -29,13 +29,13 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> {
 
-    private final HugeLongArray allLabels;
+    private final HugeIntArray allLabels;
     private final LocalIdMap classIdMap;
 
     public DecisionTreeClassifierTrainer(
         ImpurityCriterion impurityCriterion,
         Features features,
-        HugeLongArray labels,
+        HugeIntArray labels,
         LocalIdMap classIdMap,
         DecisionTreeTrainerConfig config,
         FeatureBagger featureBagger
@@ -73,8 +73,7 @@ public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> 
         var array = group.array();
 
         for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {
-            long label = allLabels.get(array.get(i));
-            classesInGroup[classIdMap.toMapped(label)]++;
+            classesInGroup[allLabels.get(array.get(i))]++;
         }
 
         long maxClassCountInGroup = -1;

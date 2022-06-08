@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -49,13 +50,13 @@ class RandomForestClassifierTest {
     private static final long NUM_SAMPLES = 10;
     private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
-    private final HugeLongArray allLabels = HugeLongArray.newArray(NUM_SAMPLES);
+    private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
 
     @BeforeEach
     void setup() {
-        allLabels.setAll(idx -> idx >= 5 ? 42 : 1337);
+        allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES);
         mutableTrainSet.setAll(idx -> idx);

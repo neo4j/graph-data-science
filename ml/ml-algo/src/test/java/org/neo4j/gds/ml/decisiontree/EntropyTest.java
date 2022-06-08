@@ -25,8 +25,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.stream.Stream;
 
@@ -34,12 +34,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntropyTest {
 
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(5, 1);
-
     private static Stream<Arguments> groupParameters() {
         return Stream.of(
             Arguments.of(
-                HugeLongArray.of(1, 5),
+                HugeIntArray.of(1, 0),
                 HugeLongArray.of(0, 1),
                 0,
                 2,
@@ -47,7 +45,7 @@ class EntropyTest {
                 new long[]{1, 1}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 5),
+                HugeIntArray.of(1, 0),
                 HugeLongArray.of(0, 1),
                 0,
                 1,
@@ -55,7 +53,7 @@ class EntropyTest {
                 new long[]{0, 1}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 5),
+                HugeIntArray.of(1, 0),
                 HugeLongArray.of(),
                 0,
                 0,
@@ -63,7 +61,7 @@ class EntropyTest {
                 new long[]{0, 0}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 1, 5, 5),
+                HugeIntArray.of(1, 1, 0, 0),
                 HugeLongArray.of(0, 1, 2, 3),
                 0,
                 4,
@@ -71,7 +69,7 @@ class EntropyTest {
                 new long[]{2, 2}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 1, 5, 5, 1, 1),
+                HugeIntArray.of(1, 1, 0, 0, 1, 1),
                 HugeLongArray.of(0, 1, 2, 3, 4, 5),
                 0,
                 4,
@@ -79,7 +77,7 @@ class EntropyTest {
                 new long[]{2, 2}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 1, 5, 5, 1, 1),
+                HugeIntArray.of(1, 1, 0, 0, 1, 1),
                 HugeLongArray.of(0, 1, 2, 3, 4, 5),
                 0,
                 6,
@@ -87,7 +85,7 @@ class EntropyTest {
                 new long[]{2, 4}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 5, 5),
+                HugeIntArray.of(1, 0, 0),
                 HugeLongArray.of(0, 1, 2),
                 0,
                 3,
@@ -95,7 +93,7 @@ class EntropyTest {
                 new long[]{2, 1}
             ),
             Arguments.of(
-                HugeLongArray.of(1, 5, 5),
+                HugeIntArray.of(1, 0, 0),
                 HugeLongArray.of(1, 2, 0),
                 0,
                 3,
@@ -108,14 +106,14 @@ class EntropyTest {
     @ParameterizedTest
     @MethodSource("groupParameters")
     void shouldComputeCorrectGroupMetaData(
-        HugeLongArray labels,
+        HugeIntArray labels,
         HugeLongArray group,
         long startIdx,
         long size,
         double expectedImpurity,
         long[] expectedClassCounts
     ) {
-        var entropyLossLoss = Entropy.fromOriginalLabels(labels, CLASS_MAPPING);
+        var entropyLossLoss = new Entropy(labels, 2);
         var impurityData = entropyLossLoss.groupImpurity(group, startIdx, size);
 
         assertThat(impurityData.impurity())
@@ -149,8 +147,8 @@ class EntropyTest {
         double expectedLoss,
         long[] expectedClassCounts
     ) {
-        var labels = HugeLongArray.of(1, 5, 5, 5, 1);
-        var entropyLossLoss = Entropy.fromOriginalLabels(labels, CLASS_MAPPING);
+        var labels = HugeIntArray.of(1, 0, 0, 0, 1);
+        var entropyLossLoss = new Entropy(labels, 2);
         var impurityData = entropyLossLoss.groupImpurity(HugeLongArray.of(2, 0, 3), 0, 3);
         entropyLossLoss.incrementalImpurity(featureVectorIdx, impurityData);
 
@@ -185,8 +183,8 @@ class EntropyTest {
         double expectedLoss,
         long[] expectedClassCounts
     ) {
-        var labels = HugeLongArray.of(1, 5, 5, 5, 1);
-        var entropyLossLoss = Entropy.fromOriginalLabels(labels, CLASS_MAPPING);
+        var labels = HugeIntArray.of(1, 0, 0, 0, 1);
+        var entropyLossLoss = new Entropy(labels, 2);
         var impurityData = entropyLossLoss.groupImpurity(HugeLongArray.of(2, 0, 3, 1, 4), 0, 5);
         entropyLossLoss.decrementalImpurity(featureVectorIdx, impurityData);
 

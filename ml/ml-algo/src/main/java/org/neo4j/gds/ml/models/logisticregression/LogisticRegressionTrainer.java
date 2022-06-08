@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -34,7 +33,6 @@ import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
-import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
 
@@ -103,14 +101,13 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     }
 
     @Override
-    public LogisticRegressionClassifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet) {
+    public LogisticRegressionClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
             ? withReducedClassCount(features.featureDimension(), classIdMap)
             : standard(features.featureDimension(), classIdMap);
         var classifier = LogisticRegressionClassifier.from(data);
-        //FIXME
-        var intLabels = HugeIntArray.of(Arrays.stream(labels.toArray()).mapToInt(classIdMap::toMapped).toArray());
-        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, intLabels);
+
+        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 

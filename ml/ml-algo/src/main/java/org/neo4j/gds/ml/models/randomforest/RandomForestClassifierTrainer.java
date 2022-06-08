@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
@@ -133,7 +134,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     public RandomForestClassifier train(
         Features allFeatureVectors,
-        HugeLongArray allLabels,
+        HugeIntArray allLabels,
         ReadOnlyHugeLongArray trainSet
     ) {
         Optional<HugeAtomicLongArray> maybePredictions = metricsHandler.isRequested(OUT_OF_BAG_ERROR)
@@ -192,12 +193,12 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         return outOfBagError.orElseThrow(() -> new IllegalAccessError("Out of bag error has not been computed."));
     }
 
-    private ImpurityCriterion initializeImpurityCriterion(HugeLongArray allLabels) {
+    private ImpurityCriterion initializeImpurityCriterion(HugeIntArray allLabels) {
         switch (config.criterion()) {
             case GINI:
-                return GiniIndex.fromOriginalLabels(allLabels, classIdMap);
+                return new GiniIndex(allLabels, classIdMap.size());
             case ENTROPY:
-                return Entropy.fromOriginalLabels(allLabels, classIdMap);
+                return new Entropy(allLabels, classIdMap.size());
             default:
                 throw new IllegalStateException("Invalid decision tree classifier impurity criterion.");
         }
@@ -211,7 +212,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         private final RandomForestTrainerConfig randomForestTrainConfig;
         private final SplittableRandom random;
         private final Features allFeatureVectors;
-        private final HugeLongArray allLabels;
+        private final HugeIntArray allLabels;
         private final LocalIdMap classIdMap;
         private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
@@ -225,7 +226,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             RandomForestTrainerConfig randomForestTrainConfig,
             SplittableRandom random,
             Features allFeatureVectors,
-            HugeLongArray allLabels,
+            HugeIntArray allLabels,
             LocalIdMap classIdMap,
             ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,

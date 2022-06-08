@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public interface ClassifierTrainer {
 
-    Classifier train(Features features, HugeLongArray labels, ReadOnlyHugeLongArray trainSet);
+    Classifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet);
 
     static Task progressTask(String taskName, long volume) {
         return Tasks.leaf(taskName, volume);
