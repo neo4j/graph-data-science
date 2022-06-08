@@ -85,17 +85,17 @@ class AdamOptimizerTest {
         assertThat(weights.data().data())
             .contains(
                 new double[]{
-                    0.109999999,
-                    0.130000000,
-                    0.230999999,
+                    0.11,
+                    0.13,
+                    0.231,
                     0.4,
                     0.3,
                     0.9,
                     0.01,
                     0.6,
-                    0.150088201
+                    0.15
                 },
-                Offset.offset(1e-9)
+                Offset.offset(1e-4)
             );
     }
 
