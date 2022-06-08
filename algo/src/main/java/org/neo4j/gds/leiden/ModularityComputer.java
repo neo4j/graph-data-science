@@ -32,11 +32,11 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-final class ModularityComputer {
+public final class ModularityComputer {
 
     private ModularityComputer() {}
 
-    static double modularity(Graph graph, HugeLongArray finalCommunities, double gamma) {
+    public static double modularity(Graph graph, HugeLongArray finalCommunities, double gamma) {
         double modularity = 0d;
         HugeDoubleArray sumOfEdges = HugeDoubleArray.newArray(graph.nodeCount());
         HugeDoubleArray insideEdges = HugeDoubleArray.newArray(graph.nodeCount());
