@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import net.bytebuddy.asm.Advice;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

@@ -411,10 +411,7 @@ public final class NodeClassificationTrain {
             metricsHandler
         );
 
-        // FIXME map them once during the extraction
-        var intTargets = HugeIntArray.of(Arrays.stream(targets.toArray()).mapToInt(classIdMap::toMapped).toArray());
-
-        return trainer.train(features, intTargets, trainSet);
+        return trainer.train(features, targets, trainSet);
     }
 
 }
