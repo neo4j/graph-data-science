@@ -23,7 +23,6 @@ import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -34,14 +33,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.KmeansStreamProc.KMEANS_DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.kmeans.write", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.alpha.kmeans.write", description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>, KmeansAlgorithmFactory<KmeansWriteConfig>> {
-
-    private final NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
-
-    KmeansWriteSpec(NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder) {
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-    }
 
     @Override
     public String name() {
@@ -75,7 +68,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 var algorithm = computationResult.algorithm();
                 var config = computationResult.config();
 
-                NodePropertyExporter exporter =  nodePropertyExporterBuilder
+                NodePropertyExporter exporter =  executionContext.nodePropertyExporterBuilder()
                     .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .parallel(Pools.DEFAULT, writeConcurrency)
