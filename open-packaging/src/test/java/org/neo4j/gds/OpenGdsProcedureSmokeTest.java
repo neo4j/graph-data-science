@@ -65,6 +65,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.leiden.mutate",
         "gds.alpha.leiden.stats",
         "gds.alpha.leiden.stream",
+        "gds.alpha.leiden.write",
 
         "gds.alpha.kmeans.mutate",
         "gds.alpha.kmeans.stats",

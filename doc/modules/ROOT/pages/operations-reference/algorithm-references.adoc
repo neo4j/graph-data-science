@@ -315,10 +315,11 @@ include::partial$/algorithms/algorithm-tiers.adoc[]
 | `gds.alpha.knn.filtered.stats`
 | `gds.alpha.knn.filtered.stream`
 | `gds.alpha.knn.filtered.write`
-.3+<.^| xref::algorithms/alpha/leiden.adoc[Leiden]
+.4+<.^| xref::algorithms/alpha/leiden.adoc[Leiden]
 | `gds.alpha.leiden.mutate`
 | `gds.alpha.leiden.stats`
 | `gds.alpha.leiden.stream`
+| `gds.alpha.leiden.write`
 .6+<.^| Filtered NodeSimilarity
 | `gds.alpha.nodeSimilarity.filtered.mutate`
 | `gds.alpha.nodeSimilarity.filtered.mutate.estimate`

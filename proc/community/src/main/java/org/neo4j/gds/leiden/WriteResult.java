@@ -26,12 +26,12 @@ import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import java.util.List;
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
+public final class WriteResult extends StatsResult {
 
-    public final long mutateMillis;
+    public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    private MutateResult(
+    private WriteResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
@@ -39,7 +39,7 @@ public final class MutateResult extends StatsResult {
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
+        long writeMillis,
         long nodePropertiesWritten,
         @Nullable Map<String, Object> communityDistribution,
         List<Double> modularities,
@@ -59,11 +59,11 @@ public final class MutateResult extends StatsResult {
             postProcessingMillis,
             configuration
         );
-        this.mutateMillis = mutateMillis;
+        this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
+    static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
 
         long levels = -1;
         boolean didConverge = false;
@@ -99,8 +99,8 @@ public final class MutateResult extends StatsResult {
         }
 
         @Override
-        protected MutateResult buildResult() {
-            return new MutateResult(
+        protected WriteResult buildResult() {
+            return new WriteResult(
                 levels,
                 didConverge,
                 nodeCount,
@@ -108,7 +108,7 @@ public final class MutateResult extends StatsResult {
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
-                mutateMillis,
+                writeMillis,
                 nodePropertiesWritten,
                 communityHistogramOrNull(),
                 modularities,
