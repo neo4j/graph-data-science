@@ -9,6 +9,7 @@ ext {
         '4.3.3'         : properties.getOrDefault('neo4jVersion433', '4.3.3'),
         '4.3.4plus'     : properties.getOrDefault('neo4jVersion434', '4.3.13'),
         '4.4.7-drop01.0': properties.getOrDefault('neo4jVersion44drop1', '4.4.7-drop01.0'),
+        '5.0.0-drop02.0': properties.getOrDefault('neo4jVersion44drop1', '5.0.0-drop02.0'),
         'dev'           : properties.getOrDefault('neo4jVersionDev', '5.0.0-dev'),
     ]
 
@@ -114,11 +115,11 @@ def neo_deps = [
     'neo4j',
 ]
 
-def neo_deps_dev = neo_deps - ['neo4j-storage-engine-api']
+def neo_deps_50 = neo_deps - ['neo4j-storage-engine-api']
 
 ext.neodeps = {
-    if (ver.'neo4j' == neos.'dev') {
-        neo_deps_dev.iterator()
+    if (ver.'neo4j' == neos.'dev' || ver.'neo4j' == neos.'5.0.0-drop02.0') {
+        neo_deps_50.iterator()
     } else {
         neo_deps.iterator()
     }

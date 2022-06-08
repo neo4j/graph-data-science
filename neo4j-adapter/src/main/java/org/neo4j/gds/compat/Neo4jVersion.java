@@ -29,6 +29,7 @@ public enum Neo4jVersion {
     V_4_3,
     V_4_4,
     V_4_4_drop10,
+    V_5_0_drop20,
     V_Dev;
 
     @Override
@@ -40,6 +41,8 @@ public enum Neo4jVersion {
                 return "4.4";
             case V_4_4_drop10:
                 return "4.4.7-drop01.0";
+            case V_5_0_drop20:
+                return "5.0.0-drop02.0";
             case V_Dev:
                 return "dev";
             default:
@@ -78,6 +81,9 @@ public enum Neo4jVersion {
     static Neo4jVersion parse(String version) {
         if ("4.4.7-drop01.0".equals(version) || "4.4.6-drop01.0".equals(version)) {
             return Neo4jVersion.V_4_4_drop10;
+        }
+        if ("5.0.0-drop02.0".equals(version)) {
+            return Neo4jVersion.V_5_0_drop20;
         }
         var majorVersion = Pattern.compile("[.-]")
             .splitAsStream(version)
