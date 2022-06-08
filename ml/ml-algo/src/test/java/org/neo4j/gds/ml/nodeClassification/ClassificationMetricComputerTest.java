@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -58,7 +59,7 @@ class ClassificationMetricComputerTest {
         multiSet.add(1L, 1);
         multiSet.add(3L, 1);
         var idMap = LocalIdMap.of(1, 0, 3);
-        var targets = HugeLongArray.of(firstTarget, 0, 3, 0);
+        var targets = HugeIntArray.of(idMap.toMapped(firstTarget), idMap.toMapped(0), idMap.toMapped(3), idMap.toMapped(0));
 
         Features features = FeaturesFactory.wrap(Stream
             .of(0, 1, 2, 3)
@@ -97,6 +98,7 @@ class ClassificationMetricComputerTest {
             features,
             targets,
             multiSet,
+            idMap,
             ReadOnlyHugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,

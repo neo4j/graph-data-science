@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
@@ -38,12 +40,14 @@ public class F1Score implements ClassificationMetric {
     }
 
     @Override
-    public double compute(HugeLongArray targets, HugeLongArray predictions, Multiset<Long> ignore) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore, LocalIdMap localIdMap) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
                     predictions.size()
                 );
+
+        var localPositiveTarget = localIdMap.toMapped(positiveTarget);
 
         long truePositives = 0L;
         long falsePositives = 0L;
@@ -53,8 +57,8 @@ public class F1Score implements ClassificationMetric {
             long targetClass = targets.get(row);
             long predictedClass = predictions.get(row);
 
-            var predictedIsPositive = predictedClass == positiveTarget;
-            var targetIsPositive = targetClass == positiveTarget;
+            var predictedIsPositive = predictedClass == localPositiveTarget;
+            var targetIsPositive = targetClass == localPositiveTarget;
             var predictedIsNegative = !predictedIsPositive;
             var targetIsNegative = !targetIsPositive;
 
@@ -78,8 +82,8 @@ public class F1Score implements ClassificationMetric {
         return result;
     }
 
-    public double compute(HugeLongArray targets, HugeLongArray predictions) {
-        return compute(targets, predictions, null);
+    public double compute(HugeIntArray targets, HugeIntArray predictions, LocalIdMap localIdMap) {
+        return compute(targets, predictions, null, localIdMap);
     }
 
     @Override

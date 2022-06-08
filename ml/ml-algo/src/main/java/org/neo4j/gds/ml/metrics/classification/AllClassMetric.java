@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
@@ -38,9 +40,10 @@ public enum AllClassMetric implements ClassificationMetric {
 
         @Override
         public double compute(
-            HugeLongArray targets,
-            HugeLongArray predictions,
-            Multiset<Long> globalClassCounts
+            HugeIntArray targets,
+            HugeIntArray predictions,
+            Multiset<Long> globalClassCounts,
+            LocalIdMap localIdMap
         ) {
             if (globalClassCounts.size() == 0) {
                 return 0.0;
@@ -49,7 +52,7 @@ public enum AllClassMetric implements ClassificationMetric {
             var weightedScores = globalClassCounts.keys().stream()
                 .mapToDouble(target -> {
                     var weight = globalClassCounts.count(target);
-                    return weight * new F1Score(target).compute(targets, predictions);
+                    return weight * new F1Score(target).compute(targets, predictions, localIdMap);
                 });
             return weightedScores.sum() / globalClassCounts.size();
         }
@@ -62,9 +65,10 @@ public enum AllClassMetric implements ClassificationMetric {
 
         @Override
         public double compute(
-            HugeLongArray targets,
-            HugeLongArray predictions,
-            Multiset<Long> globalClassCounts
+            HugeIntArray targets,
+            HugeIntArray predictions,
+            Multiset<Long> globalClassCounts,
+            LocalIdMap localIdMap
         ) {
             var metrics = globalClassCounts.keys().stream()
                 .map(F1Score::new)
@@ -72,7 +76,7 @@ public enum AllClassMetric implements ClassificationMetric {
 
             return metrics
                 .stream()
-                .mapToDouble(metric -> metric.compute(targets, predictions))
+                .mapToDouble(metric -> metric.compute(targets, predictions, localIdMap))
                 .average()
                 .orElse(-1);
         }
@@ -85,9 +89,10 @@ public enum AllClassMetric implements ClassificationMetric {
 
         @Override
         public double compute(
-            HugeLongArray targets,
-            HugeLongArray predictions,
-            Multiset<Long> globalClassCounts
+            HugeIntArray targets,
+            HugeIntArray predictions,
+            Multiset<Long> globalClassCounts,
+            LocalIdMap ignored
         ) {
             long accuratePredictions = 0;
             assert targets.size() == predictions.size() : formatWithLocale(

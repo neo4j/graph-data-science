@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,40 +31,43 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AccuracyMetricTest {
     @Test
     void shouldComputeAccuracy() {
-        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
-        var targets = HugeLongArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
+        var predictions = HugeIntArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeIntArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
         var classCounts = new Multiset<Long>();
         for (long target : targets.toArray()) {
             classCounts.add(target);
         }
+        var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
         var metric = AllClassMetric.ACCURACY;
-        assertThat(metric.compute(targets, predictions, classCounts)).isCloseTo(7.0 / 15, Offset.offset(1e-8));
+        assertThat(metric.compute(targets, predictions, classCounts, localIdMap)).isCloseTo(7.0 / 15, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeAccuracyWhenAllPredictionsAreCorrect() {
-        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
-        var targets = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var predictions = HugeIntArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeIntArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         var classCounts = new Multiset<Long>();
         for (long target : targets.toArray()) {
             classCounts.add(target);
         }
+        var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
         var metric = AllClassMetric.ACCURACY;
-        assertThat(metric.compute(targets, predictions, classCounts)).isCloseTo(1.0, Offset.offset(1e-8));
+        assertThat(metric.compute(targets, predictions, classCounts, localIdMap)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeAccuracyWhenAllPredictionsAreWrong() {
-        var predictions = HugeLongArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
-        var targets = HugeLongArray.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        var predictions = HugeIntArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
+        var targets = HugeIntArray.of(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         var classCounts = new Multiset<Long>();
         for (long target : targets.toArray()) {
             classCounts.add(target);
         }
+        var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
         var metric = AllClassMetric.ACCURACY;
-        assertThat(metric.compute(targets, predictions, classCounts)).isCloseTo(0.0, Offset.offset(1e-8));
+        assertThat(metric.compute(targets, predictions, classCounts, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 }

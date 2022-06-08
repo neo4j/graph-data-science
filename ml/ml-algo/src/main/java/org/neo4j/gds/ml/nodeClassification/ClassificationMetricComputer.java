@@ -22,9 +22,11 @@ package org.neo4j.gds.ml.nodeClassification;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -32,34 +34,39 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.openjdk.jol.util.Multiset;
 
+import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
 
 public final class ClassificationMetricComputer {
 
-    private final HugeLongArray predictedClasses;
-    private final HugeLongArray labels;
+    private final HugeIntArray predictedClasses;
+    private final LocalIdMap localIdMap;
+    private final HugeIntArray labels;
     private final Multiset<Long> classCounts;
 
     private ClassificationMetricComputer(
-        HugeLongArray predictedClasses,
-        HugeLongArray labels,
-        Multiset<Long> classCounts
+        HugeIntArray predictedClasses,
+        HugeIntArray labels,
+        Multiset<Long> classCounts,
+        LocalIdMap localIdMap
     ) {
         this.labels = labels;
         this.classCounts = classCounts;
         this.predictedClasses = predictedClasses;
+        this.localIdMap = localIdMap;
     }
 
     public double score(ClassificationMetric metric) {
-        return metric.compute(labels, predictedClasses, classCounts);
+        return metric.compute(labels, predictedClasses, classCounts, localIdMap);
     }
 
     public static ClassificationMetricComputer forEvaluationSet(
         Features features,
-        HugeLongArray labels,
+        HugeIntArray labels,
         Multiset<Long> classCounts,
+        LocalIdMap classIdMap,
         ReadOnlyHugeLongArray evaluationSet,
         Classifier classifier,
         int concurrency,
@@ -75,15 +82,18 @@ public final class ClassificationMetricComputer {
             progressTracker
         );
 
+        var predictedClasses = HugeIntArray.of(Arrays.stream(predictor.predict(evaluationSet).toArray()).mapToInt(classIdMap::toMapped).toArray());
+
         return new ClassificationMetricComputer(
-            predictor.predict(evaluationSet),
+            predictedClasses,
             makeLocalTargets(evaluationSet, labels),
-            classCounts
+            classCounts,
+            classIdMap
         );
     }
 
-    private static HugeLongArray makeLocalTargets(ReadOnlyHugeLongArray nodeIds, HugeLongArray targets) {
-        var localTargets = HugeLongArray.newArray(nodeIds.size());
+    private static HugeIntArray makeLocalTargets(ReadOnlyHugeLongArray nodeIds, HugeIntArray targets) {
+        var localTargets = HugeIntArray.newArray(nodeIds.size());
 
         localTargets.setAll(i -> targets.get(nodeIds.get(i)));
         return localTargets;

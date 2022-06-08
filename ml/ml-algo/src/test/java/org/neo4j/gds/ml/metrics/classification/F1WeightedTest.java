@@ -19,32 +19,46 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import net.bytebuddy.asm.Advice;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class F1WeightedTest {
 
-    private HugeLongArray targets;
-    private HugeLongArray predictions;
+    private HugeLongArray originalTargets;
+    private HugeLongArray originalPredictions;
+    private HugeIntArray targets;
+    private HugeIntArray predictions;
     private Multiset<Long> classCounts;
+
+    private LocalIdMap localIdMap;
 
     @BeforeEach
     void setup() {
-        predictions = HugeLongArray.of(
+        originalPredictions = HugeLongArray.of(
             3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4
         );
-        targets = HugeLongArray.of(
+        originalTargets = HugeLongArray.of(
             4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
         );
+
         classCounts = new Multiset<>();
-        for (long target : targets.toArray()) {
+        for (long target : originalTargets.toArray()) {
             classCounts.add(target, 2L);
         }
+        localIdMap = LocalIdMap.ofSorted(classCounts.keys());
+
+        predictions = HugeIntArray.newArray(originalPredictions.size());
+        predictions.setAll(index -> localIdMap.toMapped(originalPredictions.get(index)));
+        targets = HugeIntArray.newArray(originalTargets.size());
+        targets.setAll(index -> localIdMap.toMapped(originalTargets.get(index)));
     }
 
     @Test
@@ -52,7 +66,7 @@ class F1WeightedTest {
         var metric = AllClassMetric.F1_WEIGHTED;
         var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
         var totalExamples = predictions.size();
-        assertThat(metric.compute(targets, predictions, classCounts))
+        assertThat(metric.compute(targets, predictions, classCounts, localIdMap))
             .isCloseTo(totalF1 / totalExamples, Offset.offset(1e-8));
     }
 }

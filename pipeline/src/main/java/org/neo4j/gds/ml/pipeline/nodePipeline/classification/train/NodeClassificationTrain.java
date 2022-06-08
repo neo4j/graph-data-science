@@ -79,7 +79,7 @@ public final class NodeClassificationTrain {
     private final NodeClassificationPipelineTrainConfig trainConfig;
     private final NodeClassificationTrainingPipeline pipeline;
     private final Features features;
-    private final HugeLongArray targets;
+    private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
@@ -253,7 +253,7 @@ public final class NodeClassificationTrain {
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         Features features,
-        HugeLongArray labels,
+        HugeIntArray labels,
         LocalIdMap classIdMap,
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
@@ -341,6 +341,7 @@ public final class NodeClassificationTrain {
             features,
             targets,
             classCounts,
+            classIdMap,
             evaluationSet,
             classifier,
             trainConfig.concurrency(),
@@ -410,10 +411,7 @@ public final class NodeClassificationTrain {
             metricsHandler
         );
 
-        // FIXME map them once during the extraction
-        var intTargets = HugeIntArray.of(Arrays.stream(targets.toArray()).mapToInt(classIdMap::toMapped).toArray());
-
-        return trainer.train(features, intTargets, trainSet);
+        return trainer.train(features, targets, trainSet);
     }
 
 }

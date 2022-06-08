@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 public final class LabelsAndClassCountsExtractor {
@@ -32,18 +34,30 @@ public final class LabelsAndClassCountsExtractor {
         NodePropertyValues targetNodeProperty,
         long nodeCount
     ) {
-        var classCounts = new Multiset<Long>();
-        var labels = HugeLongArray.newArray(nodeCount);
+        var labels = HugeIntArray.newArray(nodeCount);
+        var classCounts = extractClassCounts(targetNodeProperty, nodeCount);
+        var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
+
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
-            labels.set(nodeId, targetNodeProperty.longValue(nodeId));
-            classCounts.add(targetNodeProperty.longValue(nodeId));
+            labels.set(nodeId, localIdMap.toMapped(targetNodeProperty.longValue(nodeId)));
         }
         return ImmutableLabelsAndClassCounts.of(labels, classCounts);
     }
 
+    static Multiset<Long> extractClassCounts(
+        NodePropertyValues targetNodeProperty,
+        long nodeCount
+    ) {
+        var classCounts = new Multiset<Long>();
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            classCounts.add(targetNodeProperty.longValue(nodeId));
+        }
+        return classCounts;
+    }
+
     @ValueClass
     interface LabelsAndClassCounts {
-        HugeLongArray labels();
+        HugeIntArray labels();
 
         Multiset<Long> classCounts();
     }
