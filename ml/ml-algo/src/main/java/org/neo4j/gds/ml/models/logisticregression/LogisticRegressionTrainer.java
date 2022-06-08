@@ -33,7 +33,6 @@ import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
-import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 import java.util.function.Supplier;
 
@@ -107,9 +106,8 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
             ? withReducedClassCount(features.featureDimension(), classIdMap.size())
             : standard(features.featureDimension(), classIdMap.size());
         var classifier = LogisticRegressionClassifier.from(data);
-        //FIXME
-        var intLabels = HugeIntArray.of(Arrays.stream(labels.toArray()).mapToInt(classIdMap::toMapped).toArray());
-        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, intLabels);
+
+        var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
 

@@ -26,6 +26,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
@@ -56,6 +57,7 @@ import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -228,8 +230,6 @@ public final class LinkPredictionTrain {
         LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
-        var intLabels = featureAndLabels.labels();
-
         return ClassifierTrainerFactory.create(
             trainerConfig,
             classIdMap,
@@ -240,7 +240,7 @@ public final class LinkPredictionTrain {
             config.randomSeed(),
             true,
             metricsHandler
-        ).train(featureAndLabels.features(), intLabels, trainSet);
+        ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {

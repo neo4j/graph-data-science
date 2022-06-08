@@ -61,6 +61,7 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.LongUnaryOperator;
@@ -410,7 +411,10 @@ public final class NodeClassificationTrain {
             metricsHandler
         );
 
-        return trainer.train(features, targets, trainSet);
+        // FIXME map them once during the extraction
+        var intTargets = HugeIntArray.of(Arrays.stream(targets.toArray()).mapToInt(classIdMap::toMapped).toArray());
+
+        return trainer.train(features, intTargets, trainSet);
     }
 
 }
