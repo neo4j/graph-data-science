@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.ComputationContext;
@@ -49,7 +50,7 @@ import static java.lang.Math.max;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LogisticRegressionObjectiveTest {
-    private HugeLongArray labels;
+    private HugeIntArray labels;
 
     private static Stream<Arguments> featureBatches() {
         return Stream.of(
@@ -72,7 +73,7 @@ class LogisticRegressionObjectiveTest {
             new double[]{Math.pow(0.3, 2), Math.pow(-0.4, 2)}
         );
 
-        labels = HugeLongArray.newArray(featuresHOA.size());
+        labels = HugeIntArray.newArray(featuresHOA.size());
         labels.setAll(idx -> (idx < 2) ? 1 : 0);
         var idMap = new LocalIdMap();
         for (long i = 0; i < labels.size(); i++) {
@@ -125,10 +126,9 @@ class LogisticRegressionObjectiveTest {
     @Test
     void makeTargets() {
         var batch = new LazyBatch(1, 2, 4);
-        var batchedTargets = standardObjective.batchLabelVector(batch, standardObjective.modelData().classIdMap());
+        var batchedTargets = standardObjective.batchLabelVector(batch);
 
-        // original labels are 1.0, 0.0 , but these are local ids. since nodeId 0 has label 1.0, this maps to 0.0.
-        assertThat(batchedTargets.data()).isEqualTo(new Vector(0.0, 1.0));
+        assertThat(batchedTargets.data()).isEqualTo(new Vector(1.0, 0.0));
     }
 
     @ParameterizedTest
@@ -213,10 +213,10 @@ class LogisticRegressionObjectiveTest {
         Matrix predictedValues = ctx.data(predictions);
         var idMap = objective.modelData().classIdMap();
         var expectedUnpenalizedLoss = 1.0/4.0 * (
-            -Math.log(predictedValues.dataAt(0, idMap.toMapped((int)labels.get(0))))
-            -Math.log(predictedValues.dataAt(1, idMap.toMapped((int)labels.get(1))))
-            -Math.log(predictedValues.dataAt(2, idMap.toMapped((int)labels.get(2))))
-            -Math.log(predictedValues.dataAt(3, idMap.toMapped((int)labels.get(3))))
+            -Math.log(predictedValues.dataAt(0, labels.get(0)))
+            -Math.log(predictedValues.dataAt(1, labels.get(1)))
+            -Math.log(predictedValues.dataAt(2, labels.get(2)))
+            -Math.log(predictedValues.dataAt(3, labels.get(3)))
         );
         var actualUnpenalizedLoss = ctx.forward(objective.crossEntropyLoss(batch)).value();
         assertThat(actualUnpenalizedLoss).isEqualTo(expectedUnpenalizedLoss, Offset.offset(1e-9));
