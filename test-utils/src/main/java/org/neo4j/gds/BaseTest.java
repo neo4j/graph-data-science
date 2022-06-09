@@ -65,7 +65,6 @@ public abstract class BaseTest {
 
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
-        builder.impermanent();
         builder.noOpSystemGraphInitializer();
         builder.setConfig(Settings.procedureUnrestricted(), singletonList("gds.*"));
         // A change in 4.3.0-drop02.0 is enabling the feature to track cursor.close() events by default

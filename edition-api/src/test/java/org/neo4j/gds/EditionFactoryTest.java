@@ -42,7 +42,6 @@ class EditionFactoryTest {
     void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder
             .noOpSystemGraphInitializer()
-            .impermanent()
             .removeExtensions(it -> it instanceof EditionFactory)
             .addExtension(new EditionFactory());
     }
