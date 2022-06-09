@@ -291,7 +291,7 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
-        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics);
+        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics, classIdMap);
     }
 
     private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, TrainingStatistics trainingStatistics) {
