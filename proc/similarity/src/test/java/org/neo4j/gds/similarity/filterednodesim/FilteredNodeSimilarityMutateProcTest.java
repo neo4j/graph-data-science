@@ -25,20 +25,15 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.isA;
 
 class FilteredNodeSimilarityMutateProcTest extends BaseTest {
 
-    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person)" +
@@ -97,13 +92,11 @@ class FilteredNodeSimilarityMutateProcTest extends BaseTest {
                 assertThat(resultRow.get("relationshipsWritten"))
                     .asInstanceOf(LONG)
                     .as("relationshipsWritten")
-//                    .isEqualTo(10);
-                    .isEqualTo(20); // TODO: Why is relationshipsWritten double that of write mode?
+                    .isEqualTo(10);
                 assertThat(resultRow.get("nodesCompared"))
                     .asInstanceOf(LONG)
                     .as("nodesCompared")
-//                    .isEqualTo(4L);
-                    .isEqualTo(8L); // TODO: Why is nodesCompared double that of write mode?
+                    .isEqualTo(4L);
 
                 assertThat(resultRow.get("similarityDistribution"))
                     .isNotNull()
@@ -195,36 +188,9 @@ class FilteredNodeSimilarityMutateProcTest extends BaseTest {
                 assertThat(resultRow.get("nodesCompared"))
                     .asInstanceOf(LONG)
                     .as("nodesCompared")
-//                    .isEqualTo(4);
-                    .isEqualTo(8L); // TODO: Why is nodesCompared double that of write mode?
+                    .isEqualTo(4);
             }
             return true;
         });
-    }
-
-    @Test
-    void testMutate() {
-        var filter = List.of(idFunction.of("a"), idFunction.of("d"));
-
-        var query = GdsCypher.call("graph")
-            .algo("gds.alpha.nodeSimilarity.filtered")
-            .mutateMode()
-            .addParameter("sourceNodeFilter", filter)
-            .addParameter("mutateRelationshipType", "SIMILAR_TO")
-            .addParameter("mutateProperty", "score")
-            .yields();
-
-        assertCypherResult(query, List.of(Map.of(
-            "relationshipsWritten", 6L,
-            "preProcessingMillis", greaterThan(-1L),
-            "computeMillis", greaterThan(-1L),
-            // TODO: postProcessingMillis is not getting set
-            "postProcessingMillis", -1L,
-            "mutateMillis", greaterThan(-1L),
-            "nodesCompared", greaterThan(-1L),
-            "similarityDistribution", isA(Map.class),
-            "configuration", isA(Map.class)
-        )));
-
     }
 }
