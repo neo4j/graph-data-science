@@ -144,7 +144,7 @@ class LogisticRegressionObjectiveTest {
             return features;
         });
 
-        Constant<Matrix> batchFeatures = Objective.batchFeatureMatrix(batch, FeaturesFactory.wrap(allFeatures));
+        Constant<Matrix> batchFeatures = Objective.batchFeatureMatrix(batch, FeaturesFactory.wrap(allFeatures), null);
 
         assertThat(batchFeatures.data()).isEqualTo(expected);
     }

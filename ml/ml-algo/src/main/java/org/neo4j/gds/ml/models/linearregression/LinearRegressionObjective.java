@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models.linearregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -29,6 +30,7 @@ import org.neo4j.gds.ml.core.functions.ElementSum;
 import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.MeanSquareError;
 import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -43,6 +45,8 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
     private final HugeDoubleArray targets;
     private final LinearRegressionData modelData;
     private final double penalty;
+
+    private @Nullable Matrix batchFeaturesBuffer;
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
@@ -59,7 +63,12 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
     @Override
     public Variable<Scalar> loss(Batch batch, long trainSize) {
         LinearRegressor regressor = new LinearRegressor(modelData);
-        var batchFeatures = Objective.batchFeatureMatrix(batch, features);
+
+        if (batchFeaturesBuffer == null) {
+            batchFeaturesBuffer = new Matrix(batch.size(), features.featureDimension());
+        }
+
+        var batchFeatures = Objective.batchFeatureMatrix(batch, features, batchFeaturesBuffer);
         var predictionsVariable = regressor.predictionsVariable(batchFeatures);
         var batchTargets = batchTargets(batch);
 
