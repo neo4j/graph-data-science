@@ -58,6 +58,13 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
             FilteredNodeSimilarityStreamProc.class,
             GraphProjectProc.class
         );
+        runQuery(DB_CYPHER);
+        var createQuery = GdsCypher.call("graph")
+            .graphProject()
+            .withNodeLabels("Person", "Item")
+            .withAnyRelationshipType()
+            .yields();
+        runQuery(createQuery);
     }
 
     @AfterEach
@@ -67,15 +74,6 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldWorkWithoutFiltering() {
-        runQuery(DB_CYPHER);
-
-        var createQuery = GdsCypher.call("graph")
-            .graphProject()
-            .withNodeLabels("Person", "Item")
-            .withAnyRelationshipType()
-            .yields();
-        runQuery(createQuery);
-
         var algoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.nodeSimilarity.filtered")
             .streamMode()
@@ -96,15 +94,6 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
 
     @Test
     void shouldWorkWithFiltering() {
-        runQuery(DB_CYPHER);
-
-        var createQuery = GdsCypher.call("graph")
-            .graphProject()
-            .withNodeLabels("Person", "Item")
-            .withAnyRelationshipType()
-            .yields();
-        runQuery(createQuery);
-
         var sourceFilteredAlgoQuery = GdsCypher.call("graph")
             .algo("gds.alpha.nodeSimilarity.filtered")
             .streamMode()
