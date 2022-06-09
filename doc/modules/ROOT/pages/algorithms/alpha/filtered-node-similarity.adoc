@@ -1,0 +1,67 @@
+[[algorithms-filtered-node-similarity]]
+[.alpha]
+= Filtered Node Similarity
+:description: This section describes the Filtered Node Similarity algorithm in the Neo4j Graph Data Science library.
+
+:entity: relationship
+:result: similarity score
+:algorithm: Filtered K-Nearest Neighbors
+
+[abstract]
+--
+This section describes the Filtered Node Similarity algorithm in the Neo4j Graph Data Science library.
+The algorithm is based on the Jaccard and Overlap similarity metrics.
+--
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-filtered-node-similarity-intro]]
+== Introduction
+
+The Filtered Node Similarity algorithm is an extension to the xref::algorithms/node-similarity.adoc[Node Similarity] algorithm.
+It adds support for filtering on source nodes, target nodes, or both.
+
+Filtered Node Similarity is under it's own namespace because the node filtering behavior is in alpha tier.
+For information about algorithm tiers, see xref::algorithms/index.adoc#algorithms-tiers[Algorithm tiers].
+
+
+[[algorithms-filtered-node-similarity-node-filtering]]
+== Node filtering
+
+A node filter reduces the node space for which the algorithm will produce results.
+Consider two similarity results: _A_ = `(alice)-[:SIMILAR_TO]->(bob)` and _B_ `(bob)-[:SIMILAR_TO]->(alice)`.
+Result A will be produced if the `(alice)` node matches the source node filter and the `(bob)` node matches the target node filter
+If the `(alice)` node does not match the target node filter, or the `(bob)` node does not match the source node filter, result *B* will not be produce.
+
+
+[[algorithms-filtered-node-similarity-filter-configuration]]
+== Configuring node filters
+
+For the standard configuration of node similarity, see xref::algorithms/node-similarity.adoc#algorithms-node-similarity-syntax[Node Similarity syntax].
+
+The source node filter is specified with the `sourceNodeFilter` configuration parameter.
+The target node filter is specified with the `targetNodeFilter` configuration parameter.
+Neither parameter is mandatory.
+
+The node filter parameters accept one of the following:
+
+.Syntax for `sourceNodeFilter` and `targetNodeFilter`
+[cols="1,2a"]
+|===
+| a single node id
+| `sourceNodeFilter: 42`
+| a list of node ids
+| `sourceNodeFilter: [23, 42, 87]`
+| a single node
+| `MATCH (person:Person) WITH person ORDER BY person.age DESC LIMIT 1` ... `sourceNodeFilter: n`
+| a list of nodes
+| `MATCH (person:Person) WHERE person.age > 35 collect(person) AS people` ... `sourceNodeFilter: people`
+| a single label
+| `sourceNodeFilter: 'Person'`
+|===
