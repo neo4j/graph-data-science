@@ -32,7 +32,6 @@ import org.neo4j.gds.ml.core.functions.MatrixMultiplyWithTransposedSecondOperand
 import org.neo4j.gds.ml.core.functions.ReducedCrossEntropyLoss;
 import org.neo4j.gds.ml.core.functions.Softmax;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;

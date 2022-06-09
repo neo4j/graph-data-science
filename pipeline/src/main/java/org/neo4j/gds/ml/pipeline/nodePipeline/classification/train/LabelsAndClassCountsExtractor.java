@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 

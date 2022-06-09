@@ -61,7 +61,6 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.LongUnaryOperator;
