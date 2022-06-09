@@ -34,7 +34,6 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.openjdk.jol.util.Multiset;
 
-import java.util.Arrays;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.ml.core.batch.BatchQueue.DEFAULT_BATCH_SIZE;
@@ -82,10 +81,8 @@ public final class ClassificationMetricComputer {
             progressTracker
         );
 
-        var predictedClasses = HugeIntArray.of(Arrays.stream(predictor.predict(evaluationSet).toArray()).mapToInt(classIdMap::toMapped).toArray());
-
         return new ClassificationMetricComputer(
-            predictedClasses,
+            predictor.predict(evaluationSet),
             makeLocalTargets(evaluationSet, labels),
             classCounts,
             classIdMap

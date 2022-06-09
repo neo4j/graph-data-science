@@ -110,8 +110,8 @@ class ParallelNodeClassifierTest {
     @Test
     void testOnEvaluationSet(SoftAssertions softly) {
         var evaluationSet = ReadOnlyHugeLongArray.of(4, 7, 13, 17, 1);
-        HugeLongArray predictions = predictor.predict(evaluationSet);
-        HugeLongArray parallelPredictions = parallelPredictor.predict(evaluationSet);
+        var predictions = predictor.predict(evaluationSet);
+        var parallelPredictions = parallelPredictor.predict(evaluationSet);
 
         var expectedClasses = HugeLongArray.of(2, 0, 1, 3, 1);
 
@@ -128,8 +128,8 @@ class ParallelNodeClassifierTest {
         var probabilities = HugeObjectArray.newArray(double[].class, numberOfPredictions);
         var parallelProbabilities = HugeObjectArray.newArray(double[].class, numberOfPredictions);
 
-        HugeLongArray predictions = predictor.predict(probabilities);
-        HugeLongArray parallelPredictions = parallelPredictor.predict(parallelProbabilities);
+        var predictions = predictor.predict(probabilities);
+        var parallelPredictions = parallelPredictor.predict(parallelProbabilities);
 
         assertThat(predictions.size()).isEqualTo(parallelPredictions.size());
 

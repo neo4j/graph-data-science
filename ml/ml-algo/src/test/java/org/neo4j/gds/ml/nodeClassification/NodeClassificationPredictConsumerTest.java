@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodeClassification;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestClassifier;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
@@ -64,7 +64,7 @@ class NodeClassificationPredictConsumerTest {
             }
         };
         var probabilities = HugeObjectArray.newArray(double[].class, 2);
-        var predictedClasses = HugeLongArray.newArray(2);
+        var predictedClasses = HugeIntArray.newArray(2);
         var predictConsumer = new NodeClassificationPredictConsumer(
             FeaturesFactory.wrap(List.of(new double[] {0.0}, new double[] {1.0})),
             BatchTransformer.IDENTITY,
@@ -85,9 +85,9 @@ class NodeClassificationPredictConsumerTest {
 
     @Test
     void predictWithRandomForest() {
-        LocalIdMap classMapping = LocalIdMap.of(5, 10);
+        LocalIdMap classMapping = LocalIdMap.of(0, 1);
 
-        var root = new TreeNode<>(classMapping.toMapped(10));
+        var root = new TreeNode<>(1);
         var modelData = ImmutableRandomForestClassifierData
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
@@ -102,7 +102,7 @@ class NodeClassificationPredictConsumerTest {
         assertThat(classifier.predictProbabilities(features.get(0))).containsExactly(0, 1);
         assertThat(classifier.predictProbabilities(features.get(1))).containsExactly(0, 1);
 
-        var predictedClasses = HugeLongArray.newArray(features.size());
+        var predictedClasses = HugeIntArray.newArray(features.size());
 
         new NodeClassificationPredictConsumer(
             features,
@@ -113,7 +113,7 @@ class NodeClassificationPredictConsumerTest {
             ProgressTracker.NULL_TRACKER
         ).accept(new ListBatch(List.of(0L, 1L)));
 
-        assertThat(predictedClasses.get(0)).isEqualTo(10);
-        assertThat(predictedClasses.get(1)).isEqualTo(10);
+        assertThat(predictedClasses.get(0)).isEqualTo(1);
+        assertThat(predictedClasses.get(1)).isEqualTo(1);
     }
 }

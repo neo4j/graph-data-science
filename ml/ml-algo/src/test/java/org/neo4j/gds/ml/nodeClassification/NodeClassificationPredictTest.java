@@ -142,17 +142,17 @@ class NodeClassificationPredictTest {
                 );
             });
 
-        assertEquals(100, result.predictedClasses().get(graph.toMappedNodeId("n1")));
-        assertEquals(10, result.predictedClasses().get(graph.toMappedNodeId("n2")));
-        assertEquals(10, result.predictedClasses().get(graph.toMappedNodeId("n3")));
-        assertEquals(100, result.predictedClasses().get(graph.toMappedNodeId("n4")));
-        assertEquals(10, result.predictedClasses().get(graph.toMappedNodeId("n5")));
+        assertEquals(2, result.predictedClasses().get(graph.toMappedNodeId("n1")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n2")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n3")));
+        assertEquals(2, result.predictedClasses().get(graph.toMappedNodeId("n4")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n5")));
     }
 
     @Test
     void singleClass() {
         var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(1);
+        classIdMap.toMapped(0);
         List<String> featureProperties = List.of("a", "b");
         var modelData = ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
@@ -198,11 +198,11 @@ class NodeClassificationPredictTest {
                 );
             });
 
-        assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n1")));
-        assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n2")));
-        assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n3")));
-        assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n4")));
-        assertEquals(1, result.predictedClasses().get(graph.toMappedNodeId("n5")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n1")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n2")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n3")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n4")));
+        assertEquals(0, result.predictedClasses().get(graph.toMappedNodeId("n5")));
     }
 
     @Test

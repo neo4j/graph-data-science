@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.nodeClassification;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -55,16 +55,16 @@ public class ParallelNodeClassifier {
         this.progressTracker = progressTracker;
     }
 
-    public HugeLongArray predict(ReadOnlyHugeLongArray evaluationSet) {
+    public HugeIntArray predict(ReadOnlyHugeLongArray evaluationSet) {
         return predict(evaluationSet.size(), evaluationSet::get, null);
     }
 
-    public HugeLongArray predict(@Nullable HugeObjectArray<double[]> predictedProbabilities) {
+    public HugeIntArray predict(@Nullable HugeObjectArray<double[]> predictedProbabilities) {
         return predict(features.size(), BatchTransformer.IDENTITY, predictedProbabilities);
     }
 
-    private HugeLongArray predict(long evaluationSetSize, BatchTransformer batchTransformer, @Nullable HugeObjectArray<double[]> predictedProbabilities) {
-        var predictedClasses = HugeLongArray.newArray(evaluationSetSize);
+    private HugeIntArray predict(long evaluationSetSize, BatchTransformer batchTransformer, @Nullable HugeObjectArray<double[]> predictedProbabilities) {
+        var predictedClasses = HugeIntArray.newArray(evaluationSetSize);
         var consumer = new NodeClassificationPredictConsumer(
             features,
             batchTransformer,

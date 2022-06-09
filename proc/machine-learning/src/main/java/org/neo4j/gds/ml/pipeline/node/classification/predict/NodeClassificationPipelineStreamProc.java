@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -55,10 +54,9 @@ import static org.neo4j.gds.ml.pipeline.node.classification.predict.NodeClassifi
 public class NodeClassificationPipelineStreamProc
     extends StreamProc<
     NodeClassificationPredictPipelineExecutor,
-    NodeClassificationPredict.NodeClassificationResult,
+    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
     NodeClassificationStreamResult,
-    NodeClassificationPredictPipelineStreamConfig>
-{
+    NodeClassificationPredictPipelineStreamConfig> {
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.predict.stream", mode = Mode.READ)
     @Description(PREDICT_DESCRIPTION)
@@ -83,10 +81,10 @@ public class NodeClassificationPipelineStreamProc
     @Override
     protected Stream<NodeClassificationStreamResult> stream(
         ComputationResult<
-                    NodeClassificationPredictPipelineExecutor,
-            NodeClassificationPredict.NodeClassificationResult,
-                    NodeClassificationPredictPipelineStreamConfig
-                    > computationResult
+            NodeClassificationPredictPipelineExecutor,
+            NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult,
+            NodeClassificationPredictPipelineStreamConfig
+            > computationResult
     ) {
         return runWithExceptionLogging("Graph streaming failed", () -> {
             Graph graph = computationResult.graph();
@@ -107,7 +105,10 @@ public class NodeClassificationPipelineStreamProc
         });
     }
 
-    private static List<Double> nodePropertiesAsList(Optional<HugeObjectArray<double[]>> predictedProbabilities, long nodeId) {
+    private static List<Double> nodePropertiesAsList(
+        Optional<HugeObjectArray<double[]>> predictedProbabilities,
+        long nodeId
+    ) {
         return predictedProbabilities.map(p -> {
             var values = p.get(nodeId);
             return Arrays.stream(values).boxed().collect(Collectors.toList());
@@ -127,13 +128,12 @@ public class NodeClassificationPipelineStreamProc
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory()
-    {
+    public GraphStoreAlgorithmFactory<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig> algorithmFactory() {
         return new NodeClassificationPredictPipelineAlgorithmFactory<>(executionContext(), modelCatalog());
     }
 
     @Override
-    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredict.NodeClassificationResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
+    public AlgorithmSpec<NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult, NodeClassificationPredictPipelineStreamConfig, Stream<NodeClassificationStreamResult>, AlgorithmFactory<?, NodeClassificationPredictPipelineExecutor, NodeClassificationPredictPipelineStreamConfig>> withModelCatalog(
         ModelCatalog modelCatalog
     ) {
         this.setModelCatalog(modelCatalog);

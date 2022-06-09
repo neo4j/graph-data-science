@@ -56,6 +56,13 @@ public class LocalIdMap {
         return idMap;
     }
 
+    public static LocalIdMap of(Collection<Long> classes) {
+        var classIdMap = new LocalIdMap();
+        classes.forEach(classIdMap::toMapped);
+
+        return classIdMap;
+    }
+
     public static LocalIdMap ofSorted(Collection<Long> classes) {
         var classIdMap = new LocalIdMap();
         classes.stream().sorted().forEach(classIdMap::toMapped);
