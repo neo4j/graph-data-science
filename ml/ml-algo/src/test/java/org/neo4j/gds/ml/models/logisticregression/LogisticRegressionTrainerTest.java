@@ -23,7 +23,6 @@ import org.assertj.core.data.Offset;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestFeatures;
-import org.neo4j.gds.TestLocalIdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -271,7 +270,7 @@ class LogisticRegressionTrainerTest {
         return new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
-            TestLocalIdMap.identityMapOf(0),
+            LocalIdMap.of(0),
             false,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,

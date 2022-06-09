@@ -38,7 +38,6 @@ import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
 
 class NodeClassificationPredictConsumerTest {
 
@@ -47,7 +46,7 @@ class NodeClassificationPredictConsumerTest {
         var classifier = new TestClassifier() {
             @Override
             public LocalIdMap classIdMap() {
-                return identityMapOf(0, 1);
+                return LocalIdMap.of(0, 1);
             }
 
             @Override

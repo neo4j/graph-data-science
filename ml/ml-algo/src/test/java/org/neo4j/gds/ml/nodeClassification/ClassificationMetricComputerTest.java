@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestLocalIdMap.identityMapOf;
 import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
@@ -58,7 +57,7 @@ class ClassificationMetricComputerTest {
         multiSet.add(0L, 2);
         multiSet.add(1L, 1);
         multiSet.add(3L, 1);
-        var idMap = identityMapOf(1, 0, 3);
+        var idMap = LocalIdMap.of(1, 0, 3);
         var targets = HugeLongArray.of(firstTarget, 0, 3, 0);
 
         Features features = FeaturesFactory.wrap(Stream
