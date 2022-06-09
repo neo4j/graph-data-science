@@ -35,7 +35,6 @@ import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -74,24 +73,20 @@ class LogisticRegressionObjectiveTest {
 
         labels = HugeIntArray.newArray(featuresHOA.size());
         labels.setAll(idx -> (idx < 2) ? 1 : 0);
-        var idMap = new LocalIdMap();
-        for (long i = 0; i < labels.size(); i++) {
-            idMap.toMapped(labels.get(i));
-        }
 
         var standardClassifier = LogisticRegressionClassifier.from(
-            LogisticRegressionData.standard(2, idMap)
+            LogisticRegressionData.standard(2, 2)
         );
         var reducedClassifier = LogisticRegressionClassifier.from(
-            LogisticRegressionData.withReducedClassCount(2, idMap)
+            LogisticRegressionData.withReducedClassCount(2, 2)
         );
         var trainedStandardClassifier = LogisticRegressionClassifier.from(
-            LogisticRegressionData.standard(2, idMap)
+            LogisticRegressionData.standard(2, 2)
         );
         Arrays.setAll(trainedStandardClassifier.data().weights().data().data(), i -> i);
         Arrays.setAll(trainedStandardClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
         var trainedReducedClassifier = LogisticRegressionClassifier.from(
-            LogisticRegressionData.withReducedClassCount(2, idMap)
+            LogisticRegressionData.withReducedClassCount(2, 2)
         );
         Arrays.setAll(trainedReducedClassifier.data().weights().data().data(), i -> i);
         Arrays.setAll(trainedReducedClassifier.data().bias().data().data(), i -> i == 0 ? 0.4 : 0.8);
@@ -210,7 +205,6 @@ class LogisticRegressionObjectiveTest {
             .findFirst()
             .get();
         Matrix predictedValues = ctx.data(predictions);
-        var idMap = objective.modelData().classIdMap();
         var expectedUnpenalizedLoss = 1.0/4.0 * (
             -Math.log(predictedValues.dataAt(0, labels.get(0)))
             -Math.log(predictedValues.dataAt(1, labels.get(1)))

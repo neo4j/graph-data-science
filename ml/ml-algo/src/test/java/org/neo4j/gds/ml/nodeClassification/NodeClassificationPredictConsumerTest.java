@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -44,11 +43,6 @@ class NodeClassificationPredictConsumerTest {
     @Test
     void canProducePredictions() {
         var classifier = new TestClassifier() {
-            @Override
-            public LocalIdMap classIdMap() {
-                return LocalIdMap.of(0, 1);
-            }
-
             @Override
             public double[] predictProbabilities(double[] features) {
                 if (Double.compare(features[0], 0) == 0) {
@@ -85,14 +79,12 @@ class NodeClassificationPredictConsumerTest {
 
     @Test
     void predictWithRandomForest() {
-        LocalIdMap classMapping = LocalIdMap.of(0, 1);
-
         var root = new TreeNode<>(1);
         var modelData = ImmutableRandomForestClassifierData
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(1)
-            .classIdMap(classMapping)
+            .numberOfClasses(2)
             .build();
 
         var classifier = ClassifierFactory.create(modelData);

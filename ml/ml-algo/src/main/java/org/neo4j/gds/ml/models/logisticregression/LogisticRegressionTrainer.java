@@ -103,8 +103,8 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     @Override
     public LogisticRegressionClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
-            ? withReducedClassCount(features.featureDimension(), classIdMap)
-            : standard(features.featureDimension(), classIdMap);
+            ? withReducedClassCount(features.featureDimension(), classIdMap.size())
+            : standard(features.featureDimension(), classIdMap.size());
         var classifier = LogisticRegressionClassifier.from(data);
 
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);

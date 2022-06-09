@@ -34,7 +34,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -83,12 +82,6 @@ class NodeClassificationPredictTest {
          * result = softmax(np.matmul(features, weights.T), axis=1)
          * result
          */
-
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(10);
-        classIdMap.toMapped(1);
-        classIdMap.toMapped(100);
-        classIdMap.toMapped(2);
         List<String> featureProperties = List.of("a", "b");
         var modelData = ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
@@ -103,7 +96,7 @@ class NodeClassificationPredictTest {
                 0.70054154,
                 -3.39978931
             ))
-            .classIdMap(classIdMap)
+            .numberOfClasses(4)
             .build();
 
         var result = new NodeClassificationPredict(
@@ -151,15 +144,13 @@ class NodeClassificationPredictTest {
 
     @Test
     void singleClass() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(0);
         List<String> featureProperties = List.of("a", "b");
         var modelData = ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
                 1.12730619, -0.84532386
             }, 1, 2)))
             .bias(Weights.ofVector(0.93216654))
-            .classIdMap(classIdMap)
+            .numberOfClasses(1)
             .build();
 
         var result = new NodeClassificationPredict(
@@ -207,8 +198,6 @@ class NodeClassificationPredictTest {
 
     @Test
     void shouldLogProgress() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(0);
         var featureProperties = List.of("a", "b");
         LogisticRegressionData modelData = ImmutableLogisticRegressionData.builder()
             .weights(new Weights<>(new Matrix(new double[]{
@@ -217,7 +206,7 @@ class NodeClassificationPredictTest {
             .bias(Weights.ofVector(
                 0.93216654
             ))
-            .classIdMap(classIdMap)
+            .numberOfClasses(1)
             .build();
 
         var log = Neo4jProxy.testLog();

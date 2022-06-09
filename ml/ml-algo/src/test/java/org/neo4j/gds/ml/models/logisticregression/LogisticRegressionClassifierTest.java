@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.batch.LazyBatch;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
@@ -66,11 +65,8 @@ class LogisticRegressionClassifierTest {
     @MethodSource("inputs")
     @ParameterizedTest
     void computesProbability(double[] features, double expectedResult) {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(0L);
-        classIdMap.toMapped(1L);
         var modelData = ImmutableLogisticRegressionData.of(
-            classIdMap,
+            2,
             new Weights<>(new Matrix(new double[]{-0.5, -0.6, -0.7, -0.8}, 1, 4)),
             Weights.ofVector(0)
         );
@@ -84,12 +80,9 @@ class LogisticRegressionClassifierTest {
 
     @Test
     void batchingGivesEquivalentResults() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(0L);
-        classIdMap.toMapped(1L);
         var featureCount = 4;
         var modelData = ImmutableLogisticRegressionData.of(
-            classIdMap,
+            2,
             new Weights<>(new Matrix(new double[]{
                 -0.5, -0.6, -0.7, -0.8,
                 0.4, -1.2, -0.4, 0.0

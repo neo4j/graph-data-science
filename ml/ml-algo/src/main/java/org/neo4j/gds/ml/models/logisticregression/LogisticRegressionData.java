@@ -48,16 +48,16 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
         return weights().dimension(Dimensions.COLUMNS_INDEX);
     }
 
-    static LogisticRegressionData standard(int featureCount, LocalIdMap classIdMap) {
-        return create(classIdMap.size(), featureCount, classIdMap);
+    static LogisticRegressionData standard(int featureCount, int numberOfClasses) {
+        return create(numberOfClasses, featureCount);
     }
 
     // this is an optimization where "virtually" add a weight of 0.0 for the last class
-    static LogisticRegressionData withReducedClassCount(int featureCount, LocalIdMap classIdMap) {
-        return create(classIdMap.size() - 1, featureCount, classIdMap);
+    static LogisticRegressionData withReducedClassCount(int featureCount, int numberOfClasses) {
+        return create(numberOfClasses - 1, featureCount);
     }
 
-    private static LogisticRegressionData create(int classCount, int featureCount, LocalIdMap classIdMap) {
+    private static LogisticRegressionData create(int classCount, int featureCount) {
         var weights = Weights.ofMatrix(classCount, featureCount);
 
         var bias = new Weights<>(new Vector(classCount));
@@ -65,7 +65,7 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
         return ImmutableLogisticRegressionData
             .builder()
             .weights(weights)
-            .classIdMap(classIdMap)
+            .numberOfClasses(classCount)
             .bias(bias)
             .build();
     }

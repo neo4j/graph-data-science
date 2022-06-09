@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
@@ -96,32 +95,22 @@ class LogisticRegressionDataTest {
 
     @Test
     void shouldCreateReducedData() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(42);
-        classIdMap.toMapped(43);
-        classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.withReducedClassCount(3, classIdMap);
+        var data = LogisticRegressionData.withReducedClassCount(3, 3);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(2);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[6]);
-        assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
     @Test
     void shouldCreateStandardData() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(42);
-        classIdMap.toMapped(43);
-        classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.standard(3, classIdMap);
+        var data = LogisticRegressionData.standard(3, 3);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(3);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[9]);
-        assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
 }

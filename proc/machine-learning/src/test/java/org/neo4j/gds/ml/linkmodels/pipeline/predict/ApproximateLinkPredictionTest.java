@@ -42,7 +42,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 
@@ -95,7 +94,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
     @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
@@ -160,7 +159,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         double[] weights = {2.0, 1.0, -3.0};
 
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(new Matrix(
                 weights,
                 1,
@@ -212,7 +211,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
         pipeline.addFeatureStep(new L2FeatureStep(List.of("a", "b", "c")));
 
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,

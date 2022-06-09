@@ -56,7 +56,6 @@ import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestProc;
 
@@ -131,7 +130,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
-                LinkPredictionTrain.makeClassIdMap(),
+                2,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0},
@@ -183,7 +182,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 .builder()
                 .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
-                .classIdMap(LinkPredictionTrain.makeClassIdMap())
+                .numberOfClasses(2)
                 .build();
 
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
@@ -227,7 +226,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
-                LinkPredictionTrain.makeClassIdMap(),
+                2,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},
@@ -276,7 +275,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             );
 
             var modelData = ImmutableLogisticRegressionData.of(
-                LinkPredictionTrain.makeClassIdMap(),
+                2,
                 new Weights<>(
                     new Matrix(
                         new double[]{2.0, 1.0, -3.0, -1.0},
@@ -356,7 +355,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     void shouldEstimateMemoryWithLogisticRegression() {
         var pipeline = LinkPredictionPredictPipeline.EMPTY;
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(
                 new Matrix(
                     new double[]{2.0, 1.0, -3.0, -1.0},
@@ -391,7 +390,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(2)
-            .classIdMap(LinkPredictionTrain.makeClassIdMap())
+            .numberOfClasses(2)
             .build();
 
         var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
@@ -421,7 +420,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             ));
 
             var modelData = ImmutableLogisticRegressionData.of(
-                LinkPredictionTrain.makeClassIdMap(),
+                2,
                 tooManyFeatureWeights,
                 Weights.ofVector(0.0)
             );

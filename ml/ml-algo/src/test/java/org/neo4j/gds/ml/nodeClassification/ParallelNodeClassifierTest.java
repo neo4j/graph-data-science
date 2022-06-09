@@ -71,11 +71,6 @@ class ParallelNodeClassifierTest {
         this.classifier = new TestClassifier() {
 
             @Override
-            public LocalIdMap classIdMap() {
-                return classMap;
-            }
-
-            @Override
             public double[] predictProbabilities(double[] features) {
                 double sum = Arrays.stream(features).sum();
                 return Arrays.stream(features).map(i -> i / sum).toArray();

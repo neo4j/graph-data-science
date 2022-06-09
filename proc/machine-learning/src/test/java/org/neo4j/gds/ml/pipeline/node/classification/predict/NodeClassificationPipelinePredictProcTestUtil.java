@@ -26,7 +26,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
@@ -118,7 +117,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
                 Map.of(),
                 ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
                 pipeline,
-                modelData.classIdMap().originalIdsList()
+                List.of(0L, 1L)
             )
         );
     }
@@ -143,7 +142,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
                 ))
             )
             .bias(new Weights<>(new Vector(bias)))
-            .classIdMap(LocalIdMap.of(0, 1))
+            .numberOfClasses(2)
             .build();
     }
 
