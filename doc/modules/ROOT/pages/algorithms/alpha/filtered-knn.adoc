@@ -80,6 +80,10 @@ This parameter accepts one of:
 | `sourceNodeFilter: 42`
 | a list of node ids
 | `sourceNodeFilter: [23, 42, 87]`
+| a single node
+| `MATCH (person:Person) WITH person ORDER BY person.age DESC LIMIT 1` ... `sourceNodeFilter: n`
+| a list of nodes
+| `MATCH (person:Person) WHERE person.age > 35 collect(person) AS people` ... `sourceNodeFilter: people`
 | a single label
 | `sourceNodeFilter: 'Person'`
 |===
@@ -95,8 +99,12 @@ This parameter accepts one of:
 | `targetNodeFilter: 117`
 | a list of node ids
 | `targetNodeFilter: [256, 512]`
+| a single node
+| `MATCH (person:Person) WITH person ORDER BY person.age ASC LIMIT 1` ... `targetNodeFilter: n`
+| a list of nodes
+| `MATCH (person:Person) WHERE person.age < 35 collect(person) AS people` ... `targetNodeFilter: people`
 | a single label
-| `targetNodeFilter: 'Sport'`
+| `targetNodeFilter: 'Person'`
 |===
 
 Seeding can be enabled with the `seedTargetNodes` configuration parameter. It defaults to `false`.
