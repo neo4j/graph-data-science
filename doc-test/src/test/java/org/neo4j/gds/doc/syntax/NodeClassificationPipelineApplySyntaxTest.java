@@ -19,24 +19,13 @@
  */
 package org.neo4j.gds.doc.syntax;
 
-import org.junit.jupiter.api.Disabled;
-
 import java.util.List;
 
-@Disabled("Until we figure out how to handle xref macros")
-class NodeClassificationPipelineSyntaxTest extends SyntaxTestBase {
+class NodeClassificationPipelineApplySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CREATE),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_SPLIT),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_CONFIGURE_AUTO_TUNING),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_LR_MODEL),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_RF_MODEL),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_FEATURE),
-            SyntaxModeMeta.of(SyntaxMode.PIPELINE_ADD_NODE_PROPERTY),
-            SyntaxModeMeta.of(SyntaxMode.TRAIN),
             SyntaxModeMeta.of(SyntaxMode.MUTATE),
             SyntaxModeMeta.of(SyntaxMode.STREAM)
         );
@@ -44,6 +33,6 @@ class NodeClassificationPipelineSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc";
+        return "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc";
     }
 }
