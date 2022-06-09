@@ -25,7 +25,6 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
 
@@ -35,7 +34,6 @@ import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class FilteredNodeSimilarityStatsProcTest extends BaseTest {
 
-    @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Person)" +
@@ -91,13 +89,11 @@ class FilteredNodeSimilarityStatsProcTest extends BaseTest {
                 assertThat(resultRow.get("nodesCompared"))
                     .asInstanceOf(LONG)
                     .as("nodesCompared")
-//                    .isEqualTo(4L);
-                    .isEqualTo(8L); // TODO: Why is nodesCompared double that of write mode?
+                    .isEqualTo(4L);
                 assertThat(resultRow.get("similarityPairs"))
                     .as("similarityPairs")
                     .asInstanceOf(LONG)
-//                    .isEqualTo(10L);
-                    .isEqualTo(20L); // TODO: Why is nodesCompared double that of write mode?
+                    .isEqualTo(10L);
 
                 assertThat(resultRow.get("similarityDistribution"))
                     .isNotNull()
@@ -217,7 +213,7 @@ class FilteredNodeSimilarityStatsProcTest extends BaseTest {
                 assertThat(resultRow.get("nodesCompared"))
                     .asInstanceOf(LONG)
                     .as("nodesCompared")
-                    .isEqualTo(8);
+                    .isEqualTo(4);
                 assertThat(resultRow.get("similarityPairs"))
                     .as("similarityPairs")
                     .asInstanceOf(LONG)
