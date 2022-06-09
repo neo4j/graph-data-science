@@ -1,6 +1,6 @@
 {
   "name": "graph-data-science",
-  "version": "2,1-preview",
+  "version": "2.1.0",
   "description": "Neo4j Graph Data Science Library",
   "main": "server.js",
   "scripts": {
