@@ -67,7 +67,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         var numberOfClasses = classifier.numberOfClasses();
         var probabilityMatrix = classifier.predictProbabilities(new MappedBatch(batch, nodeIds), features);
         var currentRow = 0;
-        for (long nodeIndex : batch.nodeIds()) {
+        for (long nodeIndex : batch.elementIds()) {
             if (predictedProbabilities != null) {
                 predictedProbabilities.set(nodeIndex, probabilityMatrix.getRow(currentRow));
             }

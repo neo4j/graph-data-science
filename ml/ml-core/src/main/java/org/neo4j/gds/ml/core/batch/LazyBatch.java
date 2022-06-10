@@ -35,7 +35,7 @@ public class LazyBatch implements Batch {
     }
 
     @Override
-    public Iterable<Long> nodeIds() {
+    public Iterable<Long> elementIds() {
         return () -> {
             AtomicLong current = new AtomicLong(startId);
             return new AbstractIterator<>() {

@@ -29,7 +29,7 @@ public class ListBatch implements Batch {
     }
 
     @Override
-    public Iterable<Long> nodeIds() {
+    public Iterable<Long> elementIds() {
         return ids;
     }
 

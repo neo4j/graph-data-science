@@ -20,6 +20,6 @@
 package org.neo4j.gds.ml.core.batch;
 
 public interface Batch {
-    Iterable<Long> nodeIds();
+    Iterable<Long> elementIds();
     int size();
 }

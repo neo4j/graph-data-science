@@ -86,7 +86,7 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
         var batchedTargets = new Vector(batch.size());
         var batchOffset = new MutableInt();
 
-        batch.nodeIds().forEach(elementId ->
+        batch.elementIds().forEach(elementId ->
             batchedTargets.setDataAt(
                 batchOffset.getAndIncrement(),
                 targets.get(elementId)

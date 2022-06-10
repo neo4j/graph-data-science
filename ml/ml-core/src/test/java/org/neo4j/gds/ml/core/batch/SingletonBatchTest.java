@@ -29,7 +29,7 @@ class SingletonBatchTest {
     void test() {
         var batch = new SingletonBatch(2);
 
-        Iterable<Long> actual = batch.nodeIds();
+        Iterable<Long> actual = batch.elementIds();
         assertThat(actual).containsExactly(2L);
     }
 }

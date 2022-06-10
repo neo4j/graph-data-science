@@ -127,7 +127,7 @@ public abstract class SignedProbabilities {
         evaluationQueue.parallelConsume(concurrency, __ -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
-                for (Long relationshipIdx : batch.nodeIds()) {
+                for (Long relationshipIdx : batch.elementIds()) {
                     double probabilityOfPositiveEdge = probabilityMatrix.dataAt(offset, positiveClassId);
                     offset += 1;
                     boolean isEdge = labels.get(relationshipIdx) == EdgeSplitter.POSITIVE;
