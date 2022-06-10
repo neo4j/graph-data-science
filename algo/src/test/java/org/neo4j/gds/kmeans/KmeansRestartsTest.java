@@ -66,7 +66,7 @@ class KmeansRestartsTest {
             .concurrency(1)
             .randomSeed(11L)
             .maxIterations(1)
-            .restarts(2)
+            .numberOfRestarts(2)
             .k(2)
             .build();
 

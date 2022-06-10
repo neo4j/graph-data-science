@@ -56,7 +56,7 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
 
     @Configuration.IntegerRange(min = 1)
     @Value.Default
-    default int restarts() {
+    default int numberOfRestarts() {
         return 1;
     }
 

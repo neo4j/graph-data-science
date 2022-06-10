@@ -48,7 +48,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private final int dimensions;
     private final KmeansIterationStopper kmeansIterationStopper;
 
-    private final int restarts;
+    private final int maximumNumberOfRestarts;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -60,7 +60,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             config.k(),
             config.concurrency(),
             config.maxIterations(),
-            config.restarts(),
+            config.numberOfRestarts(),
             config.deltaThreshold(),
             nodeProperties,
             getSplittableRandom(config.randomSeed())
@@ -75,7 +75,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         int k,
         int concurrency,
         int maxIterations,
-        int restarts,
+        int maximumNumberOfRestarts,
         double deltaThreshold,
         NodePropertyValues nodePropertyValues,
         SplittableRandom random
@@ -94,7 +94,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             maxIterations,
             graph.nodeCount()
         );
-        this.restarts = restarts;
+        this.maximumNumberOfRestarts = maximumNumberOfRestarts;
 
     }
 
@@ -116,7 +116,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
         KmeansSampler sampler = new KmeansUniformSampler();
 
-        for (int restartIteration = 0; restartIteration < restarts; ++restartIteration) {
+        for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
             currentCommunities.setAll(v -> UNASSIGNED);
 
@@ -147,7 +147,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             //
             int iteration = 0;
             while (true) {
-                long swaps = 0;
+                long numberOfSwaps = 0;
                 //assign each node to a center
                 RunWithConcurrency.builder()
                     .concurrency(concurrency)
@@ -156,9 +156,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
                     .run();
 
                 for (KmeansTask task : tasks) {
-                    swaps += task.getSwaps();
+                    numberOfSwaps += task.getSwaps();
                 }
-                if (kmeansIterationStopper.shouldQuit(swaps, ++iteration)) {
+                if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
                     break;
                 }
                 recomputeCenters(clusterManager, tasks);
