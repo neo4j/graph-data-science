@@ -120,6 +120,14 @@ public abstract class ScalarScaler implements Scaler {
             ) {
                 return L2Norm.initialize(properties, nodeCount, concurrency, executor);
             }
+        },
+        CENTER {
+            @Override
+            public ScalarScaler create(
+                NodePropertyValues properties, long nodeCount, int concurrency, ExecutorService executor
+            ) {
+                return Center.initialize(properties, nodeCount, concurrency, executor);
+            }
         };
 
         private static final List<String> VALUES = Arrays
