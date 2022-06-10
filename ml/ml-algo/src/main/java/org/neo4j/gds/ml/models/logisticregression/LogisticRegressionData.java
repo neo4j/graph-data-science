@@ -49,18 +49,20 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
     }
 
     static LogisticRegressionData standard(int featureCount, int numberOfClasses) {
-        return create(numberOfClasses, featureCount);
+        return create(numberOfClasses, featureCount, false);
     }
 
     // this is an optimization where "virtually" add a weight of 0.0 for the last class
     static LogisticRegressionData withReducedClassCount(int featureCount, int numberOfClasses) {
-        return create(numberOfClasses - 1, featureCount);
+        return create(numberOfClasses, featureCount, true);
     }
 
-    private static LogisticRegressionData create(int classCount, int featureCount) {
-        var weights = Weights.ofMatrix(classCount, featureCount);
+    private static LogisticRegressionData create(int classCount, int featureCount, boolean skipLastClass) {
+        var rows = skipLastClass ? classCount - 1 : classCount;
 
-        var bias = new Weights<>(new Vector(classCount));
+        var weights = Weights.ofMatrix(rows, featureCount);
+
+        var bias = new Weights<>(new Vector(rows));
 
         return ImmutableLogisticRegressionData
             .builder()
