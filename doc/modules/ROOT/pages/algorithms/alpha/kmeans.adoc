@@ -63,6 +63,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | Name                      | Type      | Description
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID.
+| distanceFromCenter        | Float     | Distance of the node from the center of its community.
 |===
 ======
 
