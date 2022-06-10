@@ -166,10 +166,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 for (KmeansTask task : tasks) {
                     numberOfSwaps += task.getSwaps();
                 }
+                recomputeCenters(clusterManager, tasks);
+
                 if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
                     break;
                 }
-                recomputeCenters(clusterManager, tasks);
             }
             for (KmeansTask task : tasks) {
                 task.switchToDistanceCalculation();
