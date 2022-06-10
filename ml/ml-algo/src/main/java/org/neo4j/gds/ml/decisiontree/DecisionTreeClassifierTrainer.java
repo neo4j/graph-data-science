@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.decisiontree;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
@@ -30,13 +29,13 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> {
 
     private final HugeIntArray allLabels;
-    private final LocalIdMap classIdMap;
+    private final int numberOfClasses;
 
     public DecisionTreeClassifierTrainer(
         ImpurityCriterion impurityCriterion,
         Features features,
         HugeIntArray labels,
-        LocalIdMap classIdMap,
+        int numberOfClasses,
         DecisionTreeTrainerConfig config,
         FeatureBagger featureBagger
     ) {
@@ -46,7 +45,7 @@ public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> 
             impurityCriterion,
             featureBagger
         );
-        this.classIdMap = classIdMap;
+        this.numberOfClasses = numberOfClasses;
 
         assert labels.size() == features.size();
         this.allLabels = labels;
@@ -69,7 +68,7 @@ public class DecisionTreeClassifierTrainer extends DecisionTreeTrainer<Integer> 
 
     @Override
     protected Integer toTerminal(Group group) {
-        final var classesInGroup = new long[classIdMap.size()];
+        final var classesInGroup = new long[numberOfClasses];
         var array = group.array();
 
         for (long i = group.startIdx(); i < group.startIdx() + group.size(); i++) {

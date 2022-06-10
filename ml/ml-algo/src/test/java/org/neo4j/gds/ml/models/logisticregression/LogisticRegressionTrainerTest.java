@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.Map;
 import java.util.Random;
@@ -40,20 +39,12 @@ class LogisticRegressionTrainerTest {
 
     private static final HugeIntArray FOUR_CLASSES = HugeIntArray.of(0, 1, 1, 0, 2, 3);
 
-    private static LocalIdMap fourClassIdMap() {
-        var idMap = new LocalIdMap();
-        for (long i = 0; i < FOUR_CLASSES.size(); i++) {
-            idMap.toMapped(FOUR_CLASSES.get(i));
-        }
-        return idMap;
-    }
-
     @Test
     void withBias() {
         var trainer = new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.DEFAULT,
-            fourClassIdMap(),
+            4,
             true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
@@ -94,7 +85,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             4,
             LogisticRegressionTrainConfig.DEFAULT,
-            fourClassIdMap(),
+            4,
             true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
@@ -129,7 +120,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.DEFAULT,
-            fourClassIdMap(),
+            4,
             false,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
@@ -175,7 +166,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 100, "maxEpochs", 100)),
-            fourClassIdMap(),
+            4,
             true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
@@ -211,7 +202,7 @@ class LogisticRegressionTrainerTest {
         var trainer = new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.DEFAULT,
-            fourClassIdMap(),
+            4,
             true,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,
@@ -271,7 +262,7 @@ class LogisticRegressionTrainerTest {
         return new LogisticRegressionTrainer(
             1,
             LogisticRegressionTrainConfig.of(Map.of("penalty", 1L)),
-            LocalIdMap.of(0),
+            1,
             false,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER,

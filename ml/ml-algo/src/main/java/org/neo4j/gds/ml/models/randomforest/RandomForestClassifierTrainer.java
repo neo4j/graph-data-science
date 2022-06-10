@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -61,7 +60,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
-    private final LocalIdMap classIdMap;
+    private final int numberOfClasses;
     private final RandomForestClassifierTrainerConfig config;
     private final int concurrency;
     private final SplittableRandom random;
@@ -73,7 +72,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     public RandomForestClassifierTrainer(
         int concurrency,
-        LocalIdMap classIdMap,
+        int numberOfClasses,
         RandomForestClassifierTrainerConfig config,
         Optional<Long> randomSeed,
         ProgressTracker progressTracker,
@@ -81,7 +80,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         TerminationFlag terminationFlag,
         ModelSpecificMetricsHandler metricsHandler
     ) {
-        this.classIdMap = classIdMap;
+        this.numberOfClasses = numberOfClasses;
         this.config = config;
         this.concurrency = concurrency;
         this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
@@ -138,7 +137,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ReadOnlyHugeLongArray trainSet
     ) {
         Optional<HugeAtomicLongArray> maybePredictions = metricsHandler.isRequested(OUT_OF_BAG_ERROR)
-            ? Optional.of(HugeAtomicLongArray.newArray(classIdMap.size() * trainSet.size()))
+            ? Optional.of(HugeAtomicLongArray.newArray(numberOfClasses * trainSet.size()))
             : Optional.empty();
 
         var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
@@ -158,7 +157,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 random.split(),
                 allFeatureVectors,
                 allLabels,
-                classIdMap,
+                numberOfClasses,
                 impurityCriterion,
                 trainSet,
                 progressTracker,
@@ -176,7 +175,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         {
             outOfBagError = Optional.of(OutOfBagError.evaluate(
                 trainSet,
-                classIdMap,
+                numberOfClasses,
                 allLabels,
                 concurrency,
                 predictions
@@ -186,7 +185,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
         var decisionTrees = tasks.stream().map(TrainDecisionTreeTask::trainedTree).collect(Collectors.toList());
 
-        return new RandomForestClassifier(decisionTrees, classIdMap.size(), allFeatureVectors.featureDimension());
+        return new RandomForestClassifier(decisionTrees, numberOfClasses, allFeatureVectors.featureDimension());
     }
 
     double outOfBagError() {
@@ -196,9 +195,9 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private ImpurityCriterion initializeImpurityCriterion(HugeIntArray allLabels) {
         switch (config.criterion()) {
             case GINI:
-                return new GiniIndex(allLabels, classIdMap.size());
+                return new GiniIndex(allLabels, numberOfClasses);
             case ENTROPY:
-                return new Entropy(allLabels, classIdMap.size());
+                return new Entropy(allLabels, numberOfClasses);
             default:
                 throw new IllegalStateException("Invalid decision tree classifier impurity criterion.");
         }
@@ -206,6 +205,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     static class TrainDecisionTreeTask implements Runnable {
 
+        private final int numberOfClasses;
         private DecisionTreePredictor<Integer> trainedTree;
         private final Optional<HugeAtomicLongArray> maybePredictions;
         private final DecisionTreeTrainerConfig decisionTreeTrainConfig;
@@ -213,7 +213,6 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         private final SplittableRandom random;
         private final Features allFeatureVectors;
         private final HugeIntArray allLabels;
-        private final LocalIdMap classIdMap;
         private final ImpurityCriterion impurityCriterion;
         private final ReadOnlyHugeLongArray trainSet;
         private final ProgressTracker progressTracker;
@@ -227,7 +226,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             SplittableRandom random,
             Features allFeatureVectors,
             HugeIntArray allLabels,
-            LocalIdMap classIdMap,
+            int numberOfClasses,
             ImpurityCriterion impurityCriterion,
             ReadOnlyHugeLongArray trainSet,
             ProgressTracker progressTracker,
@@ -240,7 +239,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             this.random = random;
             this.allFeatureVectors = allFeatureVectors;
             this.allLabels = allLabels;
-            this.classIdMap = classIdMap;
+            this.numberOfClasses = numberOfClasses;
             this.impurityCriterion = impurityCriterion;
             this.trainSet = trainSet;
             this.progressTracker = progressTracker;
@@ -287,7 +286,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                 impurityCriterion,
                 allFeatureVectors,
                 allLabels,
-                classIdMap,
+                numberOfClasses,
                 decisionTreeTrainConfig,
                 featureBagger
             );
@@ -298,7 +297,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             maybePredictions.ifPresent(predictionsCache -> OutOfBagError.addPredictionsForTree(
                 trainedTree,
-                classIdMap,
+                numberOfClasses,
                 allFeatureVectors,
                 trainSet,
                 bootstrappedDataset.trainSetIndices(),

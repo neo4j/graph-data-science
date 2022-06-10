@@ -232,7 +232,7 @@ public final class LinkPredictionTrain {
     ) {
         return ClassifierTrainerFactory.create(
             trainerConfig,
-            classIdMap,
+            classIdMap.size(),
             terminationFlag,
             progressTracker,
             messageLogLevel,

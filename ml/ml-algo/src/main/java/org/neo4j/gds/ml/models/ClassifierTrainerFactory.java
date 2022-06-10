@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
@@ -40,7 +39,7 @@ public final class ClassifierTrainerFactory {
 
     public static ClassifierTrainer create(
         TrainerConfig config,
-        LocalIdMap classIdMap,
+        int numberOfClasses,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         LogLevel messageLogLevel,
@@ -54,7 +53,7 @@ public final class ClassifierTrainerFactory {
                 return new LogisticRegressionTrainer(
                     concurrency,
                     (LogisticRegressionTrainConfig) config,
-                    classIdMap,
+                    numberOfClasses,
                     reduceClassCount,
                     terminationFlag,
                     progressTracker,
@@ -64,7 +63,7 @@ public final class ClassifierTrainerFactory {
             case RandomForestClassification: {
                 return new RandomForestClassifierTrainer(
                     concurrency,
-                    classIdMap,
+                    numberOfClasses,
                     (RandomForestClassifierTrainerConfig) config,
                     randomSeed,
                     progressTracker,

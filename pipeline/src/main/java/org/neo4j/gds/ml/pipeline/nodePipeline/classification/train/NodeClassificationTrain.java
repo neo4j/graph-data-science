@@ -401,7 +401,7 @@ public final class NodeClassificationTrain {
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
-            classIdMap,
+            classIdMap.size(),
             terminationFlag,
             progressTracker,
             messageLogLevel,
