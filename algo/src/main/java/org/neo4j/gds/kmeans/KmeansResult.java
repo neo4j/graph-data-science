@@ -30,4 +30,6 @@ public interface KmeansResult {
 
     HugeDoubleArray distanceFromCenter();
 
+    double[][] centers();
+
 }
