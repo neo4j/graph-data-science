@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,6 +47,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private final SplittableRandom random;
     private final NodePropertyValues nodePropertyValues;
     private final int dimensions;
+
+    private HugeDoubleArray distanceFromCenter;
     private final KmeansIterationStopper kmeansIterationStopper;
 
     private final int maximumNumberOfRestarts;
@@ -95,6 +98,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             graph.nodeCount()
         );
         this.maximumNumberOfRestarts = maximumNumberOfRestarts;
+        this.distanceFromCenter = HugeDoubleArray.newArray(graph.nodeCount());
 
     }
 
@@ -105,12 +109,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             bestCommunities.setAll(v -> (int) v);
+            distanceFromCenter.setAll(v -> 0d);
             progressTracker.endSubTask();
-            return ImmutableKmeansResult.of(bestCommunities);
+            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter);
         }
         long nodeCount = graph.nodeCount();
 
         var currentCommunities = HugeIntArray.newArray(nodeCount);
+        var currentDistanceFromCenter = HugeDoubleArray.newArray(nodeCount);
+
         double bestDistance = Double.POSITIVE_INFINITY;
         bestCommunities.setAll(v -> UNASSIGNED);
 
@@ -127,6 +134,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                     clusterManager,
                     nodePropertyValues,
                     currentCommunities,
+                    currentDistanceFromCenter,
                     k,
                     dimensions,
                     partition,
@@ -163,15 +171,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 }
                 recomputeCenters(clusterManager, tasks);
             }
+            for (KmeansTask task : tasks) {
+                task.switchToDistanceCalculation();
+            }
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .executor(executorService)
+                .run();
             if (restartIteration > 1) {
-                for (KmeansTask task : tasks) {
-                    task.switchToDistanceCalculation();
-                }
-                RunWithConcurrency.builder()
-                    .concurrency(concurrency)
-                    .tasks(tasks)
-                    .executor(executorService)
-                    .run();
                 double distanceFromClusterCentre = 0;
                 for (KmeansTask task : tasks) {
                     distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
@@ -180,14 +188,17 @@ public class Kmeans extends Algorithm<KmeansResult> {
                     bestDistance = distanceFromClusterCentre;
                     ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
                         bestCommunities.set(v, currentCommunities.get(v));
+                        distanceFromCenter.set(v, currentDistanceFromCenter.get(v));
+
                     });
                 }
             } else {
                 bestCommunities = currentCommunities;
+                distanceFromCenter = currentDistanceFromCenter;
             }
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(bestCommunities);
+        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter);
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {

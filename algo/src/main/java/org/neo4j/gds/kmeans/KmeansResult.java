@@ -20,10 +20,14 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 
 
 @ValueClass
 public interface KmeansResult {
     HugeIntArray communities();
+
+    HugeDoubleArray distanceFromCenter();
+
 }
