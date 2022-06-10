@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
@@ -78,10 +79,20 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute().communities();
-        assertThat(result.get(0)).isEqualTo(result.get(1));
-        assertThat(result.get(2)).isEqualTo(result.get(3));
-        assertThat(result.get(0)).isNotEqualTo(result.get(2));
+        var result = kmeans.compute();
+        var communities = result.communities();
+        var distances = result.distanceFromCenter();
+
+        assertThat(communities.get(0)).isEqualTo(communities.get(1));
+        assertThat(communities.get(2)).isEqualTo(communities.get(3));
+        assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
+
+        assertThat(distances.get(0)).isEqualTo(0.5);  //centre is (1,1.5)  sqrt ( 0^2 + 0.5^2)
+        assertThat(distances.get(1)).isEqualTo(0.5);
+        assertThat(distances.get(2)).isCloseTo(Math.sqrt(2), Offset.offset(1e-4)); //centre is (101,101) sqrt (1^2+1^2)
+        assertThat(distances.get(3)).isCloseTo(Math.sqrt(2), Offset.offset(1e-4));
+
+
     }
 
     @Test
@@ -95,10 +106,11 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute().communities();
-        assertThat(result.get(0)).isEqualTo(result.get(1));
-        assertThat(result.get(2)).isEqualTo(result.get(3));
-        assertThat(result.get(0)).isNotEqualTo(result.get(2));
+        var result = kmeans.compute();
+        var communities = result.communities();
+        assertThat(communities.get(0)).isEqualTo(communities.get(1));
+        assertThat(communities.get(2)).isEqualTo(communities.get(3));
+        assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
     }
 
     @Test
@@ -113,10 +125,11 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute().communities();
-        assertThat(result.get(0)).isEqualTo(result.get(1));
-        assertThat(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
-        assertThat(result.get(0)).isNotEqualTo(result.get(2));
+        var result = kmeans.compute();
+        var communities = result.communities();
+        assertThat(communities.get(0)).isEqualTo(communities.get(1));
+        assertThat(communities.get(2)).isEqualTo(communities.get(3)).isEqualTo(communities.get(4));
+        assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
     }
 
     @Test
@@ -131,9 +144,13 @@ class KmeansTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute().communities();
+        var result = kmeans.compute();
+        var communities = result.communities();
 
-        assertThat(result.get(1)).isEqualTo(result.get(2)).isEqualTo(result.get(3)).isEqualTo(result.get(4));
-        assertThat(result.get(0)).isNotEqualTo(result.get(1));
+        assertThat(communities.get(1))
+            .isEqualTo(communities.get(2))
+            .isEqualTo(communities.get(3))
+            .isEqualTo(communities.get(4));
+        assertThat(communities.get(0)).isNotEqualTo(communities.get(1));
     }
 }
