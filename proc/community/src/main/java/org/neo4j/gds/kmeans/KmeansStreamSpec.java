@@ -52,13 +52,16 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamProc.StreamResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            var result = computationResult.result().communities();
+            var result = computationResult.result();
+            var communities = result.communities();
+            var distances = result.distanceFromCenter();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
                 .mapToObj(nodeId -> new KmeansStreamProc.StreamResult(
                     graph.toOriginalNodeId(nodeId),
-                    result.get(nodeId)
+                    communities.get(nodeId),
+                    distances.get(nodeId)
                 ));
         };
     }
