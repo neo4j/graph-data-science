@@ -128,7 +128,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
     }
 
@@ -160,7 +160,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
     }
 
@@ -193,7 +193,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
     }
 
@@ -256,7 +256,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1337);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(0);
     }
 
     @ParameterizedTest

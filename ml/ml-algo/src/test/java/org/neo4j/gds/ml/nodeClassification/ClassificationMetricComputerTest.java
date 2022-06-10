@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodeClassification;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -79,13 +79,17 @@ class ClassificationMetricComputerTest {
                     case 3:
                         return new double[]{0.0, 1.0, 0.0};
                 }
-                Assertions.fail("we only got 4 nodes");
-                return null;
+                throw new IllegalStateException("we only got 4 nodes");
             }
 
             @Override
             public ClassifierData data() {
-                return null;
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public int numberOfClasses() {
+                return 3;
             }
         };
 

@@ -80,6 +80,11 @@ class ParallelNodeClassifierTest {
             public ClassifierData data() {
                 throw new NotImplementedException();
             }
+
+            @Override
+            public int numberOfClasses() {
+                return featureDimension;
+            }
         };
 
         int batchSize = 1;

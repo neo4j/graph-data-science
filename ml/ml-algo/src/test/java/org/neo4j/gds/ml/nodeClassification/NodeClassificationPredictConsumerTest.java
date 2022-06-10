@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodeClassification;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestClassifier;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -54,7 +55,12 @@ class NodeClassificationPredictConsumerTest {
 
             @Override
             public ClassifierData data() {
-                return null;
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public int numberOfClasses() {
+                return 2;
             }
         };
         var probabilities = HugeObjectArray.newArray(double[].class, 2);
