@@ -119,7 +119,7 @@ public final class NodeClassificationTrain {
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
         var builder = MemoryEstimations.builder()
-            .perNode("global targets", HugeLongArray::memoryEstimation)
+            .perNode("global targets", HugeIntArray::memoryEstimation)
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
             .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)

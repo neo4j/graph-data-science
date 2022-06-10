@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
@@ -75,7 +74,6 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
     static MemoryEstimation memoryEstimation(boolean isReduced, int numberOfClasses, MemoryRange featureDimension) {
         int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
         return MemoryEstimations.builder("Logistic regression model data")
-            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
             .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
                 normalizedNumberOfClasses,
                 Math.toIntExact(featureDim)

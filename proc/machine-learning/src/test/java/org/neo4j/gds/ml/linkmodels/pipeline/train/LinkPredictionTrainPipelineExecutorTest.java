@@ -489,7 +489,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         );
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(22_488, 696_728)),
+            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(22_200, 696_440)),
             Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_136)),
             Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_136))
         );
