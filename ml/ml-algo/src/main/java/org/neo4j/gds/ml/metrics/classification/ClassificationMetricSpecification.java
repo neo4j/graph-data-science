@@ -63,7 +63,7 @@ public interface ClassificationMetricSpecification {
         return MemoryEstimations.builder()
             .rangePerNode("metrics", __ -> {
                 var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
-                return MemoryRange.of(1 * sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
+                return MemoryRange.of(sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
             })
             .build();
     }
@@ -137,25 +137,16 @@ public interface ClassificationMetricSpecification {
                 }
             }
             var metricType = matcher.group(1);
-            if (matcher.group(2).equals("*")) {
-                for (Map.Entry<String, Function<Long, ClassificationMetric>> entry : SINGLE_CLASS_METRIC_FACTORIES.entrySet()) {
-                    String metric = entry.getKey();
-                    if (metric.equals(metricType)) {
-                        return createSpecification(
-                            classes -> classes
-                                .stream()
-                                .map(classId -> entry.getValue().apply(classId)),
-                            composeSpecification(metricType, "*")
-                        );
-                    }
-                }
-            }
-            var classId = Long.parseLong(matcher.group(2));
+            var classId = matcher.group(2);
+            var metricGenerator = SINGLE_CLASS_METRIC_FACTORIES.get(metricType);
+
+            Function<Collection<Long>, Stream<Metric>> metricsFactory = classId.equals("*")
+                ? (classes) -> classes.stream().map(metricGenerator)
+                : ignored -> Stream.of(metricGenerator.apply(Long.parseLong(classId)));
+
             return createSpecification(
-                ignored -> Stream.of(SINGLE_CLASS_METRIC_FACTORIES
-                    .get(metricType)
-                    .apply(classId)),
-                composeSpecification(metricType, String.valueOf(classId))
+                metricsFactory,
+                composeSpecification(metricType, classId)
             );
         }
 
@@ -210,8 +201,7 @@ public interface ClassificationMetricSpecification {
     }
 
     private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
-        var validExpressions = new LinkedList<String>();
-        validExpressions.addAll(MODEL_SPECIFIC_METRICS);
+        var validExpressions = new LinkedList<>(MODEL_SPECIFIC_METRICS);
         var allClassExpressions = AllClassMetric.values();
         for (AllClassMetric allClassExpression : allClassExpressions) {
             validExpressions.add(allClassExpression.name());
