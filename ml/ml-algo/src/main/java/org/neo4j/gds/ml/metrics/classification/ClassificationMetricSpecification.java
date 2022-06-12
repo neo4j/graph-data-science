@@ -44,22 +44,64 @@ import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_E
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
-public interface ClassificationMetricSpecification {
-    List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
-    SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(Map.of(
-        F1Score.NAME, F1Score::new,
-        Precision.NAME, Precision::new,
-        Recall.NAME, Recall::new,
-        Accuracy.NAME, Accuracy::new
-    ));
+public final class ClassificationMetricSpecification {
+    private static final List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
+    private static final SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(
+        Map.of(
+            F1Score.NAME, F1Score::new,
+            Precision.NAME, Precision::new,
+            Recall.NAME, Recall::new,
+            Accuracy.NAME, Accuracy::new
+        ));
+
     @RegExp
-    String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
-    String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
-    Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
+    private static final String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
+    private static final String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
+    private static final Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
         "(" + VALID_SINGLE_CLASS_METRICS + ")" +
         "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
 
-    static MemoryEstimation memoryEstimation(int numberOfClasses) {
+    private final String stringRepresentation;
+    private final Function<Collection<Long>, Stream<Metric>> metricFactory;
+
+    private ClassificationMetricSpecification(
+        String stringRepresentation,
+        Function<Collection<Long>, Stream<Metric>> metricFactory
+    ) {
+        this.stringRepresentation = stringRepresentation;
+        this.metricFactory = metricFactory;
+    }
+
+    private static ClassificationMetricSpecification createSpecification(
+        Function<Collection<Long>, Stream<Metric>> metricFactory,
+        String stringRepresentation
+    ) {
+        return new ClassificationMetricSpecification(stringRepresentation, metricFactory);
+    }
+
+    public Stream<Metric> createMetrics(Collection<Long> classes) {
+        return metricFactory.apply(classes);
+    }
+
+    @Override
+    public String toString() {
+        return stringRepresentation;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ClassificationMetricSpecification)) {
+            return false;
+        }
+        return toString().equals(obj.toString());
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    public static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder()
             .rangePerNode("metrics", __ -> {
                 var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
@@ -68,15 +110,11 @@ public interface ClassificationMetricSpecification {
             .build();
     }
 
-    static String composeSpecification(String metricType, String classId) {
-        return formatWithLocale("%s(class=%s)", metricType, classId);
+    public static Iterable<String> singleClassMetrics() {
+        return SINGLE_CLASS_METRIC_FACTORIES.keySet();
     }
 
-    Stream<Metric> createMetrics(Collection<Long> classes);
-
-    String asString();
-
-    static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
+    public static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
         if (userSpecifications.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
         }
@@ -90,10 +128,10 @@ public interface ClassificationMetricSpecification {
         var mainMetric = stringInput.get(0).toUpperCase(Locale.ENGLISH);
         var errors = new ArrayList<String>();
         if (mainMetric.contains("*")) {
-                errors.add(formatWithLocale(
-                    "The primary (first) metric provided must be one of %s.",
-                    String.join(", ", validPrimaryMetricExpressions())
-                ));
+            errors.add(formatWithLocale(
+                "The primary (first) metric provided must be one of %s.",
+                String.join(", ", validPrimaryMetricExpressions())
+            ));
         }
         List<String> badSpecifications = stringInput
             .stream()
@@ -111,7 +149,7 @@ public interface ClassificationMetricSpecification {
             .collect(Collectors.toList());
     }
 
-    static ClassificationMetricSpecification parse(Object userSpecification) {
+    public static ClassificationMetricSpecification parse(Object userSpecification) {
         if (userSpecification instanceof ClassificationMetricSpecification) {
             return (ClassificationMetricSpecification) userSpecification;
         }
@@ -146,7 +184,7 @@ public interface ClassificationMetricSpecification {
 
             return createSpecification(
                 metricsFactory,
-                composeSpecification(metricType, classId)
+                formatWithLocale("%s(class=%s)", metricType, classId)
             );
         }
 
@@ -154,42 +192,6 @@ public interface ClassificationMetricSpecification {
             "Expected MetricSpecification or String. Got %s.",
             userSpecification.getClass().getSimpleName()
         ));
-    }
-
-    static ClassificationMetricSpecification createSpecification(
-        Function<Collection<Long>, Stream<Metric>> metricFactory,
-        String stringRepresentation
-    ) {
-        return new ClassificationMetricSpecification() {
-            @Override
-            public Stream<Metric> createMetrics(Collection<Long> classes) {
-                return metricFactory.apply(classes);
-            }
-
-            @Override
-            public String asString() {
-                return stringRepresentation;
-            }
-
-            @Override
-            public String toString() {
-                return asString();
-            }
-
-
-            @Override
-            public boolean equals(Object obj) {
-                if (!(obj instanceof ClassificationMetricSpecification)) {
-                    return false;
-                }
-                return asString().equals(((ClassificationMetricSpecification) obj).asString());
-            }
-
-            @Override
-            public int hashCode() {
-                return asString().hashCode();
-            }
-        };
     }
 
     private static List<String> allValidMetricExpressions() {
@@ -206,7 +208,7 @@ public interface ClassificationMetricSpecification {
         for (AllClassMetric allClassExpression : allClassExpressions) {
             validExpressions.add(allClassExpression.name());
         }
-        for (String singleClassMetric : SINGLE_CLASS_METRIC_FACTORIES.keySet()) {
+        for (String singleClassMetric : singleClassMetrics()) {
             if (includeSyntacticSugarMetrics) {
                 validExpressions.add(singleClassMetric + "(class=*)");
             }
@@ -215,9 +217,9 @@ public interface ClassificationMetricSpecification {
         return validExpressions;
     }
 
-    static List<String> specificationsToString(List<ClassificationMetricSpecification> specifications) {
+    public static List<String> specificationsToString(List<ClassificationMetricSpecification> specifications) {
         return specifications.stream()
-            .map(ClassificationMetricSpecification::asString)
+            .map(ClassificationMetricSpecification::toString)
             .collect(Collectors.toList());
     }
 

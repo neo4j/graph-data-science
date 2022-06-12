@@ -39,7 +39,7 @@ public class ClassificationMetricSpecificationTest {
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
         assertThat(metric.name()).isEqualTo("F1(class=42)");
-        assertThat(metricSpecification.asString()).isEqualTo("F1(class=42)");
+        assertThat(metricSpecification.toString()).isEqualTo("F1(class=42)");
     }
 
     @Test
@@ -47,7 +47,7 @@ public class ClassificationMetricSpecificationTest {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
-        assertThat(metricSpecification.asString()).isEqualTo("ACCURACY");
+        assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
         assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
     }
 
@@ -74,7 +74,7 @@ public class ClassificationMetricSpecificationTest {
         assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
         assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
         assertThat(metric.name()).isEqualTo("OUT_OF_BAG_ERROR");
-        assertThat(metricSpecification.asString()).isEqualTo("OUT_OF_BAG_ERROR");
+        assertThat(metricSpecification.toString()).isEqualTo("OUT_OF_BAG_ERROR");
     }
 
     @Test
