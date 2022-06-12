@@ -32,8 +32,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -103,14 +101,13 @@ public final class ClassificationMetricSpecification {
 
     public static final class Parser {
 
-        private static final List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
-        private static final SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(
-            Map.of(
+        private static final List<String> MODEL_SPECIFIC_METRICS = List.of(OUT_OF_BAG_ERROR.name());
+        private static final Map<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
                 F1Score.NAME, F1Score::new,
                 Precision.NAME, Precision::new,
                 Recall.NAME, Recall::new,
                 Accuracy.NAME, Accuracy::new
-            ));
+            );
 
         @RegExp
         private static final String NUMBER_OR_STAR = "(-?[\\d]+|\\*)";
@@ -175,16 +172,17 @@ public final class ClassificationMetricSpecification {
 
                 var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
                 if (!matcher.matches()) {
-                    try {
-                        var metric = AllClassMetric.valueOf(upperCaseSpecification);
-                        return createSpecification(
-                            ignored -> Stream.of(metric),
-                            upperCaseSpecification
-                        );
-                    } catch (Exception e) {
+                    if (!AllClassMetric.METRICS.contains(upperCaseSpecification)) {
                         throw new IllegalArgumentException(errorMessage(List.of(input)));
                     }
+
+                    var metric = AllClassMetric.valueOf(upperCaseSpecification);
+                    return createSpecification(
+                        ignored -> Stream.of(metric),
+                        upperCaseSpecification
+                    );
                 }
+
                 var metricType = matcher.group(1);
                 var classId = matcher.group(2);
                 var metricGenerator = SINGLE_CLASS_METRIC_FACTORIES.get(metricType);
