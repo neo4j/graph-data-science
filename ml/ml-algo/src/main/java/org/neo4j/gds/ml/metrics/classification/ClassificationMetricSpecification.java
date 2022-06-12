@@ -113,11 +113,11 @@ public final class ClassificationMetricSpecification {
             ));
 
         @RegExp
-        private static final String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
-        private static final String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
+        private static final String NUMBER_OR_STAR = "(-?[\\d]+|\\*)";
+        @RegExp
+        private static final String CLASS_NAME_PATTERN = "(.+)";
         private static final Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
-            "(" + VALID_SINGLE_CLASS_METRICS + ")" +
-            "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
+            CLASS_NAME_PATTERN + "\\(\\s*CLASS\\s*=\\s*" + NUMBER_OR_STAR + "\\s*\\)");
 
         private Parser() {}
 
@@ -169,7 +169,7 @@ public final class ClassificationMetricSpecification {
                 String input = (String) userSpecification;
 
                 var upperCaseSpecification = toUpperCaseWithLocale(input);
-                if (upperCaseSpecification.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
+                if (upperCaseSpecification.equals(OUT_OF_BAG_ERROR.name())) {
                     return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
                 }
 
@@ -188,6 +188,10 @@ public final class ClassificationMetricSpecification {
                 var metricType = matcher.group(1);
                 var classId = matcher.group(2);
                 var metricGenerator = SINGLE_CLASS_METRIC_FACTORIES.get(metricType);
+
+                if (metricGenerator == null) {
+                    throw new IllegalArgumentException(errorMessage(List.of(input)));
+                }
 
                 Function<Collection<Long>, Stream<Metric>> metricsFactory = classId.equals("*")
                     ? (classes) -> classes.stream().map(metricGenerator)
