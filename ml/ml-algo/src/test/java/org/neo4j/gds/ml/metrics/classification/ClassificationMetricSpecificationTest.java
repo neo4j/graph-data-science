@@ -31,11 +31,11 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-public class ClassificationMetricSpecificationTest {
+class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
         assertThat(metric.name()).isEqualTo("F1(class=42)");
@@ -45,7 +45,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateAccuracyMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
         assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
@@ -54,7 +54,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
         assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
     }
@@ -62,7 +62,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1MacroMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_maCRo")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
     }
@@ -70,7 +70,7 @@ public class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateOOBEMetric() {
         var metricSpecification = ClassificationMetricSpecification.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().get();
+        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
         assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
         assertThat(metric.name()).isEqualTo("OUT_OF_BAG_ERROR");
@@ -114,7 +114,7 @@ public class ClassificationMetricSpecificationTest {
         var numberOfClasses = 1000;
         var actual = ClassificationMetricSpecification
             .memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
-        var expected = MemoryRange.of(24 * 1, 24 * numberOfClasses);
+        var expected = MemoryRange.of(1, numberOfClasses).times(24);
         assertThat(actual).isEqualTo(expected);
     }
 
