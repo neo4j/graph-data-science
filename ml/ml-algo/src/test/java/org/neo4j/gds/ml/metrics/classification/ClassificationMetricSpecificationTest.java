@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1(clAss =  42 )")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1(clAss =  42 )")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
@@ -44,7 +44,7 @@ class ClassificationMetricSpecificationTest {
 
     @Test
     void shouldCreateAccuracyMetric() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
@@ -53,7 +53,7 @@ class ClassificationMetricSpecificationTest {
 
     @Test
     void shouldCreateF1WeightedMetric() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_WeIGhTED")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_WeIGhTED")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
         assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
@@ -61,7 +61,7 @@ class ClassificationMetricSpecificationTest {
 
     @Test
     void shouldCreateF1MacroMetric() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("F1_maCRo")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_maCRo")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
@@ -69,7 +69,7 @@ class ClassificationMetricSpecificationTest {
 
     @Test
     void shouldCreateOOBEMetric() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
         var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
         assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
@@ -79,7 +79,7 @@ class ClassificationMetricSpecificationTest {
 
     @Test
     void shouldParseSyntacticSugar() {
-        var metricSpecification = ClassificationMetricSpecification.parse(List.of("Accuracy", "F1(class=*)")).get(1);
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy", "F1(class=*)")).get(1);
         var metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
         assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
         assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
@@ -93,7 +93,7 @@ class ClassificationMetricSpecificationTest {
     @MethodSource("invalidSingleClassSpecifications")
     void shouldFailOnInvalidSingleClassSpecifications(String metric) {
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> ClassificationMetricSpecification.parse(metric))
+            .isThrownBy(() -> ClassificationMetricSpecification.Parser.parse(metric))
             .withMessageContaining(
                 "Invalid metric expression"
             );
@@ -102,7 +102,7 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldFailOnMultipleInvalidSingleClassSpecifications() {
         assertThatExceptionOfType(IllegalArgumentException.class)
-            .isThrownBy(() -> ClassificationMetricSpecification.parse(invalidSingleClassSpecifications()))
+            .isThrownBy(() -> ClassificationMetricSpecification.Parser.parse(invalidSingleClassSpecifications()))
             .withMessageContaining(
                 "Invalid metric expressions"
             );

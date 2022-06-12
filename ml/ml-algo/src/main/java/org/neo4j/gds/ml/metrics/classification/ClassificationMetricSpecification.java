@@ -45,21 +45,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public final class ClassificationMetricSpecification {
-    private static final List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
-    private static final SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(
-        Map.of(
-            F1Score.NAME, F1Score::new,
-            Precision.NAME, Precision::new,
-            Recall.NAME, Recall::new,
-            Accuracy.NAME, Accuracy::new
-        ));
-
-    @RegExp
-    private static final String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
-    private static final String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
-    private static final Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
-        "(" + VALID_SINGLE_CLASS_METRICS + ")" +
-        "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
 
     private final String stringRepresentation;
     private final Function<Collection<Long>, Stream<Metric>> metricFactory;
@@ -110,140 +95,157 @@ public final class ClassificationMetricSpecification {
             .build();
     }
 
-    public static Iterable<String> singleClassMetrics() {
-        return SINGLE_CLASS_METRIC_FACTORIES.keySet();
-    }
-
-    public static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
-        if (userSpecifications.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
-        }
-
-        if (userSpecifications.get(0) instanceof ClassificationMetricSpecification) {
-            return (List<ClassificationMetricSpecification>) userSpecifications;
-        }
-
-        List<String> stringInput = (List<String>) userSpecifications;
-
-        var mainMetric = stringInput.get(0).toUpperCase(Locale.ENGLISH);
-        var errors = new ArrayList<String>();
-        if (mainMetric.contains("*")) {
-            errors.add(formatWithLocale(
-                "The primary (first) metric provided must be one of %s.",
-                String.join(", ", validPrimaryMetricExpressions())
-            ));
-        }
-        List<String> badSpecifications = stringInput
-            .stream()
-            .filter(ClassificationMetricSpecification::invalidSpecification)
-            .collect(Collectors.toList());
-        if (!badSpecifications.isEmpty()) {
-            errors.add(errorMessage(badSpecifications));
-        }
-        if (!errors.isEmpty()) {
-            throw new IllegalArgumentException(String.join(" ", errors));
-        }
-        return userSpecifications.stream()
-            .map(ClassificationMetricSpecification::parse)
-            .distinct()
-            .collect(Collectors.toList());
-    }
-
-    public static ClassificationMetricSpecification parse(Object userSpecification) {
-        if (userSpecification instanceof ClassificationMetricSpecification) {
-            return (ClassificationMetricSpecification) userSpecification;
-        }
-
-        if (userSpecification instanceof String) {
-            String input = (String) userSpecification;
-
-            var upperCaseSpecification = toUpperCaseWithLocale(input);
-            if (upperCaseSpecification.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
-                return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
-            }
-
-            var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
-            if (!matcher.matches()) {
-                try {
-                    var metric = AllClassMetric.valueOf(upperCaseSpecification);
-                    return createSpecification(
-                        ignored -> Stream.of(metric),
-                        upperCaseSpecification
-                    );
-                } catch (Exception e) {
-                    failSingleSpecification(input);
-                }
-            }
-            var metricType = matcher.group(1);
-            var classId = matcher.group(2);
-            var metricGenerator = SINGLE_CLASS_METRIC_FACTORIES.get(metricType);
-
-            Function<Collection<Long>, Stream<Metric>> metricsFactory = classId.equals("*")
-                ? (classes) -> classes.stream().map(metricGenerator)
-                : ignored -> Stream.of(metricGenerator.apply(Long.parseLong(classId)));
-
-            return createSpecification(
-                metricsFactory,
-                formatWithLocale("%s(class=%s)", metricType, classId)
-            );
-        }
-
-        throw new IllegalArgumentException(formatWithLocale(
-            "Expected MetricSpecification or String. Got %s.",
-            userSpecification.getClass().getSimpleName()
-        ));
-    }
-
-    private static List<String> allValidMetricExpressions() {
-        return validMetricExpressions(true);
-    }
-
-    private static List<String> validPrimaryMetricExpressions() {
-        return validMetricExpressions(false);
-    }
-
-    private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
-        var validExpressions = new LinkedList<>(MODEL_SPECIFIC_METRICS);
-        var allClassExpressions = AllClassMetric.values();
-        for (AllClassMetric allClassExpression : allClassExpressions) {
-            validExpressions.add(allClassExpression.name());
-        }
-        for (String singleClassMetric : singleClassMetrics()) {
-            if (includeSyntacticSugarMetrics) {
-                validExpressions.add(singleClassMetric + "(class=*)");
-            }
-            validExpressions.add(singleClassMetric + "(class=<class value>)");
-        }
-        return validExpressions;
-    }
-
     public static List<String> specificationsToString(List<ClassificationMetricSpecification> specifications) {
         return specifications.stream()
             .map(ClassificationMetricSpecification::toString)
             .collect(Collectors.toList());
     }
 
-    static void failSingleSpecification(String userSpecification) {
-        throw new IllegalArgumentException(errorMessage(List.of(userSpecification)));
-    }
+    public static final class Parser {
 
-    static String errorMessage(List<String> specifications) {
-        return formatWithLocale(
-            "Invalid metric expression%s %s. Available metrics are %s (case insensitive and space allowed between brackets).",
-            specifications.size() == 1 ? "" : "s",
-            specifications.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", ")),
-            String.join(", ", allValidMetricExpressions())
-        );
-    }
+        private static final List<String> MODEL_SPECIFIC_METRICS = List.of(((Metric) OUT_OF_BAG_ERROR).name());
+        private static final SortedMap<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = new TreeMap<>(
+            Map.of(
+                F1Score.NAME, F1Score::new,
+                Precision.NAME, Precision::new,
+                Recall.NAME, Recall::new,
+                Accuracy.NAME, Accuracy::new
+            ));
 
-    static boolean invalidSpecification(String userSpecification) {
-        var upperCaseSpecification = userSpecification.toUpperCase(Locale.ENGLISH);
-        if (MODEL_SPECIFIC_METRICS.contains(upperCaseSpecification)) return false;
-        var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
-        if (matcher.matches()) return false;
-        return Arrays
-            .stream(AllClassMetric.values())
-            .map(AllClassMetric::name)
-            .noneMatch(upperCaseSpecification::equals);
+        @RegExp
+        private static final String NUMBER_OR_STAR = "((?:-?[\\d]+)|(?:\\*))";
+        private static final String VALID_SINGLE_CLASS_METRICS = String.join("|", SINGLE_CLASS_METRIC_FACTORIES.keySet());
+        private static final Pattern SINGLE_CLASS_METRIC_PATTERN = Pattern.compile(
+            "(" + VALID_SINGLE_CLASS_METRICS + ")" +
+            "\\([\\s]*CLASS[\\s]*=[\\s]*" + NUMBER_OR_STAR + "[\\s]*\\)");
+
+        private Parser() {}
+
+        public static Iterable<String> singleClassMetrics() {
+            return SINGLE_CLASS_METRIC_FACTORIES.keySet();
+        }
+
+        public static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
+            if (userSpecifications.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale("No metrics specified, we require at least one"));
+            }
+
+            if (userSpecifications.get(0) instanceof ClassificationMetricSpecification) {
+                return (List<ClassificationMetricSpecification>) userSpecifications;
+            }
+
+            List<String> stringInput = (List<String>) userSpecifications;
+
+            var mainMetric = stringInput.get(0).toUpperCase(Locale.ENGLISH);
+            var errors = new ArrayList<String>();
+            if (mainMetric.contains("*")) {
+                errors.add(formatWithLocale(
+                    "The primary (first) metric provided must be one of %s.",
+                    String.join(", ", validPrimaryMetricExpressions())
+                ));
+            }
+            List<String> badSpecifications = stringInput
+                .stream()
+                .filter(Parser::invalidSpecification)
+                .collect(Collectors.toList());
+            if (!badSpecifications.isEmpty()) {
+                errors.add(errorMessage(badSpecifications));
+            }
+            if (!errors.isEmpty()) {
+                throw new IllegalArgumentException(String.join(" ", errors));
+            }
+            return userSpecifications.stream()
+                .map(Parser::parse)
+                .distinct()
+                .collect(Collectors.toList());
+        }
+
+        public static ClassificationMetricSpecification parse(Object userSpecification) {
+            if (userSpecification instanceof ClassificationMetricSpecification) {
+                return (ClassificationMetricSpecification) userSpecification;
+            }
+
+            if (userSpecification instanceof String) {
+                String input = (String) userSpecification;
+
+                var upperCaseSpecification = toUpperCaseWithLocale(input);
+                if (upperCaseSpecification.equals(((Metric) OUT_OF_BAG_ERROR).name())) {
+                    return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
+                }
+
+                var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
+                if (!matcher.matches()) {
+                    try {
+                        var metric = AllClassMetric.valueOf(upperCaseSpecification);
+                        return createSpecification(
+                            ignored -> Stream.of(metric),
+                            upperCaseSpecification
+                        );
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException(errorMessage(List.of(input)));
+                    }
+                }
+                var metricType = matcher.group(1);
+                var classId = matcher.group(2);
+                var metricGenerator = SINGLE_CLASS_METRIC_FACTORIES.get(metricType);
+
+                Function<Collection<Long>, Stream<Metric>> metricsFactory = classId.equals("*")
+                    ? (classes) -> classes.stream().map(metricGenerator)
+                    : ignored -> Stream.of(metricGenerator.apply(Long.parseLong(classId)));
+
+                return createSpecification(
+                    metricsFactory,
+                    formatWithLocale("%s(class=%s)", metricType, classId)
+                );
+            }
+
+            throw new IllegalArgumentException(formatWithLocale(
+                "Expected MetricSpecification or String. Got %s.",
+                userSpecification.getClass().getSimpleName()
+            ));
+        }
+        private static List<String> allValidMetricExpressions() {
+            return validMetricExpressions(true);
+        }
+
+        private static List<String> validPrimaryMetricExpressions() {
+            return validMetricExpressions(false);
+        }
+
+        private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
+            var validExpressions = new LinkedList<>(MODEL_SPECIFIC_METRICS);
+            var allClassExpressions = AllClassMetric.values();
+            for (AllClassMetric allClassExpression : allClassExpressions) {
+                validExpressions.add(allClassExpression.name());
+            }
+            for (String singleClassMetric : singleClassMetrics()) {
+                if (includeSyntacticSugarMetrics) {
+                    validExpressions.add(singleClassMetric + "(class=*)");
+                }
+                validExpressions.add(singleClassMetric + "(class=<class value>)");
+            }
+            return validExpressions;
+        }
+
+        private static String errorMessage(List<String> specifications) {
+            return formatWithLocale(
+                "Invalid metric expression%s %s. Available metrics are %s (case insensitive and space allowed between brackets).",
+                specifications.size() == 1 ? "" : "s",
+                specifications.stream().map(s -> "`" + s + "`").collect(Collectors.joining(", ")),
+                String.join(", ", allValidMetricExpressions())
+            );
+        }
+
+        private static boolean invalidSpecification(String userSpecification) {
+            var upperCaseSpecification = userSpecification.toUpperCase(Locale.ENGLISH);
+            if (MODEL_SPECIFIC_METRICS.contains(upperCaseSpecification)) return false;
+            var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
+            if (matcher.matches()) return false;
+            return Arrays
+                .stream(AllClassMetric.values())
+                .map(AllClassMetric::name)
+                .noneMatch(upperCaseSpecification::equals);
+        }
+
     }
 }

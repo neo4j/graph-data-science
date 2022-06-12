@@ -110,7 +110,7 @@ final class NodeClassificationPipelinePredictProcTestUtil {
                 .modelName("model")
                 .graphName(graphName)
                 .pipeline("DUMMY")
-                .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
+                .metrics(ClassificationMetricSpecification.Parser.parse(List.of("F1_MACRO")))
                 .targetProperty("foo")
                 .build(),
             NodeClassificationPipelineModelInfo.of(

@@ -414,7 +414,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             NodeClassificationPipelineTrainConfigImpl.builder()
                 .username(getUsername())
                 .modelName("model")
-                .metrics(ClassificationMetricSpecification.parse(List.of("F1_MACRO")))
+                .metrics(ClassificationMetricSpecification.Parser.parse(List.of("F1_MACRO")))
                 .graphName(GRAPH_NAME)
                 .pipeline("DUMMY")
                 .targetProperty("foo")

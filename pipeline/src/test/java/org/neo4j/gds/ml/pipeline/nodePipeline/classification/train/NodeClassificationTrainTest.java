@@ -223,9 +223,9 @@ class NodeClassificationTrainTest {
             .metrics(
                 includeOOB
                     ? List.of(
-                    ClassificationMetricSpecification.parse("F1_WEIGHTED"),
-                    ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR"))
-                    : List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED"))
+                    ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED"),
+                    ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR"))
+                    : List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED"))
             )
             .build();
 
@@ -285,7 +285,7 @@ class NodeClassificationTrainTest {
             .concurrency(1)
             .randomSeed(42L)
             .targetProperty("t")
-            .metrics(List.of(ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR")))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR")))
             .build();
 
         var ncTrain = NodeClassificationTrain.create(
@@ -403,7 +403,7 @@ class NodeClassificationTrainTest {
             LogisticRegressionTrainConfig.of(Map.of("penalty", 0.125 * 2.0 / 3.0 * 0.5, "maxEpochs", 100))
         );
 
-        var metrics = ClassificationMetricSpecification.parse("F1(class=1)");
+        var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", metrics, 42L);
 
         var progressTask = progressTask(
@@ -439,7 +439,7 @@ class NodeClassificationTrainTest {
         );
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
-        var metrics = ClassificationMetricSpecification.parse("F1(class=1)");
+        var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", metrics, 42L);
 
         var progressTask = progressTask(pipeline.splitConfig(), MAX_TRIALS, graph.nodeCount());
@@ -479,7 +479,7 @@ class NodeClassificationTrainTest {
             .modelName("model")
             .randomSeed(42L)
             .targetProperty("t")
-            .metrics(List.of(ClassificationMetricSpecification.parse("Accuracy")))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("Accuracy")))
             .concurrency(concurrency)
             .build();
 
@@ -526,11 +526,11 @@ class NodeClassificationTrainTest {
     }
 
     static Stream<Arguments> metricArguments() {
-        var singleClassMetrics = Stream.of(Arguments.arguments(ClassificationMetricSpecification.parse("F1(class=1)")));
+        var singleClassMetrics = Stream.of(Arguments.arguments(ClassificationMetricSpecification.Parser.parse("F1(class=1)")));
         var allClassMetrics = Arrays
             .stream(AllClassMetric.values())
             .map(AllClassMetric::name)
-            .map(ClassificationMetricSpecification::parse)
+            .map(ClassificationMetricSpecification.Parser::parse)
             .map(Arguments::of);
         return Stream.concat(singleClassMetrics, allClassMetrics);
     }
