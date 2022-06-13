@@ -324,18 +324,35 @@ class LouvainTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 1, 6414137, 23057664),
-            arguments(1, 10, 6414137, 30258024),
-            arguments(4, 1, 6417425, 29057928),
-            arguments(4, 10, 6417425, 36258288),
-            arguments(42, 1, 6459073, 105061272),
-            arguments(42, 10, 6459073, 112261632)
+
+            arguments(1, 1, true, 6414145, 23057672),
+            arguments(1, 1, false, 6414145, 23057672),
+            arguments(1, 10, true, 6414145, 30258032),
+            arguments(1, 10, false, 6414145, 23857712),
+
+            arguments(4, 1, true, 6417433, 29057936),
+            arguments(4, 1, false, 6417433, 29057936),
+            arguments(4, 10, true, 6417433, 36258296),
+            arguments(4, 10, false, 6417433, 29857976),
+
+            arguments(42, 1, true, 6459081, 105061280),
+            arguments(42, 1, false, 6459081, 105061280),
+            arguments(42, 10, true, 6459081, 112261640),
+            arguments(42, 10, false, 6459081, 105861320)
+
         );
     }
 
+
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(int concurrency, int levels, long expectedMinBytes, long expectedMaxBytes) {
+    void testMemoryEstimation(
+        int concurrency,
+        int levels,
+        boolean includeIntermediateCommunities,
+        long expectedMinBytes,
+        long expectedMaxBytes
+    ) {
         var nodeCount = 100_000L;
         var relCount = 500_000L;
 
@@ -343,7 +360,7 @@ class LouvainTest {
             .maxLevels(levels)
             .maxIterations(10)
             .tolerance(TOLERANCE_DEFAULT)
-            .includeIntermediateCommunities(false)
+            .includeIntermediateCommunities(includeIntermediateCommunities)
             .concurrency(1)
             .build();
 
