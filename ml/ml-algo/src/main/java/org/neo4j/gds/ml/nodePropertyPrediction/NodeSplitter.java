@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.nodePropertyPrediction;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -28,26 +29,39 @@ import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.Optional;
+import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.ml.util.ShuffleUtil.createRandomDataGenerator;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallNodeSets;
 
 public final class NodeSplitter {
 
+    private final int concurrency;
     private final long numberOfExamples;
     private final ProgressTracker progressTracker;
+    private final LongUnaryOperator toOriginalId;
+    private final LongUnaryOperator toMappedId;
 
     public NodeSplitter(
+        int concurrency,
         long numberOfExamples,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        LongUnaryOperator toOriginalId,
+        LongUnaryOperator toMappedId
     ) {
+        this.concurrency = concurrency;
         this.numberOfExamples = numberOfExamples;
         this.progressTracker = progressTracker;
+        this.toOriginalId = toOriginalId;
+        this.toMappedId = toMappedId;
     }
 
     public NodeSplits split(double testFraction, int validationFolds, Optional<Long> randomSeed) {
         var allTrainingExamples = HugeLongArray.newArray(numberOfExamples);
-        allTrainingExamples.setAll(i -> i);
+        allTrainingExamples.setAll(toOriginalId);
+        HugeMergeSort.sort(allTrainingExamples, concurrency);
+        // apply operator to value, not to index
+        allTrainingExamples.setAll(i -> toMappedId.applyAsLong(allTrainingExamples.get(i)));
 
         ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(randomSeed));
         var outerSplit = new FractionSplitter().split(ReadOnlyHugeLongArray.of(allTrainingExamples), 1 - testFraction);

@@ -33,8 +33,11 @@ class NodeSplitterTest {
     void testSplitter() {
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
+            4,
             numberOfExamples,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            i -> i,
+            i -> i
         );
 
         double testFraction = 0.25;

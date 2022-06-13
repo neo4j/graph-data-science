@@ -80,6 +80,7 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
+    private final Graph graph;
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
     private final Multiset<Long> classCounts;
@@ -240,7 +241,7 @@ public final class NodeClassificationTrain {
             features,
             labels,
             classIdMap,
-            metrics,
+            graph, metrics,
             classificationMetrics,
             classCounts,
             progressTracker,
@@ -254,12 +255,14 @@ public final class NodeClassificationTrain {
         Features features,
         HugeIntArray labels,
         LocalIdMap classIdMap,
+        Graph graph,
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
+        this.graph = graph;
         this.classificationMetrics = classificationMetrics;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
@@ -275,8 +278,11 @@ public final class NodeClassificationTrain {
     public NodeClassificationTrainResult compute() {
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
+            trainConfig.concurrency(),
             features.size(),
-            progressTracker
+            progressTracker,
+            graph::toOriginalNodeId,
+            graph::toMappedNodeId
         ).split(
             splitConfig.testFraction(),
             splitConfig.validationFolds(),

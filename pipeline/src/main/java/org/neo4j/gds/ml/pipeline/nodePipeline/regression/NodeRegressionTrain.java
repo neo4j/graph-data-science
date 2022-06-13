@@ -54,6 +54,7 @@ public final class NodeRegressionTrain {
 
     private final Features features;
     private final HugeDoubleArray targets;
+    private final Graph graph;
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
@@ -101,6 +102,7 @@ public final class NodeRegressionTrain {
             trainConfig,
             features,
             targets,
+            graph,
             progressTracker,
             terminationFlag
         );
@@ -111,11 +113,13 @@ public final class NodeRegressionTrain {
         NodeRegressionPipelineTrainConfig trainConfig,
         Features features,
         HugeDoubleArray targets,
+        Graph graph,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
+        this.graph = graph;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.features = features;
@@ -125,8 +129,11 @@ public final class NodeRegressionTrain {
     public NodeRegressionTrainResult compute() {
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
+            trainConfig.concurrency(),
             features.size(),
-            progressTracker
+            progressTracker,
+            graph::toOriginalNodeId,
+            graph::toMappedNodeId
         ).split(
             splitConfig.testFraction(),
             splitConfig.validationFolds(),
