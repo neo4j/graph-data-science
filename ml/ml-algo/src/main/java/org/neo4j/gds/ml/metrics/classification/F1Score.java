@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
@@ -32,21 +31,22 @@ public class F1Score implements ClassificationMetric {
 
     public static final String NAME = "F1";
 
-    private final long positiveTarget;
+    private final long originalTarget;
 
-    public F1Score(long positiveTarget) {
-        this.positiveTarget = positiveTarget;
+    private final int internalTarget;
+
+    public F1Score(long originalTarget, int internalTarget) {
+        this.originalTarget = originalTarget;
+        this.internalTarget = internalTarget;
     }
 
     @Override
-    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore, LocalIdMap localIdMap) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
                     predictions.size()
                 );
-
-        var localPositiveTarget = localIdMap.toMapped(positiveTarget);
 
         long truePositives = 0L;
         long falsePositives = 0L;
@@ -56,8 +56,8 @@ public class F1Score implements ClassificationMetric {
             long targetClass = targets.get(row);
             long predictedClass = predictions.get(row);
 
-            var predictedIsPositive = predictedClass == localPositiveTarget;
-            var targetIsPositive = targetClass == localPositiveTarget;
+            var predictedIsPositive = predictedClass == internalTarget;
+            var targetIsPositive = targetClass == internalTarget;
             var predictedIsNegative = !predictedIsPositive;
             var targetIsNegative = !targetIsPositive;
 
@@ -81,8 +81,8 @@ public class F1Score implements ClassificationMetric {
         return result;
     }
 
-    public double compute(HugeIntArray targets, HugeIntArray predictions, LocalIdMap localIdMap) {
-        return compute(targets, predictions, null, localIdMap);
+    public double compute(HugeIntArray targets, HugeIntArray predictions) {
+        return compute(targets, predictions, null);
     }
 
     @Override
@@ -90,7 +90,7 @@ public class F1Score implements ClassificationMetric {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         F1Score f1Score = (F1Score) o;
-        return positiveTarget == f1Score.positiveTarget;
+        return originalTarget == f1Score.originalTarget;
     }
 
     @Override
@@ -100,12 +100,12 @@ public class F1Score implements ClassificationMetric {
 
     @Override
     public String toString() {
-        return formatWithLocale("%s_class_%d", NAME, positiveTarget);
+        return formatWithLocale("%s_class_%d", NAME, originalTarget);
     }
 
     @Override
     public String name() {
-        return formatWithLocale("%s(class=%d)", NAME, positiveTarget);
+        return formatWithLocale("%s(class=%d)", NAME, originalTarget);
     }
 
     @Override

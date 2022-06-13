@@ -27,7 +27,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_MACRO;
 
 class F1MacroTest {
 
@@ -52,7 +51,7 @@ class F1MacroTest {
     void shouldComputeF1AllCorrectMultiple() {
         var totalF1 = 1.0 + 2.0/3.0 + 2.0/3.0 + 2.0/3.0;
         var totalClasses = 7;
-        assertThat(F1_MACRO.compute(targets, predictions, classCounts, localIdMap))
+        assertThat(new F1Macro(localIdMap).compute(targets, predictions, classCounts))
             .isCloseTo(totalF1 / totalClasses, Offset.offset(1e-8));
     }
 }

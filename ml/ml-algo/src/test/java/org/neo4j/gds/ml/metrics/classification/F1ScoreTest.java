@@ -55,82 +55,82 @@ class F1ScoreTest {
     void shouldComputeF1BinaryBadModel() {
         var binaryPredictions = HugeIntArray.of(0, 0, 0, 0, 0);
         var binaryTargets = HugeIntArray.of(0, 0, 0, 0, 1);
-        var metric = new F1Score(1);
-        assertThat(metric.compute(binaryTargets, binaryPredictions, localIdMap)).isEqualTo(0.0);
+        var metric = new F1Score(1, localIdMap.toMapped(1));
+        assertThat(metric.compute(binaryTargets, binaryPredictions, null)).isEqualTo(0.0);
     }
 
     @Test
     void shouldComputeF1BinaryMediumModel() {
         var binaryPredictions = HugeIntArray.of(0, 0, 0, 0, 1);
         var binaryTargets = HugeIntArray.of(0, 0, 0, 1, 1);
-        var metric = new F1Score(1);
+        var metric = new F1Score(1, 1);
         var precision = 1.0;
         var recall = 0.5;
         var f1 = 2.0/(1.0/precision + 1.0/recall);
-        assertThat(metric.compute(binaryTargets, binaryPredictions, LocalIdMap.of(0,1))).isCloseTo(f1, Offset.offset(1e-8));
+        assertThat(metric.compute(binaryTargets, binaryPredictions, null)).isCloseTo(f1, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1BinaryPerfectModel() {
         var binaryPredictions = HugeIntArray.of(0, 0, 0, 1, 1);
         var binaryTargets = HugeIntArray.of(0, 0, 0, 1, 1);
-        var metric = new F1Score(1);
-        assertThat(metric.compute(binaryTargets, binaryPredictions, LocalIdMap.of(0,1))).isCloseTo(1.0, Offset.offset(1e-8));
+        var metric = new F1Score(1, 1);
+        assertThat(metric.compute(binaryTargets, binaryPredictions, null)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
-        var metric = new F1Score(1);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(1.0, Offset.offset(1e-8));
+        var metric = new F1Score(1, localIdMap.toMapped(1));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1MissedSome() {
-        var metric = new F1Score(2);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
+        var metric = new F1Score(2, localIdMap.toMapped(2));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1PredictedSomeExtra() {
-        var metric = new F1Score(3);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
+        var metric = new F1Score(3, localIdMap.toMapped(3));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1MissedSomePredictedSomeExtra() {
-        var metric = new F1Score(4);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
+        var metric = new F1Score(4, localIdMap.toMapped(4));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(2.0 / 3.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1MissedAll() {
-        var metric = new F1Score(5);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric = new F1Score(5, localIdMap.toMapped(5));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1NoSuchTarget() {
-        var metric = new F1Score(6);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric = new F1Score(6, localIdMap.toMapped(6));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1NoSuchTargetNoSuchPrediction() {
-        var metric = new F1Score(99);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric = new F1Score(99, localIdMap.toMapped(99));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1NoSuchTargetSinglePrediction() {
-        var metric = new F1Score(7);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric = new F1Score(7, localIdMap.toMapped(7));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 
     @Test
     void shouldComputeF1MissedAllAndPredictedAllWrong() {
-        var metric = new F1Score(8);
-        assertThat(metric.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
-        var metric2 = new F1Score(9);
-        assertThat(metric2.compute(targets, predictions, localIdMap)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric = new F1Score(8, localIdMap.toMapped(8));
+        assertThat(metric.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
+        var metric2 = new F1Score(9, localIdMap.toMapped(9));
+        assertThat(metric2.compute(targets, predictions, null)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 }

@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.openjdk.jol.util.Multiset;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
 
@@ -97,7 +97,6 @@ class ClassificationMetricComputerTest {
             features,
             targets,
             multiSet,
-            idMap,
             ReadOnlyHugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
@@ -105,6 +104,6 @@ class ClassificationMetricComputerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(classificationMetricComputer.score(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));
+        assertThat(classificationMetricComputer.score(new F1Weighted(idMap))).isCloseTo(expectedF1Score, Offset.offset(1e-7));
     }
 }

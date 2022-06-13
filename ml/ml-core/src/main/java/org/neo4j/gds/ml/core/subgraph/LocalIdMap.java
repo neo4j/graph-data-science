@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.subgraph;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
+import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -32,6 +33,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class LocalIdMap {
     private final LongArrayList originalIds;
@@ -91,6 +94,10 @@ public class LocalIdMap {
         var list = new ArrayList<Long>();
         originalIds.forEach((Consumer<LongCursor>) longCursor -> list.add(longCursor.value));
         return list;
+    }
+
+    public Stream<LongIntCursor> getMappings() {
+        return StreamSupport.stream(originalToInternalIdMap.spliterator(), false);
     }
 
     public int size() {

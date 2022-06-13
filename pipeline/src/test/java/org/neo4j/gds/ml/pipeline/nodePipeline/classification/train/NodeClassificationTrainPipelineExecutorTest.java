@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -117,7 +118,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of()).findFirst().orElseThrow();
 
         var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
         pipeline.addTrainerConfig(modelCandidate);

@@ -37,8 +37,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.metrics.classification.AllClassMetric;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
+import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -50,19 +51,18 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
@@ -101,7 +101,7 @@ class NodeClassificationTrainTest {
     @MethodSource("metricArguments")
     void selectsTheBestModel(ClassificationMetricSpecification metricSpecification) {
 
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1)).findFirst().orElseThrow();
 
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
@@ -241,6 +241,8 @@ class NodeClassificationTrainTest {
 
         var trainingStatistics = result.trainingStatistics();
 
+        var F1_WEIGHTED = new F1Weighted(result.classIdMap());
+
         assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
         assertThat(trainingStatistics.getValidationStats(F1_WEIGHTED))
             .hasSize(10)
@@ -310,7 +312,7 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(ClassificationMetricSpecification metricSpecification) {
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1)).findFirst().orElseThrow();
 
         var bananasPipeline = new NodeClassificationTrainingPipeline();
         bananasPipeline.setSplitConfig(SPLIT_CONFIG);
@@ -527,9 +529,8 @@ class NodeClassificationTrainTest {
 
     static Stream<Arguments> metricArguments() {
         var singleClassMetrics = Stream.of(Arguments.arguments(ClassificationMetricSpecification.Parser.parse("F1(class=1)")));
-        var allClassMetrics = Arrays
-            .stream(AllClassMetric.values())
-            .map(AllClassMetric::name)
+
+        var allClassMetrics = StreamSupport.stream(ClassificationMetricSpecification.Parser.allClassMetrics().spliterator(), false)
             .map(ClassificationMetricSpecification.Parser::parse)
             .map(Arguments::of);
         return Stream.concat(singleClassMetrics, allClassMetrics);

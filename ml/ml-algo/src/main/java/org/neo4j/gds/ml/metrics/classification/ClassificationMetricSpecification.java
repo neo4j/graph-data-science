@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import org.eclipse.collections.api.block.function.primitive.LongIntToObjectFunction;
 import org.intellij.lang.annotations.RegExp;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -45,25 +45,25 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public final class ClassificationMetricSpecification {
 
     private final String stringRepresentation;
-    private final Function<Collection<Long>, Stream<Metric>> metricFactory;
+    private final Function<LocalIdMap, Stream<Metric>> metricFactory;
 
     private ClassificationMetricSpecification(
         String stringRepresentation,
-        Function<Collection<Long>, Stream<Metric>> metricFactory
+        Function<LocalIdMap, Stream<Metric>> metricFactory
     ) {
         this.stringRepresentation = stringRepresentation;
         this.metricFactory = metricFactory;
     }
 
     private static ClassificationMetricSpecification createSpecification(
-        Function<Collection<Long>, Stream<Metric>> metricFactory,
+        Function<LocalIdMap, Stream<Metric>> metricFactory,
         String stringRepresentation
     ) {
         return new ClassificationMetricSpecification(stringRepresentation, metricFactory);
     }
 
-    public Stream<Metric> createMetrics(Collection<Long> classes) {
-        return metricFactory.apply(classes);
+    public Stream<Metric> createMetrics(LocalIdMap classIdMap) {
+        return metricFactory.apply(classIdMap);
     }
 
     @Override
@@ -87,7 +87,7 @@ public final class ClassificationMetricSpecification {
     public static MemoryEstimation memoryEstimation(int numberOfClasses) {
         return MemoryEstimations.builder()
             .rangePerNode("metrics", __ -> {
-                var sizeOfRepresentativeMetric = sizeOf(new F1Score(1));
+                var sizeOfRepresentativeMetric = sizeOf(new F1Score(1, 1));
                 return MemoryRange.of(sizeOfRepresentativeMetric, numberOfClasses * sizeOfRepresentativeMetric);
             })
             .build();
@@ -102,12 +102,18 @@ public final class ClassificationMetricSpecification {
     public static final class Parser {
 
         private static final List<String> MODEL_SPECIFIC_METRICS = List.of(OUT_OF_BAG_ERROR.name());
-        private static final Map<String, Function<Long, ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
+        private static final Map<String, LongIntToObjectFunction<ClassificationMetric>> SINGLE_CLASS_METRIC_FACTORIES = Map.of(
                 F1Score.NAME, F1Score::new,
                 Precision.NAME, Precision::new,
                 Recall.NAME, Recall::new,
                 Accuracy.NAME, Accuracy::new
             );
+
+        private static final Map<String, Function<LocalIdMap, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
+            F1Weighted.NAME, F1Weighted::new,
+            F1Macro.NAME, F1Macro::new,
+            GlobalAccuracy.NAME, GlobalAccuracy::new
+        );
 
         @RegExp
         private static final String NUMBER_OR_STAR = "(-?[\\d]+|\\*)";
@@ -121,6 +127,8 @@ public final class ClassificationMetricSpecification {
         public static Iterable<String> singleClassMetrics() {
             return SINGLE_CLASS_METRIC_FACTORIES.keySet();
         }
+
+        public static Iterable<String> allClassMetrics() { return ALL_CLASS_METRIC_FACTORIES.keySet(); }
 
         public static List<ClassificationMetricSpecification> parse(List<?> userSpecifications) {
             if (userSpecifications.isEmpty()) {
@@ -172,13 +180,12 @@ public final class ClassificationMetricSpecification {
 
                 var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
                 if (!matcher.matches()) {
-                    if (!AllClassMetric.METRICS.contains(upperCaseSpecification)) {
+                    var allClassMetricGenerator = ALL_CLASS_METRIC_FACTORIES.get(upperCaseSpecification);
+                    if (allClassMetricGenerator == null) {
                         throw new IllegalArgumentException(errorMessage(List.of(input)));
                     }
-
-                    var metric = AllClassMetric.valueOf(upperCaseSpecification);
                     return createSpecification(
-                        ignored -> Stream.of(metric),
+                        classIdMap -> Stream.of(allClassMetricGenerator.apply(classIdMap)),
                         upperCaseSpecification
                     );
                 }
@@ -191,9 +198,9 @@ public final class ClassificationMetricSpecification {
                     throw new IllegalArgumentException(errorMessage(List.of(input)));
                 }
 
-                Function<Collection<Long>, Stream<Metric>> metricsFactory = classId.equals("*")
-                    ? (classes) -> classes.stream().map(metricGenerator)
-                    : ignored -> Stream.of(metricGenerator.apply(Long.parseLong(classId)));
+                Function<LocalIdMap, Stream<Metric>> metricsFactory = classId.equals("*")
+                    ? classIdMap -> classIdMap.getMappings().map(idMap -> metricGenerator.value(idMap.key,idMap.value))
+                    : classIdMap -> Stream.of(metricGenerator.value(Long.parseLong(classId), classIdMap.toMapped(Long.parseLong(classId))));
 
                 return createSpecification(
                     metricsFactory,
@@ -216,9 +223,9 @@ public final class ClassificationMetricSpecification {
 
         private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
             var validExpressions = new LinkedList<>(MODEL_SPECIFIC_METRICS);
-            var allClassExpressions = AllClassMetric.values();
-            for (AllClassMetric allClassExpression : allClassExpressions) {
-                validExpressions.add(allClassExpression.name());
+            var allClassExpressions = ALL_CLASS_METRIC_FACTORIES.keySet();
+            for (String allClassExpression : allClassExpressions) {
+                validExpressions.add(allClassExpression);
             }
             for (String singleClassMetric : singleClassMetrics()) {
                 if (includeSyntacticSugarMetrics) {
@@ -243,10 +250,7 @@ public final class ClassificationMetricSpecification {
             if (MODEL_SPECIFIC_METRICS.contains(upperCaseSpecification)) return false;
             var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
             if (matcher.matches()) return false;
-            return Arrays
-                .stream(AllClassMetric.values())
-                .map(AllClassMetric::name)
-                .noneMatch(upperCaseSpecification::equals);
+            return !ALL_CLASS_METRIC_FACTORIES.containsKey(upperCaseSpecification);
         }
 
     }

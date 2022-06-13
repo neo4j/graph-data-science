@@ -223,7 +223,7 @@ public final class NodeClassificationTrain {
         Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
         var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
-        var metrics = config.metrics(classCounts.keys());
+        var metrics = config.metrics(classIdMap);
         var classificationMetrics = classificationMetrics(metrics);
 
         Features features;
@@ -340,7 +340,6 @@ public final class NodeClassificationTrain {
             features,
             targets,
             classCounts,
-            classIdMap,
             evaluationSet,
             classifier,
             trainConfig.concurrency(),
