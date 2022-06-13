@@ -1,0 +1,593 @@
+:procedure-name: Pearson Similarity
+[[alpha-algorithms-similarity-pearson]]
+[.alpha]
+= Pearson Similarity
+:description: This section describes the Pearson Similarity algorithm in the Neo4j Graph Data Science library.
+
+
+link:https://en.wikipedia.org/wiki/Pearson_correlation_coefficient[Pearson similarity] is the covariance of the two _n_-dimensional vectors divided by the product of their standard deviations.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
+[[algorithms-similarity-pearson-context]]
+== History and explanation
+
+// tag::explanation[]
+
+Pearson similarity is computed using the following formula:
+
+image::pearson-similarity.png[role="middle"]
+
+Values range between -1 and 1, where -1 is perfectly dissimilar and 1 is perfectly similar.
+
+The library contains both procedures and functions to calculate similarity between sets of data.
+The function is best used when calculating the similarity between small numbers of sets.
+The procedures parallelize the computation and are therefore more appropriate for computing similarities on bigger datasets.
+
+// end::explanation[]
+
+[[algorithms-similarity-pearson-usecase]]
+== Use-cases - when to use the Pearson Similarity algorithm
+
+// tag::use-case[]
+We can use the Pearson Similarity algorithm to work out the similarity between two things.
+We might then use the computed similarity as part of a recommendation query.
+For example, to get movie recommendations based on the preferences of users who have given similar ratings to other movies that you've seen.
+// end::use-case[]
+
+
+[[algorithms-similarity-pearson-function-sample]]
+== Pearson Similarity algorithm function sample
+
+The Pearson Similarity function computes the similarity of two lists of numbers.
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=weighted-function-note]
+
+We can use it to compute the similarity of two hardcoded lists.
+
+.The following will return the Pearson similarity of two lists of numbers:
+[source, cypher, role=noplay]
+----
+RETURN gds.alpha.similarity.pearson([5,8,7,5,4,9], [7,8,6,6,4,5]) AS similarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `similarity`
+| 0.28767798089123053
+|===
+
+We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+MERGE (home_alone:Movie {name:'Home Alone'})
+MERGE (matrix:Movie {name:'The Matrix'})
+MERGE (good_men:Movie {name:'A Few Good Men'})
+MERGE (top_gun:Movie {name:'Top Gun'})
+MERGE (jerry:Movie {name:'Jerry Maguire'})
+MERGE (gruffalo:Movie {name:'The Gruffalo'})
+
+MERGE (zhen:Person {name: 'Zhen'})
+MERGE (praveena:Person {name: 'Praveena'})
+MERGE (michael:Person {name: 'Michael'})
+MERGE (arya:Person {name: 'Arya'})
+MERGE (karin:Person {name: 'Karin'})
+
+MERGE (zhen)-[:RATED {score: 2}]->(home_alone)
+MERGE (zhen)-[:RATED {score: 2}]->(good_men)
+MERGE (zhen)-[:RATED {score: 3}]->(matrix)
+MERGE (zhen)-[:RATED {score: 6}]->(jerry)
+
+MERGE (praveena)-[:RATED {score: 6}]->(home_alone)
+MERGE (praveena)-[:RATED {score: 7}]->(good_men)
+MERGE (praveena)-[:RATED {score: 8}]->(matrix)
+MERGE (praveena)-[:RATED {score: 9}]->(jerry)
+
+MERGE (michael)-[:RATED {score: 7}]->(home_alone)
+MERGE (michael)-[:RATED {score: 9}]->(good_men)
+MERGE (michael)-[:RATED {score: 3}]->(jerry)
+MERGE (michael)-[:RATED {score: 4}]->(top_gun)
+
+MERGE (arya)-[:RATED {score: 8}]->(top_gun)
+MERGE (arya)-[:RATED {score: 1}]->(matrix)
+MERGE (arya)-[:RATED {score: 10}]->(jerry)
+MERGE (arya)-[:RATED {score: 10}]->(gruffalo)
+
+MERGE (karin)-[:RATED {score: 9}]->(top_gun)
+MERGE (karin)-[:RATED {score: 7}]->(matrix)
+MERGE (karin)-[:RATED {score: 7}]->(home_alone)
+MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
+----
+
+.The following will return the Pearson similarity of Arya and Karin:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)
+WITH p1, gds.alpha.similarity.asVector(movie, rated.score) AS p1Vector
+MATCH (p2:Person {name: 'Karin'})-[rated:RATED]->(movie)
+WITH p1, p2, p1Vector, gds.alpha.similarity.asVector(movie, rated.score) AS p2Vector
+RETURN p1.name AS from,
+       p2.name AS to,
+       gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: "maps"}) AS similarity
+----
+
+// tag::function-cypher[]
+.Results
+[opts="header"]
+|===
+| `from`| `to`       | `similarity`
+|"Arya" |	"Karin"	 | 0.8194651785206903
+
+|===
+// end::function-cypher[]
+
+
+In this example, we pass in `vectorType: "maps"` as an extra parameter, as well as using the `gds.alpha.similarity.asVector` function to construct a vector of maps containing each movie and the corresponding rating.
+We do this because the Pearson Similarity algorithm needs to compute the average of *all* the movies that a user has reviewed, not just the ones that they have in common with the user we're comparing them to.
+We can't therefore just pass in collections of the ratings of movies that have been reviewed by both people.
+
+.The following will return the Pearson similarity of Arya and other people that have rated at least one movie:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Arya'})-[rated:RATED]->(movie)
+WITH p1, gds.alpha.similarity.asVector(movie, rated.score) AS p1Vector
+MATCH (p2:Person)-[rated:RATED]->(movie) WHERE p2 <> p1
+WITH p1, p2, p1Vector, gds.alpha.similarity.asVector(movie, rated.score) AS p2Vector
+RETURN p1.name AS from,
+       p2.name AS to,
+       gds.alpha.similarity.pearson(p1Vector, p2Vector, {vectorType: "maps"}) AS similarity
+ORDER BY similarity DESC
+----
+
+// tag::function-cypher--all[]
+.Results
+[opts="header"]
+|===
+| `from` | `to`       | `similarity`
+| "Arya" | "Karin"    | 0.8194651785206903
+| "Arya" | "Zhen"     | 0.4839533792540704
+| "Arya" | "Praveena" | 0.09262336892949784
+| "Arya" | "Michael"  | -0.9551953674747637
+
+|===
+// end::function-cypher-all[]
+
+
+[[algorithms-similarity-pearson-procedure-sample]]
+== Pearson Similarity algorithm procedures sample
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=computation]
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=weighted-note]
+
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+MERGE (home_alone:Movie {name:'Home Alone'})
+MERGE (matrix:Movie {name:'The Matrix'})
+MERGE (good_men:Movie {name:'A Few Good Men'})
+MERGE (top_gun:Movie {name:'Top Gun'})
+MERGE (jerry:Movie {name:'Jerry Maguire'})
+MERGE (gruffalo:Movie {name:'The Gruffalo'})
+
+MERGE (zhen:Person {name: 'Zhen'})
+MERGE (praveena:Person {name: 'Praveena'})
+MERGE (michael:Person {name: 'Michael'})
+MERGE (arya:Person {name: 'Arya'})
+MERGE (karin:Person {name: 'Karin'})
+
+MERGE (zhen)-[:RATED {score: 2}]->(home_alone)
+MERGE (zhen)-[:RATED {score: 2}]->(good_men)
+MERGE (zhen)-[:RATED {score: 3}]->(matrix)
+MERGE (zhen)-[:RATED {score: 6}]->(jerry)
+
+MERGE (praveena)-[:RATED {score: 6}]->(home_alone)
+MERGE (praveena)-[:RATED {score: 7}]->(good_men)
+MERGE (praveena)-[:RATED {score: 8}]->(matrix)
+MERGE (praveena)-[:RATED {score: 9}]->(jerry)
+
+MERGE (michael)-[:RATED {score: 7}]->(home_alone)
+MERGE (michael)-[:RATED {score: 9}]->(good_men)
+MERGE (michael)-[:RATED {score: 3}]->(jerry)
+MERGE (michael)-[:RATED {score: 4}]->(top_gun)
+
+MERGE (arya)-[:RATED {score: 8}]->(top_gun)
+MERGE (arya)-[:RATED {score: 1}]->(matrix)
+MERGE (arya)-[:RATED {score: 10}]->(jerry)
+MERGE (arya)-[:RATED {score: 10}]->(gruffalo)
+
+MERGE (karin)-[:RATED {score: 9}]->(top_gun)
+MERGE (karin)-[:RATED {score: 7}]->(matrix)
+MERGE (karin)-[:RATED {score: 7}]->(home_alone)
+MERGE (karin)-[:RATED {score: 9}]->(gruffalo)
+----
+
+
+[[algorithm-similarity-pearson-stream]]
+=== Stream
+
+.The following will return a stream of node pairs along with their Pearson similarities:
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stream({
+ data: data,
+ topK: 0
+})
+YIELD item1, item2, count1, count2, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ORDER BY similarity DESC
+----
+
+// tag::stream[]
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Zhen"     | "Karin"    | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+| "Zhen"     | "Arya"     | 0.4839533792540704
+| "Praveena" | "Karin"    | 0.4472135954999579
+| "Praveena" | "Arya"     | 0.09262336892949784
+| "Praveena" | "Michael"  | -0.788492846568306
+| "Zhen"     | "Michael"  | -0.9091365607973364
+| "Michael"  | "Arya"     | -0.9551953674747637
+| "Michael"  | "Karin"    | -0.9863939238321437
+
+|===
+// end::stream[]
+
+Zhen and Praveena are the most similar with a score of 0.88.
+The maximum score is 1.0
+We also have 4 pairs of users who are not similar at all.
+We'd probably want to filter those out, which we can do by passing in the `similarityCutoff` parameter.
+
+.The following will return a stream of node pairs that have a similarity of at least 0.1, along with their Pearson similarities:
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stream({
+ data: data,
+ similarityCutoff: 0.1,
+ topK: 0
+})
+YIELD item1, item2, count1, count2, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ORDER BY similarity DESC
+----
+
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Zhen"     | "Karin"    | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+| "Zhen"     | "Arya"     | 0.4839533792540704
+| "Praveena" | "Karin"    | 0.4472135954999579
+|===
+
+We can see that those users with no similarity have been filtered out.
+If we're implementing a k-Nearest Neighbors type query we might instead want to find the most similar `k` users for a given user.
+We can do that by passing in the `topK` parameter.
+
+.The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stream({
+ data: data,
+ topK:1,
+ similarityCutoff: 0.0
+})
+YIELD item1, item2, count1, count2, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ORDER BY similarity DESC
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`     | `to`       | `similarity`
+| "Zhen"     | "Praveena" | 0.8865926413116155
+| "Praveena" | "Zhen"     | 0.8865926413116155
+| "Karin"    | "Zhen"     | 0.8320502943378437
+| "Arya"     | "Karin"    | 0.8194651785206903
+
+|===
+
+These results will not necessarily be symmetrical.
+For example, the person most similar to Arya is Karin, but the person most similar to Karin is Zhen.
+
+
+[[algorithm-similarity-pearson-write]]
+=== Write
+
+.The following will find the most similar user for each user, and store a relationship between those users:
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.write({
+ data: data,
+ topK: 1,
+ similarityCutoff: 0.1
+})
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+.Results
+[opts="header"]
+|===
+| `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
+| 5       | 4                 | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688
+|===
+
+We then could write a query to find out which are the movies that other people similar to us liked.
+
+.The following will find the most similar user to Karin, and return their movies that Karin didn't (yet!) rate:
+[source, cypher, role=noplay]
+----
+MATCH (p:Person {name: 'Karin'})-[:SIMILAR]->(other),
+      (other)-[r:RATED]->(movie)
+WHERE not((p)-[:RATED]->(movie)) and r.score >= 5
+RETURN movie.name AS movie
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `movie`
+| Jerry Maguire
+|===
+
+
+[[algorithm-similarity-pearson-stats]]
+=== Stats
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stats({
+ data: data,
+ topK: 1,
+ similarityCutoff: 0.1
+})
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+
+[[algorithms-similarity-pearson-source-target-ids]]
+== Specifying source and target ids
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=source-target-ids]
+
+We could use this technique to compute the similarity of a subset of items to all other items.
+
+.The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
+[source, cypher, role=noplay]
+----
+MATCH (p:Person), (m:Movie)
+OPTIONAL MATCH (p)-[rated:RATED]->(m)
+WITH {item:id(p), name: p.name, weights: collect(coalesce(rated.score, gds.util.NaN()))} AS userData
+WITH collect(userData) AS personCuisines
+WITH personCuisines,
+     [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
+CALL gds.alpha.similarity.pearson.stream({
+ data: personCuisines,
+ sourceIds: sourceIds,
+ topK: 1
+})
+YIELD item1, item2, similarity
+WITH gds.util.asNode(item1) AS from, gds.util.asNode(item2) AS to, similarity
+RETURN from.name AS from, to.name AS to, similarity
+ORDER BY similarity DESC
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`   | `to`  | `similarity`
+| Praveena | Zhen  | 0.8865926413116155 
+| Arya     | Karin | 0.8194651785206903 
+|===
+
+[[algorithms-similarity-pearson-skipping-values]]
+== Skipping values
+
+By default the `skipValue` parameter is `gds.util.NaN()`.
+The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
+For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+MERGE (home_alone:Movie {name:'Home Alone'})    SET home_alone.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
+MERGE (matrix:Movie {name:'The Matrix'})        SET matrix.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
+MERGE (good_men:Movie {name:'A Few Good Men'})  SET good_men.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]
+MERGE (top_gun:Movie {name:'Top Gun'})          SET top_gun.embedding = [0.12, 0.23, 0.35, 0.31, 0.3]
+MERGE (jerry:Movie {name:'Jerry Maguire'})      SET jerry.embedding = [0.47, 0.98, 0.81, 0.72, 0]
+----
+
+.The following will find the similarity between movies based on the `embedding` property:
+[source, cypher, role=noplay]
+----
+MATCH (m:Movie)
+WITH {item:id(m), weights: m.embedding} AS userData
+WITH collect(userData) AS data
+CALL gds.alpha.similarity.pearson.stream({
+ data: data,
+ skipValue: null
+})
+YIELD item1, item2, count1, count2, similarity
+RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ORDER BY similarity DESC
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`         | `to`           | `similarity`
+| The Matrix     | Jerry Maguire  | 0.8689113641953199   
+| A Few Good Men | Top Gun        | 0.6846566091701214
+| Home Alone     | A Few Good Men | 0.556559508845268
+| The Matrix     | Top Gun        | 0.39320549183813097
+| Home Alone     | Jerry Maguire  | 0.10026787755714502
+| Top Gun        | Jerry Maguire  | 0.056232940630734043
+| Home Alone     | Top Gun        | 0.006048691083898151
+| Home Alone     | The Matrix     | -0.23435051666541426
+| The Matrix     | A Few Good Men | -0.2545273235448378
+| A Few Good Men | Jerry Maquire  |  -0.31099199179883635
+|===
+
+[[algorithms-similarity-pearson-cypher-projection]]
+== Cypher projection
+
+include::partial$/algorithms/alpha/alpha-cypher-similarity-explanation.adoc[]
+
+.Set `graph:'cypher'` in the config:
+
+[source, cypher, role=noplay]
+----
+WITH "MATCH (person:Person)-[rated:RATED]->(c)
+      RETURN id(person) AS item, id(c) AS category, rated.score AS weight" AS query
+CALL gds.alpha.similarity.pearson({
+ data: query,
+ graph: 'cypher',
+ topK: 1,
+ similarityCutoff: 0.1
+})
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95
+RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+.Results
+[opts="header"]
+|===
+| `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`              | `max`              | `mean`             | `p95`
+| 5       | 4                 | "SIMILAR"               | "score"         | 0.8194618225097656 | 0.8865890502929688 | 0.8561716079711914 | 0.8865890502929688
+|===
+
+
+[[algorithms-similarity-pearson-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.similarity.pearson.write(configuration: Map)
+YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type          | Default        | Optional | Description
+| configuration     | Map           | n/a            | no       | Algorithm-specific configuration.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                  | Type              | Default                | Optional | Description
+| data                  | List or String    | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top                   | Integer           | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK                  | Integer           | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff      | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff          | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue             | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency           | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
+| writeConcurrency      | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| graph                 | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
+| writeBatchSize        | Integer           | 10000                  | yes      | The batch size to use when storing results.
+| writeRelationshipType | String            | SIMILAR                | yes      | The relationship type to use when storing results.
+| writeProperty         | String            | score                  | yes      | The property to use when storing results.
+| sourceIds             | List of String          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds             | List of String          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| nodes                 | Integer   | The number of nodes passed in.
+| similarityPairs       | Integer   | The number of pairs of similar nodes computed.
+| writeRelationshipType | String    | The relationship type used when storing results.
+| writeProperty         | String    | The property used when storing results.
+| min                   | Float     | The minimum similarity score computed.
+| max                   | Float     | The maximum similarity score computed.
+| mean                  | Float     | The mean of similarities scores computed.
+| stdDev                | Float     | The standard deviation of similarities scores computed.
+| p25                   | Float     | The 25 percentile of similarities scores computed.
+| p50                   | Float     | The 50 percentile of similarities scores computed.
+| p75                   | Float     | The 75 percentile of similarities scores computed.
+| p90                   | Float     | The 90 percentile of similarities scores computed.
+| p95                   | Float     | The 95 percentile of similarities scores computed.
+| p99                   | Float     | The 99 percentile of similarities scores computed.
+| p999                  | Float     | The 99.9 percentile of similarities scores computed.
+| p100                  | Float     | The 100 percentile of similarities scores computed.
+|===
+
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.similarity.pearson.stream(configuration: Map)
+YIELD item1, item2, count1, count2, intersection, similarity
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type              | Default        | Optional | Description
+| configuration     | Map               | n/a            | no       | Algorithm-specific configuration.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type              | Default                | Optional | Description
+| data              | List or String    | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top               | Integer           | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK              | Integer           | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff  | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff      | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue         | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency       | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| graph             | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
+| sourceIds         | List of Integer         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds         | List of Integer         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type      | Description
+| item1         | Integer   | The ID of one node in the similarity pair.
+| item2         | Integer   | The ID of other node in the similarity pair.
+| count1        | Integer   | The size of the `targets` list of one node.
+| count2        | Integer   | The size of the `targets` list of other node.
+| intersection  | Integer   | The number of intersecting values in the two nodes `targets` lists.
+| similarity    | Integer   | The pearson similarity of the two nodes.
+|===

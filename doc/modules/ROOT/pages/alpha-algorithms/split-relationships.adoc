@@ -1,0 +1,172 @@
+[[algorithms-split-relationships]]
+[.alpha]
+= Split Relationships
+:description: This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
+
+:algorithm: Split Relationships
+
+
+[[algorithms-split-relationships-intro]]
+== Introduction
+
+The Split relationships algorithm is a utility algorithm that is used to pre-process a graph for model training.
+It splits the relationships into a holdout set and a remaining set.
+The holdout set is divided into two classes: positive, i.e., existing relationships, and negative, i.e., non-existing relationships.
+The class is indicated by a `label` property on the relationships.
+This enables the holdout set to be used for training or testing a machine learning model.
+Both, the holdout and the remaining relationships are added to the in-memory graph.
+
+If the configuration option `relationshipWeightProperty` is specified, then the corresponding relationship property is preserved on the remaining set of relationships.
+Note however that the holdout set only has the `label` property; it is not possible to induce relationship weights on the holdout set as it also contains negative samples.
+
+
+[[algorithms-split-relationships-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Split Relationships syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-mutate]
+======
+.Run Split Relationships in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.splitRelationships.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  relationshipsWritten: Integer,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                          | Type           | Default         | Optional  | Description
+| holdoutFraction               | Float          | n/a             | no        | The fraction of all relationships being used as holdout set.
+| negativeSamplingRatio         | Float          | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
+| holdoutRelationshipType       | String         | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
+| remainingRelationshipType     | String         | n/a             | no        | Relationship type used for the remaining set.
+| nonNegativeRelationshipTypes  | List of String | n/a             | yes       | Additional relationship types that are used for negative sampling.
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty]
+                                | String         | null            | yes       | Name of the relationship property that is inherited by the `remainingRelationshipType`.
+| randomSeed                    | Integer        | n/a             | yes       | An optional seed value for the random selection of relationships.
+|===
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name                  | Type      | Description
+| createMillis          | Integer   | Milliseconds for loading data.
+| computeMillis         | Integer   | Milliseconds for running the algorithm.
+| mutateMillis          | Integer   | Milliseconds for adding properties to the in-memory graph.
+| relationshipsWritten  | Integer   | The number of relationships created by the algorithm.
+| configuration         | Map       | The configuration used for running the algorithm.
+|===
+======
+====
+
+[[algorithms-split-relationships-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description:
+:image-file: split-relationships.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+    (n0:Label),
+    (n1:Label),
+    (n2:Label),
+    (n3:Label),
+    (n4:Label),
+    (n5:Label),
+
+    (n0)-[:TYPE { prop: 0} ]->(n1),
+    (n1)-[:TYPE { prop: 1} ]->(n2),
+    (n2)-[:TYPE { prop: 4} ]->(n3),
+    (n3)-[:TYPE { prop: 9} ]->(n4),
+    (n4)-[:TYPE { prop: 16} ]->(n5)
+----
+
+Given the above graph, we want to use 20% of the relationships as holdout set.
+The holdout set will be split into two same-sized classes: positive and negative.
+Positive relationships will be randomly selected from the existing relationships and marked with a property `label: 1`.
+Negative relationships will be randomly generated, i.e., they do not exist in the input graph, and are marked with a property `label: 0`.
+
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+    'graph',
+    'Label',
+    { TYPE: { orientation: 'UNDIRECTED' } }
+)
+----
+
+Now we can run the algorithm by specifying the appropriate ratio and the output relationship types.
+We use a random seed value in order to produce deterministic results.
+
+[role=query-example]
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.splitRelationships.mutate('graph', {
+    holdoutRelationshipType: 'TYPE_HOLDOUT',
+    remainingRelationshipType: 'TYPE_REMAINING',
+    holdoutFraction: 0.2,
+    negativeSamplingRatio: 1.0,
+    randomSeed: 1337
+}) YIELD relationshipsWritten
+----
+
+[opts=header]
+.Results
+|===
+| relationshipsWritten
+| 10
+|===
+
+The input graph consists of 5 relationships.
+We use 20% (1 relationship) of the relationships to create the 'TYPE_HOLDOUT' relationship type (holdout set).
+This creates 1 relationship with positive label.
+Because of the `negativeSamplingRatio`, one relationship with negative label is also created.
+Finally, the `TYPE_REMAINING` relationship type is formed with the remaining 80% (4 relationships).
+These are written as orientation `UNDIRECTED` which counts as writing 8 relationships.
+
+.The mutated graph will look like the following graph when filtered by the `TEST` and `TRAIN` relationship.
+[source, cypher, role=noplay]
+----
+CREATE
+    (n0:Label),
+    (n1:Label),
+    (n2:Label),
+    (n3:Label),
+    (n4:Label),
+    (n5:Label),
+
+    (n2)-[:TYPE_HOLDOUT { label: 0 } ]->(n5), // negative, non-existing
+    (n3)-[:TYPE_HOLDOUT { label: 1 } ]->(n2), // positive, existing
+
+    (n0)<-[:TYPE_REMAINING { prop: 0} ]-(n1),
+    (n1)<-[:TYPE_REMAINING { prop: 1} ]-(n2),
+    (n3)<-[:TYPE_REMAINING { prop: 9} ]-(n4),
+    (n4)<-[:TYPE_REMAINING { prop: 16} ]-(n5),
+    (n0)-[:TYPE_REMAINING { prop: 0} ]->(n1),
+    (n1)-[:TYPE_REMAINING { prop: 1} ]->(n2),
+    (n3)-[:TYPE_REMAINING { prop: 9} ]->(n4),
+    (n4)-[:TYPE_REMAINING { prop: 16} ]->(n5)
+----

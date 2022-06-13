@@ -1,0 +1,44 @@
+[[appendix-a-graph-ops]]
+= Graph Catalog
+
+== Production-quality tier
+
+.List of all production-quality graph operations in the GDS library. Functions are written in _italic_.
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+|Description | Operation
+.4+<.^|xref::graph-create.adoc[Create Graph]
+| `gds.graph.create`
+| `gds.graph.create.estimate`
+| `gds.graph.create.cypher`
+| `gds.graph.create.cypher.estimate`
+.2+<.^|xref::graph-exists.adoc[Check if a named graph exists]
+| `gds.graph.exists`
+| `_gds.graph.exists_`
+|xref::graph-list.adoc[List graphs] | `gds.graph.list`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Remove node properties from a named graph] | `gds.graph.removeNodeProperties`
+|xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph] | `gds.graph.deleteRelationships`
+|xref::graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller] | `gds.graph.streamNodeProperty`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller] | `gds.graph.streamNodeProperties`
+|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller] | `gds.graph.streamRelationshipProperty`
+|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller] | `gds.graph.streamRelationshipProperties`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j] | `gds.graph.writeNodeProperties`
+|xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j] | `gds.graph.writeRelationship`
+|xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export`
+|===
+
+== Beta Tier
+
+.List of all beta graph operations in the GDS library. Functions are written in _italic_.
+[role=procedure-listing]
+[opts=header,cols="1, 1"]
+|===
+|Description                                | Operation
+|xref::create-subgraph.adoc[Create a graph from a named graph] | `gds.beta.graph.create.subgraph`
+|xref::alpha-algorithms/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
+.2+<.^|xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
+| `gds.beta.graph.export.csv`
+| `gds.beta.graph.export.csv.estimate`
+|===

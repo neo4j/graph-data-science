@@ -1,0 +1,663 @@
+[[algorithms-node-similarity]]
+= Node Similarity
+:description: This section describes the Node Similarity algorithm in the Neo4j Graph Data Science library. The algorithm is based on the Jaccard Similarity score.
+:entity: relationship
+:result: similarity score
+:algorithm: Node Similarity
+
+
+:directed:
+:undirected:
+:homogeneous:
+:heterogeneous:
+:weighted:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+[[algorithms-node-similarity-intro]]
+== Introduction
+
+The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
+Two nodes are considered similar if they share many of the same neighbors.
+Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score.
+
+Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
+
+image::jaccard.png[role="middle"]
+// This is the raw information for this image:
+// // J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣ // = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B| //
+
+The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
+Each relationship starts from a node in the first node set and ends at a node in the second node set.
+
+The Node Similarity algorithm compares each node that has outgoing relationships with each other such node.
+For every node `n`, we collect the outgoing neighborhood `N(n)` of that node, that is, all nodes `m` such that there is a relationship from `n` to `m`.
+For each pair `n`, `m`, the algorithm computes a similarity for that pair which is the Jaccard similarity of `N(n)` and `N(m)`.
+
+The complexity of this comparison grows quadratically with the number of nodes to compare.
+The algorithm reduces the complexity by ignoring disconnected nodes.
+
+In addition to computational complexity, the memory requirement for producing results also scales roughly quadratically.
+In order to bound memory usage, the algorithm requires an explicit limit on the number of results to compute per node.
+This is the 'topK' parameter.
+It can be set to any value, except 0.
+
+The output of the algorithm are new relationships between pairs of the first node set.
+Similarity scores are expressed via relationship properties.
+
+A related function for computing Jaccard similarity is described in xref::alpha-algorithms/jaccard.adoc[Jaccard Similarity].
+
+For more information on this algorithm, see:
+
+* https://en.wikipedia.org/wiki/Similarity_(network_science)#Structural_equivalence[Structural equivalence (Wikipedia)]
+* https://en.wikipedia.org/wiki/Jaccard_index[The Jaccard index (Wikipedia)].
+* https://en.wikipedia.org/wiki/Bipartite_graph[Bipartite graphs (Wikipedia)]
+
+[NOTE]
+====
+Running this algorithm requires sufficient available memory.
+Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+====
+
+
+[[algorithms-node-similarity-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.Node Similarity syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run Node Similarity in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name       | Type    | Description
+| node1      | Integer | Node ID of the first node.
+| node2      | Integer | Node ID of the second node.
+| similarity | Float   | Similarity score for the two nodes.
+|===
+======
+
+[.include-with-stats]
+======
+.Run Node Similarity in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  similarityPairs: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type      | Description
+| createMillis                  | Integer   | Milliseconds for loading data.
+| computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| nodesCompared                 | Integer   | The number of nodes compared.
+| postProcessingMillis          | Integer   | Milliseconds for computing component count and distribution statistics.
+| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+| configuration                 | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run Node Similarity in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  relationshipsWritten: Integer,
+  nodesCompared: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
+| createMillis           | Integer | Milliseconds for loading data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run Node Similarity in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
+| createMillis           | Integer | Milliseconds for loading data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | Integer | Milliseconds for computing percentiles.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-node-similarity-syntax-anonymous]]
+=== Anonymous graphs
+
+include::partial$/algorithms/shared/syntax-anonymous-graphs.adoc[]
+
+.Run Node Similarity in write mode on an anonymous graph.
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.write(
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+
+The results are the same as for running write mode with a named graph, see the xref::algorithms/node-similarity.adoc#algorithms-node-similarity-syntax[write mode syntax above].
+
+
+[[algorithms-node-similarity-examples]]
+== Examples
+
+:algorithm-name: {algorithm}
+:graph-description: knowledge
+:image-file: node-similarity.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (alice:Person {name: 'Alice'}),
+  (bob:Person {name: 'Bob'}),
+  (carol:Person {name: 'Carol'}),
+  (dave:Person {name: 'Dave'}),
+  (eve:Person {name: 'Eve'}),
+  (guitar:Instrument {name: 'Guitar'}),
+  (synth:Instrument {name: 'Synthesizer'}),
+  (bongos:Instrument {name: 'Bongos'}),
+  (trumpet:Instrument {name: 'Trumpet'}),
+
+  (alice)-[:LIKES]->(guitar),
+  (alice)-[:LIKES]->(synth),
+  (alice)-[:LIKES {strength: 0.5}]->(bongos),
+  (bob)-[:LIKES]->(guitar),
+  (bob)-[:LIKES]->(synth),
+  (carol)-[:LIKES]->(bongos),
+  (dave)-[:LIKES]->(guitar),
+  (dave)-[:LIKES]->(synth),
+  (dave)-[:LIKES]->(bongos);
+----
+
+This bipartite graph has two node sets, Person nodes and Instrument nodes.
+The two node sets are connected via LIKES relationships.
+Each relationship starts at a Person node and ends at an Instrument node.
+
+In the example, we want to use the Node Similarity algorithm to compare people based on the instruments they like.
+
+The Node Similarity algorithm will only compute similarity for nodes that have a degree of at least 1.
+In the example graph, the Eve node will not be compared to other Person nodes.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    ['Person', 'Instrument'],
+    {
+        LIKES: {
+            type: 'LIKES',
+            properties: {
+                strength: {
+                    property: 'strength',
+                    defaultValue: 1.0
+                }
+            }
+        }
+    }
+);
+----
+
+In the following examples we will demonstrate using the Node Similarity algorithm on this graph.
+
+
+[[algorithms-node-similarity-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.write.estimate('myGraph', {
+  writeRelationshipType: 'SIMILAR',
+  writeProperty: 'score'
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 9         | 9                 | 2592     | 2808     | "[2592 Bytes \... 2808 Bytes]"
+|===
+
+
+[[algorithms-node-similarity-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph')
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Dave"  | "Bob"   | 0.6666666666666666
+| "Alice" | "Carol" | 0.3333333333333333
+| "Carol" | "Alice" | 0.3333333333333333
+| "Carol" | "Dave"  | 0.3333333333333333
+| "Dave"  | "Carol" | 0.3333333333333333
+|===
+
+We use default values for the procedure configuration parameter.
+TopK is set to 10, topN is set to 0.
+Because of that the result set contains the top 10 similarity scores for each node.
+
+[NOTE]
+====
+If we would like to instead compare the Instruments to each other, we would then project the `LIKES` relationship type using `REVERSE` orientation.
+This would return similarities for pairs of Instruments and not compute any similarities between Persons.
+====
+
+
+[[algorithms-node-similarity-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-node-similarity-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stats('myGraph')
+YIELD nodesCompared, similarityPairs
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 4             | 10
+|===
+
+
+[[algorithms-node-similarity-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm, and write back results to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 4             | 10
+|===
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+
+[[algorithms-node-similarity-examples-write]]
+=== Write
+
+The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the Jaccard similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+
+
+[role=query-example]
+.The following will run the algorithm, and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.write('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 4             | 10
+|===
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+
+[[algorithms-node-similarity-examples-limits]]
+=== Limit results
+
+There are four limits that can be applied to the similarity results.
+Top limits the result to the highest similarity scores.
+Bottom limits the result to the lowest similarity scores.
+Both top and bottom limits can apply to the result as a whole ("N"), or to the result per node ("K").
+
+[NOTE]
+====
+There must always be a "K" limit, either bottomK or topK, which is a positive number.
+The default value for topK and bottomK is 10.
+====
+
+
+.Result limits
+[opts="header", cols="1h,1,1"]
+|===
+|               | total results | results per node
+| highest score | topN          | topK
+| lowest score  | bottomN       | bottomK
+|===
+
+
+[[algorithms-node-similarity-examples-limits-topk-bottomk]]
+==== topK and bottomK
+
+TopK and bottomK are limits on the number of scores computed per node.
+For topK, the K largest similarity scores per node are returned.
+For bottomK, the K smallest similarity scores per node are returned.
+TopK and bottomK cannot be 0, used in conjunction, and the default value is 10.
+If neither is specified, topK is used.
+
+[role=query-example]
+.The following will run the algorithm, and stream the top 1 result per node:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { topK: 1 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Carol" | "Alice" | 0.3333333333333333
+| "Dave"  | "Alice" | 1.0
+|===
+
+
+[role=query-example]
+.The following will run the algorithm, and stream the bottom 1 result per node:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { bottomK: 1 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Carol" | 0.3333333333333333
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Carol" | "Alice" | 0.3333333333333333
+| "Dave"  | "Carol" | 0.3333333333333333
+|===
+
+
+[[algorithms-node-similarity-examples-limits-topn-bottomn]]
+==== topN and bottomN
+
+TopN and bottomN limit the number of similarity scores across all nodes.
+This is a limit on the total result set, in addition to the topK or bottomK limit on the results per node.
+For topN, the N largest similarity scores are returned.
+For bottomN, the N smallest similarity scores are returned.
+A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
+
+[role=query-example]
+.The following will run the algorithm, and stream the 3 highest out of the top 1 results per node:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { topK: 1, topN: 3 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESC, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+| "Bob"   | "Alice" | 0.6666666666666666
+|===
+
+
+[[algorithms-node-similarity-examples-degree-similarity-cutoff]]
+=== Degree cutoff and similarity cutoff
+
+Degree cutoff is a lower limit on the node degree for a node to be considered in the comparisons.
+This value can not be lower than 1.
+
+[role=query-example]
+.The following will ignore nodes with less than 3 LIKES relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { degreeCutoff: 3 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Dave"  | "Alice" | 1.0
+|===
+
+Similarity cutoff is a lower limit for the similarity score to be present in the result.
+The default value is very small (`1E-42`) to exclude results with a similarity score of 0.
+
+[NOTE]
+====
+Setting similarity cutoff to 0 may yield a very large result set, increased runtime and memory consumption.
+====
+
+[role=query-example]
+.The following will ignore node pairs with a similarity score less than 0.5:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { similarityCutoff: 0.5 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 1.0
+| "Alice" | "Bob"   | 0.6666666666666666
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Bob"   | "Alice" | 0.6666666666666666
+| "Dave"  | "Alice" | 1.0
+| "Dave"  | "Bob"   | 0.6666666666666666
+|===
+
+
+[[algorithms-node-similarity-examples-weighted]]
+=== Weighted Jaccard Similarity
+
+Relationship properties can be used to modify the similarity induced by certain relationships.
+For example a relationship value of 2 is equal to counting that relationship twice while computing the jaccard similarity.
+
+[NOTE]
+====
+Weighted jaccard similarity is only defined for values greater or equal to 0.
+====
+
+[role=query-example]
+.The following query will respect relationship properties in the similarity computation:
+[source, cypher, role=noplay]
+----
+CALL gds.nodeSimilarity.stream('myGraph', { relationshipWeightProperty: 'strength', similarityCutoff: 0.5 })
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY Person1
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Dave"  | 0.8333333333333334
+| "Alice" | "Bob"   | 0.8
+| "Bob"   | "Alice" | 0.8
+| "Bob"   | "Dave"  | 0.6666666666666666
+| "Dave"  | "Alice" | 0.8333333333333334
+| "Dave"  | "Bob"   | 0.6666666666666666
+|===
+
+It can be seen that the similarity between Alice and Dave decreased compared to the non-weighted version of this algorithm.
+This is the case as the strength of the relationship between Alice and Bongos is reduced and both persons now only share 2.5 out of 3 possible instruments.
+Analogous the similarity between Alice and Bob increased as the missing liked instrument has a lower impact on the similarity score.

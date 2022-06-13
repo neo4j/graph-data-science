@@ -1,0 +1,472 @@
+[[algorithms-knn]]
+[.beta]
+= K-Nearest Neighbors
+:description: This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library.
+
+:entity: relationship
+:result: similarity score
+:algorithm: K-Nearest Neighbors
+
+
+[[algorithms-knn-intro]]
+== Introduction
+
+The K-Nearest Neighbors algorithm computes a distance value for all node pairs in the graph and creates new relationships between each node and its k nearest neighbors.
+The distance is calculated based on node properties.
+
+The input of this algorithm is a monopartite graph.
+The graph does not need to be connected, in fact, existing relationships between nodes will be ignored.
+New relationships are created between each node and its k nearest neighbors.
+
+The K-Nearest Neighbors algorithm compares a given property of each node.
+The `k` nodes where this property is most similar are the k-nearest neighbors.
+
+The initial set of neighbors is picked at random and verified and refined in multiple iterations.
+The number of iterations is limited by the configuration parameter `maxIterations`.
+The algorithm may stop earlier if the neighbor lists only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
+
+The particular implementation is based on https://dl.acm.org/doi/abs/10.1145/1963405.1963487[Efficient k-nearest neighbor graph construction for generic similarity measures] by Wei Dong et al.
+Instead of comparing every node with every other node, the algorithm selects possible neighbors based on the assumption, that the neighbors-of-neighbors of a node are most likely already the nearest one.
+The algorithm scales quasi-linear with respect to the node count, instead of being quadratic.
+
+Furthermore, the algorithm only compares a sample of all possible neighbors on each iteration, assuming that eventually all possible neighbors will be seen.
+This can be controlled with the configuration parameter `sampleRate`:
+
+* A valid sample rate must be in between 0 (exclusive) and 1 (inclusive).
+* The default value is `0.5`.
+* The parameter is used to control the trade-off between accuracy and runtime-performance.
+* A higher sample rate will increase the accuracy of the result.
+** The algorithm will also require more memory and will take longer to compute.
+* A lower sample rate will increase the runtime-performance.
+** Some potential nodes may be missed in the comparison and may not be included in the result.
+
+The output of the algorithm are new relationships between nodes and their k-nearest neighbors.
+Similarity scores are expressed via relationship properties.
+
+For more information on this algorithm, see:
+
+* https://dl.acm.org/doi/abs/10.1145/1963405.1963487[Efficient k-nearest neighbor graph construction for generic similarity measures]
+* https://en.wikipedia.org/wiki/Nearest_neighbor_graph[Nearest neighbor graph (Wikipedia)]
+
+[NOTE]
+====
+Running this algorithm requires sufficient available memory.
+Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+====
+
+
+[[algorithms-knn-introduction-similarity]]
+=== Similarity measures
+
+The similarity measure used in the KNN algorithm depends on the type of the configured node property.
+KNN supports both scalar numeric values as well as lists of numbers.
+
+Scalar numeric property::
+
+When the property is a scalar number, the similarity is computed as one divided by one plus the absolute difference between the values:
+
+image::equations/knn-scalar-similarity.svg[one divided by one plus the absolute difference of ps and pt,align="center"]
+
+List of integers::
+
+When the property is a list of integers, the similarity is computed as one divided by  one plus the number of unequal numbers in the list:
+
+image::equations/knn-integer-list-similarity.svg[one divided by one plus delta of ps and pt,align="center"]
+
+List of floating-point numbers::
+
+When the property is a list of floating-point numbers, the similarity is computed using the cosine similarity metric.
+See the xref::alpha-algorithms/cosine.adoc#algorithms-similarity-cosine-context[Cosine Similarity] algorithm for more details.
+If the cosine similarity is negative, we clip the value to `0`, i.e., `max(cosine(a, b), 0))`.
+
+
+[[algorithms-knn-syntax]]
+== Syntax
+
+include::partial$/algorithms/shared/syntax-intro-named-graph.adoc[]
+
+.K-Nearest Neighbors syntax per mode
+[.tabbed-example, caption = ]
+====
+
+[.include-with-stream]
+======
+.Run K-Nearest Neighbors in stream mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.stream(
+  graphName: String,
+  configuration: Map
+) YIELD
+  node1: Integer,
+  node2: Integer,
+  similarity: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/beta/knn-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1m,1,6"]
+|===
+| Name       | Type    | Description
+| node1      | Integer | Node ID of the first node.
+| node2      | Integer | Node ID of the second node.
+| similarity | Float   | Similarity score for the two nodes.
+|===
+======
+
+[.include-with-stats]
+======
+.Run K-Nearest Neighbors in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  similarityPairs: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/beta/knn-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                          | Type      | Description
+| createMillis                  | Integer   | Milliseconds for loading data.
+| computeMillis                 | Integer   | Milliseconds for running the algorithm.
+| postProcessingMillis          | Integer   | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared                 | Integer   | The number of nodes compared.
+| similarityPairs               | Integer   | The number of pairs of similar nodes computed.
+| similarityDistribution        | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of the computed similarity results.
+| configuration                 | Map       | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-mutate]
+======
+.Run K-Nearest Neighbors in mutate mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  mutateMillis: Integer,
+  postProcessingMillis: Integer,
+  relationshipsWritten: Integer,
+  nodesCompared: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-mutate-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/beta/knn-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| createMillis           | Integer | Milliseconds for loading data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| mutateMillis           | Integer | Milliseconds for adding properties to the in-memory graph.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+
+[.include-with-write]
+======
+.Run K-Nearest Neighbors in write mode on a graph stored in the catalog.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.write(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+include::partial$/algorithms/common-configuration/common-write-configuration-named-graph.adoc[]
+
+include::partial$/algorithms/beta/knn-specific-algo-config.adoc[]
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                   | Type    | Description
+| createMillis           | Integer | Milliseconds for loading data.
+| computeMillis          | Integer | Milliseconds for running the algorithm.
+| writeMillis            | Integer | Milliseconds for writing result data back to Neo4j.
+| postProcessingMillis   | Integer | Milliseconds for computing similarity value distribution statistics.
+| nodesCompared          | Integer | The number of nodes compared.
+| relationshipsWritten   | Integer | The number of relationships created.
+| similarityDistribution | Map     | Map containing min, max, mean, stdDev and p1, p5, p10, p25, p75, p90, p95, p99, p100 percentile values of the computed similarity results.
+| configuration          | Map     | The configuration used for running the algorithm.
+|===
+======
+====
+
+
+[[algorithms-knn-syntax-anonymous]]
+=== Anonymous graphs
+
+include::partial$/algorithms/shared/syntax-anonymous-graphs.adoc[]
+
+.Run K-Nearest Neighbors in write mode on an anonymous graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.write(
+  configuration: Map
+)
+YIELD
+  createMillis: Integer,
+  computeMillis: Integer,
+  writeMillis: Integer,
+  postProcessingMillis: Integer,
+  nodesCompared: Integer,
+  relationshipsWritten: Integer,
+  similarityDistribution: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-write-configuration-anonymous-graph.adoc[]
+
+[NOTE]
+====
+The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.
+====
+
+include::partial$/algorithms/beta/knn-specific-algo-config.adoc[]
+
+The results are the same as running write mode on a named graph, see xref::algorithms/knn.adoc#algorithms-knn-syntax[write mode syntax above].
+
+[NOTE]
+====
+To get a deterministic result when running the algorithm:
+
+* the `concurrency` parameter must be set to one
+* the `randomSeed` must be explicitly set to something other than `-1`.
+====
+
+[[algorithms-knn-examples]]
+== Examples
+
+Consider the graph created by the following Cypher statement:
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE (alice:Person {name: 'Alice', age: 24})
+CREATE (bob:Person {name: 'Bob', age: 73})
+CREATE (carol:Person {name: 'Carol', age: 24})
+CREATE (dave:Person {name: 'Dave', age: 48})
+CREATE (eve:Person {name: 'Eve', age: 67});
+----
+
+In the example, we want to use the K-Nearest Neighbors algorithm to compare people based on their age.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will create the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-create-query]
+----
+CALL gds.graph.create(
+    'myGraph',
+    {
+        Person: {
+            label: 'Person',
+            properties: 'age'
+        }
+    },
+    '*'
+);
+----
+
+
+[[algorithms-knn-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.write.estimate('myGraph', {
+  nodeWeightProperty: 'age',
+  writeRelationshipType: 'SIMILAR',
+  writeProperty: 'score',
+  topK: 1
+})
+YIELD nodeCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header", cols="1,1,1,1"]
+|===
+| nodeCount | bytesMin | bytesMax | requiredMemory
+| 5         | 1944     | 3000     | "[1944 Bytes \... 3000 Bytes]"
+|===
+
+
+[[algorithms-knn-examples-stream]]
+=== Stream
+
+include::partial$/algorithms/shared/examples-stream-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.stream('myGraph', {
+    topK: 1,
+    nodeWeightProperty: 'age',
+    // The following parameters are set to produce a deterministic result
+    randomSeed: 1337,
+    concurrency: 1,
+    sampleRate: 1.0,
+    deltaThreshold: 0.0
+})
+YIELD node1, node2, similarity
+RETURN gds.util.asNode(node1).name AS Person1, gds.util.asNode(node2).name AS Person2, similarity
+ORDER BY similarity DESCENDING, Person1, Person2
+----
+
+.Results
+[opts="header"]
+|===
+| Person1 | Person2 | similarity
+| "Alice" | "Carol" | 1.0
+| "Carol" | "Alice" | 1.0
+| "Bob"   | "Eve"   | 0.14285714285714285
+| "Eve"   | "Bob"   | 0.14285714285714285
+| "Dave"  | "Eve"   | 0.05
+|===
+
+We use default values for the procedure configuration parameter for most parameters.
+The `randomSeed` and `concurrency` is set to produce the same result on every invocation.
+The `topK` parameter is set to 1 to only return the single nearest neighbor for every node.
+
+
+[[algorithms-knn-examples-stats]]
+=== Stats
+
+:stats-syntax: algorithms-knn-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm and return the result in form of statistical and measurement values:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.stats('myGraph', {topK: 1, concurrency: 1, randomSeed: 42, nodeWeightProperty: 'age'})
+YIELD nodesCompared, similarityPairs
+----
+
+.Results
+[opts="header",cols="2"]
+|===
+| nodesCompared | similarityPairs
+| 5             | 5
+|===
+
+
+[[algorithms-knn-examples-mutate]]
+=== Mutate
+
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
+
+[role=query-example]
+.The following will run the algorithm, and write back results to the in-memory graph:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.mutate('myGraph', {
+    mutateRelationshipType: 'SIMILAR',
+    mutateProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeWeightProperty: 'age'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 5
+|===
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
+
+
+[[algorithms-knn-examples-write]]
+=== Write
+
+The `write` execution mode extends the `stats` mode with an important side effect: for each pair of nodes we create a relationship with the similarity score as a property to the Neo4j database.
+The type of the new relationship is specified using the mandatory configuration parameter `writeRelationshipType`.
+Each new relationship stores the similarity score between the two nodes it represents.
+The relationship property key is set using the mandatory configuration parameter `writeProperty`.
+The result is a single summary row, similar to `stats`, but with some additional metrics.
+
+For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+
+
+[role=query-example]
+.The following will run the algorithm, and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.knn.write('myGraph', {
+    writeRelationshipType: 'SIMILAR',
+    writeProperty: 'score',
+    topK: 1,
+    randomSeed: 42,
+    concurrency: 1,
+    nodeWeightProperty: 'age'
+})
+YIELD nodesCompared, relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodesCompared | relationshipsWritten
+| 5             | 5
+|===
+
+As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.

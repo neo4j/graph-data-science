@@ -1,0 +1,24 @@
+[[algorithms-community]]
+= Community detection
+:description: This chapter provides explanations and examples for each of the community detection algorithms in the Neo4j Graph Data Science library.
+
+
+Community detection algorithms are used to evaluate how groups of nodes are clustered or partitioned, as well as their tendency to strengthen or break apart.
+The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
+
+* Production-quality
+** xref::algorithms/louvain.adoc[Louvain]
+** xref::algorithms/label-propagation.adoc[Label Propagation]
+** xref::algorithms/wcc.adoc[Weakly Connected Components]
+** xref::algorithms/triangle-count.adoc[Triangle Count]
+** xref::algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
+* Beta
+** xref::algorithms/k1coloring.adoc[K-1 Coloring]
+** xref::algorithms/modularity-optimization.adoc[Modularity Optimization]
+* Alpha
+** xref::algorithms/strongly-connected-components.adoc[Strongly Connected Components]
+** xref::algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
+** xref::algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
+** xref::algorithms/alpha/conductance.adoc[Conductance metric]
+
+

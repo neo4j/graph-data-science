@@ -1,0 +1,5 @@
+[NOTE]
+====
+In the examples below we will use named graphs and native projections as the norm.
+However, anonymous graphs and/or xref::graph-create-cypher.adoc[Cypher projections] can also be used.
+====

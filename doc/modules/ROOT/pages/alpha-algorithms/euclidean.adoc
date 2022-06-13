@@ -1,0 +1,597 @@
+:procedure-name: Euclidean Distance
+
+[[alpha-algorithms-similarity-euclidean]]
+[.alpha]
+= Euclidean Distance
+:description: This section describes the Euclidean Distance algorithm in the Neo4j Graph Data Science library.
+
+
+Euclidean distance measures the straight line distance between two points in n-dimensional space.
+
+[.alpha-note]
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
+[[algorithms-similarity-euclidean-context]]
+== History and explanation
+
+// tag::explanation[]
+
+Euclidean distance is computed using the following formula:
+
+image::euclidean.png[role="middle"]
+
+// This is the raw information for this image:
+// [subs = none]
+// \( similarity(p_1, p_2) = \sqrt{\sum_{i~\in~\textrm{item}} (s_{p_1} - s_{p_2})^2} \)
+
+The library contains both procedures and functions to calculate similarity between sets of data.
+The function is best used when calculating the similarity between small numbers of sets.
+The procedures parallelize the computation and are therefore more appropriate for computing similarities on bigger datasets.
+
+// end::explanation[]
+
+
+[[algorithms-similarity-euclidean-usecase]]
+== Use-cases - when to use the Euclidean Distance algorithm
+
+// tag::use-case[]
+We can use the Euclidean Distance algorithm to work out the similarity between two things.
+We might then use the computed similarity as part of a recommendation query.
+For example, to get movie recommendations based on the preferences of users who have given similar ratings to other movies that you’ve seen.
+// end::use-case[]
+
+
+[[algorithms-similarity-euclidean-function-sample]]
+== Euclidean Distance algorithm function sample
+
+The Euclidean Distance function computes the similarity of two lists of numbers.
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=weighted-function-note]
+
+We can use it to compute the similarity of two hardcoded lists.
+
+.The following will return the euclidean similarity of two lists of numbers:
+[source, cypher, role=noplay]
+----
+ RETURN gds.alpha.similarity.euclideanDistance([3,8,7,5,2,9], [10,8,6,6,4,5]) AS similarity
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `similarity`
+| 8.426149773176359
+|===
+
+These two lists of numbers have a euclidean distance of 8.42.
+
+We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+ MERGE (french:Cuisine {name:'French'})
+ MERGE (italian:Cuisine {name:'Italian'})
+ MERGE (indian:Cuisine {name:'Indian'})
+ MERGE (lebanese:Cuisine {name:'Lebanese'})
+ MERGE (portuguese:Cuisine {name:'Portuguese'})
+ MERGE (british:Cuisine {name:'British'})
+ MERGE (mauritian:Cuisine {name:'Mauritian'})
+
+ MERGE (zhen:Person {name: "Zhen"})
+ MERGE (praveena:Person {name: "Praveena"})
+ MERGE (michael:Person {name: "Michael"})
+ MERGE (arya:Person {name: "Arya"})
+ MERGE (karin:Person {name: "Karin"})
+
+ MERGE (praveena)-[:LIKES {score: 9}]->(indian)
+ MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
+ MERGE (praveena)-[:LIKES {score: 8}]->(british)
+ MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+
+ MERGE (zhen)-[:LIKES {score: 10}]->(french)
+ MERGE (zhen)-[:LIKES {score: 6}]->(indian)
+ MERGE (zhen)-[:LIKES {score: 2}]->(british)
+
+ MERGE (michael)-[:LIKES {score: 8}]->(french)
+ MERGE (michael)-[:LIKES {score: 7}]->(italian)
+ MERGE (michael)-[:LIKES {score: 9}]->(indian)
+ MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+
+ MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
+ MERGE (arya)-[:LIKES {score: 10}]->(italian)
+ MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
+ MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+
+ MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
+ MERGE (karin)-[:LIKES {score: 7}]->(italian)
+ MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
+----
+
+.The following will return the Euclidean distance of Zhen and Praveena:
+[source, cypher, role=noplay]
+----
+ MATCH (p1:Person {name: 'Zhen'})-[likes1:LIKES]->(cuisine)
+ MATCH (p2:Person {name: 'Praveena'})-[likes2:LIKES]->(cuisine)
+ RETURN p1.name AS from,
+        p2.name AS to,
+        gds.alpha.similarity.euclideanDistance(collect(likes1.score), collect(likes2.score)) AS similarity
+----
+
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+| "Zhen" | "Praveena" | 6.708203932499369
+|===
+
+.The following will return the Euclidean distance  of Zhen and the other people that have a cuisine in common:
+[source, cypher, role=noplay]
+----
+ MATCH (p1:Person {name: 'Zhen'})-[likes1:LIKES]->(cuisine)
+ MATCH (p2:Person)-[likes2:LIKES]->(cuisine) WHERE p2 <> p1
+ RETURN p1.name AS from,
+        p2.name AS to,
+        gds.alpha.similarity.euclideanDistance(collect(likes1.score), collect(likes2.score)) AS similarity
+ ORDER BY similarity DESC
+----
+
+.Results
+[opts="header"]
+|===
+| `from`       | `to`         | `similarity`
+| "Zhen" | "Praveena" | 6.708203932499369
+| "Zhen" | "Michael"  | 3.605551275463989
+
+|===
+
+[[algorithms-similarity-euclidean-procedure-sample]]
+== Euclidean Distance algorithm procedures sample
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=computation]
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=weighted-note]
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+ MERGE (french:Cuisine {name:'French'})
+ MERGE (italian:Cuisine {name:'Italian'})
+ MERGE (indian:Cuisine {name:'Indian'})
+ MERGE (lebanese:Cuisine {name:'Lebanese'})
+ MERGE (portuguese:Cuisine {name:'Portuguese'})
+ MERGE (karin:Person {name: "Karin"})
+
+ MERGE (praveena)-[:LIKES {score: 9}]->(indian)
+ MERGE (praveena)-[:LIKES {score: 7}]->(portuguese)
+ MERGE (praveena)-[:LIKES {score: 8}]->(british)
+ MERGE (praveena)-[:LIKES {score: 1}]->(mauritian)
+
+ MERGE (zhen)-[:LIKES {score: 10}]->(french)
+ MERGE (zhen)-[:LIKES {score: 6}]->(indian)
+ MERGE (zhen)-[:LIKES {score: 2}]->(british)
+
+ MERGE (british:Cuisine {name:'British'})
+ MERGE (mauritian:Cuisine {name:'Mauritian'})
+
+ MERGE (zhen:Person {name: "Zhen"})
+ MERGE (praveena:Person {name: "Praveena"})
+ MERGE (michael:Person {name: "Michael"})
+ MERGE (arya:Person {name: "Arya"})
+ MERGE (michael)-[:LIKES {score: 8}]->(french)
+ MERGE (michael)-[:LIKES {score: 7}]->(italian)
+ MERGE (michael)-[:LIKES {score: 9}]->(indian)
+ MERGE (michael)-[:LIKES {score: 3}]->(portuguese)
+
+ MERGE (arya)-[:LIKES {score: 10}]->(lebanese)
+ MERGE (arya)-[:LIKES {score: 10}]->(italian)
+ MERGE (arya)-[:LIKES {score: 7}]->(portuguese)
+ MERGE (arya)-[:LIKES {score: 9}]->(mauritian)
+
+ MERGE (karin)-[:LIKES {score: 9}]->(lebanese)
+ MERGE (karin)-[:LIKES {score: 7}]->(italian)
+ MERGE (karin)-[:LIKES {score: 10}]->(portuguese)
+----
+
+
+[[algorithm-similarity-euclidean-stream]]
+=== Stream
+
+.The following will return a stream of node pairs, along with their intersection and euclidean similarities:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: data,
+  topK: 0
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY similarity
+----
+
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
+| "Praveena" | "Michael"  | 4.0
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Michael"  | "Arya"     | 5.0
+| "Zhen"     | "Praveena" | 6.708203932499369
+| "Michael"  | "Karin"    | 7.0
+| "Praveena" | "Arya"     | 8.0
+| "Zhen"     | "Arya"     | NaN
+| "Zhen"     | "Karin"    | NaN
+
+|===
+
+Praveena and Karin have the most similar food preferences, with a euclidean distance of 3.0.
+Lower scores are better here; a score of 0 would indicate that users have exactly the same preferences.
+
+We can also see at the bottom of the list that Zhen and Arya and Zhen and Karin have a similarity of `NaN`.
+We get this result because there is no overlap in their food preferences.
+
+We can filter those results out using the `gds.util.isFinite` function.
+
+.The following will return a stream of node pairs, along with their intersection and finite euclidean similarities:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: data,
+  topK: 0
+ })
+ YIELD item1, item2, count1, count2, similarity
+ WHERE gds.util.isFinite(similarity)
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY similarity
+----
+
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
+| "Praveena" | "Michael"  | 4.0
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Michael"  | "Arya"     | 5.0
+| "Zhen"     | "Praveena" | 6.708203932499369
+| "Michael"  | "Karin"    | 7.0
+| "Praveena" | "Arya"     | 8.0
+
+|===
+
+We can see in these results that Zhen and Arya and Zhen and Karin have been removed.
+
+We might decide that we don't want to see users with a similarity above 4 returned in our results.
+If so, we can filter those out by passing in the `similarityCutoff` parameter.
+
+.The following will return a stream of node pairs that have a similarity of at most 4, along with their euclidean distance:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: data,
+  similarityCutoff: 4.0,
+  topK: 0
+ })
+ YIELD item1, item2, count1, count2, similarity
+ WHERE gds.util.isFinite(similarity)
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY similarity
+----
+
+.Results
+[opts="header"]
+|===
+| `from`     | `to`       | `similarity`
+| "Praveena" | "Karin"   | 3.0
+| "Zhen"     | "Michael" | 3.605551275463989
+| "Praveena" | "Michael" | 4.0
+|===
+
+We can see that those users with a high score have been filtered out.
+If we're implementing a k-Nearest Neighbors type query we might instead want to find the most similar `k` users for a given user.
+We can do that by passing in the `topK` parameter.
+
+.The following will return a stream of users along with the most similar user to them (i.e. `k=1`):
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: data,
+  topK: 1
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY from
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`       | `to`         | `similarity`
+| "Arya"     | "Karin"    | 4.358898943540674
+| "Karin"    | "Praveena" | 3.0
+| "Michael"  | "Zhen"     | 3.605551275463989
+| "Praveena" | "Karin"    | 3.0
+| "Zhen"     | "Michael"  | 3.605551275463989
+
+|===
+
+These results will not necessarily be symmetrical.
+For example, the person most similar to Arya is Karin, but the person most similar to Karin is Praveena.
+
+
+[[algorithm-similarity-euclidean-write]]
+=== Write
+
+.The following will find the most similar user for each user, and store a relationship between those users:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.write({
+  data: data,
+  topK: 1
+ })
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+.Results
+[opts="header"]
+|===
+| `nodes` | `similarityPairs` | `writeRelationshipType` | `writeProperty` | `min`  | `max`              | `mean`             | `p95`
+| 5       | 5                 | "SIMILAR"               | "score"         | 3.0    | 4.3589019775390625 | 3.5139984130859374 | 4.3589019775390625
+|===
+
+We then could write a query to find out what types of cuisine that other people similar to us might like.
+
+.The following will find the most similar user to Praveena, and return their favorite cuisines that Praveena doesn't (yet!) like:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person {name: "Praveena"})-[:SIMILAR]->(other),
+       (other)-[:LIKES]->(cuisine)
+ WHERE not((p)-[:LIKES]->(cuisine))
+ RETURN cuisine.name AS cuisine
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `cuisine`
+| Italian
+| Lebanese
+|===
+
+
+[[algorithm-similarity-euclidean-stats]]
+=== Stats
+
+.The following will run the algorithm and returns the result in form of statistical and measurement values
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stats({
+  data: data,
+  topK: 1
+ })
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+
+[[algorithms-similarity-euclidean-source-target-ids]]
+== Specifying source and target ids
+
+include::partial$/algorithms/alpha/alpha-similarity.adoc[tag=source-target-ids]
+
+We could use this technique to compute the similarity of a subset of items to all other items.
+
+
+.The following will find the most similar person (i.e. `k=1`) to Arya and Praveena:
+[source, cypher, role=noplay]
+----
+ MATCH (p:Person), (c:Cuisine)
+ OPTIONAL MATCH (p)-[likes:LIKES]->(c)
+ WITH {item:id(p), name: p.name, weights: collect(coalesce(likes.score, gds.util.NaN()))} AS userData
+ WITH collect(userData) AS personCuisines
+ WITH personCuisines,
+      [value in personCuisines WHERE value.name IN ["Praveena", "Arya"] | value.item ] AS sourceIds
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: personCuisines,
+  sourceIds: sourceIds,
+  topK: 1
+ })
+ YIELD item1, item2, similarity
+ WITH gds.util.asNode(item1) AS from, gds.util.asNode(item2) AS to, similarity
+ RETURN from.name AS from, to.name AS to, similarity
+ ORDER BY similarity DESC
+----
+
+.Results
+[opts="header",cols="1,1,1"]
+|===
+| `from`   | `to`     | `similarity`
+| "Arya"     | "Karin" | 4.358898943540674
+| "Praveena" | "Karin" | 3.0
+|===
+
+
+[[algorithms-similarity-euclidean-skipping-values]]
+== Skipping values
+
+By default the `skipValue` parameter is `gds.util.NaN()`.
+The algorithm checks every value against the `skipValue` to determine whether that value should be considered as part of the similarity result.
+For cases where no values should be skipped, skipping can be disabled by setting `skipValue` to `null`.
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+ MERGE (french:Cuisine {name:'French'})          SET french.embedding = [0.71, 0.33, 0.81, 0.52, 0.41]
+ MERGE (italian:Cuisine {name:'Italian'})        SET italian.embedding = [0.31, 0.72, 0.58, 0.67, 0.31]
+ MERGE (indian:Cuisine {name:'Indian'})          SET indian.embedding = [0.43, 0.26, 0.98, 0.51, 0.76]
+ MERGE (lebanese:Cuisine {name:'Lebanese'})      SET lebanese.embedding = [0.12, 0.23, 0.35, 0.31, 0.39]
+ MERGE (portuguese:Cuisine {name:'Portuguese'})  SET portuguese.embedding = [0.47, 0.98, 0.81, 0.72, 0.89]
+ MERGE (british:Cuisine {name:'British'})        SET british.embedding = [0.94, 0.12, 0.23, 0.4, 0.71]
+ MERGE (mauritian:Cuisine {name:'Mauritian'})    SET mauritian.embedding = [0.31, 0.56, 0.98, 0.21, 0.62]
+----
+
+.The following will find the similarity between cuisines based on the `embedding` property:
+[source, cypher, role=noplay]
+----
+ MATCH (c:Cuisine)
+ WITH {item:id(c), weights: c.embedding} AS userData
+ WITH collect(userData) AS data
+ CALL gds.alpha.similarity.euclidean.stream({
+  data: data,
+  skipValue: null
+ })
+ YIELD item1, item2, count1, count2, similarity
+ RETURN gds.util.asNode(item1).name AS from, gds.util.asNode(item2).name AS to, similarity
+ ORDER BY similarity DESC
+----
+
+[[algorithms-similarity-euclidean-cypher-projection]]
+== Cypher projection
+
+include::partial$/algorithms/alpha/alpha-cypher-similarity-explanation.adoc[]
+
+.Set `graph:'cypher'` in the config:
+
+[source, cypher, role=noplay]
+----
+ WITH "MATCH (person:Person)-[likes:LIKES]->(c)
+       RETURN id(person) AS item, id(c) AS category, likes.score AS weight" AS query
+ CALL gds.alpha.similarity.euclidean.write({
+  data: query,
+  graph: 'cypher',
+  topK: 1,
+  similarityCutoff: 4.0
+ })
+ YIELD nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, stdDev, p95
+ RETURN nodes, similarityPairs, writeRelationshipType, writeProperty, min, max, mean, p95
+----
+
+
+[[algorithms-similarity-euclidean-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.similarity.euclidean.write(configuration: Map)
+YIELD nodes, similarityPair, writeRelationshipType, writeProperty, min, max, mean, stdDev, p25, p50, p75, p90, p95, p99, p999, p100
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type          | Default        | Optional | Description
+| configuration     | Map           | n/a            | no       | Algorithm-specific configuration.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                  | Type              | Default                | Optional | Description
+| data                  | List or String    | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top                   | Integer           | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK                  | Integer           | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff      | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff          | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue             | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency           | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'writeConcurrency'.
+| writeConcurrency      | Integer           | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| graph                 | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
+| writeBatchSize        | Integer           | 10000                  | yes      | The batch size to use when storing results.
+| writeRelationshipType | String            | SIMILAR                | yes      | The relationship type to use when storing results.
+| writeProperty         | String            | score                  | yes      | The property to use when storing results.
+| sourceIds             | List of String          | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds             | List of String          | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                  | Type      | Description
+| nodes                 | Integer   | The number of nodes passed in.
+| similarityPairs       | Integer   | The number of pairs of similar nodes computed.
+| writeRelationshipType | String    | The relationship type used when storing results.
+| writeProperty         | String    | The property used when storing results.
+| min                   | Float     | The minimum similarity score computed.
+| max                   | Float     | The maximum similarity score computed.
+| mean                  | Float     | The mean of similarities scores computed.
+| stdDev                | Float     | The standard deviation of similarities scores computed.
+| p25                   | Float     | The 25 percentile of similarities scores computed.
+| p50                   | Float     | The 50 percentile of similarities scores computed.
+| p75                   | Float     | The 75 percentile of similarities scores computed.
+| p90                   | Float     | The 90 percentile of similarities scores computed.
+| p95                   | Float     | The 95 percentile of similarities scores computed.
+| p99                   | Float     | The 99 percentile of similarities scores computed.
+| p999                  | Float     | The 99.9 percentile of similarities scores computed.
+| p100                  | Float     | The 100 percentile of similarities scores computed.
+|===
+
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.similarity.euclidean.stream(configuration: Map)
+YIELD item1, item2, count1, count2, intersection, similarity
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type              | Default        | Optional | Description
+| configuration     | Map               | n/a            | no       | Algorithm-specific configuration.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type              | Default                | Optional | Description
+| data              | List or String    | null                   | no       | A list of maps of the following structure: `{item: nodeId, weights: [double, double, double]}` or a Cypher query.
+| top               | Integer           | 0                      | yes      | The number of similar pairs to return. If `0`, it will return as many as it finds.
+| topK              | Integer           | 3                      | yes      | The number of similar values to return per node. If `0`, it will return as many as it finds.
+| similarityCutoff  | Integer           | -1                     | yes      | The threshold for similarity. Values below this will not be returned.
+| degreeCutoff      | Integer           | 0                      | yes      | The threshold for the number of items in the `targets` list. If the list contains less than this amount, that node will be excluded from the calculation.
+| skipValue         | Float             | gds.util.NaN()         | yes      | Value to skip when executing similarity computation. A value of `null` means that skipping is disabled.
+| concurrency       | Integer           | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| graph             | String            | dense                  | yes      | The graph name ('dense' or 'cypher').
+| sourceIds         | List of Integer         | null                   | yes      | The ids of items from which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+| targetIds         | List of Integer         | null                   | yes      | The ids of items to which we need to compute similarities. Defaults to all the items provided in the `data` parameter.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type      | Description
+| item1         | Integer   | The ID of one node in the similarity pair.
+| item2         | Integer   | The ID of other node in the similarity pair.
+| count1        | Integer   | The size of the `targets` list of one node.
+| count2        | Integer   | The size of the `targets` list of other node.
+| intersection  | Integer   | The number of intersecting values in the two nodes `targets` lists.
+| similarity    | Integer   | The euclidean similarity of the two nodes.
+|===

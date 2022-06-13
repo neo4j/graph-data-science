@@ -1,0 +1,15 @@
+[[migration-product-algos]]
+= Production-ready algorithms
+
+This section covers all algorithms that have been migrated to the production-ready tier of the Neo4j Graph Data Science library.
+Syntax changes in configuration, return columns, and execution modes are illustrated with side-by-side examples of queries.
+
+* xref::appendix-b/migration-lpa.adoc[Label Propagation]
+* xref::appendix-b/migration-louvain.adoc[Louvain]
+* xref::appendix-b/migration-node-sim.adoc[Node Similarity]
+* xref::appendix-b/migration-page-rank.adoc[PageRank]
+* xref::appendix-b/migration-wcc.adoc[Weakly Connected Components]
+* xref::appendix-b/migration-triangle-count.adoc[Triangle Count / Clustering Coefficient]
+* xref::appendix-b/migration-betweenness-centrality.adoc[Betweenness Centrality (exact and sampled)]
+
+

@@ -1,3 +1,0 @@
-If node labels and relationship types are not selective enough to project a graph, you can use Cypher queries instead.
-Cypher projections can also be used to run algorithms on a virtual graph.
-You can learn more in the <<catalog-graph-create-cypher>> section of the manual.

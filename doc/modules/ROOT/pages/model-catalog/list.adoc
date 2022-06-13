@@ -1,0 +1,72 @@
+[.beta]
+[[catalog-model-list]]
+= Listing models
+
+Information about models in the catalog can be retrieved using the `gds.beta.model.list()` procedure.
+
+
+== Syntax
+
+[.model-list-syntax]
+.List models from the catalog:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.list(modelName: String)
+YIELD
+    modelInfo: Map,
+    trainConfig: Map,
+    graphSchema: Map,
+    loaded: Boolean,
+    stored: Boolean,
+    creationTime: DateTime,
+    shared: Boolean
+----
+
+.Parameters
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name          | Type   | Default | Optional | Description
+| modelName     | String | n/a     | yes      | The name of a model. If not specified, all models in the catalog are listed.
+|===
+
+include::partial$/model-catalog/shared/model-info-result.adoc[]
+
+== Examples
+
+Once we have trained models in the catalog we can see information about either all of them or a single model using its name
+
+=== Listing all models
+
+[role=query-example]
+.Listing detailed information about all models:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.list()
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, loaded, shared, stored
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| modelName   | loaded  | shared | stored
+| "my-model"  |  true   | false  | false
+|===
+
+=== Listing a specific model
+
+[role=query-example]
+.Listing detailed information about specific model:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.model.list('my-model')
+YIELD modelInfo, loaded, shared, stored
+RETURN modelInfo.modelName AS modelName, loaded, shared, stored
+----
+
+.Results
+[opts="header",cols="1m,1m,1m,1m"]
+|===
+| modelName   | loaded  | shared | stored
+| "my-model"  |  true   | false  | false
+|===

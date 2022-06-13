@@ -1,0 +1,222 @@
+[[algorithms-ml-linkprediction-pipelines-train]]
+== Training the pipeline
+
+The train mode, `gds.alpha.ml.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
+Running this mode results in a `Link prediction pipeline` model being stored in the model catalog along with metrics collected during training.
+The trained pipeline can be xref::algorithms/ml-models/linkprediction-pipelines.adoc#algorithms-link-prediction-pipelines-predict[applied] to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
+
+More precisely, the procedure will in order:
+
+. Apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
+. Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in xref::algorithms/ml-models/linkprediction-pipelines.adoc#algorithms-ml-linkprediction-configure-splits[Configuring the relationship splits].
+These graphs are internally managed and exist only for the duration of the training.
+. Apply the node property steps, added according to xref::algorithms/ml-models/linkprediction-pipelines.adoc#algorithms-ml-linkprediction-adding-node-properties[Adding node properties], on the `feature-input` graph.
+. Apply the feature steps, added according to xref::algorithms/ml-models/linkprediction-pipelines.adoc#algorithms-ml-linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
+. Split the training instances using stratified k-fold cross-validation.
+The number of folds `k` can be configured using `validationFolds` in `gds.alpha.ml.pipeline.linkPrediction.configureSplit`.
+. Train each model candidate given by the xref::algorithms/ml-models/linkprediction-pipelines.adoc#algorithms-ml-linkprediction-configure-model-parameters[parameter space] for each of the folds and evaluate the model on the respective validation set.
+The training process uses a logistic regression algorithm, and the evaluation uses the xref::algorithms/ml-models/linkprediction.adoc#algorithms-ml-metrics[AUCPR metric].
+. Declare as winner the model with the highest average metric across the folds.
+. Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
+In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
+. Register the winning model in the xref::model-catalog/index.adoc[Model Catalog].
+
+NOTE: The above steps describe what the procedure does logically.
+The actual steps as well as their ordering in the implementation may differ.
+
+NOTE: A step can only use node properties that are already present in the input graph or produced by steps, which were added before.
+
+=== Syntax
+
+[.include-with-train]
+.Run Link Prediction in train mode on a named graph:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.train(
+  graphName: String,
+  configuration: Map
+) YIELD
+  trainMillis: Integer,
+  modelInfo: Map,
+  configuration: Map
+----
+
+include::partial$/algorithms/common-configuration/common-parameters-named-graph.adoc[]
+
+.Configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                                                          | Type              | Default | Optional | Description
+| modelName                                                     | String            | n/a     | no       | The name of the model to train, must not exist in the Model Catalog.
+| pipeline                                                      | String            | n/a     | no       | The name of the pipeline to execute.
+| negativeClassWeight                                           | Float             | 1.0     | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1.
+| randomSeed                                                    | Integer           | n/a     | yes      | Seed for the random number generator used during training.
+| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']   | yes      | Filter the named graph using the given node labels.
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']   | yes      | Filter the named graph using the given relationship types.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4       | yes      | The number of concurrent threads used for running the algorithm.
+|===
+
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name          | Type    | Description
+| trainMillis   | Integer | Milliseconds used for training.
+| modelInfo     | Map     | Information about the training and the winning model.
+| configuration | Map     | Configuration used for the train procedure.
+|===
+
+The `modelInfo` can also be retrieved at a later time by using the xref::model-catalog/list.adoc[Model List Procedure].
+The `modelInfo` return field has the following algorithm-specific subfields:
+
+.Model info fields
+[opts="header",cols="1,1,6"]
+|===
+| Name                    | Type          | Description
+| bestParameters          | Map           | The model parameters which performed best on average on validation folds according to the primary metric.
+| metrics                 | Map           | Map from metric description to evaluated metrics for various models and subsets of the data, see below.
+| trainingPipeline        | Map           | The pipeline used for the training.
+|===
+
+
+The structure of `modelInfo` is:
+
+[listing]
+----
+{
+    bestParameters: Map,        // <1>
+    trainingPipeline: Map       // <2>
+    metrics: {                  // <3>
+        AUCPR: {
+            test: Float,        // <4>
+            outerTrain: Float,  // <5>
+            train: [{           // <6>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            {
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            ...
+            ],
+            validation: [{      // <7>
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            {
+                avg: Float,
+                max: Float,
+                min: Float,
+                params: Map
+            },
+            ...
+            ]
+        }
+    }
+}
+----
+<1> The best scoring model candidate configuration.
+<2> The pipeline used for the training.
+<3> The `metrics` map contains an entry for each metric description (currently only `AUCPR`) and the corresponding results for that metric.
+<4> Numeric value for the evaluation of the best model on the test set.
+<5> Numeric value for the evaluation of the best model on the outer train set.
+<6> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+<7> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+
+=== Example
+
+In this example we will create a small graph and train the pipeline we have built up thus far.
+The graph consists of a handful nodes connected in a particular pattern.
+The example graph looks like this:
+
+image::example-graphs/link-prediction.svg[Visualization of the example graph,align="center"]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query, group=lp]
+----
+CREATE
+  (alice:Person {name: 'Alice', numberOfPosts: 38}),
+  (michael:Person {name: 'Michael', numberOfPosts: 67}),
+  (karin:Person {name: 'Karin', numberOfPosts: 30}),
+  (chris:Person {name: 'Chris', numberOfPosts: 132}),
+  (will:Person {name: 'Will', numberOfPosts: 6}),
+  (mark:Person {name: 'Mark', numberOfPosts: 32}),
+  (greg:Person {name: 'Greg', numberOfPosts: 29}),
+  (veselin:Person {name: 'Veselin', numberOfPosts: 3}),
+
+  (alice)-[:KNOWS]->(michael),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(greg),
+  (will)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (greg)-[:KNOWS]->(chris),
+  (veselin)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(veselin),
+  (chris)-[:KNOWS]->(karin);
+----
+
+With the graph in Neo4j we can now project it into the graph catalog.
+We do this using a native projection targeting the `Person` nodes and the `KNOWS` relationships.
+We will also project the `numberOfPosts` property, so it can be used when creating link features.
+For the relationships we must use the `UNDIRECTED` orientation.
+This is because the Link Prediction pipelines are defined only for undirected graphs.
+
+.The following statement will create a graph using a native projection and store it in the graph catalog under the name 'myGraph'.
+[source, cypher, role=noplay graph-create-query, group=lp]
+----
+CALL gds.graph.create(
+  'myGraph',
+  {
+    Person: {
+      properties: ['numberOfPosts']
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+WARNING: The Link Prediction model requires the graph to be created using the `UNDIRECTED` orientation for relationships.
+
+
+//TODO add model.list call to show how pipeline looks?
+[[algorithms-ml-linkprediction-pipeline-examples-train-query]]
+[role=query-example,group=lp]
+.The following will train a model using a pipeline:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.ml.pipeline.linkPrediction.train('myGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model',
+  randomSeed: 42
+}) YIELD modelInfo
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.outerTrain AS trainGraphScore,
+  modelInfo.metrics.AUCPR.test AS testGraphScore
+----
+
+.Results
+[opts="header", cols="6, 2, 2"]
+|===
+| winningModel                                                                                         | trainGraphScore     | testGraphScore
+| {useBiasFeature=true, maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001} | 0.41666666666666663 | 0.7638888888888888
+|===
+
+We can see the model configuration with `tolerance = 0.001` (and defaults filled for remaining parameters) was selected, and has a score of `0.76` on the test set.
+The score computed as the xref::algorithms/ml-models/linkprediction.adoc#algorithms-ml-metrics[AUCPR] metric, which is in the range [0, 1].
+A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
+

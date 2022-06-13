@@ -1,0 +1,26 @@
+.Algorithm specific configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                  | Type      | Default | Optional | Description
+| trainRelationshipType | String    | n/a     | no       | Relationship type to use during model training.
+| testRelationshipType  | String    | n/a     | no       | Relationship type to use during model evaluation.
+| validationFolds       | Integer   | n/a     | no       | Number of divisions of the training graph used during model selection.
+| negativeClassWeight   | Float     | n/a     | no       | Weight of negative examples in model evaluation. Positive examples have weight 1.
+| params                | List of Map | n/a     | no       | List of model configurations to be trained and compared. See next table for details.
+| randomSeed            | Integer   | n/a     | yes      | Seed for the random number generator used during training.
+|===
+
+.Model configuration
+[opts="header",cols="1,1,1m,1,4"]
+|===
+| Name                | Type    | Default         | Optional | Description
+| penalty             | Float   | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
+| linkFeatureCombiner | String  | "L2"            | yes      | Link feature combiner is used to combine two node feature vectors into the feature vector for the training. Available combiners are `L2`, `HADAMARD` and `COSINE`.
+| batchSize           | Integer | 100             | yes      | Number of nodes per batch.
+| minEpochs           | Integer | 1               | yes      | Minimum number of training epochs.
+| maxEpochs           | Integer | 100             | yes      | Maximum number of training epochs.
+| patience            | Integer | 1               | yes      | Maximum number of unproductive consecutive epochs.
+| tolerance           | Float   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
+|===
+
+For hyperparameter tuning ideas, look xref::algorithms/ml-models/models-tuning.adoc[here].

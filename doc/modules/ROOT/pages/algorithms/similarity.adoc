@@ -1,0 +1,21 @@
+[[algorithms-similarity]]
+= Similarity
+:description: This chapter provides explanations and examples for each of the similarity algorithms in the Neo4j Graph Data Science library.
+
+
+Similarity algorithms compute the similarity of pairs of nodes using different vector-based metrics.
+The Neo4j GDS library includes the following similarity algorithms, grouped by quality tier:
+
+* Production-quality
+** xref::algorithms/node-similarity.adoc[Node Similarity]
+* Beta
+** xref::algorithms/knn.adoc[K-Nearest Neighbors]
+* Alpha
+** xref::alpha-algorithms/approximate-nearest-neighbors.adoc[Approximate Nearest Neighbors]
+** xref::alpha-algorithms/cosine.adoc[Cosine Similarity]
+** xref::alpha-algorithms/euclidean.adoc[Euclidean Similarity]
+** xref::alpha-algorithms/jaccard.adoc[Jaccard Similarity]
+** xref::alpha-algorithms/overlap.adoc[Overlap Similarity]
+** xref::alpha-algorithms/pearson.adoc[Pearson Similarity]
+
+

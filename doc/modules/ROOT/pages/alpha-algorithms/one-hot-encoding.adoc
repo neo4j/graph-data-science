@@ -1,0 +1,83 @@
+[[alpha-algorithms-one-hot-encoding]]
+[.alpha]
+= One Hot Encoding
+:description: This section describes the One Hot Encoding function in the Neo4j Graph Data Science library.
+
+
+The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+[[algorithms-one-hot-encoding-sample]]
+== One Hot Encoding sample
+
+One hot encoding will return a list equal to the length of the `available values`.
+In the list, `selected values` are represented by `1`, and `unselected values` are represented by `0`.
+
+.The following will run the algorithm on hardcoded lists:
+[source, cypher, role=noplay]
+----
+RETURN gds.alpha.ml.oneHotEncoding(['Chinese', 'Indian', 'Italian'], ['Italian']) AS embedding
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| embedding
+| [0,0,1]
+|===
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+CREATE (french:Cuisine {name:'French'}),
+       (italian:Cuisine {name:'Italian'}),
+       (indian:Cuisine {name:'Indian'}),
+
+       (zhen:Person {name: "Zhen"}),
+       (praveena:Person {name: "Praveena"}),
+       (michael:Person {name: "Michael"}),
+       (arya:Person {name: "Arya"}),
+
+       (praveena)-[:LIKES]->(indian),
+       (zhen)-[:LIKES]->(french),
+       (michael)-[:LIKES]->(french),
+       (michael)-[:LIKES]->(italian)
+----
+
+.The following will return a one hot encoding for each user and the types of cuisine that they like:
+[source, cypher, role=noplay]
+----
+MATCH (cuisine:Cuisine)
+WITH cuisine
+  ORDER BY cuisine.name
+WITH collect(cuisine) AS cuisines
+MATCH (p:Person)
+RETURN p.name AS name, gds.alpha.ml.oneHotEncoding(cuisines, [(p)-[:LIKES]->(cuisine) | cuisine]) AS embedding
+  ORDER BY name
+----
+
+.Results
+[opts="header",cols="1, 1"]
+|===
+| name     | embedding
+| Arya     | [0,0,0]
+| Michael  | [1,0,1]
+| Praveena | [0,1,0]
+| Zhen     | [1,0,0]
+|===
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name              | Type    | Default        | Optional | Description
+| `availableValues`   | list    | null           | yes      | The available values. If null, the function will return an empty list.
+| `selectedValues`    | list    | null           | yes      | The selected values. If null, the function will return a list of all 0's.
+|===
+
+.Results
+[opts="header",cols="1,6"]
+|===
+| Type | Description
+| `list` | One hot encoding of the selected values.
+|===

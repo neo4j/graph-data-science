@@ -1,0 +1,20 @@
+[[algorithms-ml-models]]
+= Machine learning models
+:description: This chapter provides explanations and examples for the supervised machine learning models in the Neo4j Graph Data Science library.
+
+
+The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
+Models can then be accessed via the xref::model-catalog/index.adoc[Model catalog] and used to make predictions about your graph.
+
+To help with working with the ML models, there are additional guides for pre-processing and hyperparameter tuning available in:
+
+* xref::algorithms/ml-models/pre-processing.adoc[Pre-processing]
+* xref::algorithms/ml-models/models-tuning.adoc[Tuning parameters for training]
+
+The Neo4j GDS library includes the following machine learning models, grouped by quality tier:
+
+* Alpha
+** xref::algorithms/ml-models/node-classification.adoc[Node Classification]
+** xref::algorithms/ml-models/nodeclassification-pipelines.adoc[Node Classification Pipelines]
+** xref::algorithms/ml-models/linkprediction.adoc[Link Prediction]
+** xref::algorithms/ml-models/linkprediction-pipelines.adoc[Link Prediction Pipelines]

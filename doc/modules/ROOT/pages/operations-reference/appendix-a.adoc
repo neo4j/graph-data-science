@@ -1,0 +1,12 @@
+[appendix]
+[[appendix-a]]
+= Operations reference
+:description: This chapter contains a reference of all the procedures and functions in the Neo4j Graph Data Science library.
+
+
+The operations in the Graph Data Science library can be divided into the following categories:
+
+* xref::operations-reference/graph-operation-references.adoc[Graph Catalog]
+* xref::operations-reference/model-operation-references.adoc[Model Catalog]
+* xref::operations-reference/algorithm-references.adoc[Graph Algorithms]
+* xref::operations-reference/additional-operation-references.adoc[Additional Operations]

@@ -1,0 +1,34 @@
+[[migration-graph-list]]
+= Graph listing
+
+.Changes in the YIELD fields
+[opts=header,cols="1,1"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+| `name`              | `graphName`
+| `nodes`             | `nodeCount`
+| `relationships`     | `relationshipCount`
+| `type`              | -
+| `direction`         | -
+| -                   | `nodeProjection` footnote:list-native[Field will be `null` if a Cypher projection was used]
+| -                   | `relationshipProjection` footnote:list-native[]
+| -                   | `nodeQuery` footnote:list-cypher[Field will be `null` unless a Cypher projection was used]
+| -                   | `relationshipQuery` footnote:list-cypher[]
+| -                   | `degreeDistribution` footnote:[Graph statistics map, i.e. min, max, percentiles, etc.]
+|===
+
+.Listing named graphs:
+[opts=header,cols="1a,1a"]
+|===
+|Graph Algorithms v3.5 |Graph Data Science v1.0
+|
+[source, cypher, role=noplay]
+----
+CALL algo.graph.list()
+----
+|
+[source, cypher, role=noplay]
+----
+CALL gds.graph.list()
+----
+|===

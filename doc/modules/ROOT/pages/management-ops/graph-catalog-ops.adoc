@@ -1,0 +1,52 @@
+[[graph-catalog-ops]]
+= Graph Catalog
+:description: This section details the graph catalog operations available to manage named graph projections within the Neo4j Graph Data Science library.
+
+
+Graph algorithms run on a graph data model which is a _projection_ of the Neo4j property graph data model.
+A graph projection can be seen as a materialized view over the stored graph, containing only analytically relevant, potentially aggregated, topological and property information.
+Graph projections are stored entirely in-memory using compressed data structures optimized for topology and property lookup operations.
+
+The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
+Using its name, a created graph can be used many times in the analytical workflow.
+Named graphs can be created using either a xref::graph-create.adoc[Native projection] or a xref::graph-create-cypher.adoc[Cypher projection].
+After usage, named graphs can be removed from the catalog to free up main memory.
+
+Graphs can also be created when running an algorithm without placing them in the catalog.
+We refer to such graphs as xref::management-ops/anonymous-graph.adoc[anonymous graphs].
+
+[NOTE]
+====
+The graph catalog exists as long as the Neo4j instance is running.
+When Neo4j is restarted, graphs stored in the catalog are lost and need to be re-created.
+====
+
+This chapter explains the available graph catalog operations.
+
+[[table-proc]]
+[opts=header,cols="1m,1"]
+|===
+| Name                                                                          | Description
+| xref::graph-create.adoc[gds.graph.create]                                    | Creates a graph in the catalog using Native projection.
+| xref::graph-create-cypher.adoc[gds.graph.create.cypher]                      | Creates a graph in the catalog using Cypher projection.
+| xref::create-subgraph.adoc[gds.beta.graph.create.subgraph]             | Creates a graph in the catalog by filtering an existing graph using node and relationship predicates.
+| xref::graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
+| xref::graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
+| xref::graph-catalog-node-ops.adoc[gds.graph.removeNodeProperties]                    | Removes node properties from a named graph.
+| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.deleteRelationships]              | Deletes relationships of a given relationship type from a named graph.
+| xref::graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
+| xref::graph-catalog-node-ops.adoc[gds.graph.streamNodeProperty]                      | Streams a single node property stored in a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.streamNodeProperties]                    | Streams node properties stored in a named graph.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperty]      | Streams a single relationship property stored in a named graph.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperties]    | Streams relationship properties stored in a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.writeNodeProperties]                     | Writes node properties stored in a named graph to Neo4j.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.writeRelationship]               | Writes relationships stored in a named graph to Neo4j.
+| xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
+| xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
+|===
+
+[NOTE]
+====
+Creating, using, listing, and dropping named graphs are management operations bound to a Neo4j user.
+Graphs created by a different Neo4j user are not accessible at any time.
+====

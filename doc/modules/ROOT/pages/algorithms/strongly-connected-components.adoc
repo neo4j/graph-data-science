@@ -1,0 +1,243 @@
+[[algorithms-strongly-connected-components]]
+[.alpha]
+= Strongly Connected Components
+:description: This section describes the Strongly Connected Components algorithm in the Neo4j Graph Data Science library.
+
+
+The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.
+A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
+It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
+
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
+[[algorithms-strongly-connected-components-context]]
+== History and explanation
+
+// tag::explanation[]
+SCC is one of the earliest graph algorithms, and the first linear-time algorithm was described by Tarjan in 1972.
+Decomposing a directed graph into its strongly connected components is a classic application of the depth-first search algorithm.
+// end::explanation[]
+
+
+[[algorithms-strongly-connected-components-usecase]]
+== Use-cases - when to use the Strongly Connected Components algorithm
+
+// tag::use-case[]
+* In the analysis of powerful transnational corporations, SCC can be used to find the set of firms in which every member owns directly and/or indirectly owns shares in every other member.
+  Although it has benefits, such as reducing transaction costs and increasing trust, this type of structure can weaken market competition.
+  Read more in http://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0025995&type=printable["The Network of Global Corporate Control"^].
+* SCC can be used to compute the connectivity of different network configurations when measuring routing performance in multihop wireless networks.
+  Read more in https://dl.acm.org/citation.cfm?id=513803["Routing performance in the presence of unidirectional links in multihop wireless networks"^]
+* Strongly Connected Components algorithms can be used as a first step in many graph algorithms that work only on strongly connected graph.
+  In social networks, a group of people are generally strongly connected (For example, students of a class or any other common place).
+  Many people in these groups generally like some common pages, or play common games.
+  The SCC algorithms can be used to find such groups, and suggest the commonly liked pages or games to the people in the group who have not yet liked those pages or games.
+// end::use-case[]
+
+
+[[algorithms-strongly-connected-components-syntax]]
+== Syntax
+
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.write(graphName: String|Map, configuration: Map)
+YIELD createMillis, computeMillis, writeMillis, setCount, maxSetSize, minSetSize
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| writeProperty    | String  | 'componentId'          | yes      | The property name written back to.
+| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+| writeConcurrency | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+|===
+
+.Results
+[opts="header",cols="1,1,6"]
+|===
+| Name                 | Type    | Description
+| createMillis         | Integer | Milliseconds for loading data.
+| computeMillis        | Integer | Milliseconds for running the algorithm.
+| writeMillis          | Integer | Milliseconds for writing result data back.
+| postProcessingMillis | Integer | Milliseconds for computing percentiles and community count.
+| nodes                | Integer | The number of nodes considered.
+| communityCount       | Integer | The number of communities found.
+| p1                   | Float   | The 1 percentile of community size.
+| p5                   | Float   | The 5 percentile of community size.
+| p10                  | Float   | The 10 percentile of community size.
+| p25                  | Float   | The 25 percentile of community size.
+| p50                  | Float   | The 50 percentile of community size.
+| p75                  | Float   | The 75 percentile of community size.
+| p90                  | Float   | The 90 percentile of community size.
+| p95                  | Float   | The 95 percentile of community size.
+| p99                  | Float   | The 99 percentile of community size.
+| p100                 | Float   | The 100 percentile of community size.
+| writeProperty        | String  | The property name written back to.
+
+|===
+
+.The following will run the algorithm and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.stream(graphName: String, configuration: Map)
+YIELD nodeId, componentId
+----
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name             | Type    | Default                | Optional | Description
+| concurrency      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency'.
+| readConcurrency  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
+|===
+
+.Results
+[opts="header"]
+|===
+| Name        | Type    | Description
+| nodeId      | Integer | Node ID.
+| componentId | Integer | Component ID.
+|===
+
+
+[[algorithms-strongly-connected-components-example]]
+== Strongly Connected Components algorithm example
+
+image::strongly_connected_components.png[]
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+CREATE (nAlice:User {name:'Alice'})
+CREATE (nBridget:User {name:'Bridget'})
+CREATE (nCharles:User {name:'Charles'})
+CREATE (nDoug:User {name:'Doug'})
+CREATE (nMark:User {name:'Mark'})
+CREATE (nMichael:User {name:'Michael'})
+
+CREATE (nAlice)-[:FOLLOW]->(nBridget)
+CREATE (nAlice)-[:FOLLOW]->(nCharles)
+CREATE (nMark)-[:FOLLOW]->(nDoug)
+CREATE (nMark)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nMichael)
+CREATE (nDoug)-[:FOLLOW]->(nMark)
+CREATE (nMichael)-[:FOLLOW]->(nAlice)
+CREATE (nAlice)-[:FOLLOW]->(nMichael)
+CREATE (nBridget)-[:FOLLOW]->(nAlice)
+CREATE (nMichael)-[:FOLLOW]->(nBridget);
+----
+
+.The following will run the algorithm and write back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.write({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW',
+  writeProperty: 'componentId'
+})
+YIELD setCount, maxSetSize, minSetSize;
+----
+
+.Results
+[opts="header",cols="1m,1m,1m"]
+|===
+| setCount | maxSetSize | minSetSize
+| 3        | 3          | 1
+|===
+
+.The following will run the algorithm and stream back results:
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.stream({
+  nodeProjection: 'User',
+  relationshipProjection: 'FOLLOW'
+})
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
+ORDER BY Component DESC
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | Component
+| "Doug"    | 3
+| "Mark"    | 3
+| "Charles" | 2
+| "Alice"   | 0
+| "Bridget" | 0
+| "Michael" | 0
+|===
+
+// tag::stream-sample-graph-explanation[]
+We have 3 strongly connected components in our sample graph.
+
+The first, and biggest, component has members Alice, Bridget, and Michael, while the second component has Doug and Mark.
+Charles ends up in his own component because there isn't an outgoing relationship from that node to any of the others.
+// end::stream-sample-graph-explanation[]
+
+.The following will find the largest partition:
+[source, cypher, role=noplay]
+----
+MATCH (u:User)
+RETURN u.componentId AS Component, count(*) AS ComponentSize
+ORDER BY ComponentSize DESC
+LIMIT 1
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Component | ComponentSize
+| 0         | 3
+|===
+
+
+[[algorithms-strongly-connected-components-cp]]
+== Cypher projection
+
+include::partial$/algorithms/alpha/alpha-cypher-explanation.adoc[]
+
+.Use `nodeQuery` and `relationshipQuery` in the config:
+
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.scc.stream({
+  nodeQuery: 'MATCH (u:User) RETURN id(u) AS id',
+  relationshipQuery: 'MATCH (u1:User)-[:FOLLOW]->(u2:User) RETURN id(u1) AS source, id(u2) AS target' })
+YIELD nodeId, componentId
+RETURN gds.util.asNode(nodeId).name AS Name, componentId AS Component
+ORDER BY Component DESC
+----
+
+.Results
+[opts="header",cols="1m,1m"]
+|===
+| Name      | Component
+| "Doug"    | 3
+| "Mark"    | 3
+| "Charles" | 2
+| "Alice"   | 0
+| "Bridget" | 0
+| "Michael" | 0
+|===
+
+
+ifndef::env-docs[]
+== References
+
+// tag::references[]
+
+* https://pdfs.semanticscholar.org/61db/6892a92d1d5bdc83e52cc18041613cf895fa.pdf
+
+* http://code.activestate.com/recipes/578507-strongly-connected-components-of-a-directed-graph/
+
+* http://www.sandia.gov/~srajama/publications/BFS_and_Coloring.pdf
+
+// end::references[]
+endif::env-docs[]

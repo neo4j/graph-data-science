@@ -1,0 +1,101 @@
+[[alpha-algorithms-linkprediction-total-neighbors]]
+[.alpha]
+= Total Neighbors
+:description: This section describes the Total Neighbors algorithm in the Neo4j Graph Data Science library.
+
+
+Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
+It is based on the idea that the more connected a node is, the more likely it is to receive new links.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
+[[algorithms-linkprediction-total-neighbors-context]]
+== History and explanation
+
+Total Neighbors is computed using the following formula:
+
+image::total-neighbors.svg[role="middle"]
+
+where `N(x)` is the set of nodes adjacent to `x`, and `N(y)` is the set of nodes adjacent to `y`.
+
+A value of 0 indicates that two nodes are not close, while higher values indicate nodes are closer.
+
+The library contains a function to calculate the closeness between two nodes.
+
+
+[[algorithms-linkprediction-total-neighbors-syntax]]
+== Syntax
+
+.The following will run the algorithm and return the result:
+[source, cypher, role=noplay]
+----
+RETURN gds.alpha.linkprediction.totalNeighbors(node1:Node, node2:Node, {
+    relationshipQuery: null,
+    direction: "BOTH"
+})
+----
+
+
+.Parameters
+[opts="header",cols="1,1,1,1,4"]
+|===
+| Name                | Type   | Default | Optional | Description
+| `node1`             | Node   | null    | no       | A node
+| `node2`             | Node   | null    | no       | Another node
+| `relationshipQuery` | String | null    | yes      | The relationship type used to compute similarity between `node1` and `node2`
+| `direction`         | String | BOTH    | yes      | The relationship direction used to compute similarity between `node1` and `node2`. Possible values are `OUTGOING`, `INCOMING` and `BOTH`.
+|===
+
+
+[[algorithms-linkprediction-total-neighbors-sample]]
+== Total Neighbors algorithm sample
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+CREATE (zhen:Person {name: 'Zhen'}),
+       (praveena:Person {name: 'Praveena'}),
+       (michael:Person {name: 'Michael'}),
+       (arya:Person {name: 'Arya'}),
+       (karin:Person {name: 'Karin'}),
+
+       (zhen)-[:FRIENDS]->(arya),
+       (zhen)-[:FRIENDS]->(praveena),
+       (praveena)-[:WORKS_WITH]->(karin),
+       (praveena)-[:FRIENDS]->(michael),
+       (michael)-[:WORKS_WITH]->(karin),
+       (arya)-[:FRIENDS]->(karin)
+----
+
+.The following will return the Total Neighbors score for Michael and Karin:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Karin'})
+RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 4.0
+|===
+
+We can also compute the score of a pair of nodes, based on a specific relationship type.
+
+.The following will return the Total Neighbors score for Michael and Karin based only on the `FRIENDS` relationship:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Michael'})
+MATCH (p2:Person {name: 'Karin'})
+RETURN gds.alpha.linkprediction.totalNeighbors(p1, p2, {relationshipQuery: "FRIENDS"}) AS score
+----
+
+.Results
+[opts="header",cols="1"]
+|===
+| `score`
+| 2.0
+|===

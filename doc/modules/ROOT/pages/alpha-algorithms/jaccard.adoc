@@ -1,0 +1,153 @@
+[[alpha-algorithms-similarity-jaccard]]
+[.alpha]
+= Jaccard Similarity
+:description: This section describes the Jaccard Similarity algorithm in the Neo4j Graph Data Science library.
+
+
+Jaccard Similarity (coefficient), a term coined by https://en.wikipedia.org/wiki/Paul_Jaccard[Paul Jaccard^], measures similarities between sets.
+It is defined as the size of the intersection divided by the size of the union of two sets.
+This notion has been generalized for multisets, where duplicate elements are counted as weights.
+
+The GDS Jaccard Similarity function is defined for lists, which are interpreted as multisets.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+A related procedure for computing Jaccard similarity is described in xref::algorithms/node-similarity.adoc[Node Similarity].
+
+
+[[alpha-algorithms-similarity-jaccard-context]]
+== History and explanation
+
+Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
+
+image::jaccard.png[role="middle"]
+
+// This is the raw information for this image:
+// ```
+// J(A,B) = ∣A ∩ B∣ / ∣(A ∪ B)∣
+//        = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B|
+// ```
+
+The library contains functions to calculate similarity between sets of data.
+The Jaccard Similarity function is best used when calculating the similarity between small numbers of sets.
+
+
+[[alpha-algorithms-similarity-jaccard-usecase]]
+== Use-cases - when to use the Jaccard Similarity algorithm
+
+We can use the Jaccard Similarity algorithm to work out the similarity between two things.
+We might then use the computed similarity as part of a recommendation query.
+For example, you can use the Jaccard Similarity algorithm to show the products that were purchased by similar customers, in terms of previous products purchased.
+
+
+[[alpha-algorithms-similarity-jaccard-function-sample]]
+== Jaccard Similarity algorithm function sample
+
+The Jaccard Similarity function computes the similarity of two lists of numbers.
+
+We can use it to compute the similarity of two hardcoded lists.
+
+.The following will return the Jaccard Similarity of two lists of numbers:
+[source, cypher, role=noplay]
+----
+RETURN gds.alpha.similarity.jaccard([1,2,3], [1,2,4,5]) AS similarity
+----
+
+
+.Results
+[opts="header",cols="1"]
+|===
+| `similarity`
+| 0.4
+|===
+
+
+These two lists of numbers have a Jaccard Similarity of 0.4.
+We can see how this result is derived by breaking down the formula:
+
+----
+J(A,B) = ∣A ∩ B∣ / ∣A∣ + ∣B∣ - ∣A ∩ B|
+J(A,B) = 2 / 3 + 4 - 2
+       = 2 / 5
+       = 0.4
+----
+
+We can also use it to compute the similarity of nodes based on lists computed by a Cypher query.
+
+.The following will create a sample graph:
+[source, cypher, role=noplay]
+----
+CREATE
+  (french:Cuisine {name:'French'}),
+  (italian:Cuisine {name:'Italian'}),
+  (indian:Cuisine {name:'Indian'}),
+  (lebanese:Cuisine {name:'Lebanese'}),
+  (portuguese:Cuisine {name:'Portuguese'}),
+
+  (zhen:Person {name: 'Zhen'}),
+  (praveena:Person {name: 'Praveena'}),
+  (michael:Person {name: 'Michael'}),
+  (arya:Person {name: 'Arya'}),
+  (karin:Person {name: 'Karin'}),
+
+  (praveena)-[:LIKES]->(indian),
+  (praveena)-[:LIKES]->(portuguese),
+
+  (zhen)-[:LIKES]->(french),
+  (zhen)-[:LIKES]->(indian),
+
+  (michael)-[:LIKES]->(french),
+  (michael)-[:LIKES]->(italian),
+  (michael)-[:LIKES]->(indian),
+
+  (arya)-[:LIKES]->(lebanese),
+  (arya)-[:LIKES]->(italian),
+  (arya)-[:LIKES]->(portuguese),
+
+  (karin)-[:LIKES]->(lebanese),
+  (karin)-[:LIKES]->(italian)
+----
+
+.The following will return the Jaccard Similarity of Karin and Arya:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Karin'})-[:LIKES]->(cuisine1)
+WITH p1, collect(id(cuisine1)) AS p1Cuisine
+MATCH (p2:Person {name: "Arya"})-[:LIKES]->(cuisine2)
+WITH p1, p1Cuisine, p2, collect(id(cuisine2)) AS p2Cuisine
+RETURN p1.name AS from,
+       p2.name AS to,
+       gds.alpha.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
+----
+
+.Results
+[opts="header"]
+|===
+| from    | to     | similarity
+| "Karin" | "Arya" | 0.6666666666666666
+
+|===
+
+.The following will return the Jaccard Similarity of Karin and the other people that have a cuisine in common:
+[source, cypher, role=noplay]
+----
+MATCH (p1:Person {name: 'Karin'})-[:LIKES]->(cuisine1)
+WITH p1, collect(id(cuisine1)) AS p1Cuisine
+MATCH (p2:Person)-[:LIKES]->(cuisine2) WHERE p1 <> p2
+WITH p1, p1Cuisine, p2, collect(id(cuisine2)) AS p2Cuisine
+RETURN p1.name AS from,
+       p2.name AS to,
+       gds.alpha.similarity.jaccard(p1Cuisine, p2Cuisine) AS similarity
+ORDER BY to, similarity DESC
+----
+
+
+.Results
+[opts="header"]
+|===
+| from    | to         | similarity
+| "Karin" | "Arya"     | 0.6666666666666666
+| "Karin" | "Michael"  | 0.25
+| "Karin" | "Praveena" | 0.0
+| "Karin" | "Zhen"     | 0.0
+|===
