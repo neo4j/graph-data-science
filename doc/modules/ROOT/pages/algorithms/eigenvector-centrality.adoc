@@ -1,10 +1,9 @@
 [[algorithms-eigenvector-centrality]]
 = Eigenvector Centrality
-:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: score
 :algorithm: Eigenvector Centrality
-
 
 :directed:
 :undirected:
@@ -303,6 +302,7 @@ CALL gds.graph.create(
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -319,6 +319,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 8         | 14                | 696     | 696     | "696 Bytes"
 |===
+--
 
 
 [[algorithms-eigenvector-centrality-examples-stream]]
@@ -328,6 +329,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -350,6 +352,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.15484062876886298
 | "Site D"  | 0.15484062876886298
 |===
+--
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
 Below, one can find an example for xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-weighted[weighted graphs].
@@ -363,6 +366,7 @@ Below, one can find an example for xref::algorithms/eigenvector-centrality.adoc#
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and return statistics about the centrality scores.
 [source, cypher, role=noplay]
 ----
@@ -379,6 +383,7 @@ RETURN centralityDistribution.max AS max
 | max
 | 0.7465581893920898
 |===
+--
 
 
 [[algorithms-eigenvector-centrality-examples-mutate]]
@@ -387,6 +392,7 @@ RETURN centralityDistribution.max AS max
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -403,6 +409,7 @@ YIELD nodePropertiesWritten, ranIterations
 | nodePropertiesWritten | ranIterations
 | 8                     | 20
 |===
+--
 
 
 [[algorithms-eigenvector-centrality-examples-write]]
@@ -411,6 +418,7 @@ YIELD nodePropertiesWritten, ranIterations
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -427,6 +435,7 @@ YIELD nodePropertiesWritten, ranIterations
 | nodePropertiesWritten | ranIterations
 | 8                     | 20
 |===
+--
 
 
 [[algorithms-eigenvector-centrality-examples-weighted]]
@@ -441,6 +450,7 @@ Note, that negative relationship weights are ignored during the computation.
 In the following example, we use the `weight` property of the input graph as relationship weight property.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode using relationship weights:
 [source, cypher, role=noplay]
 ----
@@ -466,6 +476,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.008327591469710233
 | "Site D"  | 0.008327591469710233
 |===
+--
 
 As in the unweighted example, the "Home" node has the highest score.
 In contrast, the "Product" now has the second highest instead of the fourth highest score.
@@ -481,6 +492,7 @@ If all scores change less than the configured tolerance, the iteration is aborte
 Note, that setting a higher tolerance leads to earlier convergence, but also to less accurate centrality scores.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode using a high `tolerance` value:
 [source, cypher, role=noplay]
 ----
@@ -506,6 +518,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.14116155811301126
 | "Site D"  | 0.14116155811301126
 |===
+--
 
 We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example].
 However, the computation converges after three iterations, and we can already observe a trend in the resulting scores.
@@ -521,6 +534,7 @@ For a given set of source nodes `S`, the initial value of each source node is se
 The following examples show how to run Eigenvector centrality centered around 'Site A'.
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -547,6 +561,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.15483736775159632
 | "Site D"  | 0.15483736775159632
 |===
+--
 
 
 [[algorithms-page-rank-examples-scaler]]
@@ -561,6 +576,7 @@ A common scaler is the `L1Norm`, which normalizes each score to a value between 
 A description of all available scalers can be found in the documentation for the xref::alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode and returns normalized results:
 [source, cypher, role=noplay]
 ----
@@ -585,5 +601,6 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.06489968457203725
 | "Site D"  | 0.06489968457203725
 |===
+--
 
 Comparing the results with the xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example], we can see that the relative order of scores is the same.

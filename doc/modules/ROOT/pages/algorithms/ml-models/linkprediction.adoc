@@ -1,6 +1,6 @@
 [[algorithms-ml-linkprediction]]
 = Link prediction
-:description: This section describes the Link prediction model in the Neo4j Graph Data Science library.
+:description: This section describes the Link prediction model in the Neo4j Graph Data Science library. 
 :entity: relationship
 :result: relationships
 :algorithm: Link Prediction
@@ -450,6 +450,7 @@ Recall that we compute the class ratio as `(q - r) / q`, where we then have `q =
 We use this to configure `negativeSampleRatio` to achieve a sampling proportional to the class ratio.
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
@@ -468,6 +469,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | relationshipsWritten
 | 25
 |===
+--
 
 We will create copied relationships for each existing relationship, into either the `KNOWS_REMAINING` or the `KNOWS_TESTGRAPH` relationship types.
 All relationships in `KNOWS_TESTGRAPH` will have a `label` property.
@@ -476,6 +478,7 @@ Additionally, a number of non-existing relationships will be created into the `K
 Next, we will create the train graph.
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
@@ -494,6 +497,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('myGraph', {
 | relationshipsWritten
 | 20
 |===
+--
 
 With both training and test graphs, we are ready to train models.
 We will use 5 validation folds, meaning we will split the train graph into 5 pairs, using one part of each pair for training and one for validation.
@@ -501,6 +505,7 @@ Since we set the `negativeSamplingRatio` to 1.33 (the class ratio of the graph) 
 
 [[algorithms-ml-linkprediction-examples-train-query]]
 [role=query-example, group=lp]
+--
 
 .Train a Link Prediction model:
 [source, cypher]
@@ -532,6 +537,7 @@ RETURN
 | winningModel                  | trainGraphScore     | testGraphScore
 | {maxEpochs=1000, penalty=0.5} | 0.38525757517173825 | 0.46710171439292664
 |===
+--
 
 Here we can observe that the model candidate with penalty 0.5 performed the best in the training phase, with a score of about 71% over the train graph.
 On the test graph, the model scored much lower at about 35%.
@@ -548,6 +554,7 @@ This allows us to inspect the results directly or post-process them in Cypher wi
 For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
@@ -571,6 +578,7 @@ CALL gds.alpha.ml.linkPrediction.predict.stream('myGraph', {
 | "Will"  | "Veselin" | 0.49869219716877955
 | "Alice" | "Mark"    | 0.49719328593255546
 |===
+--
 
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Note that the predicted link between the Karin and Greg nodes does not reflect any particular direction between them.
@@ -586,6 +594,7 @@ We will use the model which we trained in the xref::algorithms/ml-models/linkpre
 We must also make sure that we do not include any of the relationships from the train or test graphs, which we do by specifying a relationship filter for the original relationship type `'KNOWS'`.
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
@@ -603,6 +612,7 @@ CALL gds.alpha.ml.linkPrediction.predict.mutate('myGraph', {
 | relationshipsWritten
 | 10
 |===
+--
 
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
@@ -614,6 +624,7 @@ In this example we will show how to use a trained model to predict new relations
 We will again use the model `'lp-numberOfPosts-model'`, as in the xref::algorithms/ml-models/linkprediction.adoc#algorithms-ml-linkprediction-examples-mutate[mutate example].
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.linkPrediction.predict.write('myGraph', {
@@ -631,6 +642,7 @@ CALL gds.alpha.ml.linkPrediction.predict.write('myGraph', {
 | relationshipsWritten
 | 10
 |===
+--
 
 The end result looks like this:
 

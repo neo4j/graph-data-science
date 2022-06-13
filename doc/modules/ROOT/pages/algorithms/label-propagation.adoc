@@ -1,10 +1,9 @@
 [[algorithms-label-propagation]]
 = Label Propagation
-:description: This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Label Propagation algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: community ID
 :algorithm: Label Propagation
-
 
 :directed:
 :undirected:
@@ -331,6 +330,7 @@ In the following examples we will demonstrate using the Label Propagation algori
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -344,6 +344,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin  | bytesMax  | requiredMemory
 | 6         | 10                | 1608      | 1608      | "1608 Bytes"
 |===
+--
 
 
 [[algorithms-label-propagation-examples-stream]]
@@ -353,6 +354,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -373,6 +375,7 @@ ORDER BY Community, Name
 | "Doug"    | 4
 | "Mark"    | 4
 |===
+--
 
 In the above example we can see that our graph has two communities each containing three nodes.
 The default behaviour of the algorithm is to run `unweighted`, e.g. without using `node` or `relationship` weights.
@@ -387,6 +390,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.labelPropagation.stats('myGraph')
@@ -399,6 +403,7 @@ YIELD communityCount, ranIterations, didConverge
 | communityCount | ranIterations | didConverge
 | 2              | 3             | true
 |===
+--
 
 As we can see from the example above the algorithm finds two communities and converges in three iterations.
 Note that we ran the algorithm `unweighted`.
@@ -409,6 +414,7 @@ Note that we ran the algorithm `unweighted`.
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
@@ -422,6 +428,7 @@ YIELD communityCount, ranIterations, didConverge
 | communityCount | ranIterations | didConverge
 | 2              | 3             | true
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `community` which stores the community ID for each node.
@@ -434,6 +441,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
@@ -447,6 +455,7 @@ YIELD communityCount, ranIterations, didConverge
 | communityCount | ranIterations | didConverge
 | 2              | 3             | true
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, each of the six nodes now has a new property `community` in the Neo4j database, containing the community ID for that node.
@@ -462,6 +471,7 @@ When we created `myGraph`, we projected the relationship property `weight`.
 In order to tell the algorithm to consider this property as a relationship weight, we have to set the `relationshipWeightProperty` configuration parameter to `weight`.
 
 [role=query-example]
+--
 .The following will run the algorithm on a graph with weighted relationships and stream results:
 [source, cypher, role=noplay]
 ----
@@ -482,6 +492,7 @@ ORDER BY Community, Name
 | "Doug"    | 4
 | "Mark"    | 4
 |===
+--
 
 Compared to the xref::algorithms/label-propagation.adoc#algorithms-label-propagation-examples-stream[unweighted run] of the algorithm we still have two communities, but they contain two and four nodes respectively.
 Using the weighted relationships, the nodes `Alice` and `Charles` are now in the same community as there is a strong link between them.
@@ -504,6 +515,7 @@ Using this preliminary set of labels, it then sequentially updates each node's l
 WARNING: The `consecutiveIds` configuration option cannot be used in combination with `seedProperty` in order to retain the seeding values.
 
 [role=query-example]
+--
 .The following will run the algorithm with pre-defined labels:
 [source, cypher, role=noplay]
 ----
@@ -524,6 +536,7 @@ ORDER BY Community, Name
 | "Bridget" | 21
 | "Michael" | 21
 |===
+--
 
 As we can see, the communities are based on the `seed_label` property, concretely `19` is from the node `Mark` and `21` from `Doug`.
 

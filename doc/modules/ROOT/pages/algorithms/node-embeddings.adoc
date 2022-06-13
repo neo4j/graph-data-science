@@ -1,7 +1,6 @@
 [[algorithms-node-embeddings]]
 = Node embeddings
-:description: This chapter provides explanations and examples for the node embedding algorithms in the Neo4j Graph Data Science library.
-
+:description: This chapter provides explanations and examples for the node embedding algorithms in the Neo4j Graph Data Science library. 
 
 Node embedding algorithms compute low-dimensional vector representations of nodes in a graph.
 These vectors, also called embeddings, can be used for machine learning.

@@ -1,5 +1,5 @@
 = The Neo4j Graph Data Science Library Manual v{docs-version}
-:description: This is the manual for Neo4j Graph Data Science library version {docs-version}.
+:description: This is the manual for Neo4j Graph Data Science library version {docs-version}. 
 [[graph-data-science]]
 :toc: left
 :experimental:

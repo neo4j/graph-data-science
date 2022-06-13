@@ -1,7 +1,7 @@
 [[algorithms-split-relationships]]
 [.alpha]
 = Split Relationships
-:description: This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library. 
 
 :algorithm: Split Relationships
 
@@ -122,6 +122,7 @@ Now we can run the algorithm by specifying the appropriate ratio and the output 
 We use a random seed value in order to produce deterministic results.
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.splitRelationships.mutate('graph', {
@@ -139,6 +140,7 @@ CALL gds.alpha.ml.splitRelationships.mutate('graph', {
 | relationshipsWritten
 | 10
 |===
+--
 
 The input graph consists of 5 relationships.
 We use 20% (1 relationship) of the relationships to create the 'TYPE_HOLDOUT' relationship type (holdout set).

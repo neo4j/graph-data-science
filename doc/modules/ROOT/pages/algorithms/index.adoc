@@ -1,7 +1,6 @@
 [[algorithms]]
 = Algorithms
-:description: This chapter describes each of the algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
-
+:description: This chapter describes each of the algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax. 
 
 The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
 The algorithms are divided into categories which represent different problem classes.

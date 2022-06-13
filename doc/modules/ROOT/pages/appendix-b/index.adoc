@@ -1,8 +1,7 @@
 [appendix]
 [[appendix-b]]
 = Migration from Graph Algorithms v3.5
-:description: If you have previously used Graph Algorithm v3.5, you can find the information you will need to migrate to using the Graph Data Science library in this section.
-
+:description: If you have previously used Graph Algorithm v3.5, you can find the information you will need to migrate to using the Graph Data Science library in this section. 
 
 == Who should read this guide
 

@@ -1,12 +1,11 @@
 [[algorithms-embeddings-graph-sage]]
 [.beta]
 = GraphSAGE
-:description: This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: embedding
 :modelType: GraphSAGE
 :algorithm: GraphSAGE
-
 
 GraphSAGE is an _inductive_ algorithm for computing node embeddings.
 GraphSAGE is using node feature information to generate node embeddings on unseen nodes or graphs.
@@ -270,6 +269,7 @@ Below is an example of how to do that.
 NOTE: The names specified in the `featureProperties` configuration parameter must exist in the in-memory graph.
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.train(
@@ -296,6 +296,7 @@ RETURN
 | modelName           | didConverge | ranEpochs | epochLosses
 | "exampleTrainModel" | false       | 1         | [186.04946807210226]
 |===
+--
 
 NOTE: Due to the random initialisation of the weight variables the results may vary between different runs.
 
@@ -503,6 +504,7 @@ CALL gds.beta.graphSage.train(
 Once we have trained a model (named `'graphSage'`) we can use it to generate and stream the embeddings.
 
 [role=query-example, group=graphSage]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.graphSage.stream(
@@ -526,6 +528,7 @@ YIELD nodeId, embedding
 | 5      | [0.5285002503196665, 0.46821817633485613, 0.7081378569589678]
 | 6      | [0.528500250213112, 0.46821817627948753, 0.7081378570751017]
 |===
+--
 
 NOTE: Due to the random initialisation of the weight variables the results may vary slightly between the runs.
 
@@ -534,6 +537,7 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 The xref::algorithms/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
 Below is an example of how to achieve this.
 
+--
 [source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.mutate(
@@ -553,12 +557,14 @@ CALL gds.beta.graphSage.mutate(
 | nodeCount | nodePropertiesWritten
 | 7         | 7
 |===
+--
 
 === Write
 
 The xref::algorithms/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to Neo4j.
 Below is an example of how to achieve this.
 
+--
 [source, cypher, role=noplay query-example, no-result=true, group=graphSage]
 ----
 CALL gds.beta.graphSage.write(
@@ -578,6 +584,7 @@ CALL gds.beta.graphSage.write(
 | nodeCount | nodePropertiesWritten
 | 7         | 7
 |===
+--
 
 [[algorithms-embeddings-graph-sage-caveats]]
 == Caveats

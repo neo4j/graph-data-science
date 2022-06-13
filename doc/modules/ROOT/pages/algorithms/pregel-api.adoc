@@ -1,7 +1,6 @@
 [[algorithms-pregel-api]]
 = Pregel API
-:description: This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library.
-
+:description: This chapter provides documentation for the Pregel API in the Neo4j Graph Data Science library. 
 
 [[algorithms-pregel-api-intro]]
 == Introduction

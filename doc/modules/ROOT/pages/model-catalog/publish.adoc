@@ -13,6 +13,7 @@ Making a model accessible to other users can be achieved by publishing it.
 == Syntax
 
 [.model-publish-syntax]
+--
 .Publish a model from the catalog:
 [source, cypher, role=noplay]
 ----
@@ -36,11 +37,13 @@ YIELD
 
 
 include::partial$/model-catalog/shared/model-info-result.adoc[]
+--
 
 
 == Examples
 
 [role=query-example]
+--
 .Publishing trained model:
 [source, cypher, role=noplay]
 ----
@@ -55,6 +58,7 @@ RETURN modelInfo.modelName AS modelName, shared
 | modelName          | shared
 | "my-model_public"  | true
 |===
+--
 
 We can see that the model is now shared. 
 The shared model has the `_public` suffix.

@@ -1,10 +1,9 @@
 [[beta-algorithms-embeddings-node2vec]]
 [.beta]
 = Node2Vec
-:description: This section describes the Node2Vec node embedding algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Node2Vec node embedding algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: embedding
-
 
 Node2Vec is a node embedding algorithm that computes a vector representation of a node based on random walks in the graph.
 The neighborhood is sampled through random walks.
@@ -215,6 +214,7 @@ CALL gds.graph.create('myGraph', ['Person', 'Instrument'], 'LIKES');
 ----
 
 [role=query-example,no-result=true]
+--
 .Run the Node2Vec algorithm on `myGraph`
 [source, cypher, role=noplay]
 ----
@@ -237,3 +237,4 @@ RETURN nodeId, embedding
 | 7 | [-0.213893860578537, 0.06195802614092827]
 | 8 | [0.2479933649301529, -0.137322798371315]
 |===
+--

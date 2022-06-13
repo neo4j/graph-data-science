@@ -1,7 +1,6 @@
 [[fabric]]
 = Using GDS and Fabric
-:description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment.
-
+:description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment. 
 
 Neo4j Fabric is a way to store and retrieve data in multiple databases, whether they are on the same Neo4j DBMS or in multiple DBMSs, using a single Cypher query.
 For more information about Fabric itself, please visit the https://neo4j.com/docs/operations-manual/current/fabric/introduction/?ref=blog[documentation].

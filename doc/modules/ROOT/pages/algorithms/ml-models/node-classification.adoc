@@ -1,6 +1,6 @@
 [[algorithms-ml-nodeclassification]]
 = Node classification
-:description: This section describes the Node classification model in the Neo4j Graph Data Science library.
+:description: This section describes the Node classification model in the Neo4j Graph Data Science library. 
 :entity: node
 :result: predicted property
 :algorithm: Node Classification
@@ -331,6 +331,7 @@ In the following examples we will demonstrate using the Node Classification mode
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -359,6 +360,7 @@ YIELD bytesMin, bytesMax, requiredMemory
 | bytesMin  | bytesMax  | requiredMemory
 | 66874376  | 66906336  | +"[63 MiB ... 63 MiB]"+
 |===
+--
 
 
 [[algorithms-ml-nodeclassification-examples-train]]
@@ -416,6 +418,7 @@ In order to do this, we must first have an already trained model registered in t
 We will use the model which we trained in the xref::algorithms/ml-models/node-classification.adoc#algorithms-ml-nodeclassification-examples-train-query[train example] which we gave the name `'nc-model'`.
 
 [role=query-example, no-result=true, group=stream]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.nodeClassification.predict.stream('myGraph', {
@@ -440,6 +443,7 @@ RETURN
 | "Tan"           |              1 | 98.0
 | "Yellow"        |              2 | 79.0
 |===
+--
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
@@ -462,6 +466,7 @@ In order to do this, we must first have an already trained model registered in t
 We will use the model which we trained in the xref::algorithms/ml-models/node-classification.adoc#algorithms-ml-nodeclassification-examples-train-query[train example] which we gave the name `'nc-model'`.
 
 [role=query-example, group=mutate]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
@@ -478,11 +483,13 @@ CALL gds.alpha.ml.nodeClassification.predict.mutate('myGraph', {
 | nodePropertiesWritten
 | 28
 |===
+--
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
 In order to analyse our predicted classes we stream the properties from the in-memory graph:
 
 [role=query-example, no-result=true, group=mutate]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.streamNodeProperties(
@@ -503,6 +510,7 @@ RETURN gds.util.asNode(nodeId).color AS classifiedHouse, nodeProperty, propertyV
 | "Yellow"        | "predictedClass"         | 2
 | "Yellow"        | "predictedProbabilities" | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
 |===
+--
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
@@ -525,6 +533,7 @@ In order to do this, we must first have an already trained model registered in t
 We will use the model which we trained in the xref::algorithms/ml-models/node-classification.adoc#algorithms-ml-nodeclassification-examples-train-query[train example] which we gave the name `'nc-model'`.
 
 [role=query-example, group=write]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.nodeClassification.predict.write('myGraph', {
@@ -541,11 +550,13 @@ CALL gds.alpha.ml.nodeClassification.predict.write('myGraph', {
 | nodePropertiesWritten
 | 28
 |===
+--
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 14 nodes.
 In order to analyse our predicted classes we stream the properties from the in-memory graph:
 
 [role=query-example, no-result=true, group=write]
+--
 [source, cypher, role=noplay]
 ----
 MATCH (house:UnknownHouse)
@@ -560,6 +571,7 @@ RETURN house.color AS classifiedHouse, house.predictedClass AS predictedClass, h
 | "Tan"           |              1 | [0.01749164563726576, 0.9824922482993587, 1.610606337562594E-5]
 | "Yellow"        |              2 | [0.0385634113659007, 0.16350471177895198, 0.7979318768551473]
 |===
+--
 
 
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.

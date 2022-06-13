@@ -1,6 +1,6 @@
 [[algorithms-ml-nodeclassification-pipelines]]
 = Node classification pipelines
-:description: This section describes Node classification pipelines in the Neo4j Graph Data Science library.
+:description: This section describes Node classification pipelines in the Neo4j Graph Data Science library. 
 :entity: node
 :result: predicted property
 :modelType: Node classification pipeline
@@ -59,6 +59,7 @@ The latter is also a model which is stored in the catalog with type `Node classi
 === Syntax
 
 [.pipeline-create-syntax]
+--
 .Create pipeline syntax
 [source, cypher, role=noplay]
 ----
@@ -81,10 +82,12 @@ YIELD
 |===
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/pipelineInfoResult.adoc[]
+--
 
 === Example
 
 [role=query-example,group=nc]
+--
 .The following will create a pipeline:
 [source, cypher, role=noplay]
 ----
@@ -99,6 +102,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.create('pipe')
            | {testFraction=0.3, validationFolds=3}
            | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, batchSize=100, tolerance=0.001}]
 |===
+--
 
 This shows that the newly created pipeline does not contain any steps yet, and has defaults for the split and train parameters.
 
@@ -117,6 +121,7 @@ For example, xref::algorithms/ml-models/pre-processing.adoc[pre-processing algor
 === Syntax
 
 [.pipeline-add-node-property-syntax]
+--
 .Add node property syntax
 [source, cypher, role=noplay]
 ----
@@ -143,9 +148,11 @@ YIELD
 |===
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/pipelineInfoResult.adoc[]
+--
 === Example
 
 [role=query-example,group=nc]
+--
 .The following will add a node property step to the pipeline. Here we assume that the input graph contains a property `sizePerStory`.
 [source, cypher, role=noplay]
 ----
@@ -165,6 +172,7 @@ YIELD name, nodePropertySteps
 |===
 
 The `scaledSizes` property can be later used as a feature.
+--
 
 
 [[algorithms-ml-nodeclassification-adding-features]]
@@ -177,6 +185,7 @@ For example, the `embedding` property could be created by the previous example, 
 === Syntax
 
 [.pipeline-add-feature-syntax]
+--
 .Adding a feature to a pipeline syntax
 [source, cypher, role=noplay]
 ----
@@ -201,10 +210,12 @@ YIELD
 |===
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/pipelineInfoResult.adoc[]
+--
 
 === Example
 
 [role=query-example,group=nc]
+--
 .The following will select features for the pipeline. Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
 [source, cypher, role=noplay]
 ----
@@ -218,6 +229,7 @@ YIELD name, featureProperties
 | name     | featureProperties
 | "pipe"   | [scaledSizes, sizePerStory]
 |===
+--
 
 [[algorithms-ml-nodeclassification-configure-splits]]
 == Configuring the node splits
@@ -253,6 +265,7 @@ image::train-test-splitting/validation-folds-node-classification.gif[validation-
 === Syntax
 
 [.pipeline-configure-split-syntax]
+--
 .Configure the node split syntax
 [source, cypher, role=noplay]
 ----
@@ -285,10 +298,12 @@ YIELD
 |===
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/pipelineInfoResult.adoc[]
+--
 
 === Example
 
 [role=query-example,group=nc]
+--
 .The following will configure the splitting of the pipeline:
 [source, cypher, role=noplay]
 ----
@@ -307,6 +322,7 @@ YIELD splitConfig
 |===
 
 We now reconfigured the splitting of the pipeline, which will be applied during xref::algorithms/ml-models/nodeclassification-pipelines.adoc#algorithms-ml-nodeclassification-pipelines-train[training].
+--
 
 [[algorithms-ml-nodeclassification-configure-model-parameters]]
 == Configuring the model parameters
@@ -324,6 +340,7 @@ The parameter space of a pipeline can be inspected using `gds.beta.model.list` a
 === Syntax
 
 [.pipeline-configure-params-syntax]
+--
 .Configure the train parameters syntax
 [source, cypher, role=noplay]
 ----
@@ -361,10 +378,12 @@ YIELD
 |===
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/pipelineInfoResult.adoc[]
+--
 
 === Example
 
 [role=query-example,group=nc]
+--
 .The following will configure the parameter space of the pipeline:
 [source, cypher, role=noplay]
 ----
@@ -382,6 +401,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.configureParams('pipe',
 
 The `parameterSpace` in the pipeline now contains the three different model parameters, expanded with the default values.
 Each specified model configuration will be tried out during the model selection in xref::algorithms/ml-models/nodeclassification-pipelines.adoc#algorithms-ml-nodeclassification-pipelines-train[training].
+--
 
 include::partial$/algorithms/alpha/nodeclassification-pipeline/training.adoc[]
 

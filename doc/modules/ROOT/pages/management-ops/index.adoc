@@ -1,7 +1,6 @@
 [[management-ops]]
 = Graph management
-:description: This chapter explains the graph catalog, the different graph projection variants and utility functions in the Neo4j Graph Data Science library.
-
+:description: This chapter explains the graph catalog, the different graph projection variants and utility functions in the Neo4j Graph Data Science library. 
 
 A central concept in the GDS library is the management of in-memory graphs.
 

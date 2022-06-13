@@ -1,7 +1,7 @@
 [[algorithms-knn]]
 [.beta]
 = K-Nearest Neighbors
-:description: This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the K-Nearest Neighbors (KNN) algorithm in the Neo4j Graph Data Science library. 
 
 :entity: relationship
 :result: similarity score
@@ -324,6 +324,7 @@ CALL gds.graph.create(
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -342,6 +343,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | bytesMin | bytesMax | requiredMemory
 | 5         | 1944     | 3000     | "[1944 Bytes \... 3000 Bytes]"
 |===
+--
 
 
 [[algorithms-knn-examples-stream]]
@@ -350,6 +352,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -377,6 +380,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Eve"   | "Bob"   | 0.14285714285714285
 | "Dave"  | "Eve"   | 0.05
 |===
+--
 
 We use default values for the procedure configuration parameter for most parameters.
 The `randomSeed` and `concurrency` is set to produce the same result on every invocation.
@@ -390,6 +394,7 @@ The `topK` parameter is set to 1 to only return the single nearest neighbor for 
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and return the result in form of statistical and measurement values:
 [source, cypher, role=noplay]
 ----
@@ -403,6 +408,7 @@ YIELD nodesCompared, similarityPairs
 | nodesCompared | similarityPairs
 | 5             | 5
 |===
+--
 
 
 [[algorithms-knn-examples-mutate]]
@@ -411,6 +417,7 @@ YIELD nodesCompared, similarityPairs
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm, and write back results to the in-memory graph:
 [source, cypher, role=noplay]
 ----
@@ -431,6 +438,7 @@ YIELD nodesCompared, relationshipsWritten
 | nodesCompared | relationshipsWritten
 | 5             | 5
 |===
+--
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
@@ -448,6 +456,7 @@ For more details on the `write` mode in general, see xref::common-usage/running-
 
 
 [role=query-example]
+--
 .The following will run the algorithm, and write back results:
 [source, cypher, role=noplay]
 ----
@@ -468,5 +477,6 @@ YIELD nodesCompared, relationshipsWritten
 | nodesCompared | relationshipsWritten
 | 5             | 5
 |===
+--
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.

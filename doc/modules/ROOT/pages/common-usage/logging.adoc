@@ -1,7 +1,6 @@
 [[logging]]
 = Logging
-:description: This section describes logging features in the Neo4j Graph Data Science library.
-
+:description: This section describes logging features in the Neo4j Graph Data Science library. 
 
 In the GDS library there are two types of logging: debug logging and progress logging.
 

@@ -1,7 +1,7 @@
 [[alpha-algorithms-conductance]]
 [.alpha]
 = Conductance metric
-:description: This section describes the Conductance algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Conductance algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: conductance
 :algorithm: Conductance
@@ -133,6 +133,7 @@ CALL gds.graph.create(
 We now run the xref::algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.
 
 [role=query-example, group=louvain-conductance]
+--
 .The following will run the Louvain algorithm and store the results in `myGraph`:
 [source, cypher, role=noplay]
 ----
@@ -146,6 +147,7 @@ YIELD communityCount
 | communityCount
 | 3
 |===
+--
 
 Now our in-memory graph `myGraph` is populated with node properties under the key `community` that we can set as input for our evaluation using Conductance.
 The nodes are now assigned to communities in the following way:
@@ -178,6 +180,7 @@ This allows us to inspect the results directly or post-process them in Cypher wi
 For more details on the stream mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example, group=louvain-conductance]
+--
 .The following will run the Conductance algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -193,6 +196,7 @@ YIELD community, conductance
 | 3         | 0.23076923076923078
 | 5         | 0.2
 |===
+--
 
 We can see that the community of the weighted graph with the lowest conductance is community 5.
 This means that 5 is the community that is most "well-knit" in the sense that most of its relationship weights are internal to the community.

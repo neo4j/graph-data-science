@@ -1,6 +1,6 @@
 [[transaction-handling]]
 = Transaction Handling
-:description: This section describes the usage of transactions during the execution of an algorithm. When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement.
+:description: This section describes the usage of transactions during the execution of an algorithm. When an algorithm procedure is called from Cypher, the procedure call is executed within the same transaction as the Cypher statement. 
 
 
 [[tx-graph-projection]]
@@ -12,6 +12,7 @@ This means that changes from the Cypher transaction state are not visible to the
 For example, the following statement will only create an empty graph (assuming the `MyLabel` label was not already present in the Neo4j database):
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CREATE (n:MyLabel) // the new node is part of Cypher transaction state
@@ -27,10 +28,12 @@ RETURN nodeCount
 | nodeCount
 | 0
 |===
+--
 
 The situation is the same when using an anonymous projection with an algorithm procedure:
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CREATE (n:MyWccLabel) // the new node is part of Cypher transaction state
@@ -46,6 +49,7 @@ RETURN componentCount
 | componentCount
 | 0
 |===
+--
 
 
 [[tx-results-writing]]

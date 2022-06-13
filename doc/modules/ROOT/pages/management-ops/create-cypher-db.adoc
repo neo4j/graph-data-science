@@ -1,8 +1,7 @@
 [[create-cypher-db]]
 [.enterprise-edition]
 = Cypher on GDS graph
-:description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
-
+:description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library. 
 
 include::partial$/management-ops/alpha-note.adoc[]
 
@@ -30,6 +29,7 @@ Some known limitations are listed below:
 == Syntax
 
 [.create-cypher-db-syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.create.cypherdb(
@@ -58,6 +58,7 @@ YIELD
 | graphName              | String   | The name under which the graph is stored in the catalog.
 | createMillis           | Integer  | Milliseconds for creating the database.
 |===
+--
 
 
 [[create-cypher-db-example]]

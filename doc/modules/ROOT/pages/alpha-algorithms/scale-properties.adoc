@@ -1,11 +1,10 @@
 [[algorithms-scale-properties]]
 [.alpha]
 = Scale Properties
-:description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library. 
 
 :algorithm: Scale Properties
 :entity: node
-
 
 [[algorithms-scale-properties-intro]]
 == Introduction
@@ -211,6 +210,7 @@ In the following examples we will demonstrate how to scale the node properties o
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -235,6 +235,7 @@ RETURN gds.util.asNode(nodeId).name AS name, scaledProperty
 | "Polar"    | [1.0, 0.17863321799307957]
 | "West"     | [0.7580645161290323, 0.0]
 |===
+--
 
 In the results we can observe that the first element in the resulting `scaledProperty` we get the min-max-scaled values for `buildYear`, where the `Plaza` hotel has the minimum value and is scaled to zero, while the `Polar` hotel has the maximum value and is scaled to one.
 This can be verified with the example graph.
@@ -254,6 +255,7 @@ In this example we will scale the two hotel properties of `buildYear` and `avgRe
 The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -270,6 +272,7 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
 | nodePropertiesWritten
 | 8
 |===
+--
 
 The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
@@ -287,6 +290,7 @@ We imagine using the output as feature vector to input in a machine learning alg
 Additionally, we will include the `avgReview` property in our feature vector.
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -311,6 +315,7 @@ RETURN gds.util.asNode(nodeId).name AS name, scaledProperty AS features
 | "Polar"    | [-0.672387512096618, 2.583849534831454, 2.5705808402272767, 2.542770749364069]
 | "West"     | [-1.2910364511016934, -0.00809984180197948, 0.027968733177547028, 0.3316657499170525]
 |===
+--
 
 The resulting feature vector contains the standard-score scaled value for the `avgReview` property in the first list position.
 We can see that some values are negative and that the maximum value sticks out for the `Central` hotel.

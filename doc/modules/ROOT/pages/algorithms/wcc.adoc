@@ -1,10 +1,9 @@
 [[algorithms-wcc]]
 = Weakly Connected Components
-:description: This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: component ID
 :algorithm: Weakly Connected Components
-
 
 :directed:
 :undirected:
@@ -278,6 +277,7 @@ In the following examples we will demonstrate using the Weakly Connected Compone
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -291,6 +291,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 4                 | 176      | 176      | "176 Bytes"
 |===
+--
 
 
 [[algorithms-wcc-examples-stream]]
@@ -300,6 +301,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -320,6 +322,7 @@ ORDER BY componentId, name
 | "Mark"    | 3
 | "Michael" | 3
 |===
+--
 
 The result shows that the algorithm identifies two components.
 This can be verified in the xref::algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
@@ -334,6 +337,7 @@ The `weighted` option will be demonstrated in xref::algorithms/wcc.adoc#algorith
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stats` mode:
 [source, cypher, role=noplay]
 ----
@@ -347,6 +351,7 @@ YIELD componentCount
 | componentCount
 | 2
 |===
+--
 
 The result shows that `myGraph` has two components and this can be verified by looking at the xref::algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
 
@@ -357,6 +362,7 @@ The result shows that `myGraph` has two components and this can be verified by l
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -370,6 +376,7 @@ YIELD nodePropertiesWritten, componentCount;
 | nodePropertiesWritten | componentCount
 | 6                     | 2
 |===
+--
 
 [[algorithms-wcc-examples-write]]
 === Write
@@ -377,6 +384,7 @@ YIELD nodePropertiesWritten, componentCount;
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -390,6 +398,7 @@ YIELD nodePropertiesWritten, componentCount;
 | nodePropertiesWritten | componentCount
 | 6                     | 2
 |===
+--
 
 As we can see from the results, the nodes connected to one another are calculated by the algorithm as belonging to the same connected component.
 
@@ -406,6 +415,7 @@ We do this by specifying the threshold value with the `threshold` configuration 
 If a relationship does not have the specified weight property, the algorithm falls back to using a default value of zero.
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -428,6 +438,7 @@ ORDER BY ComponentId, Name
 | "Mark"    | 3
 | "Michael" | 3
 |===
+--
 
 As we can see from the results, the node named 'Bridget' is now in its own component, due to its relationship weight being less than the configured threshold and thus ignored.
 
@@ -467,6 +478,7 @@ We will use the weighted variant of WCC.
 
 _Step 1_
 [role=query-example, group=seeding]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -484,18 +496,21 @@ YIELD nodePropertiesWritten, componentCount;
 | nodePropertiesWritten | componentCount
 | 6                     | 3
 |===
+--
 
 _Step 2_
 
 After the algorithm has finished writing to Neo4j we want to create a new node in the database.
 
 [role=query-example, no-result=true, group=seeding]
+--
 .The following will create a new node in the Neo4j graph, with no component ID:
 [source, cypher, role=noplay]
 ----
 MATCH (b:User {name: 'Bridget'})
 CREATE (b)-[:LINK {weight: 2.0}]->(new:User {name: 'Mats'})
 ----
+--
 
 _Step 3_
 
@@ -503,6 +518,7 @@ Note, that we cannot use our already created graph as it does not contain the co
 We will therefore create a second in-memory graph that contains the previously computed component id.
 
 [role=query-example, no-result=true, group=seeding]
+--
 .The following will create a new graph containing the previously computed component id:
 [source, cypher, role=noplay]
 ----
@@ -516,11 +532,13 @@ CALL gds.graph.create(
   }
 )
 ----
+--
 
 _Step 4_
 
 
 [role=query-example, group=seeding]
+--
 .The following will run the algorithm in `stream` mode using `seedProperty`:
 [source, cypher, role=noplay]
 ----
@@ -545,6 +563,7 @@ ORDER BY componentId, name
 | "Mark"    | 3
 | "Michael" | 3
 |===
+--
 
 The result shows that despite not having the `seedProperty` when it was created, the node 'Mats' has been assigned to the same component as the node 'Bridget'.
 This is correct because these two nodes are connected.
@@ -558,6 +577,7 @@ Below is an example on how to use `seedProperty` in `write` mode.
 Note that the example below relies on xref::algorithms/wcc.adoc#algorithms-wcc-examples-seeding-steps[Steps 1 - 3] from the previous section.
 
 [role=query-example, group=seeding]
+--
 .The following will run the algorithm in `write` mode using `seedProperty`:
 [source, cypher, role=noplay]
 ----
@@ -576,6 +596,7 @@ YIELD nodePropertiesWritten, componentCount;
 | nodePropertiesWritten | componentCount
 | 1                     | 3
 |===
+--
 
 [NOTE]
 ====

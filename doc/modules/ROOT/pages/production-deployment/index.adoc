@@ -1,7 +1,6 @@
 [[production-deployment]]
 = Production deployment
-:description: This chapter explains advanced details with regards to common Neo4j components.
-
+:description: This chapter explains advanced details with regards to common Neo4j components. 
 
 This chapter is divided into the following sections:
 

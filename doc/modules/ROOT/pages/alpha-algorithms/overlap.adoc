@@ -1,8 +1,7 @@
 [[alpha-algorithms-similarity-overlap]]
 [.alpha]
 = Overlap Similarity
-:description: This section describes the Overlap Similarity algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Overlap Similarity algorithm in the Neo4j Graph Data Science library. 
 
 link:https://en.wikipedia.org/wiki/Overlap_coefficient[Overlap similarity] measures overlap between two sets.
 It is defined as the size of the intersection of two sets, divided by the size of the smaller of the two sets.

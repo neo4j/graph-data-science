@@ -1,8 +1,7 @@
 [[algorithms-modularity-optimization]]
 [.beta]
 = Modularity Optimization
-:description: This section describes the Modularity Optimization algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Modularity Optimization algorithm in the Neo4j Graph Data Science library. 
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 
@@ -219,6 +218,7 @@ CALL gds.graph.create(
 The following example demonstrates using the Modularity Algorithm on this weighted graph.
 
 [role=query-example]
+--
 .Running the Modularity Optimization algorithm in stream mode:
 [source, cypher, role=noplay]
 ----
@@ -239,10 +239,12 @@ ORDER BY name
 | "Elton"   | 4
 | "Frank"   | 4
 |===
+--
 
 It is also possible to write the assigned community ids back to the database using the `write` mode.
 
 [role=query-example]
+--
 .Running the Modularity Optimization algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -256,6 +258,7 @@ YIELD nodes, communityCount, ranIterations, didConverge
 | nodes | communityCount | ranIterations | didConverge
 | 6     | 2              | 3             | true
 |===
+--
 
 When using `write` mode the procedure will return information about the algorithm execution.
 In this example we return the number of processed nodes, the number of communities assigned to the nodes in the graph, the number of iterations and information whether the algorithm converged.
@@ -265,6 +268,7 @@ Running the algorithm without specifying the `relationshipWeightProperty` will d
 To instead mutate the in-memory graph with the assigned community ids, the `mutate` mode is used.
 
 [role=query-example]
+--
 .Running the Modularity Optimization algorithm in mutate mode:
 [source, cypher, role=noplay]
 ----
@@ -278,5 +282,6 @@ YIELD nodes, communityCount, ranIterations, didConverge
 | nodes | communityCount | ranIterations | didConverge
 | 6     | 2              | 3             | true
 |===
+--
 
 When using `mutate` mode the procedure will return information about the algorithm execution as in `write` mode.

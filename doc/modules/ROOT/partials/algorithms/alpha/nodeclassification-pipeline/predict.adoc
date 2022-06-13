@@ -138,6 +138,7 @@ We will use the model which we trained in the xref::algorithms/ml-models/nodecla
 [[algorithms-node-classification-pipelines-predict-examples-stream]]
 ==== Stream
 [role=query-example, group=nc]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.predict.stream('myGraph', {
@@ -166,6 +167,7 @@ RETURN
 As we can see, the model was able to predict the pink house into class 0, tan house into class 1, and yellow house into class 2.
 This makes sense, as all houses in class 0 had three stories, class 1 two stories and class 2 one story, and the same is true of the pink, tan and yellow houses, respectively.
 Additionally, we see that the model is confident in these predictions, as the confidence is >=79% in all cases.
+--
 
 [[algorithms-ml-nodeclassification-pipeline-examples-mutate]]
 ==== Mutate
@@ -178,6 +180,7 @@ The `mutate` mode is especially useful when multiple algorithms are used in conj
 For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
 [role=query-example, group=nc]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate('myGraph', {
@@ -194,6 +197,7 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.mutate('myGraph', {
 | nodePropertiesWritten
 | 6
 |===
+--
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.
 
@@ -209,6 +213,7 @@ The `write` mode enables directly persisting the results to the database.
 For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
 
 [role=query-example, group=nc]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.ml.pipeline.nodeClassification.predict.write('myGraph', {
@@ -225,5 +230,6 @@ CALL gds.alpha.ml.pipeline.nodeClassification.predict.write('myGraph', {
 | nodePropertiesWritten
 | 6
 |===
+--
 
 Since we specified also the `predictedProbabilityProperty` we are writing two properties for each of the 3 `UnknownHouse` nodes.

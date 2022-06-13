@@ -1,7 +1,6 @@
 [[catalog-graph-create]]
 = Creating graphs
-:description: This section details projecting GDS graphs using `native` projections.
-
+:description: This section details projecting GDS graphs using `native` projections. 
 
 A projected graph can be stored in the xref::management-ops/graph-catalog-ops.adoc[catalog] under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.
@@ -12,14 +11,18 @@ Recommended for both the development, and the production phase.
 
 
 [NOTE]
+--
 There is also a way to generate a random graph, see xref::alpha-algorithms/graph-generation.adoc[Graph Generation] documentation for more details.
+--
 
 [NOTE]
+--
 The projected graphs will reside in the catalog until:
 
 - the graph is dropped using xref::graph-drop.adoc[gds.graph.drop]
 - the Neo4j database from which to graph was projected is stopped or dropped
 - the Neo4j database management system is stopped.
+--
 
 
 [[graph-create-native-syntax]]
@@ -29,6 +32,7 @@ A native projection takes three mandatory arguments: `graphName`, `nodeProjectio
 In addition, the optional `configuration` parameter allows us to further configure the graph creation.
 
 [.graph-create-syntax]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.graph.create(
@@ -79,6 +83,7 @@ NOTE: To get information about a stored graph, such as its schema, one can use x
 | relationshipCount      | Integer  | The number of relationships stored in the projected graph.
 | createMillis           | Integer  | Milliseconds for creating the graph.
 |===
+--
 
 
 [[node-projection-syntax]]
@@ -237,6 +242,7 @@ A simple graph is a graph with only one node label and relationship type, i.e., 
 We are going to start with demonstrating how to load a simple graph by projecting only the `Person` node label and `KNOWS` relationship type.
 
 [role=query-example]
+--
 .Project `Person` nodes and `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
@@ -258,6 +264,7 @@ YIELD
 | graph     | nodeProjection                         | nodes  | relationshipProjection                                                        | rels
 | "persons" | {Person={label=Person, properties={}}} | 3      | {KNOWS={orientation=NATURAL, aggregation=DEFAULT, type=KNOWS, properties={}}} | 2
 |===
+--
 
 In the example above, we used a short-hand syntax for the node and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown in the `Results` table.
@@ -271,6 +278,7 @@ A multi-graph is a graph with multiple node labels and relationship types.
 To project multiple node labels and relationship types, we can adjust the projections as follows:
 
 [role=query-example]
+--
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
@@ -292,6 +300,7 @@ YIELD
 | graph             | nodeProjection                                                           | nodes  | rels
 | "personsAndBooks" | {Book={label=Book, properties={}}, Person={label=Person, properties={}}} | 5      | 6
 |===
+--
 
 In the example above, we used a short-hand syntax for the node and relationship projection.
 The used projections are internally expanded to the full `Map` syntax as shown for the `nodeProjection` in the Results table.
@@ -305,6 +314,7 @@ In GDS, we call this the `NATURAL` orientation.
 Additionally, we provide the functionality to load the relationships in the `REVERSE` or even `UNDIRECTED` orientation.
 
 [role=query-example]
+--
 .Project `Person` nodes and undirected `KNOWS` relationships:
 [source, cypher, role=noplay]
 ----
@@ -329,6 +339,7 @@ YIELD
 | graph             | knowsProjection                                                                  | nodes  | rels
 | "undirectedKnows" | {KNOWS={orientation=UNDIRECTED, aggregation=DEFAULT, type=KNOWS, properties={}}} | 3      | 4
 |===
+--
 
 To specify the orientation, we need to write the `relationshipProjection` with the extended Map-syntax.
 Projecting the `KNOWS` relationships `UNDIRECTED`, loads each relationship in both directions.
@@ -341,6 +352,7 @@ Thus, the `undirectedKnows` graph contains four relationships, twice as many as 
 To project node properties, we can either use the `nodeProperties` configuration parameter for shared properties, or extend an individual `nodeProjection` for a specific label.
 
 [role=query-example, group=node-properties]
+--
 .Project `Person` and `Book` nodes and `KNOWS` and `READ` relationships:
 [source, cypher, role=noplay]
 ----
@@ -370,6 +382,7 @@ RETURN graphName, nodeProjection.Book AS bookProjection, nodes, rels
 | graphName             | bookProjection                                                           | nodes  | rels
 | "graphWithProperties" | {label=Book, properties={price={defaultValue=5.0, property=price}, ratings={defaultValue=null, property=ratings}}} | 5      | 6
 |===
+--
 
 The projected `graphWithProperties` graph contains five nodes and six relationships.
 In the returned `bookProjection` we can observe, the node properties `price` and `ratings` are loaded for `Books`.
@@ -381,6 +394,7 @@ Not every book has a price specified in the example graph.
 In the following we check if the price was correctly projected:
 
 [role=query-example, group=node-properties]
+--
 .Verify the ratings property of Adam in the projected graph:
 [source, cypher, role=noplay]
 ----
@@ -396,6 +410,7 @@ ORDER BY price
 | "The Hobbit"  | 5.0
 | "Frankenstein"| 19.99
 |===
+--
 
 We can see, that the price was projected with the Hobbit having the default price of 5.0.
 
@@ -405,6 +420,7 @@ We can see, that the price was projected with the Hobbit having the default pric
 Analogous to node properties, we can either use the `relationshipProperties` configuration parameter or extend an individual `relationshipProjection` for a specific type.
 
 [role=query-example, group=rel-properties]
+--
 .Project `Person` and `Book` nodes and `READ` relationships with `numberOfPages` property:
 [source, cypher, role=noplay]
 ----
@@ -432,10 +448,12 @@ YIELD
 | graph                | readProjection                                                                                                                                            | nodes  | rels
 | "readWithProperties" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=DEFAULT}}}} | 5      | 4
 |===
+--
 
 Next, we will verify that the relationship property `numberOfPages` were correctly loaded.
 
 [role=query-example, group=rel-properties]
+--
 .Stream the relationship property `numberOfPages` of the projected graph:
 [source, cypher, role=noplay]
 ----
@@ -457,6 +475,7 @@ ORDER BY person ASC, numberOfPages DESC
 | "Florentin" |  "The Hobbit"        | 4.0
 | "Veselin"   |  "Frankenstein"      | NaN
 |===
+--
 
 We can see, that the `numberOfPages` property is loaded. The default property value is `Double.NaN` and could be changed using the Map-Syntax the same as for node properties in xref::graph-create-cypher.adoc#node-properties-example[Node properties].
 
@@ -474,6 +493,7 @@ If we do not need the count, we could use the `SINGLE` aggregation.
 
 // special case: COUNT example
 [role=query-example, group=count-aggregate]
+--
 .Project `Person` and `Book` nodes and `COUNT` aggregated `READ` relationships:
 [source, cypher, role=noplay]
 ----
@@ -510,10 +530,12 @@ YIELD
 | graph      | readProjection                                                                  | nodes  | rels
 | "readCount" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfReads={defaultValue=null, property=*, aggregation=COUNT}}}} | 5      | 3
 |===
+--
 
 Next, we will verify that the `READ` relationships were correctly aggregated.
 
 [role=query-example, group=count-aggregate]
+--
 .Stream the relationship property `numberOfReads` of the projected graph:
 [source, cypher, role=noplay]
 ----
@@ -534,6 +556,7 @@ ORDER BY numberOfReads DESC, person
 | "Adam"      |  "The Hobbit"        | 1.0
 | "Veselin"   |  "Frankenstein"      | 1.0
 |===
+--
 
 We can see, that the two READ relationships between Florentin, and the Hobbit result in `2` numberOfReads.
 
@@ -543,6 +566,7 @@ We can see, that the two READ relationships between Florentin, and the Hobbit re
 For graphs with relationship properties we can also use other aggregations.
 
 [role=query-example, group=sum-aggregate]
+--
 .Project `Person` and `Book` nodes and aggregated `READ` relationships by summing the `numberOfPages`:
 [source, cypher, role=noplay]
 ----
@@ -567,10 +591,12 @@ YIELD
 | graph      | readProjection                                                                  | nodes  | rels
 | "readSums" | {READ={orientation=NATURAL, aggregation=DEFAULT, type=READ, properties={numberOfPages={defaultValue=null, property=numberOfPages, aggregation=SUM}}}} | 5      | 3
 |===
+--
 
 Next, we will verify that the relationship property `numberOfPages` was correctly aggregated.
 
 [role=query-example, group=sum-aggregate]
+--
 .Stream the relationship property `numberOfPages` of the projected graph:
 [source, cypher, role=noplay]
 ----
@@ -592,6 +618,7 @@ ORDER BY numberOfPages DESC, person
 | "Adam"      |  "The Hobbit"        | 30.0
 | "Veselin"   |  "Frankenstein"      | 0.0
 |===
+--
 
 We can see, that the two READ relationships between Florentin and the Hobbit sum up to `46` numberOfReads.
 
@@ -603,6 +630,7 @@ Note that even if the flag is set to `false` such a relationship will still not 
 
 We can simulate such a case with the xref::graph-create-cypher.adoc#graph-create-examples[graph present in the Neo4j database]:
 
+--
 .Project `READ` and `KNOWS` relationships but only `Person` nodes, with `validateRelationships` set to true:
 [source, cypher]
 ----
@@ -625,6 +653,7 @@ YIELD
 ----
 org.neo4j.graphdb.QueryExecutionException: Failed to invoke procedure `gds.graph.create`: Caused by: java.lang.IllegalArgumentException: Failed to load a relationship because its target-node with id 3 is not part of the node query or projection. To ignore the relationship, set the configuration parameter `validateRelationships` to false.
 ----
+--
 
 We can see that the above query resulted in an exception being thrown.
 The exception message will provide information about the specific node id that was missing, which will help debugging underlying problems.

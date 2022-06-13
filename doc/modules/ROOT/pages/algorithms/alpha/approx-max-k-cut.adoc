@@ -1,7 +1,7 @@
 [[alpha-algorithms-approx-max-k-cut]]
 [.alpha]
 = Approximate Maximum k-cut
-:description: This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: approximate maximum k-cut
 :algorithm: Approximate Maximum k-cut
@@ -221,6 +221,7 @@ CALL gds.graph.create(
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -234,6 +235,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 7         | 15                | 488      | 488      | "488 Bytes"
 |===
+--
 
 
 [[algorithms-approx-max-k-cut-mutate-unweighted-example]]
@@ -242,6 +244,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -255,6 +258,7 @@ YIELD cutCost, nodePropertiesWritten
 | cutCost | nodePropertiesWritten
 | 13.0    | 7
 |===
+--
 
 We can see that when relationship weight is not taken into account we derive a cut into two (since we didn't override the default `k = 2`) communities of cost `13.0`.
 The total cost is represented by the `cutCost` column here.
@@ -264,6 +268,7 @@ Additionally, the graph 'myGraph' now has a node property `community` which stor
 To inspect which community each node belongs to we can xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties].
 
 [role=query-example]
+--
 .Stream node properties:
 [source, cypher, role=noplay]
 ----
@@ -284,6 +289,7 @@ RETURN gds.util.asNode(nodeId).name as name, propertyValue AS community
 | "Fiona"   | 1
 | "George"  | 1
 |===
+--
 
 Looking at our graph topology we can see that there are no relationships between the nodes of community `1`, and two relationships between the nodes of community `0`, namely `Alice -> Bridget` and `Charles -> Bridget`.
 However, since there are a total of eight relationships between `Bridget` and nodes of community `1`, and our graph is unweighted assigning `Bridget` to community `1` would not yield a cut of a higher total weight.
@@ -303,6 +309,7 @@ Note however, that for that solution the cut cost would remain the same.
 In this example we will have a look at how adding relationship weight can affect our solution.
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode, diving our nodes into two communities once again:
 [source, cypher, role=noplay]
 ----
@@ -323,12 +330,14 @@ YIELD cutCost, nodePropertiesWritten
 | cutCost | nodePropertiesWritten
 | 146.0   | 7
 |===
+--
 
 Since the `value` properties on our `TRANSACTION` relationships were all at least `1.0` and several of a larger value it's not surprising that we obtain a cut with a larger cost in the weighted case.
 
 Let us now xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] to once again inspect the node community distribution.
 
 [role=query-example]
+--
 .Stream node properties:
 [source, cypher, role=noplay]
 ----
@@ -349,6 +358,7 @@ RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
 | "Fiona"   | 1
 | "George"  | 1
 |===
+--
 
 Comparing this result with that of xref::algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[unweighted case] we can see that `Bridget` has moved to another community but the output is otherwise the same.
 Indeed, this makes sense by looking at our graph.
@@ -371,6 +381,7 @@ Note however, that for that solution the cut cost would remain the same.
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode using default configuration parameters:
 [source, cypher, role=noplay]
 ----
@@ -392,6 +403,7 @@ RETURN gds.util.asNode(nodeId).name AS name, communityId
 | "Fiona"   | 1
 | "George"  | 1
 |===
+--
 
 We can see that the result is what we expect, namely the same as in the xref::algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[mutate unweighted] example.
 

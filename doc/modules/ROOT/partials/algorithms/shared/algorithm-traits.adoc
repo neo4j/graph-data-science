@@ -1,5 +1,6 @@
 .Supported algorithm traits:
 [.graph-variants, caption=]
+--
 ifdef::directed[]
 [.supported]
 endif::[]
@@ -39,3 +40,4 @@ ifndef::weighted[]
 [.not-supported]
 endif::[]
 xref::introduction.adoc#introduction-algorithms-weighted[Weighted]
+--

@@ -1,10 +1,9 @@
 [[algorithms-article-rank]]
 = Article Rank
-:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the {algorithm} algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: score
 :algorithm: Article Rank
-
 
 :directed:
 :undirected:
@@ -312,6 +311,7 @@ CALL gds.graph.create(
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -328,6 +328,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 8         | 14                | 696     | 696     | "696 Bytes"
 |===
+--
 
 
 [[algorithms-article-rank-examples-stream]]
@@ -337,6 +338,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -359,6 +361,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.18152391630760797
 | "Site D"  | 0.18152391630760797
 |===
+--
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
 Below, one can find an example for xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-weighted[weighted graphs].
@@ -372,6 +375,7 @@ Below, one can find an example for xref::algorithms/article-rank.adoc#algorithms
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and return statistics about the centrality scores.
 [source, cypher, role=noplay]
 ----
@@ -386,6 +390,7 @@ RETURN centralityDistribution.max AS max
 | max
 | 0.5607099533081055
 |===
+--
 
 
 [[algorithms-article-rank-examples-mutate]]
@@ -394,6 +399,7 @@ RETURN centralityDistribution.max AS max
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -409,6 +415,7 @@ YIELD nodePropertiesWritten, ranIterations
 | nodePropertiesWritten | ranIterations
 | 8                     | 19
 |===
+--
 
 
 [[algorithms-article-rank-examples-write]]
@@ -417,6 +424,7 @@ YIELD nodePropertiesWritten, ranIterations
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -432,6 +440,7 @@ YIELD nodePropertiesWritten, ranIterations
 | nodePropertiesWritten | ranIterations
 | 8                     | 19
 |===
+--
 
 
 [[algorithms-article-rank-examples-weighted]]
@@ -446,6 +455,7 @@ Note, that negative relationship weights are ignored during the computation.
 In the following example, we use the `weight` property of the input graph as relationship weight property.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode using relationship weights:
 [source, cypher, role=noplay]
 ----
@@ -470,6 +480,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.15281123078335393
 | "Site D"  | 0.15281123078335393
 |===
+--
 
 As in the unweighted example, the "Home" node has the highest score.
 In contrast, the "Product" now has the second highest instead of the fourth highest score.
@@ -485,6 +496,7 @@ If all scores change less than the configured tolerance, the iteration is aborte
 Note, that setting a higher tolerance leads to earlier convergence, but also to less accurate centrality scores.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode using a high `tolerance` value:
 [source, cypher, role=noplay]
 ----
@@ -509,6 +521,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.16888888888888892
 | "Site D"  | 0.16888888888888892
 |===
+--
 
 We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example].
 However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
@@ -524,6 +537,7 @@ For a given set of source nodes `S`, the initial value of each source node is se
 The following examples show how to run Eigenvector centrality centered around 'Site A' and 'Site B'.
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -550,6 +564,7 @@ ORDER BY score DESC, name ASC
 | "Site C"  | 0.002490527753147571
 | "Site D"  | 0.002490527753147571
 |===
+--
 
 Comparing these results to the ones from the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
@@ -562,6 +577,7 @@ A common scaler is the `L1Norm`, which normalizes each score to a value between 
 A description of all available scalers can be found in the documentation for the xref::alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode and returns normalized results:
 [source, cypher, role=noplay]
 ----
@@ -587,5 +603,6 @@ ORDER BY score DESC, name ASC
 | "Site D"  | 0.08907776212918608
 
 |===
+--
 
 Comparing the results with the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example], we can see that the relative order of scores is the same.

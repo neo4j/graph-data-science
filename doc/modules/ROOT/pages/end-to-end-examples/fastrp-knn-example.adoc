@@ -89,6 +89,7 @@ Please see the xref::algorithms/fastrp.adoc#algorithms-embeddings-fastrp-syntax[
 Since we want to use the embeddings as input when we run kNN later we use FastRP's xref::common-usage/running-algos.adoc#running-algos-mutate[`mutate` mode].
 
 [role=query-example, group=fastrp-knn]
+--
 .Create node embeddings using FastRP:
 [source, cypher, role=noplay]
 ----
@@ -110,6 +111,7 @@ YIELD nodePropertiesWritten
 | nodePropertiesWritten
 | 13
 |===
+--
 
 
 == Similarities with kNN
@@ -121,6 +123,7 @@ Please see the xref::algorithms/knn.adoc#algorithms-knn-syntax[syntax section] o
 Note that we use the algorithm's xref::common-usage/running-algos.adoc#running-algos-write[`write` mode] to write the properties and relationships back to our database, so that we can analyze them later using Cypher.
 
 [role=query-example, group=fastrp-knn]
+--
 .Run kNN with FastRP node embeddings as input:
 [source, cypher, role=noplay]
 ----
@@ -144,6 +147,7 @@ RETURN nodesCompared, relationshipsWritten, similarityDistribution.mean as meanS
 | nodesCompared | relationshipsWritten | meanSimilarity
 | 13            | 26                   | 0.8341259589562049
 |===
+--
 
 As we can see the mean similarity between nodes is quite high.
 This is due to the fact that we have a small example where there are no long paths between nodes leading to many similar FastRP node embeddings.
@@ -156,6 +160,7 @@ We can use the `SIMILARITY` relationship type to filter out the relationships we
 And since we just care about similarities between people for our product recommendation engine, we make sure to only match nodes with the `Person` label.
 
 [role=query-example, group=fastrp-knn]
+--
 .List pairs of people that are similar:
 [source, cypher, role=noplay , group=fastrp-knn]
 ----
@@ -174,6 +179,7 @@ ORDER BY similarity DESCENDING, person1, person2
 | "Elsa"  | "Dan"   | 0.9606010317802429
 | "Jeff"  | "Annie" | 0.6309423446655273
 |===
+--
 
 Our kNN results indicate among other things that the `Person` nodes named "Annie" and "Matt" are very similar.
 Looking at the `BUYS` relationships for these two nodes we can see that such a conclusion makes sense.
@@ -188,6 +194,7 @@ Since they are similar, we can assume that products purchased by only one of the
 By this principle we can derive product recommendations for the `Person` named "Matt" using a simple Cypher query.
 
 [role=query-example, group=fastrp-knn]
+--
 .Product recommendations for `Person` node with name "Matt":
 [source, cypher, role=noplay , group=fastrp-knn]
 ----
@@ -204,6 +211,7 @@ RETURN p2.name as recommendation
 | recommendation
 | "Kale"
 |===
+--
 
 Indeed, "Kale" is the one product that the `Person` named "Annie" buys that is also not purchased by the `Person` named "Matt".
 

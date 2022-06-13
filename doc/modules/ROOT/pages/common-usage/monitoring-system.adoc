@@ -1,8 +1,7 @@
 [.enterprise-edition]
 [[monitoring-system]]
 = Monitoring system
-:description: This section describes features for monitoring a system's capacity and analytics workload using the Neo4j Graph Data Science library.
-
+:description: This section describes features for monitoring a system's capacity and analytics workload using the Neo4j Graph Data Science library. 
 
 GDS supports multiple users concurrently working on the same system.
 Typically, GDS procedures are resource heavy in the sense that they may use a lot of memory and/or many CPU cores to do their computation.
@@ -20,6 +19,7 @@ It will give you information on the capacity of the DBMS's JVM instance in terms
 === Syntax
 
 [.system-monitor-syntax]
+--
 .Monitor the system capacity and analytics workload:
 [source, cypher, role=noplay]
 ----
@@ -46,6 +46,7 @@ YIELD
 | jvmHeapStatus                 | Map         | The above-mentioned heap metrics in human-readable form.
 | ongoingGdsProcedures          | List of Map | A list of maps containing resource usage and progress information for all GDS procedures (of all users) currently running on the Neo4j instance. Each map contains the name of the procedure, how far it has progressed, its estimated memory usage as well as how many CPU cores it will try to use at most.
 |===
+--
 
 [NOTE]
 ====

@@ -17,6 +17,7 @@ The feature is useful in the following, exemplary scenarios:
 == Syntax
 
 [.graph-export-syntax]
+--
 .Export an in-memory graph to a new database in the Neo4j databases directory:
 [source, cypher, role=noplay]
 ----
@@ -65,6 +66,7 @@ YIELD
 | relationshipPropertyCount | Integer  | The number of relationship properties exported.
 | writeMillis               | Integer  | Milliseconds for writing the graph into the new database.
 |===
+--
 
 
 == Example

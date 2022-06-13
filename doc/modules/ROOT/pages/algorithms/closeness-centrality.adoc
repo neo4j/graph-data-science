@@ -1,8 +1,7 @@
 [[algorithms-closeness-centrality]]
 [.alpha]
 = Closeness Centrality
-:description: This section describes the Closeness Centrality algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Closeness Centrality algorithm in the Neo4j Graph Data Science library. 
 
 // tag::introduction[]
 Closeness centrality is a way of detecting nodes that are able to spread information very efficiently through a graph.

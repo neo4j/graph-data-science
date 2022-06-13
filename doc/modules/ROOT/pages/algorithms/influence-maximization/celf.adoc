@@ -1,11 +1,10 @@
 [[algorithms-celf]]
 [.alpha]
 = CELF
-:description: This section describes the Cost Effective Lazy Forward (CELF) influence maximization algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Cost Effective Lazy Forward (CELF) influence maximization algorithm in the Neo4j Graph Data Science library. 
 :entity: influenceMaximization
 :result: spread
 :algorithm: CELF
-
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
@@ -159,6 +158,7 @@ This allows us to inspect the results directly or post-process them in Cypher wi
 For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -176,3 +176,4 @@ ORDER BY spread ASC
 | "Ethan"   | 2.701
 | "Michael" | 3.8
 |===
+--

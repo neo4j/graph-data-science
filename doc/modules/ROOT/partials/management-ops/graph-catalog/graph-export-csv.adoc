@@ -18,6 +18,7 @@ The `gds.export.location` parameter must be configured for this feature.
 == Syntax
 
 [.graph-export-syntax]
+--
 .Export a named graph to a set of CSV files:
 [source, cypher, role=noplay]
 ----
@@ -65,6 +66,7 @@ YIELD
 | relationshipPropertyCount | Integer  | The number of relationship properties exported.
 | writeMillis               | Integer  | Milliseconds for writing the graph into the new database.
 |===
+--
 
 == Estimation
 
@@ -73,6 +75,7 @@ Using the `gds.beta.graph.export.csv.estimate` procedure, it is possible to esti
 The estimation uses sampling to generate a more accurate estimate.
 
 [.estimate-syntax]
+--
 .Estimate the required disk space for exporting a named graph to CSV files.:
 [source, cypher, role=noplay]
 ----
@@ -121,6 +124,7 @@ YIELD
 | heapPercentageMin     | Float     | The minimum percentage of the configured maximum heap required.
 | heapPercentageMax     | Float     | The maximum percentage of the configured maximum heap required.
 |===
+--
 
 
 == Export format

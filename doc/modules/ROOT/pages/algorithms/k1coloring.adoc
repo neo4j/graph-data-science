@@ -1,8 +1,7 @@
 [[algorithms-k1coloring]]
 [.beta]
 = K-1 Coloring
-:description: This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library. 
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 
@@ -244,6 +243,7 @@ CALL gds.graph.create('myGraph', 'Person', 'LIKES')
 In the following examples we will demonstrate using the K-1 Coloring algorithm on this graph.
 
 [role=query-example]
+--
 .Running the K-1 Coloring algorithm in stream mode:
 [source, cypher, role=noplay]
 ----
@@ -262,10 +262,12 @@ ORDER BY name
 | "Charles" | 2
 | "Doug"    | 1
 |===
+--
 
 It is also possible to write the assigned colors back to the database using the `write` mode.
 
 [role=query-example]
+--
 .Running the K-1 Coloring algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -279,6 +281,7 @@ YIELD nodeCount, colorCount, ranIterations, didConverge
 | nodeCount | colorCount | ranIterations | didConverge
 | 4         | 3          | 1             | true
 |===
+--
 
 When using `write` mode the procedure will return information about the algorithm execution.
 In this example we return the number of processed nodes, the number of colors used to color the graph, the number of iterations and information whether the algorithm converged.
@@ -286,6 +289,7 @@ In this example we return the number of processed nodes, the number of colors us
 To instead mutate the in-memory graph with the assigned colors, the `mutate` mode can be used as follows.
 
 [role=query-example]
+--
 .Running the K-1 Coloring algorithm in mutate mode:
 [source, cypher, role=noplay]
 ----
@@ -299,10 +303,12 @@ YIELD nodeCount, colorCount, ranIterations, didConverge
 | nodeCount | colorCount | ranIterations | didConverge
 | 4         | 3          | 1             | true
 |===
+--
 
 Similar to the `write` mode, `stats` mode can run the algorithm and return only the execution statistics without persisting the results.
 
 [role=query-example]
+--
 .Running the K-1 Coloring algorithm in stats mode:
 [source, cypher, role=noplay]
 ----
@@ -316,3 +322,4 @@ YIELD nodeCount, colorCount, ranIterations, didConverge
 | nodeCount | colorCount | ranIterations | didConverge
 | 4         | 3          | 1             | true
 |===
+--

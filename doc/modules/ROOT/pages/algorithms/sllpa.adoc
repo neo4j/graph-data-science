@@ -1,7 +1,7 @@
 [[algorithms-sllpa]]
 [.alpha]
 = Speaker-Listener Label Propagation
-:description: This section describes the Speaker-Listener Label Propagation algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Speaker-Listener Label Propagation algorithm in the Neo4j Graph Data Science library. 
 :entity: pregel
 :result: community IDs
 :algorithm: SLLPA
@@ -253,6 +253,7 @@ This allows us to inspect the results directly or post-process them in Cypher wi
 For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example, no-result=true]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -278,5 +279,6 @@ RETURN gds.util.asNode(nodeId).name AS Name, values.communityIds AS communityIds
 | "James"    | [1]
 | "Khalid"   | [1]
 |===
+--
 
 Due to the randomness of the algorithm, the results will tend to vary between runs.

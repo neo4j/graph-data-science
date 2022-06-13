@@ -1,7 +1,6 @@
 [[installation]]
 = Installation
-:description: This chapter provides instructions for installation and basic usage of the Neo4j Graph Data Science library.
-
+:description: This chapter provides instructions for installation and basic usage of the Neo4j Graph Data Science library. 
 
 The Neo4j Graph Data Science (GDS) library is delivered as a plugin to the Neo4j Graph Database.
 The plugin needs to be installed into the database and added to the allowlist in the Neo4j configuration.

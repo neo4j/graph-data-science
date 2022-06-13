@@ -1,7 +1,6 @@
 [[graph-catalog-relationship-ops]]
 = Relationship operations
-:description: This section details the operations available over relationships and relationship properties stored in projected graphs within the Neo4j Graph Data Science library.
-
+:description: This section details the operations available over relationships and relationship properties stored in projected graphs within the Neo4j Graph Data Science library. 
 
 The graphs in the Neo4j Graph Data Science Library support properties for relationships.
 We provide multiple operations to work with the stored relationship-properties in projected graphs.
@@ -290,6 +289,7 @@ The most basic case for streaming relationship information from a named graph is
 In the example below we stream the relationship property `score`.
 
 [role=query-example]
+--
 .Stream a single relationship property:
 [source, cypher, role=noplay]
 ----
@@ -330,11 +330,13 @@ ORDER BY source ASC, target ASC
 | "Dave"  | "Guitar"      | "LIKES"           | 3.0
 | "Dave"  | "Synthesizer" | "LIKES"           | 1.0
 |===
+--
 
 As we can see from the results, we get two relationship types (`SIMILAR` and `LIKES`) that have the `score` relationship property.
 We can further on filter the relationship types we want to stream, this is demonstrated in the next example.
 
 [role=query-example]
+--
 .Stream a single relationship property for specific relationship type:
 [source, cypher, role=noplay]
 ----
@@ -368,6 +370,7 @@ ORDER BY source ASC, target ASC
 | "Dave"  | "Bob"   | "SIMILAR"         | 0.6666666666666666
 | "Dave"  | "Carol" | "SIMILAR"         | 0.3333333333333333
 |===
+--
 
 [[catalog-graph-stream-relationship-properties-example]]
 ==== Multiple properties
@@ -375,6 +378,7 @@ ORDER BY source ASC, target ASC
 It is also possible to stream multiple relationship properties.
 
 [role=query-example]
+--
 .Stream multiple relationship properties:
 [source, cypher, role=noplay]
 ----
@@ -416,6 +420,7 @@ ORDER BY source ASC, target ASC
 | "Dave"  | "Synthesizer" | "LIKES"           | "score"               | 1.0
 | "Dave"  | "Synthesizer" | "LIKES"           | "strength"            | 1.0
 |===
+--
 
 
 ==== Multiple relationship types
@@ -423,6 +428,7 @@ ORDER BY source ASC, target ASC
 Similar to the multiple relationship properties we can stream properties for multiple relationship types.
 
 [role=query-example]
+--
 .Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
 ----
@@ -471,6 +477,7 @@ ORDER BY source ASC, target ASC
 | "Dave"  | "Guitar"      | "LIKES"           | "score"               | 3.0
 | "Dave"  | "Synthesizer" | "LIKES"           | "score"               | 1.0
 |===
+--
 
 NOTE: The properties we want to stream must exist for each specified relationship type.
 
@@ -487,6 +494,7 @@ NOTE: Relationships are always written using a single thread.
 ==== Relationship type
 
 [role=query-example]
+--
 .Write relationships to Neo4j:
 [source, cypher, role=noplay]
 ----
@@ -506,6 +514,7 @@ YIELD
 | graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
 | "personsAndInstruments" | "SIMILAR"        | null                 | 10                   | 0
 |===
+--
 
 By default, no relationship properties will be written, as it can be seen from the results, the `relationshipProperty` value is `null` and `propertiesWritten` are `0`.
 
@@ -522,6 +531,7 @@ The relationships in this example are undirected because we used xref::algorithm
 To write relationship properties, these have to be explicitly specified.
 
 [role=query-example]
+--
 .Write relationships and their properties to Neo4j:
 [source, cypher, role=noplay]
 ----
@@ -543,6 +553,7 @@ YIELD
 | graphName               | relationshipType | relationshipProperty | relationshipsWritten | propertiesWritten
 | "personsAndInstruments" | "SIMILAR"        | "score"              | 10                   | 10
 |===
+--
 
 
 [[catalog-graph-delete-rel-type]]
@@ -558,6 +569,7 @@ If we still want to delete these relationships we need to xref::graph-drop.adoc[
 ====
 
 [role=query-example]
+--
 .Delete all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
@@ -577,3 +589,4 @@ YIELD
 | graphName               | relationshipType | deletedRelationships | deletedProperties
 | "personsAndInstruments" | "SIMILAR"        | 10                   | {score=10}
 |===
+--

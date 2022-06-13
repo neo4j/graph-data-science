@@ -8,6 +8,7 @@ Information about models in the catalog can be retrieved using the `gds.beta.mod
 == Syntax
 
 [.model-list-syntax]
+--
 .List models from the catalog:
 [source, cypher, role=noplay]
 ----
@@ -30,6 +31,7 @@ YIELD
 |===
 
 include::partial$/model-catalog/shared/model-info-result.adoc[]
+--
 
 == Examples
 
@@ -38,6 +40,7 @@ Once we have trained models in the catalog we can see information about either a
 === Listing all models
 
 [role=query-example]
+--
 .Listing detailed information about all models:
 [source, cypher, role=noplay]
 ----
@@ -52,10 +55,12 @@ RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 | modelName   | loaded  | shared | stored
 | "my-model"  |  true   | false  | false
 |===
+--
 
 === Listing a specific model
 
 [role=query-example]
+--
 .Listing detailed information about specific model:
 [source, cypher, role=noplay]
 ----
@@ -70,3 +75,4 @@ RETURN modelInfo.modelName AS modelName, loaded, shared, stored
 | modelName   | loaded  | shared | stored
 | "my-model"  |  true   | false  | false
 |===
+--

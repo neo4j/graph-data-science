@@ -1,8 +1,7 @@
 [[algorithms-dfs]]
 [.alpha]
 = Depth First Search
-:description: This section describes the Depth First Search traversal algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Depth First Search traversal algorithm in the Neo4j Graph Data Science library. 
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
@@ -85,6 +84,7 @@ In the following examples we will demonstrate using the Depth First Search algor
 If we do not specify any of the options for early termination, the whole graph is visited:
 
 [role=query-example]
+--
 .Running the Depth First Search algorithm:
 [source, cypher, role=noplay]
 ----
@@ -107,10 +107,12 @@ ORDER BY tags
 | "d"
 | "e"
 |===
+--
 
 If specifying d and e as target nodes, not all nodes at distance 1 will be visited due to the depth first traversal order, in which node d is reached before b:
 
 [role=query-example]
+--
 .Running the Depth First Search algorithm with target nodes:
 [source, cypher, role=noplay]
 ----
@@ -131,9 +133,11 @@ ORDER BY tags
 | "c"
 | "d"
 |===
+--
 
 
 [role=query-example]
+--
 .Running the Depth First Search algorithm with maxDepth:
 [source, cypher, role=noplay]
 ----
@@ -154,5 +158,6 @@ ORDER BY tags
 | "b"
 | "c"
 |===
+--
 
 In the above case, nodes d and e were not visited since they are at distance 2 from a.

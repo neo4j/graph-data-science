@@ -51,6 +51,7 @@ The primary metric may not be a `*` expansion due to the ambiguity of which of t
 === Syntax
 
 [.include-with-train]
+--
 .Run Node Classification in train mode on a named graph:
 [source, cypher, role=noplay]
 ----
@@ -154,6 +155,7 @@ The structure of `modelInfo` is:
 <7> Numeric value for the evaluation of the winning model on the outer train set.
 <8> The `train` entry lists the scores over the `train` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
 <9> The `validation` entry lists the scores over the `validation` set for all candidate models (e.g., `params`). Each such result is in turn also a map with keys `params`, `avg`, `min` and `max`.
+--
 
 [[algorithms-ml-nodeclassification-examples-train]]
 === Example
@@ -208,6 +210,7 @@ We will train a model to predict the class in which a house belongs, based on it
 
 [[algorithms-ml-nodeclassification-pipeline-examples-train-query]]
 [role=query-example,group=nc]
+--
 .The following will train a model using a pipeline:
 [source, cypher, role=noplay]
 ----
@@ -236,3 +239,4 @@ RETURN
 Here we can observe that the model candidate with penalty `0.0625` performed the best in the training phase, with an `F1_WEIGHTED` score nearing 1 over the train graph as well as on the test graph.
 This indicates that the model reacted very well to the train graph, and was able to generalize fairly well to unseen data.
 Notice that this is just a toy example on a very small graph. In order to achieve a higher test score, we may need to use better features, a larger graph, or different model configuration.
+--

@@ -1,10 +1,9 @@
 [[algorithms-node-similarity]]
 = Node Similarity
-:description: This section describes the Node Similarity algorithm in the Neo4j Graph Data Science library. The algorithm is based on the Jaccard Similarity score.
+:description: This section describes the Node Similarity algorithm in the Neo4j Graph Data Science library. The algorithm is based on the Jaccard Similarity score. 
 :entity: relationship
 :result: similarity score
 :algorithm: Node Similarity
-
 
 :directed:
 :undirected:
@@ -326,6 +325,7 @@ In the following examples we will demonstrate using the Node Similarity algorith
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -342,6 +342,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 9         | 9                 | 2592     | 2808     | "[2592 Bytes \... 2808 Bytes]"
 |===
+--
 
 
 [[algorithms-node-similarity-examples-stream]]
@@ -350,6 +351,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -374,6 +376,7 @@ ORDER BY similarity DESCENDING, Person1, Person2
 | "Carol" | "Dave"  | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
 |===
+--
 
 We use default values for the procedure configuration parameter.
 TopK is set to 10, topN is set to 0.
@@ -393,6 +396,7 @@ This would return similarities for pairs of Instruments and not compute any simi
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
@@ -406,6 +410,7 @@ YIELD nodesCompared, similarityPairs
 | nodesCompared | similarityPairs
 | 4             | 10
 |===
+--
 
 
 [[algorithms-node-similarity-examples-mutate]]
@@ -414,6 +419,7 @@ YIELD nodesCompared, similarityPairs
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm, and write back results to the in-memory graph:
 [source, cypher, role=noplay]
 ----
@@ -430,6 +436,7 @@ YIELD nodesCompared, relationshipsWritten
 | nodesCompared | relationshipsWritten
 | 4             | 10
 |===
+--
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
@@ -446,6 +453,7 @@ For more details on the `write` mode in general, see xref::common-usage/running-
 
 
 [role=query-example]
+--
 .The following will run the algorithm, and write back results:
 [source, cypher, role=noplay]
 ----
@@ -462,6 +470,7 @@ YIELD nodesCompared, relationshipsWritten
 | nodesCompared | relationshipsWritten
 | 4             | 10
 |===
+--
 
 As we can see from the results, the number of created relationships is equal to the number of rows in the streaming example.
 
@@ -500,6 +509,7 @@ TopK and bottomK cannot be 0, used in conjunction, and the default value is 10.
 If neither is specified, topK is used.
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream the top 1 result per node:
 [source, cypher, role=noplay]
 ----
@@ -518,9 +528,11 @@ ORDER BY Person1
 | "Carol" | "Alice" | 0.3333333333333333
 | "Dave"  | "Alice" | 1.0
 |===
+--
 
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream the bottom 1 result per node:
 [source, cypher, role=noplay]
 ----
@@ -539,6 +551,7 @@ ORDER BY Person1
 | "Carol" | "Alice" | 0.3333333333333333
 | "Dave"  | "Carol" | 0.3333333333333333
 |===
+--
 
 
 [[algorithms-node-similarity-examples-limits-topn-bottomn]]
@@ -551,6 +564,7 @@ For bottomN, the N smallest similarity scores are returned.
 A value of 0 means no global limit is imposed and all results from topK or bottomK are returned.
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream the 3 highest out of the top 1 results per node:
 [source, cypher, role=noplay]
 ----
@@ -568,6 +582,7 @@ ORDER BY similarity DESC, Person1, Person2
 | "Dave"  | "Alice" | 1.0
 | "Bob"   | "Alice" | 0.6666666666666666
 |===
+--
 
 
 [[algorithms-node-similarity-examples-degree-similarity-cutoff]]
@@ -577,6 +592,7 @@ Degree cutoff is a lower limit on the node degree for a node to be considered in
 This value can not be lower than 1.
 
 [role=query-example]
+--
 .The following will ignore nodes with less than 3 LIKES relationships:
 [source, cypher, role=noplay]
 ----
@@ -593,6 +609,7 @@ ORDER BY Person1
 | "Alice" | "Dave"  | 1.0
 | "Dave"  | "Alice" | 1.0
 |===
+--
 
 Similarity cutoff is a lower limit for the similarity score to be present in the result.
 The default value is very small (`1E-42`) to exclude results with a similarity score of 0.
@@ -603,6 +620,7 @@ Setting similarity cutoff to 0 may yield a very large result set, increased runt
 ====
 
 [role=query-example]
+--
 .The following will ignore node pairs with a similarity score less than 0.5:
 [source, cypher, role=noplay]
 ----
@@ -623,6 +641,7 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 1.0
 | "Dave"  | "Bob"   | 0.6666666666666666
 |===
+--
 
 
 [[algorithms-node-similarity-examples-weighted]]
@@ -637,6 +656,7 @@ Weighted jaccard similarity is only defined for values greater or equal to 0.
 ====
 
 [role=query-example]
+--
 .The following query will respect relationship properties in the similarity computation:
 [source, cypher, role=noplay]
 ----
@@ -657,6 +677,7 @@ ORDER BY Person1
 | "Dave"  | "Alice" | 0.8333333333333334
 | "Dave"  | "Bob"   | 0.6666666666666666
 |===
+--
 
 It can be seen that the similarity between Alice and Dave decreased compared to the non-weighted version of this algorithm.
 This is the case as the strength of the relationship between Alice and Bongos is reduced and both persons now only share 2.5 out of 3 possible instruments.

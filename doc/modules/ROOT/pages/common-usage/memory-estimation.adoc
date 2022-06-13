@@ -1,7 +1,6 @@
 [[memory-estimation]]
 = Memory Estimation
-:description: This section describes how to estimate memory requirements for the projected graph model used by the Neo4j Graph Data Science library.
-
+:description: This section describes how to estimate memory requirements for the projected graph model used by the Neo4j Graph Data Science library. 
 
 The graph algorithms library operates completely on the heap, which means we'll need to configure our Neo4j Server with a much larger heap size than we would for transactional workloads.
 The diagram belows shows how memory is used by the projected graph model:
@@ -177,11 +176,13 @@ For that use case we have _sudo mode_ which allows you to manually skip heap con
 To enable sudo mode, add the sudo parameter when calling a procedure. Here is an example of calling the popular Louvain community detection algorithm in sudo mode:
 
 [role=query-example]
+--
 .Run Louvain in sudo mode:
 [source, cypher, role=noplay]
 ----
 CALL gds.louvain.write('myGraph', { writeProperty: 'community', sudo: true })
 YIELD communityCount, modularity, modularities
 ----
+--
 
 Accidentally enabling sudo mode when calling a procedure, causing it to run out of memory, will not significantly damage your installation, but it will waste your time.

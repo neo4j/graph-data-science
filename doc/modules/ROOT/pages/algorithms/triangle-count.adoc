@@ -1,10 +1,9 @@
 [[algorithms-triangle-count]]
 = Triangle Count
-:description: This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: triangle count
 :algorithm: Triangle Count
-
 
 :undirected:
 :homogeneous:
@@ -312,6 +311,7 @@ In the following examples we will demonstrate using the Triangle Count algorithm
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -325,6 +325,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 16                | 152      | 152      | "152 Bytes"
 |===
+--
 
 Note that the relationship count is 16 although we only created 8 relationships in the original Cypher statement.
 This is because we used the `UNDIRECTED` orientation, which will project each relationship in each direction, effectively doubling the number of relationships.
@@ -338,6 +339,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 .The following will run the algorithm in `stream` mode:
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.stream('myGraph')
@@ -357,6 +359,7 @@ ORDER BY triangleCount DESC
 | "Mark"    | 1
 | "Alice"   | 0
 |===
+--
 
 Here we find that the 'Michael' node has the most triangles.
 This can be verified in the xref::algorithms/triangle-count.adoc#algorithms-triangle-count-examples[example graph].
@@ -372,6 +375,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.stats('myGraph')
@@ -384,6 +388,7 @@ YIELD globalTriangleCount, nodeCount
 | globalTriangleCount | nodeCount
 | 3                   | 6
 |===
+--
 
 Here we can see that the graph has six nodes with a total number of three triangles.
 Comparing this to the xref::algorithms/triangle-count.adoc#algorithms-triangle-count-examples-stream[stream example] we can see that the 'Michael' node has a triangle count equal to the global triangle count.
@@ -397,6 +402,7 @@ In other words, that node is part of all of the triangles in the graph and thus 
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -412,6 +418,7 @@ YIELD globalTriangleCount, nodeCount
 | globalTriangleCount | nodeCount
 | 3                   | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `triangles` which stores the triangle count for each node.
@@ -424,6 +431,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -439,6 +447,7 @@ YIELD globalTriangleCount, nodeCount
 | globalTriangleCount | nodeCount
 | 3                   | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, each of the six nodes now has a new property `triangles` in the Neo4j database, containing the triangle count for that node.
@@ -456,6 +465,7 @@ The nodes excluded from the computation get assigned a triangle count of `-1`.
 
 .The following will run the algorithm in `stream` mode with the `maxDegree` parameter:
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.triangleCount.stream('myGraph', {
@@ -477,6 +487,7 @@ ORDER BY name ASC
 | "Michael" | -1
 | "Will"    | 0
 |===
+--
 
 Running the algorithm on the example graph with `maxDegree: 4` excludes the 'Michael' node from the computation, as it has a degree of 5.
 
@@ -492,6 +503,7 @@ To do this we make use of the `alpha` procedure `gds.alpha.triangles`.
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 [role=query-example]
+--
 .The following will compute a stream of node IDs for each triangle and return the name property of the nodes:
 [source, cypher, role=noplay]
 ----
@@ -511,6 +523,7 @@ RETURN
 | "Michael" | "Chris" | "Will"
 | "Michael" | "Will"  | "Mark"
 |===
+--
 
 We can see that there are three triangles in the graph: "Will, Michael, and Chris", "Will, Mark, and Michael", and "Michael, Karin, and Chris".
 The node "Alice" is not part of any triangle and thus does not appear in the triangles listing.

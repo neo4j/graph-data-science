@@ -1,8 +1,7 @@
 [[graph-generation]]
 [.beta]
 = Graph Generation
-:description: This section describes how random graphs can be generated in the Neo4j Graph Data Science library.
-
+:description: This section describes how random graphs can be generated in the Neo4j Graph Data Science library. 
 
 In certain use cases it is useful to generate random graphs, for example, for testing or benchmarking purposes.
 For that reason the Neo4j Graph Algorithm library comes with a set of built-in graph generators.

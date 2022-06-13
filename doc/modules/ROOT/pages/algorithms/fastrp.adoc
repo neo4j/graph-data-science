@@ -1,10 +1,9 @@
 [[algorithms-embeddings-fastrp]]
 = Fast Random Projection
-:description: This section describes the Fast Random Projection (FastRP) node embedding algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Fast Random Projection (FastRP) node embedding algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: embedding
 :algorithm: FastRP
-
 
 :directed:
 :undirected:
@@ -409,6 +408,7 @@ CALL gds.graph.create(
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -422,6 +422,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 7         | 18                | 11424    | 11424    | "11424 Bytes"
 |===
+--
 
 
 [[algorithms-embeddings-fastrp-examples-stream]]
@@ -431,6 +432,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -455,6 +457,7 @@ YIELD nodeId, embedding
 | 5      | [0.8408374190330505, -0.37151476740837097, 0.12121132016181946, -1.530960202217102]
 | 6      | [1.0, -0.11054422706365585, -0.3697933852672577, -0.9225144982337952]
 |===
+--
 
 The results of the algorithm are not very intuitively interpretable, as the node embedding format is a mathematical abstraction of the node within its neighborhood, designed for machine learning programs.
 What we can see is that the embeddings have four elements (as configured using `embeddingDimension`) and that the numbers are relatively small (they all fit in the range of `[-2, 2]`).
@@ -474,6 +477,7 @@ However, this does not necessarily mean that the pairwise distances of two node 
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
@@ -487,6 +491,7 @@ YIELD nodeCount
 | nodeCount
 | 7
 |===
+--
 
 The `stats` mode does not currently offer any statistical results for the embeddings themselves.
 We can however see that the algorithm has successfully processed all seven nodes in our example graph.
@@ -498,6 +503,7 @@ We can however see that the algorithm has successfully processed all seven nodes
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -517,6 +523,7 @@ YIELD nodePropertiesWritten
 | nodePropertiesWritten
 | 7
 |===
+--
 
 The returned result is similar to the `stats` example.
 Additionally, the graph 'persons' now has a node property `fastrp-embedding` which stores the node embedding for each node.
@@ -529,6 +536,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -548,6 +556,7 @@ YIELD nodePropertiesWritten
 | nodePropertiesWritten
 | 7
 |===
+--
 
 The returned result is similar to the `stats` example.
 Additionally, each of the seven nodes now has a new property `fastrp-embedding` in the Neo4j database, containing the node embedding for that node.
@@ -561,6 +570,7 @@ To change this behaviour we can use configuration parameter called `relationship
 Below is an example of running the weighted variant of algorithm.
 
 [role=query-example]
+--
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
@@ -587,6 +597,7 @@ YIELD nodeId, embedding
 | 5      | [0.14497177302837372, -0.2312137484550476, 0.5552002191543579, -1.2605633735656738]
 | 6      | [0.5139184594154358, -0.07954332232475281, 0.3690345287322998, -0.9176374077796936]
 |===
+--
 
 Since the initial state of the algorithm is randomised, it isn't possible to intuitively analyse the effect of the relationship weights.
 
@@ -607,6 +618,7 @@ The initial random vector for the node `n` contains first 8 values sampled as in
 In the example below, we again set the embedding dimension to 2, but we set `propertyRatio` to 1, which means the embedding is computed from node properties only.
 
 [role=query-example]
+--
 .The following will run FastRP with feature properties:
 [source, cypher, role=noplay]
 ----
@@ -631,6 +643,7 @@ CALL gds.fastRP.stream('persons', {
 | 5 | [0.0, -1.0]
 | 6 | [0.0, -1.0]
 |===
+--
 
 In this example, the embeddings are based on the `age` property.
 Because of L2 normalization which is applied to each iteration (here only one iteration), all nodes have the same embedding despite having different age values (apart from rounding errors).

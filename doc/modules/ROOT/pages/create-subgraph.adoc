@@ -1,8 +1,7 @@
 [[catalog-graph-create-subgraph]]
 [.beta]
 = Creating a subgraph
-:description: This section details how to create subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
-
+:description: This section details how to create subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library. 
 
 In GDS, algorithms can be executed on a named graph that has been filtered based on its xref::common-usage/running-algos.adoc#common-configuration-node-labels[node labels] and xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
 However, that filtered graph only exists during the execution of the algorithm and it is not possible to filter on property values.
@@ -16,6 +15,7 @@ Creating subgraphs of subgraphs is also possible.
 == Syntax
 
 [.create-subgraph-syntax]
+--
 .A new graph can be created by using the `gds.beta.graph.create.subgraph()` procedure:
 [source, cypher, role=noplay]
 ----
@@ -65,6 +65,7 @@ CALL gds.beta.graph.create.subgraph(
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
 | createMillis           | Integer  | Milliseconds for creating the subgraph.
 |===
+--
 
 The `nodeFilter` and `relationshipFilter` configuration keys can be used to express filter predicates.
 Filter predicates are https://neo4j.com/docs/cypher-manual/current/clauses/where/#query-where[Cypher] predicates bound to a single entity.
@@ -152,6 +153,7 @@ YIELD graphName, nodeCount, relationshipCount, createMillis
 === Node filtering
 
 [role=query-example]
+--
 .Create a new graph containing only users of a certain age group:
 [source, cypher, role=noplay]
 ----
@@ -170,11 +172,13 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers"  | "social-graph"   | 2         | 1
 |===
+--
 
 
 === Node and relationship filtering
 
 [role=query-example]
+--
 .Create a new graph containing only users of a certain age group that know each other since a given point a time:
 [source, cypher, role=noplay]
 ----
@@ -192,11 +196,13 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers"  | "social-graph"   | 2         | 0
 |===
+--
 
 
 === Bipartite subgraph
 
 [role=query-example]
+--
 .Create a new bipartite graph between books and users connected by the `READS` relationship type:
 [source, cypher, role=noplay]
 ----
@@ -215,11 +221,13 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 | graphName          | fromGraphName    | nodeCount | relationshipCount
 | "teenagers-books"  | "social-graph"   | 5         | 3
 |===
+--
 
 
 === Bipartite graph node filtering
 
 [role=query-example]
+--
 .The previous example can be extended with an additional filter applied only to persons:
 [source, cypher, role=noplay]
 ----
@@ -238,3 +246,4 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers-books"  | "social-graph"   | 3         | 1
 |===
+--

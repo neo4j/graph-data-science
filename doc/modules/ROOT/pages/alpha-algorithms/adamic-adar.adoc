@@ -1,8 +1,7 @@
 [[alpha-algorithms-linkprediction-adamic-adar]]
 [.alpha]
 = Adamic Adar
-:description: This section describes the Adamic Adar algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Adamic Adar algorithm in the Neo4j Graph Data Science library. 
 
 link:https://en.wikipedia.org/wiki/Adamic/Adar_index[Adamic Adar] is a measure used to compute the closeness of nodes based on their shared neighbors.
 

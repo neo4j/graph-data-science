@@ -1,6 +1,6 @@
 [[model-catalog-ops]]
 = Model catalog
-:description: This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
+:description: This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library. 
 
 
 Some graph algorithms use trained models in their computation.

@@ -1,12 +1,11 @@
 [[algorithms-astar]]
 = A*
-:description: This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the A* Shortest Path algorithm in the Neo4j Graph Data Science library. 
 :entity: source-target-pair
 :result: shortest path
 :algorithm: A*
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.astar]
-
 
 :directed:
 :undirected:
@@ -117,6 +116,7 @@ In the following example we will demonstrate the use of the {algorithm} Shortest
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm in write mode:
 [source, cypher, role=noplay]
 ----
@@ -138,6 +138,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 5         | 5                 | 984      | 984      | "984 Bytes"
 |===
+--
 
 
 [[algorithms-astar-examples-stream]]
@@ -147,6 +148,7 @@ RETURN nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -176,6 +178,7 @@ ORDER BY index
 | index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs                | path
 | 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 0.7, 2.0, 3.3] | [Node[0], Node[1], Node[2], Node[4]]
 |===
+--
 
 The result shows the total cost of the shortest path between node `King's Cross` and `Kentish Town` in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
@@ -189,6 +192,7 @@ The Path objects contain the node objects and virtual relationships which have a
 include::partial$/algorithms/shortest-path/path-examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -211,6 +215,7 @@ RETURN relationshipsWritten
 | relationshipsWritten
 | 1
 |===
+--
 
 After executing the above query, the in-memory graph will be updated with new relationships of type `PATH`.
 The new relationships will store a single property `totalCost`.
@@ -222,6 +227,7 @@ The new relationships will store a single property `totalCost`.
 include::partial$/algorithms/shortest-path/path-examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -246,6 +252,7 @@ RETURN relationshipsWritten
 | relationshipsWritten
 | 1
 |===
+--
 
 The above query will write one relationship of type `PATH` back to Neo4j.
 The relationship stores three properties describing the path: `totalCost`, `nodeIds` and `costs`.

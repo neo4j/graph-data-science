@@ -1,8 +1,7 @@
 [[alpha-algorithms-single-source-shortest-path]]
 [.alpha]
 = Single Source Shortest Path
-:description: This section describes the Single Source Shortest Path algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Single Source Shortest Path algorithm in the Neo4j Graph Data Science library. 
 
 The Single Source Shortest Path (SSSP) algorithm calculates the shortest (weighted) path from a node to all other nodes in the graph.
 
@@ -117,6 +116,7 @@ CREATE (a:Loc {name: "A"}),
 === Delta stepping algorithm
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -148,10 +148,12 @@ RETURN gds.util.asNode(nodeId).name AS Name, distance AS Cost
 | "E"    | 120.0
 | "F"    | 160.0
 |===
+--
 
 The above table shows the cost of going from A to each of the other nodes, including itself at a cost of 0.
 
 [role=query-example]
+--
 .The following will run the algorithm and write back results:
 [source, cypher, role=noplay]
 ----
@@ -179,6 +181,7 @@ RETURN nodeCount
 | nodeCount
 | 6
 |===
+--
 
 [[algorithms-single-source-shortest-path-cp]]
 ==== Cypher projection
@@ -186,6 +189,7 @@ RETURN nodeCount
 include::partial$/algorithms/alpha/alpha-cypher-explanation.adoc[]
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 MATCH (start:Loc {name: 'A'})
@@ -207,3 +211,4 @@ RETURN nodeCount
 | nodeCount
 | 5
 |===
+--

@@ -1,7 +1,6 @@
 [[creating-graphs]]
 = Creating graphs
-:description: This section discusses creating named and anonymous graphs to be used for algorithm computation in the Neo4j Graph Data Science library.
-
+:description: This section discusses creating named and anonymous graphs to be used for algorithm computation in the Neo4j Graph Data Science library. 
 
 In order for any algorithm in the GDS library to run, we must first create a graph to run on.
 The graph is created as either an _anonymous graph_ or a _named graph_.

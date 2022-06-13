@@ -1,10 +1,9 @@
 [[algorithms-degree-centrality]]
 = Degree Centrality
-:description: This section describes the Degree Centrality algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Degree Centrality algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: degree centrality
 :algorithm: Degree Centrality
-
 
 :directed:
 :undirected:
@@ -282,6 +281,7 @@ This will be demonstrated using the Degree Centrality algorithm on this graph.
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -295,6 +295,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 8                 | 40     | 40     | "40 Bytes"
 |===
+--
 
 
 [[algorithms-degree-centrality-examples-stream]]
@@ -304,6 +305,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -324,6 +326,7 @@ ORDER BY followers DESC, name DESC
 | "Mark"    | 0.0
 | "Alice"   | 0.0
 |===
+--
 
 We can see that Doug is the most popular user in our imaginary social network graph, with 5 followers - all other users follow them, but they don't follow anybody back.
 In a real social network, celebrities have very high follower counts but tend to follow only very few people.
@@ -337,6 +340,7 @@ We could therefore consider Doug quite the celebrity!
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stats` mode:
 [source, cypher, role=noplay]
 ----
@@ -351,6 +355,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore
 | 0.0          | 1.3333358764648438
 |===
+--
 
 Comparing this to the results we saw in the xref::algorithms/degree-centrality.adoc#algorithms-degree-centrality-examples-stream[stream example], we can find our minimum and mean values from the table.
 
@@ -361,6 +366,7 @@ Comparing this to the results we saw in the xref::algorithms/degree-centrality.a
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -375,6 +381,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore                  | nodePropertiesWritten
 | 0.0          | 1.3333358764648438         | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `degree` which stores the degree centrality score for each node.
@@ -387,6 +394,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -401,6 +409,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore                  | nodePropertiesWritten
 | 0.0          | 1.3333358764648438         | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, each of the seven nodes now has a new property `degree` in the Neo4j database, containing the degree centrality score for that node.
@@ -413,6 +422,7 @@ This example will explain the weighted Degree Centrality algorithm.
 This algorithm is a variant of the Degree Centrality algorithm, that measures the sum of positive weights of incoming and outgoing relationships.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode, showing which users have the highest weighted degree centrality:
 [source, cypher, role=noplay]
 ----
@@ -436,6 +446,7 @@ ORDER BY weightedFollowers DESC, name DESC
 | "Bridget" | 0.0
 | "Alice"   | 0.0
 |===
+--
 
 Doug still remains our most popular user, but there isn't such a big gap to the next person.
 Charles and Michael both only have one follower, but those relationships have a high relationship weight.
@@ -452,6 +463,7 @@ In order to change the orientation, we can use the `orientation` configuration k
 Supported values are `NATURAL` (default), `REVERSE` and `UNDIRECTED`.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode, showing which users have the highest in-degree centrality using the reverse orientation of the relationships:
 [source, cypher, role=noplay]
 ----
@@ -475,5 +487,6 @@ ORDER BY followees DESC, name DESC
 | "Bridget" | 1.0
 | "Doug"    | 0.0
 |===
+--
 
 The example shows that when looking at the reverse orientation, `Alice` is more central in the network than `Doug`.

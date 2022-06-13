@@ -1,7 +1,6 @@
 [[common-usage]]
 = Common usage
-:description: This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library.
-
+:description: This chapter explains the common usage patterns and operations that constitute the core of the Neo4j Graph Data Science library. 
 
 The GDS library usage pattern is typically split in two phases: development and production.
 In the development phase the goal is to establish a workflow of useful algorithms.

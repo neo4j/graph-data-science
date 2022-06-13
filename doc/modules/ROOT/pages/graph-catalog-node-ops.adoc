@@ -1,7 +1,6 @@
 [[graph-catalog-node-ops]]
 = Node operations
-:description: This section details the operations available over node-properties stored in projected graphs within the Neo4j Graph Data Science library.
-
+:description: This section details the operations available over node-properties stored in projected graphs within the Neo4j Graph Data Science library. 
 
 The graphs in the Neo4j Graph Data Science Library support properties for nodes.
 We provide multiple operations to work with the stored node-properties in projected graphs.
@@ -255,6 +254,7 @@ This is similar to what an algorithm `stream` execution mode does, but allows mo
 In the following, we stream the previously computed scores `score`.
 
 [role=query-example]
+--
 .Stream the `score` node property:
 [source, cypher, role=noplay]
 ----
@@ -273,6 +273,7 @@ ORDER BY score DESC
 | "Veselin"    | 0.0
 | "The Hobbit" | 0.0
 |===
+--
 
 NOTE: The above example requires all given properties to be present on at least one node projection, and the properties will be streamed for all such projections.
 
@@ -282,6 +283,7 @@ NOTE: The above example requires all given properties to be present on at least 
 The procedure can be configured to stream just the properties for specific node labels.
 
 [role=query-example]
+--
 .Stream the `score` property for `Person` nodes:
 [source, cypher, role=noplay]
 ----
@@ -299,6 +301,7 @@ ORDER BY score DESC
 | "Adam"      | 1.0
 | "Veselin"   | 0.0
 |===
+--
 
 It is required, that all specified node labels have the node property.
 
@@ -308,6 +311,7 @@ It is required, that all specified node labels have the node property.
 We can also stream several properties at once.
 
 [role=query-example]
+--
 .Stream multiple node properties:
 [source, cypher, role=noplay]
 ----
@@ -328,6 +332,7 @@ ORDER BY name, nodeProperty
 | "Veselin"    | "age"         | 20
 | "Veselin"    | "score"       | 0.0
 |===
+--
 
 [NOTE]
 ====
@@ -341,6 +346,7 @@ This adds with some overhead, as each property name must be repeated for each no
 To write the 'score' property for all node labels in the social graph, we use the following query:
 
 [role=query-example]
+--
 .Write the `score` property back to Neo4j:
 [source, cypher, role=noplay]
 ----
@@ -354,6 +360,7 @@ YIELD propertiesWritten
 | propertiesWritten
 | 4
 |===
+--
 
 The above example requires the `score` property to be present on _at least one_ projected node label, and the properties will be written for all such labels.
 
@@ -363,6 +370,7 @@ The procedure can be configured to write just the properties for some specific n
 In the following example, we will only write back the scores of the `Person` nodes.
 
 [role=query-example]
+--
 .Write node properties of a specific projected node label to Neo4j:
 [source, cypher, role=noplay]
 ----
@@ -376,9 +384,12 @@ YIELD propertiesWritten
 | propertiesWritten
 | 3
 |===
+--
 
 [NOTE]
+--
 If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
+--
 
 
 [[catalog-graph-remove-node-properties-example]]
@@ -386,6 +397,7 @@ If the `nodeLabels` parameter is specified, it is required that _all_ given node
 
 
 [role=query-example]
+--
 .Remove the `score` property from all projected nodes in the `socialGraph`:
 [source, cypher, role=noplay]
 ----
@@ -399,9 +411,12 @@ YIELD propertiesRemoved
 | propertiesRemoved
 | 4
 |===
+--
 
 [NOTE]
+--
 The above example requires all given properties to be present on _at least one_ projected node label.
+--
 
 ==== NodeLabels
 
@@ -417,6 +432,7 @@ The procedure can be configured to remove just the properties for s.
 In the following example, we will only remove the scores from the `Book` nodes.
 
 [role=query-example]
+--
 .Remove the `degree` property from the projected `Book` nodes:
 [source, cypher, role=noplay]
 ----
@@ -430,9 +446,12 @@ YIELD propertiesRemoved
 | propertiesRemoved
 | 1
 |===
+--
 
 [NOTE]
+--
 If the `nodeLabels` parameter is specified, it is required that _all_ given node labels have _all_ of the given properties.
+--
 
 
 [[utility-functions-catalog]]
@@ -466,6 +485,7 @@ If the property value is missing for the given node, `null` is returned.
 We use the `socialGraph` with the property `score` introduced xref::graph-catalog-node-ops.adoc#node-ops-examples[above].
 
 [role=query-example]
+--
 .Access a property node property for Florentin:
 [source, cypher, role=noplay]
 ----
@@ -481,10 +501,12 @@ RETURN
 | name        | score
 | "Florentin" | 2.0
 |===
+--
 
 We can also specifically return the `score` property from the `Person` projection in case other projections also have a `score` property as follows.
 
 [role=query-example]
+--
 .Access a property node property from Person for Florentin:
 [source, cypher, role=noplay]
 ----
@@ -500,3 +522,4 @@ RETURN
 | name        | score
 | "Florentin" | 2.0
 |===
+--

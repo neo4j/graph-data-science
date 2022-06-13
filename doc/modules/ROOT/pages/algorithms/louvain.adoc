@@ -1,10 +1,9 @@
 [[algorithms-louvain]]
 = Louvain
-:description: This section describes the Louvain algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Louvain algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: community ID
 :algorithm: Louvain
-
 
 :directed:
 :undirected:
@@ -308,6 +307,7 @@ In the following examples we will demonstrate using the Louvain algorithm on thi
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -321,6 +321,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 14                | 5321     | 563904   | "[5321 Bytes \... 550 KiB]"
 |===
+--
 
 
 [[algorithms-louvain-examples-stream]]
@@ -329,6 +330,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -349,6 +351,7 @@ ORDER BY name ASC
 | "Mark"    | 5             | null
 | "Michael" | 5             | null
 |===
+--
 
 We use default values for the procedure configuration parameter.
 Levels and `innerIterations` are set to 10 and the tolerance value is 0.0001.
@@ -362,6 +365,7 @@ Because we did not set the value of `includeIntermediateCommunities` to `true`, 
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and returns the result in form of statistical and measurement values
 [source, cypher, role=noplay]
 ----
@@ -375,6 +379,7 @@ YIELD communityCount
 | communityCount
 | 2
 |===
+--
 
 
 [[algorithms-louvain-examples-mutate]]
@@ -383,6 +388,7 @@ YIELD communityCount
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm and store the results in `myGraph`:
 [source, cypher, role=noplay]
 ----
@@ -397,6 +403,7 @@ YIELD communityCount, modularity, modularities
 | 2              | 0.3571428571428571 | [0.3571428571428571]
 |1 row
 |===
+--
 
 In `mutate` mode, only a single row is returned by the procedure.
 The result contains meta information, like the number of identified communities and the modularity values.
@@ -409,6 +416,7 @@ In contrast to the `write` mode the result is written to the GDS in-memory graph
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following run the algorithm, and write back results:
 [source, cypher, role=noplay]
 ----
@@ -423,6 +431,7 @@ YIELD communityCount, modularity, modularities
 | 2              | 0.3571428571428571 | [0.3571428571428571]
 |1 row
 |===
+--
 
 When writing back the results, only a single row is returned by the procedure.
 The result contains meta information, like the number of identified communities and the modularity values.
@@ -434,6 +443,7 @@ The result contains meta information, like the number of identified communities 
 The Louvain algorithm can also run on weighted graphs, taking the given relationship weights into concern when calculating the modularity.
 
 [role=query-example]
+--
 .The following will run the algorithm on a weighted graph and stream results:
 [source, cypher, role=noplay]
 ----
@@ -454,6 +464,7 @@ ORDER BY name ASC
 | "Mark"    | 5             | null
 | "Michael" | 5             | null
 |===
+--
 
 Using the weighted relationships, we see that `Alice` and `Doug` have formed their own community, as their link is much stronger than all the others.
 
@@ -466,6 +477,7 @@ With the seed property an initial community mapping can be supplied for a subset
 The algorithm will try to keep the seeded community IDs.
 
 [role=query-example]
+--
 .The following will run the algorithm and stream results:
 [source, cypher, role=noplay]
 ----
@@ -486,6 +498,7 @@ ORDER BY name ASC
 | "Mark"    | 47          | null
 | "Michael" | 47          | null
 |===
+--
 
 Using the seeded graph, we see that the community around `Alice` keeps its initial community ID of `42`.
 The other community is assigned a new community ID, which is guaranteed to be larger than the largest seeded community ID.
@@ -551,6 +564,7 @@ CREATE (m)-[:TYPE]->(n);
 ----
 
 [role=query-example]
+--
 .The following will load the example graph, run the algorithm and stream results including the intermediate communities:
 [source, cypher, role=noplay]
 ----
@@ -589,5 +603,6 @@ ORDER BY name ASC
 | "n"   | 12          | [12, 12]
 | "x"   | 14          | [14, 14]
 |===
+--
 
 In this example graph, after the first iteration we see 4 clusters, which in the second iteration are reduced to three.

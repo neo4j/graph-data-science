@@ -1,8 +1,7 @@
 [[algorithms-bfs]]
 [.alpha]
 = Breadth First Search
-:description: This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library. 
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
@@ -85,6 +84,7 @@ CALL gds.graph.create('myGraph', 'Node', 'REL', { relationshipProperties: 'cost'
 In the following examples we will demonstrate using the Breadth First Search algorithm on this graph.
 
 [role=query-example]
+--
 .Running the Breadth First Search algorithm:
 [source, cypher, role=noplay]
 ----
@@ -107,10 +107,12 @@ ORDER BY tags
 | "d"
 | "e"
 |===
+--
 
 Since none of the options for early termination are specified, the whole graph is visited during the traversal.
 
 [role=query-example]
+--
 .Running the Breadth First Search algorithm with target nodes:
 [source, cypher, role=noplay]
 ----
@@ -132,8 +134,10 @@ ORDER BY tags
 | "c"
 | "e"
 |===
+--
 
 [role=query-example]
+--
 .Running the Breadth First Search algorithm with maxDepth:
 [source, cypher, role=noplay]
 ----
@@ -154,5 +158,6 @@ ORDER BY tags
 | "b"
 | "c"
 |===
+--
 
 In the above example, nodes d and e were not visited since they are at distance 2 from a.

@@ -1,7 +1,6 @@
 [[catalog-graph-list]]
 = Listing graphs
-:description: This section details how to list graphs stored in the graph catalog of the Neo4j Graph Data Science library.
-
+:description: This section details how to list graphs stored in the graph catalog of the Neo4j Graph Data Science library. 
 
 Information about graphs in the catalog can be retrieved using the `gds.graph.list()` procedure.
 
@@ -9,6 +8,7 @@ Information about graphs in the catalog can be retrieved using the `gds.graph.li
 == Syntax
 
 [.graph-list-syntax]
+--
 .List information about graphs in the catalog:
 [source, cypher, role=noplay]
 ----
@@ -63,6 +63,7 @@ CALL gds.graph.list(
 | sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
 | memoryUsage            | String   | Human readable description of `sizeInBytes`.
 |===
+--
 
 The information contains basic statistics about the graph, e.g., the node and relationship count.
 The result field `creationTime` indicates when the graph was created in memory.
@@ -131,6 +132,7 @@ CALL gds.graph.create(
 === List basic information about all graphs in the catalog
 
 [role=query-example]
+--
 .List basic information about all graphs in the catalog:
 [source, cypher, role=noplay]
 ----
@@ -148,11 +150,13 @@ ORDER BY graphName ASC
 | "personsNative"        | 3           | 2
 | "personsWithAgeNative" | 3           | 2
 |===
+--
 
 
 === List extended information about a specific named graph in the catalog
 
 [role=query-example]
+--
 .List extended information about a specific Cypher named graph in the catalog:
 [source, cypher, role=noplay]
 ----
@@ -168,8 +172,10 @@ YIELD graphName, nodeProjection, nodeQuery
 | null
 | "MATCH (n:Person) RETURN id(n) AS id, labels(n) as labels"
 |===
+--
 
 [role=query-example]
+--
 .List extended information about a specific native named graph in the catalog:
 [source, cypher, role=noplay]
 ----
@@ -185,6 +191,7 @@ YIELD graphName, nodeProjection, nodeQuery
 | {Person={label=Person, properties={}}}
 | null
 |===
+--
 
 The above examples demonstrate that `nodeQuery` only has value when the graph is projected using Cypher projection while `nodeProjection` is present when we have a native graph.
 This is also true for `relationshipQuery` and relationshipProjection` respectively.
@@ -192,6 +199,7 @@ This is also true for `relationshipQuery` and relationshipProjection` respective
 Despite different result columns being present for the different projections that we can use the Graph Schemas are the same, which is demonstrated in the example below.
 
 [role=query-example]
+--
 .Cypher graph schema:
 [source, cypher, role=noplay]
 ----
@@ -206,8 +214,10 @@ YIELD graphName, schema
 | "personsCypher"
 | {relationships={KNOWS={}}, nodes={Person={}}}
 |===
+--
 
 [role=query-example]
+--
 .Native graph schema:
 [source, cypher, role=noplay]
 ----
@@ -222,11 +232,13 @@ YIELD graphName, schema
 | "personsNative"
 | {relationships={KNOWS={}}, nodes={Person={}}}
 |===
+--
 
 
 === Degree distribution of a specific graph
 
 [role=query-example]
+--
 .List information about the degree distribution of a specific graph:
 [source, cypher, role=noplay]
 ----
@@ -241,3 +253,4 @@ YIELD graphName, degreeDistribution;
 | "personsNative"
 | {p99=2, min=0, max=2, mean=0.6666666666666666, p90=2, p50=0, p999=2, p95=2, p75=0}
 |===
+--

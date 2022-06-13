@@ -1,7 +1,6 @@
 [[catalog-graph-drop]]
 = Removing graphs
-:description: This section details how to remove graphs stored in the graph catalog of the Neo4j Graph Data Science library.
-
+:description: This section details how to remove graphs stored in the graph catalog of the Neo4j Graph Data Science library. 
 
 To free up memory, we can remove unused graphs.
 In order to do so, the `gds.graph.drop` procedure comes in handy.
@@ -9,6 +8,7 @@ In order to do so, the `gds.graph.drop` procedure comes in handy.
 == Syntax
 
 [.graph-drop-syntax]
+--
 .Remove a graph from the catalog:
 [source, cypher, role=noplay]
 ----
@@ -67,6 +67,7 @@ CALL gds.graph.drop(
 | sizeInBytes            | Integer  | Number of bytes used in the Java heap to store the graph.
 | memoryUsage            | String   | Human readable description of `sizeInBytes`.
 |===
+--
 
 == Examples
 

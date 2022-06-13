@@ -127,6 +127,7 @@ We will explain each individually with examples in the xref::algorithms/ml-model
 ==== Stream
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.predict.stream('myGraph', {
@@ -153,6 +154,7 @@ We specified `threshold` to filter out predictions with probability less than 45
 |===
 
 We can see, that our model predicts the most likely link is between Alice and Chris.
+--
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
@@ -169,6 +171,7 @@ The exhaustive search will simply run through all possible new links, that is, c
 For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
@@ -190,6 +193,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 | relationshipsWritten | samplingStats
 | 10                   | {linksConsidered=16, strategy=exhaustive}
 |===
+--
 
 As we can see in the `samplingStats`, we use the exhaustive search strategy and check 16 possible links during the prediction.
 Indeed, since there are a total of `8 * (8 - 1) / 2 = 28` possible links in the graph and we already have 12, that means we check all possible new links.
@@ -214,6 +218,7 @@ The algorithm may stop earlier if the link predictions per node only change by a
 See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more details on how the search works.
 
 [role=query-example, group=lp]
+--
 [source, cypher]
 ----
 CALL gds.alpha.ml.pipeline.linkPrediction.predict.mutate('myGraph', {
@@ -241,6 +246,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 | relationshipsWritten | samplingStats
 | 16                   | {linksConsidered=44, didConverge=true, strategy=approximate, ranIterations=2}
 |===
+--
 
 As we can see in the `samplingStats`, we use the approximate search strategy and check 44 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.

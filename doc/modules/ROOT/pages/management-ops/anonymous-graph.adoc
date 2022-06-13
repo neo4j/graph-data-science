@@ -1,7 +1,6 @@
 [[anonymous-graph]]
 = Anonymous graphs
-:description: This chapter explains how to create an anonymous graph for a single algorithm execution.
-
+:description: This chapter explains how to create an anonymous graph for a single algorithm execution. 
 
 The typical workflow when using the GDS library is to xref::graph-create.adoc[create a graph] and store it in the catalog.
 This is useful to minimize reads from Neo4j and to run an algorithm with various settings or several algorithms on the same graph projection.

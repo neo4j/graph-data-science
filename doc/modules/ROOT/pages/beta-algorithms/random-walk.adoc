@@ -1,8 +1,7 @@
 [[beta-algorithms-random-walk]]
 [.beta]
 = Random Walk
-:description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library. 
 
 Random Walk is an algorithm that provides random paths in a graph.
 
@@ -113,6 +112,7 @@ CALL gds.graph.create(
 === Without specified source nodes
 
 [role=query-example]
+--
 .Run the RandomWalk algorithm on `myGraph`
 [source, cypher, role=noplay]
 ----
@@ -142,11 +142,13 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 | [6, 3, 7] | [Site C, Links, Site D]
 | [7, 3, 0] | [Site D, Links, Home]
 |===
+--
 
 
 === With specified source nodes
 
 [role=query-example]
+--
 .Run the RandomWalk algorithm on `myGraph` with specified sourceNodes
 [source, cypher, role=noplay]
 ----
@@ -174,3 +176,4 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 | [0, 5, 3] | [Home, Site B, Links]
 | [1, 0, 6] | [About, Home, Site C]
 |===
+--

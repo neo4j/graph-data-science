@@ -1,10 +1,9 @@
 [[algorithms-local-clustering-coefficient]]
 = Local Clustering Coefficient
-:description: This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: local clustering coefficient
 :algorithm: Local Clustering Coefficient
-
 
 :undirected:
 :homogeneous:
@@ -281,6 +280,7 @@ In the following examples we will demonstrate using the Local Clustering Coeffic
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -296,6 +296,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 6         | 16                | 296      | 296      | "296 Bytes"
 |===
+--
 
 Note that the relationship count is 16 although we only created 8 relationships in the original Cypher statement.
 This is because we used the `UNDIRECTED` orientation, which will project each relationship in each direction, effectively doubling the number of relationships.
@@ -308,6 +309,7 @@ This is because we used the `UNDIRECTED` orientation, which will project each re
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -328,6 +330,7 @@ ORDER BY localClusteringCoefficient DESC
 | "Michael" | 0.3
 | "Alice"   | 0.0
 |===
+--
 
 From the results we can see that the nodes 'Karin' and 'Mark' have the highest local clustering coefficients.
 This shows that they are the best at introducing their friends - all the people who know them, know each other!
@@ -343,6 +346,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 .The following will run the algorithm in `stats` mode:
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.localClusteringCoefficient.stats('myGraph')
@@ -355,6 +359,7 @@ YIELD averageClusteringCoefficient, nodeCount
 | averageClusteringCoefficient | nodeCount
 | 0.6055555555555555           | 6
 |===
+--
 
 The result shows that on average each node of our example graph has approximately 60% of its neighbours connected.
 
@@ -365,6 +370,7 @@ The result shows that on average each node of our example graph has approximatel
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -380,6 +386,7 @@ YIELD averageClusteringCoefficient, nodeCount
 | averageClusteringCoefficient | nodeCount
 | 0.6055555555555555           | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `localClusteringCoefficient` which stores the local clustering coefficient for each node.
@@ -392,6 +399,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -407,6 +415,7 @@ YIELD averageClusteringCoefficient, nodeCount
 | averageClusteringCoefficient | nodeCount
 | 0.6055555555555555           | 6
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, each of the six nodes now has a new property `localClusteringCoefficient` in the Neo4j database, containing the local clustering coefficient for that node.
@@ -426,6 +435,7 @@ The Triangle Count algorithm is going to store its result back into 'myGraph'.
 It is also possible to obtain the property value from the Neo4j database using a graph projection with a node property when creating the in-memory graph.
 
 [role=query-example, no-result=true, group=triangleCountProperty]
+--
 .The following computes the triangle counts and stores the result into the in-memory graph:
 [source, cypher, role=noplay]
 ----
@@ -433,8 +443,10 @@ CALL gds.triangleCount.mutate('myGraph', {
   mutateProperty: 'triangles'
 })
 ----
+--
 
 [role=query-example, group=triangleCountProperty]
+--
 .The following will run the algorithm in `stream` mode using pre-computed triangle counts:
 [source, cypher, role=noplay]
 ----
@@ -457,5 +469,6 @@ ORDER BY localClusteringCoefficient DESC
 | "Michael" | 0.3
 | "Alice"   | 0.0
 |===
+--
 
 As we can see the results are the same as in xref::algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-stream[the `stream` example] where we did not specify a `triangleCountProperty`.

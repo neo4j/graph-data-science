@@ -1,7 +1,7 @@
 [[algorithms-collapse-path]]
 [.alpha]
 = Collapse Path
-:description: This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library. 
 
 
 [[algorithms-collapse-path-intro]]
@@ -121,6 +121,7 @@ CALL gds.graph.create(
 Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in the `relationshipTypes` option.
 
 [role=query-example]
+--
 [source, cypher, role=noplay]
 ----
 CALL gds.alpha.collapsePath.mutate(
@@ -139,6 +140,7 @@ CALL gds.alpha.collapsePath.mutate(
 | relationshipsWritten
 | 4
 |===
+--
 
 .The mutated graph will look like the following graph when filtered by the `PLAYS_SAME_INSTRUMENT` relationship
 [source, cypher, role=noplay]

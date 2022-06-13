@@ -1,8 +1,7 @@
 [[alpha-algorithms-approximate-nearest-neighbors]]
 [.alpha]
 = Approximate Nearest Neighbors (ANN)
-:description: This section describes the Approximate Nearest Neighbors algorithm in the Neo4j Graph Data Science library.
-
+:description: This section describes the Approximate Nearest Neighbors algorithm in the Neo4j Graph Data Science library. 
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 

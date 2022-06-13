@@ -1,7 +1,6 @@
 [[algorithms-ml-models]]
 = Machine learning models
-:description: This chapter provides explanations and examples for the supervised machine learning models in the Neo4j Graph Data Science library.
-
+:description: This chapter provides explanations and examples for the supervised machine learning models in the Neo4j Graph Data Science library. 
 
 The machine learning procedures in Neo4j GDS allow you to train supervised machine learning models.
 Models can then be accessed via the xref::model-catalog/index.adoc[Model catalog] and used to make predictions about your graph.

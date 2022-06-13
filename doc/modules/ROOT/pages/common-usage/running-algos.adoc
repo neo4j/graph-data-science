@@ -1,7 +1,6 @@
 [[running-algos]]
 = Running algorithms
-:description: This section describes the common execution modes for algorithms: `stream`, `stats`, `mutate` and `write`.
-
+:description: This section describes the common execution modes for algorithms: `stream`, `stats`, `mutate` and `write`. 
 
 All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.

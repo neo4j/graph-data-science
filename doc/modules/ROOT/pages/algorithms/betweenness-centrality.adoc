@@ -1,10 +1,9 @@
 [[algorithms-betweenness-centrality]]
 = Betweenness Centrality
-:description: This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library.
+:description: This section describes the Betweenness Centrality algorithm in the Neo4j Graph Data Science library. 
 :entity: node
 :result: centrality
 :algorithm: Betweenness Centrality
-
 
 :directed:
 :undirected:
@@ -302,6 +301,7 @@ In the following examples we will demonstrate using the Betweenness Centrality a
 include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -315,10 +315,12 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 7         | 7                 | 2912     | 2912     | "2912 Bytes"
 |===
+--
 
 As is discussed in xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-considerations[Considerations and sampling] we can configure the memory requirements using the `concurrency` configuration parameter.
 
 [role=query-example]
+--
 .The following will estimate the memory requirements for running the algorithm:
 [source, cypher, role=noplay]
 ----
@@ -332,6 +334,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
 | 7         | 7                 | 848      | 848      | "848 Bytes"
 |===
+--
 
 Here we can note that the estimated memory requirements were lower than when running with the default concurrency setting.
 Similarly, using a higher value will increase the estimated memory requirements.
@@ -344,6 +347,7 @@ Similarly, using a higher value will increase the estimated memory requirements.
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode:
 [source, cypher, role=noplay]
 ----
@@ -365,6 +369,7 @@ ORDER BY name ASC
 | "Frank" | 5.0
 | "Gale"  | 0.0
 |===
+--
 
 We note that the 'Carol' node has the highest score, followed by the 'Frank' node.
 Studying the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples[example graph] we can see that these nodes are in bottleneck positions in the graph.
@@ -384,6 +389,7 @@ Conversely, there are no shortest paths that pass through either of the nodes 'A
 include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `stats` mode:
 [source, cypher, role=noplay]
 ----
@@ -398,6 +404,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore
 | 0.0          | 2.714292253766741
 |===
+--
 
 Comparing this to the results we saw in the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples-stream[stream example], we can find our minimum and maximum values from the table.
 It is worth noting that unless the graph has a particular shape involving a directed cycle, the minimum score will almost always be zero.
@@ -409,6 +416,7 @@ It is worth noting that unless the graph has a particular shape involving a dire
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `mutate` mode:
 [source, cypher, role=noplay]
 ----
@@ -423,6 +431,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore                  | nodePropertiesWritten
 | 0.0          | 2.714292253766741          | 7
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `betweenness` which stores the betweenness centrality score for each node.
@@ -435,6 +444,7 @@ To find out how to inspect the new schema of the in-memory graph, see xref::grap
 include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example]
+--
 .The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
@@ -449,6 +459,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 | minimumScore | meanScore                  | nodePropertiesWritten
 | 0.0          | 2.714292253766741          | 7
 |===
+--
 
 The returned result is the same as in the `stats` example.
 Additionally, each of the seven nodes now has a new property `betweenness` in the Neo4j database, containing the betweenness centrality score for that node.
@@ -464,6 +475,7 @@ We illustrate this on our example graph by approximating Betweenness Centrality 
 The seed value is an arbitrary integer, where using the same value will yield the same results between different runs of the procedure.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode with a sampling size of two:
 [source, cypher, role=noplay]
 ----
@@ -485,6 +497,7 @@ ORDER BY name ASC
 | "Frank" | 2.0
 | "Gale"  | 0.0
 |===
+--
 
 Here we can see that the 'Carol' node has the highest score, followed by a three-way tie between the 'Dan', 'Eve', and 'Frank' nodes.
 We are only sampling from two nodes, where the probability of a node being picked for the sampling is proportional to its outgoing degree.
@@ -519,6 +532,7 @@ The algorithm automatically figures out that the graph is undirected.
 Running the algorithm on an undirected graph is about twice as computationally intensive compared to a directed graph.
 
 [role=query-example]
+--
 .The following will run the algorithm in `stream` mode on the undirected graph:
 [source, cypher, role=noplay]
 ----
@@ -540,6 +554,7 @@ ORDER BY name ASC
 | "Frank" | 5.5
 | "Gale"  | 0.0
 |===
+--
 
 The central nodes now have slightly higher scores, due to the fact that there are more shortest paths in the graph, and these are more likely to pass through the central nodes.
 The 'Dan' and 'Eve' nodes retain the same centrality scores as in the directed case.
