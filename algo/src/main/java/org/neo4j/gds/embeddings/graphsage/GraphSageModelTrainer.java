@@ -32,6 +32,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.ConstantScale;
+import org.neo4j.gds.ml.core.functions.ElementSum;
+import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
@@ -192,14 +195,29 @@ public class GraphSageModelTrainer {
 
         Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
 
-        GraphSageLoss lossFunction = new GraphSageLoss(
+        GraphSageLoss unsupervisedLoss = new GraphSageLoss(
             SubGraph.relationshipWeightFunction(localGraph),
             embeddingVariable,
             extendedBatch,
             config.negativeSampleWeight()
         );
 
-        return new BatchTask(lossFunction, weights, progressTracker);
+        // FIXME add weight-decay parameter
+        double weightDecay = 0.000;
+        long originalBatchSize = extendedBatch.length / 3;
+
+        List<Variable<?>> l2penalty = Arrays
+            .stream(layers)
+            .map(layer -> layer.aggregator().weightsWithoutBias())
+            .flatMap(layerWeights -> layerWeights.stream().map(L2NormSquared::new))
+            .collect(Collectors.toList());
+
+        var loss = new ElementSum(List.of(
+            unsupervisedLoss,
+            new ConstantScale<>(new ElementSum(l2penalty), weightDecay * originalBatchSize / graph.nodeCount())
+        ));
+
+        return new BatchTask(loss, weights, progressTracker);
     }
 
     private EpochResult trainEpoch(
