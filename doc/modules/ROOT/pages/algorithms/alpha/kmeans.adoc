@@ -44,7 +44,9 @@ CALL gds.alpha.kmeans.stream(
 )
 YIELD
   nodeId: Integer,
-  communityId: Integer
+  communityId: Integer,
+  distanceFromCenter: Float
+
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
