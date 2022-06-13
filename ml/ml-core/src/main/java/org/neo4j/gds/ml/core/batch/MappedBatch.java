@@ -31,12 +31,12 @@ public class MappedBatch implements Batch {
     }
 
     @Override
-    public Iterable<Long> nodeIds() {
+    public Iterable<Long> elementIds() {
         if (batchTransformer == BatchTransformer.IDENTITY) {
-            return delegate.nodeIds();
+            return delegate.elementIds();
         }
         return () -> {
-            var originalIterator = delegate.nodeIds().iterator();
+            var originalIterator = delegate.elementIds().iterator();
             return new Iterator<>() {
                 @Override
                 public boolean hasNext() {

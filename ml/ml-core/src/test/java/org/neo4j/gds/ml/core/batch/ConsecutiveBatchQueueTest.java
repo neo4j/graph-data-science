@@ -81,7 +81,7 @@ class ConsecutiveBatchQueueTest {
         TerminationFlag flag = () -> false;
         var batchQueue = BatchQueue.consecutive(101, 1, 4);
 
-        assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::nodeIds, 4, flag))
+        assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::elementIds, 4, flag))
             .isInstanceOf(TransactionTerminatedException.class)
             .hasMessageContaining("The transaction has been terminated.");
     }

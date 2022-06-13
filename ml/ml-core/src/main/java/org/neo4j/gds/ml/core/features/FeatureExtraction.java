@@ -79,7 +79,7 @@ public final class FeatureExtraction {
             }
         };
         int nodeOffset = 0;
-        for (long nodeId : batch.nodeIds()) {
+        for (long nodeId : batch.elementIds()) {
             extract(nodeId, nodeOffset, extractors, featureConsumer);
             nodeOffset++;
         }

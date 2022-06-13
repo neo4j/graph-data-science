@@ -154,7 +154,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
         var batchedTargets = new Vector(batch.size());
         var batchOffset = new MutableInt();
 
-        batch.nodeIds().forEach(elementId ->
+        batch.elementIds().forEach(elementId ->
             batchedTargets.setDataAt(
                 batchOffset.getAndIncrement(),
                 labels.get(elementId)

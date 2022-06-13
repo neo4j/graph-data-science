@@ -87,7 +87,7 @@ public class RandomForestClassifier implements Classifier {
         var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
         var offset = 0;
 
-        for (long id : batch.nodeIds()) {
+        for (long id : batch.elementIds()) {
             predictedProbabilities.setRow(offset++, predictProbabilities(features.get(id)));
         }
 

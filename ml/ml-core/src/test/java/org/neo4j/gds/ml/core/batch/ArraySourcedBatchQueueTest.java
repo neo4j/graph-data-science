@@ -33,12 +33,12 @@ class ArraySourcedBatchQueueTest {
         var hugeBatchQueue = new ArraySourcedBatchQueue(ReadOnlyHugeLongArray.of(data), 5);
         var b1 = hugeBatchQueue.pop();
         assertThat(b1).isPresent();
-        assertThat(b1.get().nodeIds()).containsExactly(3L, 6L, 2L, 3L, 6L);
+        assertThat(b1.get().elementIds()).containsExactly(3L, 6L, 2L, 3L, 6L);
         var b2 = hugeBatchQueue.pop();
         assertThat(b2).isPresent();
-        assertThat(b2.get().nodeIds()).containsExactly(2L, 76L, 3L, 2L, 6L);
+        assertThat(b2.get().elementIds()).containsExactly(2L, 76L, 3L, 2L, 6L);
         var b3 = hugeBatchQueue.pop();
         assertThat(b3).isPresent();
-        assertThat(b3.get().nodeIds()).containsExactly(7L, 42L, 43L);
+        assertThat(b3.get().elementIds()).containsExactly(7L, 42L, 43L);
     }
 }

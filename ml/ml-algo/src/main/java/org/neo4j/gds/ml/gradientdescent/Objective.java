@@ -58,7 +58,7 @@ public interface Objective<DATA> {
         var batchFeaturesOffset = new MutableInt();
 
         batch
-            .nodeIds()
+            .elementIds()
             .forEach(id -> batchFeatures.setRow(batchFeaturesOffset.getAndIncrement(), features.get(id)));
 
         return new Constant<>(batchFeatures);

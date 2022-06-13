@@ -28,7 +28,7 @@ public class SingletonBatch implements Batch {
     public SingletonBatch(long id) {this.id = id;}
 
     @Override
-    public Iterable<Long> nodeIds() {
+    public Iterable<Long> elementIds() {
         return () -> new Iterator<>() {
             private boolean hasNext = true;
 

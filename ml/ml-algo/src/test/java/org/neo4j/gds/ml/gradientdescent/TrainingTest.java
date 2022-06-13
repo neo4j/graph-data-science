@@ -105,7 +105,7 @@ class TrainingTest {
         @Override
         public Variable<Scalar> loss(Batch batch, long trainSize) {
             var nodeIdsInBatch = new DoubleArrayList(batch.size());
-            batch.nodeIds().forEach(nodeIdsInBatch::add);
+            batch.elementIds().forEach(nodeIdsInBatch::add);
             Vector nodeVector = new Vector(nodeIdsInBatch.toArray());
 
             return new Sigmoid<>(new ElementSum(
