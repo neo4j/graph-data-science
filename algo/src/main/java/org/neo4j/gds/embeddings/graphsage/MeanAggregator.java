@@ -63,6 +63,11 @@ public class MeanAggregator implements Aggregator {
     }
 
     @Override
+    public List<Weights<? extends Tensor<?>>> weightsWithoutBias() {
+        return List.of(weights);
+    }
+
+    @Override
     public AggregatorType type() {
         return AggregatorType.MEAN;
     }

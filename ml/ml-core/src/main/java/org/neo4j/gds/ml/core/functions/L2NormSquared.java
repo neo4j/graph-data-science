@@ -22,12 +22,12 @@ package org.neo4j.gds.ml.core.functions;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.Variable;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Scalar;
+import org.neo4j.gds.ml.core.tensor.Tensor;
 
-public class L2NormSquared extends SingleParentVariable<Matrix, Scalar> {
+public class L2NormSquared<T extends Tensor<T>> extends SingleParentVariable<T, Scalar> {
 
-    public L2NormSquared(Variable<Matrix> parent) {
+    public L2NormSquared(Variable<T> parent) {
         super(parent, Dimensions.scalar());
     }
 
@@ -38,22 +38,19 @@ public class L2NormSquared extends SingleParentVariable<Matrix, Scalar> {
     @Override
     public Scalar apply(ComputationContext ctx) {
         var parentMatrix = ctx.data(parent);
-        var rows = parentMatrix.rows();
-        var cols = parentMatrix.cols();
+        var length = parentMatrix.totalSize();
 
         double l2Norm = 0;
-        for (int row = 0; row < rows; row++) {
-            for (int col = 0; col < cols; col++) {
-                var value = parentMatrix.dataAt(row * cols + col);
-                l2Norm += (value * value);
-            }
+        for (int idx = 0; idx < length; idx++) {
+            var value = parentMatrix.dataAt(idx);
+            l2Norm += (value * value);
         }
 
         return new Scalar(l2Norm);
     }
 
     @Override
-    public Matrix gradientForParent(ComputationContext ctx) {
+    public T gradientForParent(ComputationContext ctx) {
         double selfGradient = ctx.gradient(this).value();
         return ctx.data(parent).scalarMultiply(2 * selfGradient);
     }
