@@ -90,10 +90,7 @@ public class LouvainDendrogramManager {
             }
             this.currentIndex = numLevels - 1;
         } else {
-            HugeLongArray[] resizedDendrogram = new HugeLongArray[1];
-            System.arraycopy(this.dendrograms, (1 + numLevels) % 2, resizedDendrogram, 0, 1);
-            this.dendrograms = resizedDendrogram;
-            this.currentIndex = 0;
+            this.currentIndex = (1 + numLevels) % 2;
         }
     }
 }
