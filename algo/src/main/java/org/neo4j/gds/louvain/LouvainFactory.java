@@ -98,7 +98,9 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * (config.includeIntermediateCommunities() ? config.maxLevels() : 2)
+                HugeLongArray.memoryEstimation(nodeCount) * (config.includeIntermediateCommunities() ? config.maxLevels() : Math.min(
+                    2,
+                    config.maxLevels()))
             ))
             .build();
     }

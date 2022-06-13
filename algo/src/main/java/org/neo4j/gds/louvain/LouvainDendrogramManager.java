@@ -36,7 +36,7 @@ public class LouvainDendrogramManager {
         if (includeIntermediateCommunities) {
             this.dendrograms = new HugeLongArray[maxLevels];
         } else {
-            this.dendrograms = new HugeLongArray[2];
+            this.dendrograms = new HugeLongArray[Math.min(maxLevels, 2)];
         }
         this.rootNodeCount = rootNodeCount;
         this.includeIntermediateCommunities = includeIntermediateCommunities;
