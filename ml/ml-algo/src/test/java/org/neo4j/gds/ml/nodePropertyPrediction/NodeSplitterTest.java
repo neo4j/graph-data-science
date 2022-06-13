@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.ml.nodePropertyPrediction;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
 
@@ -52,6 +55,44 @@ class NodeSplitterTest {
         assertThat(splits.outerSplit())
             .matches(outerSplits -> outerSplits.testSet().size() == numberOfExamples * testFraction)
             .matches(outerSplits -> outerSplits.trainSet().size() == numberOfExamples * (1 - testFraction));
+    }
+
+    @Test
+    void testRandomnessIsIndependentOfIdMapping() {
+        var originalIds1 = List.of(5L, 7L, 2L, 6L, 1L, 4L, 9L, 11L, 0L, 8L, 3L, 10L);
+        var splits1 = makeSplits(originalIds1);
+        var originalIds2 = List.of(5L, 6L, 7L, 2L, 4L, 0L, 1L, 9L, 11L, 8L, 3L, 10L);
+        var splits2 = makeSplits(originalIds2);
+
+        var result1 = new ArrayList<Long>();
+        var result2 = new ArrayList<Long>();
+        for (long id : splits1.outerSplit().trainSet().toArray()) {
+            result1.add(originalIds1.get((int) id));
+        }
+        for (long id : splits2.outerSplit().trainSet().toArray()) {
+            result2.add(originalIds2.get((int) id));
+        }
+        assertThat(result1).isEqualTo(result2);
+    }
+
+    @NotNull
+    private NodeSplitter.NodeSplits makeSplits(List<Long> originalIds) {
+        var toMappedIds = new long[12];
+        for (int i = 0; i < originalIds.size(); i++) {
+            toMappedIds[Math.toIntExact(originalIds.get(i))] = i;
+        }
+        int numberOfExamples = 12;
+        var splitter = new NodeSplitter(
+            4,
+            numberOfExamples,
+            ProgressTracker.NULL_TRACKER,
+            i -> originalIds.get((int) i),
+            i -> toMappedIds[(int) i]
+        );
+
+        double testFraction = 0.25;
+        int validationFolds = 3;
+        return splitter.split(testFraction, validationFolds, Optional.of(42L));
     }
 
     boolean isSorted(long... elements) {
