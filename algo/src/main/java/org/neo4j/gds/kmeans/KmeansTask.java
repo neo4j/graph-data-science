@@ -37,6 +37,10 @@ public abstract class KmeansTask implements Runnable {
     final int dimensions;
     long swaps;
 
+    double distance;
+
+    boolean calculateDistancePhase;
+
     long getNumAssignedAtCenter(int ith) {
         return communitySizes[ith];
     }
@@ -66,6 +70,8 @@ public abstract class KmeansTask implements Runnable {
         this.partition = partition;
         this.progressTracker = progressTracker;
         this.communitySizes = new long[k];
+        this.calculateDistancePhase = false;
+        this.distance = 0d;
     }
 
     static KmeansTask createTask(
@@ -99,10 +105,11 @@ public abstract class KmeansTask implements Runnable {
         );
     }
 
-    @Override
-    public void run() {
-        var startNode = partition.startNode();
-        long endNode = startNode + partition.nodeCount();
+    void switchToDistanceCalculation() {
+        calculateDistancePhase = true;
+    }
+
+    private void assignNodesToClusters(long startNode, long endNode) {
         swaps = 0;
 
         reset();
@@ -121,6 +128,31 @@ public abstract class KmeansTask implements Runnable {
             //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
             // or avoid calculating their distance from other nodes etc...
             updateAfterAssignment(nodeId, closestCommunity);
+
+        }
+    }
+
+    public double getDistanceFromClusterNormalized() {
+        return distance / communities.size();
+    }
+
+    private void calculateDistance(long startNode, long endNode) {
+
+
+        for (long nodeId = startNode; nodeId < endNode; nodeId++) {
+            distance += clusterManager.euclidean(nodeId, communities.get(nodeId));
+
+        }
+    }
+
+    @Override
+    public void run() {
+        var startNode = partition.startNode();
+        long endNode = startNode + partition.nodeCount();
+        if (!calculateDistancePhase) {
+            assignNodesToClusters(startNode, endNode);
+        } else {
+            calculateDistance(startNode, endNode);
         }
     }
 }

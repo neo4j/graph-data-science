@@ -54,6 +54,12 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         return 0.05;
     }
 
+    @Configuration.IntegerRange(min = 1)
+    @Value.Default
+    default int numberOfRestarts() {
+        return 1;
+    }
+
     String nodeProperty();
 
     @Configuration.GraphStoreValidationCheck
