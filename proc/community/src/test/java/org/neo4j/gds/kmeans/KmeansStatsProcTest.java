@@ -27,11 +27,14 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
-class KmeansStatsProcTest extends BaseProcTest{
+class KmeansStatsProcTest extends BaseProcTest {
 
     @Neo4jGraph
     static final @Language("Cypher") String DB_CYPHER =
@@ -75,7 +78,8 @@ class KmeansStatsProcTest extends BaseProcTest{
                     "preProcessingMillis",
                     "computeMillis",
                     "postProcessingMillis",
-                    "configuration"
+                    "configuration",
+                    "centroids"
                 );
 
             while (result.hasNext()) {
@@ -99,6 +103,19 @@ class KmeansStatsProcTest extends BaseProcTest{
                     .isNotNull()
                     .asInstanceOf(MAP)
                     .isNotEmpty();
+
+                var centroids = resultRow.get("centroids");
+                assertThat(centroids)
+                    .isNotNull()
+                    .asInstanceOf(LIST)
+                    .isNotEmpty();
+                List<Object> listCentroids = (List<Object>) centroids;
+                for (Object centroid : listCentroids) {
+                    assertThat(centroid)
+                        .isNotNull()
+                        .asInstanceOf(LIST)
+                        .isNotEmpty();
+                }
             }
 
             return true;

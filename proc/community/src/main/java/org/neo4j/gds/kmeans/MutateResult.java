@@ -39,7 +39,7 @@ public class MutateResult extends StatsResult {
         @Nullable Map<String, Object> communityDistribution,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, communityDistribution, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, communityDistribution, null, configuration);
         this.mutateMillis = mutateMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }

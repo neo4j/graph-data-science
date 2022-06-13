@@ -24,27 +24,32 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Map;
 
 public class StatsResult extends StandardStatsResult {
 
     public final Map<String, Object> communityDistribution;
-
+    public final List<List<Double>> centroids;
     public StatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         @Nullable Map<String, Object> communityDistribution,
+        @Nullable List<List<Double>> centroids,
         Map<String, Object> configuration
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.communityDistribution = communityDistribution;
+        this.centroids = centroids;
     }
 
     static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
         Builder(ProcedureCallContext callContext, int concurrency) {
             super(callContext, concurrency);
         }
+
+        private List<List<Double>> centroids;
 
         @Override
         public StatsResult buildResult() {
@@ -53,8 +58,14 @@ public class StatsResult extends StandardStatsResult {
                 computeMillis,
                 postProcessingDuration,
                 communityHistogramOrNull(),
+                centroids,
                 config.toMap()
             );
+        }
+
+        public Builder withCentroids(List<List<Double>> listCenters) {
+            this.centroids = listCenters;
+            return this;
         }
     }
 }

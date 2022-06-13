@@ -25,6 +25,8 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -48,16 +50,40 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         return (__, config) -> KmeansStatsConfig.of(config);
     }
 
+    private List<List<Double>> arrayMatrixToListMatrix(double[][] matrix) {
+        var result = new ArrayList<List<Double>>();
+
+        for (double[] row : matrix) {
+            List<Double> rowList = new ArrayList<>();
+            result.add(rowList);
+            for (double column : row)
+                rowList.add(column);
+        }
+        return result;
+    }
+
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed", executionContext.log(), () -> Stream.of(
-            new StatsResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
-                .withCommunityFunction(computationResult.result().communities()::get)
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config())
-                .build()
-        ));
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Stats call failed",
+            executionContext.log(),
+            () -> {
+                var builder = new StatsResult.Builder(
+                    executionContext.callContext(),
+                    computationResult.config().concurrency()
+                );
+
+                if (executionContext.containsOutputField("centroids")) {
+                    builder.withCentroids(arrayMatrixToListMatrix(computationResult.result().centers()));
+                }
+                builder.withCommunityFunction(computationResult.result().communities()::get)
+                    .withPreProcessingMillis(computationResult.preProcessingMillis())
+                    .withComputeMillis(computationResult.computeMillis())
+                    .withNodeCount(computationResult.graph().nodeCount())
+                    .withConfig(computationResult.config());
+                return Stream.of(builder.build());
+
+            }
+        );
     }
 }

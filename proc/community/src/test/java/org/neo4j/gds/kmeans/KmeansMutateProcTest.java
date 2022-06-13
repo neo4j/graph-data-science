@@ -80,7 +80,8 @@ class KmeansMutateProcTest extends BaseProcTest {
                     "postProcessingMillis",
                     "mutateMillis",
                     "nodePropertiesWritten",
-                    "configuration"
+                    "configuration",
+                    "centroids"
                 );
 
             while(result.hasNext()) {

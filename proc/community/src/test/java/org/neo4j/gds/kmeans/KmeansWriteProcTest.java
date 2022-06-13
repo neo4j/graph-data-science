@@ -80,7 +80,8 @@ class KmeansWriteProcTest extends BaseProcTest {
                     "postProcessingMillis",
                     "writeMillis",
                     "nodePropertiesWritten",
-                    "configuration"
+                    "configuration",
+                    "centroids"
                 );
 
             var softAssertions = new SoftAssertions();
