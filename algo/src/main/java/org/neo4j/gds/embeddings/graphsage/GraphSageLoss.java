@@ -76,7 +76,7 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
                    - negativeSamplingFactor * Math.log(Sigmoid.sigmoid(-negativeAffinity));
         }).sum();
 
-        return new Scalar(loss);
+        return new Scalar(loss / bucketSize);
     }
 
     private double relationshipWeightFactor(long nodeId, long positiveNodeId) {
