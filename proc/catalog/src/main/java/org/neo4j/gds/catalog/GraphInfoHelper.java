@@ -49,6 +49,7 @@ public final class GraphInfoHelper {
         long maximumDegree = Math.max(2, graph.relationshipCount());
         AtomicHistogram histogram = new AtomicHistogram(maximumDegree, PRECISION);
 
+        //noinspection removal
         ParallelUtil.readParallel(
             ConcurrencyConfig.DEFAULT_CONCURRENCY,
             batchSize,

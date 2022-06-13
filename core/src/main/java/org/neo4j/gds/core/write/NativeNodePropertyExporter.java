@@ -197,6 +197,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
             .waitTime(10L, TimeUnit.MICROSECONDS)
             .terminationFlag(terminationFlag)
             .executor(executorService)
+            .mayInterruptIfRunning(false)
             .run();
     }
 }
