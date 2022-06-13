@@ -25,7 +25,9 @@ import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -114,5 +116,10 @@ public enum AllClassMetric implements ClassificationMetric {
                 .divide(BigDecimal.valueOf(targets.size()), 8, RoundingMode.UP)
                 .doubleValue();
         }
-    }
+    };
+
+    static final Set<String> METRICS = Arrays
+        .stream(AllClassMetric.values())
+        .map(AllClassMetric::name)
+        .collect(Collectors.toSet());
 }

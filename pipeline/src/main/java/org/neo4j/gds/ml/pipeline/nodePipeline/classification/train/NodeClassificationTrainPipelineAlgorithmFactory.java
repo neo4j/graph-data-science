@@ -51,7 +51,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             NodeClassificationTrainingPipeline.class
         );
 
-        validateMainMetric(pipeline, configuration.metrics().get(0).asString());
+        validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
         return new NodeClassificationTrainPipelineExecutor(
             pipeline,

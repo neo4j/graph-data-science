@@ -41,7 +41,7 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
 
     String graphName();
 
-    @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#parse")
+    @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification.Parser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")
     List<ClassificationMetricSpecification> metrics();
 

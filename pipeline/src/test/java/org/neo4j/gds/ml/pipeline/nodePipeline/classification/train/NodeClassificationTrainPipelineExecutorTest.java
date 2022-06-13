@@ -116,7 +116,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
-        var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
 
         var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
@@ -187,7 +187,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.addFeatureStep(NodeFeatureStep.of("array"));
 
-        var metricSpecification = ClassificationMetricSpecification.parse("OUT_OF_BAG_ERROR");
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR");
 
         var modelCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
         pipeline.addTrainerConfig(modelCandidate);
@@ -233,7 +233,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
-        var metricSpecification = ClassificationMetricSpecification.parse("F1(class=1)");
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
@@ -296,7 +296,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .graphName(GRAPH_NAME)
             .modelName("myModel")
             .targetProperty("INVALID_PROPERTY")
-            .metrics(List.of(ClassificationMetricSpecification.parse("F1(class=1)")))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1(class=1)")))
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -382,7 +382,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .targetProperty("t")
             .relationshipTypes(List.of("SOME_REL"))
             .nodeLabels(List.of("SOME_LABEL"))
-            .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
             .build();
 
         var memoryEstimation = NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog());
@@ -410,7 +410,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             .targetProperty("t")
             .relationshipTypes(List.of("SOME_REL"))
             .nodeLabels(List.of("SOME_LABEL"))
-            .metrics(List.of(ClassificationMetricSpecification.parse("F1_WEIGHTED")))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
             .build();
 
         assertThatThrownBy(() -> NodeClassificationTrainPipelineExecutor.estimate(pipeline, config, new OpenModelCatalog()))
