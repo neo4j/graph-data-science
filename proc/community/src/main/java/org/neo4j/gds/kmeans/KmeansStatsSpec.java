@@ -25,8 +25,6 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
@@ -50,17 +48,6 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         return (__, config) -> KmeansStatsConfig.of(config);
     }
 
-    private List<List<Double>> arrayMatrixToListMatrix(double[][] matrix) {
-        var result = new ArrayList<List<Double>>();
-
-        for (double[] row : matrix) {
-            List<Double> rowList = new ArrayList<>();
-            result.add(rowList);
-            for (double column : row)
-                rowList.add(column);
-        }
-        return result;
-    }
 
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>> computationResultConsumer() {
@@ -74,7 +61,9 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 );
 
                 if (executionContext.containsOutputField("centroids")) {
-                    builder.withCentroids(arrayMatrixToListMatrix(computationResult.result().centers()));
+                    builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult
+                        .result()
+                        .centers()));
                 }
                 builder.withCommunityFunction(computationResult.result().communities()::get)
                     .withPreProcessingMillis(computationResult.preProcessingMillis())
