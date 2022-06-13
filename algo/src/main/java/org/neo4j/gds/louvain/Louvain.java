@@ -54,12 +54,11 @@ public final class Louvain extends Algorithm<Louvain> {
     private final NodePropertyValues seedingValues;
     private final ExecutorService executorService;
     // results
-    private HugeLongArray[] dendrograms;
-
+    private final LouvainDendrogramManager dendrogramManager;
     private double[] modularities;
     private int ranLevels;
 
-    private final boolean includeIntermediateCommunities;
+    private boolean includeIntermediateCommunities;
 
     public Louvain(
         Graph graph,
@@ -72,13 +71,13 @@ public final class Louvain extends Algorithm<Louvain> {
         this.rootGraph = graph;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
-        this.includeIntermediateCommunities = config.includeIntermediateCommunities();
-        if (this.includeIntermediateCommunities) {
-            this.dendrograms = new HugeLongArray[config.maxLevels()];
-        } else {
-            this.dendrograms = new HugeLongArray[2];
-        }
+        this.dendrogramManager = new LouvainDendrogramManager(
+            graph.nodeCount(),
+            config.maxLevels(),
+            config.includeIntermediateCommunities()
+        );
         this.modularities = new double[config.maxLevels()];
+        this.includeIntermediateCommunities = config.includeIntermediateCommunities();
     }
 
     @Override
@@ -102,16 +101,10 @@ public final class Louvain extends Algorithm<Louvain> {
             modularityOptimization.release();
 
             modularities[ranLevels] = modularityOptimization.getModularity();
-            int dendogramIndex = includeIntermediateCommunities ? ranLevels : (ranLevels % 2);
-            if (dendogramIndex > 1 || ranLevels <= 1) {
-                dendrograms[dendogramIndex] = HugeLongArray.newArray(rootGraph.nodeCount());
-            }
-            int oldIndex = includeIntermediateCommunities ? ranLevels - 1 : ((1 + ranLevels) % 2);
+            dendrogramManager.prepareNextLevel(ranLevels);
 
             long maxCommunityId = buildDendrogram(
                 workingGraph,
-                oldIndex,
-                dendogramIndex,
                 ranLevels,
                 modularityOptimization
             );
@@ -149,25 +142,12 @@ public final class Louvain extends Algorithm<Louvain> {
             System.arraycopy(this.modularities, 0, resizedModularities, 0, numLevels);
             this.modularities = resizedModularities;
         }
+        dendrogramManager.resizeDendrogram(numLevels);
 
-        if (includeIntermediateCommunities) {
-            HugeLongArray[] resizedDendrogram = new HugeLongArray[numLevels];
-            if (numLevels < config.maxLevels()) {
-                System.arraycopy(this.dendrograms, 0, resizedDendrogram, 0, numLevels);
-                this.dendrograms = resizedDendrogram;
-            }
-        } else {
-            HugeLongArray[] resizedDendrogram = new HugeLongArray[1];
-            System.arraycopy(this.dendrograms, (1 + numLevels) % 2, resizedDendrogram, 0, 1);
-            this.dendrograms = resizedDendrogram;
-
-        }
     }
 
     private long buildDendrogram(
         Graph workingGraph,
-        int oldIndex,
-        int index,
         int level,
         ModularityOptimization modularityOptimization
     ) {
@@ -175,7 +155,7 @@ public final class Louvain extends Algorithm<Louvain> {
         ParallelUtil.parallelForEachNode(rootGraph, config.concurrency(), (nodeId) -> {
             long prevId = level == 0
                 ? nodeId
-                : workingGraph.toMappedNodeId(dendrograms[oldIndex].get(nodeId));
+                : workingGraph.toMappedNodeId(dendrogramManager.getPrevious(nodeId));
 
             long communityId = modularityOptimization.getCommunityId(prevId);
 
@@ -189,7 +169,7 @@ public final class Louvain extends Algorithm<Louvain> {
                 }
             } while (!updatedMaxCurrentId);
 
-            dendrograms[index].set(nodeId, communityId);
+            dendrogramManager.set(nodeId, communityId);
         });
 
         return maxCommunityId.get();
@@ -275,29 +255,21 @@ public final class Louvain extends Algorithm<Louvain> {
     }
 
     public HugeLongArray[] dendrograms() {
-        return this.dendrograms;
+        return this.dendrogramManager.getAllDendrograms();
     }
 
-    private int getDendrogramIndex() {
-        return includeIntermediateCommunities ? levels() - 1 : 0;
-    }
 
     public HugeLongArray finalDendrogram() {
-        return this.dendrograms[getDendrogramIndex()];
+        return dendrogramManager.getCurrent();
     }
 
     public long getCommunity(long nodeId) {
-        return dendrograms[getDendrogramIndex()].get(nodeId);
+        return dendrogramManager.getCommunity(nodeId);
     }
 
     public long[] getCommunities(long nodeId) {
-        long[] communities = new long[dendrograms.length];
+        return dendrogramManager.getIntermediateCommunitiesForNode(nodeId);
 
-        for (int i = 0; i < dendrograms.length; i++) {
-            communities[i] = dendrograms[i].get(nodeId);
-        }
-
-        return communities;
     }
 
     public int levels() {
