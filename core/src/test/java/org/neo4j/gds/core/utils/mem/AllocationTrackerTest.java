@@ -30,14 +30,11 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_KERNEL_TRACKER;
 
 class AllocationTrackerTest {
 
     private static final long GRAB_SIZE_1KB = ByteUnit.kibiBytes(1);
-    private static final String EXCEPTION_NAME = "MemoryLimitExceededException";
 
     @ParameterizedTest
     @MethodSource("allocationTrackers")
@@ -87,34 +84,6 @@ class AllocationTrackerTest {
         var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
         var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
         assertThat(allocationTracker).isExactlyInstanceOf(InMemoryAllocationTracker.class);
-    }
-
-    @Test
-    void shouldUseKernelTrackerWhenFeatureIsToggledOn() {
-        USE_KERNEL_TRACKER.enableAndRun(() -> {
-            var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(1337, GRAB_SIZE_1KB);
-            var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
-            assertThat(allocationTracker).isExactlyInstanceOf(KernelAllocationTracker.class);
-        });
-    }
-
-    @Test
-    void shouldTerminateTransactionWhenOverallocating() {
-        USE_KERNEL_TRACKER.enableAndRun(
-            () -> {
-                var memoryTrackerProxy = Neo4jProxy.limitedMemoryTrackerProxy(42, GRAB_SIZE_1KB);
-                var allocationTracker = AllocationTracker.create(memoryTrackerProxy);
-                allocationTracker.add(42);
-                assertEquals(42L, allocationTracker.trackedBytes());
-                var exception = assertThrows(
-                    Exception.class,
-                    () -> allocationTracker.add(1)
-                );
-
-                assertThat(exception.getClass().getSimpleName()).isEqualTo(EXCEPTION_NAME);
-                assertThat(exception).hasMessageStartingWith("The allocation of an extra 1 B would use more than the limit 42 B.");
-            }
-        );
     }
 
     static Stream<AllocationTracker> emptyTrackers() {

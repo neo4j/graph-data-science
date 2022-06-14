@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
-import org.neo4j.gds.compat.AllocationTrackerAdapter;
-
 import java.util.concurrent.atomic.LongAdder;
 
 public class InMemoryAllocationTracker implements AllocationTracker {
@@ -46,7 +44,7 @@ public class InMemoryAllocationTracker implements AllocationTracker {
         return new InMemoryAllocationTracker();
     }
 
-    public static AllocationTracker ignoring(AllocationTrackerAdapter ignored) {
+    public static AllocationTracker ignoring() {
         return create();
     }
 }
