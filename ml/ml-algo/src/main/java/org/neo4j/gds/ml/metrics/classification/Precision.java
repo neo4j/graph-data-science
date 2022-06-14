@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
@@ -32,21 +31,22 @@ public class Precision implements ClassificationMetric {
 
     public static final String NAME = "PRECISION";
 
-    private final long positiveTarget;
+    private final long originalTarget;
 
-    public Precision(long positiveTarget) {
-        this.positiveTarget = positiveTarget;
+    private final long internalTarget;
+
+    public Precision(long originalTarget, int internalTarget) {
+        this.originalTarget = originalTarget;
+        this.internalTarget = internalTarget;
     }
 
     @Override
-    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore, LocalIdMap localIdMap) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
                     "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
                     targets.size(),
                     predictions.size()
                 );
-
-        var localPositiveTarget = localIdMap.toMapped(positiveTarget);
 
         long truePositives = 0L;
         long falsePositives = 0L;
@@ -55,10 +55,10 @@ public class Precision implements ClassificationMetric {
             long targetClass = targets.get(row);
             long predictedClass = predictions.get(row);
 
-            var predictedIsPositive = predictedClass == localPositiveTarget;
+            var predictedIsPositive = predictedClass == internalTarget;
             if (!predictedIsPositive) continue;
 
-            var targetIsPositive = targetClass == localPositiveTarget;
+            var targetIsPositive = targetClass == internalTarget;
 
             if (targetIsPositive) {
                 truePositives++;
@@ -77,8 +77,8 @@ public class Precision implements ClassificationMetric {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Precision precisionScore = (Precision) o;
-        return positiveTarget == precisionScore.positiveTarget;
+        Precision precision = (Precision) o;
+        return originalTarget == precision.originalTarget;
     }
 
     @Override
@@ -88,12 +88,12 @@ public class Precision implements ClassificationMetric {
 
     @Override
     public String toString() {
-        return formatWithLocale("%s_class_%d", NAME, positiveTarget);
+        return formatWithLocale("%s_class_%d", NAME, originalTarget);
     }
 
     @Override
     public String name() {
-        return formatWithLocale("%s(class=%d)", NAME, positiveTarget);
+        return formatWithLocale("%s(class=%d)", NAME, originalTarget);
     }
 
     @Override

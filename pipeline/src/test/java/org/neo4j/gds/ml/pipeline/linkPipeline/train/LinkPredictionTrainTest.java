@@ -126,22 +126,22 @@ class LinkPredictionTrainTest {
             Arguments.of(
                 "Default",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(27_992, 898_232)
+                MemoryRange.of(27_504, 897_744)
             ),
             Arguments.of(
                 "Higher test-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.6).trainFraction(0.1).validationFolds(2).build(),
-                MemoryRange.of(79_192, 2_909_432)
+                MemoryRange.of(76_704, 2_906_944)
             ),
             Arguments.of(
                 "Higher train-set",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(2).build(),
-                MemoryRange.of(121_464, 3_951_304)
+                MemoryRange.of(119_216, 3_949_056)
             ),
             Arguments.of(
                 "Higher validation folds",
                 LinkPredictionSplitConfigImpl.builder().testFraction(0.1).trainFraction(0.6).validationFolds(5).build(),
-                MemoryRange.of(134_664, 3_964_504)
+                MemoryRange.of(132_416, 3_962_256)
             )
         );
     }
@@ -157,17 +157,17 @@ class LinkPredictionTrainTest {
 
         return Stream.of(
             Arguments.of("LLR batchSize 10",
-                List.of(llrConfigs.get(0)), MemoryRange.of(23_224, 717_064)
+                List.of(llrConfigs.get(0)), MemoryRange.of(22_736, 716_576)
             ),
             Arguments.of(
                 "LLR batchSize 100",
                 List.of(llrConfigs.get(1)),
-                MemoryRange.of(28_792, 899_032)
+                MemoryRange.of(28_304, 898_544)
             ),
             Arguments.of(
                 "LLR batchSize 10,100",
                 llrConfigs,
-                MemoryRange.of(28_872, 899_112)
+                MemoryRange.of(28_384, 898_624)
             ),
             Arguments.of(
                 "RF",
@@ -180,7 +180,7 @@ class LinkPredictionTrainTest {
                     .build()
                     .toTunableConfig()
                 ),
-                MemoryRange.of(36_120, 473_720)
+                MemoryRange.of(35_720, 473_320)
             ),
             Arguments.of(
                 "Default RF and default LR",
@@ -188,7 +188,7 @@ class LinkPredictionTrainTest {
                     LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(43_200, 1_371_408)
+                MemoryRange.of(42_800, 1_371_008)
             ),
             Arguments.of(
                 "Default RF and default LR with range",
@@ -199,7 +199,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(43_200, 1_371_408)
+                MemoryRange.of(42_800, 1_371_008)
             ),
             Arguments.of(
                 "Default RF and default LR with batch size range",
@@ -210,7 +210,7 @@ class LinkPredictionTrainTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(12_816_072, 405_294_312)
+                MemoryRange.of(12_815_584, 405_293_824)
             )
         );
     }
@@ -339,11 +339,11 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  10,   10, 2_728, 69_368",
-        "  10,  100, 17_464, 534_904",
-        "  10, 1000, 28_792, 899_032",
+        "  10,   10, 2_640, 69_280",
+        "  10,  100, 17_336, 534_776",
+        "  10, 1000, 28_304, 898_544",
         // nodeCount has no effect on the estimation
-        "1000, 1000, 28_792, 899_032"
+        "1000, 1000, 28_304, 898_544"
     })
     void estimateWithDifferentGraphSizes(int nodeCount, int relationshipCount, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()
@@ -417,9 +417,9 @@ class LinkPredictionTrainTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "  1,  28_264, 874_984",
-        "  2,  28_440, 883_000",
-        "  4,  28_792, 899_032",
+        "  1,  27_776, 874_496",
+        "  2,  27_952, 882_512",
+        "  4,  28_304, 898_544",
     })
     void estimateWithConcurrency(int concurrency, int expectedMinEstimation, int expectedMaxEstimation) {
         var trainConfig = LinkPredictionTrainConfigImpl.builder()

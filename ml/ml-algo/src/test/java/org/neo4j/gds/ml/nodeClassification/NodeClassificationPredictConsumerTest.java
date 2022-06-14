@@ -19,15 +19,15 @@
  */
 package org.neo4j.gds.ml.nodeClassification;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestClassifier;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchTransformer;
 import org.neo4j.gds.ml.core.batch.ListBatch;
 import org.neo4j.gds.ml.core.batch.SingletonBatch;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.TreeNode;
 import org.neo4j.gds.ml.models.ClassifierFactory;
@@ -45,11 +45,6 @@ class NodeClassificationPredictConsumerTest {
     void canProducePredictions() {
         var classifier = new TestClassifier() {
             @Override
-            public LocalIdMap classIdMap() {
-                return LocalIdMap.of(0, 1);
-            }
-
-            @Override
             public double[] predictProbabilities(double[] features) {
                 if (Double.compare(features[0], 0) == 0) {
                     return new double[]{0.2, 0.8};
@@ -60,11 +55,16 @@ class NodeClassificationPredictConsumerTest {
 
             @Override
             public ClassifierData data() {
-                return null;
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public int numberOfClasses() {
+                return 2;
             }
         };
         var probabilities = HugeObjectArray.newArray(double[].class, 2);
-        var predictedClasses = HugeLongArray.newArray(2);
+        var predictedClasses = HugeIntArray.newArray(2);
         var predictConsumer = new NodeClassificationPredictConsumer(
             FeaturesFactory.wrap(List.of(new double[] {0.0}, new double[] {1.0})),
             BatchTransformer.IDENTITY,
@@ -85,14 +85,12 @@ class NodeClassificationPredictConsumerTest {
 
     @Test
     void predictWithRandomForest() {
-        LocalIdMap classMapping = LocalIdMap.of(5, 10);
-
-        var root = new TreeNode<>(classMapping.toMapped(10));
+        var root = new TreeNode<>(1);
         var modelData = ImmutableRandomForestClassifierData
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(1)
-            .classIdMap(classMapping)
+            .numberOfClasses(2)
             .build();
 
         var classifier = ClassifierFactory.create(modelData);
@@ -102,7 +100,7 @@ class NodeClassificationPredictConsumerTest {
         assertThat(classifier.predictProbabilities(features.get(0))).containsExactly(0, 1);
         assertThat(classifier.predictProbabilities(features.get(1))).containsExactly(0, 1);
 
-        var predictedClasses = HugeLongArray.newArray(features.size());
+        var predictedClasses = HugeIntArray.newArray(features.size());
 
         new NodeClassificationPredictConsumer(
             features,
@@ -113,7 +111,7 @@ class NodeClassificationPredictConsumerTest {
             ProgressTracker.NULL_TRACKER
         ).accept(new ListBatch(List.of(0L, 1L)));
 
-        assertThat(predictedClasses.get(0)).isEqualTo(10);
-        assertThat(predictedClasses.get(1)).isEqualTo(10);
+        assertThat(predictedClasses.get(0)).isEqualTo(1);
+        assertThat(predictedClasses.get(1)).isEqualTo(1);
     }
 }

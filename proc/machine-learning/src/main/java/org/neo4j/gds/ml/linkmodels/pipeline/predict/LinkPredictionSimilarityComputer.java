@@ -28,10 +28,9 @@ import org.neo4j.gds.similarity.knn.NeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 class LinkPredictionSimilarityComputer implements SimilarityComputer {
-
+    private static final int POSITIVE_CLASS_INDEX = (int) EdgeSplitter.POSITIVE;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Classifier classifier;
-    private final int positiveClassLocalId;
 
     LinkPredictionSimilarityComputer(
         LinkFeatureExtractor linkFeatureExtractor,
@@ -39,13 +38,12 @@ class LinkPredictionSimilarityComputer implements SimilarityComputer {
     ) {
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.classifier = classifier;
-        this.positiveClassLocalId = classifier.classIdMap().toMapped((long)EdgeSplitter.POSITIVE);
     }
 
     @Override
     public double similarity(long sourceId, long targetId) {
         var features = linkFeatureExtractor.extractFeatures(sourceId, targetId);
-        return classifier.predictProbabilities(features)[positiveClassLocalId];
+        return classifier.predictProbabilities(features)[POSITIVE_CLASS_INDEX];
     }
 
     static final class LinkFilter implements NeighborFilter {

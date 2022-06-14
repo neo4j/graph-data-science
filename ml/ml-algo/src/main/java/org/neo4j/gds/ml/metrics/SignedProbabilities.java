@@ -123,12 +123,12 @@ public abstract class SignedProbabilities {
 
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
-        int positiveClassId = classifier.classIdMap().toMapped((long) EdgeSplitter.POSITIVE);
+        var positiveClassIndex = (int) EdgeSplitter.POSITIVE;
         evaluationQueue.parallelConsume(concurrency, __ -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
                 for (Long relationshipIdx : batch.elementIds()) {
-                    double probabilityOfPositiveEdge = probabilityMatrix.dataAt(offset, positiveClassId);
+                    double probabilityOfPositiveEdge = probabilityMatrix.dataAt(offset, positiveClassIndex);
                     offset += 1;
                     boolean isEdge = labels.get(relationshipIdx) == EdgeSplitter.POSITIVE;
 

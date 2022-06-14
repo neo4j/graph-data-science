@@ -41,7 +41,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 
 import java.util.List;
@@ -93,7 +92,7 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
         var pipeline = LinkPredictionPredictPipeline.from(Stream.of(), Stream.of(new L2FeatureStep(List.of("a", "b", "c"))));
 
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(new Matrix(
                 weights,
                 1,

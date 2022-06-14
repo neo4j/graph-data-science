@@ -24,12 +24,12 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,10 +48,10 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
     String pipeline();
 
     @Configuration.Ignore
-    default List<Metric> metrics(Collection<Long> classes) {
+    default List<Metric> metrics(LocalIdMap classIdMap) {
         return metrics()
             .stream()
-            .flatMap(spec -> spec.createMetrics(classes))
+            .flatMap(spec -> spec.createMetrics(classIdMap))
             .collect(Collectors.toList());
     }
 

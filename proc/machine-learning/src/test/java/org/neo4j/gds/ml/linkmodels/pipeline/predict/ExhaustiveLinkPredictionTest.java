@@ -42,7 +42,6 @@ import org.neo4j.gds.ml.models.logisticregression.ImmutableLogisticRegressionDat
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 
 import java.util.List;
 import java.util.Map;
@@ -96,7 +95,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,
@@ -157,7 +156,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
 
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(
                 new Matrix(
                     WEIGHTS,

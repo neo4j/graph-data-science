@@ -24,7 +24,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
@@ -48,10 +47,9 @@ class LogisticRegressionDataTest {
             .memoryUsage();
 
         // LocalIdMap is backed by 3 arrays with each have a base estimation of 16
-        var overheadForOneClassIdMap = 3 * 16;
         var overheadForOneWeigths = 16;
         var overheadForOneBias = 16;
-        var overheadForOneNLRData = overheadForOneClassIdMap + overheadForOneWeigths + overheadForOneBias;
+        var overheadForOneNLRData = overheadForOneWeigths + overheadForOneBias;
 
         // scaling number of classes scales memory usage linearly, modulo overhead
         assertThat(_08_05.max).isEqualTo(2 * _04_05.max - overheadForOneNLRData);
@@ -69,8 +67,8 @@ class LogisticRegressionDataTest {
         // * 4: the number of classes
         // * 8: size per stored value in the weights matrix
         // => the size of the change based on varying the number of features
-        assertThat(_04_05.max).isEqualTo(352);
-        assertThat(_04_10.max).isEqualTo(352 + 5 * 4 * 8); // five is the number of added features
+        assertThat(_04_05.max).isEqualTo(224);
+        assertThat(_04_10.max).isEqualTo(224 + 5 * 4 * 8); // five is the number of added features
         assertThat(_04_10.max).isEqualTo(_04_05.max + 5 * 4 * 8);
         assertThat(_08_10.max).isEqualTo(_08_05.max + 5 * 8 * 8);
         assertThat(_04_20.max).isEqualTo(_04_05.max + 15 * 4 * 8);
@@ -79,10 +77,10 @@ class LogisticRegressionDataTest {
 
     @ParameterizedTest
     @CsvSource(value = {
-        "100,   0, 100, 128, 928",
-        "1000,  0, 100, 128, 928",
-        "100,  50, 500, 528, 4_128",
-        "1000, 50, 500, 528, 4_128"
+        "100,   0, 100, 40, 840",
+        "1000,  0, 100, 40, 840",
+        "100,  50, 500, 440, 4_040",
+        "1000, 50, 500, 440, 4_040"
     })
     void shouldEstimateCorrectlyBinaryReduced(int relCount, int minFeatureCount, int maxFeatureCount, int minEstimation, int maxEstimation) {
         var estimatedFeatureCount = MemoryRange.of(minFeatureCount, maxFeatureCount);
@@ -96,32 +94,22 @@ class LogisticRegressionDataTest {
 
     @Test
     void shouldCreateReducedData() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(42);
-        classIdMap.toMapped(43);
-        classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.withReducedClassCount(3, classIdMap);
+        var data = LogisticRegressionData.withReducedClassCount(3, 3);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(2);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[6]);
-        assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
     @Test
     void shouldCreateStandardData() {
-        var classIdMap = new LocalIdMap();
-        classIdMap.toMapped(42);
-        classIdMap.toMapped(43);
-        classIdMap.toMapped(1900);
-        var data = LogisticRegressionData.standard(3, classIdMap);
+        var data = LogisticRegressionData.standard(3, 3);
         var matrix = data.weights().data();
 
         assertThat(matrix.rows()).isEqualTo(3);
         assertThat(matrix.cols()).isEqualTo(3);
         assertThat(matrix.data()).containsExactly(new double[9]);
-        assertThat(data.classIdMap()).isEqualTo(classIdMap);
     }
 
 }

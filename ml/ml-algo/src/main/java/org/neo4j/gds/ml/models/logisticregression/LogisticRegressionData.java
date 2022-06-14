@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.Dimensions;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
@@ -48,24 +47,26 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
         return weights().dimension(Dimensions.COLUMNS_INDEX);
     }
 
-    static LogisticRegressionData standard(int featureCount, LocalIdMap classIdMap) {
-        return create(classIdMap.size(), featureCount, classIdMap);
+    static LogisticRegressionData standard(int featureCount, int numberOfClasses) {
+        return create(numberOfClasses, featureCount, false);
     }
 
     // this is an optimization where "virtually" add a weight of 0.0 for the last class
-    static LogisticRegressionData withReducedClassCount(int featureCount, LocalIdMap classIdMap) {
-        return create(classIdMap.size() - 1, featureCount, classIdMap);
+    static LogisticRegressionData withReducedClassCount(int featureCount, int numberOfClasses) {
+        return create(numberOfClasses, featureCount, true);
     }
 
-    private static LogisticRegressionData create(int classCount, int featureCount, LocalIdMap classIdMap) {
-        var weights = Weights.ofMatrix(classCount, featureCount);
+    private static LogisticRegressionData create(int classCount, int featureCount, boolean skipLastClass) {
+        var rows = skipLastClass ? classCount - 1 : classCount;
 
-        var bias = new Weights<>(new Vector(classCount));
+        var weights = Weights.ofMatrix(rows, featureCount);
+
+        var bias = new Weights<>(new Vector(rows));
 
         return ImmutableLogisticRegressionData
             .builder()
             .weights(weights)
-            .classIdMap(classIdMap)
+            .numberOfClasses(classCount)
             .bias(bias)
             .build();
     }
@@ -73,7 +74,6 @@ public interface LogisticRegressionData extends Classifier.ClassifierData {
     static MemoryEstimation memoryEstimation(boolean isReduced, int numberOfClasses, MemoryRange featureDimension) {
         int normalizedNumberOfClasses = isReduced ? (numberOfClasses - 1) : numberOfClasses;
         return MemoryEstimations.builder("Logistic regression model data")
-            .add("classIdMap", LocalIdMap.memoryEstimation(numberOfClasses))
             .fixed("weights", featureDimension.apply(featureDim -> Weights.sizeInBytes(
                 normalizedNumberOfClasses,
                 Math.toIntExact(featureDim)

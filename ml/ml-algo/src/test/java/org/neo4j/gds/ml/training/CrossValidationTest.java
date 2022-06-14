@@ -28,7 +28,9 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.neo4j.gds.ml.metrics.classification.F1Macro;
 import org.neo4j.gds.ml.models.TrainerConfig;
 
 import java.util.List;
@@ -37,7 +39,6 @@ import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_MACRO;
 
 class CrossValidationTest {
 
@@ -54,7 +55,7 @@ class CrossValidationTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        List<Metric> metrics = List.of(F1_MACRO);
+        List<Metric> metrics = List.of(new F1Macro(LocalIdMap.of(0)));
         var trainingStatistics = new TrainingStatistics(metrics);
 
         var crossValidation = new CrossValidation<>(
@@ -64,7 +65,7 @@ class CrossValidationTest {
             3,
             Optional.empty(),
             (trainSet, modelParameters, metricsHandler, messageLogLevel) -> 0L,
-            (evaluationSet, model, scoreConsumer) -> { scoreConsumer.consume(F1_MACRO, 0); }
+            (evaluationSet, model, scoreConsumer) -> { scoreConsumer.consume(metrics.get(0), 0); }
         );
 
         progressTracker.beginSubTask("test");

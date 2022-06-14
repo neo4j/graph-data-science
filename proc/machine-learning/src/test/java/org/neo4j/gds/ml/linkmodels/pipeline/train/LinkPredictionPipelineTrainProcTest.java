@@ -313,7 +313,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
 
         assertThat(data1).usingRecursiveComparison().ignoringFieldsOfTypes(LocalIdMap.class).isEqualTo(modelData("trainedModel6"));
-        assertThat(data1.classIdMap()).isEqualTo(modelData("trainedModel6").classIdMap());
+        assertThat(data1.numberOfClasses()).isEqualTo(modelData("trainedModel6").numberOfClasses());
     }
 
     @Test
@@ -354,7 +354,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             db,
             query,
             Map.of("graphName", GRAPH_NAME),
-            MemoryRange.of(16_696, 510_616),
+            MemoryRange.of(16_592, 510_512),
             16,
             42
         );

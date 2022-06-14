@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.LongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +34,7 @@ class OutOfBagErrorTest {
     void handleZeroOutOfAnyBagVectors() {
         double outOfBagError = OutOfBagError.evaluate(
             ReadOnlyHugeLongArray.of(HugeLongArray.of(1L)),
-            LocalIdMap.of(0),
+            1,
             HugeIntArray.of(0),
             4,
             HugeAtomicLongArray.newArray(1, LongPageCreator.identity(1))

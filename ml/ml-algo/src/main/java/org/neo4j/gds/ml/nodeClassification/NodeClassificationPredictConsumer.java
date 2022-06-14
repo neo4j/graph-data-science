@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.nodeClassification;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -43,7 +43,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
     private final BatchTransformer nodeIds;
     private final Classifier classifier;
     private final @Nullable HugeObjectArray<double[]> predictedProbabilities;
-    private final HugeLongArray predictedClasses;
+    private final HugeIntArray predictedClasses;
     private final ProgressTracker progressTracker;
 
     NodeClassificationPredictConsumer(
@@ -51,7 +51,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         BatchTransformer nodeIds,
         Classifier classifier,
         @Nullable HugeObjectArray<double[]> predictedProbabilities,
-        HugeLongArray predictedClasses,
+        HugeIntArray predictedClasses,
         ProgressTracker progressTracker
     ) {
         this.features = features;
@@ -82,9 +82,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
                     bestClassId = classId;
                 }
             }
-
-            long bestClass = classifier.classIdMap().toOriginal(bestClassId);
-            predictedClasses.set(nodeIndex, bestClass);
+            predictedClasses.set(nodeIndex, bestClassId);
             currentRow++;
         }
 

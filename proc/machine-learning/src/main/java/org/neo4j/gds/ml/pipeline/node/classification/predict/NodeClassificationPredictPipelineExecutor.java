@@ -20,15 +20,19 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -42,16 +46,18 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     NodeClassificationPredictPipelineBaseConfig,
     NodePropertyPredictPipeline,
-    NodeClassificationPredict.NodeClassificationResult
+    NodeClassificationPredictPipelineExecutor.NodeClassificationPipelineResult
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
+    private LocalIdMap classIdMap;
 
     public NodeClassificationPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
@@ -60,10 +66,12 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         GraphStore graphStore,
         String graphName,
         ProgressTracker progressTracker,
-        Classifier.ClassifierData modelData
+        Classifier.ClassifierData modelData,
+        LocalIdMap classIdMap
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.modelData = modelData;
+        this.classIdMap = classIdMap;
     }
 
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
@@ -118,7 +126,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     }
 
     @Override
-    protected NodeClassificationPredict.NodeClassificationResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
+    protected NodeClassificationPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
         var features = FeaturesFactory.extractLazyFeatures(nodesGraph, pipeline.featureProperties());
 
@@ -131,7 +139,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             ));
         }
 
-        return new NodeClassificationPredict(
+        var nodeClassificationResult =  new NodeClassificationPredict(
             ClassifierFactory.create(modelData),
             features,
             MIN_BATCH_SIZE,
@@ -140,5 +148,23 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
             progressTracker,
             terminationFlag
         ).compute();
+
+        return NodeClassificationPipelineResult.of(nodeClassificationResult, classIdMap);
+
+    }
+
+    @ValueClass
+    public interface NodeClassificationPipelineResult {
+        HugeLongArray predictedClasses();
+        Optional<HugeObjectArray<double[]>> predictedProbabilities();
+
+        static NodeClassificationPipelineResult of(NodeClassificationPredict.NodeClassificationResult nodeClassificationResult, LocalIdMap classIdMap) {
+            var internalPredictions = nodeClassificationResult.predictedClasses();
+            var predictions = HugeLongArray.newArray(internalPredictions.size());
+            for (long i = 0; i < nodeClassificationResult.predictedClasses().size(); i++) {
+                predictions.set(i, classIdMap.toOriginal(internalPredictions.get(i)));
+            }
+            return ImmutableNodeClassificationPipelineResult.of(predictions, nodeClassificationResult.predictedProbabilities());
+        }
     }
 }

@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.models.Features;
@@ -48,26 +47,24 @@ public final class OutOfBagError implements Metric {
 
     public static void addPredictionsForTree(
         DecisionTreePredictor<Integer> decisionTree,
-        LocalIdMap classMapping,
+        int numberOfClasses,
         final Features allFeatureVectors,
         ReadOnlyHugeLongArray trainSet,
         final BitSet sampledTrainSet,
         HugeAtomicLongArray predictions
     ) {
-        var numClasses = classMapping.size();
-
         for (long trainSetIdx = 0; trainSetIdx < trainSet.size(); trainSetIdx++) {
             if (sampledTrainSet.get(trainSetIdx)) continue;
 
             double[] featureVector = allFeatureVectors.get(trainSet.get(trainSetIdx));
             Integer prediction = decisionTree.predict(featureVector);
-            predictions.getAndAdd(trainSetIdx * numClasses + prediction, 1);
+            predictions.getAndAdd(trainSetIdx * numberOfClasses + prediction, 1);
         }
     }
 
     public static double evaluate(
         ReadOnlyHugeLongArray trainSet,
-        LocalIdMap classMapping,
+        int numberOfClasses,
         HugeIntArray expectedLabels,
         int concurrency,
         HugeAtomicLongArray predictions
@@ -78,7 +75,7 @@ public final class OutOfBagError implements Metric {
         var tasks = PartitionUtils.rangePartition(concurrency, trainSet.size(), partition ->
                 accumulationTask(
                     partition,
-                    classMapping,
+                    numberOfClasses,
                     trainSet,
                     predictions,
                     expectedLabels,
@@ -102,7 +99,7 @@ public final class OutOfBagError implements Metric {
 
     private static Runnable accumulationTask(
         Partition partition,
-        LocalIdMap classMapping,
+        int numberOfClasses,
         ReadOnlyHugeLongArray trainSet,
         HugeAtomicLongArray predictions,
         HugeIntArray expectedLabels,
@@ -111,18 +108,17 @@ public final class OutOfBagError implements Metric {
     ) {
 
         return () -> {
-            int numClasses = classMapping.size();
             long numMistakes = 0;
             long numOutOfAnyBagVectors = 0;
             final long startOffset = partition.startNode();
             final long endOffset = startOffset + partition.nodeCount();
 
             for (long i = startOffset; i < endOffset; i++) {
-                final long innerOffset = i * numClasses;
+                final long innerOffset = i * numberOfClasses;
                 long max = 0;
                 int maxClassIdx = 0;
 
-                for (int j = 0; j < numClasses; j++) {
+                for (int j = 0; j < numberOfClasses; j++) {
                     var numPredictions = predictions.get(innerOffset + j);
 
                     if (numPredictions <= max) continue;

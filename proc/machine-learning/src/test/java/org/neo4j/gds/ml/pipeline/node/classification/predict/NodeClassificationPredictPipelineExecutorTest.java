@@ -51,7 +51,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -150,12 +149,14 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                modelData
+                modelData,
+                LocalIdMap.of(42, 1337)
             );
 
             var predictionResult = pipelineExecutor.compute();
 
             assertThat(predictionResult.predictedClasses().size()).isEqualTo(graphStore.nodeCount());
+            assertThat(predictionResult.predictedClasses().toArray()).containsOnly(42, 1337);
             assertThat(predictionResult.predictedProbabilities()).isPresent();
             assertThat(predictionResult
                 .predictedProbabilities()
@@ -192,7 +193,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 .builder()
                 .addDecisionTree(new DecisionTreePredictor<>(root))
                 .featureDimension(3)
-                .classIdMap(LinkPredictionTrain.makeClassIdMap())
+                .numberOfClasses(2)
                 .build();
 
             var pipelineExecutor = new NodeClassificationPredictPipelineExecutor(
@@ -202,7 +203,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                modelData
+                modelData,
+                LocalIdMap.of(0, 1)
             );
 
             var predictionResult = pipelineExecutor.compute();
@@ -257,7 +259,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                modelData
+                modelData,
+                LocalIdMap.of(0, 1)
             );
 
             var predictionResult = pipelineExecutor.compute();
@@ -319,7 +322,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 progressTracker,
-                modelData
+                modelData,
+                LocalIdMap.of(0, 1)
             );
 
             pipelineExecutor.compute();
@@ -362,7 +366,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 streamConfig.graphName(),
                 ProgressTracker.NULL_TRACKER,
-                model.data()
+                model.data(),
+                LocalIdMap.of(0, 1)
             );
 
             assertThatThrownBy(algo::compute)
@@ -402,7 +407,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .builder()
             .addDecisionTree(new DecisionTreePredictor<>(root))
             .featureDimension(3)
-            .classIdMap(LocalIdMap.ofSorted(List.of(0L)))
+            .numberOfClasses(1)
             .build();
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
@@ -424,7 +429,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 Map.of(),
                 ModelCandidateStats.of(RandomForestClassifierTrainerConfig.DEFAULT, Map.of(), Map.of()),
                 NodePropertyPredictPipeline.EMPTY,
-                modelData.classIdMap().originalIdsList()
+                List.of(0L)
             )
         );
 
@@ -471,7 +476,8 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
-                NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias)
+                NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias),
+                LocalIdMap.of(0, 1)
             );
 
             assertThatThrownBy(pipelineExecutor::compute)

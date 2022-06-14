@@ -20,15 +20,12 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 public interface Classifier {
     default int numberOfClasses() {
-        return classIdMap().size();
+        return data().numberOfClasses();
     }
-
-    LocalIdMap classIdMap();
 
     double[] predictProbabilities(double[] features);
 
@@ -38,8 +35,7 @@ public interface Classifier {
 
     interface ClassifierData {
         TrainingMethod trainerMethod();
-
-        LocalIdMap classIdMap();
+        int numberOfClasses();
 
         int featureDimension();
     }

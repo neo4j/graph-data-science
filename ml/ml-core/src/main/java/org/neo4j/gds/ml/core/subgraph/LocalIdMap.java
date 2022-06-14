@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.subgraph;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
+import com.carrotsearch.hppc.cursors.LongIntCursor;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -32,6 +33,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 public class LocalIdMap {
     private final LongArrayList originalIds;
@@ -54,6 +57,13 @@ public class LocalIdMap {
         Arrays.stream(originalIds).forEach(idMap::toMapped);
 
         return idMap;
+    }
+
+    public static LocalIdMap of(Collection<Long> classes) {
+        var classIdMap = new LocalIdMap();
+        classes.forEach(classIdMap::toMapped);
+
+        return classIdMap;
     }
 
     public static LocalIdMap ofSorted(Collection<Long> classes) {
@@ -84,6 +94,11 @@ public class LocalIdMap {
         var list = new ArrayList<Long>();
         originalIds.forEach((Consumer<LongCursor>) longCursor -> list.add(longCursor.value));
         return list;
+    }
+
+    //This method is not order preserving because internally spliterator is not
+    public Stream<LongIntCursor> getMappings() {
+        return StreamSupport.stream(originalToInternalIdMap.spliterator(), false);
     }
 
     public int size() {

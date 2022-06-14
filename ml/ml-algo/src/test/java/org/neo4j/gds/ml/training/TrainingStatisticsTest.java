@@ -25,9 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelStats;
+import org.neo4j.gds.ml.metrics.classification.F1Weighted;
+import org.neo4j.gds.ml.metrics.classification.GlobalAccuracy;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
@@ -39,12 +42,13 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.LinkMetric.AUCPR;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.ACCURACY;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQUARED_ERROR;
 
 class TrainingStatisticsTest {
+
+    static final Metric F1_WEIGHTED = new F1Weighted(LocalIdMap.of());
+    static final Metric ACCURACY = new GlobalAccuracy();
 
     public static Stream<Arguments> mainMetricWithExpectecWinner() {
         return Stream.of(

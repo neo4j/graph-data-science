@@ -24,6 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -159,12 +160,12 @@ public class NodeClassificationPredict {
     @ValueClass
     public interface NodeClassificationResult {
 
-        HugeLongArray predictedClasses();
+        HugeIntArray predictedClasses();
 
         Optional<HugeObjectArray<double[]>> predictedProbabilities();
 
         static NodeClassificationResult of(
-            HugeLongArray classes,
+            HugeIntArray classes,
             @Nullable HugeObjectArray<double[]> probabilities
         ) {
             return ImmutableNodeClassificationResult.builder()

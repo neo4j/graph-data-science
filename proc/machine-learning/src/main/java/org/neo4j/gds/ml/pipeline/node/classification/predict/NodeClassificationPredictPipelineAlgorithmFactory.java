@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
@@ -74,6 +75,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration.username()
         );
         var nodeClassificationPipeline = model.customInfo().pipeline();
+        var classIdMap = LocalIdMap.of(model.customInfo().classes());
         return new NodeClassificationPredictPipelineExecutor(
             nodeClassificationPipeline,
             configuration,
@@ -81,7 +83,8 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             graphStore,
             configuration.graphName(),
             progressTracker,
-            model.data()
+            model.data(),
+            classIdMap
         );
     }
 

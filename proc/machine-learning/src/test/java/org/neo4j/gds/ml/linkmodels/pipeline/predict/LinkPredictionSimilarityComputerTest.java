@@ -34,7 +34,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
 import org.neo4j.gds.similarity.knn.NeighborFilter;
 
 import java.util.List;
@@ -65,7 +64,7 @@ class LinkPredictionSimilarityComputerTest {
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, linkFeatureSteps);
         var modelData = ImmutableLogisticRegressionData.of(
-            LinkPredictionTrain.makeClassIdMap(),
+            2,
             new Weights<>(new Matrix(
                 new double[]{-1, -0.0001},
                 1,

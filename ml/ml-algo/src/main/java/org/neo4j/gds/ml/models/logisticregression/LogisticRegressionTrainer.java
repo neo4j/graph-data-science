@@ -28,7 +28,6 @@ import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
@@ -42,9 +41,9 @@ import static org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData.
 public final class LogisticRegressionTrainer implements ClassifierTrainer {
 
     private final LogisticRegressionTrainConfig trainConfig;
+    private final int numberOfClasses;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
-    private final LocalIdMap classIdMap;
     private final boolean reduceClassCount;
     private final LogLevel messageLogLevel;
     private final int concurrency;
@@ -85,7 +84,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     public LogisticRegressionTrainer(
         int concurrency,
         LogisticRegressionTrainConfig trainConfig,
-        LocalIdMap classIdMap,
+        int numberOfClasses,
         boolean reduceClassCount,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
@@ -93,7 +92,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     ) {
         this.concurrency = concurrency;
         this.trainConfig = trainConfig;
-        this.classIdMap = classIdMap;
+        this.numberOfClasses = numberOfClasses;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.reduceClassCount = reduceClassCount;
@@ -103,8 +102,8 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
     @Override
     public LogisticRegressionClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
         var data = reduceClassCount
-            ? withReducedClassCount(features.featureDimension(), classIdMap)
-            : standard(features.featureDimension(), classIdMap);
+            ? withReducedClassCount(features.featureDimension(), numberOfClasses)
+            : standard(features.featureDimension(), numberOfClasses);
         var classifier = LogisticRegressionClassifier.from(data);
 
         var objective = new LogisticRegressionObjective(classifier, trainConfig.penalty(), features, labels);

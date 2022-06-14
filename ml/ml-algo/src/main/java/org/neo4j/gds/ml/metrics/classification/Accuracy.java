@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
@@ -30,27 +29,25 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Accuracy implements ClassificationMetric {
 
-    // TODO: Accuracy per class clashes with the global Accuracy metric.
-    // Let's solve that later, and call this APC for now.
     public static final String NAME = "ACCURACY";
 
-    private final long positiveTarget;
+    private final long originalTarget;
 
-    public Accuracy(long positiveTarget) {
-        this.positiveTarget = positiveTarget;
+    private final int internalTarget;
+
+    public Accuracy(long originalTarget, int internalTarget) {
+        this.originalTarget = originalTarget;
+        this.internalTarget = internalTarget;
     }
 
     @Override
     public double compute(
-        HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore, LocalIdMap localIdMap
-    ) {
+        HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
             "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
             targets.size(),
             predictions.size()
         );
-
-        var localPositiveTarget = localIdMap.toMapped(positiveTarget);
 
         if (targets.size() == 0) {
             return 0;
@@ -62,8 +59,8 @@ public class Accuracy implements ClassificationMetric {
             long targetClass = targets.get(row);
             long predictedClass = predictions.get(row);
 
-            var predictedIsPositive = predictedClass == localPositiveTarget;
-            var targetIsPositive = targetClass == localPositiveTarget;
+            var predictedIsPositive = predictedClass == internalTarget;
+            var targetIsPositive = targetClass == internalTarget;
 
             if (predictedIsPositive == targetIsPositive) {
                 accurates++;
@@ -79,8 +76,8 @@ public class Accuracy implements ClassificationMetric {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Accuracy accuracyScore = (Accuracy) o;
-        return positiveTarget == accuracyScore.positiveTarget;
+        Accuracy accuracy = (Accuracy) o;
+        return originalTarget == accuracy.originalTarget;
     }
 
     @Override
@@ -90,12 +87,12 @@ public class Accuracy implements ClassificationMetric {
 
     @Override
     public String toString() {
-        return formatWithLocale("%s_class_%d", NAME, positiveTarget);
+        return formatWithLocale("%s_class_%d", NAME, originalTarget);
     }
 
     @Override
     public String name() {
-        return formatWithLocale("%s(class=%d)", NAME, positiveTarget);
+        return formatWithLocale("%s(class=%d)", NAME, originalTarget);
     }
 
     @Override

@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1(clAss =  42 )")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
         assertThat(metric.name()).isEqualTo("F1(class=42)");
@@ -45,32 +46,40 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateAccuracyMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
-        assertThat(metric).isEqualTo(AllClassMetric.ACCURACY);
+        assertThat(metric).isEqualTo(new GlobalAccuracy());
+    }
+
+    @Test
+    void shouldCreateGlobalAccuracyMetric() {
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy(class=1337)")).get(0);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+        assertThat(metricSpecification.toString()).isEqualTo("ACCURACY(class=1337)");
+        assertThat(metric).isEqualTo(new Accuracy(1337, 0));
     }
 
     @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_WeIGhTED")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
-        assertThat(metric).isEqualTo(AllClassMetric.F1_WEIGHTED);
+        assertThat(metric).isEqualTo(new F1Weighted(LocalIdMap.of(1337l)));
     }
 
     @Test
     void shouldCreateF1MacroMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_maCRo")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
-        assertThat(metric).isEqualTo(AllClassMetric.F1_MACRO);
+        assertThat(metric).isEqualTo(new F1Macro(LocalIdMap.of(1337L)));
     }
 
     @Test
     void shouldCreateOOBEMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
-        var metric = metricSpecification.createMetrics(List.of(1337L)).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
         assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
         assertThat(metric.name()).isEqualTo("OUT_OF_BAG_ERROR");
@@ -80,13 +89,9 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldParseSyntacticSugar() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy", "F1(class=*)")).get(1);
-        var metrics = metricSpecification.createMetrics(List.of(42L, -1337L)).collect(Collectors.toList());
-        assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
-        assertThat(metrics.get(0).name()).isEqualTo("F1(class=42)");
-        assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(1).toString()).isEqualTo("F1_class_-1337");
-        assertThat(metrics.get(1).name()).isEqualTo("F1(class=-1337)");
+        var metrics = metricSpecification.createMetrics(LocalIdMap.of(42L, -1337L)).collect(Collectors.toList());
+        assertThat(metrics).containsExactlyInAnyOrder(new F1Score(42,0), new F1Score(-1337,0));
+
     }
 
     @ParameterizedTest

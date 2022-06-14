@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.models.Classifier;
@@ -39,10 +38,10 @@ public class RandomForestClassifier implements Classifier {
 
     public RandomForestClassifier(
         List<DecisionTreePredictor<Integer>> decisionTrees,
-        LocalIdMap classMapping,
+        int numberOfClasses,
         int featureDimension
     ) {
-        this(ImmutableRandomForestClassifierData.of(classMapping, featureDimension, decisionTrees));
+        this(ImmutableRandomForestClassifierData.of(numberOfClasses, featureDimension, decisionTrees));
     }
 
     public RandomForestClassifier(RandomForestClassifierData data) {
@@ -56,11 +55,6 @@ public class RandomForestClassifier implements Classifier {
     }
 
     @Override
-    public LocalIdMap classIdMap() {
-        return data.classIdMap();
-    }
-
-    @Override
     public ClassifierData data() {
         return data;
     }
@@ -70,7 +64,7 @@ public class RandomForestClassifier implements Classifier {
         int[] votesPerClass = gatherTreePredictions(features);
         int numberOfTrees = data.decisionTrees().size();
 
-        double[] probabilities = new double[data.classIdMap().size()];
+        double[] probabilities = new double[numberOfClasses()];
 
         for (int classIdx = 0; classIdx < votesPerClass.length; classIdx++) {
             int voteForClass = votesPerClass[classIdx];
@@ -95,8 +89,7 @@ public class RandomForestClassifier implements Classifier {
     }
 
     int[] gatherTreePredictions(double[] features) {
-        var classMapping = data.classIdMap();
-        final var predictionsPerClass = new int[classMapping.size()];
+        final var predictionsPerClass = new int[numberOfClasses()];
 
         for (DecisionTreePredictor<Integer> decisionTree : data.decisionTrees()) {
             int predictedClass = decisionTree.predict(features);

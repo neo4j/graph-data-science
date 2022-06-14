@@ -228,11 +228,9 @@ public final class LinkPredictionTrain {
         LogLevel messageLogLevel,
         ModelSpecificMetricsHandler metricsHandler
     ) {
-        var intLabels = featureAndLabels.labels();
-
         return ClassifierTrainerFactory.create(
             trainerConfig,
-            classIdMap,
+            classIdMap.size(),
             terminationFlag,
             progressTracker,
             messageLogLevel,
@@ -240,7 +238,7 @@ public final class LinkPredictionTrain {
             config.randomSeed(),
             true,
             metricsHandler
-        ).train(featureAndLabels.features(), intLabels, trainSet);
+        ).train(featureAndLabels.features(), featureAndLabels.labels(), trainSet);
     }
 
     private void computeTestMetric(Classifier classifier, TrainingStatistics trainingStatistics) {

@@ -30,7 +30,6 @@ import org.neo4j.gds.ml.core.functions.MatrixVectorSum;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.functions.Softmax;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Classifier;
@@ -79,7 +78,7 @@ public final class LogisticRegressionClassifier implements Classifier {
 
     public static LogisticRegressionClassifier from(LogisticRegressionData data) {
         LogisticRegressionPredictionStrategy predictionStrategy;
-        if (data.classIdMap().size() == 2 && data.weights().data().rows() == 1) {
+        if (data.numberOfClasses() == 2 && data.weights().data().rows() == 1) {
             // this case corresponds to 2 classes and 1 weight
             // that 'happens to be' the LinkPrediction case
             // it could also be used for NodeClassification if we use reduced weights matrix for it
@@ -130,11 +129,6 @@ public final class LogisticRegressionClassifier implements Classifier {
 
     private static long sizeOfFeatureExtractorsInBytes(int numberOfFeatures) {
         return FeatureExtraction.memoryUsageInBytes(numberOfFeatures);
-    }
-
-    @Override
-    public LocalIdMap classIdMap() {
-        return data.classIdMap();
     }
 
     @Override

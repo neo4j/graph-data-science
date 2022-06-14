@@ -41,6 +41,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -117,7 +118,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var metric = metricSpecification.createMetrics(List.of()).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of()).findFirst().orElseThrow();
 
         var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
         pipeline.addTrainerConfig(modelCandidate);
@@ -319,15 +320,15 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(779_232, 811_192)
+                MemoryRange.of(778_968, 810_928)
             ),
             Arguments.of(
                 List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(90_938, 207_710)
+                MemoryRange.of(90_906, 207_678)
             ),
             Arguments.of(
                 List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(860_200, 927_440)
+                MemoryRange.of(859_936, 927_176)
             ),
             Arguments.of(
                 List.of(
@@ -337,7 +338,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(860_200, 927_440)
+                MemoryRange.of(859_936, 927_176)
             ),
             Arguments.of(
                 List.of(
@@ -347,7 +348,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
                     ),
                     RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
                 ),
-                MemoryRange.of(430_030_600, 430_097_840)
+                MemoryRange.of(430_030_336, 430_097_576)
             )
         );
     }

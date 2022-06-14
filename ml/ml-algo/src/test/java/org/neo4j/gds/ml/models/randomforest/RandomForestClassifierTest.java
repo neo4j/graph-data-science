@@ -33,7 +33,6 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
@@ -48,15 +47,15 @@ import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_E
 
 class RandomForestClassifierTest {
     private static final long NUM_SAMPLES = 10;
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
-
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
     private ReadOnlyHugeLongArray trainSet;
     private Features allFeatureVectors;
+    private int numberOfClasses;
 
     @BeforeEach
     void setup() {
         allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
+        numberOfClasses = 2;
 
         HugeLongArray mutableTrainSet = HugeLongArray.newArray(NUM_SAMPLES);
         mutableTrainSet.setAll(idx -> idx);
@@ -99,7 +98,7 @@ class RandomForestClassifierTest {
             maxClassIdx = i;
         }
 
-        return RandomForestClassifierTest.CLASS_MAPPING.toOriginal(maxClassIdx);
+        return maxClassIdx;
     }
 
     @ParameterizedTest
@@ -107,7 +106,7 @@ class RandomForestClassifierTest {
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
-            CLASS_MAPPING,
+            numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .maxDepth(1)
                 .minSplitSize(2)
@@ -129,7 +128,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.0, 1.0);
     }
 
@@ -138,7 +137,7 @@ class RandomForestClassifierTest {
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
-            CLASS_MAPPING,
+            numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .maxDepth(2)
                 .minSplitSize(2)
@@ -161,7 +160,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
     }
 
@@ -170,7 +169,7 @@ class RandomForestClassifierTest {
     void usingTwentyTreesAndEntropyLoss(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
-            CLASS_MAPPING,
+            numberOfClasses,
             RandomForestClassifierTrainerConfigImpl.builder()
                 .criterion("entropy")
                 .maxDepth(2)
@@ -194,7 +193,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(42);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1);
         assertThat(randomForestPredictor.predictProbabilities(featureVector)).containsExactly(0.15, 0.85);
     }
 
@@ -203,7 +202,7 @@ class RandomForestClassifierTest {
     void shouldMakeSaneErrorEstimation(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
-            CLASS_MAPPING,
+            numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
@@ -228,7 +227,7 @@ class RandomForestClassifierTest {
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestClassifierTrainer(
             concurrency,
-            CLASS_MAPPING,
+            numberOfClasses,
             RandomForestClassifierTrainerConfigImpl
                 .builder()
                 .maxDepth(2)
@@ -257,7 +256,7 @@ class RandomForestClassifierTest {
             IllegalAccessError.class,
             randomForestTrainer::outOfBagError
         );
-        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(1337);
+        assertThat(predictLabel(featureVector, randomForestPredictor)).isEqualTo(0);
     }
 
     @ParameterizedTest

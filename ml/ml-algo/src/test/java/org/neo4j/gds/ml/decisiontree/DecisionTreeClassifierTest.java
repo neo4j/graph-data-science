@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
@@ -42,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DecisionTreeClassifierTest {
 
     private static final long NUM_SAMPLES = 10;
-    // FIXME remove this
-    private static final LocalIdMap CLASS_MAPPING = LocalIdMap.of(1337, 42);
 
     private final HugeIntArray allLabels = HugeIntArray.newArray(NUM_SAMPLES);
+
+    private int numberOfClasses;
     private Features features;
     private GiniIndex giniIndexLoss;
     private Entropy entropyLoss;
@@ -53,6 +52,7 @@ class DecisionTreeClassifierTest {
     @BeforeEach
     void setup() {
         allLabels.setAll(idx -> idx >= 5 ? 1 : 0);
+        numberOfClasses = 2;
 
         HugeObjectArray<double[]> featureVectorArray = HugeObjectArray.newArray(
             double[].class,
@@ -75,8 +75,8 @@ class DecisionTreeClassifierTest {
 
         features = FeaturesFactory.wrap(featureVectorArray);
 
-        giniIndexLoss = new GiniIndex(allLabels, CLASS_MAPPING.size());
-        entropyLoss = new Entropy(allLabels, CLASS_MAPPING.size());
+        giniIndexLoss = new GiniIndex(allLabels, numberOfClasses);
+        entropyLoss = new Entropy(allLabels, numberOfClasses);
     }
 
     private static Stream<Arguments> predictionWithoutSamplingParameters() {
@@ -106,7 +106,7 @@ class DecisionTreeClassifierTest {
             useGini ? giniIndexLoss : entropyLoss,
             features,
             allLabels,
-            CLASS_MAPPING,
+            numberOfClasses,
             DecisionTreeTrainerConfigImpl.builder()
                 .maxDepth(maxDepth)
                 .minSplitSize(minSplitSize)
@@ -139,7 +139,7 @@ class DecisionTreeClassifierTest {
             giniIndexLoss,
             features,
             allLabels,
-            CLASS_MAPPING,
+            numberOfClasses,
             decisionTreeTrainConfig,
             new FeatureBagger(new SplittableRandom(-6938002729576536314L), features.get(0).length, 0.5D)
         );
@@ -153,7 +153,7 @@ class DecisionTreeClassifierTest {
             giniIndexLoss,
             features,
             allLabels,
-            CLASS_MAPPING,
+            2,
             decisionTreeTrainConfig,
             new FeatureBagger(new SplittableRandom(1337L), featureVector.length, 0.5D) // Only one feature is used.
         );
@@ -179,7 +179,7 @@ class DecisionTreeClassifierTest {
             giniIndexLoss,
             features,
             allLabels,
-            CLASS_MAPPING,
+            numberOfClasses,
             decisionTreeTrainConfig,
             new FeatureBagger(new SplittableRandom(5677377167946646799L), featureVector.length, 1)
         );
@@ -195,7 +195,7 @@ class DecisionTreeClassifierTest {
             giniIndexLoss,
             features,
             allLabels,
-            CLASS_MAPPING,
+            numberOfClasses,
             decisionTreeTrainConfig,
             new FeatureBagger(new SplittableRandom(321328L), featureVector.length, 1)
         );

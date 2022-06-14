@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.nodeClassification;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.assertj.core.data.Offset;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.openjdk.jol.util.Multiset;
@@ -38,7 +39,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.ml.metrics.classification.AllClassMetric.F1_WEIGHTED;
 
 class ClassificationMetricComputerTest {
 
@@ -66,10 +66,6 @@ class ClassificationMetricComputerTest {
             .collect(Collectors.toList()));
 
         var classifier = new TestClassifier() {
-            @Override
-            public LocalIdMap classIdMap() {
-                return idMap;
-            }
 
             @Override
             public double[] predictProbabilities(double[] features) {
@@ -83,13 +79,17 @@ class ClassificationMetricComputerTest {
                     case 3:
                         return new double[]{0.0, 1.0, 0.0};
                 }
-                Assertions.fail("we only got 4 nodes");
-                return null;
+                throw new IllegalStateException("we only got 4 nodes");
             }
 
             @Override
             public ClassifierData data() {
-                return null;
+                throw new NotImplementedException();
+            }
+
+            @Override
+            public int numberOfClasses() {
+                return 3;
             }
         };
 
@@ -97,7 +97,6 @@ class ClassificationMetricComputerTest {
             features,
             targets,
             multiSet,
-            idMap,
             ReadOnlyHugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
@@ -105,6 +104,6 @@ class ClassificationMetricComputerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(classificationMetricComputer.score(F1_WEIGHTED)).isCloseTo(expectedF1Score, Offset.offset(1e-7));
+        assertThat(classificationMetricComputer.score(new F1Weighted(idMap))).isCloseTo(expectedF1Score, Offset.offset(1e-7));
     }
 }

@@ -118,7 +118,7 @@ public final class NodeClassificationTrain {
         // Final step is to retrain the best model with the entire node set.
         // Training memory is independent of node set size so we can skip that last estimation.
         var builder = MemoryEstimations.builder()
-            .perNode("global targets", HugeLongArray::memoryEstimation)
+            .perNode("global targets", HugeIntArray::memoryEstimation)
             .rangePerNode("global class counts", __ -> MemoryRange.of(2 * Long.BYTES, fudgedClassCount * Long.BYTES))
             .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
             .perNode("node IDs", HugeLongArray::memoryEstimation)
@@ -223,7 +223,7 @@ public final class NodeClassificationTrain {
         Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
         var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
-        var metrics = config.metrics(classCounts.keys());
+        var metrics = config.metrics(classIdMap);
         var classificationMetrics = classificationMetrics(metrics);
 
         Features features;
@@ -291,7 +291,7 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
-        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics);
+        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics, classIdMap);
     }
 
     private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, TrainingStatistics trainingStatistics) {
@@ -340,7 +340,6 @@ public final class NodeClassificationTrain {
             features,
             targets,
             classCounts,
-            classIdMap,
             evaluationSet,
             classifier,
             trainConfig.concurrency(),
@@ -400,7 +399,7 @@ public final class NodeClassificationTrain {
     ) {
         ClassifierTrainer trainer = ClassifierTrainerFactory.create(
             trainerConfig,
-            classIdMap,
+            classIdMap.size(),
             terminationFlag,
             progressTracker,
             messageLogLevel,

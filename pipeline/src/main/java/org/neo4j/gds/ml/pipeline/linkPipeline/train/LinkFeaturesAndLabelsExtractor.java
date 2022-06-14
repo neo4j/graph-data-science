@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -66,7 +65,7 @@ final class LinkFeaturesAndLabelsExtractor {
             .perGraphDimension(
                 setDesc + "relationship targets",
                 (graphDim, threads) -> MemoryRange.of(
-                    HugeDoubleArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
+                    HugeIntArray.memoryEstimation(relSetSizeExtractor.applyAsLong(graphDim.relationshipCounts()))
                 )
             ).build();
     }
