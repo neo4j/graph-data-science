@@ -20,6 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,6 +32,9 @@ public abstract class KmeansTask implements Runnable {
     final ProgressTracker progressTracker;
     final Partition partition;
     final NodePropertyValues nodePropertyValues;
+
+    final HugeDoubleArray distanceFromCenter;
+
     final HugeIntArray communities;
     final long[] communitySizes;
     final int k;
@@ -57,6 +61,7 @@ public abstract class KmeansTask implements Runnable {
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
+        HugeDoubleArray distanceFromCenter,
         int k,
         int dimensions,
         Partition partition,
@@ -65,6 +70,7 @@ public abstract class KmeansTask implements Runnable {
         this.clusterManager = clusterManager;
         this.nodePropertyValues = nodePropertyValues;
         this.communities = communities;
+        this.distanceFromCenter = distanceFromCenter;
         this.k = k;
         this.dimensions = dimensions;
         this.partition = partition;
@@ -78,6 +84,7 @@ public abstract class KmeansTask implements Runnable {
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
+        HugeDoubleArray distanceFromCenter,
         int k,
         int dimensions,
         Partition partition,
@@ -88,6 +95,7 @@ public abstract class KmeansTask implements Runnable {
                 clusterManager,
                 nodePropertyValues,
                 communities,
+                distanceFromCenter,
                 k,
                 dimensions,
                 partition,
@@ -98,6 +106,7 @@ public abstract class KmeansTask implements Runnable {
             clusterManager,
             nodePropertyValues,
             communities,
+            distanceFromCenter,
             k,
             dimensions,
             partition,
@@ -140,7 +149,9 @@ public abstract class KmeansTask implements Runnable {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            distance += clusterManager.euclidean(nodeId, communities.get(nodeId));
+            double nodeCenterDistance = clusterManager.euclidean(nodeId, communities.get(nodeId));
+            distance += nodeCenterDistance;
+            distanceFromCenter.set(nodeId, nodeCenterDistance);
 
         }
     }
@@ -165,12 +176,22 @@ final class DoubleKmeansTask extends KmeansTask {
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
+        HugeDoubleArray distanceFromCluster,
         int k,
         int dimensions,
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        super(clusterManager, nodePropertyValues, communities, k, dimensions, partition, progressTracker);
+        super(
+            clusterManager,
+            nodePropertyValues,
+            communities,
+            distanceFromCluster,
+            k,
+            dimensions,
+            partition,
+            progressTracker
+        );
         this.communityCoordinateSums = new double[k][dimensions];
 
     }
@@ -206,12 +227,22 @@ final class FloatKmeansTask extends KmeansTask {
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
+        HugeDoubleArray distanceFromCluster,
         int k,
         int dimensions,
         Partition partition,
         ProgressTracker progressTracker
     ) {
-        super(clusterManager, nodePropertyValues, communities, k, dimensions, partition, progressTracker);
+        super(
+            clusterManager,
+            nodePropertyValues,
+            communities,
+            distanceFromCluster,
+            k,
+            dimensions,
+            partition,
+            progressTracker
+        );
         this.communityCoordinateSums = new float[k][dimensions];
     }
 

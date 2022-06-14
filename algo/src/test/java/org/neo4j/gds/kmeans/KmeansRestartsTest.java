@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
@@ -57,9 +58,17 @@ class KmeansRestartsTest {
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
         var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
-        var result = kmeans.compute().communities();
-        assertThat(result.get(0)).isNotEqualTo(result.get(1));
-        assertThat(result.get(2)).isEqualTo(result.get(1));
+        var result1 = kmeans.compute();
+        var communities1 = result1.communities();
+        var distances1 = result1.distanceFromCenter();
+
+        assertThat(communities1.get(0)).isNotEqualTo(communities1.get(1));
+        assertThat(communities1.get(2)).isEqualTo(communities1.get(1));
+
+        assertThat(distances1.get(0)).isEqualTo(0d);
+        assertThat(distances1.get(1)).isCloseTo(49.45, Offset.offset(1e-4));
+        assertThat(distances1.get(2)).isCloseTo(49.45, Offset.offset(1e-4));
+
 
         var kmeansConfig2 = ImmutableKmeansStreamConfig.builder()
             .nodeProperty("kmeans")
@@ -71,9 +80,15 @@ class KmeansRestartsTest {
             .build();
 
         var kmeans2 = Kmeans.createKmeans(graph, kmeansConfig2, kmeansContext);
-        var result2 = kmeans2.compute().communities();
-        assertThat(result2.get(2)).isNotEqualTo(result2.get(1));
-        assertThat(result2.get(0)).isEqualTo(result2.get(1));
+        var result2 = kmeans.compute();
+        var communities2 = result2.communities();
+        var distances2 = result2.distanceFromCenter();
+        assertThat(communities2.get(2)).isNotEqualTo(communities2.get(1));
+        assertThat(communities2.get(0)).isEqualTo(communities2.get(1));
+
+        assertThat(distances2.get(2)).isEqualTo(0.0d);
+        assertThat(distances2.get(0)).isCloseTo(0.05, Offset.offset(1e-4));
+        assertThat(distances2.get(1)).isCloseTo(0.05, Offset.offset(1e-4));
 
 
     }
