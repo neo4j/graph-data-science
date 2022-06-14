@@ -48,7 +48,7 @@ import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQ
 class TrainingStatisticsTest {
 
     static final Metric F1_WEIGHTED = new F1Weighted(LocalIdMap.of());
-    static final Metric ACCURACY = new GlobalAccuracy(LocalIdMap.of());
+    static final Metric ACCURACY = new GlobalAccuracy();
 
     public static Stream<Arguments> mainMetricWithExpectecWinner() {
         return Stream.of(

@@ -38,7 +38,7 @@ class AccuracyMetricTest {
         }
         var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
-        assertThat(new GlobalAccuracy(localIdMap).compute(targets, predictions, classCounts)).isCloseTo(7.0 / 15, Offset.offset(1e-8));
+        assertThat(new GlobalAccuracy().compute(targets, predictions, classCounts)).isCloseTo(7.0 / 15, Offset.offset(1e-8));
     }
 
     @Test
@@ -51,7 +51,7 @@ class AccuracyMetricTest {
         }
         var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
-        assertThat(new GlobalAccuracy(localIdMap).compute(targets, predictions, classCounts)).isCloseTo(1.0, Offset.offset(1e-8));
+        assertThat(new GlobalAccuracy().compute(targets, predictions, classCounts)).isCloseTo(1.0, Offset.offset(1e-8));
     }
 
     @Test
@@ -64,6 +64,6 @@ class AccuracyMetricTest {
         }
         var localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
-        assertThat(new GlobalAccuracy(localIdMap).compute(targets, predictions, classCounts)).isCloseTo(0.0, Offset.offset(1e-8));
+        assertThat(new GlobalAccuracy().compute(targets, predictions, classCounts)).isCloseTo(0.0, Offset.offset(1e-8));
     }
 }

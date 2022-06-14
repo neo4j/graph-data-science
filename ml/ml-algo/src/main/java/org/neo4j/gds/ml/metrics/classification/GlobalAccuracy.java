@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
@@ -31,11 +30,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class GlobalAccuracy implements ClassificationMetric{
 
-    //Class name clashes with Accuracy(local).
-    //But user input does not define classes for GlobalAccuracy.
     public static final String NAME = "ACCURACY";
 
-    public GlobalAccuracy(LocalIdMap classIdMap) {}
+    public GlobalAccuracy() {}
 
     @Override
     public String name() {

@@ -29,8 +29,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Accuracy implements ClassificationMetric {
 
-    //Class name clashes with GlobalAccuracy
-    //But user input must have classes defined for local metrics.
     public static final String NAME = "ACCURACY";
 
     private final long originalTarget;

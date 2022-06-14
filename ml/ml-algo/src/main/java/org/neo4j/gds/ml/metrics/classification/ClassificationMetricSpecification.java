@@ -112,7 +112,7 @@ public final class ClassificationMetricSpecification {
         private static final Map<String, Function<LocalIdMap, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
             F1Weighted.NAME, F1Weighted::new,
             F1Macro.NAME, F1Macro::new,
-            GlobalAccuracy.NAME, GlobalAccuracy::new
+            GlobalAccuracy.NAME, ignored -> new GlobalAccuracy()
         );
 
         @RegExp

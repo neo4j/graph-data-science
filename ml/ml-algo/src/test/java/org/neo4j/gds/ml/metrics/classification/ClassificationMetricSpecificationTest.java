@@ -49,7 +49,7 @@ class ClassificationMetricSpecificationTest {
         var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
-        assertThat(metric).isEqualTo(new GlobalAccuracy(LocalIdMap.of(1337L)));
+        assertThat(metric).isEqualTo(new GlobalAccuracy());
     }
 
     @Test
