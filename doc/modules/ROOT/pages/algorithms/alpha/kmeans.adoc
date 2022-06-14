@@ -45,7 +45,7 @@ CALL gds.alpha.kmeans.stream(
 YIELD
   nodeId: Integer,
   communityId: Integer,
-  distanceFromCenter: Float
+  distanceFromCentroid: Float
 
 ----
 
@@ -65,7 +65,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | Name                      | Type      | Description
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID.
-| distanceFromCenter        | Float     | Distance of the node from the center of its community.
+| distanceFromCentroid      | Float     | Distance of the node from the centroid of its community.
 |===
 ======
 

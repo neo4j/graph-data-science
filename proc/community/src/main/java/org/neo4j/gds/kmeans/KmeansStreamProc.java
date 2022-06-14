@@ -79,13 +79,13 @@ public class KmeansStreamProc extends AlgoBaseProc<
         public final long nodeId;
 
         public final long communityId;
-        public final double distanceFromCenter;
+        public final double distanceFromCentroid;
 
 
-        public StreamResult(long nodeId, long communityId, double distanceFromCenter) {
+        public StreamResult(long nodeId, long communityId, double distanceFromCentroid) {
             this.nodeId = nodeId;
             this.communityId = communityId;
-            this.distanceFromCenter = distanceFromCenter;
+            this.distanceFromCentroid = distanceFromCentroid;
         }
     }
 }
