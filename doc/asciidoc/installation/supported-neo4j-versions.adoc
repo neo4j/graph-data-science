@@ -13,7 +13,7 @@ Time to upgrade!
 [opts=header]
 |===
 | Neo4j Graph Data Science | Neo4j version
-.4+<.^|`1.8`
+.4+<.^|`1.8` footnote:soonDeprecated[This version series will go out of support on 29 September 2022]
 | `4.4`
 | `4.3`
 | `4.2`
