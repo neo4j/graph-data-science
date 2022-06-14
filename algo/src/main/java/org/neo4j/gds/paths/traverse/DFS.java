@@ -35,11 +35,14 @@ public class DFS extends Algorithm<HugeLongArray> {
     private final Aggregator aggregatorFunction;
     private final long nodeCount;
 
+    private final long maxDepth;
+
     public DFS(
         Graph graph,
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
+        long maxDepth,
         ProgressTracker progressTracker
     ) {
 
@@ -49,6 +52,7 @@ public class DFS extends Algorithm<HugeLongArray> {
         this.startNodeId = startNodeId;
         this.exitPredicate = exitPredicate;
         this.aggregatorFunction = aggregatorFunction;
+        this.maxDepth = maxDepth;
     }
 
     @Override
@@ -88,18 +92,28 @@ public class DFS extends Algorithm<HugeLongArray> {
             // For disconnected graphs or early termination, this will not reach 100
             progressTracker.logProgress(graph.degree(node));
 
-            graph.forEachRelationship(
-                node,
-                (s, t) -> {
-                    if (!visited.get(t)) {
-                        visited.set(t);
-                        sources.push(s);
-                        nodes.push(t);
-                        weights.push(aggregatorFunction.apply(s, t, weight));
+            //If there is a maximum depth, and node is already at it, do not waste time with its neighborhood
+            if (maxDepth == DfsBaseConfig.NO_MAX_DEPTH || weight < maxDepth) {
+                graph.forEachRelationship(
+                    node,
+                    (s, t) -> {
+                        if (!visited.get(t)) {
+                            if (exitPredicate.test(
+                                node,
+                                t,
+                                aggregatorFunction.apply(s, t, weight)
+                            ) != ExitPredicate.Result.CONTINUE) {
+                                visited.set(t);
+                                sources.push(s);
+                                nodes.push(t);
+                                weights.push(aggregatorFunction.apply(s, t, weight));
+                            }
+
+                        }
+                        return terminationFlag.running();
                     }
-                    return terminationFlag.running();
-                }
-            );
+                );
+            }
         }
 
         progressTracker.endSubTask();

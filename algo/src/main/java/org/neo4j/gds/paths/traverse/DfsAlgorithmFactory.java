@@ -57,12 +57,13 @@ public class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgo
         }
 
         var mappedSourceNodeId = graph.toMappedNodeId(configuration.sourceNode());
-
+        var maxDepth = configuration.maxDepth();
         return new DFS(
             graph,
             mappedSourceNodeId,
             exitFunction,
             aggregatorFunction,
+            maxDepth,
             progressTracker
         );
     }

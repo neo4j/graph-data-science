@@ -98,6 +98,7 @@ class DFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            DfsBaseConfig.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER
         ).compute().toArray();
 
@@ -118,6 +119,7 @@ class DFSTest {
             source,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            DfsBaseConfig.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER
         ).compute().toArray();
 
@@ -139,6 +141,7 @@ class DFSTest {
             source,
             (s, t, w) -> t == target ? Result.BREAK : Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            DfsBaseConfig.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER
         ).compute().toArray();
 
@@ -153,6 +156,7 @@ class DFSTest {
             0,
             (s, t, w) -> Result.FOLLOW,
             Aggregator.NO_AGGREGATION,
+            DfsBaseConfig.NO_MAX_DEPTH,
             ProgressTracker.NULL_TRACKER
         ).compute();
     }
