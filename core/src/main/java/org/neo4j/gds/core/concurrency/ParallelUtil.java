@@ -232,7 +232,10 @@ public final class ParallelUtil {
     /**
      * Executes read operations in parallel, based on the given batch size
      * and executor.
+     *
+     * @deprecated Use {@link org.neo4j.gds.core.concurrency.RunWithConcurrency} instead.
      */
+    @Deprecated(forRemoval = true)
     public static <T extends Runnable> void readParallel(
         final int concurrency,
         final int batchSize,

@@ -170,11 +170,11 @@ public interface RunWithConcurrency {
      * <p>
      * In either case, tasks that have not been started will never start.
      * <p>
-     * The default behavior is to let tasks continue and not interrupt them.
+     * The default behavior is to interrupt running tasks ({@code true}).
      */
     @Value.Default
     default boolean mayInterruptIfRunning() {
-        return false;
+        return true;
     }
 
     /**

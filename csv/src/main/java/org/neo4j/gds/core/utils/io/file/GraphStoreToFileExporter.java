@@ -189,6 +189,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         RunWithConcurrency.builder()
             .concurrency(config.writeConcurrency())
             .tasks(tasks)
+            .mayInterruptIfRunning(false)
             .run();
     }
 
