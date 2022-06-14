@@ -117,7 +117,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCenters[i] = nodePropertyValues.doubleArrayValue(i);
             }
-            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters);
+            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0);
         }
         long nodeCount = graph.nodeCount();
 
@@ -208,7 +208,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             }
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters);
+        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance);
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {
