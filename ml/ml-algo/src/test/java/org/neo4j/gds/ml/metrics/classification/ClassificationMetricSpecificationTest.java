@@ -53,6 +53,14 @@ class ClassificationMetricSpecificationTest {
     }
 
     @Test
+    void shouldCreateGlobalAccuracyMetric() {
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy(class=1337)")).get(0);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+        assertThat(metricSpecification.toString()).isEqualTo("ACCURACY(class=1337)");
+        assertThat(metric).isEqualTo(new Accuracy(1337, 0));
+    }
+
+    @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_WeIGhTED")).get(0);
         var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
@@ -82,12 +90,8 @@ class ClassificationMetricSpecificationTest {
     void shouldParseSyntacticSugar() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy", "F1(class=*)")).get(1);
         var metrics = metricSpecification.createMetrics(LocalIdMap.of(42L, -1337L)).collect(Collectors.toList());
-        assertThat(metrics.get(0).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(0).toString()).isEqualTo("F1_class_42");
-        assertThat(metrics.get(0).name()).isEqualTo("F1(class=42)");
-        assertThat(metrics.get(1).getClass()).isEqualTo(F1Score.class);
-        assertThat(metrics.get(1).toString()).isEqualTo("F1_class_-1337");
-        assertThat(metrics.get(1).name()).isEqualTo("F1(class=-1337)");
+        assertThat(metrics).containsExactlyInAnyOrder(new F1Score(42,0), new F1Score(-1337,0));
+
     }
 
     @ParameterizedTest

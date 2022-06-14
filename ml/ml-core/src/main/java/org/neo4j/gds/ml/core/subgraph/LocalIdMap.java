@@ -96,6 +96,7 @@ public class LocalIdMap {
         return list;
     }
 
+    //This method is not order preserving because internally spliterator is not
     public Stream<LongIntCursor> getMappings() {
         return StreamSupport.stream(originalToInternalIdMap.spliterator(), false);
     }
