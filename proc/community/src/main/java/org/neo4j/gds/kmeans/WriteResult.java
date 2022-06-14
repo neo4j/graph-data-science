@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 
+import java.util.List;
 import java.util.Map;
 
 public class WriteResult extends StatsResult {
@@ -37,14 +38,24 @@ public class WriteResult extends StatsResult {
         long writeMillis,
         long nodePropertiesWritten,
         @Nullable Map<String, Object> communityDistribution,
+        @Nullable List<List<Double>> centroids,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, communityDistribution, configuration);
+        super(
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            communityDistribution,
+            centroids,
+            configuration
+        );
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
     static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
+
+        private List<List<Double>> centroids;
 
         Builder(
             ProcedureCallContext context,
@@ -62,8 +73,14 @@ public class WriteResult extends StatsResult {
                 writeMillis,
                 nodePropertiesWritten,
                 communityHistogramOrNull(),
+                centroids,
                 config.toMap()
             );
+        }
+
+        public Builder withCentroids(List<List<Double>> listCenters) {
+            this.centroids = listCenters;
+            return this;
         }
     }
 

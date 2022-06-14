@@ -72,11 +72,19 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
         ComputationResult<Kmeans, KmeansResult, KmeansMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
-            .withCommunityFunction(computationResult.result().communities()::get)
+        var builder = new MutateResult.Builder(
+            executionContext.callContext(),
+            computationResult.config().concurrency()
+        );
+        if (executionContext.containsOutputField("centroids")) {
+            builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult.result().centers()));
+        }
+        builder.withCommunityFunction(computationResult.result().communities()::get)
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withNodeCount(computationResult.graph().nodeCount())
             .withConfig(computationResult.config());
+
+        return builder;
     }
 }

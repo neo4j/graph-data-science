@@ -48,16 +48,31 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         return (__, config) -> KmeansStatsConfig.of(config);
     }
 
+
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<StatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Stats call failed", executionContext.log(), () -> Stream.of(
-            new StatsResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
-                .withCommunityFunction(computationResult.result().communities()::get)
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config())
-                .build()
-        ));
+        return (computationResult, executionContext) -> runWithExceptionLogging(
+            "Stats call failed",
+            executionContext.log(),
+            () -> {
+                var builder = new StatsResult.Builder(
+                    executionContext.callContext(),
+                    computationResult.config().concurrency()
+                );
+
+                if (executionContext.containsOutputField("centroids")) {
+                    builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult
+                        .result()
+                        .centers()));
+                }
+                builder.withCommunityFunction(computationResult.result().communities()::get)
+                    .withPreProcessingMillis(computationResult.preProcessingMillis())
+                    .withComputeMillis(computationResult.computeMillis())
+                    .withNodeCount(computationResult.graph().nodeCount())
+                    .withConfig(computationResult.config());
+                return Stream.of(builder.build());
+
+            }
+        );
     }
 }

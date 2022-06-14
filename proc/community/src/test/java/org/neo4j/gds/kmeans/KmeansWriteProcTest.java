@@ -28,7 +28,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
@@ -80,7 +83,8 @@ class KmeansWriteProcTest extends BaseProcTest {
                     "postProcessingMillis",
                     "writeMillis",
                     "nodePropertiesWritten",
-                    "configuration"
+                    "configuration",
+                    "centroids"
                 );
 
             var softAssertions = new SoftAssertions();
@@ -124,6 +128,19 @@ class KmeansWriteProcTest extends BaseProcTest {
                 .isNotNull()
                 .asInstanceOf(MAP)
                 .isNotEmpty();
+
+            var centroids = resultRow.get("centroids");
+            softAssertions.assertThat(centroids)
+                .isNotNull()
+                .asInstanceOf(LIST)
+                .isNotEmpty();
+            List<Object> listCentroids = (List<Object>) centroids;
+            for (Object centroid : listCentroids) {
+                softAssertions.assertThat(centroid)
+                    .isNotNull()
+                    .asInstanceOf(LIST)
+                    .isNotEmpty();
+            }
 
             softAssertions.assertAll();
 

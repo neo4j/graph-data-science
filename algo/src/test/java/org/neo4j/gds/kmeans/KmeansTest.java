@@ -82,7 +82,7 @@ class KmeansTest {
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
-
+        var centers = result.centers();
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
         assertThat(communities.get(2)).isEqualTo(communities.get(3));
         assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
@@ -92,6 +92,8 @@ class KmeansTest {
         assertThat(distances.get(2)).isCloseTo(Math.sqrt(2), Offset.offset(1e-4)); //centre is (101,101) sqrt (1^2+1^2)
         assertThat(distances.get(3)).isCloseTo(Math.sqrt(2), Offset.offset(1e-4));
 
+        assertThat(centers[0]).isEqualTo(new double[]{1.0, 1.5});
+        assertThat(centers[1]).isEqualTo(new double[]{101, 101});
 
     }
 
@@ -108,9 +110,14 @@ class KmeansTest {
         var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig, kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
+        var centers = result.centers();
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
         assertThat(communities.get(2)).isEqualTo(communities.get(3));
         assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
+
+        assertThat(centers[0]).isEqualTo(new double[]{1.0, 1.5});
+        assertThat(centers[1]).isEqualTo(new double[]{101, 101});
+
     }
 
     @Test

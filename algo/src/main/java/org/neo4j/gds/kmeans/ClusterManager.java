@@ -55,6 +55,8 @@ abstract class ClusterManager {
         }
     }
 
+    abstract double[][] getCenters();
+
 
     static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {
@@ -123,6 +125,17 @@ class FloatClusterManager extends ClusterManager {
     }
 
     @Override
+    double[][] getCenters() {
+        double[][] doubleClusterCenters = new double[k][dimensions];
+        for (int i = 0; i < k; ++i) {
+            for (int j = 0; j < dimensions; ++j) {
+                doubleClusterCenters[i][j] = clusterCenters[i][j];
+            }
+        }
+        return doubleClusterCenters;
+    }
+
+    @Override
     public double euclidean(long nodeId, int centerId) {
         float[] left = nodePropertyValues.floatArrayValue(nodeId);
         float[] right = clusterCenters[centerId];
@@ -183,6 +196,11 @@ class DoubleClusterManager extends ClusterManager {
     public void initialAssignCluster(int i, long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
         System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
+    }
+
+    @Override
+    public double[][] getCenters() {
+        return clusterCenters;
     }
 
 }

@@ -55,8 +55,15 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var graph = computationResult.graph();
-            var builder = new WriteResult.Builder(executionContext.callContext(), computationResult.config().concurrency())
-                .withCommunityFunction(computationResult.result().communities()::get)
+            var builder = new WriteResult.Builder(
+                executionContext.callContext(),
+                computationResult.config().concurrency()
+            );
+
+            if (executionContext.containsOutputField("centroids")) {
+                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(computationResult.result().centers()));
+            }
+            builder.withCommunityFunction(computationResult.result().communities()::get)
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
                 .withNodeCount(graph.nodeCount())
