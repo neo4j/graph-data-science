@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.logisticregression;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
@@ -43,8 +42,6 @@ public final class LogisticRegressionClassifier implements Classifier {
 
     private final LogisticRegressionData data;
     private final LogisticRegressionPredictionStrategy predictionStrategy;
-
-    private @Nullable Matrix batchFeaturesBuffer;
 
     private LogisticRegressionClassifier(
         LogisticRegressionData data,
@@ -148,12 +145,7 @@ public final class LogisticRegressionClassifier implements Classifier {
     @Override
     public Matrix predictProbabilities(Batch batch, Features features) {
         ComputationContext ctx = new ComputationContext();
-
-        if (batchFeaturesBuffer == null) {
-            batchFeaturesBuffer = new Matrix(batch.size(), features.featureDimension());
-        }
-
-        return ctx.forward(predictionsVariable(Objective.batchFeatureMatrix(batch, features, batchFeaturesBuffer)));
+        return ctx.forward(predictionsVariable(Objective.batchFeatureMatrix(batch, features)));
     }
 
     Variable<Matrix> predictionsVariable(Constant<Matrix> batchFeatures) {

@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.gradientdescent;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
 import org.neo4j.gds.ml.core.functions.Constant;
@@ -45,16 +44,8 @@ public interface Objective<DATA> {
      */
     DATA modelData();
 
-    static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features, @Nullable Matrix matrixBuffer) {
-        Matrix batchFeatures;
-
-        if (matrixBuffer != null && matrixBuffer.rows() == batch.size() && matrixBuffer.cols() == features.featureDimension()) {
-            // not clearing the buffer as its overridden by the features
-            batchFeatures = matrixBuffer;
-        } else {
-            batchFeatures  = new Matrix(batch.size(), features.featureDimension());
-        }
-
+    static Constant<Matrix> batchFeatureMatrix(Batch batch, Features features) {
+        var batchFeatures = new Matrix(batch.size(), features.featureDimension());
         var batchFeaturesOffset = new MutableInt();
 
         batch

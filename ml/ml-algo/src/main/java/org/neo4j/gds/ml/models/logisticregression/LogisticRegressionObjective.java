@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.models.logisticregression;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -48,8 +47,6 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     private final double penalty;
     private final Features features;
     private final HugeIntArray labels;
-
-    private @Nullable Matrix batchFeaturesBuffer;
 
     @SuppressWarnings({"PointlessArithmeticExpression", "UnnecessaryLocalVariable"})
     public static long sizeOfBatchInBytes(boolean isReduced, int batchSize, int numberOfFeatures, int numberOfClasses) {
@@ -129,12 +126,8 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     }
 
     ReducedCrossEntropyLoss crossEntropyLoss(Batch batch) {
-        if (batchFeaturesBuffer == null) {
-            batchFeaturesBuffer = new Matrix(batch.size(), features.featureDimension());
-        }
-
         var batchLabels = batchLabelVector(batch);
-        var batchFeatures = Objective.batchFeatureMatrix(batch, features, batchFeaturesBuffer);
+        var batchFeatures = Objective.batchFeatureMatrix(batch, features);
         var predictions = classifier.predictionsVariable(batchFeatures);
         return new ReducedCrossEntropyLoss(
             predictions,
