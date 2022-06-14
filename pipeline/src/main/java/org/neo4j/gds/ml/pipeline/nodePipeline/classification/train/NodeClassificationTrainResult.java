@@ -23,10 +23,13 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.openjdk.jol.util.Multiset;
 
 @ValueClass
 public interface NodeClassificationTrainResult {
     Classifier classifier();
     TrainingStatistics trainingStatistics();
     LocalIdMap classIdMap();
+
+    Multiset<Long> classCounts();
 }

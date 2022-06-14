@@ -64,7 +64,7 @@ class F1WeightedTest {
     void shouldComputeF1AllCorrectMultiple() {
         var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
         var totalExamples = predictions.size();
-        assertThat(new F1Weighted(localIdMap).compute(targets, predictions, classCounts))
+        assertThat(new F1Weighted(localIdMap, classCounts).compute(targets, predictions))
             .isCloseTo(totalF1 / totalExamples, Offset.offset(1e-8));
     }
 }

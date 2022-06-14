@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.model.ModelConfig;
+import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,10 +49,10 @@ public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, M
     String pipeline();
 
     @Configuration.Ignore
-    default List<Metric> metrics(LocalIdMap classIdMap) {
+    default List<Metric> metrics(LocalIdMap classIdMap,  Multiset<Long> classCounts) {
         return metrics()
             .stream()
-            .flatMap(spec -> spec.createMetrics(classIdMap))
+            .flatMap(spec -> spec.createMetrics(classIdMap, classCounts))
             .collect(Collectors.toList());
     }
 

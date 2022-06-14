@@ -31,9 +31,11 @@ public class F1Weighted implements ClassificationMetric {
     public static final String NAME = "F1_WEIGHTED";
 
     private final LocalIdMap classIdMap;
+    private final Multiset<Long> globalClassCounts;
 
-    public F1Weighted(LocalIdMap classIdMap) {
+    public F1Weighted(LocalIdMap classIdMap, Multiset<Long> globalClassCounts) {
         this.classIdMap = classIdMap;
+        this.globalClassCounts = globalClassCounts;
     }
 
     @Override
@@ -47,7 +49,7 @@ public class F1Weighted implements ClassificationMetric {
     }
 
     @Override
-    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> globalClassCounts) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions) {
         if (globalClassCounts.size() == 0) {
             return 0.0;
         }

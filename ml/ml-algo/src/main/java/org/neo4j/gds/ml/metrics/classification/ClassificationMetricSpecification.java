@@ -26,12 +26,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
+import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -45,25 +47,25 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public final class ClassificationMetricSpecification {
 
     private final String stringRepresentation;
-    private final Function<LocalIdMap, Stream<Metric>> metricFactory;
+    private final BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory;
 
     private ClassificationMetricSpecification(
         String stringRepresentation,
-        Function<LocalIdMap, Stream<Metric>> metricFactory
+        BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory
     ) {
         this.stringRepresentation = stringRepresentation;
         this.metricFactory = metricFactory;
     }
 
     private static ClassificationMetricSpecification createSpecification(
-        Function<LocalIdMap, Stream<Metric>> metricFactory,
+        BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory,
         String stringRepresentation
     ) {
         return new ClassificationMetricSpecification(stringRepresentation, metricFactory);
     }
 
-    public Stream<Metric> createMetrics(LocalIdMap classIdMap) {
-        return metricFactory.apply(classIdMap);
+    public Stream<Metric> createMetrics(LocalIdMap classIdMap, Multiset<Long> classCounts) {
+        return metricFactory.apply(classIdMap, classCounts);
     }
 
     @Override
@@ -109,10 +111,10 @@ public final class ClassificationMetricSpecification {
                 Accuracy.NAME, Accuracy::new
             );
 
-        private static final Map<String, Function<LocalIdMap, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
+        private static final Map<String, BiFunction<LocalIdMap, Multiset<Long>, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
             F1Weighted.NAME, F1Weighted::new,
-            F1Macro.NAME, F1Macro::new,
-            GlobalAccuracy.NAME, ignored -> new GlobalAccuracy()
+            F1Macro.NAME, (classIdMap, ignore) -> new F1Macro(classIdMap),
+            GlobalAccuracy.NAME, (ignored1, ignored2) -> new GlobalAccuracy()
         );
 
         @RegExp
@@ -175,7 +177,7 @@ public final class ClassificationMetricSpecification {
 
                 var upperCaseSpecification = toUpperCaseWithLocale(input);
                 if (upperCaseSpecification.equals(OUT_OF_BAG_ERROR.name())) {
-                    return createSpecification(ignored -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
+                    return createSpecification((ignored, ignored2) -> Stream.of(OUT_OF_BAG_ERROR), upperCaseSpecification);
                 }
 
                 var matcher = SINGLE_CLASS_METRIC_PATTERN.matcher(upperCaseSpecification);
@@ -185,7 +187,7 @@ public final class ClassificationMetricSpecification {
                         throw new IllegalArgumentException(errorMessage(List.of(input)));
                     }
                     return createSpecification(
-                        classIdMap -> Stream.of(allClassMetricGenerator.apply(classIdMap)),
+                        (classIdMap, classCounts) -> Stream.of(allClassMetricGenerator.apply(classIdMap, classCounts)),
                         upperCaseSpecification
                     );
                 }
@@ -203,7 +205,7 @@ public final class ClassificationMetricSpecification {
                     : classIdMap -> Stream.of(metricGenerator.value(Long.parseLong(classId), classIdMap.toMapped(Long.parseLong(classId))));
 
                 return createSpecification(
-                    metricsFactory,
+                    (classIdMap, ignored) -> metricsFactory.apply(classIdMap),
                     formatWithLocale("%s(class=%s)", metricType, classId)
                 );
             }
@@ -223,10 +225,10 @@ public final class ClassificationMetricSpecification {
 
         private static List<String> validMetricExpressions(boolean includeSyntacticSugarMetrics) {
             var validExpressions = new LinkedList<>(MODEL_SPECIFIC_METRICS);
+
             var allClassExpressions = ALL_CLASS_METRIC_FACTORIES.keySet();
-            for (String allClassExpression : allClassExpressions) {
-                validExpressions.add(allClassExpression);
-            }
+            validExpressions.addAll(allClassExpressions);
+
             for (String singleClassMetric : singleClassMetrics()) {
                 if (includeSyntacticSugarMetrics) {
                     validExpressions.add(singleClassMetric + "(class=*)");

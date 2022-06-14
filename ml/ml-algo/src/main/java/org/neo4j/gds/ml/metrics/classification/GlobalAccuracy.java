@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.openjdk.jol.util.Multiset;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -45,7 +44,7 @@ public class GlobalAccuracy implements ClassificationMetric{
     }
 
     @Override
-    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> globalClassCounts) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions) {
         long accuratePredictions = 0;
         assert targets.size() == predictions.size() : formatWithLocale(
             "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",

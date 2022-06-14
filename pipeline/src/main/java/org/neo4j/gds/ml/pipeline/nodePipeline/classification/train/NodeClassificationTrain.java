@@ -225,7 +225,7 @@ public final class NodeClassificationTrain {
         Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
         var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
-        var metrics = config.metrics(classIdMap);
+        var metrics = config.metrics(classIdMap, classCounts);
         var classificationMetrics = classificationMetrics(metrics);
 
         Features features;
@@ -299,7 +299,7 @@ public final class NodeClassificationTrain {
 
         Classifier retrainedModelData = retrainBestModel(nodeSplits.allTrainingExamples(), trainingStatistics.bestParameters());
 
-        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics, classIdMap);
+        return ImmutableNodeClassificationTrainResult.of(retrainedModelData, trainingStatistics, classIdMap, classCounts);
     }
 
     private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, TrainingStatistics trainingStatistics) {
@@ -347,7 +347,6 @@ public final class NodeClassificationTrain {
         var trainMetricComputer = ClassificationMetricComputer.forEvaluationSet(
             features,
             targets,
-            classCounts,
             evaluationSet,
             classifier,
             trainConfig.concurrency(),

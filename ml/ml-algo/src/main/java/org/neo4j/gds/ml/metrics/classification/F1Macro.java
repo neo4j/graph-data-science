@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -48,7 +47,7 @@ public class F1Macro implements ClassificationMetric{
     }
 
     @Override
-    public double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignored) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions) {
         var metrics = classIdMap.getMappings()
             .map(idMap -> new F1Score(idMap.key, idMap.value))
             .collect(Collectors.toList());

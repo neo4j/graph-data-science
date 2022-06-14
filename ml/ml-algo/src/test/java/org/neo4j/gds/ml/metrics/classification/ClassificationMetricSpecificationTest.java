@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
+import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,7 +37,10 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1Metric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1(clAss =  42 )")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(F1Score.class);
         assertThat(metric.toString()).isEqualTo("F1_class_42");
         assertThat(metric.name()).isEqualTo("F1(class=42)");
@@ -46,7 +50,10 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateAccuracyMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("ACCURACY");
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY");
         assertThat(metric).isEqualTo(new GlobalAccuracy());
@@ -55,7 +62,10 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateGlobalAccuracyMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy(class=1337)")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metricSpecification.toString()).isEqualTo("ACCURACY(class=1337)");
         assertThat(metric).isEqualTo(new Accuracy(1337, 0));
     }
@@ -63,15 +73,21 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateF1WeightedMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_WeIGhTED")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_WEIGHTED");
-        assertThat(metric).isEqualTo(new F1Weighted(LocalIdMap.of(1337l)));
+        assertThat(metric).isEqualTo(new F1Weighted(LocalIdMap.of(1337L), classCounts));
     }
 
     @Test
     void shouldCreateF1MacroMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("F1_maCRo")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metric.toString()).isEqualTo("F1_MACRO");
         assertThat(metric).isEqualTo(new F1Macro(LocalIdMap.of(1337L)));
     }
@@ -79,7 +95,10 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldCreateOOBEMetric() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("OuT_Of_BAG_ErROR")).get(0);
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L)).findFirst().orElseThrow();
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(1337L);
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(1337L), classCounts).findFirst().orElseThrow();
         assertThat(metric.getClass()).isEqualTo(OutOfBagError.class);
         assertThat(metric.toString()).isEqualTo("OUT_OF_BAG_ERROR");
         assertThat(metric.name()).isEqualTo("OUT_OF_BAG_ERROR");
@@ -89,7 +108,11 @@ class ClassificationMetricSpecificationTest {
     @Test
     void shouldParseSyntacticSugar() {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse(List.of("Accuracy", "F1(class=*)")).get(1);
-        var metrics = metricSpecification.createMetrics(LocalIdMap.of(42L, -1337L)).collect(Collectors.toList());
+
+        var classCounts = new Multiset<Long>();
+        classCounts.add(-1337L);
+        classCounts.add(42L);
+        var metrics = metricSpecification.createMetrics(LocalIdMap.of(42L, -1337L), classCounts).collect(Collectors.toList());
         assertThat(metrics).containsExactlyInAnyOrder(new F1Score(42,0), new F1Score(-1337,0));
 
     }

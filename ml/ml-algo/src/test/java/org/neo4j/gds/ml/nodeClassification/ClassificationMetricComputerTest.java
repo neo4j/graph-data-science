@@ -53,10 +53,10 @@ class ClassificationMetricComputerTest {
     @ParameterizedTest
     @MethodSource("targetAndScores")
     void shouldComputeMetrics(long firstTarget, double expectedF1Score) {
-        var multiSet = new Multiset<Long>();
-        multiSet.add(0L, 2);
-        multiSet.add(1L, 1);
-        multiSet.add(3L, 1);
+        var classCounts = new Multiset<Long>();
+        classCounts.add(0L, 2);
+        classCounts.add(1L, 1);
+        classCounts.add(3L, 1);
         var idMap = LocalIdMap.of(1, 0, 3);
         var targets = HugeIntArray.of(idMap.toMapped(firstTarget), idMap.toMapped(0), idMap.toMapped(3), idMap.toMapped(0));
 
@@ -96,7 +96,6 @@ class ClassificationMetricComputerTest {
         var classificationMetricComputer = ClassificationMetricComputer.forEvaluationSet(
             features,
             targets,
-            multiSet,
             ReadOnlyHugeLongArray.of(0, 1, 2, 3),
             classifier,
             1,
@@ -104,6 +103,6 @@ class ClassificationMetricComputerTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThat(classificationMetricComputer.score(new F1Weighted(idMap))).isCloseTo(expectedF1Score, Offset.offset(1e-7));
+        assertThat(classificationMetricComputer.score(new F1Weighted(idMap, classCounts))).isCloseTo(expectedF1Score, Offset.offset(1e-7));
     }
 }

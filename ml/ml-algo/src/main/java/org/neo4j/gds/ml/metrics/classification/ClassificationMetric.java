@@ -21,9 +21,8 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.openjdk.jol.util.Multiset;
 
 public interface ClassificationMetric extends Metric {
     double EPSILON = 1e-8;
-    double compute(HugeIntArray targets, HugeIntArray predictions, Multiset<Long> globalClassCounts);
+    double compute(HugeIntArray targets, HugeIntArray predictions);
 }

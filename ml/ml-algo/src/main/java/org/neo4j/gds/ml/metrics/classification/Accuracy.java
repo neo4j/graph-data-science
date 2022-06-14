@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.metrics.classification;
 
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -41,8 +40,7 @@ public class Accuracy implements ClassificationMetric {
     }
 
     @Override
-    public double compute(
-        HugeIntArray targets, HugeIntArray predictions, Multiset<Long> ignore) {
+    public double compute(HugeIntArray targets, HugeIntArray predictions) {
         assert (targets.size() == predictions.size()) : formatWithLocale(
             "Metrics require equal length targets and predictions. Sizes are %d and %d respectively.",
             targets.size(),
@@ -68,8 +66,7 @@ public class Accuracy implements ClassificationMetric {
 
         }
 
-        var result = ((double) accurates) / targets.size();
-        return result;
+        return ((double) accurates) / targets.size();
     }
 
     @Override

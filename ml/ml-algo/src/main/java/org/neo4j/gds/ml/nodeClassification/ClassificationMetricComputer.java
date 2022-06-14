@@ -31,7 +31,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.function.LongUnaryOperator;
 
@@ -41,26 +40,22 @@ public final class ClassificationMetricComputer {
 
     private final HugeIntArray predictedClasses;
     private final HugeIntArray labels;
-    private final Multiset<Long> classCounts;
 
     private ClassificationMetricComputer(
         HugeIntArray predictedClasses,
-        HugeIntArray labels,
-        Multiset<Long> classCounts
+        HugeIntArray labels
     ) {
         this.labels = labels;
-        this.classCounts = classCounts;
         this.predictedClasses = predictedClasses;
     }
 
     public double score(ClassificationMetric metric) {
-        return metric.compute(labels, predictedClasses, classCounts);
+        return metric.compute(labels, predictedClasses);
     }
 
     public static ClassificationMetricComputer forEvaluationSet(
         Features features,
         HugeIntArray labels,
-        Multiset<Long> classCounts,
         ReadOnlyHugeLongArray evaluationSet,
         Classifier classifier,
         int concurrency,
@@ -78,8 +73,7 @@ public final class ClassificationMetricComputer {
 
         return new ClassificationMetricComputer(
             predictor.predict(evaluationSet),
-            makeLocalTargets(evaluationSet, labels),
-            classCounts
+            makeLocalTargets(evaluationSet, labels)
         );
     }
 

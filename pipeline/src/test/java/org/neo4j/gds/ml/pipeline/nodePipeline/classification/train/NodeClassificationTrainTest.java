@@ -37,7 +37,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -100,9 +99,6 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void selectsTheBestModel(ClassificationMetricSpecification metricSpecification) {
-
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1)).findFirst().orElseThrow();
-
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addFeatureStep(NodeFeatureStep.of("a"));
@@ -154,6 +150,11 @@ class NodeClassificationTrainTest {
         );
 
         var result = ncTrain.compute();
+
+        var metric = metricSpecification
+            .createMetrics(result.classIdMap(), result.classCounts())
+            .findFirst()
+            .orElseThrow();
 
         var validationStats = result.trainingStatistics().getValidationStats(metric);
 
@@ -241,7 +242,7 @@ class NodeClassificationTrainTest {
 
         var trainingStatistics = result.trainingStatistics();
 
-        var F1_WEIGHTED = new F1Weighted(result.classIdMap());
+        var F1_WEIGHTED = new F1Weighted(result.classIdMap(), result.classCounts());
 
         assertThat(trainingStatistics.getBestTrialIdx()).isBetween(0, 10);
         assertThat(trainingStatistics.getValidationStats(F1_WEIGHTED))
@@ -312,8 +313,6 @@ class NodeClassificationTrainTest {
     @ParameterizedTest
     @MethodSource("metricArguments")
     void shouldProduceDifferentMetricsForDifferentTrainings(ClassificationMetricSpecification metricSpecification) {
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(1)).findFirst().orElseThrow();
-
         var bananasPipeline = new NodeClassificationTrainingPipeline();
         bananasPipeline.setSplitConfig(SPLIT_CONFIG);
 
@@ -383,6 +382,10 @@ class NodeClassificationTrainTest {
             .withFailMessage("Should not produce the same trained `data`!")
             .isNotEqualTo(bananasClassifier.data());
 
+        var metric = metricSpecification
+            .createMetrics(bananasModelTrainResult.classIdMap(), bananasModelTrainResult.classCounts())
+            .findFirst()
+            .orElseThrow();
         var bananasMetrics = bananasModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
         var arrayPropertyMetrics = arrayModelTrainResult.trainingStatistics().bestCandidate().trainingStats().get(metric);
 
