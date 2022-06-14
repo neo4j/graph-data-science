@@ -83,12 +83,12 @@ class KmeansStreamProcTest extends BaseProcTest {
             .addParameter("nodeProperty", "kmeans")
             .addParameter("randomSeed", 19)
             .addParameter("concurrency", 1)
-            .yields("nodeId", "communityId", "distanceFromCenter");
+            .yields("nodeId", "communityId", "distanceFromCentroid");
         assertCypherResult(algoQuery, List.of(
-            Map.of("nodeId", 0L, "communityId", 0L, "distanceFromCenter", 0.5),
-            Map.of("nodeId", 1L, "communityId", 1L, "distanceFromCenter", Math.sqrt(2)),
-            Map.of("nodeId", 2L, "communityId", 0L, "distanceFromCenter", 0.5),
-            Map.of("nodeId", 3L, "communityId", 1L, "distanceFromCenter", Math.sqrt(2))
+            Map.of("nodeId", 0L, "communityId", 0L, "distanceFromCentroid", 0.5),
+            Map.of("nodeId", 1L, "communityId", 1L, "distanceFromCentroid", Math.sqrt(2)),
+            Map.of("nodeId", 2L, "communityId", 0L, "distanceFromCentroid", 0.5),
+            Map.of("nodeId", 3L, "communityId", 1L, "distanceFromCentroid", Math.sqrt(2))
 
         ));
     }
