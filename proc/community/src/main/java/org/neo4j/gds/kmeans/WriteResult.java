@@ -47,6 +47,7 @@ public class WriteResult extends StatsResult {
             postProcessingMillis,
             communityDistribution,
             centroids,
+            0,
             configuration
         );
         this.writeMillis = writeMillis;

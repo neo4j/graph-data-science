@@ -47,6 +47,7 @@ public class MutateResult extends StatsResult {
             postProcessingMillis,
             communityDistribution,
             centroids,
+            0,
             configuration
         );
         this.mutateMillis = mutateMillis;
