@@ -61,8 +61,9 @@ class KmeansRestartsTest {
         var result1 = kmeans.compute();
         var communities1 = result1.communities();
         var distances1 = result1.distanceFromCenter();
-
+        var averageDistance1 = result1.averageDistanceToCentroid();
         var centers1 = result1.centers();
+
         assertThat(communities1.get(0)).isNotEqualTo(communities1.get(1));
         assertThat(communities1.get(2)).isEqualTo(communities1.get(1));
 
@@ -72,6 +73,8 @@ class KmeansRestartsTest {
 
         assertThat(centers1[0]).isEqualTo(new double[]{1.0});
         assertThat(centers1[1][0]).isCloseTo(50.55, Offset.offset(1e-4));
+
+        assertThat(averageDistance1).isCloseTo(distances1.stream().sum() / 3.0, Offset.offset(1e-4));
 
 
         var kmeansConfig2 = ImmutableKmeansStreamConfig.builder()
@@ -88,6 +91,7 @@ class KmeansRestartsTest {
         var communities2 = result2.communities();
         var distances2 = result2.distanceFromCenter();
         var centers2 = result2.centers();
+        var averageDistance2 = result2.averageDistanceToCentroid();
 
         assertThat(communities2.get(2)).isNotEqualTo(communities2.get(1));
         assertThat(communities2.get(0)).isEqualTo(communities2.get(1));
@@ -98,6 +102,9 @@ class KmeansRestartsTest {
 
         assertThat(centers2[0][0]).isCloseTo(1.05, Offset.offset(1e-4));
         assertThat(centers2[1]).isEqualTo(new double[]{100});
+
+        assertThat(averageDistance2).isCloseTo(distances2.stream().sum() / 3.0, Offset.offset(1e-4));
+
 
     }
 
