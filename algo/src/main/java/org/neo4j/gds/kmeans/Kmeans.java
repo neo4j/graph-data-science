@@ -186,11 +186,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 .tasks(tasks)
                 .executor(executorService)
                 .run();
-            if (restartIteration > 1) {
-                double distanceFromClusterCentre = 0;
-                for (KmeansTask task : tasks) {
-                    distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
-                }
+            double distanceFromClusterCentre = 0;
+            for (KmeansTask task : tasks) {
+                distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
+            }
+            if (restartIteration >= 1) {
                 if (distanceFromClusterCentre < bestDistance) {
                     bestDistance = distanceFromClusterCentre;
                     ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
@@ -203,6 +203,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 bestCommunities = currentCommunities;
                 distanceFromCenter = currentDistanceFromCenter;
                 bestCenters = clusterManager.getCenters();
+                bestDistance = distanceFromClusterCentre;
+
             }
         }
         progressTracker.endSubTask();
