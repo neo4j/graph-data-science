@@ -21,17 +21,6 @@ ext.languageVersion = { ->
 }
 
 allprojects {
-    plugins.withType(JavaPlugin) {
-        java {
-            toolchain {
-                vendor = vendor()
-                languageVersion = languageVersion()
-            }
-        }
-    }
-}
-
-allprojects {
     plugins.withType(JavaLibraryPlugin) {
 
         repositories {
@@ -105,12 +94,6 @@ allprojects {
         }
 
         tasks.withType(JavaCompile) {
-            if (ver.'neo4j' == neos.'dev' || ver.'neo4j' == neos.'5.0.0-drop02.0' || ver.'neo4j' == neos.'5.0.0-drop04.0') {
-                options.compilerArgs += "--release=17"
-            } else {
-                options.compilerArgs += "--release=11"
-            }
-
             options.warnings = true
             options.encoding = 'UTF-8'
 
