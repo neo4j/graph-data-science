@@ -24,22 +24,22 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 public class LouvainDendrogramManager {
 
     private HugeLongArray[] dendrograms;
-    private final long rootNodeCount;
+    private final long nodeCount;
     private final int maxLevels;
-    private final boolean includeIntermediateCommunities;
+    private final boolean trackIntermediateCommunities;
 
     private int currentIndex;
 
     private int previousIndex;
 
-    public LouvainDendrogramManager(long rootNodeCount, int maxLevels, boolean includeIntermediateCommunities) {
-        if (includeIntermediateCommunities) {
+    public LouvainDendrogramManager(long nodeCount, int maxLevels, boolean trackIntermediateCommunities) {
+        if (trackIntermediateCommunities) {
             this.dendrograms = new HugeLongArray[maxLevels];
         } else {
             this.dendrograms = new HugeLongArray[Math.min(maxLevels, 2)];
         }
-        this.rootNodeCount = rootNodeCount;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
+        this.nodeCount = nodeCount;
+        this.trackIntermediateCommunities = trackIntermediateCommunities;
         this.maxLevels = maxLevels;
     }
 
@@ -48,11 +48,11 @@ public class LouvainDendrogramManager {
     }
 
     public void prepareNextLevel(int ranLevels) {
-        currentIndex = includeIntermediateCommunities ? ranLevels : (ranLevels % 2);
+        currentIndex = trackIntermediateCommunities ? ranLevels : (ranLevels % 2);
         if (currentIndex > 1 || ranLevels <= 1) {
-            dendrograms[currentIndex] = HugeLongArray.newArray(rootNodeCount);
+            dendrograms[currentIndex] = HugeLongArray.newArray(nodeCount);
         }
-        previousIndex = includeIntermediateCommunities ? ranLevels - 1 : ((1 + ranLevels) % 2);
+        previousIndex = trackIntermediateCommunities ? ranLevels - 1 : ((1 + ranLevels) % 2);
     }
 
     public void set(long nodeId, long communityId) {
@@ -82,7 +82,7 @@ public class LouvainDendrogramManager {
     }
 
     public void resizeDendrogram(int numLevels) {
-        if (includeIntermediateCommunities) {
+        if (trackIntermediateCommunities) {
             HugeLongArray[] resizedDendrogram = new HugeLongArray[numLevels];
             if (numLevels < maxLevels) {
                 System.arraycopy(this.dendrograms, 0, resizedDendrogram, 0, numLevels);

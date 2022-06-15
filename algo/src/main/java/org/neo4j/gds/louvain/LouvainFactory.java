@@ -59,8 +59,13 @@ public class LouvainFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgor
         return new Louvain(
             graph,
             configuration,
-            Pools.DEFAULT,
-            progressTracker
+            configuration.includeIntermediateCommunities(),
+            configuration.maxLevels(),
+            configuration.maxIterations(),
+            configuration.tolerance(),
+            configuration.concurrency(),
+            progressTracker, Pools.DEFAULT
+
         );
     }
 

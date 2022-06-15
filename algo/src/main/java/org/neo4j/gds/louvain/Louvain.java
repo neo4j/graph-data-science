@@ -50,7 +50,6 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.DEFAULT_BATCH_SIZE;
 public final class Louvain extends Algorithm<Louvain> {
 
     private final Graph rootGraph;
-    private final LouvainBaseConfig config;
     private final NodePropertyValues seedingValues;
     private final ExecutorService executorService;
     // results
@@ -58,26 +57,42 @@ public final class Louvain extends Algorithm<Louvain> {
     private double[] modularities;
     private int ranLevels;
 
-    private boolean includeIntermediateCommunities;
+    private final int maxLevels;
+
+    private final int concurrency;
+
+    private final int maxIterations;
+
+    private final double tolerance;
+
+    private final boolean trackIntermediateCommunities;
 
     public Louvain(
         Graph graph,
         LouvainBaseConfig config,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
+        boolean trackIntermediateCommunities,
+        int maxLevels,
+        int maxIterations,
+        double tolerance,
+        int concurrency,
+        ProgressTracker progressTracker,
+        ExecutorService executorService
     ) {
         super(progressTracker);
-        this.config = config;
         this.rootGraph = graph;
+        this.maxIterations = maxIterations;
+        this.concurrency = concurrency;
         this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
         this.dendrogramManager = new LouvainDendrogramManager(
             graph.nodeCount(),
-            config.maxLevels(),
-            config.includeIntermediateCommunities()
+            maxLevels,
+            trackIntermediateCommunities
         );
-        this.modularities = new double[config.maxLevels()];
-        this.includeIntermediateCommunities = config.includeIntermediateCommunities();
+        this.tolerance = tolerance;
+        this.modularities = new double[maxLevels];
+        this.maxLevels = maxLevels;
+        this.trackIntermediateCommunities = trackIntermediateCommunities;
     }
 
     @Override
@@ -90,7 +105,7 @@ public final class Louvain extends Algorithm<Louvain> {
         boolean resized = false;
 
         long oldNodeCount = rootGraph.nodeCount();
-        for (ranLevels = 0; ranLevels < config.maxLevels(); ranLevels++) {
+        for (ranLevels = 0; ranLevels < maxLevels; ranLevels++) {
 
             terminationFlag.assertRunning();
 
@@ -128,7 +143,7 @@ public final class Louvain extends Algorithm<Louvain> {
             }
             oldNodeCount = workingGraph.nodeCount();
         }
-        if (!resized && !includeIntermediateCommunities) {
+        if (!resized && !trackIntermediateCommunities) {
             resizeResultArrays();
         }
         progressTracker.endSubTask();
@@ -138,7 +153,7 @@ public final class Louvain extends Algorithm<Louvain> {
     private void resizeResultArrays() {
         int numLevels = levels();
         double[] resizedModularities = new double[numLevels];
-        if (numLevels < config.maxLevels()) {
+        if (numLevels < maxLevels) {
             System.arraycopy(this.modularities, 0, resizedModularities, 0, numLevels);
             this.modularities = resizedModularities;
         }
@@ -152,7 +167,7 @@ public final class Louvain extends Algorithm<Louvain> {
         ModularityOptimization modularityOptimization
     ) {
         AtomicLong maxCommunityId = new AtomicLong(0L);
-        ParallelUtil.parallelForEachNode(rootGraph, config.concurrency(), (nodeId) -> {
+        ParallelUtil.parallelForEachNode(rootGraph, concurrency, (nodeId) -> {
             long prevId = level == 0
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrogramManager.getPrevious(nodeId));
@@ -178,9 +193,9 @@ public final class Louvain extends Algorithm<Louvain> {
     private ModularityOptimization runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
         ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
             .builder()
-            .maxIterations(config.maxIterations())
-            .tolerance(config.tolerance())
-            .concurrency(config.concurrency())
+            .maxIterations(maxIterations)
+            .tolerance(tolerance)
+            .concurrency(concurrency)
             .batchSize(DEFAULT_BATCH_SIZE)
             .build();
 
@@ -205,7 +220,7 @@ public final class Louvain extends Algorithm<Louvain> {
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .build();
 
         terminationFlag.assertRunning();
@@ -227,7 +242,7 @@ public final class Louvain extends Algorithm<Louvain> {
             .build();
 
         var relationshipCreators = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency,
             workingGraph.nodeCount(),
             partition ->
                 new RelationshipCreator(
@@ -251,7 +266,7 @@ public final class Louvain extends Algorithm<Louvain> {
 
         double previousModularity = modularities[ranLevels - 1];
         double currentModularity = modularities[ranLevels];
-        return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > config.tolerance());
+        return !(currentModularity > previousModularity && Math.abs(currentModularity - previousModularity) > tolerance);
     }
 
     public HugeLongArray[] dendrograms() {

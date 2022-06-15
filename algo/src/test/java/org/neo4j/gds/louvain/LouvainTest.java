@@ -160,11 +160,18 @@ class LouvainTest {
             Optional.empty()
         );
 
+        var config = defaultConfigBuilder().build();
         Louvain algorithm = new Louvain(
             graph,
-            defaultConfigBuilder().build(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -199,12 +206,18 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT", "TYPE_IN"),
             Optional.of("weight")
         );
-
+        var config = defaultConfigBuilder().build();
         Louvain algorithm = new Louvain(
             graph,
-            defaultConfigBuilder().build(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -240,11 +253,18 @@ class LouvainTest {
             Optional.of("weight")
         );
 
+        var config = defaultConfigBuilder().seedProperty("seed").build();
         Louvain algorithm = new Louvain(
             graph,
-            defaultConfigBuilder().seedProperty("seed").build(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -276,17 +296,26 @@ class LouvainTest {
             Optional.empty()
         );
 
-        Louvain algorithm = new Louvain(
-            graph,
+        var config =
             ImmutableLouvainStreamConfig.builder()
                 .maxLevels(10)
                 .maxIterations(10)
                 .tolerance(2.0)
                 .includeIntermediateCommunities(false)
                 .concurrency(1)
-                .build(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+                .build();
+
+        Louvain algorithm = new Louvain(
+            graph,
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
+
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -303,17 +332,25 @@ class LouvainTest {
             Optional.empty()
         );
 
-        Louvain algorithm = new Louvain(
-            graph,
+        var config =
             ImmutableLouvainStreamConfig.builder()
                 .maxLevels(1)
                 .maxIterations(10)
                 .tolerance(TOLERANCE_DEFAULT)
                 .includeIntermediateCommunities(false)
                 .concurrency(1)
-                .build(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+                .build();
+
+        Louvain algorithm = new Louvain(
+            graph,
+            config,
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER,
+            Pools.DEFAULT
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -325,20 +362,20 @@ class LouvainTest {
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
 
-            arguments(1, 1, true, 6414145, 23057672),
-            arguments(1, 1, false, 6414145, 23057672),
-            arguments(1, 10, true, 6414145, 30258032),
-            arguments(1, 10, false, 6414145, 23857712),
+            arguments(1, 1, true, 6414161, 23057688),
+            arguments(1, 1, false, 6414161, 23057688),
+            arguments(1, 10, true, 6414161, 30258048),
+            arguments(1, 10, false, 6414161, 23857728),
 
-            arguments(4, 1, true, 6417433, 29057936),
-            arguments(4, 1, false, 6417433, 29057936),
-            arguments(4, 10, true, 6417433, 36258296),
-            arguments(4, 10, false, 6417433, 29857976),
+            arguments(4, 1, true, 6417449, 29057952),
+            arguments(4, 1, false, 6417449, 29057952),
+            arguments(4, 10, true, 6417449, 36258312),
+            arguments(4, 10, false, 6417449, 29857992),
 
-            arguments(42, 1, true, 6459081, 105061280),
-            arguments(42, 1, false, 6459081, 105061280),
-            arguments(42, 10, true, 6459081, 112261640),
-            arguments(42, 10, false, 6459081, 105861320)
+            arguments(42, 1, true, 6459097, 105061296),
+            arguments(42, 1, false, 6459097, 105061296),
+            arguments(42, 10, true, 6459097, 112261656),
+            arguments(42, 10, false, 6459097, 105861336)
 
         );
     }
@@ -419,13 +456,20 @@ class LouvainTest {
             .build()
             .generate();
 
+        var config = defaultConfigBuilder().concurrency(2).build();
         assertTerminates((terminationFlag) ->
             {
                 Louvain louvain = new Louvain(
                     graph,
-                    defaultConfigBuilder().concurrency(2).build(),
-                    Pools.DEFAULT,
-                    ProgressTracker.NULL_TRACKER
+                    config,
+                    config.includeIntermediateCommunities(),
+                    config.maxLevels(),
+                    config.maxIterations(),
+                    config.tolerance(),
+                    config.concurrency(),
+                    ProgressTracker.NULL_TRACKER,
+                    Pools.DEFAULT
+
                 );
                 louvain.setTerminationFlag(terminationFlag);
                 louvain.compute();
@@ -452,11 +496,17 @@ class LouvainTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        var louvain = new Louvain(
+        Louvain louvain = new Louvain(
             graph,
             config,
-            Pools.DEFAULT,
-            progressTracker
+            config.includeIntermediateCommunities(),
+            config.maxLevels(),
+            config.maxIterations(),
+            config.tolerance(),
+            config.concurrency(),
+            progressTracker,
+            Pools.DEFAULT
+
         );
 
         louvain.compute();
