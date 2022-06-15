@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 
@@ -60,6 +61,16 @@ public enum TrainingMethod {
         public String toString() {
             return "RandomForest";
         }
+    },
+
+    MLPClassification {
+        @Override
+        public TrainerConfig createConfig(Map<String, Object> configMap) {
+            return MLPClassifierTrainConfig.of(configMap);
+        }
+
+        @Override
+        public String toString() { return "MultiLayerPerceptronClassification"; }
     };
 
     public abstract TrainerConfig createConfig(Map<String, Object> configMap);

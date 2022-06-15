@@ -26,19 +26,24 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 public class Relu<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     private static final double ALPHA = 0.01;
+    private double alpha;
 
-    public Relu(Variable<T> parent) {
+    public Relu(Variable<T> parent, double alpha) {
         super(parent, parent.dimensions());
+        this.alpha = alpha;
+    }
+    public Relu(Variable<T> parent) {
+        this(parent, ALPHA);
     }
 
     @Override
     public T apply(ComputationContext ctx) {
-        return ctx.data(parent).map(value -> (value > 0) ? value : (ALPHA * value));
+        return ctx.data(parent).map(value -> (value > 0) ? value : (alpha * value));
     }
 
     @Override
     public T gradientForParent(ComputationContext ctx) {
-        T gradient = ctx.data(parent).map(value -> value > 0 ? 1 : ALPHA);
+        T gradient = ctx.data(parent).map(value -> value > 0 ? 1 : alpha);
         gradient.elementwiseProductMutate(ctx.gradient(this));
         return gradient;
     }
