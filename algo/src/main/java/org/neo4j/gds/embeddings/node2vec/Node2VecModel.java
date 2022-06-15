@@ -34,7 +34,9 @@ import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.SplittableRandom;
+import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.scale;
@@ -50,6 +52,7 @@ public class Node2VecModel {
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
+    private final long randomSeed;
 
     public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
@@ -67,6 +70,7 @@ public class Node2VecModel {
     }
 
     Node2VecModel(
+        LongUnaryOperator toOriginalId,
         long nodeCount,
         Node2VecBaseConfig config,
         CompressedRandomWalks walks,
@@ -78,11 +82,11 @@ public class Node2VecModel {
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
+        this.randomSeed = config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong());
 
-        var random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
-
-        centerEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
-        contextEmbeddings = initializeEmbeddings(nodeCount, config.embeddingDimension(), random);
+        var random = new Random();
+        centerEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, config.embeddingDimension(), random);
+        contextEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, config.embeddingDimension(), random);
     }
 
     Result train() {
@@ -140,13 +144,14 @@ public class Node2VecModel {
         return ImmutableResult.of(centerEmbeddings, lossPerIteration);
     }
 
-    private static HugeObjectArray<FloatVector> initializeEmbeddings(long nodeCount, int embeddingDimensions, SplittableRandom random) {
+    private HugeObjectArray<FloatVector> initializeEmbeddings(LongUnaryOperator toOriginalNodeId, long nodeCount, int embeddingDimensions, Random random) {
         HugeObjectArray<FloatVector> embeddings = HugeObjectArray.newArray(
             FloatVector.class,
             nodeCount
         );
 
         for (var i = 0L; i < nodeCount; i++) {
+            random.setSeed(toOriginalNodeId.applyAsLong(i) + randomSeed);
             var data = random
                 .doubles(embeddingDimensions, -1, 1)
                 .collect(

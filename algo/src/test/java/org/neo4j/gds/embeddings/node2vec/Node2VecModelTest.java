@@ -69,6 +69,7 @@ class Node2VecModelTest {
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
+            i -> i,
             nodeCount,
             config,
             walks,
@@ -166,6 +167,7 @@ class Node2VecModelTest {
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
+            i -> i,
             nodeCount,
             config,
             walks,
@@ -174,6 +176,7 @@ class Node2VecModelTest {
         );
 
         var otherNode2VecModel = new Node2VecModel(
+            i -> i,
             nodeCount,
             config,
             walks,

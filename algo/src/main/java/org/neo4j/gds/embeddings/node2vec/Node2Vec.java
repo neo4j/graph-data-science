@@ -75,6 +75,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         });
 
         var node2VecModel = new Node2VecModel(
+            graph::toOriginalNodeId,
             graph.nodeCount(),
             config,
             walks,
