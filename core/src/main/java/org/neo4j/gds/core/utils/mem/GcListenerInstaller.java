@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.mem;
 
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.internal.LogService;
 
 import javax.management.ListenerNotFoundException;
 import javax.management.NotificationBroadcaster;
@@ -36,17 +36,17 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 final class GcListenerInstaller extends LifecycleAdapter {
-    private final LogProvider logProvider;
+    private final LogService logService;
     private final List<GarbageCollectorMXBean> gcBeans;
     private final AtomicLong freeMemory;
     private final Map<NotificationBroadcaster, NotificationListener> registeredListeners;
 
     GcListenerInstaller(
-        LogProvider logProvider,
+        LogService logService,
         Collection<GarbageCollectorMXBean> gcBeans,
         AtomicLong freeMemory
     ) {
-        this.logProvider = logProvider;
+        this.logService = logService;
         // make defensive copy
         this.gcBeans = new ArrayList<>(gcBeans);
         this.freeMemory = freeMemory;
@@ -69,7 +69,7 @@ final class GcListenerInstaller extends LifecycleAdapter {
         if (gcBean instanceof NotificationBroadcaster) {
             NotificationBroadcaster broadcaster = (NotificationBroadcaster) gcBean;
             Optional<NotificationListener> listener = HotSpotGcListener.install(
-                this.logProvider,
+                this.logService,
                 this.freeMemory,
                 gcBean.getMemoryPoolNames(),
                 broadcaster

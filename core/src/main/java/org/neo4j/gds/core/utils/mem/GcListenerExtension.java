@@ -47,7 +47,7 @@ public final class GcListenerExtension extends ExtensionFactory<GcListenerExtens
     @Override
     public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
         return new GcListenerInstaller(
-            dependencies.logService().getInternalLogProvider(),
+            dependencies.logService(),
             ManagementFactory.getGarbageCollectorMXBeans(),
             freeMemoryAfterLastGc
         );
