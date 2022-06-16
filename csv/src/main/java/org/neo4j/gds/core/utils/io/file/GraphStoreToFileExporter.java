@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
@@ -29,6 +30,7 @@ import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter;
 import org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor;
+import org.neo4j.gds.core.utils.io.file.csv.CsvGraphPropertyVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor;
 import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor;
@@ -51,6 +53,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
+    private final VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier;
 
     public static GraphStoreToFileExporter csv(
         GraphStore graphStore,
@@ -99,7 +102,13 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 headerFiles,
                 index
             ),
-            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index)
+            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index),
+            (index) -> new CsvGraphPropertyVisitor(
+                exportPath,
+                graphStore.schema().graphProperties(),
+                headerFiles,
+                index
+            )
         );
     }
 
@@ -113,7 +122,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
-        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
+        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
+        VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
     ) {
         if (config.includeMetaData()) {
             return new FullGraphStoreToFileExporter(
@@ -126,7 +136,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 relationshipSchemaVisitorSupplier,
                 graphCapabilitiesWriterSupplier,
                 nodeVisitorSupplier,
-                relationshipVisitorSupplier
+                relationshipVisitorSupplier,
+                graphPropertyVisitorSupplier
             );
         } else {
             return new GraphStoreToFileExporter(
@@ -134,7 +145,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
                 config,
                 neoNodeProperties,
                 nodeVisitorSupplier,
-                relationshipVisitorSupplier
+                relationshipVisitorSupplier,
+                graphPropertyVisitorSupplier
             );
         }
     }
@@ -144,17 +156,20 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         GraphStoreToFileExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
-        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
+        VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
+        VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
     ) {
         super(graphStore, config, neoNodeProperties);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
+        this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;
     }
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
         exportNodes(graphStoreInput);
         exportRelationships(graphStoreInput);
+        exportGraphProperties(graphStoreInput);
     }
 
     @Override
@@ -162,13 +177,13 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return IdMappingType.ORIGINAL;
     }
 
-    private void exportNodes(GraphStoreInput graphStoreInput) {
+    private void exportNodes(CompatInput graphStoreInput) {
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner(nodeVisitorSupplier.apply(index), nodeInputIterator, ProgressTracker.NULL_TRACKER)
+            (index) -> new ElementImportRunner<>(nodeVisitorSupplier.apply(index), nodeInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
         RunWithConcurrency.builder()
@@ -177,19 +192,34 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             .run();
     }
 
-    private void exportRelationships(GraphStoreInput graphStoreInput) {
+    private void exportRelationships(CompatInput graphStoreInput) {
         var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner(relationshipVisitorSupplier.apply(index), relationshipInputIterator, ProgressTracker.NULL_TRACKER)
+            (index) -> new ElementImportRunner<>(relationshipVisitorSupplier.apply(index), relationshipInputIterator, ProgressTracker.NULL_TRACKER)
         );
 
         RunWithConcurrency.builder()
             .concurrency(config.writeConcurrency())
             .tasks(tasks)
             .mayInterruptIfRunning(false)
+            .run();
+    }
+
+    private void exportGraphProperties(GraphStoreInput graphStoreInput) {
+        var graphPropertyInput = graphStoreInput.graphProperties();
+        var graphPropertyInputIterator = graphPropertyInput.iterator();
+
+        var tasks = ParallelUtil.tasks(
+            config.writeConcurrency(),
+            (index) -> new ElementImportRunner<>(graphPropertyVisitorSupplier.apply(index), graphPropertyInputIterator, ProgressTracker.NULL_TRACKER)
+        );
+
+        RunWithConcurrency.builder()
+            .concurrency(config.writeConcurrency())
+            .tasks(tasks)
             .run();
     }
 
@@ -210,9 +240,17 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
             Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
-            VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
+            VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
+            VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
         ) {
-            super(graphStore, config, neoNodeProperties, nodeVisitorSupplier, relationshipVisitorSupplier);
+            super(
+                graphStore,
+                config,
+                neoNodeProperties,
+                nodeVisitorSupplier,
+                relationshipVisitorSupplier,
+                graphPropertyVisitorSupplier
+            );
             this.userInfoVisitorSupplier = userInfoVisitorSupplier;
             this.graphInfoVisitorSupplier = graphInfoVisitorSupplier;
             this.nodeSchemaVisitorSupplier = nodeSchemaVisitorSupplier;

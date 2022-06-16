@@ -167,7 +167,7 @@ public final class CsvGraphStoreImporter {
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
+            (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
@@ -201,7 +201,7 @@ public final class CsvGraphStoreImporter {
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
+            (index) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
         );
 
         ParallelUtil.run(tasks, Pools.DEFAULT);
