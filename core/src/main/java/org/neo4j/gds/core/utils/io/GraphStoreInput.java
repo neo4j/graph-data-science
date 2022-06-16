@@ -219,7 +219,7 @@ public final class GraphStoreInput implements CompatInput {
 
         private final Iterator<GraphProperty> graphPropertyIterator;
         private @Nullable String currentPropertyName;
-        private @Nullable Spliterator<Object> currentPropertyValues;
+        private @Nullable SpliteratorTaskSupplier<Object> currentPropertyValuesSupplier;
 
         GraphPropertyIterator(GraphPropertyStore graphPropertyStore) {
             this.graphPropertyIterator = graphPropertyStore.graphPropertyIterator();
@@ -232,16 +232,17 @@ public final class GraphStoreInput implements CompatInput {
 
         @Override
         public synchronized boolean next(InputChunk chunk) throws IOException {
-            if (currentPropertyValues == null) {
+            if (currentPropertyValuesSupplier == null) {
                 if (this.graphPropertyIterator.hasNext()) {
                     var graphProperty = graphPropertyIterator.next();
+                    var graphPropertySpliterator = graphProperty.values().objects().spliterator();
                     this.currentPropertyName = graphProperty.key();
-                    this.currentPropertyValues = graphProperty.values().objects().spliterator();
+                    this.currentPropertyValuesSupplier = new SpliteratorTaskSupplier<>(graphPropertySpliterator);
                 } else {
                     return false;
                 }
             }
-            var propertyValues = currentPropertyValues.trySplit();
+            var propertyValues = currentPropertyValuesSupplier.split();
             if (propertyValues != null) {
                 ((GraphPropertyInputChunk) chunk).initialize(
                     Objects.requireNonNull(currentPropertyName),
@@ -250,7 +251,7 @@ public final class GraphStoreInput implements CompatInput {
                 return true;
             }
 
-            currentPropertyValues = null;
+            currentPropertyValuesSupplier = null;
             currentPropertyName = null;
             return false;
         }
