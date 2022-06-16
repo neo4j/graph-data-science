@@ -54,7 +54,7 @@ See xref::graph-project-apache-arrow.adoc#arrow-send-nodes[Sending node records 
 +
 In the third and last phase, the client sends record batches of relationships via `PUT` as a Flight stream.
 Once all record batches are sent, the client needs to indicate that the import process is complete.
-This is done via sending another Flight action with type `RELATIONSIP_LOAD_DONE`.
+This is done via sending another Flight action with type `RELATIONSHIP_LOAD_DONE`.
 The server finalizes the construction of the in-memory graph and stores the graph in the graph catalog.
 +
 See xref::graph-project-apache-arrow.adoc#arrow-send-relationships[Sending relationship records via PUT as a Flight stream] for more details.
