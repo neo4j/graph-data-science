@@ -24,21 +24,19 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 public class LeidenDendrogramManager {
 
     private HugeLongArray[] dendrograms;
-    private final long rootNodeCount;
-    private final int maxIterations;
-    private final boolean includeIntermediateCommunities;
+    private final long nodeCount;
+    private final boolean trackIntermediateCommunities;
 
     private int currentIndex;
 
-    public LeidenDendrogramManager(long rootNodeCount, int maxIterations, boolean includeIntermediateCommunities) {
-        if (includeIntermediateCommunities) {
+    public LeidenDendrogramManager(long nodeCount, int maxIterations, boolean trackIntermediateCommunities) {
+        if (trackIntermediateCommunities) {
             this.dendrograms = new HugeLongArray[maxIterations];
         } else {
             this.dendrograms = new HugeLongArray[1];
         }
-        this.rootNodeCount = rootNodeCount;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
-        this.maxIterations = maxIterations;
+        this.nodeCount = nodeCount;
+        this.trackIntermediateCommunities = trackIntermediateCommunities;
     }
 
     public HugeLongArray[] getAllDendrograms() {
@@ -46,9 +44,9 @@ public class LeidenDendrogramManager {
     }
 
     public void prepareNextLevel(int iteration) {
-        currentIndex = includeIntermediateCommunities ? iteration : 0;
+        currentIndex = trackIntermediateCommunities ? iteration : 0;
         if (currentIndex > 0 || iteration == 0) {
-            dendrograms[currentIndex] = HugeLongArray.newArray(rootNodeCount);
+            dendrograms[currentIndex] = HugeLongArray.newArray(nodeCount);
         }
     }
 
