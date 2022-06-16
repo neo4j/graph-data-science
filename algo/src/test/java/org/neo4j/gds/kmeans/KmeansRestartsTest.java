@@ -116,12 +116,14 @@ class KmeansRestartsTest {
 
     @Test
     void shouldNotIgnoreFirstIteration() {
-
+        //the seed forces to pick as centers:
+        //in first iteration: optimally:   100.0 alone and one of the others two
+        //in second iteration: 100.0 is not selected as a cluster center
         var kmeansConfig = ImmutableKmeansStreamConfig.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(2L)
-            .maxIterations(1)
+            .maxIterations(1) //no room for improvement
             .numberOfRestarts(2)
             .k(2)
             .build();
