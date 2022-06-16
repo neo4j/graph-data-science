@@ -100,11 +100,14 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
         var metaDataStore = MetaDataStore.of(graphStore);
         var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
+        var graphPropertyStore = new GraphPropertyStore(graphStore);
+
         var graphStoreInput = GraphStoreInput.of(
             metaDataStore,
             nodeStore,
             relationshipStore,
             graphStore.capabilities(),
+            graphPropertyStore,
             config.batchSize(),
             idMappingType()
         );
