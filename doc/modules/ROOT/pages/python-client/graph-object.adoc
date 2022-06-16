@@ -22,7 +22,7 @@ G, res = gds.graph.project(
     "my-graph",                 #  Graph name
     ["MyLabel", "YourLabel"],   #  Node projection
     "MY_REL_TYPE",              #  Relationship projection
-    concurrency=4               #  Configuration parameters
+    readConcurrency=4               #  Configuration parameters
 )
 ----
 
