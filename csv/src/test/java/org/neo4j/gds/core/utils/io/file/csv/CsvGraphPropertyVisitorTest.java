@@ -43,10 +43,10 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
             }
         }
 
-        assertCsvFiles(List.of("graph_properties_longProp_0.csv"));
-        assertHeaderFile("graph_properties_longProp_header.csv", longPropWithSchema);
+        assertCsvFiles(List.of("graph_property_longProp_0.csv"));
+        assertHeaderFile("graph_property_longProp_header.csv", longPropWithSchema);
         assertDataContent(
-            "graph_properties_longProp_0.csv",
+            "graph_property_longProp_0.csv",
             List.of(
                 List.of("0"),
                 List.of("1"),
@@ -74,12 +74,12 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
             }
         }
 
-        assertCsvFiles(List.of("graph_properties_doubleProp_0.csv", "graph_properties_floatArrayProp_0.csv"));
-        assertHeaderFile("graph_properties_doubleProp_header.csv", Map.of("doubleProp", graphPropertySchemas.get("doubleProp")));
-        assertHeaderFile("graph_properties_floatArrayProp_header.csv", Map.of("floatArrayProp", graphPropertySchemas.get("floatArrayProp")));
+        assertCsvFiles(List.of("graph_property_doubleProp_0.csv", "graph_property_floatArrayProp_0.csv"));
+        assertHeaderFile("graph_property_doubleProp_header.csv", Map.of("doubleProp", graphPropertySchemas.get("doubleProp")));
+        assertHeaderFile("graph_property_floatArrayProp_header.csv", Map.of("floatArrayProp", graphPropertySchemas.get("floatArrayProp")));
 
         assertDataContent(
-            "graph_properties_doubleProp_0.csv",
+            "graph_property_doubleProp_0.csv",
             List.of(
                 List.of("0.0"),
                 List.of("1.0"),
@@ -89,7 +89,7 @@ class CsvGraphPropertyVisitorTest extends CsvVisitorTest {
         );
 
         assertDataContent(
-            "graph_properties_floatArrayProp_0.csv",
+            "graph_property_floatArrayProp_0.csv",
             List.of(
                 List.of("0.0;0.1"),
                 List.of("1.0;1.1"),

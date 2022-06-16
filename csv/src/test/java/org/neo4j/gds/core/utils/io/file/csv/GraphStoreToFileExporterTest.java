@@ -311,6 +311,51 @@ public class GraphStoreToFileExporterTest extends CsvTest {
     }
 
     @Test
+    void exportGraphPropertiesMultithreaded() throws IOException {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(4)
+            .includeMetaData(false)
+            .build();
+
+        var graphPropertyValues = new LongGraphPropertyValues() {
+            @Override
+            public long size() {
+                return 1_000_000;
+            }
+
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, size());
+            }
+        };
+
+        graphStore.addGraphProperty("graphProp", graphPropertyValues);
+
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run();
+
+        var exportedValues = Files
+            .list(tempDir)
+            .filter(path -> path.getFileName().toString().startsWith("graph_property_graphProp"))
+            .filter(not(path -> path.getFileName().toString().endsWith("header.csv")))
+            .flatMap(path -> {
+                try {
+                    return Files.readAllLines(path).stream();
+                } catch (IOException e) {
+                    throw new UncheckedIOException(e);
+                }
+            })
+            .filter(not(String::isEmpty))
+            .mapToLong(Long::valueOf)
+            .sorted()
+            .toArray();
+
+        assertArrayEquals(LongStream.range(0, graphPropertyValues.size()).toArray(), exportedValues);
+    }
+
+    @Test
     void exportSchemaAndDatabaseId() {
         var config = ImmutableGraphStoreToFileExporterConfig
             .builder()
