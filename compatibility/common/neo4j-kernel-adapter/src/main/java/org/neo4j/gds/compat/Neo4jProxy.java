@@ -66,7 +66,7 @@ import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -321,6 +321,10 @@ public final class Neo4jProxy {
         return IMPL.testLog();
     }
 
+    public static Log getInternalLog(LogService logService, Class<?> loggingClass) {
+        return IMPL.getInternalLog(logService, loggingClass);
+    }
+
     public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return IMPL.virtualRelationship(id, startNode, endNode, type);
     }
@@ -333,10 +337,10 @@ public final class Neo4jProxy {
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
         PageCache pageCache,
-        LogProvider logProvider,
+        LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
-        return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logProvider, pageCacheTracer);
+        return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logService, pageCacheTracer);
     }
 
     public static boolean isNotNumericIndex(IndexCapability indexCapability) {
@@ -366,19 +370,19 @@ public final class Neo4jProxy {
     public static SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
-        LogProvider logProvider
+        LogService logService
     ) {
-        return IMPL.createSllPolicyLoader(fileSystem, config, logProvider);
+        return IMPL.createSllPolicyLoader(fileSystem, config, logService);
     }
 
     public static RecordFormats recordFormatSelector(
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogProvider internalLogProvider,
+        LogService logService,
         DependencyResolver dependencyResolver
     ) {
-        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, internalLogProvider, dependencyResolver);
+        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, dependencyResolver);
     }
 
     public static NamedDatabaseId randomDatabaseId() {
