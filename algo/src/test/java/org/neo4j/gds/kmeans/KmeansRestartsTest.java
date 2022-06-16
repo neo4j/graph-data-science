@@ -100,5 +100,27 @@ class KmeansRestartsTest {
         assertThat(centers2[1]).isEqualTo(new double[]{100});
 
     }
-    
+
+
+    @Test
+    void shouldNotIgnoreFirstIteration() {
+
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(2L)
+            .maxIterations(1)
+            .numberOfRestarts(2)
+            .k(2)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var centers = kmeans.compute().centers();
+        assertThat(centers[1]).isEqualTo(new double[]{100.0});
+        assertThat(centers[0][0]).isCloseTo(1.05, Offset.offset(1e-4));
+
+
+    }
+
+
 }
