@@ -22,11 +22,15 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -96,4 +100,24 @@ class CSRGraphStoreTest {
             .containsExactlyInAnyOrder(NodeLabel.of("B"), NodeLabel.of("C"));
     }
 
+    @Test
+    void shouldAddNewGraphProperties() {
+        var factory = GdlFactory.of("(:A), (:A), (:B), (:C)");
+        var graphStore = factory.build();
+
+        graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, 4);
+            }
+
+            @Override
+            public long size() {
+                return 4;
+            }
+        });
+
+        assertThat(graphStore.graphProperty("longProp")).isNotNull();
+        assertThat(graphStore.schema().graphProperties()).containsEntry("longProp", PropertySchema.of("longProp", ValueType.LONG));
+    }
 }
