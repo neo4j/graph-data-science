@@ -26,6 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
@@ -37,6 +38,7 @@ import org.neo4j.gds.gdl.GdlFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collections;
@@ -45,8 +47,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
+import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
@@ -200,6 +205,51 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             )
         );
 
+    }
+
+    @Test
+    void shouldExportGraphProperties() {
+        var config = ImmutableGraphStoreToFileExporterConfig
+            .builder()
+            .exportName(tempDir.toString())
+            .writeConcurrency(1)
+            .includeMetaData(false)
+            .build();
+
+        var graphPropertyValues = new LongGraphPropertyValues() {
+            @Override
+            public long size() {
+                return 3;
+            }
+
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, size());
+            }
+        };
+
+        graphStore.addGraphProperty("graphProp", graphPropertyValues);
+
+        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        exporter.run();
+
+        assertCsvFiles(List.of("graph_property_graphProp_0.csv", "graph_property_graphProp_header.csv"));
+
+        assertDataContent(
+            "graph_property_graphProp_0.csv",
+            List.of(
+                List.of("0"),
+                List.of("1"),
+                List.of("2")
+            )
+        );
+
+        assertDataContent(
+            "graph_property_graphProp_header.csv",
+            List.of(
+                List.of("graphProp:long")
+            )
+        );
     }
 
     @Test
