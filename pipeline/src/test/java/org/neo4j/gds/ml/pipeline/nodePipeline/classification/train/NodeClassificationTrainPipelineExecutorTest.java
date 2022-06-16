@@ -33,6 +33,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -54,7 +55,6 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.test.TestProc;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.List;
 import java.util.Map;
@@ -119,7 +119,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(), new Multiset<>()).findFirst().orElseThrow();
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(), new LongMultiSet()).findFirst().orElseThrow();
 
         var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
         pipeline.addTrainerConfig(modelCandidate);

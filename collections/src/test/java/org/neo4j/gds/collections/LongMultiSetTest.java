@@ -17,19 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
+package org.neo4j.gds.collections;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.junit.jupiter.api.Test;
 
-@ValueClass
-public interface NodeClassificationTrainResult {
-    Classifier classifier();
-    TrainingStatistics trainingStatistics();
-    LocalIdMap classIdMap();
+import static org.assertj.core.api.Assertions.assertThat;
 
-    LongMultiSet classCounts();
+class LongMultiSetTest {
+
+    @Test
+    void addValues() {
+        var actualSet = new LongMultiSet();
+
+        assertThat(actualSet)
+            .matches(set -> set.keys().length == 0)
+            .matches(set -> set.count(42) == 0);
+
+        actualSet.add(42);
+        actualSet.add(42);
+        actualSet.add(1337, 30);
+        actualSet.add(1337);
+
+        assertThat(actualSet.keys()).containsExactlyInAnyOrder(42, 1337);
+
+        assertThat(actualSet.count(42)).isEqualTo(2);
+        assertThat(actualSet.count(1337)).isEqualTo(31);
+    }
+
 }

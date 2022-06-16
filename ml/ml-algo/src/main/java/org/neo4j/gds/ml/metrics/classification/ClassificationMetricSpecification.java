@@ -21,12 +21,12 @@ package org.neo4j.gds.ml.metrics.classification;
 
 import org.eclipse.collections.api.block.function.primitive.LongIntToObjectFunction;
 import org.intellij.lang.annotations.RegExp;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -47,24 +47,24 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public final class ClassificationMetricSpecification {
 
     private final String stringRepresentation;
-    private final BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory;
+    private final BiFunction<LocalIdMap, LongMultiSet, Stream<Metric>> metricFactory;
 
     private ClassificationMetricSpecification(
         String stringRepresentation,
-        BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory
+        BiFunction<LocalIdMap, LongMultiSet, Stream<Metric>> metricFactory
     ) {
         this.stringRepresentation = stringRepresentation;
         this.metricFactory = metricFactory;
     }
 
     private static ClassificationMetricSpecification createSpecification(
-        BiFunction<LocalIdMap, Multiset<Long>, Stream<Metric>> metricFactory,
+        BiFunction<LocalIdMap, LongMultiSet, Stream<Metric>> metricFactory,
         String stringRepresentation
     ) {
         return new ClassificationMetricSpecification(stringRepresentation, metricFactory);
     }
 
-    public Stream<Metric> createMetrics(LocalIdMap classIdMap, Multiset<Long> classCounts) {
+    public Stream<Metric> createMetrics(LocalIdMap classIdMap, LongMultiSet classCounts) {
         return metricFactory.apply(classIdMap, classCounts);
     }
 
@@ -111,7 +111,7 @@ public final class ClassificationMetricSpecification {
                 Accuracy.NAME, Accuracy::new
             );
 
-        private static final Map<String, BiFunction<LocalIdMap, Multiset<Long>, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
+        private static final Map<String, BiFunction<LocalIdMap, LongMultiSet, ClassificationMetric>> ALL_CLASS_METRIC_FACTORIES = Map.of(
             F1Weighted.NAME, F1Weighted::new,
             F1Macro.NAME, (classIdMap, ignore) -> new F1Macro(classIdMap),
             GlobalAccuracy.NAME, (ignored1, ignored2) -> new GlobalAccuracy()

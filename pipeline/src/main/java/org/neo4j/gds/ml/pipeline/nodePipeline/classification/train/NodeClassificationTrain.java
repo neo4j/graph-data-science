@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -59,7 +60,6 @@ import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,7 +84,7 @@ public final class NodeClassificationTrain {
     private final IdMap nodeIdMap;
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
-    private final Multiset<Long> classCounts;
+    private final LongMultiSet classCounts;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
@@ -222,7 +222,7 @@ public final class NodeClassificationTrain {
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
-        Multiset<Long> classCounts = labelsAndClassCounts.classCounts();
+        LongMultiSet classCounts = labelsAndClassCounts.classCounts();
         var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
         var metrics = config.metrics(classIdMap, classCounts);
@@ -260,7 +260,7 @@ public final class NodeClassificationTrain {
         IdMap nodeIdMap,
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
-        Multiset<Long> classCounts,
+        LongMultiSet classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -329,10 +329,15 @@ public final class NodeClassificationTrain {
             trainConfig.randomSeed()
         );
 
+        var sortedClassIds = new TreeSet<Long>();
+        for (long clazz : classCounts.keys()) {
+            sortedClassIds.add(clazz);
+        }
+
         crossValidation.selectModel(
             trainNodeIds,
             targets::get,
-            new TreeSet<>(classCounts.keys()),
+            sortedClassIds,
             trainingStatistics,
             modelCandidates
         );

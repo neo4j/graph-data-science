@@ -21,9 +21,9 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.openjdk.jol.util.Multiset;
 
 public final class LabelsAndClassCountsExtractor {
 
@@ -43,11 +43,11 @@ public final class LabelsAndClassCountsExtractor {
         return ImmutableLabelsAndClassCounts.of(labels, classCounts);
     }
 
-    static Multiset<Long> extractClassCounts(
+    static LongMultiSet extractClassCounts(
         NodePropertyValues targetNodeProperty,
         long nodeCount
     ) {
-        var classCounts = new Multiset<Long>();
+        var classCounts = new LongMultiSet();
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             classCounts.add(targetNodeProperty.longValue(nodeId));
         }
@@ -58,6 +58,6 @@ public final class LabelsAndClassCountsExtractor {
     interface LabelsAndClassCounts {
         HugeIntArray labels();
 
-        Multiset<Long> classCounts();
+        LongMultiSet classCounts();
     }
 }

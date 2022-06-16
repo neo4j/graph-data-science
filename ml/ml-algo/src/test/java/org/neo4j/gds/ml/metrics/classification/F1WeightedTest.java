@@ -22,10 +22,10 @@ package org.neo4j.gds.ml.metrics.classification;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +35,7 @@ class F1WeightedTest {
     private HugeLongArray originalPredictions;
     private HugeIntArray targets;
     private HugeIntArray predictions;
-    private Multiset<Long> classCounts;
+    private LongMultiSet classCounts;
 
     private LocalIdMap localIdMap;
 
@@ -48,7 +48,7 @@ class F1WeightedTest {
             4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
         );
 
-        classCounts = new Multiset<>();
+        classCounts = new LongMultiSet();
         for (long target : originalTargets.toArray()) {
             classCounts.add(target, 2L);
         }

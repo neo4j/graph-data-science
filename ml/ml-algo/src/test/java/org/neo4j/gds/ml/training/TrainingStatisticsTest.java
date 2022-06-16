@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -47,7 +48,7 @@ import static org.neo4j.gds.ml.metrics.regression.RegressionMetrics.ROOT_MEAN_SQ
 
 class TrainingStatisticsTest {
 
-    static final Metric F1_WEIGHTED = new F1Weighted(LocalIdMap.of());
+    static final Metric F1_WEIGHTED = new F1Weighted(LocalIdMap.of(), new LongMultiSet());
     static final Metric ACCURACY = new GlobalAccuracy();
 
     public static Stream<Arguments> mainMetricWithExpectecWinner() {

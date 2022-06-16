@@ -24,10 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -150,15 +150,15 @@ class StratifiedKFoldSplitterTest {
         assertMemoryRange(actualEstimation, expectedMemory);
     }
 
-    private Multiset<Long> classCounts(HugeLongArray values) {
-        var counts = new Multiset<Long>();
+    private LongMultiSet classCounts(HugeLongArray values) {
+        var counts = new LongMultiSet();
         Arrays.stream(values.toArray()).forEach(counts::add);
 
         return counts;
     }
 
-    private Multiset<Long> classCountsForSet(ReadOnlyHugeLongArray idSet, HugeLongArray targets) {
-        var counts = new Multiset<Long>();
+    private LongMultiSet classCountsForSet(ReadOnlyHugeLongArray idSet, HugeLongArray targets) {
+        var counts = new LongMultiSet();
 
         for (long i = 0; i < idSet.size(); i++) {
             counts.add(targets.get(idSet.get(i)));

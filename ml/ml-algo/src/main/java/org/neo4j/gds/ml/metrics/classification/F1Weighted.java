@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.metrics.classification;
 
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -31,9 +31,9 @@ public class F1Weighted implements ClassificationMetric {
     public static final String NAME = "F1_WEIGHTED";
 
     private final LocalIdMap classIdMap;
-    private final Multiset<Long> globalClassCounts;
+    private final LongMultiSet globalClassCounts;
 
-    public F1Weighted(LocalIdMap classIdMap, Multiset<Long> globalClassCounts) {
+    public F1Weighted(LocalIdMap classIdMap, LongMultiSet globalClassCounts) {
         this.classIdMap = classIdMap;
         this.globalClassCounts = globalClassCounts;
     }

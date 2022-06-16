@@ -24,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.openjdk.jol.util.Multiset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -32,7 +31,6 @@ class F1MacroTest {
 
     private HugeIntArray targets;
     private HugeIntArray predictions;
-    private Multiset<Long> classCounts;
 
     private LocalIdMap localIdMap;
 
@@ -40,18 +38,17 @@ class F1MacroTest {
     void setup() {
         predictions = HugeIntArray.of(3, 4, 6, 6, 7, 9, 8, 1, 1, 2, 3, 3, 3, 4, 4);
         targets = HugeIntArray.of(4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5);
-        classCounts = new Multiset<>();
+        localIdMap = new LocalIdMap();
         for (long target : targets.toArray()) {
-            classCounts.add(target);
+            localIdMap.toMapped(target);
         }
-        localIdMap = LocalIdMap.ofSorted(classCounts.keys());
     }
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
         var totalF1 = 1.0 + 2.0/3.0 + 2.0/3.0 + 2.0/3.0;
         var totalClasses = 7;
-        assertThat(new F1Macro(localIdMap).compute(targets, predictions, classCounts))
+        assertThat(new F1Macro(localIdMap).compute(targets, predictions))
             .isCloseTo(totalF1 / totalClasses, Offset.offset(1e-8));
     }
 }

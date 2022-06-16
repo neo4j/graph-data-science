@@ -17,19 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
+package org.neo4j.gds.collections;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
-import org.neo4j.gds.ml.models.Classifier;
-import org.neo4j.gds.ml.training.TrainingStatistics;
+import com.carrotsearch.hppc.LongLongHashMap;
 
-@ValueClass
-public interface NodeClassificationTrainResult {
-    Classifier classifier();
-    TrainingStatistics trainingStatistics();
-    LocalIdMap classIdMap();
+public class LongMultiSet {
 
-    LongMultiSet classCounts();
+    private final LongLongHashMap map;
+
+    public LongMultiSet() {map = new LongLongHashMap();}
+
+    public long add(long value) {
+        return map.addTo(value, 1);
+    }
+
+    public long add(long key, long count) {
+        return map.addTo(key, count);
+    }
+
+    public long count(long value) {
+        return map.getOrDefault(value, 0);
+    }
+
+    public long[] keys() {
+        return map.keys().toArray();
+    }
+
+    public long size() {
+        return map.size();
+    }
 }

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestClassifier;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
@@ -33,7 +34,6 @@ import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
-import org.openjdk.jol.util.Multiset;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -53,7 +53,7 @@ class ClassificationMetricComputerTest {
     @ParameterizedTest
     @MethodSource("targetAndScores")
     void shouldComputeMetrics(long firstTarget, double expectedF1Score) {
-        var classCounts = new Multiset<Long>();
+        var classCounts = new LongMultiSet();
         classCounts.add(0L, 2);
         classCounts.add(1L, 1);
         classCounts.add(3L, 1);
