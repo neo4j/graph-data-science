@@ -72,6 +72,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.neo4j.gds.config.ConcurrencyConfig.DEFAULT_CONCURRENCY;
@@ -449,11 +450,7 @@ public final class CypherAggregation extends BaseProc {
             buildRelationshipsWithProperties(graphStoreBuilder, nodes);
 
             var graphStore = graphStoreBuilder.schema(graphSchemaBuilder.build()).build();
-
-            var config = ImmutableGraphProjectFromCypherAggregation.builder()
-                .graphName(graphName)
-                .username(this.username)
-                .build();
+            var config = GraphProjectFromCypherAggregationConfig.of(this.username, graphName);
 
             GraphStoreCatalog.set(config, graphStore);
 
@@ -553,24 +550,44 @@ public final class CypherAggregation extends BaseProc {
     }
 
     @ValueClass
+    @Configuration
     @SuppressWarnings("immutables:subtype")
-    public interface GraphProjectFromCypherAggregation extends GraphProjectConfig {
+    public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
 
         @org.immutables.value.Value.Default
+        @Configuration.Ignore
         default Orientation orientation() {
             return Orientation.NATURAL;
         }
 
         @org.immutables.value.Value.Default
+        @Configuration.Ignore
         default Aggregation aggregation() {
             return Aggregation.NONE;
         }
 
+        @Configuration.Ignore
         @Override
         default GraphStoreFactory.Supplier graphStoreFactory() {
             throw new UnsupportedOperationException(
                 "Cypher aggregation does not work over the default graph store framework"
             );
+        }
+
+        @org.immutables.value.Value.Derived
+        @Configuration.Ignore
+        default Set<String> outputFieldDenylist() {
+            return Set.of(
+                NODE_COUNT_KEY,
+                RELATIONSHIP_COUNT_KEY,
+                READ_CONCURRENCY_KEY,
+                SUDO_KEY,
+                VALIDATE_RELATIONSHIPS_KEY
+            );
+        }
+
+        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName) {
+            return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.empty());
         }
 
         @Override
@@ -584,7 +601,18 @@ public final class CypherAggregation extends BaseProc {
 
         interface Cases<R> extends GraphProjectConfig.Cases<R> {
 
-            R cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig);
+            R cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig);
+        }
+
+        interface Visitor extends Cases<Void> {
+
+            @Override
+            default Void cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
+                visit(cypherAggregationConfig);
+                return null;
+            }
+
+            default void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {}
         }
     }
 
