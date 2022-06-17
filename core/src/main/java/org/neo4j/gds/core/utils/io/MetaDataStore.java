@@ -22,10 +22,12 @@ package org.neo4j.gds.core.utils.io;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.utils.io.file.GraphInfo;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
 
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -34,6 +36,7 @@ public interface MetaDataStore {
     GraphInfo graphInfo();
     NodeSchema nodeSchema();
     RelationshipSchema relationshipSchema();
+    Map<String, PropertySchema> graphPropertySchema();
 
     static MetaDataStore of(GraphStore graphStore) {
         var relTypeCounts = graphStore.relationshipTypes().stream().collect(Collectors.toMap(
@@ -46,8 +49,12 @@ public interface MetaDataStore {
             graphStore.nodes().highestNeoId(),
             relTypeCounts
         );
-        NodeSchema nodeSchema = graphStore.schema().nodeSchema();
-        RelationshipSchema relationshipSchema = graphStore.schema().relationshipSchema();
-        return ImmutableMetaDataStore.of(graphInfo, nodeSchema, relationshipSchema);
+        var schema = graphStore.schema();
+        return ImmutableMetaDataStore.of(
+            graphInfo,
+            schema.nodeSchema(),
+            schema.relationshipSchema(),
+            schema.graphProperties()
+        );
     }
 }
