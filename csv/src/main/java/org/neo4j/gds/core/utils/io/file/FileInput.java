@@ -128,7 +128,7 @@ public final class FileInput implements CompatInput {
     }
 
     abstract static class FileImporter<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
         SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
         IDENTIFIER extends ElementIdentifier,
         PROPERTY_SCHEMA extends PropertySchema> implements InputIterator {
@@ -192,7 +192,7 @@ public final class FileInput implements CompatInput {
     }
 
     abstract static class LineChunk<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
         SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
         IDENTIFIER extends ElementIdentifier,
         PROPERTY_SCHEMA extends PropertySchema> implements InputChunk {
