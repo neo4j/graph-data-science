@@ -42,6 +42,7 @@ public interface GraphProjectConfig extends BaseConfig {
     String NODE_COUNT_KEY = "nodeCount";
     String RELATIONSHIP_COUNT_KEY = "relationshipCount";
     String READ_CONCURRENCY_KEY = "readConcurrency";
+    String VALIDATE_RELATIONSHIPS_KEY = "validateRelationships";
 
     @Configuration.Parameter
     @Value.Default
@@ -88,6 +89,7 @@ public interface GraphProjectConfig extends BaseConfig {
 
     @Value.Default
     @Value.Parameter(false)
+    @Configuration.Key(VALIDATE_RELATIONSHIPS_KEY)
     default boolean validateRelationships() {
         return false;
     }
