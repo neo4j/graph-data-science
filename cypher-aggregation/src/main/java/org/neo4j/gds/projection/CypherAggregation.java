@@ -444,7 +444,7 @@ public final class CypherAggregation extends BaseProc {
             buildRelationshipsWithProperties(graphStoreBuilder, nodes);
 
             var graphStore = graphStoreBuilder.build();
-            var config = GraphProjectFromCypherAggregation.of(this.username, graphName);
+            var config = GraphProjectFromCypherAggregationConfig.of(this.username, graphName);
 
             GraphStoreCatalog.set(config, graphStore);
 
@@ -527,7 +527,7 @@ public final class CypherAggregation extends BaseProc {
     @ValueClass
     @Configuration
     @SuppressWarnings("immutables:subtype")
-    public interface GraphProjectFromCypherAggregation extends GraphProjectConfig {
+    public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
 
         @org.immutables.value.Value.Default
         @Configuration.Ignore
@@ -561,8 +561,8 @@ public final class CypherAggregation extends BaseProc {
             );
         }
 
-        static GraphProjectFromCypherAggregation of(String userName, String graphName) {
-            return new GraphProjectFromCypherAggregationImpl(userName, graphName, CypherMapWrapper.empty());
+        static GraphProjectFromCypherAggregationConfig of(String userName, String graphName) {
+            return new GraphProjectFromCypherAggregationConfigImpl(userName, graphName, CypherMapWrapper.empty());
         }
 
         @Override
@@ -576,18 +576,18 @@ public final class CypherAggregation extends BaseProc {
 
         interface Cases<R> extends GraphProjectConfig.Cases<R> {
 
-            R cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig);
+            R cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig);
         }
 
         interface Visitor extends Cases<Void> {
 
             @Override
-            default Void cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig) {
+            default Void cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
                 visit(cypherAggregationConfig);
                 return null;
             }
 
-            default void visit(GraphProjectFromCypherAggregation cypherAggregationConfig) {}
+            default void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {}
         }
     }
 
