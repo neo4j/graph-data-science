@@ -124,6 +124,11 @@ public interface GraphSageTrainConfig extends
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     Optional<Double> maybeBatchSamplingRatio();
 
+    @Configuration.DoubleRange(min = 0)
+    default double penaltyL2() {
+        return 0;
+    }
+
     @Configuration.Ignore
     @Value.Derived
     default int batchesPerIteration(long nodeCount) {

@@ -25,6 +25,7 @@ import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -343,6 +344,31 @@ class GraphSageModelTrainerTest {
 
         // reason: sampling results in more stochastic gradient descent and different losses
         assertThat(trainResultWithoutSampling.metrics().epochLosses().get(0)).isNotEqualTo(trainResultWithSampling.metrics().epochLosses().get(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.01, 26.6", "0.5, 27.4", "1, 28.20"})
+    void l2Penalty(double penalty, double expectedLoss) {
+        var config = this.configBuilder
+            .modelName("penaltyTest")
+            .embeddingDimension(12)
+            .epochs(1)
+            .maxIterations(1)
+            .tolerance(1e-10)
+            .sampleSizes(List.of(5, 3))
+            .penaltyL2(penalty)
+            .batchSize(5)
+            .randomSeed(42L)
+            .build();
+
+        var result = new GraphSageModelTrainer(
+            config,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).train(unweightedGraph, features);
+
+        Offset<Double> offset = Offset.offset(0.05);
+        assertThat((result.metrics().iterationLossPerEpoch().get(0).get(0))).isEqualTo(expectedLoss, offset);
     }
 
     @ParameterizedTest

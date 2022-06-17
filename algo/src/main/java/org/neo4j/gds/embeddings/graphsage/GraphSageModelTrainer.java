@@ -202,20 +202,26 @@ public class GraphSageModelTrainer {
             config.negativeSampleWeight()
         );
 
-        // FIXME add weight-decay parameter
-        double weightDecay = 0.000;
         long originalBatchSize = extendedBatch.length / 3;
 
-        List<Variable<?>> l2penalty = Arrays
-            .stream(layers)
-            .map(layer -> layer.aggregator().weightsWithoutBias())
-            .flatMap(layerWeights -> layerWeights.stream().map(L2NormSquared::new))
-            .collect(Collectors.toList());
+        Variable<Scalar> loss;
+        if (config.penaltyL2() > 0) {
+            List<Variable<?>> l2penalty = Arrays
+                .stream(layers)
+                .map(layer -> layer.aggregator().weightsWithoutBias())
+                .flatMap(layerWeights -> layerWeights.stream().map(L2NormSquared::new))
+                .collect(Collectors.toList());
 
-        var loss = new ElementSum(List.of(
-            unsupervisedLoss,
-            new ConstantScale<>(new ElementSum(l2penalty), weightDecay * originalBatchSize / graph.nodeCount())
-        ));
+            loss = new ElementSum(List.of(
+                unsupervisedLoss,
+                new ConstantScale<>(
+                    new ElementSum(l2penalty),
+                    config.penaltyL2() * originalBatchSize / graph.nodeCount()
+                )
+            ));
+        } else {
+            loss = unsupervisedLoss;
+        }
 
         return new BatchTask(loss, weights, progressTracker);
     }
