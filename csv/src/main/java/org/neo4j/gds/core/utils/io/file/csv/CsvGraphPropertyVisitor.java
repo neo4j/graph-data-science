@@ -35,7 +35,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CsvGraphPropertyVisitor extends GraphPropertyVisitor {
 
-    private static final String GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE = "graph_property_%s_%d.csv";
+    static final String GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE = "graph_property_%s_%d.csv";
     private static final String GRAPH_PROPERTY_HEADER_FILE_NAME_TEMPLATE = "graph_property_%s_header.csv";
 
     private final Path fileLocation;

@@ -327,7 +327,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
             @Override
             public LongStream longValues() {
-                return LongStream.range(0, size());
+                return LongStream.range(0, size()).parallel();
             }
         };
 
@@ -335,6 +335,17 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
         exporter.run();
+
+        assertCsvFiles(
+            LongStream
+                .range(0, config.writeConcurrency())
+                .mapToObj(i -> formatWithLocale(
+                    CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
+                    "graphProp",
+                    i
+                ))
+                .collect(Collectors.toList())
+        );
 
         var exportedValues = Files
             .list(tempDir)
