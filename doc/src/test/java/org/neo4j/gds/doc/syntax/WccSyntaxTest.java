@@ -23,6 +23,6 @@ class WccSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/wcc/wcc.adoc";
+        return "pages/algorithms/wcc.adoc";
     }
 }

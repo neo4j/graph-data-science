@@ -23,6 +23,6 @@ class DegreeCentralitySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/degree-centrality/degree-centrality.adoc";
+        return "pages/algorithms/degree-centrality.adoc";
     }
 }

@@ -23,6 +23,6 @@ class KnnSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/knn.adoc";
+        return "pages/algorithms/knn.adoc";
     }
 }

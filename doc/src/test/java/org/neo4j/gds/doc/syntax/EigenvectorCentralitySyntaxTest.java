@@ -23,7 +23,7 @@ class EigenvectorCentralitySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/eigenvector-centrality/eigenvector-centrality.adoc";
+        return "pages/algorithms/eigenvector-centrality.adoc";
     }
 
 }

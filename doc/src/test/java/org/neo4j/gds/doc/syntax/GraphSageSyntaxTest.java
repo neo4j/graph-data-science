@@ -35,6 +35,6 @@ class GraphSageSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/graph-sage/graph-sage.adoc";
+        return "pages/algorithms/graph-sage.adoc";
     }
 }

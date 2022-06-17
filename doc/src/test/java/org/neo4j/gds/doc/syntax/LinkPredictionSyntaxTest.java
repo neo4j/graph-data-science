@@ -40,6 +40,6 @@ class LinkPredictionSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/linkprediction/linkprediction.adoc";
+        return "pages/algorithms/ml-models/linkprediction.adoc";
     }
 }

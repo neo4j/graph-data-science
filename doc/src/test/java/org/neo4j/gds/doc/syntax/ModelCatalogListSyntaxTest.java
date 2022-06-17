@@ -29,6 +29,6 @@ class ModelCatalogListSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "model-catalog/catalog-model-list.adoc";
+        return "pages/model-catalog/list.adoc";
     }
 }

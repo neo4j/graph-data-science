@@ -23,6 +23,6 @@ class NodeSimilaritySyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/node-similarity/node-similarity.adoc";
+        return "pages/algorithms/node-similarity.adoc";
     }
 }

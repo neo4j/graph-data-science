@@ -45,7 +45,7 @@ import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 @ExtendWith(SoftAssertionsExtension.class)
 public abstract class SyntaxTestBase {
 
-    private static final Path ASCIIDOC_PATH = Paths.get("modules/ROOT/pages");
+    private static final Path ASCIIDOC_PATH = Paths.get("modules/ROOT");
 
     private Asciidoctor asciidoctor;
 

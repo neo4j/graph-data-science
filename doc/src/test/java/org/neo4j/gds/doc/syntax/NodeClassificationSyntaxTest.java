@@ -40,6 +40,6 @@ class NodeClassificationSyntaxTest extends SyntaxTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/nodeclassification/nodeclassification.adoc";
+        return "pages/algorithms/ml-models/node-classification.adoc";
     }
 }
