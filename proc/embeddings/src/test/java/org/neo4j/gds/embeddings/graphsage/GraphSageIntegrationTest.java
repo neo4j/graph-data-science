@@ -113,7 +113,7 @@ class GraphSageIntegrationTest extends GraphSageBaseProcTest {
                     ),
                     "creationTime", isA(ZonedDateTime.class),
                     "trainConfig", allOf(
-                        aMapWithSize(20),
+                        aMapWithSize(21),
                         hasEntry("modelName", modelName),
                         hasEntry("aggregator", "MEAN"),
                         hasEntry("activationFunction", "SIGMOID")

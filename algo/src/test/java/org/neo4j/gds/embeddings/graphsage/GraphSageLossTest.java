@@ -82,12 +82,12 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
     @ParameterizedTest
     @CsvSource({
-        "1, 2.7317010501515524",
-        "4, 7.2713924182831615",
-        "8, 13.324314242458641",
-        "12, 19.37723606663412",
-        "20, 31.48307971498508",
-        "50, 76.87999339630119"
+        "1,   0.9105670167",
+        "4,   2.42379747276",
+        "8,   4.44143808081",
+        "12,  6.45907868887",
+        "20, 10.49435990499",
+        "50, 25.62666446543"
     })
     void shouldComputeLoss(int negativeSamplingFactor, double expectedLoss) {
         var combinedEmbeddings = Constant.matrix(
@@ -191,12 +191,12 @@ class GraphSageLossTest implements FiniteDifferenceTest {
 
         @ParameterizedTest
         @CsvSource({
-            "1, 1.0881440613066096",
-            "4, 3.9896785885315578",
-            "8, 7.858391291498155",
-            "12, 11.727103994464752",
-            "20, 19.464529400397947",
-            "50, 48.47987467264743"
+            "1,   0.5440720306",
+            "4,   1.9948392942",
+            "8,   3.9291956457",
+            "12,  5.8635519972",
+            "20,  9.7322647001",
+            "50, 24.2399373363"
         })
         void shouldComputeOnFilteredGraph(int negativeSamplingFactor, double expectedLoss) {
             var combinedEmbeddings = new Weights<>(new Matrix(

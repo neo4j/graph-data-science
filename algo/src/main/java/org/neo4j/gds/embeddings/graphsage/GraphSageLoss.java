@@ -140,8 +140,10 @@ public class GraphSageLoss extends SingleParentVariable<Matrix, Scalar> {
                     embeddingIdx
                 );
             }
-
         }
+
+        gradientResult.mapInPlace(i -> i / bucketSize);
+
         return gradientResult;
     }
 
