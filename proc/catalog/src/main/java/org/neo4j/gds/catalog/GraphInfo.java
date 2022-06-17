@@ -127,7 +127,7 @@ public class GraphInfo {
 
     static final class Visitor implements
         GraphProjectConfig.Visitor,
-        CypherAggregation.GraphProjectFromCypherAggregation.Visitor {
+        CypherAggregation.GraphProjectFromCypherAggregationConfig.Visitor {
 
         Map<String, Object> configuration = null;
 
@@ -142,7 +142,7 @@ public class GraphInfo {
         }
 
         @Override
-        public void visit(CypherAggregation.GraphProjectFromCypherAggregation cypherAggregationConfig) {
+        public void visit(CypherAggregation.GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
             configuration = cleansed(cypherAggregationConfig.toMap(), cypherAggregationConfig.outputFieldDenylist());
         }
 
