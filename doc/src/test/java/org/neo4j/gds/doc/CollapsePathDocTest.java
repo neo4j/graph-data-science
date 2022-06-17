@@ -36,7 +36,7 @@ class CollapsePathDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/collapse-path/collapse-path.adoc";
+        return "pages/alpha-algorithms/collapse-path.adoc";
     }
 
 }

@@ -48,6 +48,6 @@ class DegreeCentralityDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/degree-centrality/degree-centrality.adoc";
+        return "pages/algorithms/degree-centrality.adoc";
     }
 }

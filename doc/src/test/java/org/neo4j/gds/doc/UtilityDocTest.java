@@ -42,7 +42,7 @@ class UtilityDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/utility-functions.adoc";
+        return "pages/management-ops/utility-functions.adoc";
     }
 
 }

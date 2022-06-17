@@ -33,6 +33,6 @@ public class BfsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/alpha-bfs.adoc";
+        return "pages/algorithms/bfs.adoc";
     }
 }

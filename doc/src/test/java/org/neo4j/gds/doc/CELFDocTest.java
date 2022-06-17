@@ -39,6 +39,6 @@ class CELFDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/influence-maximization/celf.adoc";
+        return "pages/algorithms/influence-maximization/celf.adoc";
     }
 }

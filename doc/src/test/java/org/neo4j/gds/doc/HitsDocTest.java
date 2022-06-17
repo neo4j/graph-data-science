@@ -42,7 +42,7 @@ class HitsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/hits/hits.adoc";
+        return "pages/algorithms/hits.adoc";
     }
 
 }

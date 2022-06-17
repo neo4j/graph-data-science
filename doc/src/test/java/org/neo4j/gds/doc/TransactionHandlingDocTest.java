@@ -37,7 +37,7 @@ class TransactionHandlingDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "production-deployment/transaction-handling.adoc";
+        return "pages/production-deployment/transaction-handling.adoc";
     }
 
 }

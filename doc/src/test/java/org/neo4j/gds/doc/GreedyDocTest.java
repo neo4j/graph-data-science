@@ -39,6 +39,6 @@ class GreedyDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/alpha/influence-maximization/greedy.adoc";
+        return "pages/algorithms/influence-maximization/greedy.adoc";
     }
 }

@@ -49,7 +49,7 @@ public abstract class DocTestBase extends BaseProcTest {
     @TempDir
     File workDir;
 
-    private static final Path ASCIIDOC_PATH = Paths.get("asciidoc");
+    private static final Path ASCIIDOC_PATH = Paths.get("modules/ROOT");
     private List<String> beforeEachQueries;
     private List<String> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;

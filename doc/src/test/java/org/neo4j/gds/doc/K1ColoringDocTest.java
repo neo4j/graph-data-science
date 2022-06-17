@@ -48,7 +48,7 @@ class K1ColoringDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/k1coloring.adoc";
+        return "pages/algorithms/k1coloring.adoc";
     }
 
 }

@@ -50,7 +50,7 @@ class TriangleCountDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/triangle-count/triangle-count.adoc";
+        return "pages/algorithms/triangle-count.adoc";
     }
 
 }

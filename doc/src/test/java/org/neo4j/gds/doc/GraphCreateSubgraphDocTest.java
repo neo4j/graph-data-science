@@ -34,7 +34,7 @@ final class GraphCreateSubgraphDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-create-subgraph.adoc";
+        return "pages/create-subgraph.adoc";
     }
 
 }

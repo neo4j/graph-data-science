@@ -32,6 +32,6 @@ class ModelCatalogListDocTest extends ModelCatalogDocTest {
 
     @Override
     protected String adocFile() {
-        return "model-catalog/catalog-model-list.adoc";
+        return "pages/model-catalog/list.adoc";
     }
 }

@@ -36,6 +36,6 @@ class Node2VecDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "algorithms/beta/node2vec/node2vec.adoc";
+        return "pages/algorithms/node2vec.adoc";
     }
 }

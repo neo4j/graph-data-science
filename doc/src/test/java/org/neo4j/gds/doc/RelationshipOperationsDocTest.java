@@ -48,7 +48,7 @@ final class RelationshipOperationsDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "management-ops/graph-catalog/graph-catalog-relationship-ops.adoc";
+        return "pages/graph-catalog-relationship-ops.adoc";
     }
 
 }
