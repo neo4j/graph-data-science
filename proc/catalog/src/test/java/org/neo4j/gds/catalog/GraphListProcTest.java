@@ -33,6 +33,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.projection.CypherAggregation;
 import org.neo4j.graphdb.Result;
 
 import java.time.ZonedDateTime;
@@ -74,9 +75,11 @@ class GraphListProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
+
             GraphGenerateProc.class,
             GraphListProc.class
         );
+        registerAggregationFunctions(CypherAggregation.class);
         runQuery(DB_CYPHER);
     }
 
@@ -354,6 +357,52 @@ class GraphListProcTest extends BaseProcTest {
 
                     return true;
                 }, "Assert Cypher `configuration` map"),
+                "nodeCount", 2L,
+                "relationshipCount", 1L,
+                "degreeDistribution", map(
+                    "min", 0L,
+                    "mean", 0.5D,
+                    "max", 1L,
+                    "p50", 0L,
+                    "p75", 1L,
+                    "p90", 1L,
+                    "p95", 1L,
+                    "p99", 1L,
+                    "p999", 1L
+                ),
+                "creationTime", isA(ZonedDateTime.class),
+                "modificationTime", isA(ZonedDateTime.class),
+                "memoryUsage", instanceOf(String.class),
+                "sizeInBytes", instanceOf(Long.class),
+                "density", new Condition<>(Double::isFinite, "a finite double")
+            )
+        ));
+    }
+
+    @Test
+    void listCypherAggregation() {
+        String name = "name";
+        runQuery(formatWithLocale("MATCH (n0)-->(n1) WITH gds.alpha.graph.project('%s', n0, n1) AS g RETURN *", name));
+
+        assertCypherResult("CALL gds.graph.list()", singletonList(
+            map(
+                "graphName", name,
+                "database", "neo4j",
+                "schema", map(
+                    "nodes", map(ALL_NODES.name, map()),
+                    "relationships", map(),
+                    "graphProperties", map()
+                ),
+                "configuration", new Condition<>(config -> {
+                    assertThat(config)
+                        .asInstanceOf(stringObjectMapAssertFactory())
+                        .hasSize(3)
+                        .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
+                        .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull());
+
+                    return true;
+                }, "Assert Cypher Aggregation `configuration` map"),
                 "nodeCount", 2L,
                 "relationshipCount", 1L,
                 "degreeDistribution", map(
