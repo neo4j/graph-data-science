@@ -32,4 +32,5 @@ public interface KmeansResult {
 
     double[][] centers();
 
+    double averageDistanceToCentroid();
 }

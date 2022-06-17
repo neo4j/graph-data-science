@@ -117,7 +117,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCenters[i] = nodePropertyValues.doubleArrayValue(i);
             }
-            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters);
+            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0);
         }
         long nodeCount = graph.nodeCount();
 
@@ -186,11 +186,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 .tasks(tasks)
                 .executor(executorService)
                 .run();
-            if (restartIteration > 1) {
-                double distanceFromClusterCentre = 0;
-                for (KmeansTask task : tasks) {
-                    distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
-                }
+            double distanceFromClusterCentre = 0;
+            for (KmeansTask task : tasks) {
+                distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
+            }
+            if (restartIteration >= 1) {
                 if (distanceFromClusterCentre < bestDistance) {
                     bestDistance = distanceFromClusterCentre;
                     ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
@@ -203,10 +203,12 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 bestCommunities = currentCommunities;
                 distanceFromCenter = currentDistanceFromCenter;
                 bestCenters = clusterManager.getCenters();
+                bestDistance = distanceFromClusterCentre;
+
             }
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters);
+        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance);
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {

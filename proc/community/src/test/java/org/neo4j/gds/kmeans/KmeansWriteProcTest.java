@@ -31,6 +31,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -84,7 +85,8 @@ class KmeansWriteProcTest extends BaseProcTest {
                     "writeMillis",
                     "nodePropertiesWritten",
                     "configuration",
-                    "centroids"
+                    "centroids",
+                    "averageDistanceToCentroid"
                 );
 
             var softAssertions = new SoftAssertions();
@@ -128,6 +130,10 @@ class KmeansWriteProcTest extends BaseProcTest {
                 .isNotNull()
                 .asInstanceOf(MAP)
                 .isNotEmpty();
+
+            softAssertions.assertThat(resultRow.get("averageDistanceToCentroid"))
+                .isNotNull()
+                .asInstanceOf(DOUBLE);
 
             var centroids = resultRow.get("centroids");
             softAssertions.assertThat(centroids)

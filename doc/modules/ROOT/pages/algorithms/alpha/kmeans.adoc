@@ -85,6 +85,7 @@ YIELD
   postProcessingMillis: Integer,
   communityDistribution: Map,
   centroids: List of List of Float,
+  averageDistanceToCentroid: Float,
   configuration: Map
 ----
 
@@ -107,6 +108,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
+| averageDistanceToCentroid | Float| Average distance between node and centroid.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -128,6 +130,7 @@ YIELD
   nodePropertiesWritten: Integer,
   communityDistribution: Map,
   centroids: List of List of Float,
+  averageDistanceToCentroid: Float,
   configuration: Map
 
 ----
@@ -153,6 +156,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
+| averageDistanceToCentroid | Float | Average distance between node and centroid.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -175,6 +179,7 @@ YIELD
   nodePropertiesWritten: Integer,
   communityDistribution: Map,
   centroids: List of List of Float,
+  averageDistanceToCentroid: Float,
   configuration: Map
 ----
 
@@ -199,6 +204,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
+| averageDistanceToCentroid | Float | Average distance between node and centroid.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======

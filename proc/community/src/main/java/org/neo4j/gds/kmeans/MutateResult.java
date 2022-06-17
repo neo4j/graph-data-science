@@ -39,6 +39,7 @@ public class MutateResult extends StatsResult {
         long nodePropertiesWritten,
         @Nullable Map<String, Object> communityDistribution,
         @Nullable List<List<Double>> centroids,
+        @Nullable double averageDistanceToCentroid,
         Map<String, Object> configuration
     ) {
         super(
@@ -47,6 +48,7 @@ public class MutateResult extends StatsResult {
             postProcessingMillis,
             communityDistribution,
             centroids,
+            averageDistanceToCentroid,
             configuration
         );
         this.mutateMillis = mutateMillis;
@@ -55,6 +57,7 @@ public class MutateResult extends StatsResult {
 
     static class Builder extends AbstractCommunityResultBuilder<MutateResult> {
         private List<List<Double>> centroids;
+        private double averageDistanceToCentroid;
 
         Builder(
             ProcedureCallContext context,
@@ -73,12 +76,18 @@ public class MutateResult extends StatsResult {
                 nodePropertiesWritten,
                 communityHistogramOrNull(),
                 centroids,
+                averageDistanceToCentroid,
                 config.toMap()
             );
         }
 
         public Builder withCentroids(List<List<Double>> listCenters) {
             this.centroids = listCenters;
+            return this;
+        }
+
+        public Builder withAverageDistanceToCentroid(double averageDistanceToCentroid) {
+            this.averageDistanceToCentroid = averageDistanceToCentroid;
             return this;
         }
     }

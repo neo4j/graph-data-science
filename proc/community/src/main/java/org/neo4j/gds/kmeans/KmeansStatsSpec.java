@@ -65,6 +65,9 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                         .result()
                         .centers()));
                 }
+                if (executionContext.containsOutputField("averageDistanceToCentroid")) {
+                    builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
+                }
                 builder.withCommunityFunction(computationResult.result().communities()::get)
                     .withPreProcessingMillis(computationResult.preProcessingMillis())
                     .withComputeMillis(computationResult.computeMillis())

@@ -83,6 +83,9 @@ class KmeansTest {
         var communities = result.communities();
         var distances = result.distanceFromCenter();
         var centers = result.centers();
+
+        var averageDistance = result.averageDistanceToCentroid();
+
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
         assertThat(communities.get(2)).isEqualTo(communities.get(3));
         assertThat(communities.get(0)).isNotEqualTo(communities.get(2));
@@ -95,6 +98,8 @@ class KmeansTest {
         assertThat(centers[0]).isEqualTo(new double[]{1.0, 1.5});
         assertThat(centers[1]).isEqualTo(new double[]{101, 101});
 
+        //distances are  anyway checked above, so we just take their mean as one last confirmation
+        assertThat(averageDistance).isCloseTo(distances.stream().sum() / 4.0, Offset.offset(1e-4));
     }
 
     @Test

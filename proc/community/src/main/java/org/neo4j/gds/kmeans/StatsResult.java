@@ -31,17 +31,20 @@ public class StatsResult extends StandardStatsResult {
 
     public final Map<String, Object> communityDistribution;
     public final List<List<Double>> centroids;
+    public final double averageDistanceToCentroid;
     public StatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         @Nullable Map<String, Object> communityDistribution,
         @Nullable List<List<Double>> centroids,
+        @Nullable double averageDistanceToCentroid,
         Map<String, Object> configuration
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.communityDistribution = communityDistribution;
         this.centroids = centroids;
+        this.averageDistanceToCentroid = averageDistanceToCentroid;
     }
 
     static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
@@ -50,7 +53,7 @@ public class StatsResult extends StandardStatsResult {
         }
 
         private List<List<Double>> centroids;
-
+        private double averageDistanceToCentroid;
         @Override
         public StatsResult buildResult() {
             return new StatsResult(
@@ -59,12 +62,18 @@ public class StatsResult extends StandardStatsResult {
                 postProcessingDuration,
                 communityHistogramOrNull(),
                 centroids,
+                averageDistanceToCentroid,
                 config.toMap()
             );
         }
 
         public Builder withCentroids(List<List<Double>> listCenters) {
             this.centroids = listCenters;
+            return this;
+        }
+
+        public Builder withAverageDistanceToCentroid(double averageDistanceToCentroid) {
+            this.averageDistanceToCentroid = averageDistanceToCentroid;
             return this;
         }
     }
