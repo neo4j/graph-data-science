@@ -25,17 +25,26 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collections.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.loading.ArrayIdMap;
+import org.neo4j.gds.core.loading.LabelInformation;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.Intersections;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,9 +55,11 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.ml.util.ShuffleUtil;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -609,4 +620,97 @@ class FastRPTest extends BaseTest {
         return extractedResult;
     }
 
+    @Test
+    void shouldBeDeterministicGivenSameOriginalIds() {
+        long nodeCount = 1000;
+        int embeddingDimension = 32;
+        long degree = 4;
+
+        var firstMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        firstMappedToOriginal.setAll(nodeId -> nodeId);
+        var firstOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            firstOriginalToMappedBuilder.set(nodeId, nodeId);
+        }
+        var firstIdMap = new ArrayIdMap(
+            firstMappedToOriginal,
+            firstOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, firstMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder firstRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(firstIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
+        secondMappedToOriginal.setAll(nodeId -> nodeId);
+
+        var gen = ShuffleUtil.createRandomDataGenerator(Optional.of(42L));
+        ShuffleUtil.shuffleHugeLongArray(secondMappedToOriginal, gen);
+        var secondOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);
+        }
+
+        var secondIdMap = new ArrayIdMap(
+            secondMappedToOriginal,
+            secondOriginalToMappedBuilder.build(),
+            LabelInformation.single(new NodeLabel("hello")).build(nodeCount, secondMappedToOriginal::get),
+            nodeCount,
+            nodeCount - 1
+        );
+        RelationshipsBuilder secondRelationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(secondIdMap)
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(Pools.DEFAULT)
+            .build();
+
+        var random = new SplittableRandom(42);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            for (int j = 0; j < degree; j++) {
+                long target = random.nextLong(nodeCount);
+                firstRelationshipsBuilder.add(nodeId, target);
+                secondRelationshipsBuilder.add(nodeId, target);
+            }
+        }
+
+        var firstRelationships = firstRelationshipsBuilder.build();
+        var secondRelationships = secondRelationshipsBuilder.build();
+
+        var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
+        var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
+
+        var config = ImmutableFastRPBaseConfig
+            .builder()
+            .embeddingDimension(embeddingDimension)
+            .concurrency(1)
+            .randomSeed(1337L)
+            .build();
+
+        var firstEmbeddings = new FastRP(
+            firstGraph,
+            config,
+            List.of(),
+            ProgressTracker.NULL_TRACKER
+        ).compute().embeddings();
+
+        var secondEmbeddings = new FastRP(
+            secondGraph,
+            config,
+            List.of(),
+            ProgressTracker.NULL_TRACKER
+        ).compute().embeddings();
+
+        double cosineSum = 0;
+        for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
+            var firstVector = firstEmbeddings.get(firstGraph.toMappedNodeId(originalNodeId));
+            var secondVector = secondEmbeddings.get(secondGraph.toMappedNodeId(originalNodeId));
+            double cosine = Intersections.cosine(firstVector, secondVector, secondVector.length);
+            cosineSum += cosine;
+        }
+        assertThat(cosineSum / nodeCount).isCloseTo(1, Offset.offset(0.000001));
+    }
 }
