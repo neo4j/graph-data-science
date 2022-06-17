@@ -59,7 +59,7 @@ public class F1Weighted implements ClassificationMetric {
                 var weight = globalClassCounts.count(idMap.key);
                 return weight * new F1Score(idMap.key, idMap.value).compute(targets, predictions);
             });
-        return weightedScores.sum() / globalClassCounts.size();
+        return weightedScores.sum() / predictions.size();
     }
 
     @Override

@@ -50,7 +50,7 @@ class F1WeightedTest {
 
         classCounts = new LongMultiSet();
         for (long target : originalTargets.toArray()) {
-            classCounts.add(target, 2L);
+            classCounts.add(target);
         }
         localIdMap = LocalIdMap.ofSorted(classCounts.keys());
 
