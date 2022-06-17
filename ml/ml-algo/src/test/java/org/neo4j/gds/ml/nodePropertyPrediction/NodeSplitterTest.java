@@ -77,11 +77,11 @@ class NodeSplitterTest {
 
     @NotNull
     private NodeSplitter.NodeSplits makeSplits(List<Long> originalIds) {
-        var toMappedIds = new long[12];
+        int numberOfExamples = originalIds.size();
+        var toMappedIds = new long[numberOfExamples];
         for (int i = 0; i < originalIds.size(); i++) {
             toMappedIds[Math.toIntExact(originalIds.get(i))] = i;
         }
-        int numberOfExamples = 12;
         var splitter = new NodeSplitter(
             4,
             numberOfExamples,
