@@ -249,6 +249,8 @@ class Node2VecTest extends BaseTest {
         );
     }
 
+    // Run the algorithm with the exact same configuration on two graphs that are exactly the same, except their node id map
+    // has been shuffled. The results should still be similar.
     @Test
     void shouldBeFairlyConsistentUnderOriginalIds() {
         long nodeCount = 1000;
@@ -261,6 +263,8 @@ class Node2VecTest extends BaseTest {
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             firstOriginalToMappedBuilder.set(nodeId, nodeId);
         }
+        // We create an IdMap explicitly instead of using a NodesBuilder in order to be sure that the id maps of the
+        // graphs we produce are very different.
         var firstIdMap = new ArrayIdMap(
             firstMappedToOriginal,
             firstOriginalToMappedBuilder.build(),
