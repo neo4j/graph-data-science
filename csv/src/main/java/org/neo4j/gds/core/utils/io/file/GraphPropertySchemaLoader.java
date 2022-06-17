@@ -25,64 +25,56 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor;
-import org.neo4j.gds.core.utils.io.file.schema.RelationshipSchemaBuilderVisitor;
+import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.utils.io.file.csv.CsvGraphPropertySchemaVisitor;
+import org.neo4j.gds.core.utils.io.file.schema.GraphPropertySchemaBuilderVisitor;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 
-public class RelationshipSchemaLoader {
+public class GraphPropertySchemaLoader {
 
     private final ObjectReader objectReader;
-    private final Path relationshipSchemaPath;
+    private final Path graphPropertySchemaPath;
 
-    RelationshipSchemaLoader(Path csvDirectory) {
-        this.relationshipSchemaPath = csvDirectory.resolve(CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME);
-        CsvMapper csvMapper = new CsvMapper();
+    GraphPropertySchemaLoader(Path csvDirectory) {
+        this.graphPropertySchemaPath = csvDirectory.resolve(CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME);
+        var csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);
         CsvSchema schema = CsvSchema.emptySchema().withHeader();
-        objectReader = csvMapper.readerFor(SchemaLine.class).with(schema);
+        this.objectReader = csvMapper.readerFor(PropertySchemaLine.class).with(schema);
     }
 
-    RelationshipSchema load() {
-        var schemaBuilder = new RelationshipSchemaBuilderVisitor();
+    Map<String, PropertySchema> load() {
+        var schemaBuilder = new GraphPropertySchemaBuilderVisitor();
 
-        try (var reader = new BufferedReader(new FileReader(relationshipSchemaPath.toFile(), StandardCharsets.UTF_8))) {
-            var linesIterator = objectReader.<SchemaLine>readValues(reader);
+        try (var reader = Files.newBufferedReader(graphPropertySchemaPath, StandardCharsets.UTF_8)) {
+            var linesIterator = objectReader.<PropertySchemaLine>readValues(reader);
             while (linesIterator.hasNext()) {
                 var schemaLine = linesIterator.next();
-                schemaBuilder.relationshipType(schemaLine.relationshipType);
-                if (schemaLine.propertyKey != null) {
-                    schemaBuilder.key(schemaLine.propertyKey);
-                    schemaBuilder.valueType(schemaLine.valueType);
-                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
-                    schemaBuilder.state(schemaLine.state);
-                    schemaBuilder.aggregation(schemaLine.aggregation);
-                }
+                schemaBuilder.key(schemaLine.propertyKey);
+                schemaBuilder.valueType(schemaLine.valueType);
+                schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                schemaBuilder.state(schemaLine.state);
+
                 schemaBuilder.endOfEntity();
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new UncheckedIOException(e);
         }
 
         schemaBuilder.close();
         return schemaBuilder.schema();
     }
 
-    public static class SchemaLine {
-
-        @JsonProperty
-        @JsonDeserialize(converter = JacksonConverters.RelationshipTypeConverter.class)
-        RelationshipType relationshipType;
+    public static class PropertySchemaLine {
 
         @JsonProperty
         String propertyKey;
@@ -94,9 +86,6 @@ public class RelationshipSchemaLoader {
         @JsonProperty
         @JsonDeserialize(converter = JacksonConverters.DefaultValueConverter.class)
         String defaultValue;
-
-        @JsonProperty
-        Aggregation aggregation;
 
         @JsonProperty
         PropertyState state;

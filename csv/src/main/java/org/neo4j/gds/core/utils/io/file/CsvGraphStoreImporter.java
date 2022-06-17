@@ -146,6 +146,7 @@ public final class CsvGraphStoreImporter {
 
         var nodes = importNodes(fileInput);
         importRelationships(fileInput, nodes);
+        importGraphProperties(fileInput);
     }
 
     private IdMap importNodes(
@@ -212,6 +213,10 @@ public final class CsvGraphStoreImporter {
         graphStoreBuilder.relationshipPropertyStores(relationships.properties());
 
         progressTracker.endSubTask();
+    }
+
+    private void importGraphProperties(FileInput fileInput) {
+        graphSchemaBuilder.graphProperties(fileInput.graphPropertySchema());
     }
 
     static RelationshipTopologyAndProperties relationshipTopologyAndProperties(

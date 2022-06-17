@@ -61,6 +61,7 @@ public final class FileInput implements CompatInput {
     private final GraphInfo graphInfo;
     private final NodeSchema nodeSchema;
     private final RelationshipSchema relationshipSchema;
+    private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
 
     FileInput(Path importPath) {
@@ -69,6 +70,7 @@ public final class FileInput implements CompatInput {
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
+        this.graphPropertySchema = new GraphPropertySchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
     }
 
@@ -121,6 +123,10 @@ public final class FileInput implements CompatInput {
 
     public RelationshipSchema relationshipSchema() {
         return relationshipSchema;
+    }
+
+    public Map<String, PropertySchema> graphPropertySchema() {
+        return graphPropertySchema;
     }
 
     public Capabilities capabilities() {
