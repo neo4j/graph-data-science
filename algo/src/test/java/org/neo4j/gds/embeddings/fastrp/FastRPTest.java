@@ -627,12 +627,10 @@ class FastRPTest extends BaseTest {
         long degree = 4;
 
         var firstMappedToOriginal = HugeLongArray.newArray(nodeCount);
-        for (long i = 0; i < nodeCount; i++) {
-            firstMappedToOriginal.set(i, i);
-        }
+        firstMappedToOriginal.setAll(nodeId -> nodeId);
         var firstOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
-        for (long i = 0; i < nodeCount; i++) {
-            firstOriginalToMappedBuilder.set(i, i);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            firstOriginalToMappedBuilder.set(nodeId, nodeId);
         }
         var firstIdMap = new ArrayIdMap(
             firstMappedToOriginal,
@@ -648,15 +646,13 @@ class FastRPTest extends BaseTest {
             .build();
 
         var secondMappedToOriginal = HugeLongArray.newArray(nodeCount);
-        for (long i = 0; i < nodeCount; i++) {
-            secondMappedToOriginal.set(i, i);
-        }
+        secondMappedToOriginal.setAll(nodeId -> nodeId);
 
         var gen = ShuffleUtil.createRandomDataGenerator(Optional.of(42L));
         ShuffleUtil.shuffleHugeLongArray(secondMappedToOriginal, gen);
         var secondOriginalToMappedBuilder = HugeSparseLongArray.builder(nodeCount);
-        for (long i = 0; i < nodeCount; i++) {
-            secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(i), i);
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+            secondOriginalToMappedBuilder.set(secondMappedToOriginal.get(nodeId), nodeId);
         }
 
         var secondIdMap = new ArrayIdMap(
@@ -673,11 +669,11 @@ class FastRPTest extends BaseTest {
             .build();
 
         var random = new SplittableRandom(42);
-        for (long i = 0; i < nodeCount; i++) {
+        for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
             for (int j = 0; j < degree; j++) {
                 long target = random.nextLong(nodeCount);
-                firstRelationshipsBuilder.add(i, target);
-                secondRelationshipsBuilder.add(i, target);
+                firstRelationshipsBuilder.add(nodeId, target);
+                secondRelationshipsBuilder.add(nodeId, target);
             }
         }
 
@@ -709,7 +705,7 @@ class FastRPTest extends BaseTest {
         ).compute().embeddings();
 
         double cosineSum = 0;
-        for (long originalNodeId = 0; originalNodeId < firstGraph.nodeCount(); originalNodeId++) {
+        for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
             var firstVector = firstEmbeddings.get(firstGraph.toMappedNodeId(originalNodeId));
             var secondVector = secondEmbeddings.get(secondGraph.toMappedNodeId(originalNodeId));
             double cosine = Intersections.cosine(firstVector, secondVector, secondVector.length);
