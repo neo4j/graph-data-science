@@ -125,7 +125,9 @@ public class GraphInfo {
         );
     }
 
-    static final class Visitor implements CypherAggregation.GraphProjectFromCypherAggregation.Visitor {
+    static final class Visitor implements
+        GraphProjectConfig.Visitor,
+        CypherAggregation.GraphProjectFromCypherAggregation.Visitor {
 
         Map<String, Object> configuration = null;
 
