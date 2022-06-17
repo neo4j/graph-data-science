@@ -579,7 +579,7 @@ public final class CypherAggregation extends BaseProc {
             R cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig);
         }
 
-        interface Visitor extends GraphProjectConfig.Visitor, Cases<Void> {
+        interface Visitor extends Cases<Void> {
 
             @Override
             default Void cypherAggregation(GraphProjectFromCypherAggregation cypherAggregationConfig) {

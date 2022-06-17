@@ -379,12 +379,11 @@ class GraphListProcTest extends BaseProcTest {
 
     @Test
     void listCypherAggregation() {
-        String name = "name";
-        runQuery(formatWithLocale("MATCH (n0)-->(n1) WITH gds.alpha.graph.project('%s', n0, n1) AS g RETURN *", name));
+        runQuery("MATCH (n0)-->(n1) WITH gds.alpha.graph.project('g', n0, n1) AS g RETURN *");
 
         assertCypherResult("CALL gds.graph.list()", singletonList(
             map(
-                "graphName", name,
+                "graphName", "g",
                 "database", "neo4j",
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
