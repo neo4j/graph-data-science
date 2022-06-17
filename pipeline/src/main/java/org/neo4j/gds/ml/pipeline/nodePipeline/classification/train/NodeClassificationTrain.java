@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -80,7 +81,7 @@ public final class NodeClassificationTrain {
     private final Features features;
     private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
-    private final Graph graph;
+    private final IdMap nodeIdMap;
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
     private final Multiset<Long> classCounts;
@@ -256,14 +257,14 @@ public final class NodeClassificationTrain {
         Features features,
         HugeIntArray labels,
         LocalIdMap classIdMap,
-        Graph graph,
+        IdMap nodeIdMap,
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
         Multiset<Long> classCounts,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        this.graph = graph;
+        this.nodeIdMap = nodeIdMap;
         this.classificationMetrics = classificationMetrics;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
@@ -282,8 +283,8 @@ public final class NodeClassificationTrain {
             trainConfig.concurrency(),
             features.size(),
             progressTracker,
-            graph::toOriginalNodeId,
-            graph::toMappedNodeId
+            nodeIdMap::toOriginalNodeId,
+            nodeIdMap::toMappedNodeId
         ).split(
             splitConfig.testFraction(),
             splitConfig.validationFolds(),

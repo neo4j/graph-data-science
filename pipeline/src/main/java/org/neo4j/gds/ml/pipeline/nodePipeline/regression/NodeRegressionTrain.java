@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -54,7 +55,7 @@ public final class NodeRegressionTrain {
 
     private final Features features;
     private final HugeDoubleArray targets;
-    private final Graph graph;
+    private final IdMap nodeIdMap;
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
@@ -113,13 +114,13 @@ public final class NodeRegressionTrain {
         NodeRegressionPipelineTrainConfig trainConfig,
         Features features,
         HugeDoubleArray targets,
-        Graph graph,
+        IdMap nodeIdMap,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
-        this.graph = graph;
+        this.nodeIdMap = nodeIdMap;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.features = features;
@@ -132,8 +133,8 @@ public final class NodeRegressionTrain {
             trainConfig.concurrency(),
             features.size(),
             progressTracker,
-            graph::toOriginalNodeId,
-            graph::toMappedNodeId
+            nodeIdMap::toOriginalNodeId,
+            nodeIdMap::toMappedNodeId
         ).split(
             splitConfig.testFraction(),
             splitConfig.validationFolds(),
