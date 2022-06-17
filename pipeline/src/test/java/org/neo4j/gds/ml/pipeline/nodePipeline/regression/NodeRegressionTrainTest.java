@@ -61,7 +61,7 @@ import static org.neo4j.gds.compat.TestLog.INFO;
 @GdlExtension
 class NodeRegressionTrainTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset=42)
     private static final String DB_QUERY =
         "({scalar: 1.5,     target:   3 })," +
         "({scalar: 2.5,     target:   5 })," +

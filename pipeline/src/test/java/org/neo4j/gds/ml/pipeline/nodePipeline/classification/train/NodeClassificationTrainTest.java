@@ -69,7 +69,7 @@ import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 @GdlExtension
 class NodeClassificationTrainTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset=42)
     private static final String DB_QUERY =
         "CREATE " +
         "  (:N {bananas: 100.0, arrayProperty: [1.2, 1.2], a: 1.2, b: 1.2, t: 0})" +

@@ -90,7 +90,7 @@ class LinkPredictionTrainTest {
                           "(n:N {scalar: 3, array: [1.0, -2.0, 3.0, 2.0, 3.0]}), " +
                           "(o:N {scalar: 2, array: [-3.0, 3.0, -1.0, -1.0, 1.0]}), ";
 
-    @GdlGraph(graphNamePrefix = "train")
+    @GdlGraph(graphNamePrefix = "train", idOffset = 42)
     static String GRAPH =
         "CREATE " +
         NODES +
