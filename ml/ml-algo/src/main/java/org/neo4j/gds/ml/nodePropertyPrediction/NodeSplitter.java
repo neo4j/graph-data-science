@@ -58,9 +58,10 @@ public final class NodeSplitter {
 
     public NodeSplits split(double testFraction, int validationFolds, Optional<Long> randomSeed) {
         var allTrainingExamples = HugeLongArray.newArray(numberOfExamples);
+        // sorting the internal id's by the corresponding originalIds makes this deterministic
+        // based on the original node-id space -- supporting different graph-projections
         allTrainingExamples.setAll(toOriginalId);
         HugeMergeSort.sort(allTrainingExamples, concurrency);
-        // apply operator to value, not to index
         allTrainingExamples.setAll(i -> toMappedId.applyAsLong(allTrainingExamples.get(i)));
 
         ShuffleUtil.shuffleHugeLongArray(allTrainingExamples, createRandomDataGenerator(randomSeed));
