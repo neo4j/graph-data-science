@@ -107,7 +107,7 @@ public class CsvGraphPropertyVisitor extends GraphPropertyVisitor {
         try (var headerAppender = fileAppender(fileLocation.resolve(headerFileName), propertySchema)) {
             var propertyHeader = formatWithLocale(
                 "%s:%s",
-                propertySchema.key() ,
+                propertySchema.key(),
                 propertySchema.valueType().csvName()
             );
 
