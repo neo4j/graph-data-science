@@ -63,7 +63,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
 
     @Override
     public MLPClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
-        var data = MLPClassifierData.create(numberOfClasses, features.featureDimension());
+        var data = MLPClassifierData.create(numberOfClasses, features.featureDimension(), true);
         var classifier = new MLPClassifier(data);
         var objective = new MLPClassifierObjective(classifier, features, labels);
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
