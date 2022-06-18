@@ -26,24 +26,39 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.util.Random;
+
 @ValueClass
 public interface MLPClassifierData extends Classifier.ClassifierData {
 
     //1 hidden layer with fixed size
     Weights<Matrix> inputWeights();
+
     Weights<Matrix> outputWeights();
+
     Weights<Vector> inputBias();
+
     Weights<Vector> outputBias();
 
-    default TrainingMethod trainerMethod() { return TrainingMethod.MLPClassification; }
+    default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
     //TODO Check indexing same with common libraries
-    static MLPClassifierData create(int classCount, int featureCount) {
-        var inputWeights = Weights.ofMatrix(featureCount, featureCount);
-        var outputWeights = Weights.ofMatrix(classCount, featureCount);
-        var inputBias =  new Weights<>(new Vector(featureCount));
-        var outputBias = new Weights<>(new Vector(classCount));
-
+    static MLPClassifierData create(int classCount, int featureCount, boolean initializeWeights) {
+        Weights<Matrix> inputWeights;
+        Weights<Matrix> outputWeights;
+        Weights<Vector> inputBias;
+        Weights<Vector> outputBias;
+        if (initializeWeights) {
+            inputWeights = generateWeights(featureCount,featureCount,42L);
+            outputWeights = generateWeights(classCount,featureCount,42L);
+            inputBias = new Weights<>(Vector.create(0.1,featureCount));
+            outputBias = new Weights<>(Vector.create(0.1,classCount));
+        } else {
+            inputWeights = Weights.ofMatrix(featureCount, featureCount);
+            outputWeights = Weights.ofMatrix(classCount, featureCount);
+            inputBias = new Weights<>(new Vector(featureCount));
+            outputBias = new Weights<>(new Vector(classCount));
+        }
 
         return ImmutableMLPClassifierData
             .builder()
@@ -56,7 +71,17 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
             .build();
     }
 
+    //TODO: Refactor to use LayerFactory and ActivationFunction in algo.embeddings.graphsage
+    private static Weights<Matrix> generateWeights(int rows, int cols, long randomSeed) {
+        var weightBound = Math.sqrt(2d / cols);
+        double[] data = new Random(randomSeed)
+            .doubles(Math.multiplyExact(rows, cols), -weightBound, weightBound)
+            .toArray();
 
-
-
+        return new Weights<>(new Matrix(
+            data,
+            rows,
+            cols
+        ));
+    }
 }

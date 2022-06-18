@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.models.mlp;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 
 import java.util.Map;
 
@@ -30,7 +29,7 @@ class MLPClassifierTrainConfigTest {
 
     @Test
     void failOnUnexpectedKeys() {
-        assertThatThrownBy(() -> LogisticRegressionTrainConfig.of(Map.of("wrongkey1", 615, "wrongkey2", "value2")))
+        assertThatThrownBy(() -> MLPClassifierTrainConfig.of(Map.of("wrongkey1", 615, "wrongkey2", "value2")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration keys: wrongkey1, wrongkey2");
     }

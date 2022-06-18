@@ -27,7 +27,7 @@ class MLPClassifierDataTest {
 
     @Test
     void shouldCreateData() {
-        var data = MLPClassifierData.create(3, 4);
+        var data = MLPClassifierData.create(3, 4, false);
         var inputMatrix = data.inputWeights().data();
         var outputMatrix = data.outputWeights().data();
         var inputBias = data.inputBias().data();

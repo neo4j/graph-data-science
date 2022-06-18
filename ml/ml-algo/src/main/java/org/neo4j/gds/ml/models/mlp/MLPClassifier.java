@@ -44,7 +44,6 @@ public final class MLPClassifier implements Classifier {
         Constant<Matrix> featuresVariable = Constant.matrix(features, 1, features.length);
         Variable<Matrix> predictionsVariable = predictionsVariable(featuresVariable);
         var steps = ctx.forward(predictionsVariable).data();
-        //System.out.println(ctx.render());
         return steps;
     }
 
