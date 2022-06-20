@@ -46,6 +46,7 @@ import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public final class GraphStoreInput implements CompatInput {
     private final NodeStore nodeStore;
     private final RelationshipStore relationshipStore;
 
-    private final GraphPropertyStore graphPropertyStore;
+    private final Set<GraphProperty> graphProperties;
     private final int batchSize;
     private final IdMapFunction idMapFunction;
     private final IdMode idMode;
@@ -116,7 +117,7 @@ public final class GraphStoreInput implements CompatInput {
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         Capabilities capabilities,
-        GraphPropertyStore graphPropertyStore,
+        Set<GraphProperty> graphProperties,
         int batchSize,
         GraphStoreExporter.IdMappingType idMappingType
     ) {
@@ -141,9 +142,9 @@ public final class GraphStoreInput implements CompatInput {
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("The range of original ids specified in the graph exceeds the limit", e);
             }
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, graphPropertyStore, batchSize, idMappingType, IdMode.MAPPING);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, graphProperties, batchSize, idMappingType, IdMode.MAPPING);
         } else {
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, graphPropertyStore, batchSize, idMappingType, IdMode.ACTUAL);
+            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, graphProperties, batchSize, idMappingType, IdMode.ACTUAL);
         }
     }
 
@@ -152,7 +153,7 @@ public final class GraphStoreInput implements CompatInput {
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         Capabilities capabilities,
-        GraphPropertyStore graphPropertyStore,
+        Set<GraphProperty> graphProperties,
         int batchSize,
         IdMapFunction idMapFunction,
         IdMode idMode
@@ -160,7 +161,7 @@ public final class GraphStoreInput implements CompatInput {
         this.metaDataStore = metaDataStore;
         this.nodeStore = nodeStore;
         this.relationshipStore = relationshipStore;
-        this.graphPropertyStore = graphPropertyStore;
+        this.graphProperties = graphProperties;
         this.batchSize = batchSize;
         this.idMapFunction = idMapFunction;
         this.idMode = idMode;
@@ -212,7 +213,7 @@ public final class GraphStoreInput implements CompatInput {
     }
 
     public InputIterable graphProperties() {
-        return () -> new GraphPropertyIterator(graphPropertyStore);
+        return () -> new GraphPropertyIterator(graphProperties.iterator());
     }
 
     static class GraphPropertyIterator implements InputIterator {
@@ -221,8 +222,8 @@ public final class GraphStoreInput implements CompatInput {
         private @Nullable String currentPropertyName;
         private @Nullable SpliteratorTaskSupplier<Object> currentPropertyValuesSupplier;
 
-        GraphPropertyIterator(GraphPropertyStore graphPropertyStore) {
-            this.graphPropertyIterator = graphPropertyStore.graphPropertyIterator();
+        GraphPropertyIterator(Iterator<GraphProperty> graphPropertyIterator) {
+            this.graphPropertyIterator = graphPropertyIterator;
         }
 
         @Override
