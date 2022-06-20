@@ -253,4 +253,6 @@ public interface Neo4jProxyApi {
     );
 
     NamedDatabaseId randomDatabaseId();
+
+    ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor);
 }
