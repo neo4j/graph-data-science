@@ -385,6 +385,10 @@ public final class Neo4jProxy {
         return IMPL.randomDatabaseId();
     }
 
+    public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
+        return IMPL.executionMonitor(compatExecutionMonitor);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

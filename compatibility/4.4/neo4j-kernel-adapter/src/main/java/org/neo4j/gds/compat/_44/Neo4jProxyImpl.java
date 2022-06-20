@@ -29,6 +29,7 @@ import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -56,6 +57,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
@@ -113,6 +115,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -553,5 +556,40 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public NamedDatabaseId randomDatabaseId() {
         return TestDatabaseIdRepository.randomNamedDatabaseId();
+    }
+
+    @Override
+    public ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
+        return new ExecutionMonitor.Adapter(
+            compatExecutionMonitor.clock(),
+            compatExecutionMonitor.checkIntervalMillis(),
+            TimeUnit.MILLISECONDS
+        ) {
+
+            @Override
+            public void initialize(DependencyResolver dependencyResolver) {
+                compatExecutionMonitor.initialize(dependencyResolver);
+            }
+
+            @Override
+            public void start(StageExecution execution) {
+                compatExecutionMonitor.start(execution);
+            }
+
+            @Override
+            public void end(StageExecution execution, long totalTimeMillis) {
+                compatExecutionMonitor.end(execution, totalTimeMillis);
+            }
+
+            @Override
+            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
+                compatExecutionMonitor.done(successful, totalTimeMillis, additionalInformation);
+            }
+
+            @Override
+            public void check(StageExecution execution) {
+                compatExecutionMonitor.check(execution);
+            }
+        };
     }
 }
