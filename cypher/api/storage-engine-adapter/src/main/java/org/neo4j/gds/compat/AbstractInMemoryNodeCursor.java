@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
@@ -62,11 +63,23 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         nodeLabelCounter.setValue(0);
 
         graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
-            nodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders.labelTokens().getIdByName(nodeLabel.name());
-                return true;
+            nodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders
+                .labelTokens()
+                .getIdByName(nodeLabel.name());
+            return true;
         });
 
         return Arrays.copyOf(nodeLabelReadBuffer, nodeLabelCounter.getValue());
+    }
+
+    public boolean hasAtLeastOneLabelForCurrentNode() {
+        var hasLabel = new MutableBoolean(false);
+        graphStore.nodes().forEachNodeLabel(getId(), __ -> {
+            hasLabel.setTrue();
+            return false;
+        });
+
+        return hasLabel.booleanValue();
     }
 
     @Override
