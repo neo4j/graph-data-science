@@ -111,6 +111,7 @@ public class CSRGraphStore implements GraphStore {
         @Nullable NodePropertyStore nodePropertyStore,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipPropertyStores,
+        Optional<GraphPropertyStore> graphProperties,
         int concurrency
     ) {
         return new CSRGraphStore(
@@ -121,6 +122,7 @@ public class CSRGraphStore implements GraphStore {
             nodePropertyStore == null ? NodePropertyStore.empty() : nodePropertyStore,
             relationships,
             relationshipPropertyStores,
+            graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
         );
     }
@@ -133,6 +135,7 @@ public class CSRGraphStore implements GraphStore {
         NodePropertyStore nodeProperties,
         Map<RelationshipType, Relationships.Topology> relationships,
         Map<RelationshipType, RelationshipPropertyStore> relationshipProperties,
+        GraphPropertyStore graphProperties,
         int concurrency
     ) {
         this.databaseId = databaseId;
@@ -140,7 +143,7 @@ public class CSRGraphStore implements GraphStore {
 
         this.schema = schema;
 
-        this.graphProperties = GraphPropertyStore.empty();
+        this.graphProperties = graphProperties;
 
         this.nodes = nodes;
         this.nodeProperties = nodeProperties;

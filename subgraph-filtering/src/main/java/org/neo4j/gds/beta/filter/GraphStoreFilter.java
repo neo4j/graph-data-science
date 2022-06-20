@@ -30,7 +30,7 @@ import org.neo4j.gds.beta.filter.expression.ExpressionParser;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.beta.filter.expression.ValidationContext;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
-import org.neo4j.gds.core.loading.CSRGraphStore;
+import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -111,16 +111,16 @@ public final class GraphStoreFilter {
 
             var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships);
 
-            return CSRGraphStore.of(
-                graphStore.databaseId(),
-                graphStore.capabilities(),
-                filteredSchema,
-                filteredNodes.idMap(),
-                filteredNodes.propertyStores(),
-                filteredRelationships.topology(),
-                filteredRelationships.propertyStores(),
-                config.concurrency()
-            );
+            return new GraphStoreBuilder()
+                .databaseId(graphStore.databaseId())
+                .capabilities(graphStore.capabilities())
+                .schema(filteredSchema)
+                .nodes(filteredNodes.idMap())
+                .nodePropertyStore(filteredNodes.propertyStores())
+                .relationships(filteredRelationships.topology())
+                .relationshipPropertyStores(filteredRelationships.propertyStores())
+                .concurrency(config.concurrency())
+                .build();
         } finally {
             progressTracker.endSubTask();
         }

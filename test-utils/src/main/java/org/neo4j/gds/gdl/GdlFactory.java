@@ -45,6 +45,7 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.ImmutableRelationshipsAndProperties;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -245,16 +246,16 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
 
         var schema = computeGraphSchema(nodes, ImmutableRelationshipsAndProperties.of(topologies, properties));
 
-        return CSRGraphStore.of(
-            databaseId,
-            capabilities,
-            schema,
-            nodes.idMap(),
-            nodes.properties(),
-            topologies,
-            properties,
-            1
-        );
+        return new GraphStoreBuilder()
+            .databaseId(databaseId)
+            .capabilities(capabilities)
+            .schema(schema)
+            .nodes(nodes.idMap())
+            .nodePropertyStore(nodes.properties())
+            .relationships(topologies)
+            .relationshipPropertyStores(properties)
+            .concurrency(1)
+            .build();
     }
 
     private IdMapAndProperties loadNodes() {
