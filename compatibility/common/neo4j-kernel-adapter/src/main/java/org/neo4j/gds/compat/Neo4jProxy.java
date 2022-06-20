@@ -26,7 +26,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -75,36 +74,10 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.ServiceLoader;
 
-@SuppressForbidden(reason = "This is the best we can do at the moment")
 public final class Neo4jProxy {
 
-    private static final Neo4jProxyApi IMPL;
-
-    static {
-        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-        Neo4jProxyFactory neo4jProxyFactory = ServiceLoader
-            .load(Neo4jProxyFactory.class)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .filter(f -> f.canLoad(neo4jVersion))
-            .findFirst()
-            .orElseThrow(() -> new LinkageError("Could not load the " + Neo4jProxy.class + " implementation for " + neo4jVersion));
-        IMPL = neo4jProxyFactory.load();
-        var log = LogBuilders.outputStreamLog(
-            System.out,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
-        );
-        log.info("Loaded compatibility layer: %s", IMPL.getClass());
-        log.info("Loaded version: %s", neo4jVersion);
-        log.info("Java vendor: %s", System.getProperty("java.vendor"));
-        log.info("Java version: %s", System.getProperty("java.version"));
-        log.info("Java home: %s", System.getProperty("java.home"));
-    }
+    private static final Neo4jProxyApi IMPL = ProxyUtil.findProxy(Neo4jProxyFactory.class);
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return IMPL.newDb(dbms);

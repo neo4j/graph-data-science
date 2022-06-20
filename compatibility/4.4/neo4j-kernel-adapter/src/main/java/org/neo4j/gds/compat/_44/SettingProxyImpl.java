@@ -17,25 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.internal;
+package org.neo4j.gds.compat._44;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Description;
-import org.neo4j.configuration.DocumentedDefaultValue;
-import org.neo4j.configuration.SettingsDeclaration;
+import org.neo4j.configuration.SettingImpl;
+import org.neo4j.gds.compat.SettingProxyApi;
 import org.neo4j.graphdb.config.Setting;
 
-import static org.neo4j.configuration.SettingValueParsers.BOOL;
-import static org.neo4j.gds.compat.SettingProxy.newBuilder;
-
-@ServiceProvider
-public class MemoryEstimationSettings implements SettingsDeclaration {
-
-    @Description("Use maximum memory estimation in procedure memory guard.")
-    @DocumentedDefaultValue("false")
-    public static final Setting<Boolean> validate_using_max_memory_estimation = newBuilder(
-        "gds.validate_using_max_memory_estimation",
-        BOOL,
-        false
-    ).build();
+public class SettingProxyImpl implements SettingProxyApi {
+    @Override
+    public <T> Setting<T> setting(org.neo4j.gds.compat.Setting<T> setting) {
+        var builder = SettingImpl.newBuilder(setting.name(), setting.parser(), setting.defaultValue());
+        if (setting.dynamic()) {
+            builder = builder.dynamic();
+        }
+        setting.constraints().forEach(builder::addConstraint);
+        return builder.build();
+    }
 }
