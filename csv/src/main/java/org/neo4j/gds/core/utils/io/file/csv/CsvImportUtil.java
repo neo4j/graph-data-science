@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file.csv;
 
+import org.neo4j.gds.core.utils.io.file.GraphPropertyFileHeader;
 import org.neo4j.gds.core.utils.io.file.NodeFileHeader;
 import org.neo4j.gds.core.utils.io.file.RelationshipFileHeader;
 
@@ -55,12 +56,24 @@ public final class CsvImportUtil {
         }
     }
 
+    public static GraphPropertyFileHeader parseGraphPropertyHeader(Path headerFile) {
+        try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
+            return GraphPropertyFileHeader.of(checkedReadLine(headerReader));
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory) {
         return headerToFileMapping(csvDirectory, CsvImportUtil::getNodeHeaderFiles);
     }
 
     public static Map<Path, List<Path>> relationshipHeaderToFileMapping(Path csvDirectory) {
         return headerToFileMapping(csvDirectory, CsvImportUtil::getRelationshipHeaderFiles);
+    }
+
+    public static Map<Path, List<Path>> graphPropertyHeaderToFileMapping(Path csvDirectory) {
+        return headerToFileMapping(csvDirectory, CsvImportUtil::getGraphPropertyHeaderFiles);
     }
 
     public static List<Path> getNodeHeaderFiles(Path csvDirectory) {
@@ -71,6 +84,11 @@ public final class CsvImportUtil {
     static List<Path> getRelationshipHeaderFiles(Path csvDirectory) {
         String nodeFilesPattern = "^relationships(_\\w+)+_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
+    }
+
+    static List<Path> getGraphPropertyHeaderFiles(Path csvDirectory) {
+        var graphPropertyFilesPattern = "^graph_property(_\\w+)+_header.csv";
+        return getFilesByRegex(csvDirectory, graphPropertyFilesPattern);
     }
 
     private static Map<Path, List<Path>> headerToFileMapping(Path csvDirectory, Function<Path, Collection<Path>> headerPaths) {
