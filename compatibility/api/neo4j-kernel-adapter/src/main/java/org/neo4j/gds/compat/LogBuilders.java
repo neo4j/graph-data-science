@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import org.apache.commons.io.output.WriterOutputStream;
 import org.immutables.builder.Builder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
@@ -28,9 +27,6 @@ import org.neo4j.logging.log4j.Log4jLogProvider;
 import org.neo4j.logging.log4j.LogConfig;
 
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Arrays;
@@ -39,7 +35,7 @@ import java.util.Optional;
 final class LogBuilders {
 
     @Builder.Factory
-    public static Log outputStreamLog(
+    static Log outputStreamLog(
         @Builder.Parameter OutputStream outputStream,
         Optional<Level> level,
         Optional<ZoneId> zoneId,
@@ -57,25 +53,6 @@ final class LogBuilders {
             .build();
 
         return new Log4jLogProvider(context).getLog(category.orElse(""));
-    }
-
-    @Builder.Factory
-    public static Log writerLog(
-        @Builder.Parameter Writer writer,
-        Optional<Level> level,
-        Optional<ZoneId> zoneId,
-        Optional<String> category
-    ) {
-        PrintWriter printWriter = writer instanceof PrintWriter
-            ? (PrintWriter) writer
-            : new PrintWriter(writer);
-        var outStream = new WriterOutputStream(printWriter, StandardCharsets.UTF_8);
-        return outputStreamLog(
-            outStream,
-            level,
-            zoneId,
-            category
-        );
     }
 
     private LogBuilders() {
