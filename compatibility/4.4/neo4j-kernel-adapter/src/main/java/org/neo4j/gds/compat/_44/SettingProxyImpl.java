@@ -20,11 +20,13 @@
 package org.neo4j.gds.compat._44;
 
 import org.neo4j.configuration.SettingImpl;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.SettingProxyApi;
 import org.neo4j.graphdb.config.Setting;
 
 public class SettingProxyImpl implements SettingProxyApi {
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public <T> Setting<T> setting(org.neo4j.gds.compat.Setting<T> setting) {
         var builder = SettingImpl.newBuilder(setting.name(), setting.parser(), setting.defaultValue());
         if (setting.dynamic()) {
