@@ -260,7 +260,7 @@ public final class GraphStoreInput implements CompatInput {
 
         private void initializePropertyValuesSupplier() {
             var graphProperty = graphPropertyIterator.next();
-            var graphPropertySpliterator = graphProperty.values().objects().spliterator();
+            var graphPropertySpliterator = graphProperty.values().objects().parallel().spliterator();
             this.currentPropertyName = graphProperty.key();
             this.currentPropertyValuesSupplier = new SpliteratorTaskSupplier<>(graphPropertySpliterator);
         }

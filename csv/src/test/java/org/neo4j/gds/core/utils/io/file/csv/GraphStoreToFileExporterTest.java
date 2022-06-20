@@ -327,7 +327,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
             @Override
             public LongStream longValues() {
-                return LongStream.range(0, size()).parallel();
+                return LongStream.range(0, size());
             }
         };
 
