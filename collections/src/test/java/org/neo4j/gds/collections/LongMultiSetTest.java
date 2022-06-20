@@ -42,6 +42,7 @@ class LongMultiSetTest {
 
         assertThat(actualSet.count(42)).isEqualTo(2);
         assertThat(actualSet.count(1337)).isEqualTo(31);
+        assertThat(actualSet.count(666)).isEqualTo(0);
     }
 
 }
