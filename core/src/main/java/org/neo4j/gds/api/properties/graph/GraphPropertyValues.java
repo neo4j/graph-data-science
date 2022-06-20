@@ -49,7 +49,7 @@ public interface GraphPropertyValues extends PropertyValues {
         throw unsupportedTypeException(ValueType.LONG_ARRAY);
     }
 
-    Stream<Object> objects();
+    Stream<?> objects();
 
     Stream<Value> values();
 }

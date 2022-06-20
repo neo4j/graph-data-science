@@ -32,8 +32,8 @@ public interface DoubleArrayGraphPropertyValues extends GraphPropertyValues {
     Stream<double[]> doubleArrayValues();
 
     @Override
-    default Stream<Object> objects() {
-        return doubleArrayValues().map(a -> a);
+    default Stream<double[]> objects() {
+        return doubleArrayValues();
     }
 
     @Override

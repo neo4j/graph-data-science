@@ -32,8 +32,8 @@ public interface FloatArrayGraphPropertyValues extends GraphPropertyValues {
     Stream<float[]> floatArrayValues();
 
     @Override
-    default Stream<Object> objects() {
-        return floatArrayValues().map(a -> a);
+    default Stream<float[]> objects() {
+        return floatArrayValues();
     }
 
     @Override

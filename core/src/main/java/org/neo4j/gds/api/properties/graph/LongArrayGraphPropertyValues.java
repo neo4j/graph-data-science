@@ -31,8 +31,8 @@ public interface LongArrayGraphPropertyValues extends GraphPropertyValues {
     Stream<long[]> longArrayValues();
 
     @Override
-    default Stream<Object> objects() {
-        return longArrayValues().map(a -> a);
+    default Stream<long[]> objects() {
+        return longArrayValues();
     }
 
     @Override

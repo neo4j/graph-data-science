@@ -32,8 +32,8 @@ public interface DoubleGraphPropertyValues extends GraphPropertyValues {
     DoubleStream doubleValues();
 
     @Override
-    default Stream<Object> objects() {
-        return doubleValues().boxed().map(l -> l);
+    default Stream<Double> objects() {
+        return doubleValues().boxed();
     }
 
     @Override

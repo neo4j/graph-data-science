@@ -35,8 +35,8 @@ public interface LongGraphPropertyValues extends GraphPropertyValues {
     LongStream longValues();
 
     @Override
-    default Stream<Object> objects() {
-        return longValues().boxed().map(l -> l);
+    default Stream<Long> objects() {
+        return longValues().boxed();
     }
 
     @Override
