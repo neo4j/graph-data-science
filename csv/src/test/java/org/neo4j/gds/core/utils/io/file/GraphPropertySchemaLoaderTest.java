@@ -60,4 +60,12 @@ class GraphPropertySchemaLoaderTest {
             )
         );
     }
+
+    @Test
+    void shouldNotFailOnMissingSchemaFile() {
+        var schemaLoader = new GraphPropertySchemaLoader(exportDir);
+        var graphPropertySchema = schemaLoader.load();
+
+        assertThat(graphPropertySchema).isEmpty();
+    }
 }

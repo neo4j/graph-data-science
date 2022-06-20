@@ -55,21 +55,22 @@ class GraphPropertySchemaLoader {
     Map<String, PropertySchema> load() {
         var schemaBuilder = new GraphPropertySchemaBuilderVisitor();
 
-        try (var reader = Files.newBufferedReader(graphPropertySchemaPath, StandardCharsets.UTF_8)) {
-            var linesIterator = objectReader.<PropertySchemaLine>readValues(reader);
-            while (linesIterator.hasNext()) {
-                var schemaLine = linesIterator.next();
-                schemaBuilder.key(schemaLine.propertyKey);
-                schemaBuilder.valueType(schemaLine.valueType);
-                schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
-                schemaBuilder.state(schemaLine.state);
+        if (Files.exists(graphPropertySchemaPath)) {
+            try (var reader = Files.newBufferedReader(graphPropertySchemaPath, StandardCharsets.UTF_8)) {
+                var linesIterator = objectReader.<PropertySchemaLine>readValues(reader);
+                while (linesIterator.hasNext()) {
+                    var schemaLine = linesIterator.next();
+                    schemaBuilder.key(schemaLine.propertyKey);
+                    schemaBuilder.valueType(schemaLine.valueType);
+                    schemaBuilder.defaultValue(DefaultValue.of(schemaLine.defaultValue, schemaLine.valueType, true));
+                    schemaBuilder.state(schemaLine.state);
 
-                schemaBuilder.endOfEntity();
+                    schemaBuilder.endOfEntity();
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
             }
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
         }
-
         schemaBuilder.close();
         return schemaBuilder.schema();
     }
