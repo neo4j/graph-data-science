@@ -39,7 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
-public class GraphPropertySchemaLoader {
+class GraphPropertySchemaLoader {
 
     private final ObjectReader objectReader;
     private final Path graphPropertySchemaPath;

@@ -27,7 +27,7 @@ import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.PROPERTY
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 
-public final class NodeSchemaConstants {
+public final class CsvSchemaConstants {
 
     public static final List<String> NODE_SCHEMA_COLUMNS = List.of(
         LABEL_COLUMN_NAME,
@@ -37,5 +37,12 @@ public final class NodeSchemaConstants {
         STATE_COLUMN_NAME
     );
 
-    private NodeSchemaConstants() {}
+    public static final List<String> GRAPH_PROPERTY_SCHEMA_COLUMNS = List.of(
+        PROPERTY_KEY_COLUMN_NAME,
+        VALUE_TYPE_COLUMN_NAME,
+        DEFAULT_VALUE_COLUMN_NAME,
+        STATE_COLUMN_NAME
+    );
+
+    private CsvSchemaConstants() {}
 }

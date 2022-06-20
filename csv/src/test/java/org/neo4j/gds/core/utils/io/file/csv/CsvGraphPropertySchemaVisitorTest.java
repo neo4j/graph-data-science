@@ -26,20 +26,10 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 
+import static org.neo4j.gds.core.utils.io.file.CsvSchemaConstants.GRAPH_PROPERTY_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME;
-import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
-import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
-import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
-import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 
 class CsvGraphPropertySchemaVisitorTest extends CsvVisitorTest {
-
-    public static final List<String> GRAPH_PROPERTY_SCHEMA_COLUMNS = List.of(
-        PROPERTY_KEY_COLUMN_NAME,
-        VALUE_TYPE_COLUMN_NAME,
-        DEFAULT_VALUE_COLUMN_NAME,
-        STATE_COLUMN_NAME
-    );
 
     @Test
     void writesVisitedGraphPropertySchema() {
