@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainer;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainer;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 
@@ -70,6 +72,16 @@ public final class ClassifierTrainerFactory {
                     messageLogLevel,
                     terminationFlag,
                     metricsHandler
+                );
+            }
+            case MLPClassification: {
+                return new MLPClassifierTrainer(
+                    numberOfClasses,
+                    (MLPClassifierTrainConfig) config,
+                    progressTracker,
+                    messageLogLevel,
+                    terminationFlag,
+                    concurrency
                 );
             }
             default:

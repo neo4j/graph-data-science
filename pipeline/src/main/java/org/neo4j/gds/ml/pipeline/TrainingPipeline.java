@@ -163,7 +163,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         CLASSIFICATION {
             @Override
             List<TrainingMethod> supportedMethods() {
-                return List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForestClassification);
+                return List.of(TrainingMethod.LogisticRegression, TrainingMethod.RandomForestClassification, TrainingMethod.MLPClassification);
             }
         },
         REGRESSION {

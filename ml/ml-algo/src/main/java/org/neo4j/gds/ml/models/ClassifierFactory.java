@@ -23,6 +23,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
+import org.neo4j.gds.ml.models.mlp.MLPClassifier;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestTrainerConfig;
@@ -41,6 +43,8 @@ public final class ClassifierFactory {
                 return LogisticRegressionClassifier.from((LogisticRegressionData) classifierData);
             case RandomForestClassification:
                 return new RandomForestClassifier((RandomForestClassifierData) classifierData);
+            case MLPClassification:
+                return new MLPClassifier((MLPClassifierData) classifierData);
             default:
                 throw new IllegalStateException("No such classifier.");
         }
@@ -63,6 +67,9 @@ public final class ClassifierFactory {
                 );
             case RandomForestClassification:
                 return RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
+            case MLPClassification:
+                //TODO Implement MLP memory estimation
+                return null;
             default:
                 throw new IllegalStateException("No such classifier.");
         }

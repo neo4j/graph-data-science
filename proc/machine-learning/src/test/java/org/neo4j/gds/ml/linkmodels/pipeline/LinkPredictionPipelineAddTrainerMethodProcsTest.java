@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
@@ -62,6 +63,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of(Map.of(
                         "maxEpochs", 100,
                         "minEpochs", 42,
@@ -91,6 +93,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureSteps", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of(
                         Map.of(
                             "maxEpochs", 100,
@@ -138,9 +141,38 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         .minSplitSize(2)
                         .build()
                         .toMapWithTrainerMethod()),
-                    TrainingMethod.LogisticRegression.name(), List.of()
+                    TrainingMethod.LogisticRegression.name(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of()
                 )
             ))
+        );
+    }
+
+    @Test
+    void addMLP() {
+        assertCypherResult(
+                "CALL gds.alpha.pipeline.linkPrediction.addMLP('myPipeline', {batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
+                List.of(Map.of("name",
+                        "myPipeline",
+                        "splitConfig", DEFAULT_SPLIT_CONFIG,
+                        "autoTuningConfig", AutoTuningConfig.DEFAULT_CONFIG.toMap(),
+                        "nodePropertySteps", List.of(),
+                        "featureSteps", List.of(),
+                        "parameterSpace", Map.of(
+                                TrainingMethod.MLPClassification.toString(),
+                                List.of(MLPClassifierTrainConfigImpl.builder()
+                                        .batchSize(10)
+                                        .minEpochs(2)
+                                        .patience(2)
+                                        .maxEpochs(2)
+                                        .tolerance(0.0001)
+                                        .learningRate(0.1)
+                                        .build()
+                                        .toMapWithTrainerMethod()),
+                                TrainingMethod.LogisticRegression.name(), List.of(),
+                                TrainingMethod.RandomForestClassification.toString(), List.of()
+                                )
+                ))
         );
     }
 

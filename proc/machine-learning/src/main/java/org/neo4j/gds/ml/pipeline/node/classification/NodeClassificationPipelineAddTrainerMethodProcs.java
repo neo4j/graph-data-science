@@ -24,6 +24,7 @@ import org.neo4j.gds.core.ConfigKeyValidation;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
@@ -73,6 +74,22 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         pipeline.addTrainerConfig(
             tunableTrainerConfig
         );
+
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+    }
+
+    @Procedure(name = "gds.alpha.pipeline.nodeClassification.addMLP", mode = READ)
+    @Description("Add a multi layer perceptron configuration to the parameter space of the node classification train pipeline.")
+    public Stream<NodePipelineInfoResult> addMLP(
+        @Name("pipelineName") String pipelineName,
+        @Name(value = "config") Map<String, Object> MLPClassifierConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(username(), pipelineName, NodeClassificationTrainingPipeline.class);
+
+        var allowedKeys = MLPClassifierTrainConfig.DEFAULT.configKeys();
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, MLPClassifierConfig.keySet());
+
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(MLPClassifierConfig));
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }

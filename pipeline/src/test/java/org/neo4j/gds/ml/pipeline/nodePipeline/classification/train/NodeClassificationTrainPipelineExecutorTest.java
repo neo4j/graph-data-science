@@ -46,6 +46,8 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierData;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
@@ -103,6 +105,82 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+    }
+
+    @Test
+    void trainMLPForNodeClassification() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            "testProc",
+            Map.of("mutateProperty", "pr")
+        ));
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
+
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(), new LongMultiSet()).findFirst().orElseThrow();
+
+        var modelCandidate = MLPClassifierTrainConfig.DEFAULT;
+        pipeline.addTrainerConfig(modelCandidate);
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+                var ncPipeTrain = new NodeClassificationTrainPipelineExecutor(
+                    pipeline,
+                    config,
+                    caller.executionContext(),
+                    graphStore,
+                    GRAPH_NAME,
+                    ProgressTracker.NULL_TRACKER
+                );
+
+                var result = ncPipeTrain.compute();
+                var model = result.model();
+
+                assertThat(model.creator()).isEqualTo(getUsername());
+                assertThat(model.algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
+                assertThat(model.data()).isInstanceOf(MLPClassifierData.class);
+                assertThat(model.trainConfig()).isEqualTo(config);
+                assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
+                assertThat(model.name()).isEqualTo("model");
+                assertThat(model.stored()).isFalse();
+                assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+                assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
+                assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
+                    .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
+
+                NodeClassificationPipelineModelInfo customInfo = model.customInfo();
+                var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
+                assertThat(testScore).isCloseTo(0, Offset.offset(1e-5));
+                var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
+                assertThat(outerTrainScore).isCloseTo(0.4, Offset.offset(1e-5));
+                var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
+                var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
+                assertThat(validationStats)
+                    .usingRecursiveComparison()
+                    .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                    .isEqualTo(Map.of("avg",0.58333, "max",0.66667, "min",0.499999));
+
+                assertThat(trainStats)
+                    .usingRecursiveComparison()
+                    .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                    .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
+
+                assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
+                assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
+            });
     }
 
     @Test

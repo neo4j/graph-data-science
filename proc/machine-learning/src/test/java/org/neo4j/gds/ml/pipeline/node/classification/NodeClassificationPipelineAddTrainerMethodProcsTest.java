@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.ml.models.TrainingMethod;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
@@ -61,6 +62,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of(Map.of(
                             "maxEpochs", 100,
                             "minEpochs", 42,
@@ -95,9 +97,36 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         .minSplitSize(2)
                         .build()
                         .toMapWithTrainerMethod()),
-                    TrainingMethod.LogisticRegression.toString(), List.of()
-                )
+                    TrainingMethod.LogisticRegression.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of()
+                    )
             ))
+        );
+    }
+
+    @Test
+    void shouldSetMLPParams() {
+        assertCypherResult(
+            "CALL gds.alpha.pipeline.nodeClassification.addMLP('myPipeline', {batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
+            List.of(Map.of(
+                "name", "myPipeline",
+                "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
+                "autoTuningConfig", Map.of("maxTrials", MAX_TRIALS),
+                "nodePropertySteps", List.of(),
+                "featureProperties", List.of(),
+                "parameterSpace", Map.of(
+                    TrainingMethod.MLPClassification.toString(),
+                    List.of(MLPClassifierTrainConfigImpl.builder().batchSize(10)
+                        .minEpochs(2)
+                        .patience(2)
+                        .maxEpochs(2)
+                        .tolerance(0.0001)
+                        .learningRate(0.1)
+                        .build()
+                        .toMapWithTrainerMethod()),
+                    TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.LogisticRegression.toString(), List.of()
+                    )))
         );
     }
 
@@ -115,6 +144,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
+                    TrainingMethod.MLPClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of(
                         Map.of(
                             "maxEpochs", 100,
