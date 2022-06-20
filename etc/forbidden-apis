@@ -2,3 +2,11 @@ org.neo4j.internal.helpers.collection.MapUtil @ Use the GDS MapUtil instead.
 java.lang.Thread.Thread(java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
 java.lang.Thread.Thread(java.lang.ThreadGroup, java.lang.Runnable) @ Use org.neo4j.gds.core.concurrency.Pools.newThread to make sure that the new thread is properly named
 org.neo4j.internal.batchimport.staging.ExecutionMonitor.Adapter @ Implement CompatExecutionMonitor and call Neo4jProxy.executionMonitor
+
+org.neo4j.logging.internal.LogService#getUserLogProvider() @ Pass the logService through and use Neo4jProxy at the end.
+org.neo4j.logging.internal.LogService#getUserLog(java.lang.Class) @ Use Neo4jProxy#getUserLog instead.
+org.neo4j.logging.internal.LogService#getInternalLogProvider() @ Pass the logService through and use Neo4jProxy at the end.
+org.neo4j.logging.internal.LogService#getInternalLog(java.lang.Class) @ Use Neo4jProxy#getInternalLog instead.
+
+org.neo4j.configuration.SettingImpl#newBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
+org.neo4j.configuration.SettingBuilder(java.lang.String, org.neo4j.configuration.SettingValueParser, java.lang.Object) @ Use SettingProxy#newBuilder instead.
