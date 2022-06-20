@@ -29,6 +29,7 @@ import org.neo4j.configuration.helpers.NormalizedDatabaseName;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
@@ -473,11 +474,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public Log getUserLog(LogService logService, Class<?> loggingClass) {
         return logService.getUserLog(loggingClass);
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public Log getInternalLog(LogService logService, Class<?> loggingClass) {
         return logService.getInternalLog(loggingClass);
     }
@@ -493,6 +496,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public RecordFormats selectRecordFormatForStore(
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
@@ -540,6 +544,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
@@ -549,6 +554,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public RecordFormats recordFormatSelector(
         String databaseName,
         Config databaseConfig,
