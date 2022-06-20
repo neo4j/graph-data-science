@@ -321,6 +321,10 @@ public final class Neo4jProxy {
         return IMPL.testLog();
     }
 
+    public static Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return IMPL.getUserLog(logService, loggingClass);
+    }
+
     public static Log getInternalLog(LogService logService, Class<?> loggingClass) {
         return IMPL.getInternalLog(logService, loggingClass);
     }

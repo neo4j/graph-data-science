@@ -214,6 +214,8 @@ public interface Neo4jProxyApi {
 
     TestLog testLog();
 
+    Log getUserLog(LogService logService, Class<?> loggingClass);
+
     Log getInternalLog(LogService logService, Class<?> loggingClass);
 
     Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);

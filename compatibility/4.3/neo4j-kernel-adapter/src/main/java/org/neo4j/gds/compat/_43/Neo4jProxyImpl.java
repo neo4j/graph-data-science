@@ -473,6 +473,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return logService.getUserLog(loggingClass);
+    }
+
+    @Override
     public Log getInternalLog(LogService logService, Class<?> loggingClass) {
         return logService.getInternalLog(loggingClass);
     }
