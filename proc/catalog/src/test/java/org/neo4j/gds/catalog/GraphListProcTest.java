@@ -387,16 +387,14 @@ class GraphListProcTest extends BaseProcTest {
                 "database", "neo4j",
                 "schema", map(
                     "nodes", map(ALL_NODES.name, map()),
-                    "relationships", map(),
-                    "graphProperties", map()
+                    "relationships", map(ALL_RELATIONSHIPS.name(), map())
                 ),
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(3)
+                        .hasSize(2)
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
-                        .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull());
+                        .hasEntrySatisfying("username", username -> assertThat(username).isNull());
 
                     return true;
                 }, "Assert Cypher Aggregation `configuration` map"),
