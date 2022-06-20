@@ -232,17 +232,14 @@ public final class GraphStoreInput implements CompatInput {
 
         @Override
         public synchronized boolean next(InputChunk chunk) throws IOException {
-            if (currentPropertyValuesSupplier == null) {
+            if (this.currentPropertyValuesSupplier == null) {
                 if (this.graphPropertyIterator.hasNext()) {
-                    var graphProperty = graphPropertyIterator.next();
-                    var graphPropertySpliterator = graphProperty.values().objects().spliterator();
-                    this.currentPropertyName = graphProperty.key();
-                    this.currentPropertyValuesSupplier = new SpliteratorTaskSupplier<>(graphPropertySpliterator);
+                    initializePropertyValuesSupplier();
                 } else {
                     return false;
                 }
             }
-            var propertyValues = currentPropertyValuesSupplier.split();
+            var propertyValues = this.currentPropertyValuesSupplier.split();
             if (propertyValues != null) {
                 ((GraphPropertyInputChunk) chunk).initialize(
                     Objects.requireNonNull(currentPropertyName),
@@ -251,14 +248,25 @@ public final class GraphStoreInput implements CompatInput {
                 return true;
             }
 
-            currentPropertyValuesSupplier = null;
-            currentPropertyName = null;
+            resetPropertyValuesSupplier();
             return false;
         }
 
         @Override
         public void close() throws IOException {
 
+        }
+
+        private void initializePropertyValuesSupplier() {
+            var graphProperty = graphPropertyIterator.next();
+            var graphPropertySpliterator = graphProperty.values().objects().spliterator();
+            this.currentPropertyName = graphProperty.key();
+            this.currentPropertyValuesSupplier = new SpliteratorTaskSupplier<>(graphPropertySpliterator);
+        }
+
+        private void resetPropertyValuesSupplier() {
+            this.currentPropertyValuesSupplier = null;
+            this.currentPropertyName = null;
         }
     }
 
