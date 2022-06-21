@@ -30,7 +30,8 @@ public final class NodeClassificationPipelineCompanion {
     static final Map<String, Object> DEFAULT_SPLIT_CONFIG =  Map.of("testFraction", 0.3, "validationFolds", 3);
     static final Map<String, List<Map<String, Object>>> DEFAULT_PARAM_CONFIG = Map.of(
         TrainingMethod.LogisticRegression.toString(), List.of(),
-        TrainingMethod.RandomForestClassification.toString(), List.of()
+        TrainingMethod.RandomForestClassification.toString(), List.of(),
+        TrainingMethod.MLPClassification.toString(), List.of()
     );
 
     private NodeClassificationPipelineCompanion() {}
