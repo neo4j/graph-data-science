@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -121,6 +122,11 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
     private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
+
+    @AfterEach
+    void tearDown() {
+        graphStore.graphPropertyKeys().forEach(graphStore::removeGraphProperty);
+    }
 
     @Test
     void exportTopology() {
@@ -347,10 +353,16 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                 .collect(Collectors.toList())
         );
 
-        var exportedValues = Files
+        var dataFiles = Files
             .list(tempDir)
             .filter(path -> path.getFileName().toString().startsWith("graph_property_graphProp"))
             .filter(not(path -> path.getFileName().toString().endsWith("header.csv")))
+            .collect(Collectors.toList());
+
+        assertThat(dataFiles).hasSize(4);
+
+        var exportedValues = dataFiles
+            .stream()
             .flatMap(path -> {
                 try {
                     return Files.readAllLines(path).stream();

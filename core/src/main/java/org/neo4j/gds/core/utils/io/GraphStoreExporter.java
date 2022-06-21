@@ -114,6 +114,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
             graphStore.capabilities(),
             graphProperties,
             config.batchSize(),
+            config.writeConcurrency(),
             idMappingType()
         );
 
