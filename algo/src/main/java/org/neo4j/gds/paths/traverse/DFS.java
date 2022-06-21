@@ -59,11 +59,10 @@ public class DFS extends Algorithm<HugeLongArray> {
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
         var result = HugeLongArray.newArray(nodeCount);
-        var inResult = new BitSet(nodeCount);
-
         var nodes = HugeLongArrayStack.newStack(nodeCount);
         var sources = HugeLongArrayStack.newStack(nodeCount);
         var weights = HugeDoubleArrayStack.newStack(nodeCount);
+        
         var visited = new BitSet(nodeCount);
         nodes.push(startNodeId);
         sources.push(startNodeId);
@@ -76,11 +75,8 @@ public class DFS extends Algorithm<HugeLongArray> {
             final long node = nodes.pop();
             final double weight = weights.pop();
 
+            result.set(resultIndex++, node);
 
-            if (!inResult.getAndSet(node)) {
-                result.set(resultIndex, node);
-                resultIndex++;
-            }
             var exitPredicateResult = exitPredicate.test(source, node, weight);
 
             if (exitPredicateResult == ExitPredicate.Result.BREAK) {
