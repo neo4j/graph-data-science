@@ -45,6 +45,8 @@ public interface Aggregator {
     // TODO: maybe turn this generic?
     List<Weights<? extends Tensor<?>>> weights();
 
+    List<Weights<? extends Tensor<?>>> weightsWithoutBias();
+
     AggregatorType type();
 
     ActivationFunction activationFunction();

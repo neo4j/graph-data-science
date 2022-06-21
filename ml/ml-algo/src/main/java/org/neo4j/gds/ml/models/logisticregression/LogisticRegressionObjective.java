@@ -122,7 +122,7 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
     }
 
     ConstantScale<Scalar> penaltyForBatch(Batch batch, long trainSize) {
-        return new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
+        return new ConstantScale<>(new L2NormSquared<>(modelData().weights()), batch.size() * penalty / trainSize);
     }
 
     ReducedCrossEntropyLoss crossEntropyLoss(Batch batch) {

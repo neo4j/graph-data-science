@@ -70,7 +70,7 @@ public class LinearRegressionObjective implements Objective<LinearRegressionData
     }
 
     private Variable<Scalar> penaltyForBatch(Batch batch, long trainSize) {
-        return new ConstantScale<>(new L2NormSquared(modelData().weights()), batch.size() * penalty / trainSize);
+        return new ConstantScale<>(new L2NormSquared<>(modelData().weights()), batch.size() * penalty / trainSize);
     }
 
     private Constant<Vector> batchTargets(Batch batch) {

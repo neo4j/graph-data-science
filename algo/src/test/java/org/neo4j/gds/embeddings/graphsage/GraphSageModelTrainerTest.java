@@ -25,6 +25,7 @@ import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -43,7 +44,6 @@ import org.neo4j.gds.ml.core.helper.TensorTestUtils;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
@@ -235,23 +235,18 @@ class GraphSageModelTrainerTest {
         assertThat(metrics.ranEpochs()).isEqualTo(10);
         assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 100, 100, 100, 100);
 
-        var metricsMap =  metrics.toMap().get("metrics");
-        assertThat(metricsMap).isInstanceOf(Map.class);
-
-        var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
-        assertThat(epochLosses).isInstanceOf(List.class);
-        assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
+        assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
                 17.33,
-                16.01,
-                15.27,
-                16.21,
-                16.43,
-                15.35,
-                15.13,
-                17.40,
-                15.03,
-                14.83
+                17.41,
+                16.55,
+                16.88,
+                17.54,
+                15.21,
+                15.14,
+                17.24,
+                15.71,
+                15.08
                 }, Offset.offset(0.05)
             );
     }
@@ -266,7 +261,8 @@ class GraphSageModelTrainerTest {
             .tolerance(1e-10)
             .sampleSizes(List.of(5, 3))
             .batchSize(5)
-            .maxIterations(100)
+            .penaltyL2(0.01)
+            .maxIterations(10)
             .randomSeed(42L)
             .build();
 
@@ -279,24 +275,22 @@ class GraphSageModelTrainerTest {
         var trainResult = trainer.train(unweightedGraph, features);
 
         var metrics = trainResult.metrics();
-        assertThat(metrics.didConverge()).isTrue();
-        assertThat(metrics.ranEpochs()).isEqualTo(7);
-        assertThat(metrics.ranIterationsPerEpoch()).containsExactly(100, 100, 100, 100, 100, 100, 51);
+        assertThat(metrics.didConverge()).isFalse();
+        assertThat(metrics.ranEpochs()).isEqualTo(10);
+        assertThat(metrics.ranIterationsPerEpoch()).containsOnly(10);
 
-        var metricsMap =  metrics.toMap().get("metrics");
-        assertThat(metricsMap).isInstanceOf(Map.class);
-
-        var epochLosses = ((Map<String, Object>) metricsMap).get("epochLosses");
-        assertThat(epochLosses).isInstanceOf(List.class);
-        assertThat(((List<Double>) epochLosses).stream().mapToDouble(Double::doubleValue).toArray())
+        assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                17.47,
-                15.28,
-                14.49,
-                18.85,
                 19.50,
-                15.47,
-                17.33
+                18.53,
+                16.60,
+                22.28,
+                17.35,
+                19.72,
+                21.07,
+                19.76,
+                17.86,
+                17.85
                 }, Offset.offset(0.05)
             );
     }
@@ -343,6 +337,31 @@ class GraphSageModelTrainerTest {
 
         // reason: sampling results in more stochastic gradient descent and different losses
         assertThat(trainResultWithoutSampling.metrics().epochLosses().get(0)).isNotEqualTo(trainResultWithSampling.metrics().epochLosses().get(0));
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.01, 26.6", "0.5, 27.4", "1, 28.20"})
+    void l2Penalty(double penalty, double expectedLoss) {
+        var config = this.configBuilder
+            .modelName("penaltyTest")
+            .embeddingDimension(12)
+            .epochs(1)
+            .maxIterations(1)
+            .tolerance(1e-10)
+            .sampleSizes(List.of(5, 3))
+            .penaltyL2(penalty)
+            .batchSize(5)
+            .randomSeed(42L)
+            .build();
+
+        var result = new GraphSageModelTrainer(
+            config,
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        ).train(unweightedGraph, features);
+
+        Offset<Double> offset = Offset.offset(0.05);
+        assertThat((result.metrics().iterationLossPerEpoch().get(0).get(0))).isEqualTo(expectedLoss, offset);
     }
 
     @ParameterizedTest

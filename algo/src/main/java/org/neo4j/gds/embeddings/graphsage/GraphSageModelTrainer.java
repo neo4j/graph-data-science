@@ -32,6 +32,9 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
+import org.neo4j.gds.ml.core.functions.ConstantScale;
+import org.neo4j.gds.ml.core.functions.ElementSum;
+import org.neo4j.gds.ml.core.functions.L2NormSquared;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.optimizer.AdamOptimizer;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
@@ -192,14 +195,36 @@ public class GraphSageModelTrainer {
 
         Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
 
-        GraphSageLoss lossFunction = new GraphSageLoss(
+        Variable<Scalar> lossWithoutPenalty = new GraphSageLoss(
             SubGraph.relationshipWeightFunction(localGraph),
             embeddingVariable,
             extendedBatch,
             config.negativeSampleWeight()
         );
 
-        return new BatchTask(lossFunction, weights, extendedBatch.length / 3, progressTracker);
+        long originalBatchSize = extendedBatch.length / 3;
+
+        Variable<Scalar> loss;
+        if (config.penaltyL2() > 0) {
+            List<Variable<?>> l2penalty = Arrays
+                .stream(layers)
+                .map(layer -> layer.aggregator().weightsWithoutBias())
+                .flatMap(layerWeights -> layerWeights.stream().map(L2NormSquared::new))
+                .collect(Collectors.toList());
+
+            loss = new ElementSum(List.of(
+                lossWithoutPenalty,
+                new ConstantScale<>(
+                    new ElementSum(l2penalty),
+                    // we scale the penalty to achieve the same impact on the last (smaller) batch as on every other batch
+                    config.penaltyL2() * originalBatchSize / graph.nodeCount()
+                )
+            ));
+        } else {
+            loss = lossWithoutPenalty;
+        }
+
+        return new BatchTask(loss, weights, progressTracker);
     }
 
     private EpochResult trainEpoch(
@@ -226,9 +251,7 @@ public class GraphSageModelTrainer {
                 .tasks(sampledBatchTasks)
                 .executor(executor)
                 .run();
-            var avgLossPerNode =
-                sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() /
-                sampledBatchTasks.stream().mapToDouble(BatchTask::batchSize).sum();
+            var avgLossPerNode = sampledBatchTasks.stream().mapToDouble(BatchTask::loss).sum() / sampledBatchTasks.size();
             iterationLosses.add(avgLossPerNode);
             progressTracker.logInfo(formatWithLocale("Average loss per node: %.10f", avgLossPerNode));
 
@@ -266,19 +289,16 @@ public class GraphSageModelTrainer {
         private final Variable<Scalar> lossFunction;
         private final List<Weights<? extends Tensor<?>>> weightVariables;
         private List<? extends Tensor<?>> weightGradients;
-        private final int batchSize;
         private final ProgressTracker progressTracker;
         private double loss;
 
         BatchTask(
             Variable<Scalar> lossFunction,
             List<Weights<? extends Tensor<?>>> weightVariables,
-            int batchSize,
             ProgressTracker progressTracker
         ) {
             this.lossFunction = lossFunction;
             this.weightVariables = weightVariables;
-            this.batchSize = batchSize;
             this.progressTracker = progressTracker;
         }
 
@@ -299,10 +319,6 @@ public class GraphSageModelTrainer {
 
         List<? extends Tensor<?>> weightGradients() {
             return weightGradients;
-        }
-
-        int batchSize() {
-            return batchSize;
         }
     }
 

@@ -37,7 +37,7 @@ class L2NormSquaredTest implements FiniteDifferenceTest {
             1, 3, 1
         }, 3, 3));
 
-        var l2 = new L2NormSquared(weights);
+        var l2 = new L2NormSquared<>(weights);
         var ctx = new ComputationContext();
         var l2Result = ctx.forward(l2);
 
@@ -52,7 +52,7 @@ class L2NormSquaredTest implements FiniteDifferenceTest {
             1, 3, 1
         }, 3, 3));
 
-        finiteDifferenceShouldApproximateGradient(weights, new L2NormSquared(weights));
+        finiteDifferenceShouldApproximateGradient(weights, new L2NormSquared<>(weights));
     }
 
     @Override

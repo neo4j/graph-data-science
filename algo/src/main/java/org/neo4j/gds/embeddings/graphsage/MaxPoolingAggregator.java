@@ -93,6 +93,11 @@ public class MaxPoolingAggregator implements Aggregator {
     }
 
     @Override
+    public List<Weights<? extends Tensor<?>>> weightsWithoutBias() {
+        return List.of(poolWeights, selfWeights, neighborsWeights);
+    }
+
+    @Override
     public AggregatorType type() {
         return AggregatorType.POOL;
     }
