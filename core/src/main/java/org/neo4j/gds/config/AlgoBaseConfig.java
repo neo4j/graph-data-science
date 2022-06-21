@@ -25,10 +25,12 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
@@ -70,4 +72,14 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {}
+
+    @Configuration.Ignore
+    @Value.Auxiliary
+    @Value.Default
+    default GraphSchema filteredSchema(GraphStore graphStore) {
+        return graphStore
+            .schema()
+            .filterNodeLabels(Set.copyOf(nodeLabelIdentifiers(graphStore)))
+            .filterRelationshipTypes(Set.copyOf(internalRelationshipTypes(graphStore)));
+    }
 }

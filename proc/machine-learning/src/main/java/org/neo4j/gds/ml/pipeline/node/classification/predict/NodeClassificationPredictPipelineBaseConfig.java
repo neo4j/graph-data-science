@@ -22,16 +22,14 @@ package org.neo4j.gds.ml.pipeline.node.classification.predict;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseConfig, ModelConfig {
+public interface NodeClassificationPredictPipelineBaseConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig {
 
     @Configuration.Key("includePredictedProbabilities")
     boolean includePredictedProbabilities();
-
-    // TODO make this a parameter
-    String graphName();
 }

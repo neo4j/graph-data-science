@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -185,7 +186,11 @@ class PipelineExecutorTest {
     private static final class PipelineExecutionTestFailure extends RuntimeException {}
     private static final class PipelineExecutionTestExecuteNodeStepFailure extends RuntimeException {}
 
-    private static class PipelineExecutorTestConfig implements AlgoBaseConfig {
+    private static class PipelineExecutorTestConfig implements AlgoBaseConfig, GraphNameConfig {
+        @Override
+        public String graphName() {
+            return "test";
+        }
 
         @Override
         public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
@@ -193,11 +198,12 @@ class PipelineExecutorTest {
         }
     }
 
-    private static class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<? extends FeatureStep>, String> {
+    private static class SucceedingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig>
+        extends PipelineExecutor<CONFIG, Pipeline<? extends FeatureStep>, String> {
         SucceedingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
-            AlgoBaseConfig config,
+            CONFIG config,
             ProgressTracker progressTracker
         ) {
             super(
@@ -222,11 +228,11 @@ class PipelineExecutorTest {
 
     }
 
-    private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
+    private class FailingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig> extends SucceedingPipelineExecutor<CONFIG> {
         FailingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
-            AlgoBaseConfig config,
+            CONFIG config,
             ProgressTracker progressTracker
         ) {
             super(

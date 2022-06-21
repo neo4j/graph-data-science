@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -44,7 +45,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public abstract class PipelineExecutor<
-    PIPELINE_CONFIG extends AlgoBaseConfig,
+    PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
     > extends Algorithm<RESULT> {
@@ -100,7 +101,7 @@ public abstract class PipelineExecutor<
         return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
     }
 
-    protected static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
+    public static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
         long volumeEstimation = 10 * featureInputSize;
         return Tasks.task(
             "Execute node property steps",
@@ -125,16 +126,21 @@ public abstract class PipelineExecutor<
     public RESULT compute() {
         progressTracker.beginSubTask();
 
+        GraphStoreValidation.validate(graphStore, config);
         pipeline.validateBeforeExecution(graphStore, config);
 
         var dataSplits = splitDataset();
+        var graphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            executionContext,
+            graphStore,
+            config,
+            graphFilter.relationshipTypes(),
+            progressTracker
+        );
         try {
-            progressTracker.beginSubTask("Execute node property steps");
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
-            executeNodePropertySteps(dataSplits.get(DatasetSplits.FEATURE_INPUT));
-            progressTracker.endSubTask("Execute node property steps");
-
-            validate(graphStore, config);
+            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
 
             var result = execute(dataSplits);
             progressTracker.endSubTask();
@@ -144,22 +150,9 @@ public abstract class PipelineExecutor<
         }
     }
 
-    protected void validate(GraphStore graphStore, PIPELINE_CONFIG config) {
-        this.pipeline.validateFeatureProperties(graphStore, config);
-        GraphStoreValidation.validate(graphStore, config);
-    }
-
     @Override
     public void release() {
 
-    }
-
-    private void executeNodePropertySteps(GraphFilter graphFilter) {
-        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
-            progressTracker.beginSubTask();
-            step.execute(executionContext, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
-            progressTracker.endSubTask();
-        }
     }
 
     protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {

@@ -20,9 +20,13 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.LongMultiSet;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
 @ValueClass
@@ -30,6 +34,36 @@ public interface NodeClassificationTrainResult {
     Classifier classifier();
     TrainingStatistics trainingStatistics();
     LocalIdMap classIdMap();
+    NodeClassificationPipelineTrainConfig config();
+    NodeClassificationTrainingPipeline pipeline();
+    GraphSchema schemaBeforeSteps();
 
     LongMultiSet classCounts();
+
+    default NodeClassificationModelResult modelResult(
+    ) {
+        var catalogModel = Model.of(
+            config().username(),
+            config().modelName(),
+            NodeClassificationTrainingPipeline.MODEL_TYPE,
+            schemaBeforeSteps(),
+            classifier().data(),
+            config(),
+            NodeClassificationPipelineModelInfo.of(
+                trainingStatistics().winningModelTestMetrics(),
+                trainingStatistics().winningModelOuterTrainMetrics(),
+                trainingStatistics().bestCandidate(),
+                NodePropertyPredictPipeline.from(pipeline()),
+                classIdMap().originalIdsList()
+            )
+        );
+
+        return ImmutableNodeClassificationModelResult.of(catalogModel, trainingStatistics());
+    }
+
+    @ValueClass
+    interface NodeClassificationModelResult {
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
+        TrainingStatistics trainingStatistics();
+    }
 }

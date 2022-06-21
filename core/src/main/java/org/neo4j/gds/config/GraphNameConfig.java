@@ -17,13 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.regression.predict;
+package org.neo4j.gds.config;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.model.ModelConfig;
-
-@Configuration
-public interface NodeRegressionPredictPipelineBaseConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig {
+public interface GraphNameConfig {
+    String graphName();
 }

@@ -19,24 +19,36 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
+import org.assertj.core.util.DoubleComparator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.ResourceUtil;
+import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -44,11 +56,15 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
 import java.util.Map;
@@ -58,6 +74,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
@@ -65,27 +83,46 @@ import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
-@GdlExtension
-class NodeClassificationTrainTest {
+class NodeClassificationTrainTest extends BaseProcTest {
+    private static final String PIPELINE_NAME = "magic flute";
+    private static final String GRAPH_NAME = "g";
+    private static final String GRAPH_NAME_WITH_RELATIONSHIPS = "gRel";
 
-    @GdlGraph(idOffset=42)
-    private static final String DB_QUERY =
+    @Neo4jGraph
+    private static final String DB_QUERY1 =
         "CREATE " +
-        "  (:N {bananas: 100.0, arrayProperty: [1.2, 1.2], a: 1.2, b: 1.2, t: 0})" +
-        ", (:N {bananas: 100.0, arrayProperty: [2.8, 2.5], a: 2.8, b: 2.5, t: 0})" +
-        ", (:N {bananas: 100.0, arrayProperty: [3.3, 0.5], a: 3.3, b: 0.5, t: 0})" +
-        ", (:N {bananas: 100.0, arrayProperty: [1.0, 0.5], a: 1.0, b: 0.5, t: 0})" +
-        ", (:N {bananas: 100.0, arrayProperty: [1.32, 0.5], a: 1.32, b: 0.5, t: 0})" +
-        ", (:N {bananas: 100.0, arrayProperty: [1.3, 1.5], a: 1.3, b: 1.5, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [5.3, 10.5], a: 5.3, b: 10.5, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [1.3, 2.5], a: 1.3, b: 2.5, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [0.0, 66.8], a: 0.0, b: 66.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [0.1, 2.8], a: 0.1, b: 2.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [0.66, 2.8], a: 0.66, b: 2.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [2.0, 10.8], a: 2.0, b: 10.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [5.0, 7.8], a: 5.0, b: 7.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [4.0, 5.8], a: 4.0, b: 5.8, t: 1})" +
-        ", (:N {bananas: 100.0, arrayProperty: [1.0, 0.9], a: 1.0, b: 0.9, t: 1})";
+        "  (a1:N {bananas: 100.0, arrayProperty: [1.2, 1.2], a: 1.2, b: 1.2, t: 0})" +
+        ", (a2:N {bananas: 100.0, arrayProperty: [2.8, 2.5], a: 2.8, b: 2.5, t: 0})" +
+        ", (a3:N {bananas: 100.0, arrayProperty: [3.3, 0.5], a: 3.3, b: 0.5, t: 0})" +
+        ", (a4:N {bananas: 100.0, arrayProperty: [1.0, 0.5], a: 1.0, b: 0.5, t: 0})" +
+        ", (a5:N {bananas: 100.0, arrayProperty: [1.32, 0.5], a: 1.32, b: 0.5, t: 0})" +
+        ", (a6:N {bananas: 100.0, arrayProperty: [1.3, 1.5], a: 1.3, b: 1.5, t: 1})" +
+        ", (a7:N {bananas: 100.0, arrayProperty: [5.3, 10.5], a: 5.3, b: 10.5, t: 1})" +
+        ", (a8:N {bananas: 100.0, arrayProperty: [1.3, 2.5], a: 1.3, b: 2.5, t: 1})" +
+        ", (a9:N {bananas: 100.0, arrayProperty: [0.0, 66.8], a: 0.0, b: 66.8, t: 1})" +
+        ", (a10:N {bananas: 100.0, arrayProperty: [0.1, 2.8], a: 0.1, b: 2.8, t: 1})" +
+        ", (a11:N {bananas: 100.0, arrayProperty: [0.66, 2.8], a: 0.66, b: 2.8, t: 1})" +
+        ", (a12:N {bananas: 100.0, arrayProperty: [2.0, 10.8], a: 2.0, b: 10.8, t: 1})" +
+        ", (a13:N {bananas: 100.0, arrayProperty: [5.0, 7.8], a: 5.0, b: 7.8, t: 1})" +
+        ", (a14:N {bananas: 100.0, arrayProperty: [4.0, 5.8], a: 4.0, b: 5.8, t: 1})" +
+        ", (a15:N {bananas: 100.0, arrayProperty: [1.0, 0.9], a: 1.0, b: 0.9, t: 1})" +
+        ", (b1:M {scalar: 1.2, array: [1.0, -1.0], t: 0})" +
+        ", (b2:M {scalar: 0.5, array: [1.0, -1.0], t: 0})" +
+        ", (b3:M {scalar: 1.1, array: [1.0, -1.0], t: 0})" +
+        ", (b4:M {scalar: 0.8, array: [1.0, -1.0], t: 0})" +
+        ", (b5:M {scalar: 1.3, array: [1.0, -1.0], t: 1})" +
+        ", (b6:M {scalar: 1.0, array: [2.0, -1.0], t: 1})" +
+        ", (b7:M {scalar: 0.8, array: [2.0, -1.0], t: 1})" +
+        ", (b8:M {scalar: 1.5, array: [2.0, -1.0], t: 1})" +
+        ", (b9:M {scalar: 0.5, array: [2.0, -1.0], t: 1})" +
+        ", (b1)-[:R]->(b2)" +
+        ", (b1)-[:R]->(b4)" +
+        ", (b3)-[:R]->(b5)" +
+        ", (b5)-[:R]->(b8)" +
+        ", (b4)-[:R]->(b6)" +
+        ", (b4)-[:R]->(b9)" +
+        ", (b2)-[:R]->(b8)";
+
 
     static final NodePropertyPredictionSplitConfig SPLIT_CONFIG = NodePropertyPredictionSplitConfigImpl
         .builder()
@@ -93,8 +130,141 @@ class NodeClassificationTrainTest {
         .validationFolds(2)
         .build();
 
-    @Inject
-    TestGraph graph;
+    private Graph graph;
+    private GraphStore graphStore;
+
+    private GraphStore graphStoreWithRelationships;
+
+    @BeforeEach
+    void setup() throws Exception {
+        registerProcedures(GraphProjectProc.class);
+
+        runQuery(GdsCypher.call(GRAPH_NAME)
+            .graphProject()
+            .withNodeLabel("N")
+            .withNodeProperties(List.of("arrayProperty", "bananas", "a", "b", "t"), DefaultValue.DEFAULT)
+            .yields());
+
+        graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+        graph = graphStore.getUnion();
+
+        runQuery(GdsCypher.call(GRAPH_NAME_WITH_RELATIONSHIPS)
+            .graphProject()
+            .withNodeLabel("M")
+            .withRelationshipType("R")
+            .withNodeProperties(List.of("array", "scalar", "t"), DefaultValue.DEFAULT)
+            .yields());
+
+        graphStoreWithRelationships = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME_WITH_RELATIONSHIPS).graphStore();
+    }
+
+    @Test
+    void trainsAModel() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            "testProc",
+            Map.of("mutateProperty", "pr")
+        ));
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
+
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
+        var metric = metricSpecification.createMetrics(LocalIdMap.of(), new LongMultiSet()).findFirst().orElseThrow();
+
+        var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
+        pipeline.addTrainerConfig(modelCandidate);
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            GRAPH_NAME_WITH_RELATIONSHIPS,
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncTrain = ncTrain(pipeline, config, caller, ProgressTracker.NULL_TRACKER);
+
+            var result = ncTrain.compute().modelResult();
+            var model = result.model();
+
+            assertThat(model.creator()).isEqualTo(getUsername());
+            assertThat(model.algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
+            assertThat(model.data()).isInstanceOf(LogisticRegressionData.class);
+            assertThat(model.trainConfig()).isEqualTo(config);
+            assertThat(model.graphSchema()).isEqualTo(graphStoreWithRelationships.schema());
+            assertThat(model.name()).isEqualTo("model");
+            assertThat(model.stored()).isFalse();
+            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
+            assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
+                .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
+
+            // using explicit type intentionally :)
+            NodeClassificationPipelineModelInfo customInfo = model.customInfo();
+            var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
+            assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
+            var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
+            assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
+            var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
+            var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
+            assertThat(validationStats)
+                .usingRecursiveComparison()
+                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
+
+            assertThat(trainStats)
+                .usingRecursiveComparison()
+                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
+                .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
+
+            assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
+            assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
+        });
+    }
+
+    @Test
+    void runWithOnlyOOBError() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR");
+
+        var modelCandidate = RandomForestClassifierTrainerConfig.DEFAULT;
+        pipeline.addTrainerConfig(modelCandidate);
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            GRAPH_NAME_WITH_RELATIONSHIPS,
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var ncTrain = ncTrain(pipeline, config, caller, ProgressTracker.NULL_TRACKER);
+
+            var actualModel = ncTrain.compute().modelResult().model();
+            assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
+                Map.of("OUT_OF_BAG_ERROR", Map.of(
+                    "test", 0.5,
+                    "validation", Map.of("avg", 0.8333333333333333, "max", 1.0, "min", 0.6666666666666666))
+                )
+            );
+            assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
+        });
+    }
 
     @ParameterizedTest
     @MethodSource("metricArguments")
@@ -139,15 +309,9 @@ class NodeClassificationTrainTest {
                 TrainingMethod.RandomForestClassification
             ));
 
-        var config = createConfig("model", metricSpecification, 1L);
+        var config = createConfig("model", GRAPH_NAME, metricSpecification, 1L);
 
-        var ncTrain = NodeClassificationTrain.create(
-            graph,
-            pipeline,
-            config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var ncTrain = ncTrainNoSteps(pipeline, config);
 
         var result = ncTrain.compute();
 
@@ -168,6 +332,27 @@ class NodeClassificationTrainTest {
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
+    }
+
+    @Test
+    void failsOnInvalidTargetProperty() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.featureProperties().add("array");
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .username(getUsername())
+            .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
+            .modelName("myModel")
+            .targetProperty("INVALID_PROPERTY")
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1(class=1)")))
+            .build();
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            assertThatThrownBy(() -> ncTrain(pipeline, config, caller, ProgressTracker.NULL_TRACKER))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
+        });
     }
 
     @ParameterizedTest
@@ -214,9 +399,9 @@ class NodeClassificationTrainTest {
             ));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .graphName("IGNORE")
-            .pipeline("IGNORE")
-            .username("IGNORE")
+            .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
+            .username(getUsername())
             .modelName("anyThing")
             .concurrency(1)
             .randomSeed(42L)
@@ -230,13 +415,7 @@ class NodeClassificationTrainTest {
             )
             .build();
 
-        var ncTrain = NodeClassificationTrain.create(
-            graph,
-            pipeline,
-            config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var ncTrain = ncTrainNoSteps(pipeline, config);
 
         var result = ncTrain.compute();
 
@@ -281,9 +460,9 @@ class NodeClassificationTrainTest {
             ));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .graphName("IGNORE")
-            .pipeline("IGNORE")
-            .username("IGNORE")
+            .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
+            .username(getUsername())
             .modelName("anyThing")
             .concurrency(1)
             .randomSeed(42L)
@@ -291,13 +470,7 @@ class NodeClassificationTrainTest {
             .metrics(List.of(ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR")))
             .build();
 
-        var ncTrain = NodeClassificationTrain.create(
-            graph,
-            pipeline,
-            config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var ncTrain = ncTrainNoSteps(pipeline, config);
 
         var result = ncTrain.compute();
 
@@ -333,15 +506,9 @@ class NodeClassificationTrainTest {
             .map(LogisticRegressionTrainConfig::of)
             .forEach(bananasPipeline::addTrainerConfig);
 
-        var bananasConfig = createConfig("bananasModel", metricSpecification, 1337L);
+        var bananasConfig = createConfig("bananasModel", GRAPH_NAME, metricSpecification, 1337L);
 
-        var bananasTrain = NodeClassificationTrain.create(
-            graph,
-            bananasPipeline,
-            bananasConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var bananasTrain = ncTrainNoSteps(bananasPipeline, bananasConfig);
 
         var arrayPipeline = new NodeClassificationTrainingPipeline();
         arrayPipeline.setSplitConfig(SPLIT_CONFIG);
@@ -356,16 +523,11 @@ class NodeClassificationTrainTest {
 
         var arrayPropertyConfig = createConfig(
             "arrayPropertyModel",
+            GRAPH_NAME,
             metricSpecification,
             42L
         );
-        var arrayPropertyTrain = NodeClassificationTrain.create(
-            graph,
-            arrayPipeline,
-            arrayPropertyConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var arrayPropertyTrain = ncTrainNoSteps(arrayPipeline, arrayPropertyConfig);
 
         var bananasModelTrainResult = bananasTrain.compute();
         var bananasClassifier = bananasModelTrainResult.classifier();
@@ -409,24 +571,77 @@ class NodeClassificationTrainTest {
         );
 
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var config = createConfig("bananasModel", metrics, 42L);
+        var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
         var progressTask = progressTask(
-            pipeline.splitConfig(),
-            pipeline.numberOfModelSelectionTrials(),
+            pipeline,
             graph.nodeCount()
         );
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
-
-        progressTracker.beginSubTask();
-        NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
-        progressTracker.endSubTask();
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.loggingOnly(progressTracker);
+        NodeClassificationTrain
+            .create(graphStore, graph, pipeline, config, nodePropertyStepExecutor, progressTracker)
+            .compute();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-log"));
+    }
+
+    @Test
+    void shouldLogWarnings() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+
+        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
+        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
+
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
+
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
+            .testFraction(0.3)
+            .validationFolds(2)
+            .build()
+        );
+
+        var config = createConfig(
+            "model",
+            GRAPH_NAME_WITH_RELATIONSHIPS,
+            metricSpecification,
+            1L
+        );
+
+        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
+            var log = Neo4jProxy.testLog();
+            var progressTracker = new TestProgressTracker(
+                    NodeClassificationTrainPipelineAlgorithmFactory.progressTask(graphStoreWithRelationships, pipeline),
+                log,
+                1,
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            var ncTrain = ncTrain(pipeline, config, caller, progressTracker);
+
+            ncTrain.compute();
+
+            assertThat(log.getMessages(TestLog.WARN))
+                .extracting(removingThreadId())
+                .containsExactly(
+                    "Node Classification Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
+                    "Proceeding with such a small set might lead to unreliable results.",
+                    "Node Classification Train Pipeline :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
+                    "Proceeding with such small sets might lead to unreliable results."
+                );
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .contains(
+                    "Node Classification Train Pipeline :: Train set size is 6",
+                    "Node Classification Train Pipeline :: Test set size is 3"
+                );
+        });
     }
 
     @Test
@@ -445,15 +660,16 @@ class NodeClassificationTrainTest {
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var config = createConfig("bananasModel", metrics, 42L);
+        var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
-        var progressTask = progressTask(pipeline.splitConfig(), MAX_TRIALS, graph.nodeCount());
+        var progressTask = progressTask(pipeline, graph.nodeCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.loggingOnly(progressTracker);
 
-        progressTracker.beginSubTask();
-        NodeClassificationTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
-        progressTracker.endSubTask();
+        NodeClassificationTrain
+            .create(graphStore, graph, pipeline, config, nodePropertyStepExecutor, progressTracker)
+            .compute();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
@@ -478,9 +694,9 @@ class NodeClassificationTrainTest {
         );
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .graphName("IGNORE")
-            .pipeline("IGNORE")
-            .username("IGNORE")
+            .pipeline(PIPELINE_NAME)
+            .graphName(GRAPH_NAME)
+            .username(getUsername())
             .modelName("model")
             .randomSeed(42L)
             .targetProperty("t")
@@ -489,11 +705,12 @@ class NodeClassificationTrainTest {
             .build();
 
         Supplier<NodeClassificationTrain> algoSupplier = () -> NodeClassificationTrain.create(
+            graphStore,
             graph,
             pipeline,
             config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            NodePropertyStepExecutor.NOOP,
+            ProgressTracker.NULL_TRACKER
         );
 
         var firstResult = algoSupplier.get().compute();
@@ -506,28 +723,168 @@ class NodeClassificationTrainTest {
             ));
     }
 
-    private static Task progressTask(NodePropertyPredictionSplitConfig splitConfig, int trials, long nodeCount) {
+    @ParameterizedTest
+    @MethodSource("trainerMethodConfigs")
+    void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            "testProc",
+            Map.of("mutateProperty", "pr")
+        ));
+        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
+            "testProc", Map.of("mutateProperty", "myNewProp"))
+        );
+        pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
+
+        for (TunableTrainerConfig tunableConfig : tunableConfigs) {
+            pipeline.addTrainerConfig(tunableConfig);
+        }
+
+        // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
+        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .pipeline(PIPELINE_NAME)
+            .username("myUser")
+            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .relationshipTypes(List.of("SOME_REL"))
+            .nodeLabels(List.of("SOME_LABEL"))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
+            .build();
+
+        var memoryEstimation = NodeClassificationTrain.estimate(pipeline, config, new OpenModelCatalog());
+        assertMemoryEstimation(
+            () -> memoryEstimation,
+            graphStoreWithRelationships.nodeCount(),
+            graphStoreWithRelationships.relationshipCount(),
+            config.concurrency(),
+            memoryRange
+        );
+    }
+
+    @Test
+    void failEstimateOnEmptyParameterSpace() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .pipeline(PIPELINE_NAME)
+            .username("myUser")
+            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
+            .modelName("myModel")
+            .concurrency(1)
+            .randomSeed(42L)
+            .targetProperty("t")
+            .relationshipTypes(List.of("SOME_REL"))
+            .nodeLabels(List.of("SOME_LABEL"))
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
+            .build();
+
+        assertThatThrownBy(() -> NodeClassificationTrain.estimate(pipeline, config, new OpenModelCatalog()))
+            .hasMessage("Need at least one model candidate for training.");
+    }
+
+    public static Stream<Arguments> trainerMethodConfigs() {
+        return Stream.of(
+            Arguments.of(
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
+                MemoryRange.of(778_968, 810_928)
+            ),
+            Arguments.of(
+                List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
+                MemoryRange.of(90_906, 207_678)
+            ),
+            Arguments.of(
+                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(), RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
+                MemoryRange.of(859_936, 927_176)
+            ),
+            Arguments.of(
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(859_936, 927_176)
+            ),
+            Arguments.of(
+                List.of(
+                    TunableTrainerConfig.of(
+                        Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
+                        TrainingMethod.LogisticRegression
+                    ),
+                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
+                ),
+                MemoryRange.of(430_030_336, 430_097_576)
+            )
+        );
+    }
+
+
+    private static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
         return Tasks.task(
             "MY DUMMY TASK",
-            NodeClassificationTrain.progressTasks(splitConfig, trials, nodeCount)
+            NodeClassificationTrain.progressTasks(pipeline, nodeCount)
         );
     }
 
     private NodeClassificationPipelineTrainConfig createConfig(
         String modelName,
+        String graphName,
         ClassificationMetricSpecification metricSpecification,
         long randomSeed
     ) {
         return NodeClassificationPipelineTrainConfigImpl.builder()
-            .graphName("IGNORE")
-            .pipeline("IGNORE")
-            .username("IGNORE")
+            .pipeline(PIPELINE_NAME)
+            .graphName(graphName)
+            .username(getUsername())
             .modelName(modelName)
             .concurrency(1)
             .randomSeed(randomSeed)
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .build();
+    }
+
+    private NodeClassificationTrain ncTrainNoSteps(
+        NodeClassificationTrainingPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config
+    ) {
+        return NodeClassificationTrain.create(
+            graphStore,
+            graph,
+            pipeline,
+            config,
+            NodePropertyStepExecutor.NOOP,
+            ProgressTracker.NULL_TRACKER
+        );
+    }
+
+    private NodeClassificationTrain ncTrain(
+        NodeClassificationTrainingPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config,
+        TestProc caller,
+        ProgressTracker progressTracker
+    ) {
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            caller.executionContext(),
+            graphStoreWithRelationships,
+            config,
+            progressTracker
+        );
+        return NodeClassificationTrain.create(
+            graphStoreWithRelationships,
+            graphStoreWithRelationships.getUnion(),
+            pipeline,
+            config,
+            nodePropertyStepExecutor,
+            progressTracker
+        );
     }
 
     static Stream<Arguments> metricArguments() {
