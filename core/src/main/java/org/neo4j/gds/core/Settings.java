@@ -20,6 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingImpl;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
@@ -32,6 +33,8 @@ import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
+
+import static org.neo4j.configuration.SettingValueParsers.BOOL;
 
 public final class Settings {
 
@@ -107,6 +110,25 @@ public final class Settings {
         } catch (Throwable e) {
             throw new IllegalStateException(
                 "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
+        }
+    }
+
+    public static Setting<Boolean> replicationEnabled() {
+        try {
+            var enterpriseInternalSettings = Class.forName(
+                "com.neo4j.configuration.EnterpriseEditionInternalSettings");
+            var enableReplicationSettingHandle = MethodHandles
+                .lookup()
+                .findStaticGetter(enterpriseInternalSettings, "enable_replication", Setting.class);
+            var enableReplicationSetting = enableReplicationSettingHandle.invoke();
+            //noinspection unchecked
+            return (Setting<Boolean>) enableReplicationSetting;
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            // Only recent 5.0 has this setting defined, redefine it for previous versions
+            return SettingImpl.newBuilder("internal.dbms.replication.enable", BOOL, true).build();
+        } catch (Throwable e) {
+            throw new IllegalStateException(
+                "The enable_replication setting requires Neo4j Enterprise Edition to be available.");
         }
     }
 
