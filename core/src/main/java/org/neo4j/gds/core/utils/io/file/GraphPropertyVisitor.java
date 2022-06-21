@@ -24,5 +24,4 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import java.io.Flushable;
 
 public abstract class GraphPropertyVisitor extends InputEntityVisitor.Adapter implements Flushable {
-    public abstract boolean property(String key, Object value);
 }
