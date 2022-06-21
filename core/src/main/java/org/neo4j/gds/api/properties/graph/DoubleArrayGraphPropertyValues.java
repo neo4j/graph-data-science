@@ -61,4 +61,18 @@ public interface DoubleArrayGraphPropertyValues extends GraphPropertyValues {
     default ValueType valueType() {
         return ValueType.DOUBLE_ARRAY;
     }
+
+    static DoubleArrayGraphPropertyValues ofDoubleArrayStream(Stream<double[]> doubleArrayStream) {
+        return new DoubleArrayGraphPropertyValues() {
+            @Override
+            public Stream<double[]> doubleArrayValues() {
+                return doubleArrayStream;
+            }
+
+            @Override
+            public long size() {
+                return -1;
+            }
+        };
+    }
 }

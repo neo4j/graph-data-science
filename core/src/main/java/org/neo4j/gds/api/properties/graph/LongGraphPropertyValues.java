@@ -58,4 +58,18 @@ public interface LongGraphPropertyValues extends GraphPropertyValues {
             return ValueConversion.exactLongToDouble(value);
         });
     }
+
+    static LongGraphPropertyValues ofLongStream(LongStream longStream) {
+        return new LongGraphPropertyValues() {
+            @Override
+            public LongStream longValues() {
+                return longStream;
+            }
+
+            @Override
+            public long size() {
+                return -1L;
+            }
+        };
+    }
 }
