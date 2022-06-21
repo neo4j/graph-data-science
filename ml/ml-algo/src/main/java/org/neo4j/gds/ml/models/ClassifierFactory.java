@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
@@ -69,7 +70,7 @@ public final class ClassifierFactory {
                 return RandomForestClassifier.runtimeOverheadMemoryEstimation(numberOfClasses);
             case MLPClassification:
                 //TODO Implement MLP memory estimation
-                return null;
+                return MemoryRange.empty();
             default:
                 throw new IllegalStateException("No such classifier.");
         }
@@ -90,6 +91,9 @@ public final class ClassifierFactory {
                     numberOfTrainingSamples,
                     (RandomForestTrainerConfig) trainerConfig
                 );
+            case MLPClassification:
+                //TODO Implement MLP memory estimation
+                return MemoryEstimations.empty();
             default:
                 throw new IllegalStateException("No such classifier.");
         }

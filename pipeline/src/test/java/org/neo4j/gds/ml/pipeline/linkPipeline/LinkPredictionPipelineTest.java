@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
@@ -176,7 +177,8 @@ class LinkPredictionPipelineTest {
                 .returns(
                     Map.of(
                         TrainingMethod.LogisticRegression.toString(), List.of(),
-                        TrainingMethod.RandomForestClassification.toString(), List.of()
+                        TrainingMethod.RandomForestClassification.toString(), List.of(),
+                        TrainingMethod.MLPClassification.toString(), List.of()
                     ),
                     pipelineMap -> pipelineMap.get("trainingParameterSpace")
                 ).returns(
@@ -207,6 +209,10 @@ class LinkPredictionPipelineTest {
                     .minSplitSize(2)
                     .numberOfDecisionTrees(1)
                     .build()
+            );
+
+            pipeline.addTrainerConfig(
+                MLPClassifierTrainConfigImpl.builder().batchSize(100).maxEpochs(10).minEpochs(2).learningRate(0.1).patience(3).tolerance(0.001).build()
             );
 
             var splitConfig = LinkPredictionSplitConfigImpl.builder().trainFraction(0.01).testFraction(0.5).build();
@@ -244,6 +250,9 @@ class LinkPredictionPipelineTest {
                         TrainingMethod.RandomForestClassification.toString(), pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification)
                             .stream()
                             .map(TunableTrainerConfig::toMap)
+                            .collect(Collectors.toList()),
+                        TrainingMethod.MLPClassification.toString(), pipeline.trainingParameterSpace().get(TrainingMethod.MLPClassification)
+                            .stream().map(TunableTrainerConfig::toMap)
                             .collect(Collectors.toList())
                     ),
                       pipelineMap -> pipelineMap.get("trainingParameterSpace")

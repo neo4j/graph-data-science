@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.models;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -112,6 +113,10 @@ public final class ClassifierTrainerFactory {
                     featureDimension,
                    (RandomForestClassifierTrainerConfig) config
                 );
+            }
+            case MLPClassification: {
+                //TODO Implement MLP memory estimation
+                return MemoryEstimations.empty();
             }
             default:
                 throw new IllegalStateException("No such training method.");
