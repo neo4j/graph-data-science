@@ -76,18 +76,17 @@ public class DFS extends Algorithm<HugeLongArray> {
             final long node = nodes.pop();
             final double weight = weights.pop();
 
-            var exitPredicateResult = exitPredicate.test(source, node, weight);
-            if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
-                continue;
-            } else {
-                if (!inResult.getAndSet(node)) {
-                    result.set(resultIndex, node);
-                    resultIndex++;
-                }
-                if (exitPredicateResult == ExitPredicate.Result.BREAK) {
-                    break;
-                }
+
+            if (!inResult.getAndSet(node)) {
+                result.set(resultIndex, node);
+                resultIndex++;
             }
+            var exitPredicateResult = exitPredicate.test(source, node, weight);
+
+            if (exitPredicateResult == ExitPredicate.Result.BREAK) {
+                break;
+            }
+
 
             // For disconnected graphs or early termination, this will not reach 100
             progressTracker.logProgress(graph.degree(node));
