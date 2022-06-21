@@ -54,11 +54,15 @@ public class F1Weighted implements ClassificationMetric {
             return 0.0;
         }
 
-        var weightedScores = classIdMap.getMappings()
-            .mapToDouble(idMap -> {
-                var weight = globalClassCounts.count(idMap.key);
-                return weight * new F1Score(idMap.key, idMap.value).compute(targets, predictions);
-            });
+        var weights = new long[(int) globalClassCounts.size()];
+        for (long i = 0; i < targets.size(); i ++) {
+            weights[targets.get(i)] += 1;
+        }
+
+        var weightedScores = classIdMap.getMappings().mapToDouble(idMap -> {
+            var weight = weights[idMap.value];
+            return weight * new F1Score(idMap.key, idMap.value).compute(targets, predictions);
+        });
         return weightedScores.sum() / predictions.size();
     }
 
