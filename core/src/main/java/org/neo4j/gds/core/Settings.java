@@ -20,7 +20,6 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.configuration.GraphDatabaseSettings;
-import org.neo4j.configuration.SettingImpl;
 import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
@@ -117,7 +116,7 @@ public final class Settings {
         );
     }
 
-    private static <T, U> T tryConfigure(
+    public static <T, U> T tryConfigure(
         T builder,
         SetConfig<T, U> setConfig,
         String className,
@@ -130,9 +129,10 @@ public final class Settings {
             var settingHandle = lookup.findStaticGetter(settingsClass, settingName, Setting.class);
             //noinspection unchecked
             var setting = (Setting<U>) settingHandle.invoke();
-            setConfig.set(builder, setting, settingValue);
+            return setConfig.set(builder, setting, settingValue);
         } catch (ClassNotFoundException | NoSuchFieldException e) {
             // Setting is not available on this version
+            return builder;
         } catch (Throwable e) {
             // Actually applying the setting failed
             throw new IllegalStateException(formatWithLocale(
@@ -141,8 +141,6 @@ public final class Settings {
                 e.getMessage()
             ), e);
         }
-
-        return builder;
     }
 
     public static Setting<List<String>> procedureUnrestricted() {
@@ -170,6 +168,6 @@ public final class Settings {
     }
 
     public interface SetConfig<T, S> {
-        void set(T config, Setting<S> setting, S value);
+        T set(T config, Setting<S> setting, S value);
     }
 }
