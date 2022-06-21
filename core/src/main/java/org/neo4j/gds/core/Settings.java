@@ -34,7 +34,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
 
-import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class Settings {
 
@@ -97,39 +97,52 @@ public final class Settings {
         return GraphDatabaseSettings.store_internal_log_path;
     }
 
-    public static Setting<Boolean> onlineBackupEnabled() {
-        try {
-            Class<?> onlineSettingsClass = Class.forName(
-                "com.neo4j.configuration.OnlineBackupSettings");
-            var onlineBackupEnabled = MethodHandles
-                .lookup()
-                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
-                .invoke();
-            //noinspection unchecked
-            return (Setting<Boolean>) onlineBackupEnabled;
-        } catch (Throwable e) {
-            throw new IllegalStateException(
-                "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
-        }
+    public static <T> T disableOnlineBackup(T builder, SetConfig<T, Boolean> setConfig) {
+        return tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.OnlineBackupSettings",
+            "online_backup_enabled",
+            Boolean.FALSE
+        );
     }
 
-    public static Setting<Boolean> replicationEnabled() {
+    public static <T> T disableReplication(T builder, SetConfig<T, Boolean> setConfig) {
+        return tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.EnterpriseEditionInternalSettings",
+            "enable_replication",
+            Boolean.FALSE
+        );
+    }
+
+    private static <T, U> T tryConfigure(
+        T builder,
+        SetConfig<T, U> setConfig,
+        String className,
+        String settingName,
+        U settingValue
+    ) {
+        var lookup = MethodHandles.lookup();
         try {
-            var enterpriseInternalSettings = Class.forName(
-                "com.neo4j.configuration.EnterpriseEditionInternalSettings");
-            var enableReplicationSettingHandle = MethodHandles
-                .lookup()
-                .findStaticGetter(enterpriseInternalSettings, "enable_replication", Setting.class);
-            var enableReplicationSetting = enableReplicationSettingHandle.invoke();
+            var settingsClass = Class.forName(className);
+            var settingHandle = lookup.findStaticGetter(settingsClass, settingName, Setting.class);
             //noinspection unchecked
-            return (Setting<Boolean>) enableReplicationSetting;
+            var setting = (Setting<U>) settingHandle.invoke();
+            setConfig.set(builder, setting, settingValue);
         } catch (ClassNotFoundException | NoSuchFieldException e) {
-            // Only recent 5.0 has this setting defined, redefine it for previous versions
-            return SettingImpl.newBuilder("internal.dbms.replication.enable", BOOL, true).build();
+            // Setting is not available on this version
         } catch (Throwable e) {
-            throw new IllegalStateException(
-                "The enable_replication setting requires Neo4j Enterprise Edition to be available.");
+            // Actually applying the setting failed
+            throw new IllegalStateException(formatWithLocale(
+                "The %s setting could not be configured: %s",
+                settingName,
+                e.getMessage()
+            ), e);
         }
+
+        return builder;
     }
 
     public static Setting<List<String>> procedureUnrestricted() {
@@ -154,5 +167,9 @@ public final class Settings {
 
     private Settings() {
         throw new UnsupportedOperationException();
+    }
+
+    public interface SetConfig<T, S> {
+        void set(T config, Setting<S> setting, S value);
     }
 }
