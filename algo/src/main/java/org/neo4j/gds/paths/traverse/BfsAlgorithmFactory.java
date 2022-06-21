@@ -49,7 +49,7 @@ public class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgo
             aggregatorFunction = Aggregator.NO_AGGREGATION;
             // maxDepth given; continue to aggregate nodes with lower depth until no more nodes left
         } else if (configuration.hasMaxDepth()) {
-            exitFunction = new MaxDepthExitPredicate(configuration.maxDepth());
+            exitFunction = ExitPredicate.FOLLOW;
             aggregatorFunction = new OneHopAggregator();
             // do complete BFS until all nodes have been visited
         } else {
