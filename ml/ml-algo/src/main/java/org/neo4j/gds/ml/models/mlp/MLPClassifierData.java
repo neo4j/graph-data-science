@@ -42,30 +42,14 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
 
     default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
-    //TODO Check indexing same with common libraries
-    static MLPClassifierData create(int classCount, int featureCount, boolean initializeWeights) {
-        Weights<Matrix> inputWeights;
-        Weights<Matrix> outputWeights;
-        Weights<Vector> inputBias;
-        Weights<Vector> outputBias;
-        if (initializeWeights) {
-            inputWeights = generateWeights(featureCount,featureCount,42L);
-            outputWeights = generateWeights(classCount,featureCount,42L);
-            inputBias = new Weights<>(Vector.create(0.1,featureCount));
-            outputBias = new Weights<>(Vector.create(0.1,classCount));
-        } else {
-            inputWeights = Weights.ofMatrix(featureCount, featureCount);
-            outputWeights = Weights.ofMatrix(classCount, featureCount);
-            inputBias = new Weights<>(new Vector(featureCount));
-            outputBias = new Weights<>(new Vector(classCount));
-        }
+    static MLPClassifierData create(int classCount, int featureCount) {
 
         return ImmutableMLPClassifierData
             .builder()
-            .inputWeights(inputWeights)
-            .outputWeights(outputWeights)
-            .inputBias(inputBias)
-            .outputBias(outputBias)
+            .inputWeights(generateWeights(featureCount,featureCount,42L))
+            .outputWeights(generateWeights(classCount,featureCount,42L))
+            .inputBias(new Weights<>(Vector.create(0.1,featureCount)))
+            .outputBias(new Weights<>(Vector.create(0.1,classCount)))
             .numberOfClasses(classCount)
             .featureDimension(featureCount)
             .build();

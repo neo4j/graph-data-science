@@ -48,8 +48,12 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(classifier.data().inputWeights(), classifier.data().outputWeights(), classifier.data()
-            .inputBias(), classifier.data().outputBias());
+        return List.of(
+            classifier.data().inputWeights(),
+            classifier.data().outputWeights(),
+            classifier.data().inputBias(),
+            classifier.data().outputBias()
+        );
     }
 
     @Override
@@ -71,13 +75,12 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
         var batchedTargets = new Vector(batch.size());
         var batchOffset = new MutableInt();
 
-        batch.elementIds().forEach(elementId ->
+        for (long elementId: batch.elementIds()) {
             batchedTargets.setDataAt(
                 batchOffset.getAndIncrement(),
                 labels.get(elementId)
-            )
-        );
-
+            );
+        }
         return new Constant<>(batchedTargets);
     }
 

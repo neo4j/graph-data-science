@@ -33,7 +33,7 @@ class MLPClassifierObjectiveTest {
 
     @Test
     void shouldCalculateCrossEntropyLoss() {
-        var data = MLPClassifierData.create(3,2, false);
+        var data = MLPClassifierData.create(3,2);
         var classifier = new MLPClassifier(data);
         var featuresHOA = HugeObjectArray.of(
             new double[]{0.1, 1.1},
@@ -49,9 +49,8 @@ class MLPClassifierObjectiveTest {
         var loss = objective.loss(batch, 0);
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
-        //System.out.println(ctx.render());
 
-        assertThat(lossValue).isCloseTo(1.098612288, Offset.offset(1e-08));
+        assertThat(lossValue).isCloseTo(1.2010265643776676, Offset.offset(1e-08));
     }
 
 }

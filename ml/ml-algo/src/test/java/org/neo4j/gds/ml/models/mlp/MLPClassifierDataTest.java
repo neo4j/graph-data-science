@@ -27,24 +27,21 @@ class MLPClassifierDataTest {
 
     @Test
     void shouldCreateData() {
-        var data = MLPClassifierData.create(3, 4, false);
+        var data = MLPClassifierData.create(3, 4);
         var inputMatrix = data.inputWeights().data();
         var outputMatrix = data.outputWeights().data();
         var inputBias = data.inputBias().data();
-        var outputBiss = data.outputBias().data();
-
+        var outputBias = data.outputBias().data();
 
         assertThat(inputMatrix.rows()).isEqualTo(4);
         assertThat(inputMatrix.cols()).isEqualTo(4);
-        assertThat(inputMatrix.data()).containsExactly(new double[16]);
 
         assertThat(outputMatrix.rows()).isEqualTo(3);
         assertThat(outputMatrix.cols()).isEqualTo(4);
-        assertThat(outputMatrix.data()).containsExactly(new double[12]);
 
-        assertThat(inputBias.data()).containsExactly(new double[4]);
+        assertThat(inputBias.length()).isEqualTo(4);
 
-        assertThat(outputBiss.data()).containsExactly(new double[3]);
+        assertThat(outputBias.length()).isEqualTo(3);
 
     }
 
