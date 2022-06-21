@@ -35,7 +35,7 @@ class F1WeightedTest {
     private HugeLongArray originalPredictions;
     private HugeIntArray targets;
     private HugeIntArray predictions;
-    private LongMultiSet classCounts;
+    private LongMultiSet globalClassCounts;
 
     private LocalIdMap localIdMap;
 
@@ -48,11 +48,18 @@ class F1WeightedTest {
             4, 4, 5, 5, 5, 8, 9, 1, 1, 2, 2, 3, 3, 4, 5
         );
 
-        classCounts = new LongMultiSet();
-        for (long target : originalTargets.toArray()) {
-            classCounts.add(target);
-        }
-        localIdMap = LocalIdMap.ofSorted(classCounts.keys());
+        globalClassCounts = new LongMultiSet();
+        globalClassCounts.add(1,11);
+        globalClassCounts.add(2, 12);
+        globalClassCounts.add(3, 13);
+        globalClassCounts.add(4, 14);
+        globalClassCounts.add(5, 15);
+        globalClassCounts.add(6, 16);
+        globalClassCounts.add(7, 17);
+        globalClassCounts.add(8, 18);
+        globalClassCounts.add(9, 19);
+
+        localIdMap = LocalIdMap.ofSorted(globalClassCounts.keys());
 
         predictions = HugeIntArray.newArray(originalPredictions.size());
         predictions.setAll(index -> localIdMap.toMapped(originalPredictions.get(index)));
@@ -62,9 +69,9 @@ class F1WeightedTest {
 
     @Test
     void shouldComputeF1AllCorrectMultiple() {
-        var totalF1 = 2 * 1.0 + 2 * 2.0/3.0 + 2 * 2.0/3.0 + 3 * 2.0/3.0;
-        var totalExamples = predictions.size();
-        assertThat(new F1Weighted(localIdMap, classCounts).compute(targets, predictions))
+        var totalF1 = 11 * 1.0 + 12 * 2.0/3.0 + 13 * 2.0/3.0 + 14 * 2.0/3.0;
+        var totalExamples = globalClassCounts.sum();
+        assertThat(new F1Weighted(localIdMap, globalClassCounts).compute(targets, predictions))
             .isCloseTo(totalF1 / totalExamples, Offset.offset(1e-8));
     }
 }
