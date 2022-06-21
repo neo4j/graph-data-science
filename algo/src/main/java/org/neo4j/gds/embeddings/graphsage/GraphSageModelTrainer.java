@@ -195,7 +195,7 @@ public class GraphSageModelTrainer {
 
         Variable<Matrix> embeddingVariable = embeddingsComputationGraph(subGraphs, layers, batchedFeaturesExtractor);
 
-        GraphSageLoss unsupervisedLoss = new GraphSageLoss(
+        Variable<Scalar> lossWithoutPenalty = new GraphSageLoss(
             SubGraph.relationshipWeightFunction(localGraph),
             embeddingVariable,
             extendedBatch,
@@ -213,14 +213,15 @@ public class GraphSageModelTrainer {
                 .collect(Collectors.toList());
 
             loss = new ElementSum(List.of(
-                unsupervisedLoss,
+                lossWithoutPenalty,
                 new ConstantScale<>(
                     new ElementSum(l2penalty),
+                    // we scale the penalty to achieve the same impact on the last (smaller) batch as on every other batch
                     config.penaltyL2() * originalBatchSize / graph.nodeCount()
                 )
             ));
         } else {
-            loss = unsupervisedLoss;
+            loss = lossWithoutPenalty;
         }
 
         return new BatchTask(loss, weights, progressTracker);
