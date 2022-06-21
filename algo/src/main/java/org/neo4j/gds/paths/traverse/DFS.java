@@ -98,17 +98,10 @@ public class DFS extends Algorithm<HugeLongArray> {
                     node,
                     (s, t) -> {
                         if (!visited.get(t)) {
-                            if (exitPredicate.test(
-                                node,
-                                t,
-                                aggregatorFunction.apply(s, t, weight)
-                            ) != ExitPredicate.Result.CONTINUE) {
                                 visited.set(t);
                                 sources.push(s);
                                 nodes.push(t);
                                 weights.push(aggregatorFunction.apply(s, t, weight));
-                            }
-
                         }
                         return terminationFlag.running();
                     }
