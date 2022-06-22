@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * <p>
  * This strategy allows accessing the predecessor node at each BFS-level.
  */
-public class PredecessorStrategy implements MultiSourceBFS.ExecutionStrategy {
+public class PredecessorStrategy implements ExecutionStrategy {
 
     private final BfsConsumer perNodeAction;
     private final BfsWithPredecessorConsumer perNeighborAction;

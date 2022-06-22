@@ -60,7 +60,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
             inverseFarness.update(nodeId, currentValue -> currentValue + (len * (1.0 / depth)));
         };
 
-        MultiSourceBFS.aggregatedNeighborProcessing(
+        MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
             graph.nodeCount(),
             graph,
             consumer

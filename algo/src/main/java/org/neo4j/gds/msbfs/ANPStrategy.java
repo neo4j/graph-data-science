@@ -42,7 +42,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
  * </li>
  * </ul>
  */
-public class ANPStrategy implements MultiSourceBFS.ExecutionStrategy {
+public class ANPStrategy implements ExecutionStrategy {
 
     final BfsConsumer perNodeAction;
 

@@ -112,7 +112,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
             progressTracker.logProgress();
         };
         MultiSourceBFS
-            .aggregatedNeighborProcessing(nodeCount, graph, consumer)
+            .aggregatedNeighborProcessingWithoutSourceNodes(nodeCount, graph, consumer)
             .run(concurrency, executorService);
         progressTracker.endSubTask();
     }

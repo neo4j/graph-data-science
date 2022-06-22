@@ -127,11 +127,10 @@ public class CollapsePath extends Algorithm<Relationships> {
             boolean allowSelfLoops,
             long[] startNodes
         ) {
-            return new MultiSourceBFS(
+            return MultiSourceBFS.createWithoutSeensNext(
                 graphs[0].nodeCount(),
                 graphs[0],
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
-                false,
                 allowSelfLoops,
                 startNodes
             );

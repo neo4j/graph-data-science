@@ -82,7 +82,7 @@ final class MultiSourceBFSTest extends BaseTest {
                     graph,
                     (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                     (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                    0, 1
+                    new long[]{0, 1}
                 );
 
                 msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -123,7 +123,7 @@ final class MultiSourceBFSTest extends BaseTest {
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
-                0, 1
+                new long[]{0, 1}
             );
 
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, Pools.DEFAULT);
@@ -142,7 +142,7 @@ final class MultiSourceBFSTest extends BaseTest {
     void testPredecessorWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
-            MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
+            MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessingWithoutSourceNodes(
                 graph,
                 (i, d, s) -> {},
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1))
@@ -193,7 +193,7 @@ final class MultiSourceBFSTest extends BaseTest {
     void testANPWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
@@ -234,7 +234,7 @@ final class MultiSourceBFSTest extends BaseTest {
                 gb -> gb.newGridBuilder().createGrid(8, 4),
                 graph -> {
                     Set<Pair<Long, Integer>> seen = new HashSet<>();
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
@@ -258,7 +258,7 @@ final class MultiSourceBFSTest extends BaseTest {
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
@@ -290,7 +290,7 @@ final class MultiSourceBFSTest extends BaseTest {
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {

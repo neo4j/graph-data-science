@@ -94,7 +94,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
         @Override
         public void run() {
-            MultiSourceBFS.aggregatedNeighborProcessing(
+            MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
                     graph.nodeCount(),
                     graph,
                     (target, distance, sources) -> {
