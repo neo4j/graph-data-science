@@ -107,13 +107,21 @@ public final class Settings {
     }
 
     public static <T> T disableReplication(T builder, SetConfig<T, Boolean> setConfig) {
-        return tryConfigure(
+        builder = tryConfigure(
             builder,
             setConfig,
             "com.neo4j.configuration.EnterpriseEditionInternalSettings",
             "enable_replication",
             Boolean.FALSE
         );
+        builder = tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.EnterpriseEditionInternalSettings",
+            "replication_enabled",
+            Boolean.FALSE
+        );
+        return builder;
     }
 
     public static <T, U> T tryConfigure(
