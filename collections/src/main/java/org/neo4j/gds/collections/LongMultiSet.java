@@ -21,6 +21,8 @@ package org.neo4j.gds.collections;
 
 import com.carrotsearch.hppc.LongLongHashMap;
 
+import java.util.Arrays;
+
 public class LongMultiSet {
 
     private final LongLongHashMap map;
@@ -46,4 +48,5 @@ public class LongMultiSet {
     public long size() {
         return map.size();
     }
+    public long sum() { return Arrays.stream(map.values).sum(); }
 }

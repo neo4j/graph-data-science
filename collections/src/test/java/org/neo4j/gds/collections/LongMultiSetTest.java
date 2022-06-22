@@ -45,4 +45,12 @@ class LongMultiSetTest {
         assertThat(actualSet.count(666)).isEqualTo(0);
     }
 
+    @Test
+    void sumShouldBeCorrect() {
+        var longMultiSet = new LongMultiSet();
+        longMultiSet.add(1, 10);
+        longMultiSet.add(42, 43);
+        assertThat(longMultiSet.sum()).isEqualTo(53);
+    }
+
 }

@@ -23,10 +23,22 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
 
+import java.util.stream.Collectors;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LocalIdMapTest {
+
+    @Test
+    void shouldGetMappingsCorrectly() {
+        LocalIdMap localIdMap = new LocalIdMap();
+        localIdMap.toMapped(42L);
+        localIdMap.toMapped(1L);
+        var mapList = localIdMap.getMappings().map(idMap -> idMap.key).collect(Collectors.toList());
+        assertThat(mapList).containsExactlyInAnyOrder(42L, 1L);
+    }
+
     @Test
     void shouldMapCorrectly() {
         LocalIdMap localIdMap = new LocalIdMap();
@@ -55,7 +67,7 @@ class LocalIdMapTest {
             assertEquals(i - 100, id);
             assertEquals(i, localIdMap.toOriginal(id));
             if (i % 3 == 1) {
-                assertEquals(id,localIdMap.toMapped(i));
+                assertEquals(id, localIdMap.toMapped(i));
             }
         }
     }
