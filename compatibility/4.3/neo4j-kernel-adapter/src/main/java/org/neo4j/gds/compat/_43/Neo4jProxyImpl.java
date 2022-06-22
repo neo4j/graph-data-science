@@ -98,9 +98,8 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -474,6 +473,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return logService.getUserLog(loggingClass);
+    }
+
+    @Override
+    public Log getInternalLog(LogService logService, Class<?> loggingClass) {
+        return logService.getInternalLog(loggingClass);
+    }
+
+    @Override
     public Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return new VirtualRelationshipImpl(id, startNode, endNode, type);
     }
@@ -488,14 +497,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
         PageCache pageCache,
-        LogProvider logProvider,
+        LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
         return RecordFormatSelector.selectForStore(
             databaseLayout,
             fs,
             pageCache,
-            NullLogService.getInstance().getInternalLogProvider(),
+            logService.getInternalLogProvider(),
             PageCacheTracer.NULL
         );
     }
@@ -534,9 +543,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
-        LogProvider logProvider
+        LogService logService
     ) {
-        return SslPolicyLoader.create(config, logProvider);
+        return SslPolicyLoader.create(config, logService.getInternalLogProvider());
     }
 
     @Override
@@ -544,10 +553,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogProvider internalLogProvider,
+        LogService logService,
         DependencyResolver dependencyResolver
     ) {
-        return RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
+        return RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider());
     }
 
     @Override

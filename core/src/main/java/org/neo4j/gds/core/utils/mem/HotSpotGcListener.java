@@ -19,7 +19,8 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
-import org.neo4j.logging.LogProvider;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.logging.internal.LogService;
 
 import javax.management.NotificationBroadcaster;
 import javax.management.NotificationListener;
@@ -39,14 +40,14 @@ final class HotSpotGcListener {
     private static final MethodHandle GET_USAGE_AFTER_GC;
 
     static Optional<NotificationListener> install(
-        LogProvider logProvider,
+        LogService logService,
         AtomicLong freeMemory,
         String[] poolNames,
         NotificationBroadcaster broadcaster
     ) {
         if (ENABLED) {
             GcListener listener = new GcListener(
-                logProvider.getLog(GcListener.class),
+                Neo4jProxy.getInternalLog(logService, GcListener.class),
                 freeMemory,
                 poolNames,
                 GC_NOTIFICATION_NAME,

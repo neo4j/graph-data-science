@@ -65,7 +65,7 @@ import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -214,6 +214,10 @@ public interface Neo4jProxyApi {
 
     TestLog testLog();
 
+    Log getUserLog(LogService logService, Class<?> loggingClass);
+
+    Log getInternalLog(LogService logService, Class<?> loggingClass);
+
     Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);
 
     GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir);
@@ -222,7 +226,7 @@ public interface Neo4jProxyApi {
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
         PageCache pageCache,
-        LogProvider logProvider,
+        LogService logService,
         PageCacheTracer pageCacheTracer
     );
 
@@ -241,14 +245,14 @@ public interface Neo4jProxyApi {
     SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
-        LogProvider logProvider
+        LogService logService
     );
 
     RecordFormats recordFormatSelector(
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogProvider internalLogProvider,
+        LogService logService,
         DependencyResolver dependencyResolver
     );
 
