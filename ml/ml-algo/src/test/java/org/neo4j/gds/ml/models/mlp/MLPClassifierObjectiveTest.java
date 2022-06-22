@@ -33,7 +33,7 @@ class MLPClassifierObjectiveTest {
 
     @Test
     void shouldCalculateCrossEntropyLoss() {
-        var data = MLPClassifierData.create(3,2, false);
+        var data = MLPClassifierData.create(3,2);
         var classifier = new MLPClassifier(data);
         var featuresHOA = HugeObjectArray.of(
             new double[]{0.1, 1.1},
