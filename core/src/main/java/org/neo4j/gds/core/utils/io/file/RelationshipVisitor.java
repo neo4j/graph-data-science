@@ -26,14 +26,17 @@ import org.neo4j.internal.batchimport.input.Group;
 
 import java.util.List;
 
-public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPropertySchema> {
+
+    private final RelationshipSchema relationshipSchema;
 
     private long currentStartNode;
     private long currentEndNode;
     private String relationshipType;
 
     protected RelationshipVisitor(RelationshipSchema relationshipSchema) {
-        super(relationshipSchema);
+        super(relationshipSchema.allProperties());
+        this.relationshipSchema = relationshipSchema;
         reset();
     }
 
@@ -92,7 +95,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipSch
 
     @Override
     protected List<RelationshipPropertySchema> getPropertySchema() {
-        return elementSchema.propertySchemasFor(RelationshipType.of(relationshipType));
+        return relationshipSchema.propertySchemasFor(RelationshipType.of(relationshipType));
     }
 
     @Override

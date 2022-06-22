@@ -211,6 +211,15 @@ public class CSRGraphStore implements GraphStore {
                 .from(graphStore.graphProperties)
                 .putIfAbsent(propertyKey, GraphProperty.of(propertyKey, propertyValues))
                 .build();
+
+            var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
+            newGraphPropertySchema.put(propertyKey, PropertySchema.of(propertyKey, propertyValues.valueType()));
+
+            this.schema = GraphSchema.of(
+                schema().nodeSchema(),
+                schema().relationshipSchema(),
+                newGraphPropertySchema
+            );
         });
     }
 
@@ -221,6 +230,15 @@ public class CSRGraphStore implements GraphStore {
                 .from(graphStore.graphProperties)
                 .removeProperty(propertyKey)
                 .build();
+
+            var newGraphPropertySchema = new HashMap<>(schema().graphProperties());
+            newGraphPropertySchema.remove(propertyKey);
+
+            this.schema = GraphSchema.of(
+                schema().nodeSchema(),
+                schema().relationshipSchema(),
+                newGraphPropertySchema
+            );
         });
     }
 

@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.utils.io;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -41,7 +43,14 @@ import org.neo4j.internal.id.IdValidator;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
@@ -51,7 +60,9 @@ public final class GraphStoreInput implements CompatInput {
     private final NodeStore nodeStore;
     private final RelationshipStore relationshipStore;
 
+    private final Set<GraphProperty> graphProperties;
     private final int batchSize;
+    private final int concurrency;
     private final IdMapFunction idMapFunction;
     private final IdMode idMode;
     private final Capabilities capabilities;
@@ -110,7 +121,9 @@ public final class GraphStoreInput implements CompatInput {
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         Capabilities capabilities,
+        Set<GraphProperty> graphProperties,
         int batchSize,
+        int concurrency,
         GraphStoreExporter.IdMappingType idMappingType
     ) {
         // Neo reserves node id 2^32 - 1 for handling special internal cases.
@@ -134,9 +147,29 @@ public final class GraphStoreInput implements CompatInput {
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("The range of original ids specified in the graph exceeds the limit", e);
             }
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, batchSize, idMappingType, IdMode.MAPPING);
+            return new GraphStoreInput(
+                metaDataStore,
+                nodeStore,
+                relationshipStore,
+                capabilities,
+                graphProperties,
+                batchSize,
+                concurrency,
+                idMappingType,
+                IdMode.MAPPING
+            );
         } else {
-            return new GraphStoreInput(metaDataStore, nodeStore, relationshipStore, capabilities, batchSize, idMappingType, IdMode.ACTUAL);
+            return new GraphStoreInput(
+                metaDataStore,
+                nodeStore,
+                relationshipStore,
+                capabilities,
+                graphProperties,
+                batchSize,
+                concurrency,
+                idMappingType,
+                IdMode.ACTUAL
+            );
         }
     }
 
@@ -145,14 +178,18 @@ public final class GraphStoreInput implements CompatInput {
         NodeStore nodeStore,
         RelationshipStore relationshipStore,
         Capabilities capabilities,
+        Set<GraphProperty> graphProperties,
         int batchSize,
+        int concurrency,
         IdMapFunction idMapFunction,
         IdMode idMode
     ) {
         this.metaDataStore = metaDataStore;
         this.nodeStore = nodeStore;
         this.relationshipStore = relationshipStore;
+        this.graphProperties = graphProperties;
         this.batchSize = batchSize;
+        this.concurrency = concurrency;
         this.idMapFunction = idMapFunction;
         this.idMode = idMode;
         this.capabilities = capabilities;
@@ -200,6 +237,119 @@ public final class GraphStoreInput implements CompatInput {
 
     public Capabilities capabilities() {
         return capabilities;
+    }
+
+    public InputIterable graphProperties() {
+        return () -> new GraphPropertyIterator(graphProperties.iterator(), concurrency);
+    }
+
+    static class GraphPropertyIterator implements InputIterator {
+
+        private final Iterator<GraphProperty> graphPropertyIterator;
+        private final int concurrency;
+        private final Queue<Spliterator<Object>> splits;
+        private @Nullable String currentPropertyName;
+
+        GraphPropertyIterator(Iterator<GraphProperty> graphPropertyIterator, int concurrency) {
+            this.graphPropertyIterator = graphPropertyIterator;
+            this.concurrency = concurrency;
+            this.splits = new ArrayBlockingQueue<>(concurrency);
+        }
+
+        @Override
+        public InputChunk newChunk() {
+            return new GraphPropertyInputChunk();
+        }
+
+        @Override
+        public synchronized boolean next(InputChunk chunk) throws IOException {
+            if (this.splits.isEmpty()) {
+                if (this.graphPropertyIterator.hasNext()) {
+                    initializeSplits();
+                } else {
+                    return false;
+                }
+            }
+
+            if (!this.splits.isEmpty()) {
+                ((GraphPropertyInputChunk) chunk).initialize(
+                    Objects.requireNonNull(currentPropertyName),
+                    this.splits.poll()
+                );
+                return true;
+            }
+
+            this.currentPropertyName = null;
+            return false;
+        }
+
+        @Override
+        public void close() throws IOException {
+
+        }
+
+        private void initializeSplits() {
+            var graphProperty = graphPropertyIterator.next();
+            var graphPropertySpliterator = graphProperty.values().objects().parallel().spliterator();
+
+            precomputeSplits(graphPropertySpliterator, concurrency);
+            this.currentPropertyName = graphProperty.key();
+        }
+
+        private void precomputeSplits(Spliterator<Object> root, int capacity) {
+            var originalCapacity = capacity;
+            var queue = new ArrayDeque<Spliterator<Object>>();
+            queue.add(root);
+            capacity--;
+
+            while (!queue.isEmpty() && capacity > 0) {
+                var spliterator = queue.poll();
+
+                var split = spliterator.trySplit();
+
+                if (split != null) {
+                    queue.offer(spliterator);
+                    queue.offer(split);
+                    capacity--;
+                } else {
+                    splits.add(spliterator);
+                }
+            }
+
+            addRemainingSplits(originalCapacity, queue);
+        }
+
+        private void addRemainingSplits(int capacity, ArrayDeque<Spliterator<Object>> queue) {
+            var queueIterator = queue.iterator();
+            for (int i = splits.size(); i < capacity && queueIterator.hasNext(); i++) {
+                splits.add(queueIterator.next());
+            }
+        }
+    }
+
+    static class GraphPropertyInputChunk implements InputChunk {
+
+        private String propertyName;
+        private Spliterator<Object> propertyValues;
+
+        void initialize(String propertyName, Spliterator<Object> propertyValues) {
+            this.propertyName = propertyName;
+            this.propertyValues = propertyValues;
+        }
+
+        @Override
+        public boolean next(InputEntityVisitor visitor) throws IOException {
+            if (propertyValues.tryAdvance(value -> visitor.property(propertyName, value))) {
+                visitor.endOfEntity();
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void close() throws IOException {
+
+        }
     }
 
     abstract static class GraphImporter implements InputIterator {
