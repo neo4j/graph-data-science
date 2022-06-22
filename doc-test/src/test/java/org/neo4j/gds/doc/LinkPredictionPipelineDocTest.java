@@ -65,6 +65,15 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/machine-learning/linkprediction-pipelines/index.adoc";
+        return "NOT LOOKED AT";
+    }
+
+    @Override
+    protected List<String> adocPaths() {
+        return List.of(
+            "pages/machine-learning/linkprediction-pipelines/config.adoc",
+            "pages/machine-learning/linkprediction-pipelines/training.adoc",
+            "pages/machine-learning/linkprediction-pipelines/predict.adoc"
+        );
     }
 }

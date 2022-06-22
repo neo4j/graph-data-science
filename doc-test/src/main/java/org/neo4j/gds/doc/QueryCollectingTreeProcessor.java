@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -57,7 +56,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     private List<String> beforeAllQueries;
     private List<String> beforeEachQueries;
-    private List<QueryExampleGroup> queryExamples;
+    private HashMap<String, List<QueryExample>> queryExampleMap;
 
     public List<String> beforeAllQueries() {
         return beforeAllQueries;
@@ -68,14 +67,25 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
     }
 
     public List<QueryExampleGroup> queryExamples() {
-        return queryExamples;
+        return queryExampleMap
+            .entrySet()
+            .stream()
+            .map(entry -> ImmutableQueryExampleGroup.of(entry.getKey(), entry.getValue()))
+            .collect(Collectors.toList());
+    }
+
+    public QueryCollectingTreeProcessor() {
+        super();
+        this.beforeAllQueries = new ArrayList<>();
+        this.beforeEachQueries = new ArrayList<>();
+        this.queryExampleMap = new HashMap<>();
     }
 
     @Override
     public Document process(Document document) {
-        beforeAllQueries = collectBeforeAllQueries(document);
-        beforeEachQueries = collectBeforeEachQueries(document);
-        queryExamples = collectQueryExamples(document);
+        beforeAllQueries.addAll(collectBeforeAllQueries(document));
+        beforeEachQueries.addAll(collectBeforeEachQueries(document));
+        collectQueryExamples(document);
         return document;
     }
 
@@ -98,56 +108,54 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     }
 
-    private List<QueryExampleGroup> collectQueryExamples(StructuralNode node) {
-        var queryExampleNodes = node.findBy(Map.of(ROLE_SELECTOR, QUERY_EXAMPLE_ROLE));
-        var groupedQueryExampleNodes = collectQueryExampleNodes(queryExampleNodes);
+    private void collectQueryExamples(StructuralNode node) {
+        var queryExampleNodesRaw = node.findBy(Map.of(ROLE_SELECTOR, QUERY_EXAMPLE_ROLE));
+        HashMap<String, List<StructuralNode>> groupedQueryExampleNodes = collectQueryExampleNodes(queryExampleNodesRaw);
 
-        List<QueryExampleGroup> queryExampleGroups = new ArrayList<>();
+        groupedQueryExampleNodes.forEach((displayName, queryExampleNodes) -> {
+            List<QueryExample> queryExamples = queryExampleNodes.stream().map(this::convertToQueryExample).collect(
+                Collectors.toList());
 
-        groupedQueryExampleNodes.forEach((displayName, groupedQueryExamples) -> {
-            var groupBuilder = QueryExampleGroup.builder().displayName(displayName);
+            // assume the oldValue is always on the left side
+            queryExampleMap.merge(displayName, queryExamples, (oldValue, newValue) -> {
+                oldValue.addAll(newValue);
+                return oldValue;
+            });
 
-            groupedQueryExamples.forEach(collectQueryExample(groupBuilder));
-
-            queryExampleGroups.add(groupBuilder.build());
         });
-
-        return queryExampleGroups;
     }
 
-    private Consumer<StructuralNode> collectQueryExample(ImmutableQueryExampleGroup.Builder groupBuilder) {
-        return queryExampleNode -> {
-            var codeBlock = findByContext(queryExampleNode, CODE_BLOCK_CONTEXT);
-            var query = undoReplacements(codeBlock.getContent().toString());
+    private QueryExample convertToQueryExample(StructuralNode queryExampleNode) {
+        var codeBlock = findByContext(queryExampleNode, CODE_BLOCK_CONTEXT);
+        var query = undoReplacements(codeBlock.getContent().toString());
 
-            var queryExampleBuilder = QueryExample.builder().query(query);
+        var queryExampleBuilder = QueryExample.builder().query(query);
 
-            if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
-                queryExampleBuilder.assertResults(false);
-            } else {
-                var resultsTable = (Table) findByContext(queryExampleNode, TABLE_CONTEXT);
+        if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {
+            queryExampleBuilder.assertResults(false);
+        } else {
+            var resultsTable = (Table) findByContext(queryExampleNode, TABLE_CONTEXT);
 
-                var resultColumns = resultsTable.getHeader().get(0).getCells()
-                    .stream()
-                    .map(Cell::getText)
-                    .collect(Collectors.toList());
+            var resultColumns = resultsTable.getHeader().get(0).getCells()
+                .stream()
+                .map(Cell::getText)
+                .collect(Collectors.toList());
 
-                queryExampleBuilder.resultColumns(resultColumns);
+            queryExampleBuilder.resultColumns(resultColumns);
 
-                var body = resultsTable.getBody();
-                for (Row resultRow : body) {
-                    queryExampleBuilder.addResult(
-                        resultRow.getCells()
-                            .stream()
-                            .map(Cell::getText)
-                            .map(QueryCollectingTreeProcessor::undoReplacements)
-                            .collect(Collectors.toList())
-                    );
-                }
+            var body = resultsTable.getBody();
+            for (Row resultRow : body) {
+                queryExampleBuilder.addResult(
+                    resultRow.getCells()
+                        .stream()
+                        .map(Cell::getText)
+                        .map(QueryCollectingTreeProcessor::undoReplacements)
+                        .collect(Collectors.toList())
+                );
             }
+        }
 
-            groupBuilder.addQueryExample(queryExampleBuilder.build());
-        };
+        return queryExampleBuilder.build();
     }
 
     private HashMap<String, List<StructuralNode>> collectQueryExampleNodes(Iterable<StructuralNode> queryExampleNodes) {

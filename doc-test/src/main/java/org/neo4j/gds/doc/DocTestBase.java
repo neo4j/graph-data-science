@@ -55,12 +55,16 @@ public abstract class DocTestBase extends BaseProcTest {
     private List<String> beforeAllQueries;
     private List<QueryExampleGroup> queryExampleGroups;
 
-    protected abstract String adocFile();
-
     protected abstract List<Class<?>> procedures();
 
-    Path adocPath() {
-        return ASCIIDOC_PATH;
+    protected abstract String adocFile();
+
+    protected List<String> adocPaths() {
+        return List.of(adocFile());
+    };
+
+    List<File> adocFiles() {
+        return adocPaths().stream().map(ASCIIDOC_PATH::resolve).map(Path::toFile).collect(Collectors.toList());
     }
 
     @BeforeEach
@@ -73,23 +77,29 @@ public abstract class DocTestBase extends BaseProcTest {
         QueryCollectingTreeProcessor treeProcessor;
         try (var asciidoctor = create()) {
             treeProcessor = new QueryCollectingTreeProcessor();
+
             asciidoctor.javaExtensionRegistry()
                 .includeProcessor(new PartialsIncludeProcessor())
                 .treeprocessor(treeProcessor);
-
-            var docFile = adocPath().resolve(adocFile()).toFile();
-            assertThat(docFile).exists().canRead();
 
             var options = OptionsBuilder.options()
                 .baseDir(ASCIIDOC_PATH.toFile()) // Make sure to set the `baseDir` it is read in `PartialsIncludeProcessor`
                 .toDir(workDir) // Make sure we don't write anything in the project.
                 .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
 
-            asciidoctor.convertFile(docFile, options);
+            for (var docFile : adocFiles()) {
+
+                assertThat(docFile)
+                    .exists()
+                    .canRead();
+
+                asciidoctor.convertFile(docFile, options);
+            }
         }
 
         beforeEachQueries = treeProcessor.beforeEachQueries();
-        queryExampleGroups = treeProcessor.queryExamples();
+
+        queryExampleGroups =  treeProcessor.queryExamples();
 
         beforeAllQueries = treeProcessor.beforeAllQueries();
 
@@ -100,7 +110,9 @@ public abstract class DocTestBase extends BaseProcTest {
 
     @TestFactory
     Collection<DynamicTest> runTests() {
-        assert queryExampleGroups.size() > 0 : "Need at least a single example found on this page";
+        assertThat(queryExampleGroups)
+            .as("Query Example Groups should not be empty!")
+            .isNotEmpty();
 
         return queryExampleGroups.stream()
             .map(this::createDynamicTest)
