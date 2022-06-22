@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.utils.io;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.gds.compat.CompatExecutionMonitor;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.utils.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -49,7 +51,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
-public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
+public class ProgressTrackerExecutionMonitor implements CompatExecutionMonitor {
+
+    private final Clock clock;
+    private final long intervalMillis;
 
     // The total task volume per stage.
     // Set to 0 at the beginning of a stage.
@@ -81,8 +86,18 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
         );
     }
 
-    public ProgressTrackerExecutionMonitor(ProgressTracker progressTracker, Clock clock, long time, TimeUnit unit) {
-        super(clock, time, unit);
+    public static ExecutionMonitor of(
+        ProgressTracker progressTracker,
+        Clock clock,
+        long time,
+        TimeUnit unit
+    ) {
+        return Neo4jProxy.executionMonitor(new ProgressTrackerExecutionMonitor(progressTracker, clock, time, unit));
+    }
+
+    private ProgressTrackerExecutionMonitor(ProgressTracker progressTracker, Clock clock, long time, TimeUnit unit) {
+        this.clock = clock;
+        this.intervalMillis = unit.toMillis(time);
         this.progressTracker = progressTracker;
         this.stageProgressTotal = new AtomicLong(0);
         this.stageProgressCurrent = new AtomicLong(0);
@@ -151,5 +166,15 @@ public class ProgressTrackerExecutionMonitor extends ExecutionMonitor.Adapter {
                 var batchSize = execution.getConfig().batchSize();
                 return doneBatches * batchSize;
             });
+    }
+
+    @Override
+    public Clock clock() {
+        return this.clock;
+    }
+
+    @Override
+    public long checkIntervalMillis() {
+        return this.intervalMillis;
     }
 }
