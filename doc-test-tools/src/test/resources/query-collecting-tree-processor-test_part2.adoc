@@ -1,0 +1,26 @@
+[role=query-example, group=testGroup]
+--
+
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL my.dummy.stream()
+----
+
+.Results
+[opts="header"]
+|===
+| Col1
+| "Alice"
+|===
+--
+
+[role=query-example, group=groupSecond, no-result=true]
+--
+
+.This is a test code block
+[source, cypher, role=noplay]
+----
+CALL my.other.dummy()
+----
+--
