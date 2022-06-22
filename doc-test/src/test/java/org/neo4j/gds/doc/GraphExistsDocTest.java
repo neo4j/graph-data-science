@@ -28,7 +28,7 @@ import java.util.List;
 class GraphExistsDocTest extends SingleFileDocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(GraphExistsFunc.class);
     }
 

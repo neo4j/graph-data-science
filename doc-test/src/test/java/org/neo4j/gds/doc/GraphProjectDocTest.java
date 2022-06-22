@@ -28,7 +28,7 @@ import java.util.List;
 
 class GraphProjectDocTest extends SingleFileDocTestBase {
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class, NodePropertyFunc.class);
     }
 

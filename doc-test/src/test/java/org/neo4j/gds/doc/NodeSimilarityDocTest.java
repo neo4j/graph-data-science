@@ -31,7 +31,7 @@ import java.util.List;
 class NodeSimilarityDocTest extends SingleFileDocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 

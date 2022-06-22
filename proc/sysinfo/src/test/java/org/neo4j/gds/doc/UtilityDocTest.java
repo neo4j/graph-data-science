@@ -29,7 +29,7 @@ import java.util.List;
 class UtilityDocTest extends SingleFileDocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class, VersionFunc.class, IsFiniteFunc.class, NodePropertyFunc.class);
     }
 

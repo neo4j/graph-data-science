@@ -43,7 +43,7 @@ final class NodeOperationsDocTest extends SingleFileDocTestBase {
     }
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(
             NodePropertyFunc.class,
             AsNodeFunc.class

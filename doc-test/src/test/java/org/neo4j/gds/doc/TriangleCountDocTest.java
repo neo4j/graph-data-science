@@ -32,7 +32,7 @@ import java.util.List;
 class TriangleCountDocTest extends SingleFileDocTestBase {
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 

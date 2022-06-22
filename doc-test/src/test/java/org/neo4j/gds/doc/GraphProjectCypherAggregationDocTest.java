@@ -28,12 +28,12 @@ import java.util.List;
 
 class GraphProjectCypherAggregationDocTest extends SingleFileDocTestBase {
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class, NodePropertyFunc.class);
     }
 
     @Override
-    List<Class<?>> aggregationFunctions() {
+    protected List<Class<?>> aggregationFunctions() {
         return List.of(CypherAggregation.class);
     }
 
