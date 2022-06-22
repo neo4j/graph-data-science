@@ -247,7 +247,7 @@ public final class GraphStoreInput implements CompatInput {
 
         private final Iterator<GraphProperty> graphPropertyIterator;
         private final int concurrency;
-        private final Queue<Spliterator<Object>> splits;
+        private final Queue<Spliterator<?>> splits;
         private @Nullable String currentPropertyName;
 
         GraphPropertyIterator(Iterator<GraphProperty> graphPropertyIterator, int concurrency) {
@@ -296,9 +296,9 @@ public final class GraphStoreInput implements CompatInput {
             this.currentPropertyName = graphProperty.key();
         }
 
-        private void precomputeSplits(Spliterator<Object> root, int capacity) {
+        private void precomputeSplits(Spliterator<?> root, int capacity) {
             var originalCapacity = capacity;
-            var queue = new ArrayDeque<Spliterator<Object>>();
+            var queue = new ArrayDeque<Spliterator<?>>();
             queue.add(root);
             capacity--;
 
@@ -319,7 +319,7 @@ public final class GraphStoreInput implements CompatInput {
             addRemainingSplits(originalCapacity, queue);
         }
 
-        private void addRemainingSplits(int capacity, ArrayDeque<Spliterator<Object>> queue) {
+        private void addRemainingSplits(int capacity, ArrayDeque<Spliterator<?>> queue) {
             var queueIterator = queue.iterator();
             for (int i = splits.size(); i < capacity && queueIterator.hasNext(); i++) {
                 splits.add(queueIterator.next());
@@ -330,9 +330,9 @@ public final class GraphStoreInput implements CompatInput {
     static class GraphPropertyInputChunk implements InputChunk {
 
         private String propertyName;
-        private Spliterator<Object> propertyValues;
+        private Spliterator<?> propertyValues;
 
-        void initialize(String propertyName, Spliterator<Object> propertyValues) {
+        void initialize(String propertyName, Spliterator<?> propertyValues) {
             this.propertyName = propertyName;
             this.propertyValues = propertyValues;
         }
