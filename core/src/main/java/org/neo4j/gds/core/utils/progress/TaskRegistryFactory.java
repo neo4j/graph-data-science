@@ -22,4 +22,12 @@ package org.neo4j.gds.core.utils.progress;
 @FunctionalInterface
 public interface TaskRegistryFactory {
     TaskRegistry newInstance(JobId jobId);
+
+    static TaskRegistryFactory local(String username, TaskStore taskStore) {
+        return new LocalTaskRegistryFactory(username, taskStore);
+    }
+
+    static TaskRegistryFactory empty() {
+        return EmptyTaskRegistryFactory.INSTANCE;
+    }
 }
