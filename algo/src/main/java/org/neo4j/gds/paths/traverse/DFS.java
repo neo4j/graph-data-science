@@ -59,11 +59,10 @@ public class DFS extends Algorithm<HugeLongArray> {
     public HugeLongArray compute() {
         progressTracker.beginSubTask();
         var result = HugeLongArray.newArray(nodeCount);
-        var inResult = new BitSet(nodeCount);
-
         var nodes = HugeLongArrayStack.newStack(nodeCount);
         var sources = HugeLongArrayStack.newStack(nodeCount);
         var weights = HugeDoubleArrayStack.newStack(nodeCount);
+        
         var visited = new BitSet(nodeCount);
         nodes.push(startNodeId);
         sources.push(startNodeId);
@@ -76,18 +75,14 @@ public class DFS extends Algorithm<HugeLongArray> {
             final long node = nodes.pop();
             final double weight = weights.pop();
 
+            result.set(resultIndex++, node);
+
             var exitPredicateResult = exitPredicate.test(source, node, weight);
-            if (exitPredicateResult == ExitPredicate.Result.CONTINUE) {
-                continue;
-            } else {
-                if (!inResult.getAndSet(node)) {
-                    result.set(resultIndex, node);
-                    resultIndex++;
-                }
-                if (exitPredicateResult == ExitPredicate.Result.BREAK) {
-                    break;
-                }
+
+            if (exitPredicateResult == ExitPredicate.Result.BREAK) {
+                break;
             }
+
 
             // For disconnected graphs or early termination, this will not reach 100
             progressTracker.logProgress(graph.degree(node));
