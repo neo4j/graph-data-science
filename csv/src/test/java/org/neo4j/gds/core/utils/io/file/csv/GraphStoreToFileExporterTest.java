@@ -56,6 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
+import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
@@ -387,10 +388,22 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .includeMetaData(true)
             .build();
 
+        graphStore.addGraphProperty("graphProp", new LongGraphPropertyValues() {
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, size());
+            }
+
+            @Override
+            public long size() {
+                return 3;
+            }
+        });
+
         var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
         exporter.run();
 
-        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
+        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_PROPERTY_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
 
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
@@ -416,6 +429,14 @@ public class GraphStoreToFileExporterTest extends CsvTest {
                 List.of("REL1", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
                 List.of("REL2", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
                 List.of("REL2", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
+            )
+        );
+
+        assertDataContent(
+            GRAPH_PROPERTY_SCHEMA_FILE_NAME,
+            List.of(
+                CsvGraphPropertySchemaVisitorTest.GRAPH_PROPERTY_SCHEMA_COLUMNS,
+                List.of("graphProp", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name())
             )
         );
 
