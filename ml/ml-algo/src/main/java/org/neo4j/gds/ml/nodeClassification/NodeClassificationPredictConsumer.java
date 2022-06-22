@@ -67,9 +67,14 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
         var numberOfClasses = classifier.numberOfClasses();
         var probabilityMatrix = classifier.predictProbabilities(new MappedBatch(batch, nodeIds), features);
         var currentRow = 0;
-        for (long nodeIndex : batch.elementIds()) {
+
+        var batchIterator = batch.elementIds();
+
+        while (batchIterator.hasNext()) {
+            var nodeId = batchIterator.nextLong();
+
             if (predictedProbabilities != null) {
-                predictedProbabilities.set(nodeIndex, probabilityMatrix.getRow(currentRow));
+                predictedProbabilities.set(nodeId, probabilityMatrix.getRow(currentRow));
             }
             var bestClassId = -1;
             var maxProbability = -1d;
@@ -82,7 +87,7 @@ public class NodeClassificationPredictConsumer implements Consumer<Batch> {
                     bestClassId = classId;
                 }
             }
-            predictedClasses.set(nodeIndex, bestClassId);
+            predictedClasses.set(nodeId, bestClassId);
             currentRow++;
         }
 

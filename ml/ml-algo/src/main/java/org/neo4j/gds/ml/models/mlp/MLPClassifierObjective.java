@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -73,14 +72,14 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
     Constant<Vector> batchLabelVector(Batch batch) {
         var batchedTargets = new Vector(batch.size());
-        var batchOffset = new MutableInt();
+        var batchOffset = 0;
+        var batchIterator = batch.elementIds();
 
-        for (long elementId: batch.elementIds()) {
-            batchedTargets.setDataAt(
-                batchOffset.getAndIncrement(),
-                labels.get(elementId)
-            );
+        while (batchIterator.hasNext()) {
+            var elementId = batchIterator.nextLong();
+            batchedTargets.setDataAt(batchOffset++, labels.get(elementId));
         }
+
         return new Constant<>(batchedTargets);
     }
 

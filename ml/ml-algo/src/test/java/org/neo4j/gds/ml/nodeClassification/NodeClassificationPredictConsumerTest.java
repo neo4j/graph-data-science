@@ -109,7 +109,7 @@ class NodeClassificationPredictConsumerTest {
             null,
             predictedClasses,
             ProgressTracker.NULL_TRACKER
-        ).accept(new ListBatch(List.of(0L, 1L)));
+        ).accept(new ListBatch(new long[] {0L, 1L}));
 
         assertThat(predictedClasses.get(0)).isEqualTo(1);
         assertThat(predictedClasses.get(1)).isEqualTo(1);

@@ -19,22 +19,34 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import java.util.List;
+import java.util.PrimitiveIterator;
 
 public class ListBatch implements Batch {
-    private final List<Long> ids;
+    private final long[] ids;
 
-    public ListBatch(List<Long> ids) {
+    public ListBatch(long[] ids) {
         this.ids = ids;
     }
 
     @Override
-    public Iterable<Long> elementIds() {
-        return ids;
+    public PrimitiveIterator.OfLong elementIds() {
+        return new PrimitiveIterator.OfLong() {
+
+            int idx = 0;
+            @Override
+            public long nextLong() {
+                return ids[idx++];
+            }
+
+            @Override
+            public boolean hasNext() {
+                return idx < ids.length;
+            }
+        };
     }
 
     @Override
     public int size() {
-        return ids.size();
+        return ids.length;
     }
 }

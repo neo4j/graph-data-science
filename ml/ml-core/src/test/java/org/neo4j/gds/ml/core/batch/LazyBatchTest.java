@@ -19,9 +19,24 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import java.util.PrimitiveIterator;
+import org.junit.jupiter.api.Test;
 
-public interface Batch {
-    PrimitiveIterator.OfLong elementIds();
-    int size();
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.core.batch.PrimitiveIteratorTestUtil.iteratorToArray;
+
+class LazyBatchTest {
+
+    @Test
+    void nonEvenBatching() {
+        var batch = new LazyBatch(42, 3, 50);
+
+        assertThat(iteratorToArray(batch.elementIds())).containsExactly(42L, 43L, 44L);
+        assertThat(iteratorToArray(batch.elementIds())).containsExactly(42L, 43L, 44L);
+
+        var shorterBatch = new LazyBatch(49, 3, 51);
+
+        assertThat(iteratorToArray(shorterBatch.elementIds())).containsExactly(49L, 50L);
+        assertThat(iteratorToArray(shorterBatch.elementIds())).containsExactly(49L, 50L);
+    }
+
 }

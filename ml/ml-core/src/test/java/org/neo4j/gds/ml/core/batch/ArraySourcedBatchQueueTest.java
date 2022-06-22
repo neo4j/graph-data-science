@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.core.batch.PrimitiveIteratorTestUtil.iteratorToArray;
 
 class ArraySourcedBatchQueueTest {
 
@@ -33,12 +34,12 @@ class ArraySourcedBatchQueueTest {
         var hugeBatchQueue = new ArraySourcedBatchQueue(ReadOnlyHugeLongArray.of(data), 5);
         var b1 = hugeBatchQueue.pop();
         assertThat(b1).isPresent();
-        assertThat(b1.get().elementIds()).containsExactly(3L, 6L, 2L, 3L, 6L);
+        assertThat(iteratorToArray(b1.get().elementIds())).containsExactly(3L, 6L, 2L, 3L, 6L);
         var b2 = hugeBatchQueue.pop();
         assertThat(b2).isPresent();
-        assertThat(b2.get().elementIds()).containsExactly(2L, 76L, 3L, 2L, 6L);
+        assertThat(iteratorToArray(b2.get().elementIds())).containsExactly(2L, 76L, 3L, 2L, 6L);
         var b3 = hugeBatchQueue.pop();
         assertThat(b3).isPresent();
-        assertThat(b3.get().elementIds()).containsExactly(7L, 42L, 43L);
+        assertThat(iteratorToArray(b3.get().elementIds())).containsExactly(7L, 42L, 43L);
     }
 }

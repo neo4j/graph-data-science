@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
-import com.carrotsearch.hppc.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -38,6 +37,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -104,9 +104,14 @@ class TrainingTest {
 
         @Override
         public Variable<Scalar> loss(Batch batch, long trainSize) {
-            var nodeIdsInBatch = new DoubleArrayList(batch.size());
-            batch.elementIds().forEach(nodeIdsInBatch::add);
-            Vector nodeVector = new Vector(nodeIdsInBatch.toArray());
+            var nodeIdsInBatch = new double[batch.size()];
+            var batchIdx = 0;
+            PrimitiveIterator.OfLong iterator = batch.elementIds();
+            while (iterator.hasNext()) {
+                nodeIdsInBatch[batchIdx++] = iterator.nextLong();
+            }
+
+            Vector nodeVector = new Vector(nodeIdsInBatch);
 
             return new Sigmoid<>(new ElementSum(
                 List.of(

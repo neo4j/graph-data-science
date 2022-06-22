@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.core.batch;
 
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 class ArraySourcedBatchQueue extends BatchQueue {
@@ -37,10 +36,16 @@ class ArraySourcedBatchQueue extends BatchQueue {
         if (currentBatch * batchSize >= data.size()) {
             return Optional.empty();
         }
-        var batchIds = new ArrayList<Long>(batchSize);
-        for (long offset = currentBatch * batchSize; offset < data.size() && offset < (currentBatch + 1) * batchSize; offset++) {
-            batchIds.add(data.get(offset));
+        var dataOffset = currentBatch * batchSize;
+        int batchLength = dataOffset + batchSize > data.size()
+            ? Math.toIntExact(data.size() - dataOffset)
+            : batchSize;
+        var batchIds = new long[batchLength];
+
+        for (int batchIdx = 0; batchIdx < batchLength; batchIdx++) {
+            batchIds[batchIdx] = data.get(dataOffset + batchIdx);
         }
+
         currentBatch += 1;
         return Optional.of(new ListBatch(batchIds));
     }
