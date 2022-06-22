@@ -100,6 +100,8 @@ public abstract class DocTestBase extends BaseProcTest {
 
     @TestFactory
     Collection<DynamicTest> runTests() {
+        assert queryExampleGroups.size() > 0 : "Need at least a single example found on this page";
+
         return queryExampleGroups.stream()
             .map(this::createDynamicTest)
             .collect(Collectors.toList());
