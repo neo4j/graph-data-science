@@ -147,7 +147,25 @@ class DFSTest {
 
         assertThat(nodes).isEqualTo(
             Stream.of("g", "f", "d", "c", "a").mapToLong(naturalGraph::toOriginalNodeId).toArray()
-        );    }
+        );
+    }
+
+    @Test
+    void testDfsWithDepth() {
+        long source = naturalGraph.toMappedNodeId("a");
+        long[] nodes = new DFS(
+            naturalGraph,
+            source,
+            (s, t, w) -> Result.FOLLOW,
+            new OneHopAggregator(),
+            3,
+            ProgressTracker.NULL_TRACKER
+        ).compute().toArray();
+
+        assertThat(nodes).isEqualTo(
+            Stream.of("a", "c", "d", "f", "e", "b").mapToLong(naturalGraph::toOriginalNodeId).toArray()
+        );
+    }
 
     @Test
     void testDfsOnLoopGraph() {
