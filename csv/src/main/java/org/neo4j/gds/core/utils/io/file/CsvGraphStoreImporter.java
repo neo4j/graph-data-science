@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -61,6 +62,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
@@ -257,26 +259,36 @@ public final class CsvGraphStoreImporter {
             );
             ParallelUtil.run(tasks, Pools.DEFAULT);
 
-            var streamFractions = graphStoreGraphPropertyVisitor.streamFractions();
-            var graphPropertyStreams = streamFractions.entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                entry -> entry.getValue()
-                    .stream()
-                    .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
-                    .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
-            ));
-
-            graphPropertyStreams.forEach((key, value) -> {
-                if (value.isPresent()) {
-                    var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
-                    graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
-                }
-            });
-
-            graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
+            var graphPropertyStreams = mergeStreamFractions(graphStoreGraphPropertyVisitor.streamFractions());
+            buildGraphPropertiesFromStreams(graphPropertyBuilder, graphPropertyStreams);
 
             progressTracker.endSubTask();
         }
+    }
+
+    private void buildGraphPropertiesFromStreams(
+        GraphPropertyStore.Builder graphPropertyBuilder,
+        Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> graphPropertyStreams
+    ) {
+        graphPropertyStreams.forEach((key, value) -> {
+            if (value.isPresent()) {
+                var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
+                graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
+            }
+        });
+
+        graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
+    }
+
+    @NotNull
+    private Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> mergeStreamFractions(Map<String, List<GraphStoreGraphPropertyVisitor.StreamBuilder<?>>> streamFractions) {
+        return streamFractions.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> entry.getValue()
+                .stream()
+                .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
+                .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
+        ));
     }
 
     private static GraphPropertyValues getGraphPropertyValuesFromStream(GraphStoreGraphPropertyVisitor.ReducibleStream<?> reducibleStream) {
