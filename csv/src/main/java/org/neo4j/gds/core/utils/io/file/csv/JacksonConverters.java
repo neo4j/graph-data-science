@@ -17,14 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
+package org.neo4j.gds.core.utils.io.file.csv;
 
 import com.fasterxml.jackson.databind.util.StdConverter;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-public class JacksonConverters {
+class JacksonConverters {
 
     static class NodeLabelConverter extends StdConverter<String, NodeLabel> {
         @Override

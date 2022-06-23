@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
+package org.neo4j.gds.core.utils.io.file.csv;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,10 +25,15 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.gds.core.utils.io.file.csv.CsvImportUtil;
+import org.neo4j.gds.core.utils.io.file.FileHeader;
+import org.neo4j.gds.core.utils.io.file.FileInput;
+import org.neo4j.gds.core.utils.io.file.GraphInfo;
+import org.neo4j.gds.core.utils.io.file.GraphPropertyFileHeader;
+import org.neo4j.gds.core.utils.io.file.MappedListIterator;
+import org.neo4j.gds.core.utils.io.file.NodeFileHeader;
+import org.neo4j.gds.core.utils.io.file.RelationshipFileHeader;
 import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.InputIterator;
 import org.neo4j.internal.batchimport.input.Collector;
@@ -48,7 +53,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class CsvFileInput implements CompatInput {
+public final class CsvFileInput implements FileInput {
 
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
 
@@ -90,6 +95,7 @@ public final class CsvFileInput implements CompatInput {
         return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);
     }
 
+    @Override
     public InputIterable graphProperties() {
         var pathMapping = CsvImportUtil.graphPropertyHeaderToFileMapping(importPath);
         var headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
@@ -114,26 +120,32 @@ public final class CsvFileInput implements CompatInput {
         return null;
     }
 
+    @Override
     public String userName() {
         return userName;
     }
 
+    @Override
     public GraphInfo graphInfo() {
         return graphInfo;
     }
 
+    @Override
     public NodeSchema nodeSchema() {
         return nodeSchema;
     }
 
+    @Override
     public RelationshipSchema relationshipSchema() {
         return relationshipSchema;
     }
 
+    @Override
     public Map<String, PropertySchema> graphPropertySchema() {
         return graphPropertySchema;
     }
 
+    @Override
     public Capabilities capabilities() {
         return capabilities;
     }

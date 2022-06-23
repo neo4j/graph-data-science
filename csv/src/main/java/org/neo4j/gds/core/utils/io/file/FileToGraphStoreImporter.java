@@ -69,7 +69,7 @@ import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public final class FileToGraphStoreImporter {
+public abstract class FileToGraphStoreImporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
@@ -84,35 +84,15 @@ public final class FileToGraphStoreImporter {
 
     private ProgressTracker progressTracker;
 
-    public static FileToGraphStoreImporter csv(
+    protected FileToGraphStoreImporter(
         int concurrency,
         Path importPath,
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        return new FileToGraphStoreImporter(
-            new GraphStoreNodeVisitor.Builder(),
-            new GraphStoreRelationshipVisitor.Builder(),
-            new GraphStoreGraphPropertyVisitor.Builder(),
-            concurrency,
-            importPath,
-            log,
-            taskRegistryFactory
-        );
-    }
-
-    private FileToGraphStoreImporter(
-        GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
-        GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
-        GraphStoreGraphPropertyVisitor.Builder graphPropertyVisitorBuilder,
-        int concurrency,
-        Path importPath,
-        Log log,
-        TaskRegistryFactory taskRegistryFactory
-    ) {
-        this.nodeVisitorBuilder = nodeVisitorBuilder;
-        this.relationshipVisitorBuilder = relationshipVisitorBuilder;
-        this.graphPropertyVisitorBuilder = graphPropertyVisitorBuilder;
+        this.nodeVisitorBuilder = new GraphStoreNodeVisitor.Builder();
+        this.relationshipVisitorBuilder = new GraphStoreRelationshipVisitor.Builder();
+        this.graphPropertyVisitorBuilder = new GraphStoreGraphPropertyVisitor.Builder();
         this.concurrency = concurrency;
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableGraphSchema.builder();
@@ -124,8 +104,10 @@ public final class FileToGraphStoreImporter {
         this.taskRegistryFactory = taskRegistryFactory;
     }
 
+    protected abstract FileInput fileInput(Path importPath);
+
     public UserGraphStore run() {
-        var fileInput = new CsvFileInput(importPath);
+        var fileInput = fileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
         progressTracker.beginSubTask();
         try {
@@ -137,7 +119,7 @@ public final class FileToGraphStoreImporter {
         }
     }
 
-    private ProgressTracker createProgressTracker(CsvFileInput fileInput) {
+    private ProgressTracker createProgressTracker(FileInput fileInput) {
         var graphInfo = fileInput.graphInfo();
         var nodeCount = graphInfo.nodeCount();
 
@@ -161,7 +143,7 @@ public final class FileToGraphStoreImporter {
         return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
-    private void importGraphStore(CsvFileInput fileInput) {
+    private void importGraphStore(FileInput fileInput) {
         graphStoreBuilder.databaseId(fileInput.graphInfo().namedDatabaseId());
         graphStoreBuilder.capabilities(fileInput.capabilities());
 
@@ -170,9 +152,7 @@ public final class FileToGraphStoreImporter {
         importGraphProperties(fileInput);
     }
 
-    private IdMap importNodes(
-        CsvFileInput fileInput
-    ) {
+    private IdMap importNodes(FileInput fileInput) {
         progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
         graphSchemaBuilder.nodeSchema(nodeSchema);
@@ -207,7 +187,7 @@ public final class FileToGraphStoreImporter {
         return idMapAndProperties.idMap();
     }
 
-    private void importRelationships(CsvFileInput fileInput, IdMap nodes) {
+    private void importRelationships(FileInput fileInput, IdMap nodes) {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();
@@ -236,7 +216,7 @@ public final class FileToGraphStoreImporter {
         progressTracker.endSubTask();
     }
 
-    private void importGraphProperties(CsvFileInput fileInput) {
+    private void importGraphProperties(FileInput fileInput) {
         if (!fileInput.graphPropertySchema().isEmpty()) {
             progressTracker.beginSubTask();
 

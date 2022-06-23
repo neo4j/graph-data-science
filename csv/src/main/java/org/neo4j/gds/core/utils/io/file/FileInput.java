@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.neo4j.gds.core.utils.io.file.csv.UserInfoVisitor;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.internal.batchimport.InputIterable;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Map;
 
-public class UserInfoLoader {
-
-    private final Path userInfoFilePath;
-
-    UserInfoLoader(Path importPath) {
-        this.userInfoFilePath = importPath.resolve(UserInfoVisitor.USER_INFO_FILE_NAME);
-    }
-
-    String load() {
-        try {
-            return Files.readString(userInfoFilePath, StandardCharsets.UTF_8).trim();
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
-    }
+public interface FileInput extends CompatInput {
+    InputIterable graphProperties();
+    String userName();
+    GraphInfo graphInfo();
+    NodeSchema nodeSchema();
+    RelationshipSchema relationshipSchema();
+    Map<String, PropertySchema> graphPropertySchema();
+    Capabilities capabilities();
 }
