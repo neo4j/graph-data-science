@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
+package org.neo4j.gds.core.utils.io.file.csv;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
@@ -29,8 +29,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.CsvMapUtil;
+import org.neo4j.gds.core.utils.io.file.GraphInfo;
+import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;

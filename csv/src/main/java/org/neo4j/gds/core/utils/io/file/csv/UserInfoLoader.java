@@ -17,35 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
-
-import org.junit.jupiter.api.io.TempDir;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.core.utils.io.file.csv.UserInfoVisitor;
+package org.neo4j.gds.core.utils.io.file.csv;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.assertj.core.api.Assertions.assertThat;
+public class UserInfoLoader {
 
-class UserInfoLoaderTest {
+    private final Path userInfoFilePath;
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "UserA",
-        "UserA     ",
-        "UserA\n",
-        "UserA\t\n"
-    })
-    void shouldReadUsername(CharSequence fileContent, @TempDir Path tempDir) throws IOException {
-        Files.writeString(tempDir.resolve(UserInfoVisitor.USER_INFO_FILE_NAME), fileContent, StandardCharsets.UTF_8);
-
-        var username = new UserInfoLoader(tempDir).load();
-
-        assertThat(username).isEqualTo("UserA");
+    UserInfoLoader(Path importPath) {
+        this.userInfoFilePath = importPath.resolve(UserInfoVisitor.USER_INFO_FILE_NAME);
     }
 
+    String load() {
+        try {
+            return Files.readString(userInfoFilePath, StandardCharsets.UTF_8).trim();
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
 }

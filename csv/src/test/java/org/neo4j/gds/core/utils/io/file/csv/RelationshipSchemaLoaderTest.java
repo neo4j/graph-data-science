@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
+package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitorTest;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.Aggregation;
