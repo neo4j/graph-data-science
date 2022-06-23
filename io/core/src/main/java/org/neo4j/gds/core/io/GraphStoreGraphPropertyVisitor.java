@@ -59,11 +59,9 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         try {
             lock.lock();
             var threadLocalStreamBuilder = streamBuilders.get();
-            threadLocalStreamBuilder.forEach((propertyName, streamBuilder) -> {
-                streamFractions
-                    .computeIfAbsent(propertyName, __ -> new ArrayList<>())
-                    .add(streamBuilder);
-            });
+            threadLocalStreamBuilder.forEach((propertyName, streamBuilder) -> streamFractions
+                .computeIfAbsent(propertyName, __ -> new ArrayList<>())
+                .add(streamBuilder));
             threadLocalStreamBuilder.clear();
         } finally {
             lock.unlock();

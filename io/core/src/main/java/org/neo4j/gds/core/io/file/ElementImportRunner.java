@@ -32,7 +32,7 @@ public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Fl
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;
 
-    public ElementImportRunner(
+    ElementImportRunner(
         T visitor,
         InputIterator inputIterator,
         ProgressTracker progressTracker

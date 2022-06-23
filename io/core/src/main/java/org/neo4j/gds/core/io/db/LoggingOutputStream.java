@@ -50,7 +50,7 @@ public class LoggingOutputStream extends OutputStream {
 
     @Override
     public void close() throws IOException {
-        if (buffer.length() > 0) {
+        if (!buffer.isEmpty()) {
             flush();
         }
         super.close();

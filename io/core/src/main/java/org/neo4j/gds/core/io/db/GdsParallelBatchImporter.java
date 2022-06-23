@@ -66,7 +66,7 @@ public final class GdsParallelBatchImporter {
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
 
-    public static GdsParallelBatchImporter fromDb(
+    static GdsParallelBatchImporter fromDb(
         GraphDatabaseAPI db,
         GraphStoreToDatabaseExporterConfig config,
         Log log,

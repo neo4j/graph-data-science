@@ -24,8 +24,8 @@ import org.neo4j.gds.core.Aggregation;
 
 public abstract class RelationshipSchemaVisitor extends InputRelationshipSchemaVisitor.Adapter {
 
-    RelationshipType relationshipType;
-    Aggregation aggregation;
+    private RelationshipType relationshipType;
+    private Aggregation aggregation;
 
     public RelationshipType relationshipType() {
         return relationshipType;
