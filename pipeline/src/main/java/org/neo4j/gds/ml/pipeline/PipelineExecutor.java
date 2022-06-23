@@ -34,7 +34,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GraphStoreValidation;
 
 import java.util.Collection;
 import java.util.List;
@@ -122,7 +121,6 @@ public abstract class PipelineExecutor<
     public RESULT compute() {
         progressTracker.beginSubTask();
 
-        GraphStoreValidation.validate(graphStore, config);
         pipeline.validateBeforeExecution(graphStore, config);
 
         var dataSplits = splitDataset();

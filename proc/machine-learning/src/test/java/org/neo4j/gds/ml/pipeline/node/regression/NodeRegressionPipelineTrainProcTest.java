@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelin
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineAddTrainerMethodProcs;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineConfigureSplitProc;
 import org.neo4j.gds.ml.pipeline.node.regression.configure.NodeRegressionPipelineCreateProc;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.gds.model.catalog.ModelDropProc;
 
 import java.util.HashMap;
@@ -47,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.aMapWithSize;
 
 @Neo4jModelCatalogExtension
@@ -102,6 +104,44 @@ class NodeRegressionPipelineTrainProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         PipelineCatalog.removeAll();
+    }
+
+    @Test
+    void failsOnInvalidTargetProperty() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeRegression.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeRegression.selectFeatures($pipeline, ['array', 'scalar'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.alpha.pipeline.nodeRegression.addLinearRegression($pipeline, {penalty: 1000, maxEpochs: 1})",
+            pipe
+        );
+        var pipeline = new NodeRegressionTrainingPipeline();
+        pipeline.featureProperties().add("array");
+
+        var params = new HashMap<>(pipe);
+        params.put("graphName", GRAPH_NAME);
+        params.put("modelName", MODEL_NAME);
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.alpha.pipeline.nodeRegression.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 'INVALID_PROPERTY'," +
+            "       metrics: ['ROOT_MEAN_SQUARED_ERROR']," +
+            "       randomSeed: 1" +
+            "})",
+            params
+        ))
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
     }
 
     @Test

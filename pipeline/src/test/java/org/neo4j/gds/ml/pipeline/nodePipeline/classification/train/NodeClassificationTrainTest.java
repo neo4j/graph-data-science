@@ -334,27 +334,6 @@ class NodeClassificationTrainTest extends BaseProcTest {
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
     }
 
-    @Test
-    void failsOnInvalidTargetProperty() {
-        var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.featureProperties().add("array");
-
-        var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .username(getUsername())
-            .pipeline(PIPELINE_NAME)
-            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
-            .modelName("myModel")
-            .targetProperty("INVALID_PROPERTY")
-            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1(class=1)")))
-            .build();
-
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            assertThatThrownBy(() -> ncTrain(pipeline, config, caller, ProgressTracker.NULL_TRACKER))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
-        });
-    }
-
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void shouldProduceCorrectTrainingStatistics(boolean includeOOB) {

@@ -37,7 +37,6 @@ import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.GraphStoreValidation;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
@@ -263,7 +262,6 @@ public final class NodeClassificationTrain extends PipelineTrain<
         NodePropertyStepExecutor nodePropertyStepExecutor,
         ProgressTracker progressTracker
     ) {
-        GraphStoreValidation.validate(graphStore, config);
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();

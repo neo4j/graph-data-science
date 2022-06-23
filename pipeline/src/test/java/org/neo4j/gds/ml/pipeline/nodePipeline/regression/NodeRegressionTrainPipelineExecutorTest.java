@@ -46,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
@@ -212,33 +211,5 @@ class NodeRegressionTrainPipelineExecutorTest extends BaseProcTest {
                 );
         });
         progressTracker.assertValidProgressEvolution();
-    }
-
-    @Test
-    void failsOnInvalidTargetProperty() {
-        var pipeline = new NodeRegressionTrainingPipeline();
-        pipeline.featureProperties().add("array");
-
-        var config = NodeRegressionPipelineTrainConfigImpl.builder()
-            .username(getUsername())
-            .pipeline(PIPELINE_NAME)
-            .graphName(GRAPH_NAME)
-            .modelName("myModel")
-            .targetProperty("INVALID_PROPERTY")
-            .metrics(List.of(RegressionMetrics.ROOT_MEAN_SQUARED_ERROR))
-            .build();
-
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var ncPipeTrain = new NodeRegressionTrainPipelineExecutor(
-                pipeline,
-                config,
-                caller.executionContext(),
-                graphStore,
-                ProgressTracker.NULL_TRACKER
-            );
-            assertThatThrownBy(ncPipeTrain::compute)
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
-        });
     }
 }
