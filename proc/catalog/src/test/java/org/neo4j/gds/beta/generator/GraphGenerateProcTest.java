@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -43,6 +44,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -158,6 +160,17 @@ class GraphGenerateProcTest extends BaseProcTest {
                 assertNull(row.get(RELATIONSHIP_SEED_KEY));
             }
         );
+    }
+
+    @Test
+    void shouldGenerateDefaultEmptySchemaWithoutProperties() {
+        String query = "CALL gds.beta.graph.generate('g', 10000, 5, {relationshipDistribution: 'RANDOM'})";
+        runQuery(query);
+
+        var graph = GraphStoreCatalog.get(this.getUsername(), this.db.databaseId(), "g").graphStore();
+
+        assertThat(graph.schema().relationshipSchema().hasProperties()).isFalse();
+        assertThat(graph.schema().relationshipSchema().properties().get(RelationshipType.of("REL"))).isEmpty();
     }
 
     @ParameterizedTest
