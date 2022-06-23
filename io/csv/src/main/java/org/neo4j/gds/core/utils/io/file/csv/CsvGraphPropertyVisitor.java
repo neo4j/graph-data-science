@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.core.utils.io.file.GraphPropertyVisitor;
+import org.neo4j.gds.core.io.file.GraphPropertyVisitor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

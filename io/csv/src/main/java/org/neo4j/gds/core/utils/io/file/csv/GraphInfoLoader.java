@@ -29,8 +29,8 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.utils.io.file.GraphInfo;
-import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
+import org.neo4j.gds.core.io.file.GraphInfo;
+import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;

@@ -21,8 +21,8 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import org.neo4j.gds.core.utils.io.file.GraphInfo;
-import org.neo4j.gds.core.utils.io.file.SingleRowVisitor;
+import org.neo4j.gds.core.io.file.GraphInfo;
+import org.neo4j.gds.core.io.file.SingleRowVisitor;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.core.utils.io.file.csv;
 
-import org.neo4j.gds.core.utils.io.file.FileInput;
-import org.neo4j.gds.core.utils.io.file.FileToGraphStoreImporter;
+import org.neo4j.gds.core.io.file.FileInput;
+import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.logging.Log;
 

@@ -23,6 +23,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.io.file.FileHeader;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 import org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor;
 import org.neo4j.gds.utils.StringFormatting;
 

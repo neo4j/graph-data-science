@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.io.file.ImmutableGraphInfo;
+import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;

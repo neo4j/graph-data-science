@@ -21,6 +21,8 @@ package org.neo4j.gds.core.utils.io.file;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.io.file.FileHeader;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 
 import java.util.Map;
 

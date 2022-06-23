@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
 
 import java.io.IOException;
 import java.util.Map;

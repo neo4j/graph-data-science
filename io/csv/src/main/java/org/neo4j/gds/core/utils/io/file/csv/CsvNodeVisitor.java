@@ -23,7 +23,7 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.core.utils.io.file.NodeVisitor;
+import org.neo4j.gds.core.io.file.NodeVisitor;
 
 import java.io.IOException;
 import java.nio.file.Path;

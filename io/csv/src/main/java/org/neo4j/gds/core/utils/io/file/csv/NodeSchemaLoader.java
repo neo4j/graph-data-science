@@ -30,7 +30,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.core.utils.io.file.schema.NodeSchemaBuilderVisitor;
+import org.neo4j.gds.core.io.schema.NodeSchemaBuilderVisitor;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

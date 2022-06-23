@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file.csv;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.core.utils.io.file.RelationshipVisitor;
+import org.neo4j.gds.core.io.file.RelationshipVisitor;
 
 import java.io.IOException;
 import java.nio.file.Path;
