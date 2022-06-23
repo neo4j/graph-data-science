@@ -36,7 +36,7 @@ class CsvGraphCapabilitiesWriterTest extends CsvVisitorTest {
             .build();
 
         var graphCapabilitiesWriter = new CsvGraphCapabilitiesWriter(tempDir);
-        graphCapabilitiesWriter.writeCapabilities(capabilities);
+        graphCapabilitiesWriter.write(capabilities);
 
         assertCsvFiles(List.of(GRAPH_CAPABILITIES_FILE_NAME));
         assertDataContent(

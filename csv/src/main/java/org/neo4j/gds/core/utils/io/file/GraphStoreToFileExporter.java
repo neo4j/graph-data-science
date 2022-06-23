@@ -124,7 +124,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
         Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
-        Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
+        Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
         VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
@@ -234,7 +234,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
         private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
-        private final Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier;
+        private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
@@ -245,7 +245,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
             Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier,
-            Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
+            Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
             VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
@@ -349,7 +349,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private void exportGraphCapabilities(GraphStoreInput graphStoreInput) {
             var capabilitiesMapper = graphCapabilitiesWriterSupplier.get();
             try {
-                capabilitiesMapper.writeCapabilities(graphStoreInput.capabilities());
+                capabilitiesMapper.write(graphStoreInput.capabilities());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
