@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.graphdb.Label;
+import org.neo4j.values.SequenceValue;
+import org.neo4j.values.storable.TextValue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +36,6 @@ import java.util.function.Function;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeLabelTokens {
-
     public static @NotNull NodeLabelToken of(@Nullable Object nodeLabels) {
         var nodeLabelToken = ofNullable(nodeLabels);
         if (nodeLabelToken == null) {
@@ -45,6 +46,34 @@ public final class NodeLabelTokens {
             ));
         }
         return nodeLabelToken;
+    }
+
+    public static @NotNull NodeLabelToken of(SequenceValue nodeLabels) {
+        return new NodeLabelToken() {
+            @Override
+            public boolean isEmpty() {
+                return nodeLabels.isEmpty();
+            }
+
+            @Override
+            public int size() {
+                return nodeLabels.length();
+            }
+
+            @Override
+            public @NotNull NodeLabel get(int index) {
+                return new NodeLabel(((TextValue) nodeLabels.value(index)).stringValue());
+            }
+
+            @Override
+            public String[] getStrings() {
+                var result = new String[nodeLabels.length()];
+                for (int i = 0; i < nodeLabels.length(); i++) {
+                    result[i] = ( (TextValue) nodeLabels.value(i)).stringValue();
+                }
+                return result;
+            }
+        };
     }
 
     @Contract("null -> !null")

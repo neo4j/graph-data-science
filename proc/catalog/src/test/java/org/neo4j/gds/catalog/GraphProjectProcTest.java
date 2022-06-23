@@ -1446,18 +1446,19 @@ class GraphProjectProcTest extends BaseProcTest {
 
     @Test
     void failsOnWriteQuery() {
-        String writeQuery = "CREATE (n) RETURN id(n) AS id";
+        String writeQueryNodes = "CREATE (n) RETURN id(n) AS id";
+        String writeQueryRelationships = "CREATE (n)-[r:R]->(m) RETURN id(n) AS source, id(m) AS target";
         String query = "CALL gds.graph.project.cypher('dragons', $nodeQuery, $relQuery)";
 
         assertError(
             query,
-            map("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQuery),
+            map("relQuery", ALL_RELATIONSHIPS_QUERY, "nodeQuery", writeQueryNodes),
             "Query must be read only. Query: "
         );
 
         assertError(
             query,
-            map("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQuery),
+            map("nodeQuery", ALL_NODES_QUERY, "relQuery", writeQueryRelationships),
             "Query must be read only. Query: "
         );
     }

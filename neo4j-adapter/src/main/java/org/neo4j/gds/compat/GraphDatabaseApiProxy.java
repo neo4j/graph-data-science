@@ -28,9 +28,17 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
+import org.neo4j.kernel.impl.query.QueryExecution;
+import org.neo4j.kernel.impl.query.QueryExecutionEngine;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
+import org.neo4j.kernel.impl.query.QuerySubscriber;
+import org.neo4j.kernel.impl.query.TransactionalContextFactory;
+import org.neo4j.kernel.impl.util.ValueUtils;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
@@ -98,12 +106,35 @@ public final class GraphDatabaseApiProxy {
         return tx.execute(query, params);
     }
 
+    public static QueryExecution runQueryWithoutClosingTheResult(InternalTransaction tx,
+                                                                 String query,
+                                                                 Map<String, Object> params,
+                                                                 TransactionalContextFactory contextFactory,
+                                                                 QueryExecutionEngine executionEngine,
+                                                                 QuerySubscriber subscriber) {
+        var convertedParams = ValueUtils.asMapValue(params);
+        var context = contextFactory.newContext(tx, query, convertedParams);
+        try {
+            return executionEngine.executeQuery(query, convertedParams, context, false, subscriber);
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
+        }
+    }
+
     public static Result runQueryWithoutClosingTheResult(
         KernelTransaction tx,
         String query,
         Map<String, Object> params
     ) {
         return tx.internalTransaction().execute(query, params);
+    }
+
+    public static QueryExecutionEngine executionEngine(GraphDatabaseService db) {
+        return resolveDependency(db, QueryExecutionEngine.class);
+    }
+
+    public static TransactionalContextFactory contextFactory(GraphDatabaseService db) {
+        return Neo4jTransactionalContextFactory.create(resolveDependency(db, GraphDatabaseQueryService.class));
     }
 
     public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {

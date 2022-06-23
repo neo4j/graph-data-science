@@ -60,7 +60,10 @@ public final class ValueConverter {
     }
 
     public static Value toValue(@NotNull Object valueObject) {
-        var value = ValueUtils.of(valueObject);
+        return toValue(ValueUtils.of(valueObject));
+    }
+
+    public static Value toValue(@NotNull AnyValue value) {
         if (value.isSequenceValue()) {
             return castToNumericArrayOrFail(value);
         } else if (value instanceof Value) {
@@ -79,49 +82,55 @@ public final class ValueConverter {
             ));
         }
     }
-
     private static ArrayValue castToNumericArrayOrFail(AnyValue value) {
-        ArrayValue array = null;
         if (value instanceof ListValue) {
-            var listValue = (ListValue) value;
-            if (listValue.isEmpty()) {
-                // encode as long array
-                return Values.longArray(new long[0]);
-            }
-            // only 2 cases are valid here: list of double and list of long
-            var firstValue = listValue.head();
-            try {
-                if (firstValue instanceof LongValue) {
-                    var longArray = new long[listValue.size()];
-                    var iterator = listValue.iterator();
-                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                        longArray[i] = ((LongValue) iterator.next()).longValue();
-                    }
-                    array = Values.longArray(longArray);
-                } else if (firstValue instanceof DoubleValue) {
-                    var doubleArray = new double[listValue.size()];
-                    var iterator = listValue.iterator();
-                    for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
-                        doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
-                    }
-                    array = Values.doubleArray(doubleArray);
-                } else {
-                    failOnBadList(listValue);
-                }
-            } catch (ClassCastException c) {
-                failOnBadList(listValue);
-            }
+            return castToNumericArrayOrFail((ListValue) value);
+        } else if (value instanceof ArrayValue){
+            return assertNumberArray((ArrayValue) value);
         } else {
-            array = ((ArrayValue) value);
-            if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
-                failOnBadList(array);
-            }
+            throw failOnBadList(value);
+        }
+    }
+
+    private static ArrayValue assertNumberArray(ArrayValue array) {
+        if (array.valueGroup() != ValueGroup.NUMBER_ARRAY) {
+            throw failOnBadList(array);
         }
         return array;
     }
+    @NotNull
+    private static ArrayValue castToNumericArrayOrFail(ListValue listValue) {
+        if (listValue.isEmpty()) {
+            // encode as long array
+            return Values.EMPTY_LONG_ARRAY;
+        }
 
-    private static void failOnBadList(AnyValue badList) {
-        throw new IllegalArgumentException(formatWithLocale(
+        var firstValue = listValue.head();
+        try {
+            if (firstValue instanceof LongValue) {
+                var longArray = new long[listValue.size()];
+                var iterator = listValue.iterator();
+                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                    longArray[i] = ((LongValue) iterator.next()).longValue();
+                }
+                return Values.longArray(longArray);
+            } else if (firstValue instanceof DoubleValue) {
+                var doubleArray = new double[listValue.size()];
+                var iterator = listValue.iterator();
+                for (int i = 0; i < listValue.size() && iterator.hasNext(); i++) {
+                    doubleArray[i] = ((DoubleValue) iterator.next()).doubleValue();
+                }
+                return Values.doubleArray(doubleArray);
+            } else {
+                throw failOnBadList(listValue);
+            }
+        } catch (ClassCastException c) {
+            throw failOnBadList(listValue);
+        }
+    }
+
+    private static IllegalArgumentException failOnBadList(AnyValue badList) {
+        return new IllegalArgumentException(formatWithLocale(
             "Only lists of uniformly typed numbers are supported as GDS node properties, but found an unsupported list `%s`.",
             badList
         ));
