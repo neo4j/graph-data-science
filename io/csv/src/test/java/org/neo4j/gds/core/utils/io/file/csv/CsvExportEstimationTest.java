@@ -20,13 +20,13 @@
 package org.neo4j.gds.core.utils.io.file.csv;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
