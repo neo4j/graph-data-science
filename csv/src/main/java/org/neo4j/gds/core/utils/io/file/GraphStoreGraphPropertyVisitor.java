@@ -40,7 +40,7 @@ final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
     private final ReentrantLock lock;
     private final Map<String, List<StreamBuilder<?>>> streamFractions;
 
-    private GraphStoreGraphPropertyVisitor(Map<String, PropertySchema> graphPropertySchema) {
+    GraphStoreGraphPropertyVisitor(Map<String, PropertySchema> graphPropertySchema) {
         this.graphPropertySchema = graphPropertySchema;
         this.streamBuilders = ThreadLocal.withInitial(HashMap::new);
         this.lock = new ReentrantLock();
@@ -57,11 +57,13 @@ final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
     public void flush() throws IOException {
         try {
             lock.lock();
-            streamBuilders.get().forEach((propertyName, streamBuilder) -> {
+            var threadLocalStreamBuilder = streamBuilders.get();
+            threadLocalStreamBuilder.forEach((propertyName, streamBuilder) -> {
                 streamFractions
                     .computeIfAbsent(propertyName, __ -> new ArrayList<>())
                     .add(streamBuilder);
             });
+            threadLocalStreamBuilder.clear();
         } finally {
             lock.unlock();
         }
@@ -191,7 +193,6 @@ final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         public ValueType valueType() {
             return ValueType.DOUBLE;
         }
-
 
         @Override
         public ReducibleStream<DoubleStream> reduce(ReducibleStream<DoubleStream> other) {
