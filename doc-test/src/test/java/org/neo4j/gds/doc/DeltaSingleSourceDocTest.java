@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.singlesource.delta.AllShortestPathsDeltaWriteProc;
 
 import java.util.List;
 
-class DeltaSingleSourceDocTest extends DocTestBase {
+class DeltaSingleSourceDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

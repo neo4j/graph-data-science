@@ -93,7 +93,6 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
                 .safe(SafeMode.UNSAFE); // By default, we are forced to use relative path which we don't want.
 
             for (var docFile : adocFiles()) {
-
                 assertThat(docFile)
                     .exists()
                     .canRead();

@@ -25,7 +25,7 @@ import org.neo4j.gds.wcc.WccStatsProc;
 import java.util.Arrays;
 import java.util.List;
 
-class TransactionHandlingDocTest extends DocTestBase {
+class TransactionHandlingDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

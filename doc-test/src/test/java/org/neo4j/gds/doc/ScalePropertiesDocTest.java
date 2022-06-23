@@ -26,7 +26,7 @@ import org.neo4j.gds.scaling.ScalePropertiesStreamProc;
 
 import java.util.List;
 
-class ScalePropertiesDocTest extends DocTestBase {
+class ScalePropertiesDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

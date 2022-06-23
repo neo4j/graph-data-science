@@ -28,7 +28,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateProc;
 
 import java.util.List;
 
-final class RelationshipOperationsDocTest extends DocTestBase {
+final class RelationshipOperationsDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

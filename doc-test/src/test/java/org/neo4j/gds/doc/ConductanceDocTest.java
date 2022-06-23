@@ -26,7 +26,7 @@ import org.neo4j.gds.louvain.LouvainMutateProc;
 
 import java.util.List;
 
-class ConductanceDocTest extends DocTestBase {
+class ConductanceDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

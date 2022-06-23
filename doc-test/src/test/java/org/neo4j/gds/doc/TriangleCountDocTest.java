@@ -29,7 +29,7 @@ import org.neo4j.gds.triangle.TriangleProc;
 
 import java.util.List;
 
-class TriangleCountDocTest extends DocTestBase {
+class TriangleCountDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

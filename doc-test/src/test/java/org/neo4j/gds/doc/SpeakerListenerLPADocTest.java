@@ -25,7 +25,7 @@ import org.neo4j.gds.pregel.SpeakerListenerLPAStreamProc;
 
 import java.util.List;
 
-class SpeakerListenerLPADocTest extends DocTestBase {
+class SpeakerListenerLPADocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

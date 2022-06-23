@@ -28,7 +28,7 @@ import org.neo4j.gds.pagerank.EigenvectorWriteProc;
 
 import java.util.List;
 
-class EigenvectorCentralityDocTest extends DocTestBase {
+class EigenvectorCentralityDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

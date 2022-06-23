@@ -25,7 +25,7 @@ import org.neo4j.gds.influenceMaximization.GreedyProc;
 
 import java.util.List;
 
-class GreedyDocTest extends DocTestBase {
+class GreedyDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

@@ -34,7 +34,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 @Neo4jModelCatalogExtension
-abstract class ModelCatalogDocTest extends DocTestBase {
+abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
 
     @Inject
     ModelCatalog modelCatalog;

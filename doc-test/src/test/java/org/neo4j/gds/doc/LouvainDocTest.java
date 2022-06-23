@@ -28,7 +28,7 @@ import org.neo4j.gds.louvain.LouvainWriteProc;
 
 import java.util.List;
 
-class LouvainDocTest extends DocTestBase {
+class LouvainDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

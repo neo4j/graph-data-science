@@ -28,7 +28,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationWriteProc;
 
 import java.util.List;
 
-class LabelPropagationDocTest extends DocTestBase {
+class LabelPropagationDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

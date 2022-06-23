@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.sourcetarget.ShortestPathAStarWriteProc;
 
 import java.util.List;
 
-class AStarDocTest extends DocTestBase {
+class AStarDocTest extends SingleFileDocTestBase {
 
     @Override
     List<Class<?>> functions() {

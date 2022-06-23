@@ -24,7 +24,7 @@ import org.neo4j.gds.walking.CollapsePathMutateProc;
 
 import java.util.List;
 
-class CollapsePathDocTest extends DocTestBase {
+class CollapsePathDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
