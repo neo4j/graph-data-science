@@ -263,7 +263,7 @@ class GraphListProcTest extends BaseProcTest {
                 }, "Assert generated `configuration` map"),
                 "schema", map(
                     "nodes", map("__ALL__", map()),
-                    "relationships", map( "REL", map("PROPERTY", "Float (DefaultValue(NaN), PERSISTENT, Aggregation.DEFAULT)")),
+                    "relationships", map("REL", map()),
                     "graphProperties", map()
                 ),
                 "nodeCount", 10L,
