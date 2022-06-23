@@ -29,7 +29,7 @@ import org.neo4j.gds.functions.NodePropertyFunc;
 
 import java.util.List;
 
-final class NodeOperationsDocTest extends DocTestBase {
+final class NodeOperationsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

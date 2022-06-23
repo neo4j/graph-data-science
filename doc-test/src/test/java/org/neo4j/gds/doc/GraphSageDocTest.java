@@ -33,7 +33,7 @@ import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import java.util.List;
 
 @Neo4jModelCatalogExtension
-class GraphSageDocTest extends DocTestBase {
+class GraphSageDocTest extends SingleFileDocTestBase {
 
     @Inject
     ModelCatalog modelCatalog;

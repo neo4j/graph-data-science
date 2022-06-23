@@ -56,7 +56,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     private List<String> beforeAllQueries;
     private List<String> beforeEachQueries;
-    private HashMap<String, List<QueryExample>> queryExampleMap;
+    private Map<String, List<QueryExample>> queryExampleMap;
 
     public List<String> beforeAllQueries() {
         return beforeAllQueries;
@@ -110,7 +110,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
     private void collectQueryExamples(StructuralNode node) {
         var queryExampleNodesRaw = node.findBy(Map.of(ROLE_SELECTOR, QUERY_EXAMPLE_ROLE));
-        HashMap<String, List<StructuralNode>> groupedQueryExampleNodes = collectQueryExampleNodes(queryExampleNodesRaw);
+        var groupedQueryExampleNodes = collectQueryExampleNodes(queryExampleNodesRaw);
 
         groupedQueryExampleNodes.forEach((displayName, queryExampleNodes) -> {
             List<QueryExample> queryExamples = queryExampleNodes.stream().map(this::convertToQueryExample).collect(
@@ -158,7 +158,7 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
         return queryExampleBuilder.build();
     }
 
-    private HashMap<String, List<StructuralNode>> collectQueryExampleNodes(Iterable<StructuralNode> queryExampleNodes) {
+    private Map<String, List<StructuralNode>> collectQueryExampleNodes(Iterable<StructuralNode> queryExampleNodes) {
         var groupedQueryExampleNodes = new HashMap<String, List<StructuralNode>>();
         queryExampleNodes.forEach(queryExampleNode -> {
             var testDisplayName = extractDisplayName(queryExampleNode);

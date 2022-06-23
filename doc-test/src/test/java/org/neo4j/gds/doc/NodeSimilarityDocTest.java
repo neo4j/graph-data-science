@@ -28,7 +28,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteProc;
 
 import java.util.List;
 
-class NodeSimilarityDocTest extends DocTestBase {
+class NodeSimilarityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

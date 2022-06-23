@@ -27,7 +27,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPWriteProc;
 
 import java.util.List;
 
-class FastRPDocTest extends DocTestBase {
+class FastRPDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

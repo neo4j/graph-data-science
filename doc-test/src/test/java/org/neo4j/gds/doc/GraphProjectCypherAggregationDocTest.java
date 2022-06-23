@@ -26,7 +26,7 @@ import org.neo4j.gds.projection.CypherAggregation;
 
 import java.util.List;
 
-class GraphProjectCypherAggregationDocTest extends DocTestBase {
+class GraphProjectCypherAggregationDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class, NodePropertyFunc.class);

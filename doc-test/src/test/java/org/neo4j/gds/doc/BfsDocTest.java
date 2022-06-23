@@ -25,7 +25,7 @@ import org.neo4j.gds.paths.traverse.BfsStreamProc;
 
 import java.util.List;
 
-public class BfsDocTest extends DocTestBase {
+public class BfsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

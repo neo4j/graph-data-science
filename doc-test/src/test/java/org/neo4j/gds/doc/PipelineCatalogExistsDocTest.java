@@ -26,7 +26,7 @@ import org.neo4j.gds.pipeline.catalog.PipelineExistsProc;
 
 import java.util.List;
 
-class PipelineCatalogExistsDocTest extends DocTestBase {
+class PipelineCatalogExistsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

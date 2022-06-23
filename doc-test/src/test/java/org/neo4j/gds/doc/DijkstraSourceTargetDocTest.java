@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraWriteProc;
 
 import java.util.List;
 
-class DijkstraSourceTargetDocTest extends DocTestBase {
+class DijkstraSourceTargetDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

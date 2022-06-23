@@ -28,7 +28,7 @@ import org.neo4j.gds.similarity.knn.KnnWriteProc;
 
 import java.util.List;
 
-class KnnDocTest extends DocTestBase {
+class KnnDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

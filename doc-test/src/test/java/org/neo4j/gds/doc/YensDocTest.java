@@ -27,7 +27,7 @@ import org.neo4j.gds.paths.sourcetarget.ShortestPathYensWriteProc;
 
 import java.util.List;
 
-class YensDocTest extends DocTestBase {
+class YensDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

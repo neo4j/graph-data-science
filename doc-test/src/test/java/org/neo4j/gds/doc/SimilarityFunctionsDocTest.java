@@ -23,7 +23,7 @@ import org.neo4j.gds.similarity.SimilaritiesFunc;
 
 import java.util.List;
 
-class SimilarityFunctionsDocTest extends DocTestBase {
+class SimilarityFunctionsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

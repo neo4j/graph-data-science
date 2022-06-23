@@ -26,7 +26,7 @@ import org.neo4j.gds.functions.VersionFunc;
 
 import java.util.List;
 
-class UtilityDocTest extends DocTestBase {
+class UtilityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

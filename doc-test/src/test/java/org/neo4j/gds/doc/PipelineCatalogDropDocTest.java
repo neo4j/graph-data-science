@@ -26,7 +26,7 @@ import org.neo4j.gds.pipeline.catalog.PipelineDropProc;
 
 import java.util.List;
 
-class PipelineCatalogDropDocTest extends DocTestBase {
+class PipelineCatalogDropDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

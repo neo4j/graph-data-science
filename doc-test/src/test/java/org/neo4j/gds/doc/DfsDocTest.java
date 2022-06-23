@@ -26,7 +26,7 @@ import org.neo4j.gds.paths.traverse.DfsStreamProc;
 
 import java.util.List;
 
-class DfsDocTest extends DocTestBase {
+class DfsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

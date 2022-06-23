@@ -28,7 +28,7 @@ import org.neo4j.gds.pagerank.ArticleRankWriteProc;
 
 import java.util.List;
 
-class ArticleRankDocTest extends DocTestBase {
+class ArticleRankDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

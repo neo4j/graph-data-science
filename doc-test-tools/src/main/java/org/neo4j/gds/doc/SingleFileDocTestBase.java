@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import java.util.List;
 
-public abstract class DocTestBase extends MultiFileDocTestBase {
+public abstract class SingleFileDocTestBase extends MultiFileDocTestBase {
 
     protected abstract String adocFile();
 

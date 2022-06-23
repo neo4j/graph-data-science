@@ -29,7 +29,7 @@ import org.neo4j.gds.wcc.WccWriteProc;
 
 import java.util.List;
 
-class WccDocTest extends DocTestBase {
+class WccDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

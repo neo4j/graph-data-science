@@ -25,7 +25,7 @@ import org.neo4j.gds.pregel.HitsStreamProc;
 
 import java.util.List;
 
-class HitsDocTest extends DocTestBase {
+class HitsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

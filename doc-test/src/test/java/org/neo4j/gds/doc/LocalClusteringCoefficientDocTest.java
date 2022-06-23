@@ -29,7 +29,7 @@ import org.neo4j.gds.triangle.TriangleCountMutateProc;
 
 import java.util.List;
 
-class LocalClusteringCoefficientDocTest extends DocTestBase {
+class LocalClusteringCoefficientDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

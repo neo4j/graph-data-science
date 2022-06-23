@@ -28,7 +28,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
-class K1ColoringDocTest extends DocTestBase {
+class K1ColoringDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

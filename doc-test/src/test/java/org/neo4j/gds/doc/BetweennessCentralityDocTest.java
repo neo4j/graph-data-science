@@ -28,7 +28,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
-class BetweennessCentralityDocTest extends DocTestBase {
+class BetweennessCentralityDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

@@ -28,7 +28,7 @@ import org.neo4j.gds.kmeans.KmeansWriteProc;
 
 import java.util.List;
 
-class KMeansDocTest extends DocTestBase {
+class KMeansDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

@@ -25,7 +25,7 @@ import org.neo4j.gds.influenceMaximization.CELFProc;
 
 import java.util.List;
 
-class CELFDocTest extends DocTestBase {
+class CELFDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

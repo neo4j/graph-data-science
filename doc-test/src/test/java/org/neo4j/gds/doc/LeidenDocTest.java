@@ -28,7 +28,7 @@ import org.neo4j.gds.leiden.LeidenWriteProc;
 
 import java.util.List;
 
-class LeidenDocTest extends DocTestBase {
+class LeidenDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

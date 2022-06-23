@@ -25,7 +25,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamProc;
 
 import java.util.List;
 
-class FilteredKnnDocTest extends DocTestBase {
+class FilteredKnnDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

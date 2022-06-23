@@ -27,7 +27,7 @@ import org.neo4j.gds.functions.AsNodeFunc;
 
 import java.util.List;
 
-class ModularityOptimizationDocTest extends DocTestBase {
+class ModularityOptimizationDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> functions() {

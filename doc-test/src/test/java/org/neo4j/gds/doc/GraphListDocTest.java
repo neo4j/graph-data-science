@@ -24,7 +24,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 
 import java.util.List;
 
-class GraphListDocTest extends DocTestBase {
+class GraphListDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

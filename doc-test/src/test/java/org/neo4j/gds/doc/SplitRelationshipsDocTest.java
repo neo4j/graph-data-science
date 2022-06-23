@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateProc;
 import java.util.Arrays;
 import java.util.List;
 
-class SplitRelationshipsDocTest extends DocTestBase {
+class SplitRelationshipsDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {

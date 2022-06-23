@@ -26,7 +26,7 @@ import org.neo4j.gds.functions.NodePropertyFunc;
 
 import java.util.List;
 
-class GraphProjectDocTest extends DocTestBase {
+class GraphProjectDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class, NodePropertyFunc.class);
