@@ -79,11 +79,13 @@ final class IndependentCascadeThread implements  Runnable{
         for (long seed = startingSeed; seed < endingSeed; seed++) {
             newActive.clear();
             newActive.set(candidateNodeId);
+            active.set(candidateNodeId);
             for (int i = 0; i < seedNodeCounter; ++i) {
                 newActive.set(seedSetNodes[i]);
+                active.set(seedSetNodes[i]);
             }
             SplittableRandom rand = new SplittableRandom(seed);
-            localSpread += newActive.size();
+            localSpread += newActive.cardinality();
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected

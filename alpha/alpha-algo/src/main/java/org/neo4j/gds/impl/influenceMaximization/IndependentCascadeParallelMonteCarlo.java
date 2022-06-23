@@ -77,7 +77,7 @@ final class IndependentCascadeParallelMonteCarlo {
         for (var task : tasks) {
             spread += task.getSpread();
         }
-        return spread;
+        return spread / monteCarloSimulations;
     }
 
     public void incrementSeedNode() {

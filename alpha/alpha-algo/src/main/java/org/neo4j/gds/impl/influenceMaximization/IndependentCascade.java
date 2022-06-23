@@ -71,9 +71,9 @@ final class IndependentCascade {
                 graph.forEachRelationship(node, (source, target) ->
                 {
                     if (rand.nextDouble() < propagationProbability) {
-                        spread++;
                         if (!active.contains(target)) {
                             //Add newly activated nodes to the set of activated nodes
+                            spread++;
                             newActive.push(target);
                             active.add(target);
                         }

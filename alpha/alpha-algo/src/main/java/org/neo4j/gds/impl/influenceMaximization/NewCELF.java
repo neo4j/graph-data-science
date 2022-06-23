@@ -139,7 +139,10 @@ public class NewCELF extends Algorithm<NewCELF> {
         for (int i = 1; i < seedSetCount; i++) {
             do {
 
-                highestNode = spreads.pop();
+                highestNode = spreads.top();
+                if (highestNode == -1) {
+                    highestNode = -1;
+                }
                 //Recalculate the spread of the top node
                 double spread = independentCascade.runForCandidate(highestNode);
                 spreads.set(highestNode, spread - gain);
