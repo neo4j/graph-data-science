@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file.csv;
 
-import org.neo4j.gds.core.utils.io.file.SingleRowVisitor;
+import org.neo4j.gds.core.io.file.SingleRowVisitor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

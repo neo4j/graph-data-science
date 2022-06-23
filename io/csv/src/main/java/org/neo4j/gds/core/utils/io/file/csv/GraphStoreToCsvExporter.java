@@ -22,9 +22,9 @@ package org.neo4j.gds.core.utils.io.file.csv;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.core.utils.io.NeoNodeProperties;
-import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
-import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.NeoNodeProperties;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 
 import java.nio.file.Path;
 import java.util.Optional;

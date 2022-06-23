@@ -29,7 +29,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.core.utils.io.file.schema.GraphPropertySchemaBuilderVisitor;
+import org.neo4j.gds.core.io.schema.GraphPropertySchemaBuilderVisitor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

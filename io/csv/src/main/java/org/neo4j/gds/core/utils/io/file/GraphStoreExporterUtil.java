@@ -23,8 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphStoreExportSettings;
-import org.neo4j.gds.core.utils.io.GraphStoreExporter;
-import org.neo4j.gds.core.utils.io.NeoNodeProperties;
+import org.neo4j.gds.core.io.GraphStoreExporter;
+import org.neo4j.gds.core.io.NeoNodeProperties;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.utils.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
@@ -35,7 +36,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.neo4j.gds.core.utils.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
+import static org.neo4j.gds.core.io.GraphStoreExporter.DIRECTORY_IS_WRITABLE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GraphStoreExporterUtil {

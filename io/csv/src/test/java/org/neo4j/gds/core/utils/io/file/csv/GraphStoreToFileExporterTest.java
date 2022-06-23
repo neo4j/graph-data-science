@@ -27,7 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;

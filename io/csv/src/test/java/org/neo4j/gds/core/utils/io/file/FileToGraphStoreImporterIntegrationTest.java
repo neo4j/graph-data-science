@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.io.file.csv.CsvToGraphStoreImporter;
 import org.neo4j.gds.core.utils.io.file.csv.GraphStoreToCsvExporter;

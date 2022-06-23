@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.io.file.csv.estimation;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 

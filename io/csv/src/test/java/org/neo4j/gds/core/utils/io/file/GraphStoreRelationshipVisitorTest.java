@@ -25,6 +25,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
+import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.construction.GraphFactory;

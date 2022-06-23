@@ -25,7 +25,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.utils.io.file.HeaderProperty;
+import org.neo4j.gds.core.io.file.HeaderProperty;
 
 import java.io.IOException;
 import java.nio.file.Files;

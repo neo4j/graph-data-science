@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.io.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvAppender;
 import de.siegmar.fastcsv.writer.CsvWriter;
-import org.neo4j.gds.core.utils.io.file.schema.ElementSchemaVisitor;
+import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;

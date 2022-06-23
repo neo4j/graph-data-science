@@ -21,6 +21,7 @@ dependencies {
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':graph-schema-api')
+    implementation project(':io-core')
     implementation project(':memory-usage')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-adapter')

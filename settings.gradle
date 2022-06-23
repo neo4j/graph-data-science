@@ -85,6 +85,9 @@ project(':graph-projection-api').projectDir = file('graph-projection-api')
 include('graph-schema-api')
 project(':graph-schema-api').projectDir = file('graph-schema-api')
 
+include 'io-core'
+project(':io-core').projectDir = file('io/core')
+
 include('licensing')
 project(':licensing').projectDir = file('licensing')
 
