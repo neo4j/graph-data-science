@@ -30,6 +30,7 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.LongConsumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,7 +83,8 @@ public abstract class AdjacencyListBuilderBaseTest {
         );
         importer.importRelationships();
 
-        adjacencyBuffer.adjacencyListBuilderTasks(mapper).forEach(Runnable::run);
+        LongConsumer drainCountConsumer = drainCount -> assertThat(drainCount).isGreaterThan(0);
+        adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.of(drainCountConsumer)).forEach(Runnable::run);
 
         try (var adjacencyList = adjacencyCompressorFactory.build().adjacency()) {
             for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

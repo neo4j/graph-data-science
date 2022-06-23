@@ -28,11 +28,18 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class Extractors {
 
     private static final Pattern TIME_MEASUREMENTS_PATTERN = Pattern.compile("(\\d+\\s*)(ms|s|min)");
+
     private Extractors() {}
 
     public static ThrowingExtractor<String, String, RuntimeException> removingThreadId() {
-        return message -> message
-            .substring(message.indexOf("] ") + 2);
+        return Extractors::removeThreadId;
+    }
+
+    private static String removeThreadId(String message) {
+        if (message.contains("] ")) {
+            return removeThreadId(message.substring(message.indexOf("] ") + 2));
+        }
+        return message;
     }
 
     public static ThrowingExtractor<String, String, RuntimeException> replaceTimings() {

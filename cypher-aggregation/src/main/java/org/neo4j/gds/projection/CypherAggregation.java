@@ -504,7 +504,7 @@ public final class CypherAggregation extends BaseProc {
             var relationshipSchemaBuilder = RelationshipSchema.builder();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
-                var allRelationships = relImporter.buildAll(Optional.of(nodes::toMappedNodeId));
+                var allRelationships = relImporter.buildAll(Optional.of(nodes::toMappedNodeId), Optional.empty());
                 var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
                     allRelationships,
                     Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())

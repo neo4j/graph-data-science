@@ -34,6 +34,7 @@ import org.neo4j.gds.utils.AutoCloseableThreadLocal;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -140,13 +141,25 @@ public class RelationshipsBuilder {
     }
 
     public List<Relationships> buildAll() {
-        return buildAll(Optional.empty());
+        return buildAll(Optional.empty(), Optional.empty());
     }
 
-    public List<Relationships> buildAll(Optional<AdjacencyCompressor.ValueMapper> mapper) {
+    /**
+     * @param mapper             A mapper to transform values before compressing them. Implementations must be thread-safe.
+     * @param drainCountConsumer A consumer which is called once a {@link org.neo4j.gds.core.loading.ChunkedAdjacencyLists}
+     *                           has been drained and its contents are written to the adjacency list. The consumer receives the number
+     *                           of relationships that have been written. Implementations must be thread-safe.
+     */
+    public List<Relationships> buildAll(
+        Optional<AdjacencyCompressor.ValueMapper> mapper,
+        Optional<LongConsumer> drainCountConsumer
+    ) {
         threadLocalBuilders.close();
 
-        var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks(mapper);
+        var adjacencyListBuilderTasks = singleTypeRelationshipImporter.adjacencyListBuilderTasks(
+            mapper,
+            drainCountConsumer
+        );
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)

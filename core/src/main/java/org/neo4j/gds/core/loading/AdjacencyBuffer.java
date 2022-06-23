@@ -36,6 +36,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
+import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
@@ -222,7 +223,10 @@ public final class AdjacencyBuffer {
         }
     }
 
-    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
+    Collection<AdjacencyListBuilderTask> adjacencyListBuilderTasks(
+        Optional<AdjacencyCompressor.ValueMapper> mapper,
+        Optional<LongConsumer> drainCountConsumer
+    ) {
         adjacencyCompressorFactory.init();
 
         var tasks = new ArrayList<AdjacencyListBuilderTask>(localBuilders.length + 1);
@@ -233,7 +237,8 @@ public final class AdjacencyBuffer {
                 localBuilders[page],
                 chunkedAdjacencyLists[page],
                 relationshipCounter,
-                mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE)
+                mapper.orElse(ZigZagLongDecoding.Identity.INSTANCE),
+                drainCountConsumer.orElse(n -> {})
             ));
         }
 
@@ -269,6 +274,7 @@ public final class AdjacencyBuffer {
         private final LongArrayBuffer buffer;
         private final LongAdder relationshipCounter;
         private final AdjacencyCompressor.ValueMapper valueMapper;
+        private final LongConsumer drainCountConsumer;
 
         AdjacencyListBuilderTask(
             int page,
@@ -276,13 +282,15 @@ public final class AdjacencyBuffer {
             ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder,
             ChunkedAdjacencyLists chunkedAdjacencyLists,
             LongAdder relationshipCounter,
-            AdjacencyCompressor.ValueMapper valueMapper
+            AdjacencyCompressor.ValueMapper valueMapper,
+            LongConsumer drainCountConsumer
         ) {
             this.page = page;
             this.paging = paging;
             this.threadLocalRelationshipsBuilder = threadLocalRelationshipsBuilder;
             this.chunkedAdjacencyLists = chunkedAdjacencyLists;
             this.valueMapper = valueMapper;
+            this.drainCountConsumer = drainCountConsumer;
             this.buffer = new LongArrayBuffer();
             this.relationshipCounter = relationshipCounter;
         }
@@ -305,6 +313,7 @@ public final class AdjacencyBuffer {
                     ));
                 });
                 relationshipCounter.add(importedRelationships.longValue());
+                drainCountConsumer.accept(importedRelationships.longValue());
             }
         }
     }
