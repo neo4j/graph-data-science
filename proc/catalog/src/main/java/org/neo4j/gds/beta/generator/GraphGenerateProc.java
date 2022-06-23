@@ -20,10 +20,10 @@
 package org.neo4j.gds.beta.generator;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -89,10 +89,9 @@ public final class GraphGenerateProc extends BaseProc {
 
             HugeGraph graph = generator.generate();
 
-            Optional<String> relationshipProperty = Optional.of(generator
+            Optional<String> relationshipProperty = generator
                 .getMaybeRelationshipPropertyProducer()
-                .map(PropertyProducer::getPropertyName)
-                .orElse("PROPERTY"));
+                .map(PropertyProducer::getPropertyName);
 
             GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
                 api.databaseId(),
