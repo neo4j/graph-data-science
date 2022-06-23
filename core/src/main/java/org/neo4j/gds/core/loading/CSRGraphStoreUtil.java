@@ -56,24 +56,37 @@ public final class CSRGraphStoreUtil {
         NamedDatabaseId databaseId,
         HugeGraph graph,
         String relationshipTypeString,
-        Optional<String> relationshipProperty,
+        Optional<String> relationshipPropertyKey,
         int concurrency
     ) {
-        Relationships relationships = graph.relationships();
-
         var relationshipType = RelationshipType.of(relationshipTypeString);
-        var topology = Map.of(relationshipType, relationships.topology());
+        var relationships = graph.relationships();
+        var relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
 
+        relationshipPropertyKey.ifPresent(property -> {
+
+            if (!graph.hasRelationshipProperty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Relationship property name '%s' does not exist in the graph.",
+                    property
+                ));
+            }
+
+            relationshipSchemaBuilder.addProperty(
+                relationshipType,
+                property,
+                ValueType.DOUBLE
+            );
+        });
+
+        var topology = Map.of(relationshipType, relationships.topology());
         var nodeProperties = constructNodePropertiesFromGraph(graph);
         var relationshipProperties = constructRelationshipPropertiesFromGraph(
             graph,
-            relationshipProperty,
+            relationshipPropertyKey,
             relationships,
             relationshipType
         );
-
-        RelationshipSchema.Builder relationshipSchemaBuilder = RelationshipSchema.builder().addRelationshipType(relationshipType);
-        relationshipProperty.ifPresent(property -> relationshipSchemaBuilder.addProperty(relationshipType, property, ValueType.DOUBLE));
 
         var schema = GraphSchema.of(graph.schema().nodeSchema(), relationshipSchemaBuilder.build(), Map.of());
 
