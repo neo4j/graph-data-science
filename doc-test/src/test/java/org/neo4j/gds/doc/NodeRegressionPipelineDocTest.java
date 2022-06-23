@@ -56,6 +56,7 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
         );
     }
 
+
     @Override
     List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
@@ -63,6 +64,15 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/machine-learning/node-property-prediction/noderegression-pipelines/index.adoc";
+        return "NOT LOOKED AT";
+    }
+
+    @Override
+    protected List<String> adocPaths() {
+        return List.of(
+            "pages/machine-learning/node-property-prediction/noderegression-pipelines/config.adoc",
+            "pages/machine-learning/node-property-prediction/noderegression-pipelines/training.adoc",
+            "pages/machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc"
+        );
     }
 }

@@ -69,6 +69,15 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
 
     @Override
     protected String adocFile() {
-        return "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc";
+        return "NOT LOOKED AT";
+    }
+
+    @Override
+    protected List<String> adocPaths() {
+        return List.of(
+            "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc",
+            "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc",
+            "pages/machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc"
+        );
     }
 }
