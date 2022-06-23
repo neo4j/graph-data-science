@@ -24,50 +24,33 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
-
-public abstract class PipelineTrain<RESULT, CONFIG extends AlgoBaseConfig, PIPELINE extends TrainingPipeline<?>> extends Algorithm<RESULT> {
-    protected final PIPELINE pipeline;
+public class PipelineTrainAlgorithm<RESULT> extends Algorithm<RESULT> {
+    protected final TrainingPipeline<?> pipeline;
     protected final GraphStore graphStore;
-    protected final CONFIG config;
+    protected final AlgoBaseConfig config;
 
-    protected PipelineTrain(
-        PIPELINE pipeline,
+    private final PipelineTrainer<RESULT> pipelineTrainer;
+
+    public PipelineTrainAlgorithm(
+        PipelineTrainer<RESULT> pipelineTrainer,
+        TrainingPipeline<?> pipeline,
         GraphStore graphStore,
-        CONFIG config,
+        AlgoBaseConfig config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
+        this.pipelineTrainer = pipelineTrainer;
         this.pipeline = pipeline;
         this.graphStore = graphStore;
         this.config = config;
     }
 
-    protected abstract RESULT unsafeCompute();
-
     @Override
     public RESULT compute() {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
         pipeline.validateBeforeExecution(graphStore, config);
-        try {
-            return unsafeCompute();
-        }
-        finally {
-            cleanUpGraphStore();
-        }
-    }
-
-    protected void cleanUpGraphStore() {
-        removeNodeProperties(graphStore);
-    }
-
-    private void removeNodeProperties(GraphStore graphstore) {
-        pipeline.nodePropertySteps().forEach(step -> {
-            var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
-            if (intermediateProperty instanceof String) {
-                graphstore.removeNodeProperty(((String) intermediateProperty));
-            }
-        });
+        pipelineTrainer.setTerminationFlag(terminationFlag);
+        return pipelineTrainer.run();
     }
 
     @Override

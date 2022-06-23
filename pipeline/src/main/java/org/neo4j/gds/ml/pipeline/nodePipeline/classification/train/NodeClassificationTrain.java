@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -58,7 +59,7 @@ import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
-import org.neo4j.gds.ml.pipeline.PipelineTrain;
+import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -81,12 +82,11 @@ import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.Labels
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class NodeClassificationTrain extends PipelineTrain<
-    NodeClassificationTrainResult,
-    NodeClassificationPipelineTrainConfig,
-    NodeClassificationTrainingPipeline> {
+public final class NodeClassificationTrain implements PipelineTrainer<NodeClassificationTrainResult> {
 
+    private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig trainConfig;
+    private final GraphStore graphStore;
     private final long nodeCount;
     private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
@@ -94,8 +94,10 @@ public final class NodeClassificationTrain extends PipelineTrain<
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
     private final LongMultiSet classCounts;
-    private final NodePropertyStepExecutor nodePropertyStepExecutor;
+    private final NodePropertyStepExecutor<?> nodePropertyStepExecutor;
     private final GraphSchema schemaBeforeSteps;
+    private final ProgressTracker progressTracker;
+    private TerminationFlag terminationFlag;
 
     public static MemoryEstimation estimate(
         NodeClassificationTrainingPipeline pipeline,
@@ -259,7 +261,7 @@ public final class NodeClassificationTrain extends PipelineTrain<
         Graph graph,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        NodePropertyStepExecutor nodePropertyStepExecutor,
+        NodePropertyStepExecutor<?> nodePropertyStepExecutor,
         ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
@@ -297,10 +299,11 @@ public final class NodeClassificationTrain extends PipelineTrain<
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
         LongMultiSet classCounts,
-        NodePropertyStepExecutor nodePropertyStepExecutor,
+        NodePropertyStepExecutor<?> nodePropertyStepExecutor,
         ProgressTracker progressTracker
     ) {
-        super(pipeline, graphStore, config, progressTracker);
+        this.graphStore = graphStore;
+        this.pipeline = pipeline;
         this.nodeCount = nodeCount;
         this.nodeIdMap = nodeIdMap;
         this.classificationMetrics = classificationMetrics;
@@ -311,9 +314,16 @@ public final class NodeClassificationTrain extends PipelineTrain<
         this.metrics = metrics;
         this.classCounts = classCounts;
         this.schemaBeforeSteps = trainConfig.filteredSchema(graphStore);
+        this.progressTracker = progressTracker;
     }
 
-    protected NodeClassificationTrainResult unsafeCompute() {
+    @Override
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = terminationFlag;
+    }
+
+    @Override
+    public NodeClassificationTrainResult run() {
         progressTracker.beginSubTask();
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(

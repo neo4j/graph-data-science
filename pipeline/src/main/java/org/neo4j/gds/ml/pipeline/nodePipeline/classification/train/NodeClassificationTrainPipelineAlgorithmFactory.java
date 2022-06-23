@@ -29,11 +29,13 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 
-public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrain, NodeClassificationPipelineTrainConfig> {
+public class NodeClassificationTrainPipelineAlgorithmFactory extends
+    GraphStoreAlgorithmFactory<PipelineTrainAlgorithm<NodeClassificationTrainResult>, NodeClassificationPipelineTrainConfig> {
 
     private final ExecutionContext executionContext;
     private static final String TASK_NAME = "Node Classification Train Pipeline";
@@ -43,7 +45,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
     }
 
     @Override
-    public NodeClassificationTrain build(
+    public PipelineTrainAlgorithm<NodeClassificationTrainResult> build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         ProgressTracker progressTracker
@@ -65,7 +67,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var nodesGraph = graphStore.getGraph(nodeLabels);
 
-        return NodeClassificationTrain.create(
+        var nodeClassificationTrain = NodeClassificationTrain.create(
             graphStore,
             nodesGraph,
             pipeline,
@@ -73,6 +75,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             nodePropertyStepExecutor,
             progressTracker
         );
+
+        return new PipelineTrainAlgorithm<>(nodeClassificationTrain, pipeline, graphStore, configuration, progressTracker);
     }
 
     @Override
