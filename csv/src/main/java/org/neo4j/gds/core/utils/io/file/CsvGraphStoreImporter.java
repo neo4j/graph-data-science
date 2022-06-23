@@ -235,46 +235,48 @@ public final class CsvGraphStoreImporter {
     }
 
     private void importGraphProperties(FileInput fileInput) {
-        progressTracker.beginSubTask();
+        if (!fileInput.graphPropertySchema().isEmpty()) {
+            progressTracker.beginSubTask();
 
-        var graphPropertySchema = fileInput.graphPropertySchema();
-        graphSchemaBuilder.graphProperties(graphPropertySchema);
-        graphPropertyVisitorBuilder.withGraphPropertySchema(graphPropertySchema);
+            var graphPropertySchema = fileInput.graphPropertySchema();
+            graphSchemaBuilder.graphProperties(graphPropertySchema);
+            graphPropertyVisitorBuilder.withGraphPropertySchema(graphPropertySchema);
 
-        var graphPropertyBuilder = GraphPropertyStore.builder();
-        var graphStoreGraphPropertyVisitor = graphPropertyVisitorBuilder.build();
+            var graphPropertyBuilder = GraphPropertyStore.builder();
+            var graphStoreGraphPropertyVisitor = graphPropertyVisitorBuilder.build();
 
-        var graphPropertiesIterator = fileInput.graphProperties().iterator();
+            var graphPropertiesIterator = fileInput.graphProperties().iterator();
 
-        var tasks = ParallelUtil.tasks(
-            concurrency,
-            (index) -> new ElementImportRunner<>(
-                graphStoreGraphPropertyVisitor,
-                graphPropertiesIterator,
-                progressTracker
-            )
-        );
-        ParallelUtil.run(tasks, Pools.DEFAULT);
+            var tasks = ParallelUtil.tasks(
+                concurrency,
+                (index) -> new ElementImportRunner<>(
+                    graphStoreGraphPropertyVisitor,
+                    graphPropertiesIterator,
+                    progressTracker
+                )
+            );
+            ParallelUtil.run(tasks, Pools.DEFAULT);
 
-        var streamFractions = graphStoreGraphPropertyVisitor.streamFractions();
-        var graphPropertyStreams = streamFractions.entrySet().stream().collect(Collectors.toMap(
-            Map.Entry::getKey,
-            entry -> entry.getValue()
-                .stream()
-                .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
-                .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
-        ));
+            var streamFractions = graphStoreGraphPropertyVisitor.streamFractions();
+            var graphPropertyStreams = streamFractions.entrySet().stream().collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue()
+                    .stream()
+                    .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
+                    .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
+            ));
 
-        graphPropertyStreams.forEach((key, value) -> {
-            if (value.isPresent()) {
-                var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
-                graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
-            }
-        });
+            graphPropertyStreams.forEach((key, value) -> {
+                if (value.isPresent()) {
+                    var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
+                    graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
+                }
+            });
 
-        graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
+            graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
 
-        progressTracker.endSubTask();
+            progressTracker.endSubTask();
+        }
     }
 
     private static GraphPropertyValues getGraphPropertyValuesFromStream(GraphStoreGraphPropertyVisitor.ReducibleStream<?> reducibleStream) {
