@@ -24,11 +24,12 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.file.CapabilitiesDTO;
 import org.neo4j.gds.core.utils.io.file.ImmutableCapabilitiesDTO;
+import org.neo4j.gds.core.utils.io.file.SimpleWriter;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class CsvGraphCapabilitiesWriter {
+public class CsvGraphCapabilitiesWriter implements SimpleWriter<Capabilities> {
 
     public static final String GRAPH_CAPABILITIES_FILE_NAME = "graph-capabilities.csv";
 
@@ -44,7 +45,7 @@ public class CsvGraphCapabilitiesWriter {
         this.fileLocation = fileLocation.resolve(GRAPH_CAPABILITIES_FILE_NAME);
     }
 
-    public void writeCapabilities(Capabilities capabilities) throws IOException {
+    public void write(Capabilities capabilities) throws IOException {
         var capabilitiesDTO = CapabilitiesDTO.from(capabilities);
         var resultFile = fileLocation.toFile();
         this.objectWriter.writeValue(resultFile, capabilitiesDTO);

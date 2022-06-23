@@ -24,6 +24,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
@@ -111,7 +112,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
         Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
-        Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
+        Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
     ) {
@@ -197,7 +198,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private final Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier;
         private final Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier;
         private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
-        private final Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier;
+        private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
         private FullGraphStoreToFileExporter(
             GraphStore graphStore,
@@ -207,7 +208,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
             Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
             Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier,
-            Supplier<CsvGraphCapabilitiesWriter> graphCapabilitiesWriterSupplier,
+            Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
             VisitorProducer<NodeVisitor> nodeVisitorSupplier,
             VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier
         ) {
@@ -288,7 +289,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         private void exportGraphCapabilities(GraphStoreInput graphStoreInput) {
             var capabilitiesMapper = graphCapabilitiesWriterSupplier.get();
             try {
-                capabilitiesMapper.writeCapabilities(graphStoreInput.capabilities());
+                capabilitiesMapper.write(graphStoreInput.capabilities());
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
