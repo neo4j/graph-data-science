@@ -29,7 +29,6 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.utils.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -140,7 +139,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         // export db
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         var aLabel = NodeLabel.of("A");
@@ -238,7 +237,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         graphStore.addGraphProperty("graphProp", graphPropertyValues);
 
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(List.of("graph_property_graphProp_0.csv", "graph_property_graphProp_header.csv"));
@@ -270,7 +269,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         // export db
-        var exporter = GraphStoreToFileExporter.csv(concurrentGraphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(concurrentGraphStore, config, tempDir);
         exporter.run();
 
         // Assert headers
@@ -341,7 +340,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
 
         graphStore.addGraphProperty("graphProp", graphPropertyValues);
 
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(
@@ -401,7 +400,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             }
         });
 
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_PROPERTY_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
@@ -472,7 +471,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .includeMetaData(true)
             .build();
 
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertThat(tempDir)
@@ -491,7 +490,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .includeMetaData(true)
             .build();
 
-        var exporter = GraphStoreToFileExporter.csv(noPropertiesGraphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(noPropertiesGraphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
@@ -535,7 +534,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .build();
 
         // export db
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(List.of(
@@ -568,7 +567,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
             .includeMetaData(true)
             .build();
 
-        var exporter = GraphStoreToFileExporter.csv(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
         assertCsvFiles(List.of(GRAPH_CAPABILITIES_FILE_NAME));

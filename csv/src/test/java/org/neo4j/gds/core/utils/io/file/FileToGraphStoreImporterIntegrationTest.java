@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
+import org.neo4j.gds.core.utils.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -73,7 +74,7 @@ class FileToGraphStoreImporterIntegrationTest {
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) {
 
-        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
 
         var importer = FileToGraphStoreImporter.csv(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -89,7 +90,7 @@ class FileToGraphStoreImporterIntegrationTest {
         addLongGraphProperty();
         addDoubleArrayGraphProperty();
 
-        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency), graphLocation).run();
         var importer = FileToGraphStoreImporter.csv(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
         var graphStore = userGraphStore.graphStore();
@@ -113,7 +114,7 @@ class FileToGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
 
-        GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(4), graphLocation).run();
 
         var importer = FileToGraphStoreImporter.csv(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -132,7 +133,7 @@ class FileToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
-        GraphStoreToFileExporter.csv(graphStoreWithCapabilities, exportConfig(1), graphLocation).run();
+        GraphStoreToCsvExporter.create(graphStoreWithCapabilities, exportConfig(1), graphLocation).run();
 
         var importer = FileToGraphStoreImporter.csv(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();

@@ -21,5 +21,5 @@ package org.neo4j.gds.core.utils.io.file;
 
 import java.util.function.Function;
 
-interface VisitorProducer<VISITOR> extends Function<Integer, VISITOR> {
+public interface VisitorProducer<VISITOR> extends Function<Integer, VISITOR> {
 }
