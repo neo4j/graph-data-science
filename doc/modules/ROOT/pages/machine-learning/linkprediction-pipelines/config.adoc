@@ -71,7 +71,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 | "pipe"   | []                | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials={max-trials}}
-| {RandomForest=[], LogisticRegression=[]}
+| {MultiLayerPerceptronClassification=[], RandomForest=[], LogisticRegression=[]}
 |===
 --
 
@@ -146,7 +146,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials={max-trials}}
-| {RandomForest=[], LogisticRegression=[]}
+| {MultiLayerPerceptronClassification=[], RandomForest=[], LogisticRegression=[]}
 |===
 
 The pipeline will now execute the xref::machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref::machine-learning/linkprediction-pipelines/training.adoc[training] a model, and when the trained model is xref::machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
