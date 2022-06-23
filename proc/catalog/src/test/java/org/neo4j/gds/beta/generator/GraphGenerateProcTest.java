@@ -164,7 +164,7 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     @Test
     void shouldGenerateDefaultEmptySchemaWithoutProperties() {
-        String query = "CALL gds.beta.graph.generate('g', 10000, 5, {relationshipDistribution: 'RANDOM'})";
+        String query = "CALL gds.beta.graph.generate('g', 4, 2, {relationshipDistribution: 'RANDOM'})";
         runQuery(query);
 
         var graph = GraphStoreCatalog.get(this.getUsername(), this.db.databaseId(), "g").graphStore();

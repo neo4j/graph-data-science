@@ -78,7 +78,7 @@ class CSRGraphStoreUtilTest {
                 1
             );
         })
-            .hasMessage("Relationship property name 'prop1' does not exist in the graph.");
+            .hasMessage("Expected relationship property 'prop1', but graph has none.");
     }
 
 }
