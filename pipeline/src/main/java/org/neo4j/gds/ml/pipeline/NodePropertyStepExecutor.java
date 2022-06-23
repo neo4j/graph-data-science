@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -28,14 +29,42 @@ import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 
-public interface NodePropertyStepExecutor {
-    NodePropertyStepExecutor NOOP = loggingOnly(ProgressTracker.NULL_TRACKER);
+public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
-    static NodePropertyStepExecutor loggingOnly(ProgressTracker progressTracker) {
-        return new LoggingOnlyNodePropertyExecutor(progressTracker);
+    private final ExecutionContext executionContext;
+    private final PIPELINE_CONFIG config;
+    private final GraphStore graphStore;
+    private final Collection<NodeLabel> nodeLabels;
+    private final Collection<RelationshipType> relTypes;
+    private final ProgressTracker progressTracker;
+
+    NodePropertyStepExecutor(
+        ExecutionContext executionContext,
+        PIPELINE_CONFIG config,
+        GraphStore graphStore,
+        Collection<RelationshipType> relationshipTypes,
+        ProgressTracker progressTracker
+    ) {
+        this.executionContext = executionContext;
+        this.config = config;
+        this.graphStore = graphStore;
+        this.nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        this.relTypes = relationshipTypes;
+        this.progressTracker = progressTracker;
     }
 
-    static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor of(
+    public void executeNodePropertySteps(Pipeline<?> pipeline) {
+        progressTracker.beginSubTask("Execute node property steps");
+        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
+            progressTracker.beginSubTask();
+            step.execute(executionContext, config.graphName(), nodeLabels, relTypes);
+            progressTracker.endSubTask();
+        }
+        pipeline.validateFeatureProperties(graphStore, config);
+        progressTracker.endSubTask("Execute node property steps");
+    }
+
+    public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(
         ExecutionContext executionContext,
         GraphStore graphStore,
         CONFIG config,
@@ -44,14 +73,15 @@ public interface NodePropertyStepExecutor {
         return of(executionContext, graphStore, config, config.internalRelationshipTypes(graphStore), progressTracker);
 
     }
-    static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor of(
+
+    public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(
         ExecutionContext executionContext,
         GraphStore graphStore,
         CONFIG config,
         Collection<RelationshipType> relationshipTypes,
         ProgressTracker progressTracker
     ) {
-        return new NodePropertyStepExecutorImpl<>(
+        return new NodePropertyStepExecutor<>(
             executionContext,
             config,
             graphStore,
@@ -59,6 +89,4 @@ public interface NodePropertyStepExecutor {
             progressTracker
         );
     }
-
-    void executeNodePropertySteps(Pipeline<?> pipeline);
 }
