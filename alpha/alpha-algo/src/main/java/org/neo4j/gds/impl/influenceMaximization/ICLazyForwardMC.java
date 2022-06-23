@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-final class IndependentCascadeParallelMonteCarlo {
+final class ICLazyForwardMC {
 
     private final Graph graph;
     private final double propagationProbability;
@@ -37,12 +37,12 @@ final class IndependentCascadeParallelMonteCarlo {
 
     private final int concurrency;
 
-    private List<IndependentCascadeThread> tasks;
+    private List<ICLazyForwardThread> tasks;
 
     private final ExecutorService executorService;
 
 
-    IndependentCascadeParallelMonteCarlo(
+    ICLazyForwardMC(
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
@@ -57,7 +57,7 @@ final class IndependentCascadeParallelMonteCarlo {
         this.tasks = PartitionUtils.rangePartition(
             concurrency,
             monteCarloSimulations,
-            partition -> new IndependentCascadeThread(partition, graph, seedSetNodes, propagationProbability),
+            partition -> new ICLazyForwardThread(partition, graph, seedSetNodes, propagationProbability),
             Optional.empty()
         );
         this.concurrency = concurrency;

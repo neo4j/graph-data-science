@@ -23,13 +23,14 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 
-import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -41,7 +42,6 @@ public class NewCELF extends Algorithm<NewCELF> {
     private final int concurrency;
 
     private final Graph graph;
-    private final ArrayList<Runnable> tasks;
     private final LongDoubleScatterMap seedSetNodes;
 
     private final long[] seedSetNodesArray;
@@ -73,7 +73,6 @@ public class NewCELF extends Algorithm<NewCELF> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.tasks = new ArrayList<>();
 
         seedSetNodes = new LongDoubleScatterMap(seedSetCount);
 
@@ -96,27 +95,34 @@ public class NewCELF extends Algorithm<NewCELF> {
     }
 
     private void greedyPart() {
-        double highestScore;
-        long highestNode;
+        HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
 
-        var globalNodeProgress = new AtomicLong(0);
-        for (int i = 0; i < concurrency; i++) {
-            var runner = new IndependentCascadeRunner(graph, spreads, globalNodeProgress,
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> new ICInitThread(
+                partition,
+                graph,
                 propagationProbability,
-                monteCarloSimulations
-            );
-            runner.setSeedSetNodes(new long[0]);
-            tasks.add(runner);
-        }
+                monteCarloSimulations,
+                singleSpreadArray
+            ),
+            Optional.empty()
+        );
+
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
 
-        //Add the node with the highest spread to the seed set
-        highestScore = spreads.cost(spreads.top());
-        highestNode = spreads.pop();
+        graph.forEachNode(nodeId -> {
+            spreads.add(nodeId, singleSpreadArray.get(nodeId));
+            return true;
+        });
+        long highestNode = spreads.top();
+        double highestScore = spreads.cost(highestNode);
+        spreads.pop();
         seedSetNodes.put(highestNode, highestScore);
         seedSetNodesArray[0] = highestNode;
         gain = highestScore;
@@ -127,7 +133,7 @@ public class NewCELF extends Algorithm<NewCELF> {
         long highestNode;
 
 
-        var independentCascade = new IndependentCascadeParallelMonteCarlo(
+        var independentCascade = new ICLazyForwardMC(
             graph,
             propagationProbability,
             monteCarloSimulations,

@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.SplittableRandom;
 
-final class IndependentCascadeThread implements  Runnable{
+final class ICLazyForwardThread implements Runnable {
 
     private final long[] seedSetNodes;
     private int seedNodeCounter;
@@ -42,7 +42,7 @@ final class IndependentCascadeThread implements  Runnable{
 
     private final double propagationProbability;
 
-    public IndependentCascadeThread(
+    public ICLazyForwardThread(
         Partition partition,
         Graph graph,
         long[] seedSetNodes,
@@ -70,6 +70,18 @@ final class IndependentCascadeThread implements  Runnable{
         return localSpread;
     }
 
+    private void initDataStructures() {
+        newActive.clear();
+        active.clear();
+        newActive.set(candidateNodeId);
+        active.set(candidateNodeId);
+        for (int i = 0; i < seedNodeCounter; ++i) {
+            newActive.set(seedSetNodes[i]);
+            active.set(seedSetNodes[i]);
+        }
+    }
+
+
     public void run() {
         //Loop over the Monte-Carlo simulations
         localSpread = 0;
@@ -77,13 +89,7 @@ final class IndependentCascadeThread implements  Runnable{
         int endingSeed = (int) partition.nodeCount() + startingSeed;
 
         for (long seed = startingSeed; seed < endingSeed; seed++) {
-            newActive.clear();
-            newActive.set(candidateNodeId);
-            active.set(candidateNodeId);
-            for (int i = 0; i < seedNodeCounter; ++i) {
-                newActive.set(seedSetNodes[i]);
-                active.set(seedSetNodes[i]);
-            }
+            initDataStructures();
             SplittableRandom rand = new SplittableRandom(seed);
             localSpread += newActive.cardinality();
             //For each newly active node, find its neighbors that become activated
