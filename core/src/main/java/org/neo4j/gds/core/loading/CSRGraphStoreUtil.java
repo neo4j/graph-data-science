@@ -67,7 +67,7 @@ public final class CSRGraphStoreUtil {
 
             if (!graph.hasRelationshipProperty()) {
                 throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship property name '%s' does not exist in the graph.",
+                    "Expected relationship property '%s', but graph has none.",
                     property
                 ));
             }
