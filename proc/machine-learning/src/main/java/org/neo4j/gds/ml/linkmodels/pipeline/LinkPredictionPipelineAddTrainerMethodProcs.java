@@ -43,14 +43,14 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     @Description("Add a logistic regression configuration to the parameter space of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> addLogisticRegression(
         @Name("pipelineName") String pipelineName,
-        @Name(value = "config", defaultValue = "{}") Map<String, Object> config
+        @Name(value = "config", defaultValue = "{}") Map<String, Object> logisticRegressionClassifierConfig
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
         var allowedKeys = LogisticRegressionTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, config.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, logisticRegressionClassifierConfig.keySet());
 
-        var tunableTrainerConfig = TunableTrainerConfig.of(config, TrainingMethod.LogisticRegression);
+        var tunableTrainerConfig = TunableTrainerConfig.of(logisticRegressionClassifierConfig, TrainingMethod.LogisticRegression);
         pipeline.addTrainerConfig(
             tunableTrainerConfig
         );
@@ -81,14 +81,14 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     @Description("Add a multi layer perceptron configuration to the parameter space of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> addMLP(
             @Name("pipelineName") String pipelineName,
-            @Name(value = "config") Map<String, Object> MLPClassifierConfig
+            @Name(value = "config") Map<String, Object> mlpClassifierConfig
     ) {
         var pipeline = PipelineCatalog.getTyped(username(), pipelineName, LinkPredictionTrainingPipeline.class);
 
         var allowedKeys = MLPClassifierTrainConfig.DEFAULT.configKeys();
-        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, MLPClassifierConfig.keySet());
+        ConfigKeyValidation.requireOnlyKeysFrom(allowedKeys, mlpClassifierConfig.keySet());
 
-        pipeline.addTrainerConfig(MLPClassifierTrainConfig.of(MLPClassifierConfig));
+        pipeline.addTrainerConfig(TunableTrainerConfig.of(mlpClassifierConfig, TrainingMethod.MLPClassification));
 
         return Stream.of(new PipelineInfoResult(pipelineName, pipeline));
     }

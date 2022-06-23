@@ -197,8 +197,9 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var metric = metricSpecification.createMetrics(LocalIdMap.of(), new LongMultiSet()).findFirst().orElseThrow();
 
-        var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
-        pipeline.addTrainerConfig(modelCandidate);
+        var winningModelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
+        pipeline.addTrainerConfig(winningModelCandidate);
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.DEFAULT);
 
         pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
             .testFraction(0.3)
@@ -232,7 +233,7 @@ class NodeClassificationTrainPipelineExecutorTest extends BaseProcTest {
             assertThat(model.graphSchema()).isEqualTo(graphStore.schema());
             assertThat(model.name()).isEqualTo("model");
             assertThat(model.stored()).isFalse();
-            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(winningModelCandidate.toMap());
             assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
             assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
                 .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
