@@ -147,6 +147,10 @@ public final class CsvGraphStoreImporter {
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
         importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
 
+        if (!fileInput.graphPropertySchema().isEmpty()) {
+            importTasks.add(Tasks.leaf("Import graph properties"));
+        }
+
         var task = Tasks.task(
             "Csv import",
             importTasks
@@ -231,6 +235,8 @@ public final class CsvGraphStoreImporter {
     }
 
     private void importGraphProperties(FileInput fileInput) {
+        progressTracker.beginSubTask();
+
         var graphPropertySchema = fileInput.graphPropertySchema();
         graphSchemaBuilder.graphProperties(graphPropertySchema);
         graphPropertyVisitorBuilder.withGraphPropertySchema(graphPropertySchema);
@@ -267,6 +273,8 @@ public final class CsvGraphStoreImporter {
         });
 
         graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
+
+        progressTracker.endSubTask();
     }
 
     private static GraphPropertyValues getGraphPropertyValuesFromStream(GraphStoreGraphPropertyVisitor.ReducibleStream<?> reducibleStream) {
