@@ -26,8 +26,8 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeFileHeaderTest {
 
