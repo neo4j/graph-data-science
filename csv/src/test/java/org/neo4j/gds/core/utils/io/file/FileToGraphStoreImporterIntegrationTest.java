@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
-class CsvGraphStoreImporterIntegrationTest {
+class FileToGraphStoreImporterIntegrationTest {
 
     @GdlGraph
     private static final String GDL =
@@ -75,7 +75,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
 
-        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = FileToGraphStoreImporter.csv(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -90,7 +90,7 @@ class CsvGraphStoreImporterIntegrationTest {
         addDoubleArrayGraphProperty();
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
-        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = FileToGraphStoreImporter.csv(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
         var graphStore = userGraphStore.graphStore();
 
@@ -115,7 +115,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStore, exportConfig(4), graphLocation).run();
 
-        var importer = CsvGraphStoreImporter.create(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = FileToGraphStoreImporter.csv(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
@@ -134,7 +134,7 @@ class CsvGraphStoreImporterIntegrationTest {
 
         GraphStoreToFileExporter.csv(graphStoreWithCapabilities, exportConfig(1), graphLocation).run();
 
-        var importer = CsvGraphStoreImporter.create(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var importer = FileToGraphStoreImporter.csv(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
 
         var importedGraphStore = userGraphStore.graphStore();
