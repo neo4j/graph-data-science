@@ -35,7 +35,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 
 import java.util.List;
 
-class LinkPredictionPipelineDocTest extends DocTestBase {
+class LinkPredictionPipelineDocTest extends MultiFileDocTestBase {
 
     @AfterAll
     static void tearDown() {
@@ -61,11 +61,6 @@ class LinkPredictionPipelineDocTest extends DocTestBase {
             GraphStreamRelationshipPropertiesProc.class,
             GraphProjectProc.class
         );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "NOT LOOKED AT";
     }
 
     @Override
