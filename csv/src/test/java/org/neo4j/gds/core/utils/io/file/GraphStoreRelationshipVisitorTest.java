@@ -119,7 +119,7 @@ class GraphStoreRelationshipVisitorTest {
         Map<String, RelationshipsBuilder> relationshipBuildersByType,
         long expectedImportedRelationshipsCount
     ) {
-        var actualRelationships = CsvGraphStoreImporter.relationshipTopologyAndProperties(
+        var actualRelationships = FileToGraphStoreImporter.relationshipTopologyAndProperties(
             relationshipBuildersByType,
             expectedGraph.schema().relationshipSchema()
         );

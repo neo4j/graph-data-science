@@ -35,13 +35,13 @@ import java.util.Objects;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
-class CsvGraphStoreImporterTest {
+class FileToGraphStoreImporterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldImportProperties(int concurrency) throws URISyntaxException {
 
-        var exporter = CsvGraphStoreImporter.create(concurrency, importPath(), Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var exporter = FileToGraphStoreImporter.csv(concurrency, importPath(), Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = exporter.run();
 
         var graphStore = userGraphStore.graphStore();
@@ -69,7 +69,7 @@ class CsvGraphStoreImporterTest {
     @Test
     void shouldLogProgress() throws URISyntaxException {
         var log = Neo4jProxy.testLog();
-        var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
+        var exporter = FileToGraphStoreImporter.csv(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
         exporter.run();
 
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");

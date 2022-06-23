@@ -45,7 +45,7 @@ class RelationshipLineChunkTest {
             .addProperty(RelationshipType.of("REL"), "baz", RelationshipPropertySchema.of("baz", ValueType.LONG_ARRAY))
             .addProperty(RelationshipType.of("REL"), "meh", RelationshipPropertySchema.of("meh", ValueType.DOUBLE_ARRAY))
             .build();
-        var lineChunk = new FileInput.RelationshipLineChunk(relationshipSchema);
+        var lineChunk = new CsvFileInput.RelationshipLineChunk(relationshipSchema);
         var visitor = new TestRelationshipVisitor();
         lineChunk.propertySchemas = header.schemaForIdentifier(relationshipSchema);
         lineChunk.visitLine(line, header, visitor);

@@ -56,7 +56,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class CsvGraphStoreImporter {
+public final class FileToGraphStoreImporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
     private final Path importPath;
@@ -70,13 +70,13 @@ public final class CsvGraphStoreImporter {
 
     private ProgressTracker progressTracker;
 
-    public static CsvGraphStoreImporter create(
+    public static FileToGraphStoreImporter csv(
         int concurrency,
         Path importPath,
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
-        return new CsvGraphStoreImporter(
+        return new FileToGraphStoreImporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
             concurrency,
@@ -86,7 +86,7 @@ public final class CsvGraphStoreImporter {
         );
     }
 
-    private CsvGraphStoreImporter(
+    private FileToGraphStoreImporter(
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
         int concurrency,
@@ -108,7 +108,7 @@ public final class CsvGraphStoreImporter {
     }
 
     public UserGraphStore run() {
-        var fileInput = new FileInput(importPath);
+        var fileInput = new CsvFileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
         progressTracker.beginSubTask();
         try {
@@ -120,7 +120,7 @@ public final class CsvGraphStoreImporter {
         }
     }
 
-    private ProgressTracker createProgressTracker(FileInput fileInput) {
+    private ProgressTracker createProgressTracker(CsvFileInput fileInput) {
         var graphInfo = fileInput.graphInfo();
         var nodeCount = graphInfo.nodeCount();
 
@@ -140,7 +140,7 @@ public final class CsvGraphStoreImporter {
         return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
-    private void importGraphStore(FileInput fileInput) {
+    private void importGraphStore(CsvFileInput fileInput) {
         graphStoreBuilder.databaseId(fileInput.graphInfo().namedDatabaseId());
         graphStoreBuilder.capabilities(fileInput.capabilities());
 
@@ -149,7 +149,7 @@ public final class CsvGraphStoreImporter {
     }
 
     private IdMap importNodes(
-        FileInput fileInput
+        CsvFileInput fileInput
     ) {
         progressTracker.beginSubTask();
         NodeSchema nodeSchema = fileInput.nodeSchema();
@@ -185,7 +185,7 @@ public final class CsvGraphStoreImporter {
         return idMapAndProperties.idMap();
     }
 
-    private void importRelationships(FileInput fileInput, IdMap nodes) {
+    private void importRelationships(CsvFileInput fileInput, IdMap nodes) {
         progressTracker.beginSubTask();
         ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
         var relationshipSchema = fileInput.relationshipSchema();

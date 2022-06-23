@@ -52,7 +52,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class FileInput implements CompatInput {
+public final class CsvFileInput implements CompatInput {
 
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
 
@@ -63,7 +63,7 @@ public final class FileInput implements CompatInput {
     private final RelationshipSchema relationshipSchema;
     private final Capabilities capabilities;
 
-    FileInput(Path importPath) {
+    CsvFileInput(Path importPath) {
         this.importPath = importPath;
         this.userName = new UserInfoLoader(importPath).load();
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
