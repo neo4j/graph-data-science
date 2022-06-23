@@ -42,7 +42,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig, GraphNameConfig, SingleThreadedRandomSeedConfig, ModelConfig {
+public interface LinkPredictionPredictPipelineBaseConfig extends
+    AlgoBaseConfig,
+    //TODO make this a parameter
+    GraphNameConfig,
+    SingleThreadedRandomSeedConfig,
+    ModelConfig {
 
     double DEFAULT_THRESHOLD = 0.0;
 
