@@ -20,21 +20,12 @@
 package org.neo4j.gds.core.utils.io.file;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.GraphStoreInput;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
-import org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter;
-import org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.CsvNodeSchemaVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.CsvNodeVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipSchemaVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor;
-import org.neo4j.gds.core.utils.io.file.csv.UserInfoVisitor;
 import org.neo4j.gds.core.utils.io.file.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.utils.io.file.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,10 +33,7 @@ import org.neo4j.internal.batchimport.input.Collector;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Path;
 import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
@@ -59,58 +47,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final Supplier<RelationshipSchemaVisitor> relationshipSchemaVisitorSupplier;
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
-    public static GraphStoreToFileExporter csv(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath
-    ) {
-        return csv(graphStore, config, exportPath, Optional.empty());
-    }
-
-    public static GraphStoreToFileExporter csv(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath,
-        Optional<NeoNodeProperties> neoNodeProperties
-    ) {
-        Set<String> headerFiles = ConcurrentHashMap.newKeySet();
-
-        var nodeSchema = graphStore.schema().nodeSchema();
-        var relationshipSchema = graphStore.schema().relationshipSchema();
-
-        var builder = NodeSchema.builder();
-
-        // Add additional properties to each label present in the graph store.
-        var neoNodeSchema = neoNodeProperties.map(additionalProps -> {
-            additionalProps
-                .neoNodeProperties()
-                .forEach((key, ignore) -> nodeSchema
-                    .availableLabels()
-                    .forEach(label -> builder.addProperty(label, key, ValueType.STRING))
-                );
-            return builder.build();
-        }).orElseGet(builder::build);
-
-        return new GraphStoreToFileExporter(
-            graphStore,
-            config,
-            neoNodeProperties,
-            () -> new UserInfoVisitor(exportPath),
-            () -> new CsvGraphInfoVisitor(exportPath),
-            () -> new CsvNodeSchemaVisitor(exportPath),
-            () -> new CsvRelationshipSchemaVisitor(exportPath),
-            () -> new CsvGraphCapabilitiesWriter(exportPath),
-            (index) -> new CsvNodeVisitor(
-                exportPath,
-                nodeSchema.union(neoNodeSchema),
-                headerFiles,
-                index
-            ),
-            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index)
-        );
-    }
-
-    GraphStoreToFileExporter(
+    public GraphStoreToFileExporter(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
