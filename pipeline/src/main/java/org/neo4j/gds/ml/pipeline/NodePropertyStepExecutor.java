@@ -29,6 +29,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+
 public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
     private final ExecutionContext executionContext;
@@ -62,6 +64,15 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         }
         pipeline.validateFeatureProperties(graphStore, config);
         progressTracker.endSubTask("Execute node property steps");
+    }
+
+    public void cleanUpGraphStore(TrainingPipeline<?> pipeline) {
+        pipeline.nodePropertySteps().forEach(step -> {
+            var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
+            if (intermediateProperty instanceof String) {
+                graphStore.removeNodeProperty(((String) intermediateProperty));
+            }
+        });
     }
 
     public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(

@@ -350,18 +350,20 @@ public final class NodeClassificationTrain extends PipelineTrain<
         );
     }
 
+    //TODO: extract to component for sharing with NodeRegression
     private Features makeFeatures(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
-        nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
-        var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
-        Features features;
-        if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
-            features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
-        } else {
-            // Random forest uses feature vectors many times each.
-            features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
-            cleanUpGraphStore();
+        try {
+            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
+            var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
+            if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
+                return FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
+            } else {
+                // Random forest uses feature vectors many times each.
+                return FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
+            }
+        } finally {
+            nodePropertyStepExecutor.cleanUpGraphStore(pipeline);
         }
-        return features;
     }
 
     private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, Features features, TrainingStatistics trainingStatistics) {

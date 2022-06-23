@@ -70,7 +70,6 @@ public abstract class PipelineTrain<RESULT, CONFIG extends AlgoBaseConfig, PIPEL
         });
     }
 
-
     @Override
     public void release() {
 
