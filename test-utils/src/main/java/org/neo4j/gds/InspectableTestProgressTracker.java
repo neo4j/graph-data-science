@@ -23,7 +23,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.progress.GlobalTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.core.utils.progress.LocalTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Progress;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -50,7 +50,14 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
     }
 
     private InspectableTestProgressTracker(Task baseTask, String userName, JobId jobId, TaskStore taskStore, TestLog log) {
-        super(baseTask, log, 1, jobId, new LocalTaskRegistryFactory(userName, taskStore), EmptyUserLogRegistryFactory.INSTANCE);
+        super(
+            baseTask,
+            log,
+            1,
+            jobId,
+            TaskRegistryFactory.local(userName, taskStore),
+            EmptyUserLogRegistryFactory.INSTANCE
+        );
         baseTask.getProgress();
         this.userName = userName;
         this.jobId = jobId;
