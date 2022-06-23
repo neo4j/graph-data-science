@@ -259,7 +259,9 @@ public final class FileInput implements CompatInput {
 
         @Override
         public void close() throws IOException {
-            this.lineStream.close();
+            if (this.lineStream != null) {
+                this.lineStream.close();
+            }
         }
     }
 
