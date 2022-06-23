@@ -37,7 +37,7 @@ import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
 import java.util.List;
 
-class NodeClassificationPipelineDocTest extends DocTestBase {
+class NodeClassificationPipelineDocTest extends MultiFileDocTestBase {
 
     @AfterAll
     static void tearDown() {
@@ -45,7 +45,7 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
     }
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
     }
 
@@ -65,11 +65,6 @@ class NodeClassificationPipelineDocTest extends DocTestBase {
             GraphProjectProc.class,
             ScalePropertiesMutateProc.class
         );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "NOT LOOKED AT";
     }
 
     @Override

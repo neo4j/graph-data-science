@@ -34,7 +34,7 @@ import org.neo4j.gds.ml.pipeline.node.regression.predict.NodeRegressionPipelineS
 
 import java.util.List;
 
-class NodeRegressionPipelineDocTest extends DocTestBase {
+class NodeRegressionPipelineDocTest extends MultiFileDocTestBase {
 
     @AfterAll
     static void tearDown() {
@@ -58,13 +58,8 @@ class NodeRegressionPipelineDocTest extends DocTestBase {
 
 
     @Override
-    List<Class<?>> functions() {
+    protected List<Class<?>> functions() {
         return List.of(AsNodeFunc.class);
-    }
-
-    @Override
-    protected String adocFile() {
-        return "NOT LOOKED AT";
     }
 
     @Override
