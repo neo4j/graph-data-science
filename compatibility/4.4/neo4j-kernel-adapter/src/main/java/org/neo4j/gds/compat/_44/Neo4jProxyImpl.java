@@ -121,6 +121,10 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel.DATABASE_NAME_LABEL;
+import static org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel.DATABASE_UUID_PROPERTY;
+import static org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel.NAME_PROPERTY;
+import static org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel.TARGETS_RELATIONSHIP;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
@@ -140,8 +144,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public void cacheDatabaseId(GraphDatabaseAPI db) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManager.class);
-        var databaseIdRepository = databaseManager.databaseIdRepository();
-        databaseIdRepository.getById(db.databaseId().databaseId());
+        try(
+            var transaction =
+                databaseManager.getSystemDatabaseContext().database().getDatabaseFacade().beginTx()
+        ) {
+            var databaseNameNode = transaction.createNode(DATABASE_NAME_LABEL);
+            databaseNameNode.setProperty(NAME_PROPERTY, db.databaseName());
+            databaseNameNode.setProperty(DATABASE_UUID_PROPERTY, db.databaseId().databaseId().uuid().toString());
+            databaseNameNode.createRelationshipTo(databaseNameNode, TARGETS_RELATIONSHIP);
+            transaction.commit();
+        }
     }
 
     @Override
