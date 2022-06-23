@@ -22,41 +22,32 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.extension.GdlExtension;
-import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
-@GdlExtension
 class CSRGraphStoreUtilTest {
-
-    @GdlGraph
-    public static final String GDL =
-        "  CREATE" +
-        "  (a:A { foo: 42, bar: 1337 })" +
-        ", (b:A { foo: 84, bar: 1234 })" +
-        ", (c:B { foo: 23 })" +
-        // Add one relationship type with a single property
-        // to ensure that the graph is a HugeGraph.
-        ", (a)-[:REL1 { prop1: 42 }]->(b)";
-
-    @Inject
-    private GraphStore graphStore;
-
-    @Inject
-    private Graph graph;
 
     @Test
     void fromGraph() {
+        String GDL =
+            "  CREATE" +
+            "  (a:A { foo: 42, bar: 1337 })" +
+            ", (b:A { foo: 84, bar: 1234 })" +
+            ", (c:B { foo: 23 })" +
+            // Add one relationship type with a single property
+            // to ensure that the graph is a HugeGraph.
+            ", (a)-[:REL1 { prop1: 42 }]->(b)";
+
+        var graphStore = TestSupport.graphStoreFromGDL(GDL);
+        var graph = graphStore.getUnion();
         assertThat(graph).isInstanceOf(HugeGraph.class);
         assertThat(graph.availableNodeLabels()).contains(NodeLabel.of("A"), NodeLabel.of("B"));
         assertThat(graph.availableNodeProperties()).contains("foo", "bar");
@@ -72,6 +63,22 @@ class CSRGraphStoreUtilTest {
         );
 
         assertGraphEquals(graphStore.getUnion(), convertedGraphStore.getUnion());
+    }
+
+    @Test
+    void shouldValidateRelationshipPropertyKey() {
+        var graph = TestSupport.fromGdl("()-[:REL]->()");
+
+        assertThatThrownBy(() -> {
+            CSRGraphStoreUtil.createFromGraph(
+                DatabaseIdFactory.from("dummy", UUID.fromString("42-42-42-42-42")),
+                (HugeGraph) graph.innerGraph(),
+                "REL",
+                Optional.of("prop1"),
+                1
+            );
+        })
+            .hasMessage("Expected relationship property 'prop1', but graph has none.");
     }
 
 }
