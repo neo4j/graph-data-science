@@ -51,7 +51,7 @@ public class GraphStoreNodeVisitor extends NodeVisitor {
 
         private NodesBuilder nodesBuilder;
 
-        public Builder withNodesBuilder(NodesBuilder nodesBuilder) {
+        Builder withNodesBuilder(NodesBuilder nodesBuilder) {
             this.nodesBuilder = nodesBuilder;
             return this;
         }

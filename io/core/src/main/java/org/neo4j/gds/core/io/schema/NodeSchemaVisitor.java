@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 
 public abstract class NodeSchemaVisitor extends InputNodeSchemaVisitor.Adapter {
 
-    NodeLabel nodeLabel;
+    private NodeLabel nodeLabel;
 
     public NodeLabel nodeLabel() {
         return nodeLabel;

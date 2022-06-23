@@ -171,7 +171,7 @@ public abstract class FileToGraphStoreImporter {
 
     private void importRelationships(FileInput fileInput, IdMap nodes) {
         progressTracker.beginSubTask();
-        ConcurrentHashMap<String, RelationshipsBuilder> relationshipBuildersByType = new ConcurrentHashMap<>();
+        var relationshipBuildersByType = new ConcurrentHashMap<String, RelationshipsBuilder>();
         var relationshipSchema = fileInput.relationshipSchema();
         graphSchemaBuilder.relationshipSchema(relationshipSchema);
 

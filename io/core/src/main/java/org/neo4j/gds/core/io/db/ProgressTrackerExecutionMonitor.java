@@ -50,7 +50,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.StreamSupport;
 
-public class ProgressTrackerExecutionMonitor implements CompatExecutionMonitor {
+public final class ProgressTrackerExecutionMonitor implements CompatExecutionMonitor {
 
     private final Clock clock;
     private final long intervalMillis;

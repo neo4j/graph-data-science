@@ -29,7 +29,7 @@ public final class ElementImportRunner implements Runnable {
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;
 
-    public ElementImportRunner(
+    ElementImportRunner(
         ElementVisitor<?, ?, ?> visitor,
         InputIterator inputIterator,
         ProgressTracker progressTracker

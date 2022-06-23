@@ -36,7 +36,7 @@ public class NodeStore {
 
     final long nodeCount;
 
-    final HugeIntArray labelCounts;
+    private final HugeIntArray labelCounts;
 
     final IdMap idMap;
 
@@ -47,7 +47,7 @@ public class NodeStore {
 
     private final boolean hasLabels;
 
-    public NodeStore(
+    private NodeStore(
         long nodeCount,
         HugeIntArray labelCounts,
         IdMap idMap,
@@ -76,7 +76,7 @@ public class NodeStore {
         return !hasLabels() ? 0 : idMap.availableNodeLabels().size();
     }
 
-    public int propertyCount() {
+    int propertyCount() {
         if (nodeProperties == null) {
             return 0;
         } else {

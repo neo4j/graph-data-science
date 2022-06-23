@@ -52,7 +52,7 @@ public final class RelationshipStore {
         this.relationshipIterators = relationshipIterators;
     }
 
-    public long propertyCount() {
+    long propertyCount() {
         return propertyCount;
     }
 

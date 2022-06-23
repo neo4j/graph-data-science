@@ -113,13 +113,8 @@ public abstract class NodeVisitor extends ElementVisitor<NodeSchema, NodeLabel, 
         NodeSchema nodeSchema;
         boolean reverseIdMap;
 
-        public SELF withNodeSchema(NodeSchema nodeSchema) {
+        SELF withNodeSchema(NodeSchema nodeSchema) {
             this.nodeSchema = nodeSchema;
-            return me();
-        }
-
-        public SELF withReverseIdMap(boolean reverseIdMap) {
-            this.reverseIdMap = reverseIdMap;
             return me();
         }
 

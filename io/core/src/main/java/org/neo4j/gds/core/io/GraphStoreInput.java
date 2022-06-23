@@ -343,11 +343,11 @@ public final class GraphStoreInput implements CompatInput {
                         }
                     }
                 } else if (hasProperties) { // no label information, but node properties
-                    nodeStore.nodeProperties.forEach((label, nodeProperties) -> {
-                        nodeProperties.forEach((propertyKey, properties) -> {
-                            exportProperty(visitor, propertyKey, properties::getObject);
-                        });
-                    });
+                    nodeStore.nodeProperties.forEach((label, nodeProperties) -> nodeProperties.forEach((propertyKey, properties) -> exportProperty(
+                        visitor,
+                        propertyKey,
+                        properties::getObject
+                    )));
                 }
 
                 nodeStore.additionalProperties.forEach((propertyKey, propertyFn) -> {
