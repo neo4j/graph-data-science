@@ -22,6 +22,6 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.core.utils.TerminationFlag;
 
 public interface PipelineTrainer<RESULT> {
-    RESULT run();
     void setTerminationFlag(TerminationFlag terminationFlag);
+    RESULT run();
 }

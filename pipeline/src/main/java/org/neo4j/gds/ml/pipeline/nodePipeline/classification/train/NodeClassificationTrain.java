@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -95,9 +94,8 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private final List<ClassificationMetric> classificationMetrics;
     private final LongMultiSet classCounts;
     private final NodePropertyStepExecutor<?> nodePropertyStepExecutor;
-    private final GraphSchema schemaBeforeSteps;
     private final ProgressTracker progressTracker;
-    private TerminationFlag terminationFlag;
+    private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
     public static MemoryEstimation estimate(
         NodeClassificationTrainingPipeline pipeline,
@@ -313,7 +311,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         this.classIdMap = classIdMap;
         this.metrics = metrics;
         this.classCounts = classCounts;
-        this.schemaBeforeSteps = trainConfig.filteredSchema(graphStore);
         this.progressTracker = progressTracker;
     }
 
@@ -353,9 +350,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             retrainedModelData,
             trainingStatistics,
             classIdMap,
-            trainConfig,
-            pipeline,
-            schemaBeforeSteps,
             classCounts
         );
     }

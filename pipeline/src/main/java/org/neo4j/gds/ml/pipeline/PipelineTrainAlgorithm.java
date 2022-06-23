@@ -21,37 +21,46 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.model.ModelConfig;
 
-public class PipelineTrainAlgorithm<RESULT> extends Algorithm<RESULT> {
-    protected final TrainingPipeline<?> pipeline;
+public abstract class PipelineTrainAlgorithm<
+    RESULT,
+    MODEL_RESULT,
+    CONFIG extends AlgoBaseConfig & ModelConfig,
+    FEATURE_STEP extends FeatureStep> extends Algorithm<MODEL_RESULT> {
+    protected final TrainingPipeline<FEATURE_STEP> pipeline;
     protected final GraphStore graphStore;
-    protected final AlgoBaseConfig config;
+    protected final CONFIG config;
 
     private final PipelineTrainer<RESULT> pipelineTrainer;
 
     public PipelineTrainAlgorithm(
         PipelineTrainer<RESULT> pipelineTrainer,
-        TrainingPipeline<?> pipeline,
+        TrainingPipeline<FEATURE_STEP> pipeline,
         GraphStore graphStore,
-        AlgoBaseConfig config,
+        CONFIG config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.pipelineTrainer = pipelineTrainer;
+        this.pipelineTrainer.setTerminationFlag(terminationFlag);
         this.pipeline = pipeline;
         this.graphStore = graphStore;
         this.config = config;
     }
 
     @Override
-    public RESULT compute() {
+    public MODEL_RESULT compute() {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
         pipeline.validateBeforeExecution(graphStore, config);
-        pipelineTrainer.setTerminationFlag(terminationFlag);
-        return pipelineTrainer.run();
+        RESULT pipelineTrainResult = pipelineTrainer.run();
+        return transformResult(pipelineTrainResult, config, config.filteredSchema(graphStore));
     }
+
+    protected abstract MODEL_RESULT transformResult(RESULT result, CONFIG config, GraphSchema originalSchema);
 
     @Override
     public void release() {

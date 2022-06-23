@@ -29,13 +29,15 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 
 public class NodeClassificationTrainPipelineAlgorithmFactory extends
-    GraphStoreAlgorithmFactory<PipelineTrainAlgorithm<NodeClassificationTrainResult>, NodeClassificationPipelineTrainConfig> {
+    GraphStoreAlgorithmFactory<
+        NodeClassificationTrainAlgorithm,
+        NodeClassificationPipelineTrainConfig
+    > {
 
     private final ExecutionContext executionContext;
     private static final String TASK_NAME = "Node Classification Train Pipeline";
@@ -45,7 +47,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
     }
 
     @Override
-    public PipelineTrainAlgorithm<NodeClassificationTrainResult> build(
+    public NodeClassificationTrainAlgorithm build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         ProgressTracker progressTracker
@@ -56,6 +58,15 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
             NodeClassificationTrainingPipeline.class
         );
 
+        return build(graphStore, configuration, pipeline, progressTracker);
+    }
+
+    public NodeClassificationTrainAlgorithm build(
+        GraphStore graphStore,
+        NodeClassificationPipelineTrainConfig configuration,
+        NodeClassificationTrainingPipeline pipeline,
+        ProgressTracker progressTracker
+    ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
@@ -67,16 +78,20 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var nodesGraph = graphStore.getGraph(nodeLabels);
 
-        var nodeClassificationTrain = NodeClassificationTrain.create(
-            graphStore,
-            nodesGraph,
+        return new NodeClassificationTrainAlgorithm(
+            NodeClassificationTrain.create(
+                graphStore,
+                nodesGraph,
+                pipeline,
+                configuration,
+                nodePropertyStepExecutor,
+                progressTracker
+            ),
             pipeline,
+            graphStore,
             configuration,
-            nodePropertyStepExecutor,
             progressTracker
         );
-
-        return new PipelineTrainAlgorithm<>(nodeClassificationTrain, pipeline, graphStore, configuration, progressTracker);
     }
 
     @Override
