@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -107,7 +108,7 @@ public class NewCELF extends Algorithm<NewCELF> {
                 monteCarloSimulations,
                 singleSpreadArray
             ),
-            Optional.empty()
+            Optional.of((int) graph.nodeCount() / concurrency)
         );
 
         RunWithConcurrency.builder()
@@ -141,7 +142,7 @@ public class NewCELF extends Algorithm<NewCELF> {
             concurrency,
             executorService
         );
-
+        HugeIntArray lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         for (int i = 1; i < seedSetCount; i++) {
             do {
 
@@ -152,9 +153,10 @@ public class NewCELF extends Algorithm<NewCELF> {
                 //Recalculate the spread of the top node
                 double spread = independentCascade.runForCandidate(highestNode);
                 spreads.set(highestNode, spread - gain);
+                lastUpdate.set(highestNode, i);
 
                 //Check if previous top node stayed on top after the sort
-            } while (highestNode != spreads.top());
+            } while (i != lastUpdate.get(spreads.top()));
 
             //Add the node with the highest spread to the seed set
             highestScore = spreads.cost(spreads.top());

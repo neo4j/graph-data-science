@@ -58,7 +58,7 @@ final class ICLazyForwardMC {
             concurrency,
             monteCarloSimulations,
             partition -> new ICLazyForwardThread(partition, graph, seedSetNodes, propagationProbability),
-            Optional.empty()
+            Optional.of((int) monteCarloSimulations / concurrency)
         );
         this.concurrency = concurrency;
         this.executorService = executorService;

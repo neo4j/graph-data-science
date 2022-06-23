@@ -22,6 +22,7 @@ package org.neo4j.gds.impl.influenceMaximization;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.SplittableRandom;
@@ -38,7 +39,7 @@ final class ICInitThread implements Runnable {
 
     private BitSet active;
 
-    private BitSet newActive;
+    private HugeLongArrayStack newActive;
 
     ICInitThread(
         Partition partition,
@@ -55,53 +56,52 @@ final class ICInitThread implements Runnable {
         this.singleSpreadArray=singleSpreadArray;
 
         active = new BitSet(graph.nodeCount());
-        newActive = new BitSet(graph.nodeCount());
+        newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
     }
 
     private void initDataStructures(long candidateNodeId) {
-        newActive.clear();
         active.clear();
-        newActive.set(candidateNodeId);
+        newActive.push(candidateNodeId);
         active.set(candidateNodeId);
     }
 
     public void run() {
         //Loop over the Monte-Carlo simulations
 
-        long startNode= partition.startNode();;
-        long endNode=startNode+ partition.nodeCount();
-        SplittableRandom[]  splittableRandom=new SplittableRandom[monteCarloSimulations];
+        long startNode = partition.startNode();
+
+        long endNode = startNode + partition.nodeCount();
+        SplittableRandom[] splittableRandom = new SplittableRandom[monteCarloSimulations];
         for (int i = 0; i < monteCarloSimulations; i++) {
             splittableRandom[i] = new SplittableRandom(i);
         }
-            for (long nodeId=startNode;nodeId<endNode;++nodeId) {
+        for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
 
-                double nodeSpread=0;
-                for (int simulation=0;simulation<monteCarloSimulations;++simulation) {
-                    initDataStructures(nodeId);
-                    var rand = splittableRandom[simulation];
-                    //For each newly active node, find its neighbors that become activated
-                    while (!newActive.isEmpty()) {
-                        //Determine neighbors that become infected
-                        long nextExaminedNode = newActive.nextSetBit(0);
-                        newActive.flip(nextExaminedNode);
-                        localGraph.forEachRelationship(nextExaminedNode, (source, target) ->
-                        {
-                            if (rand.nextDouble() < propagationProbability) {
-                                if (!active.get(target)) {
-                                    //Add newly activated nodes to the set of activated nodes
-                                    newActive.set(target);
-                                    active.set(target);
-                                }
+            double nodeSpread = 0;
+            for (int simulation = 0; simulation < monteCarloSimulations; ++simulation) {
+                initDataStructures(nodeId);
+                var rand = splittableRandom[simulation];
+                //For each newly active node, find its neighbors that become activated
+                while (!newActive.isEmpty()) {
+                    //Determine neighbors that become infected
+                    long nextExaminedNode = newActive.pop();
+                    localGraph.forEachRelationship(nextExaminedNode, (source, target) ->
+                    {
+                        if (rand.nextDouble() < propagationProbability) {
+                            if (!active.get(target)) {
+                                //Add newly activated nodes to the set of activated nodes
+                                newActive.push(target);
+                                active.set(target);
                             }
-                            return true;
-                        });
-                    }
-                    nodeSpread+= active.cardinality();
+                        }
+                        return true;
+                    });
                 }
-                singleSpreadArray.set(nodeId,nodeSpread/monteCarloSimulations);
-                }
+                nodeSpread += active.cardinality();
+            }
+            singleSpreadArray.set(nodeId, nodeSpread / monteCarloSimulations);
+        }
 
         }
 
