@@ -332,4 +332,12 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
         };
     }
 
+    public long[] getFirstK(int k) {
+        long[] elems = new long[k];
+        for (int i = 1; i <= k; ++i) {
+            elems[i - 1] = heap.get(i);
+        }
+        return elems;
+    }
+
 }

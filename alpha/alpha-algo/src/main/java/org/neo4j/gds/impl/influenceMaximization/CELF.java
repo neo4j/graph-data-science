@@ -148,13 +148,22 @@ public class CELF extends Algorithm<CELF> {
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         for (int i = 1; i < seedSetCount; i++) {
             do {
-                var highestNode = spreads.top();
-
-                //Recalculate the spread of the top node
-                double spread = independentCascade.runForCandidate(highestNode);
-                spreads.set(highestNode, spread - gain);
-                lastUpdate.set(highestNode, i);
-
+                long k = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
+                int ik = (int) k;
+                long[] firstK = spreads.getFirstK(ik);
+                int jj = 0;
+                for (int j = 0; j < (ik); ++j) {
+                    if (lastUpdate.get(firstK[j]) != i) {
+                        firstK[jj++] = firstK[j];
+                    }
+                }
+                double[] vals = independentCascade.runForCandidate(firstK, jj);
+                for (int j = 0; j < jj; ++j) {
+                    long nodeId = firstK[j];
+                    double value = vals[j] / monteCarloSimulations;
+                    spreads.set(nodeId, value - gain);
+                    lastUpdate.set(nodeId, i);
+                }
                 //Check if previous top node stayed on top after the sort
             } while (i != lastUpdate.get(spreads.top()));
 

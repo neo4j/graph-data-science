@@ -37,6 +37,7 @@ final class ICLazyForwardMC {
     private final List<ICLazyForwardTask> tasks;
 
     private final ExecutorService executorService;
+    public static int DEFAULT_BATCH_SIZE = 10;
 
     static ICLazyForwardMC create(
         Graph graph,
@@ -51,13 +52,13 @@ final class ICLazyForwardMC {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             monteCarloSimulations,
-            // should we copy the array when we initialise the threads?
             partition -> new ICLazyForwardTask(
                 partition,
                 graph.concurrentCopy(),
                 seedSetNodes.clone(),
                 propagationProbability,
-                initialRandomSeed
+                initialRandomSeed,
+                DEFAULT_BATCH_SIZE
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
@@ -79,20 +80,23 @@ final class ICLazyForwardMC {
         this.executorService = executorService;
     }
 
-    double runForCandidate(long candidateId) {
+    public double[] runForCandidate(long[] candidateIdNodes, int candidateSize) {
         for (var task : tasks) {
-            task.setCandidateNodeId(candidateId);
+            task.setCandidateNodeId(candidateIdNodes, candidateSize);
         }
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
-        double spread = 0d;
+        double[] spread = new double[candidateSize];
         for (var task : tasks) {
-            spread += task.getSpread();
+            double[] taskSpread = task.getSpread();
+            for (int j = 0; j < candidateSize; ++j) {
+                spread[j] += taskSpread[j];
+            }
         }
-        return spread / monteCarloSimulations;
+        return spread;
     }
 
     void incrementSeedNode(long newSetNode) {
