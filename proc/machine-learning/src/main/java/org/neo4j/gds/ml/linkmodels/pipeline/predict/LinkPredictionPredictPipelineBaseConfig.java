@@ -44,7 +44,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineBaseConfig extends
     AlgoBaseConfig,
-    //TODO make this a parameter
     GraphNameConfig,
     SingleThreadedRandomSeedConfig,
     ModelConfig {

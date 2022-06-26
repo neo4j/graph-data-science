@@ -27,7 +27,6 @@ import org.neo4j.gds.model.ModelConfig;
 @Configuration
 public interface NodeRegressionPredictPipelineBaseConfig extends
     AlgoBaseConfig,
-    //TODO make this a parameter
     GraphNameConfig,
     ModelConfig {
 }
