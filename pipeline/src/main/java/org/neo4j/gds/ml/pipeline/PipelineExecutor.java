@@ -38,6 +38,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
@@ -76,7 +77,10 @@ public abstract class PipelineExecutor<
         this.executionContext = executionContext;
         this.graphStore = graphStore;
         this.graphName = graphName;
-        this.schemaBeforeSteps = config.filteredSchema(graphStore);
+        this.schemaBeforeSteps = graphStore
+            .schema()
+            .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
+            .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
     public static MemoryEstimation estimateNodePropertySteps(

@@ -26,6 +26,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Set;
+
 public abstract class PipelineTrainAlgorithm<
     RESULT,
     MODEL_RESULT,
@@ -56,7 +58,10 @@ public abstract class PipelineTrainAlgorithm<
     public MODEL_RESULT compute() {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
         pipeline.validateBeforeExecution(graphStore, config);
-        var originalSchema = config.filteredSchema(graphStore);
+        var originalSchema = graphStore
+            .schema()
+            .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
+            .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
         RESULT pipelineTrainResult = pipelineTrainer.run();
         return transformResult(pipelineTrainResult, config, originalSchema);
     }
