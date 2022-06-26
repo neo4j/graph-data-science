@@ -121,7 +121,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         );
     }
 
-    public static MemoryEstimation estimateExcludingNodePropertySteps(
+    private static MemoryEstimation estimateExcludingNodePropertySteps(
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config
     ) {
