@@ -56,8 +56,9 @@ public abstract class PipelineTrainAlgorithm<
     public MODEL_RESULT compute() {
         PipelineExecutor.validateTrainingParameterSpace(pipeline);
         pipeline.validateBeforeExecution(graphStore, config);
+        var originalSchema = config.filteredSchema(graphStore);
         RESULT pipelineTrainResult = pipelineTrainer.run();
-        return transformResult(pipelineTrainResult, config, config.filteredSchema(graphStore));
+        return transformResult(pipelineTrainResult, config, originalSchema);
     }
 
     protected abstract MODEL_RESULT transformResult(RESULT result, CONFIG config, GraphSchema originalSchema);
