@@ -85,7 +85,6 @@ import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_E
 import static org.neo4j.gds.ml.pipeline.AutoTuningConfig.MAX_TRIALS;
 
 class NodeClassificationTrainTest extends BaseProcTest {
-    private static final String PIPELINE_NAME = "magic flute";
     private static final String GRAPH_NAME = "g";
     private static final String GRAPH_NAME_WITH_RELATIONSHIPS = "gRel";
 
@@ -387,7 +386,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
             ));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .graphName(GRAPH_NAME)
             .username(getUsername())
             .modelName("anyThing")
@@ -450,7 +449,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
             ));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .graphName(GRAPH_NAME)
             .username(getUsername())
             .modelName("anyThing")
@@ -694,7 +693,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
         );
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .graphName(GRAPH_NAME)
             .username(getUsername())
             .modelName("model")
@@ -745,7 +744,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .username("myUser")
             .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
             .modelName("myModel")
@@ -773,7 +772,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
         pipeline.featureProperties().addAll(List.of("array", "scalar"));
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .username("myUser")
             .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
             .modelName("myModel")
@@ -841,7 +840,7 @@ class NodeClassificationTrainTest extends BaseProcTest {
         long randomSeed
     ) {
         return NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline(PIPELINE_NAME)
+            .pipeline("")
             .graphName(graphName)
             .username(getUsername())
             .modelName(modelName)
