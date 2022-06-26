@@ -182,11 +182,11 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
     protected abstract boolean lessThan(long a, long b);
 
     private boolean addCost(long element, double cost) {
-        double oldCost = costValues.get(element);
+      //  double oldCost = costValues.get(element);
         boolean elementExists = costKeys.get(element);
         costKeys.set(element);
         costValues.set(element, cost);
-        return oldCost != cost || !elementExists;
+        return elementExists;
     }
 
     /**
