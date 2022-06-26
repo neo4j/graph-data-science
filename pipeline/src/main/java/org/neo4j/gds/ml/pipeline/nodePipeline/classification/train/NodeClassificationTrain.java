@@ -37,6 +37,7 @@ import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
@@ -251,6 +252,31 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         return MemoryEstimations.builder("model selection")
             .max(foldEstimations)
             .build();
+    }
+
+    public static NodeClassificationTrain create(
+        GraphStore graphStore,
+        Graph graph,
+        NodeClassificationTrainingPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config,
+        ExecutionContext executionContext,
+        ProgressTracker progressTracker
+    ) {
+
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            executionContext,
+            graphStore,
+            config,
+            progressTracker
+        );
+        return NodeClassificationTrain.create(
+            graphStore,
+            graph,
+            pipeline,
+            config,
+            nodePropertyStepExecutor,
+            progressTracker
+        );
     }
 
     public static NodeClassificationTrain create(

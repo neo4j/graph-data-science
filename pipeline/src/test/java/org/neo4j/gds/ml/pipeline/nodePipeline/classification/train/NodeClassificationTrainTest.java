@@ -59,7 +59,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -318,7 +317,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
         var config = createConfig("model", GRAPH_NAME, metricSpecification, 1L);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var ncTrain = ncTrain(graphStore, pipeline, config, caller, ProgressTracker.NULL_TRACKER);
+            var ncTrain = NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                ProgressTracker.NULL_TRACKER
+            );
 
             var result = ncTrain.run();
 
@@ -403,7 +409,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var ncTrain = ncTrain(graphStore, pipeline, config, caller, ProgressTracker.NULL_TRACKER);
+            var ncTrain = NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                ProgressTracker.NULL_TRACKER
+            );
 
             var result = ncTrain.run();
 
@@ -460,7 +473,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var ncTrain = ncTrain(graphStore, pipeline, config, caller, ProgressTracker.NULL_TRACKER);
+            var ncTrain = NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                ProgressTracker.NULL_TRACKER
+            );
 
             var result = ncTrain.run();
 
@@ -500,7 +520,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
         var bananasConfig = createConfig("bananasModel", GRAPH_NAME, metricSpecification, 1337L);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var bananasTrain = ncTrain(graphStore, bananasPipeline, bananasConfig, caller, ProgressTracker.NULL_TRACKER);
+            var bananasTrain = NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                bananasPipeline,
+                bananasConfig,
+                caller.executionContext(),
+                ProgressTracker.NULL_TRACKER
+            );
 
             var arrayPipeline = new NodeClassificationTrainingPipeline();
             arrayPipeline.setSplitConfig(SPLIT_CONFIG);
@@ -519,7 +546,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
                 metricSpecification,
                 42L
             );
-            var arrayPropertyTrain = ncTrain(graphStore, arrayPipeline, arrayPropertyConfig, caller, ProgressTracker.NULL_TRACKER);
+            var arrayPropertyTrain = NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                arrayPipeline,
+                arrayPropertyConfig,
+                caller.executionContext(),
+                ProgressTracker.NULL_TRACKER
+            );
 
             var bananasModelTrainResult = bananasTrain.run();
             var bananasClassifier = bananasModelTrainResult.classifier();
@@ -581,7 +615,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            ncTrain(graphStore, pipeline, config, caller, progressTracker)
+            NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                progressTracker
+            )
                 .run();
 
             assertThat(testLog.getMessages(INFO))
@@ -623,7 +664,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            ncTrain(graphStoreWithRelationships, pipeline, config, caller, progressTracker).run();
+            NodeClassificationTrain.create(
+                graphStoreWithRelationships,
+                graphStoreWithRelationships.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                progressTracker
+            ).run();
 
             assertThat(log.getMessages(TestLog.WARN))
                 .extracting(removingThreadId())
@@ -666,7 +714,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            ncTrain(graphStore, pipeline, config, caller, progressTracker)
+            NodeClassificationTrain.create(
+                graphStore,
+                graphStore.getUnion(),
+                pipeline,
+                config,
+                caller.executionContext(),
+                progressTracker
+            )
                 .run();
 
             assertThat(testLog.getMessages(INFO))
@@ -704,13 +759,14 @@ class NodeClassificationTrainTest extends BaseProcTest {
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            Supplier<NodeClassificationTrain> algoSupplier = () -> ncTrain(
+            Supplier<NodeClassificationTrain> algoSupplier = () -> NodeClassificationTrain.create(
                 graphStore,
+                        graphStore.getUnion(),
                 pipeline,
                 config,
-                caller,
+                        caller.executionContext(),
                 ProgressTracker.NULL_TRACKER
-            );
+                    );
 
             var firstResult = algoSupplier.get().run();
             var secondResult = algoSupplier.get().run();
@@ -849,29 +905,6 @@ class NodeClassificationTrainTest extends BaseProcTest {
             .targetProperty("t")
             .metrics(List.of(metricSpecification))
             .build();
-    }
-
-    private NodeClassificationTrain ncTrain(
-        GraphStore graphStore,
-        NodeClassificationTrainingPipeline pipeline,
-        NodeClassificationPipelineTrainConfig config,
-        TestProc caller,
-        ProgressTracker progressTracker
-    ) {
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            caller.executionContext(),
-            graphStore,
-            config,
-            progressTracker
-        );
-        return NodeClassificationTrain.create(
-            graphStore,
-            graphStore.getUnion(),
-            pipeline,
-            config,
-            nodePropertyStepExecutor,
-            progressTracker
-        );
     }
 
     static Stream<Arguments> metricArguments() {
