@@ -179,7 +179,7 @@ class PipelineExecutorTest {
     private Task taskTree(TrainingPipeline<?> pipeline) {
         return Tasks.task(
             "FailingPipelineExecutor",
-            PipelineExecutor.nodePropertyStepTasks(pipeline.nodePropertySteps(), 10)
+            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), 10)
         );
     }
 

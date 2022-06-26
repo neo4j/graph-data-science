@@ -140,6 +140,12 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         this.autoTuningConfig = autoTuningConfig;
     }
 
+    public void validateTrainingParameterSpace() {
+        if (numberOfModelSelectionTrials() == 0) {
+            throw new IllegalArgumentException("Need at least one model candidate for training.");
+        }
+    }
+
     private void validateUniqueMutateProperty(NodePropertyStep step) {
         this.nodePropertySteps.forEach(nodePropertyStep -> {
             var newMutatePropertyName = step.config().get(MUTATE_PROPERTY_KEY);

@@ -56,7 +56,7 @@ public abstract class PipelineTrainAlgorithm<
 
     @Override
     public MODEL_RESULT compute() {
-        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+        pipeline.validateTrainingParameterSpace();
         pipeline.validateBeforeExecution(graphStore, config);
         var originalSchema = graphStore
             .schema()

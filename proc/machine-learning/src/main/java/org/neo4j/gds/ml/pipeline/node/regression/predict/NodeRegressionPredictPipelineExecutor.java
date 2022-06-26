@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.nodePropertyPrediction.regression.NodeRegressionPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.utils.StringJoining;
@@ -62,7 +63,7 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
-            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
+            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
             NodeRegressionPredict.progressTask(graphStore.nodeCount())
         );
     }

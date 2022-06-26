@@ -27,19 +27,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
@@ -81,40 +74,6 @@ public abstract class PipelineExecutor<
             .schema()
             .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
-    }
-
-    public static MemoryEstimation estimateNodePropertySteps(
-        ModelCatalog modelCatalog,
-        List<ExecutableNodePropertyStep> nodePropertySteps,
-        List<String> nodeLabels,
-        List<String> relationshipTypes
-    ) {
-        var nodePropertyStepEstimations = nodePropertySteps
-            .stream()
-            .map(step -> step.estimate(modelCatalog, nodeLabels, relationshipTypes))
-            .collect(Collectors.toList());
-
-        // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
-        // Also, theoretically we clean the feature dataset after the node property steps have run, but we never account for this
-        // in the memory estimation.
-        return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
-    }
-
-    public static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
-        long volumeEstimation = 10 * featureInputSize;
-        return Tasks.task(
-            "Execute node property steps",
-            nodePropertySteps.stream()
-                .map(ExecutableNodePropertyStep::rootTaskName)
-                .map(taskName -> Tasks.leaf(taskName, volumeEstimation))
-                .collect(Collectors.toList())
-        );
-    }
-
-    public static void validateTrainingParameterSpace(TrainingPipeline pipeline) {
-        if (pipeline.numberOfModelSelectionTrials() == 0) {
-            throw new IllegalArgumentException("Need at least one model candidate for training.");
-        }
     }
 
     public abstract Map<DatasetSplits, GraphFilter> splitDataset();

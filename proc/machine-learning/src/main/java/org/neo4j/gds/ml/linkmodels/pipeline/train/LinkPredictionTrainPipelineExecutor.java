@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -88,7 +89,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
                 "Split relationships",
                 sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
             ));
-            add(nodePropertyStepTasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
+            add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), sizes.featureInputSize()));
             addAll(LinkPredictionTrain.progressTasks(
                 relationshipCount,
                 pipeline.splitConfig(),
@@ -102,11 +103,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         LinkPredictionTrainingPipeline pipeline,
         LinkPredictionTrainConfig configuration
     ) {
-        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+        pipeline.validateTrainingParameterSpace();
 
         var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());
 
-        MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
+        MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
@@ -149,7 +150,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
     @Override
     protected LinkPredictionTrainPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+        pipeline.validateTrainingParameterSpace();
 
         var trainDataSplit = dataSplits.get(DatasetSplits.TRAIN);
         var testDataSplit = dataSplits.get(DatasetSplits.TEST);

@@ -57,7 +57,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
-import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
@@ -76,7 +75,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.ml.pipeline.PipelineExecutor.nodePropertyStepTasks;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor.tasks;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -102,9 +101,9 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         NodeClassificationPipelineTrainConfig configuration,
         ModelCatalog modelCatalog
     ) {
-        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+        pipeline.validateTrainingParameterSpace();
 
-        MemoryEstimation nodePropertyStepsEstimation = PipelineExecutor.estimateNodePropertySteps(
+        MemoryEstimation nodePropertyStepsEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
@@ -191,7 +190,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         int validationFolds = splitConfig.validationFolds();
 
         var tasks = new ArrayList<Task>();
-        tasks.add(nodePropertyStepTasks(pipeline.nodePropertySteps(), nodeCount));
+        tasks.add(tasks(pipeline.nodePropertySteps(), nodeCount));
         tasks.addAll(CrossValidation.progressTasks(
             validationFolds,
             pipeline.numberOfModelSelectionTrials(),
