@@ -70,7 +70,7 @@ public enum TrainingMethod {
         }
 
         @Override
-        public String toString() { return "MultiLayerPerceptronClassification"; }
+        public String toString() { return "MultilayerPerceptronClassification"; }
     };
 
     public abstract TrainerConfig createConfig(Map<String, Object> configMap);

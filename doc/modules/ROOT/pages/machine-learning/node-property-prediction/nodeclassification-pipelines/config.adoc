@@ -280,8 +280,9 @@ One or more model configurations must be added to the _parameter space_ of the t
 
 * `gds.beta.pipeline.nodeClassification.addLogisticRegression`
 * `gds.alpha.pipeline.nodeClassification.addRandomForest`
+* `gds.alpha.pipeline.nodeClassification.addMLP`
 
-For information about the available training methods in GDS, logistic regression and random forest, see xref::machine-learning/training-methods/index.adoc[Training methods].
+For information about the available training methods in GDS, logistic regression, random forest and multi-layer perceptron, see xref::machine-learning/training-methods/index.adoc[Training methods].
 
 In xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
@@ -365,6 +366,41 @@ include::partial$/machine-learning/training-methods/random-forest-classification
 include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.adoc[]
 --
 ======
+
+[.include-with-multi-layer-perceptron]
+======
+
+[.pipeline-add-rf-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.nodeClassification.addMLP(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureProperties: List of String,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The multi-layer perceptron config for a potential model. The allowed parameters for a model are defined in the next table.
+|===
+
+include::partial$/machine-learning/training-methods/mlp-classification-config.adoc[]
+
+include::partial$/machine-learning/node-property-prediction/pipelineInfoResult.adoc[]
+--
+======
 ====
 
 
@@ -386,6 +422,13 @@ CALL gds.alpha.pipeline.nodeClassification.addRandomForest('pipe', {numberOfDeci
 YIELD parameterSpace
 --
 
+[source, cypher, role=noplay query-example, no-result=true, group=nc]
+.The following will add a multi-layer perceptron model with default configuration:
+--
+CALL gds.alpha.pipeline.nodeClassification.addMLP('pipe')
+YIELD parameterSpace
+--
+
 [role=query-example,group=nc]
 --
 .The following will add a logistic regression model with a range parameter:
@@ -393,18 +436,18 @@ YIELD parameterSpace
 ----
 CALL gds.beta.pipeline.nodeClassification.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
 YIELD parameterSpace
-RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace, parameterSpace.MLP AS MultilayerPerceptronSpace
 ----
 
 .Results
-[opts="header",cols="1, 1"]
+[opts="header",cols="1, 1, 1"]
 |===
-| randomForestSpace | logisticRegressionSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+| randomForestSpace | logisticRegressionSpace | MultilayerPerceptronSpace
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=MultilayerPerceptronClassification, batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 
-The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+The `parameterSpace` in the pipeline now contains the four different model candidates, expanded with the default values.
 Each specified model candidate will be tried out during the model selection in xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training].
 
 [NOTE]
