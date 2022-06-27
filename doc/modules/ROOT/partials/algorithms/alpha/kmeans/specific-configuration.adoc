@@ -3,4 +3,5 @@
 | maxIterations     | Integer   | 10        | yes       | The maximum number of iterations of K-Means to run.
 | deltaThreshold    | Float     | 0.05      | yes       | Value as a percentage to determine when to stop early. If fewer  than 'deltaThreshold * \|nodes\|'  nodes change their cluster , the algorithm stops. Value must be between 0 (exclusive) and 1 (inclusive).
 | numberOfRestarts     | Integer   | 1        | yes       | Number of times to execute K-Means with different initial centers. The communities returned are those minimizing the average node-center distances.
+| randomSeed  | Integer         | n/a       | yes      | The seed value to control the initial centroid assignment.
 
