@@ -12,6 +12,9 @@
 :homogeneous:
 :weighted:
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
 [[algorithms-filtered-knn-intro]]
 == Introduction
 
