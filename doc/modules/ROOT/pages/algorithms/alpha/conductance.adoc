@@ -13,6 +13,7 @@
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
 == Introduction
@@ -25,8 +26,6 @@ The lower the conductance, the more "well-knit" a community is.
 It was shown by Yang and Leskovec in the paper _"Defining and Evaluating Network Communities based on Ground-truth"_ that conductance is a very good metric for evaluating actual communities of real world graphs.
 
 The algorithm runs in time linear to the number of relationships in the graph.
-
-include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
 == Syntax

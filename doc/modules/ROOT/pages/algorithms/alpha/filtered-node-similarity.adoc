@@ -20,15 +20,13 @@ The algorithm is based on the Jaccard and Overlap similarity metrics.
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 [[algorithms-filtered-node-similarity-intro]]
 == Introduction
 
 The Filtered Node Similarity algorithm is an extension to the xref::algorithms/node-similarity.adoc[Node Similarity] algorithm.
 It adds support for filtering on source nodes, target nodes, or both.
-
-Filtered Node Similarity is under it's own namespace because the node filtering behavior is in alpha tier.
-For information about algorithm tiers, see xref::algorithms/index.adoc#algorithms-tiers[Algorithm tiers].
 
 
 [[algorithms-filtered-node-similarity-node-filtering]]
