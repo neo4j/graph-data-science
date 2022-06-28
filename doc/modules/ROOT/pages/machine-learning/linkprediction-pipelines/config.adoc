@@ -363,8 +363,9 @@ One or more model configurations must be added to the _parameter space_ of the t
 
 * `gds.beta.pipeline.linkPrediction.addLogisticRegression`
 * `gds.alpha.pipeline.linkPrediction.addRandomForest`
+* `gds.alpha.pipeline.linkPrediction.addMLP`
 
-For information about the available training methods in GDS, logistic regression and random forest, see xref::machine-learning/training-methods/index.adoc[Training methods].
+For information about the available training methods in GDS, logistic regression, random forest and multilayer perceptron, see xref::machine-learning/training-methods/index.adoc[Training methods].
 
 In xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
@@ -448,6 +449,40 @@ include::partial$/machine-learning/training-methods/random-forest-classification
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
 --
 ======
+
+[.include-with-multilayer-perceptron]
+======
+[.pipeline-add-mlp-syntax]
+--
+.Configure the train parameters syntax
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.pipeline.linkPrediction.addMLP(
+  pipelineName: String,
+  config: Map
+)
+YIELD
+  name: String,
+  nodePropertySteps: List of Map,
+  featureSteps: List of Map,
+  splitConfig: Map,
+  autoTuningConfig: Map,
+  parameterSpace: Map
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name            | Type        | Description
+| pipelineName    | String      | The name of the pipeline.
+| config          | Map         | The multilayer perceptron config for a model candidate. The allowed parameters for a model are defined in the next table.
+|===
+
+include::partial$/machine-learning/training-methods/mlp-classification-config.adoc[]
+
+include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
+--
+======
 ====
 
 
@@ -479,15 +514,22 @@ YIELD parameterSpace
 RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
 
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a multilayer perceptron model with default configuration:
+--
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe')
+YIELD parameterSpace
+--
+
 .Results
-[opts="header",cols="1, 1"]
+[opts="header",cols="1, 1, 1"]
 |===
-| randomForestSpace | logisticRegressionSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}]
+| randomForestSpace | logisticRegressionSpace | multilayerPerceptronSpace
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}
 |===
 --
 
-The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
+The `parameterSpace` in the pipeline now contains the four different model candidates, expanded with the default values.
 Each specified model candidate will be tried out during the model selection in xref::machine-learning/linkprediction-pipelines/training.adoc[training].
 
 [NOTE]
