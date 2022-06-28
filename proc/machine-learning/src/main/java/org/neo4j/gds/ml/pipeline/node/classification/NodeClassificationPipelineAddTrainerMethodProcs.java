@@ -79,7 +79,7 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
     }
 
     @Procedure(name = "gds.alpha.pipeline.nodeClassification.addMLP", mode = READ)
-    @Description("Add a multi-layer perceptron configuration to the parameter space of the node classification train pipeline.")
+    @Description("Add a multilayer perceptron configuration to the parameter space of the node classification train pipeline.")
     public Stream<NodePipelineInfoResult> addMLP(
         @Name("pipelineName") String pipelineName,
         @Name(value = "config") Map<String, Object> mlpClassifierConfig

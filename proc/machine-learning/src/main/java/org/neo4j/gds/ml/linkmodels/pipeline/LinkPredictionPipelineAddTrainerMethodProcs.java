@@ -78,7 +78,7 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
     }
 
     @Procedure(name = "gds.alpha.pipeline.linkPrediction.addMLP", mode = READ)
-    @Description("Add a multi-layer perceptron configuration to the parameter space of the link prediction train pipeline.")
+    @Description("Add a multilayer perceptron configuration to the parameter space of the link prediction train pipeline.")
     public Stream<PipelineInfoResult> addMLP(
             @Name("pipelineName") String pipelineName,
             @Name(value = "config") Map<String, Object> mlpClassifierConfig

@@ -504,6 +504,13 @@ CALL gds.alpha.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecision
 YIELD parameterSpace
 --
 
+[source, cypher, role=noplay query-example, no-result=true, group=lp]
+.The following will add a multilayer perceptron model with default configuration:
+--
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe')
+YIELD parameterSpace
+--
+
 [role=query-example,group=lp]
 --
 .The following will add a logistic regression model with a range parameter:
@@ -513,13 +520,6 @@ CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 
 YIELD parameterSpace
 RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
 ----
-
-[source, cypher, role=noplay query-example, no-result=true, group=lp]
-.The following will add a multilayer perceptron model with default configuration:
---
-CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe')
-YIELD parameterSpace
---
 
 .Results
 [opts="header",cols="1, 1, 1"]
