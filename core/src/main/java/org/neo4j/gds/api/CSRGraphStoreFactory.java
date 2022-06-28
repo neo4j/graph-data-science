@@ -24,6 +24,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.IdMapAndProperties;
 import org.neo4j.gds.core.loading.RelationshipsAndProperties;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -45,16 +46,16 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         IdMapAndProperties idMapAndProperties,
         RelationshipsAndProperties relationshipsAndProperties
     ) {
-        return CSRGraphStore.of(
-            loadingContext.api().databaseId(),
-            capabilities,
-            computeGraphSchema(idMapAndProperties, relationshipsAndProperties),
-            idMapAndProperties.idMap(),
-            idMapAndProperties.properties(),
-            relationshipsAndProperties.relationships(),
-            relationshipsAndProperties.properties(),
-            graphProjectConfig.readConcurrency()
-        );
+        return new GraphStoreBuilder()
+            .databaseId(loadingContext.api().databaseId())
+            .capabilities(capabilities)
+            .schema(computeGraphSchema(idMapAndProperties, relationshipsAndProperties))
+            .nodes(idMapAndProperties.idMap())
+            .nodePropertyStore(idMapAndProperties.properties())
+            .relationships(relationshipsAndProperties.relationships())
+            .relationshipPropertyStores(relationshipsAndProperties.properties())
+            .concurrency(graphProjectConfig.readConcurrency())
+            .build();
     }
 
     protected void logLoadingSummary(GraphStore graphStore) {

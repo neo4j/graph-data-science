@@ -31,6 +31,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -67,6 +68,17 @@ class CsvGraphStoreImporterTest {
     }
 
     @Test
+    void shouldImportGraphProperties() throws URISyntaxException {
+        var exporter = CsvGraphStoreImporter.create(2, importPath(), Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = exporter.run();
+        var graphStore = userGraphStore.graphStore();
+
+        assertThat(graphStore.graphPropertyKeys()).containsExactly("prop1");
+        assertThat(graphStore.graphProperty("prop1").values().longValues().toArray())
+            .containsExactly(LongStream.range(0, 10).toArray());
+    }
+
+    @Test
     void shouldLogProgress() throws URISyntaxException {
         var log = Neo4jProxy.testLog();
         var exporter = CsvGraphStoreImporter.create(1, importPath(), log, EmptyTaskRegistryFactory.INSTANCE);
@@ -74,6 +86,7 @@ class CsvGraphStoreImporterTest {
 
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Start");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes 100%");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import nodes :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Start");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 20%");
@@ -82,6 +95,9 @@ class CsvGraphStoreImporterTest {
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 80%");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships 100%");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Import relationships :: Finished");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties :: Start");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties 100%");
+        log.assertContainsMessage(TestLog.INFO, "Csv import :: Import graph properties :: Finished");
         log.assertContainsMessage(TestLog.INFO, "Csv import :: Finished");
     }
 

@@ -19,11 +19,23 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
 
-public interface FileHeader<SCHEMA, PROPERTY_SCHEMA extends PropertySchema> {
+@ValueClass
+public interface GraphPropertyFileHeader extends FileHeader<Map<String, PropertySchema>, PropertySchema> {
 
-    Map<String, PROPERTY_SCHEMA> schemaForIdentifier(SCHEMA schema);
+    HeaderProperty propertyMapping();
+
+    @Override
+    default Map<String, PropertySchema> schemaForIdentifier(Map<String, PropertySchema> propertySchema) {
+        var graphPropertySchema = propertySchema.get(propertyMapping().propertyKey());
+        return Map.of(graphPropertySchema.key(), graphPropertySchema);
+    }
+
+    static GraphPropertyFileHeader of(String headerLine) {
+        return ImmutableGraphPropertyFileHeader.of(HeaderProperty.parse(0, headerLine));
+    }
 }

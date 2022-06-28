@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -26,6 +27,14 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
+import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.DoubleGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.FloatArrayGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.GraphProperty;
+import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
+import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.LongArrayGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -53,14 +62,19 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 public final class CsvGraphStoreImporter {
 
     private final GraphStoreNodeVisitor.Builder nodeVisitorBuilder;
-    private final Path importPath;
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
+    private final GraphStoreGraphPropertyVisitor.Builder graphPropertyVisitorBuilder;
+    private final Path importPath;
     private final int concurrency;
 
     private final ImmutableGraphSchema.Builder graphSchemaBuilder;
@@ -79,6 +93,7 @@ public final class CsvGraphStoreImporter {
         return new CsvGraphStoreImporter(
             new GraphStoreNodeVisitor.Builder(),
             new GraphStoreRelationshipVisitor.Builder(),
+            new GraphStoreGraphPropertyVisitor.Builder(),
             concurrency,
             importPath,
             log,
@@ -89,6 +104,7 @@ public final class CsvGraphStoreImporter {
     private CsvGraphStoreImporter(
         GraphStoreNodeVisitor.Builder nodeVisitorBuilder,
         GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder,
+        GraphStoreGraphPropertyVisitor.Builder graphPropertyVisitorBuilder,
         int concurrency,
         Path importPath,
         Log log,
@@ -96,6 +112,7 @@ public final class CsvGraphStoreImporter {
     ) {
         this.nodeVisitorBuilder = nodeVisitorBuilder;
         this.relationshipVisitorBuilder = relationshipVisitorBuilder;
+        this.graphPropertyVisitorBuilder = graphPropertyVisitorBuilder;
         this.concurrency = concurrency;
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableGraphSchema.builder();
@@ -132,6 +149,10 @@ public final class CsvGraphStoreImporter {
             : graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum();
         importTasks.add(Tasks.leaf("Import relationships", relationshipTaskVolume));
 
+        if (!fileInput.graphPropertySchema().isEmpty()) {
+            importTasks.add(Tasks.leaf("Import graph properties"));
+        }
+
         var task = Tasks.task(
             "Csv import",
             importTasks
@@ -146,6 +167,7 @@ public final class CsvGraphStoreImporter {
 
         var nodes = importNodes(fileInput);
         importRelationships(fileInput, nodes);
+        importGraphProperties(fileInput);
     }
 
     private IdMap importNodes(
@@ -212,6 +234,78 @@ public final class CsvGraphStoreImporter {
         graphStoreBuilder.relationshipPropertyStores(relationships.properties());
 
         progressTracker.endSubTask();
+    }
+
+    private void importGraphProperties(FileInput fileInput) {
+        if (!fileInput.graphPropertySchema().isEmpty()) {
+            progressTracker.beginSubTask();
+
+            var graphPropertySchema = fileInput.graphPropertySchema();
+            graphSchemaBuilder.graphProperties(graphPropertySchema);
+            graphPropertyVisitorBuilder.withGraphPropertySchema(graphPropertySchema);
+
+            var graphPropertyBuilder = GraphPropertyStore.builder();
+            var graphStoreGraphPropertyVisitor = graphPropertyVisitorBuilder.build();
+
+            var graphPropertiesIterator = fileInput.graphProperties().iterator();
+
+            var tasks = ParallelUtil.tasks(
+                concurrency,
+                (index) -> new ElementImportRunner<>(
+                    graphStoreGraphPropertyVisitor,
+                    graphPropertiesIterator,
+                    progressTracker
+                )
+            );
+            ParallelUtil.run(tasks, Pools.DEFAULT);
+
+            var graphPropertyStreams = mergeStreamFractions(graphStoreGraphPropertyVisitor.streamFractions());
+            buildGraphPropertiesFromStreams(graphPropertyBuilder, graphPropertyStreams);
+
+            progressTracker.endSubTask();
+        }
+    }
+
+    private void buildGraphPropertiesFromStreams(
+        GraphPropertyStore.Builder graphPropertyBuilder,
+        Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> graphPropertyStreams
+    ) {
+        graphPropertyStreams.forEach((key, value) -> {
+            if (value.isPresent()) {
+                var graphPropertyValues = getGraphPropertyValuesFromStream(value.get());
+                graphPropertyBuilder.putProperty(key, GraphProperty.of(key, graphPropertyValues));
+            }
+        });
+
+        graphStoreBuilder.graphProperties(graphPropertyBuilder.build());
+    }
+
+    @NotNull
+    private Map<String, Optional<? extends GraphStoreGraphPropertyVisitor.ReducibleStream<?>>> mergeStreamFractions(Map<String, List<GraphStoreGraphPropertyVisitor.StreamBuilder<?>>> streamFractions) {
+        return streamFractions.entrySet().stream().collect(Collectors.toMap(
+            Map.Entry::getKey,
+            entry -> entry.getValue()
+                .stream()
+                .map(GraphStoreGraphPropertyVisitor.StreamBuilder::build)
+                .reduce(GraphStoreGraphPropertyVisitor.ReducibleStream::reduce)
+        ));
+    }
+
+    private static GraphPropertyValues getGraphPropertyValuesFromStream(GraphStoreGraphPropertyVisitor.ReducibleStream<?> reducibleStream) {
+        switch (reducibleStream.valueType()) {
+            case LONG:
+                return LongGraphPropertyValues.ofLongStream((LongStream) reducibleStream.stream());
+            case DOUBLE:
+                return DoubleGraphPropertyValues.ofDoubleStream((DoubleStream) reducibleStream.stream());
+            case FLOAT_ARRAY:
+                return FloatArrayGraphPropertyValues.ofFloatArrayStream((Stream<float[]>) reducibleStream.stream());
+            case DOUBLE_ARRAY:
+                return DoubleArrayGraphPropertyValues.ofDoubleArrayStream((Stream<double[]>) reducibleStream.stream());
+            case LONG_ARRAY:
+                return LongArrayGraphPropertyValues.ofLongArrayStream((Stream<long[]>) reducibleStream.stream());
+            default:
+                throw new UnsupportedOperationException();
+        }
     }
 
     static RelationshipTopologyAndProperties relationshipTopologyAndProperties(

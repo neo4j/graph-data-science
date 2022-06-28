@@ -21,10 +21,6 @@ package org.neo4j.gds.core.utils.io.file;
 
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.ElementIdentifier;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.schema.ElementSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -61,6 +57,7 @@ public final class FileInput implements CompatInput {
     private final GraphInfo graphInfo;
     private final NodeSchema nodeSchema;
     private final RelationshipSchema relationshipSchema;
+    private final Map<String, PropertySchema> graphPropertySchema;
     private final Capabilities capabilities;
 
     FileInput(Path importPath) {
@@ -69,6 +66,7 @@ public final class FileInput implements CompatInput {
         this.graphInfo = new GraphInfoLoader(importPath, CSV_MAPPER).load();
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
+        this.graphPropertySchema = new GraphPropertySchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
     }
 
@@ -90,6 +88,15 @@ public final class FileInput implements CompatInput {
             Map.Entry::getValue
         ));
         return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);
+    }
+
+    public InputIterable graphProperties() {
+        var pathMapping = CsvImportUtil.graphPropertyHeaderToFileMapping(importPath);
+        var headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
+            entry -> CsvImportUtil.parseGraphPropertyHeader(entry.getKey()),
+            Map.Entry::getValue
+        ));
+        return () -> new GraphPropertyImporter(headerToDataFilesMapping, graphPropertySchema);
     }
 
     @Override
@@ -123,14 +130,17 @@ public final class FileInput implements CompatInput {
         return relationshipSchema;
     }
 
+    public Map<String, PropertySchema> graphPropertySchema() {
+        return graphPropertySchema;
+    }
+
     public Capabilities capabilities() {
         return capabilities;
     }
 
     abstract static class FileImporter<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
-        SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
-        IDENTIFIER extends ElementIdentifier,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
+        SCHEMA,
         PROPERTY_SCHEMA extends PropertySchema> implements InputIterator {
 
         private final MappedListIterator<HEADER, Path> entryIterator;
@@ -150,7 +160,7 @@ public final class FileInput implements CompatInput {
                 Pair<HEADER, Path> entry = entryIterator.next();
 
                 assert chunk instanceof LineChunk;
-                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(entry.getKey(), entry.getValue());
+                ((LineChunk<HEADER, SCHEMA, PROPERTY_SCHEMA>) chunk).initialize(entry.getKey(), entry.getValue());
                 return true;
             }
             return false;
@@ -161,7 +171,7 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
+    static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, PropertySchema> {
 
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
@@ -176,7 +186,7 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+    static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipPropertySchema> {
 
         RelationshipImporter(
             Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping,
@@ -191,10 +201,24 @@ public final class FileInput implements CompatInput {
         }
     }
 
+    static class GraphPropertyImporter extends FileImporter<GraphPropertyFileHeader, Map<String, PropertySchema>, PropertySchema> {
+
+        GraphPropertyImporter(
+            Map<GraphPropertyFileHeader, List<Path>> headerToDataFilesMapping,
+            Map<String, PropertySchema> graphPropertySchema
+        ) {
+            super(headerToDataFilesMapping, graphPropertySchema);
+        }
+
+        @Override
+        public InputChunk newChunk() {
+            return new GraphPropertyLineChunk(elementSchema);
+        }
+    }
+
     abstract static class LineChunk<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
-        SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
-        IDENTIFIER extends ElementIdentifier,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
+        SCHEMA,
         PROPERTY_SCHEMA extends PropertySchema> implements InputChunk {
 
         private final SCHEMA schema;
@@ -235,11 +259,13 @@ public final class FileInput implements CompatInput {
 
         @Override
         public void close() throws IOException {
-            this.lineStream.close();
+            if (this.lineStream != null) {
+                this.lineStream.close();
+            }
         }
     }
 
-    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
+    static class NodeLineChunk extends LineChunk<NodeFileHeader, NodeSchema, PropertySchema> {
 
         NodeLineChunk(NodeSchema nodeSchema) {
             super(nodeSchema);
@@ -280,7 +306,7 @@ public final class FileInput implements CompatInput {
         }
     }
 
-    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+    static class RelationshipLineChunk extends LineChunk<RelationshipFileHeader, RelationshipSchema, RelationshipPropertySchema> {
 
         public RelationshipLineChunk(RelationshipSchema relationshipSchema) {
             super(relationshipSchema);
@@ -307,6 +333,27 @@ public final class FileInput implements CompatInput {
         @Override
         public void close() throws IOException {
 
+        }
+    }
+
+    static class GraphPropertyLineChunk extends LineChunk<GraphPropertyFileHeader, Map<String, PropertySchema>, PropertySchema> {
+
+        GraphPropertyLineChunk(Map<String, PropertySchema> stringPropertySchemaMap) {
+            super(stringPropertySchemaMap);
+        }
+
+        @Override
+        void visitLine(
+            String line, GraphPropertyFileHeader header, InputEntityVisitor visitor
+        ) throws IOException {
+            var lineValues = line.split(",", -1);
+
+            var property = header.propertyMapping();
+            visitor.property(
+                property.propertyKey(),
+                property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
+            );
+            visitor.endOfEntity();
         }
     }
 }

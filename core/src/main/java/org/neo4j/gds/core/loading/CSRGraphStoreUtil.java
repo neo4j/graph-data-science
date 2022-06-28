@@ -28,6 +28,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.api.ValueTypes;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -99,6 +100,7 @@ public final class CSRGraphStoreUtil {
             nodeProperties,
             topology,
             relationshipProperties,
+            GraphPropertyStore.empty(),
             concurrency
         );
     }

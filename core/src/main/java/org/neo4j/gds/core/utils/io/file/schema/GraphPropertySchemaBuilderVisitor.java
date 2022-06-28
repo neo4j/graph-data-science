@@ -17,13 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.io.file;
+package org.neo4j.gds.core.utils.io.file.schema;
 
 import org.neo4j.gds.api.schema.PropertySchema;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public interface FileHeader<SCHEMA, PROPERTY_SCHEMA extends PropertySchema> {
+public class GraphPropertySchemaBuilderVisitor extends ElementSchemaVisitor {
 
-    Map<String, PROPERTY_SCHEMA> schemaForIdentifier(SCHEMA schema);
+    private final Map<String, PropertySchema> graphPropertySchema;
+
+    public GraphPropertySchemaBuilderVisitor() {
+        graphPropertySchema = new HashMap<>();
+    }
+
+    @Override
+    protected void export() {
+        graphPropertySchema.put(
+            key(),
+            PropertySchema.of(key(), valueType(), defaultValue(), state())
+        );
+    }
+
+    public Map<String, PropertySchema> schema() {
+        return this.graphPropertySchema;
+    }
 }

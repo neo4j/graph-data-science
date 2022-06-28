@@ -53,7 +53,8 @@ import java.util.stream.LongStream;
 import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.neo4j.gds.core.utils.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
+import static org.neo4j.gds.core.utils.io.file.CsvSchemaConstants.GRAPH_PROPERTY_SCHEMA_COLUMNS;
+import static org.neo4j.gds.core.utils.io.file.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.gds.core.utils.io.file.csv.CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME;
@@ -435,7 +436,7 @@ public class GraphStoreToFileExporterTest extends CsvTest {
         assertDataContent(
             GRAPH_PROPERTY_SCHEMA_FILE_NAME,
             List.of(
-                CsvGraphPropertySchemaVisitorTest.GRAPH_PROPERTY_SCHEMA_COLUMNS,
+                GRAPH_PROPERTY_SCHEMA_COLUMNS,
                 List.of("graphProp", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name())
             )
         );

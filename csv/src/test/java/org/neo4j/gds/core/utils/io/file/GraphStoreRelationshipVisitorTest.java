@@ -125,7 +125,7 @@ class GraphStoreRelationshipVisitorTest {
         );
         assertThat(actualRelationships.importedRelationships()).isEqualTo(expectedImportedRelationshipsCount);
 
-        Map<? extends RelationshipType, ? extends RelationshipPropertyStore> propertyStores = actualRelationships.properties();
+        Map<RelationshipType, RelationshipPropertyStore> propertyStores = actualRelationships.properties();
         return new GraphStoreBuilder()
             .schema(expectedGraph.schema())
             .capabilities(ImmutableStaticCapabilities.of(true))

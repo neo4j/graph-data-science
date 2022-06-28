@@ -25,6 +25,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
+import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -34,6 +36,9 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.nio.file.Path;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -78,6 +83,32 @@ class CsvGraphStoreImporterIntegrationTest {
         assertGraphEquals(graph, importedGraph);
     }
 
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void shouldImportGraphStoreWithGraphProperties(int concurrency) {
+        addLongGraphProperty();
+        addDoubleArrayGraphProperty();
+
+        GraphStoreToFileExporter.csv(graphStore, exportConfig(concurrency), graphLocation).run();
+        var importer = CsvGraphStoreImporter.create(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run();
+        var graphStore = userGraphStore.graphStore();
+
+        assertThat(graphStore.graphPropertyKeys()).containsExactlyInAnyOrder("longProp", "doubleArrayProp");
+
+        var expectedLongValues = LongStream.range(0, 10_000).toArray();
+        assertThat(graphStore.graphProperty("longProp").values().longValues().toArray())
+            .containsExactlyInAnyOrder(expectedLongValues);
+
+        var expectedDoubleArrayProperties = LongStream
+            .range(0, 1337)
+            .mapToObj(i -> new double[]{(double) i, 42.0})
+            .collect(Collectors.toList())
+            .toArray(new double[0][0]);
+        assertThat(graphStore.graphProperty("doubleArrayProp").values().doubleArrayValues().collect(Collectors.toList()))
+            .containsExactlyInAnyOrder(expectedDoubleArrayProperties);
+    }
+
     @Test
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
@@ -119,5 +150,33 @@ class CsvGraphStoreImporterIntegrationTest {
             .writeConcurrency(concurrency)
             .includeMetaData(true)
             .build();
+    }
+
+    private void addDoubleArrayGraphProperty() {
+        graphStore.addGraphProperty("doubleArrayProp", new DoubleArrayGraphPropertyValues() {
+            @Override
+            public Stream<double[]> doubleArrayValues() {
+                return LongStream.range(0, 1337).mapToObj(i -> new double[]{ (double) i, 42.0 });
+            }
+
+            @Override
+            public long size() {
+                return 1337;
+            }
+        });
+    }
+
+    private void addLongGraphProperty() {
+        graphStore.addGraphProperty("longProp", new LongGraphPropertyValues() {
+            @Override
+            public LongStream longValues() {
+                return LongStream.range(0, 10_000);
+            }
+
+            @Override
+            public long size() {
+                return 10_000;
+            }
+        });
     }
 }

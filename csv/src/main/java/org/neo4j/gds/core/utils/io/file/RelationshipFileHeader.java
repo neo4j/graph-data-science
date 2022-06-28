@@ -19,18 +19,18 @@
  */
 package org.neo4j.gds.core.utils.io.file;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor;
-import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.utils.io.file.csv.CsvRelationshipVisitor;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Map;
 import java.util.Set;
 
 @ValueClass
-public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipPropertySchema> {
     Set<HeaderProperty> propertyMappings();
     String relationshipType();
 

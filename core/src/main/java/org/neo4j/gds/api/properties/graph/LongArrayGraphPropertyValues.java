@@ -44,4 +44,18 @@ public interface LongArrayGraphPropertyValues extends GraphPropertyValues {
     default ValueType valueType() {
         return ValueType.LONG_ARRAY;
     }
+
+    static LongArrayGraphPropertyValues ofLongArrayStream(Stream<long[]> longArrayStream) {
+        return new LongArrayGraphPropertyValues() {
+            @Override
+            public Stream<long[]> longArrayValues() {
+                return longArrayStream;
+            }
+
+            @Override
+            public long size() {
+                return -1;
+            }
+        };
+    }
 }
