@@ -19,3 +19,5 @@ Neo4j Graph Data Science supports the option of `l2` regularization which can be
 
 
 include::partial$/machine-learning/training-methods/gradient-descent-config-tuning.adoc[leveloffset =+ 1]
+
+include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]

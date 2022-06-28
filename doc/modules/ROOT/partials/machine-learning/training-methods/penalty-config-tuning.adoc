@@ -1,0 +1,5 @@
+== Penalty
+
+This parameter defines the influence of the regularization term in the loss function.
+While the regularization can avoid overfitting, a high value can even lead to underfitting.
+The minimal value is zero, where the regularization term has no effect at all.

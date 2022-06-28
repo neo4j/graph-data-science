@@ -1,0 +1,11 @@
+[[machine-learning-training-methods-multilayer-perceptron]]
+[.alpha]
+= Multilayer Perceptron
+
+
+A Multilayer Perceptron (MLP) is a type of feed-forward neural network. It consists of multiple layers of connected neurons. Values in any neuron is computed by applying an activation function on the aggregating weighted inputs from previous layer. Optimization of the weights are done by some Newtonian method with respect to some loss function. Gradients used during optimization are computed using methods based on chain rule, for example backpropagation.
+
+
+include::partial$/machine-learning/training-methods/gradient-descent-config-tuning.adoc[leveloffset =+ 1]
+
+include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]
