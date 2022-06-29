@@ -160,7 +160,12 @@ public final class CypherAggregation extends BaseProc {
             }
 
             if (this.idMapBuilder == null) {
-                this.idMapBuilder = new LazyIdMapBuilder();
+                this.idMapBuilder = newIdMapBuilder(
+                    sourceNodeLabels,
+                    sourceNodePropertyValues,
+                    targetNodeLabels,
+                    targetNodePropertyValues
+                );
             }
 
             Map<String, Value> relationshipProperties = null;
@@ -222,6 +227,18 @@ public final class CypherAggregation extends BaseProc {
                     relImporter.addFromInternal(sourceNodeId, targetNodeId);
                 }
             }
+        }
+
+        @NotNull
+        private LazyIdMapBuilder newIdMapBuilder(
+            NodeLabelToken sourceNodeLabels,
+            @Nullable Map<String, Value> sourceNodeProperties,
+            NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Value> targetNodeProperties
+        ) {
+            boolean hasLabelInformation = !(sourceNodeLabels.isEmpty() && targetNodeLabels.isEmpty());
+            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
+            return new LazyIdMapBuilder(hasLabelInformation, hasProperties);
         }
 
         private void validateGraphName(String graphName) {
@@ -641,12 +658,12 @@ final class LazyIdMapBuilder implements PartialIdMap {
     private final ShardedLongSet seenNodes;
     private final NodesBuilder nodesBuilder;
 
-    LazyIdMapBuilder() {
+    LazyIdMapBuilder(boolean hasLabelInformation, boolean hasProperties) {
         this.seenNodes = ShardedLongSet.of(1);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
-            .hasLabelInformation(true)
-            .hasProperties(true)
+            .hasLabelInformation(hasLabelInformation)
+            .hasProperties(hasProperties)
             .deduplicateIds(false)
             .build();
     }
