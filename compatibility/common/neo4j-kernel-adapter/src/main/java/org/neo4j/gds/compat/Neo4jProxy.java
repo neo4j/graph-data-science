@@ -49,8 +49,10 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -395,6 +397,16 @@ public final class Neo4jProxy {
 
     public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
         return IMPL.executionMonitor(compatExecutionMonitor);
+    }
+
+    public static UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        boolean internal
+    ) {
+        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal);
     }
 
     private Neo4jProxy() {
