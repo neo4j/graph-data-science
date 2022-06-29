@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._44;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
@@ -611,7 +612,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    @SuppressForbidden(reason = "We assign nulls because it makes the code more readable")
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE") // We assign nulls because it makes the code more readable
     public UserFunctionSignature userFunctionSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,
