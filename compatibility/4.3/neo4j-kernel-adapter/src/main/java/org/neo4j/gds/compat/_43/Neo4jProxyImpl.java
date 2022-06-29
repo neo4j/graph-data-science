@@ -76,8 +76,10 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -603,5 +605,32 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
                 compatExecutionMonitor.check(execution);
             }
         };
+    }
+
+    @Override
+    public UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        boolean internal
+    ) {
+        String deprecated = null;    // no depracation
+        String category = null;      // No predefined categpry (like temporal or math)
+        var allowed = new String[0]; // empty allow - related to advanced function permissions
+        var caseInsensitive = false; // case sensitive name match
+        var isBuiltIn = false;       // is built in; never true for GDS
+        return new UserFunctionSignature(
+            name,
+            inputSignature,
+            type,
+            deprecated,
+            allowed,
+            description,
+            category,
+            caseInsensitive,
+            isBuiltIn,
+            internal
+        );
     }
 }
