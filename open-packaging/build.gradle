@@ -15,11 +15,11 @@ dependencies {
     testImplementation project(':proc-test')
 }
 
-task licenseFile {
+tasks.register("licenseFile") {
     outputs.file(distributionLicenseFile)
 }
 
-task checkLicensesFile {
+tasks.register("checkLicensesFile") {
     dependsOn generateLicensesFiles
 
     doLast {
@@ -71,7 +71,7 @@ shadowJar {
     from generateLicensesFiles
 }
 
-task shadowCopy(type: Copy) {
+tasks.register("shadowCopy", Copy) {
     from(shadowJar)
     into distributionDir
 }

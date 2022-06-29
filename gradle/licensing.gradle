@@ -141,7 +141,7 @@ allprojects { proj ->
         }
 
         // Dependency license validation
-        task validateLicenses {
+        tasks.register("validateLicenses") {
             group 'license'
             description 'Checks dependency licenses against an allowlist'
             dependsOn tasks.downloadLicenses
@@ -156,7 +156,7 @@ allprojects { proj ->
         tasks.check.dependsOn tasks.validateLicenses
 
         // Compound dependency licenses files
-        task generateLicensesFiles {
+        tasks.register("generateLicensesFiles") {
             description 'Generates dependency license report files'
             dependsOn tasks.downloadLicenses, tasks.validateLicenses
             ext.licensesFile = file("$tasks.downloadLicenses.jsonDestination/LICENSES.txt")

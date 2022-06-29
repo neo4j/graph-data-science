@@ -47,20 +47,20 @@ allprojects {
     group = 'org.neo4j.gds'
     version = gdsVersion
 
-    task ci {
+    tasks.register("ci") {
         dependsOn tasks.check
     }
 
-    task cipr {
+    tasks.register("cipr") {
         dependsOn tasks.check
     }
 
-    task checkstyle {
+    tasks.register("checkstyle") {
         group = "verification"
         description = "Run all checkstyle related tasks"
     }
 
-    task spotbugs {
+    tasks.register("spotbugs") {
         group = "verification"
         description = "Run all spotbugs related tasks"
     }
