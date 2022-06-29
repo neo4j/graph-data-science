@@ -257,7 +257,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667 | [0.3333333333333333, 0.6388888888888888, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+| {maxEpochs=100, minEpochs=1, patience=1, methodName=MultilayerPerceptronClassification, batchSize=100, tolerance=0.001, learningRate=0.001} | 0.753240740740741 |  0.768452380952381 | 0.344444444444444 | [0.3333333333333333, 0.6388888888888888, 0.6805555555555555, 0.3333333333333333, 0.3333333333333333]
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 5` (and defaults filled for remaining parameters) was selected, and has a score of `0.58` on the test set.

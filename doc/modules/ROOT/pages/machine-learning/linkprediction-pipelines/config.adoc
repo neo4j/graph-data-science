@@ -71,7 +71,7 @@ CALL gds.beta.pipeline.linkPrediction.create('pipe')
 | "pipe"   | []                | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials={max-trials}}
-| {MultiLayerPerceptronClassification=[], RandomForest=[], LogisticRegression=[]}
+| {RandomForest=[], MultilayerPerceptronClassification=[], LogisticRegression=[]}
 |===
 --
 
@@ -146,7 +146,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, validationFolds=3, trainFraction=0.1}
 | {maxTrials={max-trials}}
-| {MultiLayerPerceptronClassification=[], RandomForest=[], LogisticRegression=[]}
+| {RandomForest=[], MultilayerPerceptronClassification=[], LogisticRegression=[]}
 |===
 
 The pipeline will now execute the xref::machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref::machine-learning/linkprediction-pipelines/training.adoc[training] a model, and when the trained model is xref::machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
@@ -518,14 +518,14 @@ YIELD parameterSpace
 ----
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
 YIELD parameterSpace
-RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace, parameterSpace.MultilayerPerceptronClassification AS multilayerPerceptronSpace
 ----
 
 .Results
 [opts="header",cols="1, 1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace | multilayerPerceptronSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, patience=1, methodName=MultilayerPerceptronClassification, batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 
