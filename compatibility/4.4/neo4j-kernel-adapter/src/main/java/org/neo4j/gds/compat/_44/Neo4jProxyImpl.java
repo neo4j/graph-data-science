@@ -611,6 +611,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "We assign nulls because it makes the code more readable")
     public UserFunctionSignature userFunctionSignature(
         QualifiedName name,
         List<FieldSignature> inputSignature,
