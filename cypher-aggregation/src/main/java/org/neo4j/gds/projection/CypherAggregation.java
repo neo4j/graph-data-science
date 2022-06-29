@@ -52,6 +52,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.paged.ShardedLongSet;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -637,20 +638,24 @@ public final class CypherAggregation extends BaseProc {
 
 final class LazyIdMapBuilder implements PartialIdMap {
     private final AtomicBoolean isEmpty = new AtomicBoolean(true);
+    private final ShardedLongSet seenNodes;
     private final NodesBuilder nodesBuilder;
 
     LazyIdMapBuilder() {
+        this.seenNodes = ShardedLongSet.of(1);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(true)
             .hasProperties(true)
-            .deduplicateIds(true)
+            .deduplicateIds(false)
             .build();
     }
 
     long addNode(long nodeId, NodeLabelToken nodeLabels) {
-        isEmpty.lazySet(false);
-        this.nodesBuilder.addNode(nodeId, nodeLabels);
+        if (seenNodes.addNode(nodeId)) {
+            isEmpty.lazySet(false);
+            this.nodesBuilder.addNode(nodeId, nodeLabels);
+        }
         return nodeId;
     }
 
@@ -659,12 +664,15 @@ final class LazyIdMapBuilder implements PartialIdMap {
         Map<String, Value> properties,
         NodeLabelToken nodeLabels
     ) {
-        if (properties.isEmpty()) {
-            return addNode(nodeId, nodeLabels);
+        if (seenNodes.addNode(nodeId)) {
+            isEmpty.lazySet(false);
+            if (properties.isEmpty()) {
+                this.nodesBuilder.addNode(nodeId, nodeLabels);
+            } else {
+                this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
+            }
         }
 
-        isEmpty.lazySet(false);
-        this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
         return nodeId;
     }
 
