@@ -1,4 +1,5 @@
 [[algorithms-filtered-knn]]
+[.alpha]
 = Filtered K-Nearest Neighbors
 :description: This section describes the Filtered K-Nearest Neighbors (Filtered KNN) algorithm in the Neo4j Graph Data Science library.
 
