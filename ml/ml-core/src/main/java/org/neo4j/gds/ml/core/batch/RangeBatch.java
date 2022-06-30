@@ -21,12 +21,12 @@ package org.neo4j.gds.ml.core.batch;
 
 import java.util.PrimitiveIterator;
 
-public class LazyBatch implements Batch {
+public class RangeBatch implements Batch {
     private final long startId;
     private final long endId;
     private final int size;
 
-    public LazyBatch(long startId, int batchSize, long nodeCount) {
+    public RangeBatch(long startId, int batchSize, long nodeCount) {
         this.startId = startId;
         this.endId = Math.min(nodeCount, startId + batchSize);
         this.size = (int) (this.endId - this.startId);

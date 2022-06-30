@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.batch.RangeBatch;
 import org.neo4j.gds.ml.core.functions.Constant;
 import org.neo4j.gds.ml.core.functions.ReducedSoftmax;
 import org.neo4j.gds.ml.core.functions.Softmax;
@@ -52,8 +52,8 @@ class LogisticRegressionObjectiveTest {
 
     private static Stream<Arguments> featureBatches() {
         return Stream.of(
-            Arguments.of(new LazyBatch(0, 2, 10), new Matrix(new double[]{0, 0, 1, 1}, 2, 2)),
-            Arguments.of(new LazyBatch(4, 3, 10), new Matrix(new double[]{4, 4, 5, 5, 6, 6}, 3, 2))
+            Arguments.of(new RangeBatch(0, 2, 10), new Matrix(new double[]{0, 0, 1, 1}, 2, 2)),
+            Arguments.of(new RangeBatch(4, 3, 10), new Matrix(new double[]{4, 4, 5, 5, 6, 6}, 3, 2))
         );
     }
 
@@ -119,7 +119,7 @@ class LogisticRegressionObjectiveTest {
 
     @Test
     void makeTargets() {
-        var batch = new LazyBatch(1, 2, 4);
+        var batch = new RangeBatch(1, 2, 4);
         var batchedTargets = standardObjective.batchLabelVector(batch);
 
         assertThat(batchedTargets.data()).isEqualTo(new Vector(1.0, 0.0));
@@ -145,7 +145,7 @@ class LogisticRegressionObjectiveTest {
 
     @Test
     void lossStandard() {
-        var batch = new LazyBatch(0, 4, 4);
+        var batch = new RangeBatch(0, 4, 4);
         var loss = standardObjective.loss(batch, 4);
 
         var ctx = new ComputationContext();
@@ -157,7 +157,7 @@ class LogisticRegressionObjectiveTest {
 
     @Test
     void lossReduced() {
-        var batch = new LazyBatch(0, 4, 4);
+        var batch = new RangeBatch(0, 4, 4);
         var loss = reducedObjective.loss(batch, 4);
 
         var ctx = new ComputationContext();
@@ -187,7 +187,7 @@ class LogisticRegressionObjectiveTest {
     <T extends Variable<Matrix>> void testLoss(Class softmaxClass, LogisticRegressionObjective objective) {
         var trainSize = 42;
         var ctx = new ComputationContext();
-        var batch = new LazyBatch(0, 4, 4);
+        var batch = new RangeBatch(0, 4, 4);
         var loss = objective.loss(batch, trainSize);
         var lossValue = ctx.forward(loss).value();
 

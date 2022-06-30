@@ -26,7 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
+import org.neo4j.gds.ml.core.batch.RangeBatch;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
@@ -103,7 +103,7 @@ class MLPClassifierTest {
         }
         var features = FeaturesFactory.wrap(featureData);
 
-        var probabilityMatrix = classifier.predictProbabilities(new LazyBatch(0, 10, 10), features);
+        var probabilityMatrix = classifier.predictProbabilities(new RangeBatch(0, 10, 10), features);
         for (int i = 0; i < 10; i++) {
             var singlePrediction = classifier.predictProbabilities(features.get(i));
             var batchPrediction = probabilityMatrix.getRow(i);
