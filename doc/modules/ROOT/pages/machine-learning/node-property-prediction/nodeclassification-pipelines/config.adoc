@@ -5,14 +5,6 @@
 :max-trials: 10
 
 This page explains how to create and configure a node classification pipeline.
-It consists of the following sections:
-
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[Creating the pipeline]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Adding model candidates]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-auto-tuning[Configuring the auto-tuning]
 
 
 [[nodeclassification-creating-a-pipeline]]

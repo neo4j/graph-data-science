@@ -2,13 +2,6 @@
 = Configuring the pipeline
 
 This page explains how to create and configure a node regression pipeline.
-It consists of the following sections:
-
-* xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-creating-a-pipeline[Creating the pipeline]
-* xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[Adding node properties]
-* xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[Adding features]
-* xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configuring the node splits]
-* xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Adding model candidates]
 
 
 [[noderegression-creating-a-pipeline]]
