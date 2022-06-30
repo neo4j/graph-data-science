@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.BaseProc;
@@ -137,8 +138,8 @@ public final class CypherAggregation extends BaseProc {
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
-            var sourceNodeLabels = NodeLabelTokens.empty();
-            var targetNodeLabels = NodeLabelTokens.empty();
+            @Nullable NodeLabelToken sourceNodeLabels = null;
+            @Nullable NodeLabelToken targetNodeLabels = null;
 
             if (nodesConfig != null) {
                 sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", nodesConfig);
@@ -231,12 +232,12 @@ public final class CypherAggregation extends BaseProc {
 
         @NotNull
         private LazyIdMapBuilder newIdMapBuilder(
-            NodeLabelToken sourceNodeLabels,
+            @Nullable NodeLabelToken sourceNodeLabels,
             @Nullable Map<String, Value> sourceNodeProperties,
-            NodeLabelToken targetNodeLabels,
+            @Nullable NodeLabelToken targetNodeLabels,
             @Nullable Map<String, Value> targetNodeProperties
         ) {
-            boolean hasLabelInformation = !(sourceNodeLabels.isEmpty() && targetNodeLabels.isEmpty());
+            boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
             boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
             return new LazyIdMapBuilder(hasLabelInformation, hasProperties);
         }
@@ -264,26 +265,25 @@ public final class CypherAggregation extends BaseProc {
             ));
         }
 
-        private @NotNull NodeLabelToken labelsConfig(
+        private @Nullable NodeLabelToken labelsConfig(
             Object node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
         ) {
             var nodeLabelsEntry = nodesConfig.remove(nodeLabelKey);
-            var nodeLabels = tryLabelsConfig(node, nodeLabelsEntry);
-
-            if (nodeLabels == null) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
-                    nodeLabelKey,
-                    nodeLabelsEntry.getClass().getSimpleName()
-                ));
-            }
-
-            return nodeLabels;
+            return tryLabelsConfig(node, nodeLabelsEntry, nodeLabelKey);
         }
 
-        private @Nullable NodeLabelToken tryLabelsConfig(Object node, @Nullable Object nodeLabels) {
+        @Contract("_, null, _ -> null")
+        private @Nullable NodeLabelToken tryLabelsConfig(
+            Object node,
+            @Nullable Object nodeLabels,
+            String nodeLabelKey
+        ) {
+            if (nodeLabels == null || Boolean.FALSE.equals(nodeLabels)) {
+                return null;
+            }
+
             if (Boolean.TRUE.equals(nodeLabels)) {
                 if (node instanceof Node) {
                     return NodeLabelTokens.ofNullable(((Node) node).getLabels());
@@ -293,11 +293,17 @@ public final class CypherAggregation extends BaseProc {
                 );
             }
 
-            if (Boolean.FALSE.equals(nodeLabels)) {
-                nodeLabels = null;
+            var nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
+
+            if (nodeLabelToken == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
+                    nodeLabelKey,
+                    nodeLabels.getClass().getSimpleName()
+                ));
             }
 
-            return NodeLabelTokens.ofNullable(nodeLabels);
+            return nodeLabelToken;
         }
 
         private @Nullable RelationshipType typeConfig(
@@ -405,7 +411,7 @@ public final class CypherAggregation extends BaseProc {
 
         private long loadNode(
             @Nullable Object node,
-            NodeLabelToken nodeLabels,
+            @Nullable NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             assert this.idMapBuilder != null;
@@ -668,9 +674,12 @@ final class LazyIdMapBuilder implements PartialIdMap {
             .build();
     }
 
-    long addNode(long nodeId, NodeLabelToken nodeLabels) {
+    long addNode(long nodeId, @Nullable NodeLabelToken nodeLabels) {
         if (seenNodes.addNode(nodeId)) {
             isEmpty.lazySet(false);
+            if (nodeLabels == null) {
+                nodeLabels = NodeLabelTokens.empty();
+            }
             this.nodesBuilder.addNode(nodeId, nodeLabels);
         }
         return nodeId;
@@ -679,10 +688,13 @@ final class LazyIdMapBuilder implements PartialIdMap {
     long addNodeWithProperties(
         long nodeId,
         Map<String, Value> properties,
-        NodeLabelToken nodeLabels
+        @Nullable NodeLabelToken nodeLabels
     ) {
         if (seenNodes.addNode(nodeId)) {
             isEmpty.lazySet(false);
+            if (nodeLabels == null) {
+                nodeLabels = NodeLabelTokens.empty();
+            }
             if (properties.isEmpty()) {
                 this.nodesBuilder.addNode(nodeId, nodeLabels);
             } else {
