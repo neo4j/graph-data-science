@@ -23,6 +23,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfiguration;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.SameCategoryStep;
 
 import java.util.Arrays;
 import java.util.List;
@@ -48,6 +49,12 @@ public enum LinkFeatureStepFactory {
         @Override
         protected LinkFeatureStep create(LinkFeatureStepConfiguration config) {
             return new L2FeatureStep(config.nodeProperties());
+        }
+    },
+    SAME_CATEGORY {
+        @Override
+        protected LinkFeatureStep create(LinkFeatureStepConfiguration config) {
+            return new SameCategoryStep(config.nodeProperties());
         }
     };
 

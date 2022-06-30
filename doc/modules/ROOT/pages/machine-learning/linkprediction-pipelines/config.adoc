@@ -222,6 +222,7 @@ The supported types of features can then be described as follows:
 | L2                     | image:equations/linkprediction/linkprediction3.svg[f equals vector of s1 minus t1 squared comma s2 minus t2 squared comma dot dot dot comma s d minus t d squared]
 | HADAMARD               | image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d]
 | COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
+| SAME_CATEGORY          | The feature is `1` if the category value of source and target are the same, otherwise its `0`. Similar to xref::alpha-algorithms/same-community.adoc#algorithms-linkprediction-same-community-sample[Same Community].
 |===
 
 

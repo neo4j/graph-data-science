@@ -56,7 +56,7 @@ final class L2LinkFeatureStepTest {
     void runL2LinkFeatureStep() {
         var step = LinkFeatureStepFactory.create(
             "L2",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("noise", "z", "array")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("noise", "z", "array")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
@@ -78,7 +78,7 @@ final class L2LinkFeatureStepTest {
     void handlesZeroVectors() {
         var step = LinkFeatureStepFactory.create(
             "L2",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("zeros")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("zeros")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
@@ -98,7 +98,7 @@ final class L2LinkFeatureStepTest {
     public void failsOnNaNValues() {
         var step = LinkFeatureStepFactory.create(
             "L2",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("invalidValue", "z")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("invalidValue", "z")).build()
         );
 
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(
