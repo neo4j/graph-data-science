@@ -7,6 +7,8 @@
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
 :directed:
 :undirected:
 :homogeneous:
@@ -14,7 +16,6 @@
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 [[algorithms-filtered-node-similarity-intro]]
 == Introduction
