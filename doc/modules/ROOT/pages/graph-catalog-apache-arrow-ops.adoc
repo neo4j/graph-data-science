@@ -3,10 +3,6 @@
 = Apache Arrow operations
 :description: This chapter explains how to export data using Apache Arrow™ in the Graph Data Science library.
 
-[abstract]
---
-This chapter explains how to export data using Apache Arrow™ in the Graph Data Science library.
---
 
 include::partial$/management-ops/alpha-note.adoc[]
 

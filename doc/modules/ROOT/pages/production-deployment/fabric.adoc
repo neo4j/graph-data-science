@@ -2,10 +2,6 @@
 = Using GDS and Fabric
 :description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment.
 
-[abstract]
---
-This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Fabric deployment.
---
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 

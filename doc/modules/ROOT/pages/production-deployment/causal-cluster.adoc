@@ -3,10 +3,6 @@
 = GDS with Neo4j Causal Cluster
 :description: This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Causal Cluster deployment.
 
-[abstract]
---
-This section describes how the Neo4j Graph Data Science library can be used in a Neo4j Causal Cluster deployment.
---
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 

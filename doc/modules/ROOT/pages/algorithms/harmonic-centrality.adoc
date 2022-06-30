@@ -3,10 +3,6 @@
 = Harmonic Centrality
 :description: This section describes the Harmonic Centrality algorithm
 
-[abstract]
---
-This section describes the Harmonic Centrality algorithm
---
 
 // tag::introduction[]
 Harmonic centrality (also known as valued centrality) is a variant of closeness centrality, that was invented to solve the problem the original formula had when dealing with unconnected graphs.

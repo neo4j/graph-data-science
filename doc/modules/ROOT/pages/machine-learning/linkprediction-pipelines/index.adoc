@@ -6,10 +6,6 @@
 :max-trials: 10
 
 
-[abstract]
---
-This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
---
 
 Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.
 More precisely, the input to the machine learning model are _examples_ of node pairs.
@@ -45,5 +41,3 @@ This segment is divided into the following pages:
 * xref::machine-learning/linkprediction-pipelines/training.adoc[Training the pipeline]
 * xref::machine-learning/linkprediction-pipelines/predict.adoc[Applying a trained model for prediction]
 * xref::machine-learning/linkprediction-pipelines/appendix.adoc[Appendix]
-
-

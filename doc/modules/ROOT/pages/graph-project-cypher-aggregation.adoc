@@ -2,10 +2,6 @@
 = Projecting graphs using Cypher Aggregation
 :description: This section details projecting GDS graphs using `Cypher` aggregations.
 
-[abstract]
---
-This section details projecting GDS graphs using `Cypher` aggregations.
---
 
 
 A projected graph can be stored in the catalog under a user-defined name.

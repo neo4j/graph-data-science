@@ -2,10 +2,6 @@
 = Auxiliary procedures
 :description: This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This chapter provides explanations and examples for auxiliary procedures in the Neo4j Graph Data Science library.
---
 
 Auxiliary procedures are extra tools that can be useful in your workflow. +
 The Neo4j GDS library includes the following auxiliary procedures, grouped by quality tier:
@@ -17,5 +13,3 @@ The Neo4j GDS library includes the following auxiliary procedures, grouped by qu
 ** xref::alpha-algorithms/scale-properties.adoc[Scale Properties]
 ** xref::alpha-algorithms/one-hot-encoding.adoc#algorithms-one-hot-encoding-sample[One Hot Encoding]
 ** xref::alpha-algorithms/split-relationships.adoc[Split Relationships]
-
-

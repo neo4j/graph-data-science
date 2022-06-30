@@ -2,10 +2,6 @@
 = Algorithms
 :description: This section covers migration for all algorithms in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section covers migration for all algorithms in the Neo4j Graph Data Science library.
---
 
 include::partial$/migration/migration-algorithms-betweenness-centrality.adoc[leveloffset=+1]
 

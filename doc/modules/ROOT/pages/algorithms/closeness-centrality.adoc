@@ -6,10 +6,6 @@
 :result: centrality
 :algorithm: Closeness Centrality
 
-[abstract]
---
-This section describes the Closeness Centrality algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

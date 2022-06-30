@@ -5,10 +5,6 @@
 
 :algorithm: Split Relationships
 
-[abstract]
---
-This section describes the Split Relationships algorithm in the Neo4j Graph Data Science library.
---
 
 
 [[algorithms-split-relationships-intro]]

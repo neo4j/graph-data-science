@@ -6,10 +6,6 @@
 :algorithm: Article Rank
 :algorithm-name: Article Rank
 
-[abstract]
---
-This section describes the Article Rank algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

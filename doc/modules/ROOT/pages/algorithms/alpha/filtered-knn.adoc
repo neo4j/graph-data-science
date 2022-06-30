@@ -6,10 +6,6 @@
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
 
-[abstract]
---
-This section describes the Filtered K-Nearest Neighbors (Filtered KNN) algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

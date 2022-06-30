@@ -2,10 +2,6 @@
 = Listing graphs
 :description: This section details how to list graphs stored in the graph catalog of the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section details how to list graphs stored in the graph catalog of the Neo4j Graph Data Science library.
---
 
 Information about graphs in the catalog can be retrieved using the `gds.graph.list()` procedure.
 

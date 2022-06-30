@@ -5,10 +5,6 @@
 :result: component ID
 :algorithm: Weakly Connected Components
 
-[abstract]
---
-This section describes the Weakly Connected Components (WCC) algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

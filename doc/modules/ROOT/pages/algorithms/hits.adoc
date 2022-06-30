@@ -7,10 +7,6 @@
 :result: authority and hub scores
 :algorithm: HITS
 
-[abstract]
---
-This section describes the HITS algorithm in the Neo4j Graph Data Science library.
---
 
 
 [[algorithms-hits-intro]]

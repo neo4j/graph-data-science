@@ -2,10 +2,6 @@
 = Model catalog
 :description: This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section details the model catalog operations available to manage named trained models within the Neo4j Graph Data Science library.
---
 
 
 Machine learning algorithms which support the `train` mode produce trained models which are stored in the Model Catalog.

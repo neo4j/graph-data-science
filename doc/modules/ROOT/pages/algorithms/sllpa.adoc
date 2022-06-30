@@ -6,10 +6,6 @@
 :result: community IDs
 :algorithm: SLLPA
 
-[abstract]
---
-This section describes the Speaker-Listener Label Propagation algorithm in the Neo4j Graph Data Science library.
---
 
 
 [[algorithms-sllpa-intro]]

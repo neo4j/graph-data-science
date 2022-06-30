@@ -2,10 +2,6 @@
 = Auto-tuning
 :description: This section describes auto-tuning for hyper-parameters in training pipelines in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes auto-tuning for hyper-parameters in training pipelines in the Neo4j Graph Data Science library.
---
 
 xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node Classification Pipelines], xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[Node Regression Pipelines], and xref::machine-learning/linkprediction-pipelines/index.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods which have multiple configurable parameters that affect training outcomes.
 To obtain models with high quality, setting good values for the hyper-parameters can have a large impact.

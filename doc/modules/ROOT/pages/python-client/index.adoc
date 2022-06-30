@@ -2,10 +2,6 @@
 = Python client
 :description: This chapter documents how to use the dedicated Python Client for Neo4j Graph Data Science.
 
-[abstract]
---
-This chapter documents how to use the dedicated Python Client for Neo4j Graph Data Science.
---
 
 To help users of GDS who work with Python as their primary language and environment, there is an official GDS client package called `graphdatascience`.
 It enables users to write pure Python code to project graphs, run algorithms, and define and use machine learning pipelines in GDS.
@@ -25,4 +21,3 @@ This chapter is divided into the following sections:
 * xref::python-client/pipelines.adoc[Machine learning pipelines]
 * xref::python-client/model-object.adoc[The model object]
 * xref::python-client/known-limitations.adoc[Known limitations]
-

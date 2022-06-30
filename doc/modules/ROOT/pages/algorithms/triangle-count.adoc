@@ -5,10 +5,6 @@
 :result: triangle count
 :algorithm: Triangle Count
 
-[abstract]
---
-This section describes the Triangle Count algorithm in the Neo4j Graph Data Science library.
---
 
 :undirected:
 :homogeneous:

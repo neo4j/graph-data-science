@@ -2,10 +2,6 @@
 = Pipeline catalog
 :description: This section details the pipeline catalog operations available to manage named training pipelines within the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section details the pipeline catalog operations available to manage named training pipelines within the Neo4j Graph Data Science library.
---
 
 In GDS, we have machine learning pipelines which offer an end-to-end workflow, from graph feature extraction to model training.
 This includes the following:

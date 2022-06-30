@@ -3,10 +3,6 @@
 = Migration from Graph Data Science library Version 1.x
 :description: If you have previously used Graph Data Science library version 1.x, you can find the information you will need to migrate to using version 2.x in this section.
 
-[abstract]
---
-If you have previously used Graph Data Science library version 1.x, you can find the information you will need to migrate to using version 2.x in this section.
---
 
 == Who should read this guide
 
@@ -28,5 +24,3 @@ This section is divided into the following sub-sections:
 * xref::appendix-b/migration-memory-estimation.adoc[Memory Estimation]
 * xref::appendix-b/migration-algorithms.adoc[Algorithms]
 * xref::appendix-b/migration-ml.adoc[Machine Learning]
-
-

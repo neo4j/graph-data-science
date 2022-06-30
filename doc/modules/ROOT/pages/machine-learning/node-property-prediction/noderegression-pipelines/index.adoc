@@ -3,10 +3,6 @@
 :description: This section describes Node regression pipelines in the Neo4j Graph Data Science library.
 :max-trials: 10
 
-[abstract]
---
-This section describes Node regression pipelines in the Neo4j Graph Data Science library.
---
 
 
 Node Regression is a common machine learning task applied to graphs: training models to predict node property values.
@@ -27,5 +23,3 @@ This segment is divided into the following pages:
 * xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc[Configuring the pipeline]
 * xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Training the pipeline]
 * xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[Applying a trained model for prediction]
-
-

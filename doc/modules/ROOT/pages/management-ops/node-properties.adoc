@@ -4,10 +4,6 @@
 :description: This section explains the currently supported node properties.
 // end::header[]
 
-[abstract]
---
-This section explains the currently supported node properties.
---
 
 The Neo4j Graph Data Science Library is capable of augmenting nodes with additional properties.
 These properties can be loaded from the database when the graph is projected.

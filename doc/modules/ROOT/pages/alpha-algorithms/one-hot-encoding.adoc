@@ -3,10 +3,6 @@
 = One Hot Encoding
 :description: This section describes the One Hot Encoding function in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes the One Hot Encoding function in the Neo4j Graph Data Science library.
---
 
 The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
 

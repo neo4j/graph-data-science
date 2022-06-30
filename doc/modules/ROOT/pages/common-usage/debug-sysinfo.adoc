@@ -2,10 +2,6 @@
 = System Information
 :description: This section describes features for obtaining information about the Neo4j Graph Data Science library installation.
 
-[abstract]
---
-This section describes features for obtaining information about the Neo4j Graph Data Science library installation.
---
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 

@@ -6,10 +6,6 @@
 :result: approximate maximum k-cut
 :algorithm: Approximate Maximum k-cut
 
-[abstract]
---
-This section describes the Approximate Maximum k-cut algorithm in the Neo4j Graph Data Science library.
---
 
 
 [[algorithms-approx-max-k-cut-intro]]

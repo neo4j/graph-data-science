@@ -4,10 +4,6 @@
 = Backup and Restore
 :description: This section explains how to back up and restore graphs and models in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section explains how to back up and restore graphs and models in the Neo4j Graph Data Science library.
---
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
