@@ -6,13 +6,13 @@
 :result: community ID
 :algorithm: Leiden
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 :undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 [[algorithms-leiden-intro]]
 == Introduction

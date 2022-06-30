@@ -6,14 +6,13 @@
 :result: conductance
 :algorithm: Conductance
 
-
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 :directed:
 :undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
-include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
 == Introduction
