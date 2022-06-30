@@ -570,7 +570,7 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public NamedDatabaseId randomDatabaseId() {
-        return new TestDatabaseIdRepository().getByName(UUID.randomUUID().toString()).get();
+        return new TestDatabaseIdRepository().getByName(UUID.randomUUID().toString()).orElseThrow();
     }
 
     @Override
