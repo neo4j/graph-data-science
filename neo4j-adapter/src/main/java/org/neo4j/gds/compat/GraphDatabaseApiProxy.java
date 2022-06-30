@@ -28,9 +28,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.GraphDatabaseQueryService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
 import org.neo4j.kernel.impl.query.QueryExecution;
@@ -88,6 +90,14 @@ public final class GraphDatabaseApiProxy {
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
         }
+    }
+
+    public static NamedDatabaseId databaseId(GraphDatabaseService db) {
+        return ((GraphDatabaseAPI) db).databaseId();
+    }
+
+    public static DatabaseLayout databaseLayout(GraphDatabaseService db) {
+        return ((GraphDatabaseAPI) db).databaseLayout();
     }
 
     public static Node getNodeById(Transaction tx, long id) {
