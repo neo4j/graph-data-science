@@ -99,7 +99,7 @@
 *** xref:alpha-algorithms/one-hot-encoding.adoc[]
 *** xref:alpha-algorithms/split-relationships.adoc[]
 ** xref:algorithms/pregel-api.adoc[]
-* xref:machine-learning.adoc[]
+* xref:machine-learning/machine-learning.adoc[]
 ** xref:machine-learning/pre-processing.adoc[]
 ** xref:machine-learning/node-embeddings/index.adoc[]
 *** xref:machine-learning/node-embeddings/fastrp.adoc[]
