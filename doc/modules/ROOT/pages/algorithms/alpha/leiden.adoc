@@ -1,16 +1,18 @@
-[.alpha]
 [[algorithms-leiden]]
+[.alpha]
 = Leiden
 :description: This section describes the Leiden algorithm in the Neo4j Graph Data Science library.
 :entity: node
 :result: community ID
 :algorithm: Leiden
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 :undirected:
 :homogeneous:
 :weighted:
 include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
 
 [[algorithms-leiden-intro]]
 == Introduction

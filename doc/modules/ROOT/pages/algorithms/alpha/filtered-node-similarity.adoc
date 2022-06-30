@@ -7,11 +7,7 @@
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
 
-[abstract]
---
-This section describes the Filtered Node Similarity algorithm in the Neo4j Graph Data Science library.
-The algorithm is based on the Jaccard and Overlap similarity metrics.
---
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 :directed:
 :undirected:
@@ -26,9 +22,6 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 The Filtered Node Similarity algorithm is an extension to the xref::algorithms/node-similarity.adoc[Node Similarity] algorithm.
 It adds support for filtering on source nodes, target nodes, or both.
-
-Filtered Node Similarity is under it's own namespace because the node filtering behavior is in alpha tier.
-For information about algorithm tiers, see xref::algorithms/index.adoc#algorithms-tiers[Algorithm tiers].
 
 
 [[algorithms-filtered-node-similarity-node-filtering]]

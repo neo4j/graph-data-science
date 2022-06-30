@@ -5,6 +5,7 @@
 
 :algorithm: Split Relationships
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
 [[algorithms-split-relationships-intro]]

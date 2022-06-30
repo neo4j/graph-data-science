@@ -6,6 +6,7 @@
 :result: community IDs
 :algorithm: SLLPA
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
 [[algorithms-sllpa-intro]]
