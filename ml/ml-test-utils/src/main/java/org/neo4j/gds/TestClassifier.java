@@ -28,7 +28,10 @@ public abstract class TestClassifier implements Classifier {
     public Matrix predictProbabilities(Batch batch, Features features) {
         var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
         var offset = 0;
-        for (long id : batch.elementIds()) {
+        var batchIterator = batch.elementIds();
+
+        while (batchIterator.hasNext()) {
+            var id = batchIterator.nextLong();
             double[] predictionsForNode = predictProbabilities(features.get(id));
             predictedProbabilities.setRow(offset++, predictionsForNode);
         }

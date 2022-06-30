@@ -53,7 +53,7 @@ class LinearRegressionObjectiveTest {
             0.0
         );
 
-        Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
+        Variable<Scalar> loss = objective.loss(new ListBatch(new long[] {0L, 1L, 2L}), 10);
         double lossValue = new ComputationContext().forward(loss).value();
 
         double expectedMeanSquareError = 6.5;
@@ -79,7 +79,7 @@ class LinearRegressionObjectiveTest {
         // set the bias
         objective.weights().get(1).data().setDataAt(0, 3);
 
-        Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
+        Variable<Scalar> loss = objective.loss(new ListBatch(new long[] {0L, 1L, 2L}), 10);
         double lossValue = new ComputationContext().forward(loss).value();
 
         double expectedMeanSquareError = 1.5;
@@ -105,7 +105,7 @@ class LinearRegressionObjectiveTest {
         // set the bias
         objective.weights().get(1).data().setDataAt(0, 3);
 
-        Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
+        Variable<Scalar> loss = objective.loss(new ListBatch(new long[] {0L, 1L, 2L}), 10);
         double lossValue = new ComputationContext().forward(loss).value();
 
         double expectedMeanSquareError = 53.460668;
@@ -136,7 +136,7 @@ class LinearRegressionObjectiveTest {
         objective.weights().get(0).data().setDataAt(0, firstWeight);
         objective.weights().get(0).data().setDataAt(1, secondWeight);
 
-        Variable<Scalar> loss = objective.loss(new ListBatch(List.of(0L, 1L, 2L)), 10);
+        Variable<Scalar> loss = objective.loss(new ListBatch(new long[] {0L, 1L, 2L}), 10);
         double lossValue = new ComputationContext().forward(loss).value();
 
         assertThat(lossValue).isCloseTo(expectedLoss, Offset.offset(1e-5));

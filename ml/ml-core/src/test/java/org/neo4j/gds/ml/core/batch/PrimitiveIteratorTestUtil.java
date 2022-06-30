@@ -19,9 +19,21 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.PrimitiveIterator;
 
-public interface Batch {
-    PrimitiveIterator.OfLong elementIds();
-    int size();
+public final class PrimitiveIteratorTestUtil {
+
+    private PrimitiveIteratorTestUtil() {}
+
+    static List<Long> iteratorToArray(PrimitiveIterator.OfLong iterator) {
+        var list = new ArrayList<Long>();
+
+        while (iterator.hasNext()) {
+            list.add(iterator.nextLong());
+        }
+
+        return list;
+    }
 }

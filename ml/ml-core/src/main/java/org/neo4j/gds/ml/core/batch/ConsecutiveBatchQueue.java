@@ -32,7 +32,7 @@ class ConsecutiveBatchQueue extends BatchQueue {
         if (currentBatch * batchSize >= totalSize) {
             return Optional.empty();
         }
-        var batch = new LazyBatch(currentBatch * batchSize, batchSize, totalSize);
+        var batch = new RangeBatch(currentBatch * batchSize, batchSize, totalSize);
         currentBatch += 1;
         return Optional.of(batch);
     }

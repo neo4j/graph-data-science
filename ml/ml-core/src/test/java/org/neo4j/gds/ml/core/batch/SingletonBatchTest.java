@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.core.batch;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.ml.core.batch.PrimitiveIteratorTestUtil.iteratorToArray;
 
 class SingletonBatchTest {
 
@@ -29,7 +30,7 @@ class SingletonBatchTest {
     void test() {
         var batch = new SingletonBatch(2);
 
-        Iterable<Long> actual = batch.elementIds();
-        assertThat(actual).containsExactly(2L);
+        var actual = batch.elementIds();
+        assertThat(iteratorToArray(actual)).containsExactly(2L);
     }
 }

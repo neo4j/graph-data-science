@@ -21,10 +21,10 @@ package org.neo4j.gds.ml.core.features;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.ml.core.batch.LazyBatch;
-import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
+import org.neo4j.gds.ml.core.batch.RangeBatch;
+import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +46,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     @Test
     void shouldConcatenateFeatures() {
         var featureExtractors = FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b"));
-        var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
+        var allNodesBatch = new RangeBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, featureExtractors);
 
         var expected = new Matrix(new double[]{ 2.0, 1.0, 1.2, 1.3, 1.0, 0.5, 0.0, 1.0, 2.8, 1.0, 1.0, 0.9 }, 4, 3);
@@ -57,7 +57,7 @@ public class FeatureExtractionTest extends FeatureExtractionBaseTest {
     void shouldConcatenateFeaturesWithBias() {
         var allExtractors = new ArrayList<>(FeatureExtraction.propertyExtractors(validGraph, List.of("a", "b")));
         allExtractors.add(new BiasFeature());
-        var allNodesBatch = new LazyBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
+        var allNodesBatch = new RangeBatch(0, (int) validGraph.nodeCount(), validGraph.nodeCount());
         var featuresMatrix = FeatureExtraction.extract(allNodesBatch, allExtractors);
 
         var expected = new Matrix(new double[]{2.0, 1.0, 1.2, 1.0, 1.3, 1.0, 0.5, 1.0, 0.0, 1.0, 2.8, 1.0, 1.0, 1.0, 0.9, 1.0}, 4, 4);

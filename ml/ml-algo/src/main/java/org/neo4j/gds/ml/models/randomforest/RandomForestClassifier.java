@@ -80,8 +80,10 @@ public class RandomForestClassifier implements Classifier {
     ) {
         var predictedProbabilities = new Matrix(batch.size(), numberOfClasses());
         var offset = 0;
+        var batchIterator = batch.elementIds();
 
-        for (long id : batch.elementIds()) {
+        while (batchIterator.hasNext()) {
+            var id = batchIterator.nextLong();
             predictedProbabilities.setRow(offset++, predictProbabilities(features.get(id)));
         }
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
-import java.util.Iterator;
+import java.util.PrimitiveIterator;
 
 public class MappedBatch implements Batch {
     private final Batch delegate;
@@ -31,23 +31,22 @@ public class MappedBatch implements Batch {
     }
 
     @Override
-    public Iterable<Long> elementIds() {
+    public PrimitiveIterator.OfLong elementIds() {
         if (batchTransformer == BatchTransformer.IDENTITY) {
             return delegate.elementIds();
         }
-        return () -> {
-            var originalIterator = delegate.elementIds().iterator();
-            return new Iterator<>() {
-                @Override
-                public boolean hasNext() {
-                    return originalIterator.hasNext();
-                }
 
-                @Override
-                public Long next() {
-                    return batchTransformer.apply(originalIterator.next());
-                }
-            };
+        var originalIterator = delegate.elementIds();
+        return new PrimitiveIterator.OfLong() {
+            @Override
+            public boolean hasNext() {
+                return originalIterator.hasNext();
+            }
+
+            @Override
+            public long nextLong() {
+                return batchTransformer.apply(originalIterator.nextLong());
+            }
         };
     }
 

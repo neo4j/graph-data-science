@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.PrimitiveIterator;
 import java.util.stream.Collectors;
 
 import static java.lang.Math.max;
@@ -79,10 +80,14 @@ public final class FeatureExtraction {
             }
         };
         int nodeOffset = 0;
-        for (long nodeId : batch.elementIds()) {
-            extract(nodeId, nodeOffset, extractors, featureConsumer);
-            nodeOffset++;
+
+        PrimitiveIterator.OfLong batchIterator = batch.elementIds();
+
+        while (batchIterator.hasNext()) {
+            long nodeId = batchIterator.nextLong();
+            extract(nodeId, nodeOffset++, extractors, featureConsumer);
         }
+
         return Constant.matrix(features, rows, cols);
     }
 

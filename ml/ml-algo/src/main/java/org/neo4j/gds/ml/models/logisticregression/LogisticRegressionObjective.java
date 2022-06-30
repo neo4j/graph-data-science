@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.logisticregression;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.ml.core.Variable;
 import org.neo4j.gds.ml.core.batch.Batch;
@@ -145,14 +144,14 @@ public class LogisticRegressionObjective implements Objective<LogisticRegression
 
     Constant<Vector> batchLabelVector(Batch batch) {
         var batchedTargets = new Vector(batch.size());
-        var batchOffset = new MutableInt();
+        int batchOffset = 0;
 
-        batch.elementIds().forEach(elementId ->
-            batchedTargets.setDataAt(
-                batchOffset.getAndIncrement(),
-                labels.get(elementId)
-            )
-        );
+        var batchIterator = batch.elementIds();
+
+        while (batchIterator.hasNext()) {
+            long elementId = batchIterator.nextLong();
+            batchedTargets.setDataAt(batchOffset++, labels.get(elementId));
+        }
 
         return new Constant<>(batchedTargets);
     }
