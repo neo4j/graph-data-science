@@ -3,10 +3,6 @@
 = Adamic Adar
 :description: This section describes the Adamic Adar algorithm in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes the Adamic Adar algorithm in the Neo4j Graph Data Science library.
---
 
 link:https://en.wikipedia.org/wiki/Adamic/Adar_index[Adamic Adar] is a measure used to compute the closeness of nodes based on their shared neighbors.
 
@@ -106,5 +102,3 @@ We can also compute the score of a pair of nodes based on a specific relationshi
 | `score`
 | 0.0
 |===
-
-

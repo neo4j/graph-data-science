@@ -2,10 +2,6 @@
 = Logging
 :description: This section describes logging features in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes logging features in the Neo4j Graph Data Science library.
---
 
 In the GDS library there are three types of logging: debug logging, progress logging and hints or warnings logging.
 

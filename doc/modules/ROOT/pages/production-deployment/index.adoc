@@ -2,10 +2,6 @@
 = Production deployment
 :description: This chapter explains advanced details with regards to common Neo4j components.
 
-[abstract]
---
-This chapter explains advanced details with regards to common Neo4j components.
---
 
 This chapter is divided into the following sections:
 
@@ -13,5 +9,3 @@ This chapter is divided into the following sections:
 * xref::production-deployment/fabric.adoc[Using GDS and Fabric]
 * xref::production-deployment/causal-cluster.adoc[GDS with Neo4j Causal Cluster]
 * xref::production-deployment/feature-toggles.adoc[GDS Feature Toggles]
-
-

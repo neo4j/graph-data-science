@@ -7,10 +7,6 @@
 :source-target: true
 :procedure-name: pass:q[gds.shortestPath.dijkstra]
 
-[abstract]
---
-This section describes the Dijkstra Shortest Path algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

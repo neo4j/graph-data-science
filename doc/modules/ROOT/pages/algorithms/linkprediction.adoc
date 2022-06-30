@@ -2,10 +2,6 @@
 = Topological link prediction
 :description: This chapter provides explanations and examples for each of the link prediction algorithms in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This chapter provides explanations and examples for each of the link prediction algorithms in the Neo4j Graph Data Science library.
---
 
 Link prediction algorithms help determine the closeness of a pair of nodes using the topology of the graph.
 The computed scores can then be used to predict new relationships between them.
@@ -25,5 +21,3 @@ The Neo4j GDS library includes the following link prediction algorithms, grouped
 ** xref::alpha-algorithms/resource-allocation.adoc[Resource Allocation]
 ** xref::alpha-algorithms/same-community.adoc[Same Community]
 ** xref::alpha-algorithms/total-neighbors.adoc[Total Neighbors]
-
-

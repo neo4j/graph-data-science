@@ -6,10 +6,6 @@
 :result: community ID
 :algorithm: Leiden
 
-[abstract]
---
-This section describes the Leiden algorithm in the Neo4j Graph Data Science library.
---
 
 :undirected:
 :homogeneous:

@@ -7,10 +7,6 @@
 :entity: node
 :result: scaled properties
 
-[abstract]
---
-This section describes the Scale Properties algorithm in the Neo4j Graph Data Science library.
---
 
 [[algorithms-scale-properties-intro]]
 == Introduction

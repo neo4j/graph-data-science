@@ -6,10 +6,6 @@
 :algorithm: Eigenvector Centrality
 :algorithm-name: Eigenvector Centrality
 
-[abstract]
---
-This section describes the Eigenvector Centrality algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

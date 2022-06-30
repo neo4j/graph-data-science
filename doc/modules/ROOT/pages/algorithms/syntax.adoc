@@ -2,10 +2,6 @@
 = Syntax overview
 :description: This section describes the general syntax for running algorithms in the Neo4j Graph Data Science library, including execution modes and common configuration parameters.
 
-[abstract]
---
-This section describes the general syntax for running algorithms in the Neo4j Graph Data Science library, including execution modes and common configuration parameters.
---
 
 The general algorithm syntax involves referencing a previously loaded named graph.
 

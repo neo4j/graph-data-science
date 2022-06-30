@@ -6,10 +6,6 @@
 :result: conductance
 :algorithm: Conductance
 
-[abstract]
---
-This section describes the Conductance algorithm in the Neo4j Graph Data Science library.
---
 
 
 :directed:

@@ -2,10 +2,6 @@
 = Training methods
 :description: This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
---
 
 xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node Classification Pipelines], xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[Node Regression Pipelines], and xref::machine-learning/linkprediction-pipelines/index.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
 These methods have several hyperparameters that one can set to influence the training.
@@ -28,5 +24,3 @@ The training methods currently support in the Neo4j Graph Data Science library a
 * Alpha
 ** xref::machine-learning/training-methods/random-forest.adoc[Random forest]
 ** xref::machine-learning/training-methods/linear-regression.adoc[Linear regression]
-
-

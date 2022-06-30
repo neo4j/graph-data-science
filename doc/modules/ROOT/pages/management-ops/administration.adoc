@@ -3,10 +3,6 @@
 = Administration
 :description: This section explains administration capabilities in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section explains administration capabilities in the Neo4j Graph Data Science library.
---
 
 The GDS catalog offers elevated access to administrator users.
 Any user granted a role with the name `admin` is considered an administrator by GDS.

@@ -7,10 +7,6 @@
 :source-target: false
 :procedure-name: pass:q[gds.allShortestPaths.delta]
 
-[abstract]
---
-This section describes the Delta-Stepping Shortest Path algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

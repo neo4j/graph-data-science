@@ -5,10 +5,6 @@
 :max-trials: 10
 
 
-[abstract]
---
-This section describes Node classification pipelines in the Neo4j Graph Data Science library.
---
 
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.
@@ -43,5 +39,3 @@ This segment is divided into the following pages:
 * xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc[Configuring the pipeline]
 * xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline]
 * xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Applying a classification model to make predictions]
-
-

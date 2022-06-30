@@ -5,10 +5,6 @@
 :entity: node
 :result: embedding
 
-[abstract]
---
-This section describes the Node2Vec node embedding algorithm in the Neo4j Graph Data Science library.
---
 
 Node2Vec is a node embedding algorithm that computes a vector representation of a node based on random walks in the graph.
 The neighborhood is sampled through random walks.

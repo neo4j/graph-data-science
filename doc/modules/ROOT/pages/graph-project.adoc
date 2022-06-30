@@ -2,10 +2,6 @@
 = Projecting graphs using native projections
 :description: This section details projecting GDS graphs using `native` projections.
 
-[abstract]
---
-This section details projecting GDS graphs using `native` projections.
---
 
 A projected graph can be stored in the xref::management-ops/graph-catalog-ops.adoc[catalog] under a user-defined name.
 Using that name, the graph can be referred to by any algorithm in the library.

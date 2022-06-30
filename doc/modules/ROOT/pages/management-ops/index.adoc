@@ -2,10 +2,6 @@
 = Graph management
 :description: This chapter explains the graph catalog, the different graph projection variants and utility functions in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This chapter explains the graph catalog, the different graph projection variants and utility functions in the Neo4j Graph Data Science library.
---
 
 A central concept in the GDS library is the management of projected graphs.
 
@@ -17,4 +13,3 @@ This chapter is divided into the following sections:
 * xref::management-ops/create-cypher-db.adoc[Cypher on GDS graph]
 * xref::management-ops/administration.adoc[Administration]
 * xref::management-ops/backup-restore.adoc[Backup and Restore]
-

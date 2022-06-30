@@ -3,10 +3,6 @@
 = Apache Arrow
 :description: This chapter explains how to set up Apache Arrow™ in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This chapter explains how to set up Apache Arrow™ in the Neo4j Graph Data Science library.
---
 
 include::partial$/management-ops/alpha-note.adoc[]
 

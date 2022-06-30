@@ -5,10 +5,6 @@
 :result: local clustering coefficient
 :algorithm: Local Clustering Coefficient
 
-[abstract]
---
-This section describes the Local Clustering Coefficient algorithm in the Neo4j Graph Data Science library.
---
 
 :undirected:
 :homogeneous:

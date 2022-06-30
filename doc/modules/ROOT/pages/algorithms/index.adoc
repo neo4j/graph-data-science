@@ -2,10 +2,6 @@
 = Graph algorithms
 :description: This chapter describes each of the graph algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
 
-[abstract]
---
-This chapter describes each of the graph algorithms in the Neo4j Graph Data Science library, including algorithm tiers, execution modes and general syntax.
---
 
 The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
 The algorithms are divided into categories which represent different problem classes.
@@ -25,5 +21,3 @@ This chapter is divided into the following sections:
 * xref::algorithms/linkprediction.adoc[Topological link prediction]
 * xref::algorithms/auxiliary.adoc[Auxiliary procedures]
 * xref::algorithms/pregel-api.adoc[Pregel API]
-
-

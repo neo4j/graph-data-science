@@ -20,10 +20,6 @@ License: <<license, Creative Commons 4.0>>
 endif::[]
 
 
-[abstract]
---
-This is the manual for Neo4j Graph Data Science library version {docs-version}.
---
 
 The manual covers the following areas:
 

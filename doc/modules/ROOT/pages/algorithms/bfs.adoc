@@ -5,10 +5,6 @@
 :result: path in traversal order
 :algorithm: Breadth First Search
 
-[abstract]
---
-This section describes the Breadth First Search traversal algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

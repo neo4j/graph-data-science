@@ -3,10 +3,6 @@
 = K-1 Coloring
 :description: This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes the K-1 Coloring algorithm in the Neo4j Graph Data Science library.
---
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 

@@ -3,10 +3,6 @@
 = Cypher on GDS graph
 :description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
 
-[abstract]
---
-This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
---
 
 include::partial$/management-ops/alpha-note.adoc[]
 

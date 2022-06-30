@@ -5,10 +5,6 @@
 :result: embedding
 :algorithm: FastRP
 
-[abstract]
---
-This section describes the Fast Random Projection (FastRP) node embedding algorithm in the Neo4j Graph Data Science library.
---
 
 :directed:
 :undirected:

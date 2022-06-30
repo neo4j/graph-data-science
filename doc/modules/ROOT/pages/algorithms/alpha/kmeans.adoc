@@ -7,10 +7,6 @@
 :algorithm: K-Means
 
 
-[abstract]
---
-This section describes the K-Means algorithm in the Neo4j Graph Data Science library.
---
 
 
 [[algorithms-k-means-intro]]

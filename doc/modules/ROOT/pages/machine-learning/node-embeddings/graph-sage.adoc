@@ -7,10 +7,6 @@
 :modelType: GraphSAGE
 :algorithm: GraphSAGE
 
-[abstract]
---
-This section describes the GraphSAGE node embedding algorithm in the Neo4j Graph Data Science library.
---
 
 GraphSAGE is an _inductive_ algorithm for computing node embeddings.
 GraphSAGE is using node feature information to generate node embeddings on unseen nodes or graphs.
@@ -589,4 +585,3 @@ CALL gds.beta.graphSage.write(
 | 7         | 7
 |===
 --
-

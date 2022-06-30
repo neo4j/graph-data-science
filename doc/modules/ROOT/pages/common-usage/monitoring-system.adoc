@@ -3,10 +3,6 @@
 = Monitoring system
 :description: This section describes features for monitoring a system's capacity and analytics workload using the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section describes features for monitoring a system's capacity and analytics workload using the Neo4j Graph Data Science library.
---
 
 GDS supports multiple users concurrently working on the same system.
 Typically, GDS procedures are resource heavy in the sense that they may use a lot of memory and/or many CPU cores to do their computation.

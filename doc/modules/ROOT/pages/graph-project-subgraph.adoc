@@ -3,10 +3,6 @@
 = Projecting a subgraph
 :description: This section details how to project subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
 
-[abstract]
---
-This section details how to project subgraphs from existing graphs stored in the graph catalog of the Neo4j Graph Data Science library.
---
 
 In GDS, algorithms can be executed on a named graph that has been filtered based on its xref::common-usage/running-algos.adoc#common-configuration-node-labels[node labels] and xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
 However, that filtered graph only exists during the execution of the algorithm, and it is not possible to filter on property values.
