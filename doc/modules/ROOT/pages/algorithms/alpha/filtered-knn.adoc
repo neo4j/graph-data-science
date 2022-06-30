@@ -6,12 +6,6 @@
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
 
-
-:directed:
-:undirected:
-:homogeneous:
-:weighted:
-
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 
 
