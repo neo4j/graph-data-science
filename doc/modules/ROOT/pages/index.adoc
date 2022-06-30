@@ -28,7 +28,7 @@ The manual covers the following areas:
 * xref::common-usage/index.adoc[Common usage] -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
 * xref::management-ops/index.adoc[Graph management] -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
 * xref::algorithms/index.adoc[Graph algorithms] -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
-* xref::machine-learning.adoc[Machine learning] -- A detailed guide to the machine learning procedures included in the Neo4j Graph Data Science library.
+* xref::machine-learning/machine-learning.adoc[Machine learning] -- A detailed guide to the machine learning procedures included in the Neo4j Graph Data Science library.
 * xref::production-deployment/index.adoc[Production deployment] -- This chapter explains advanced details with regards to common Neo4j components.
 * xref::python-client/index.adoc[Python client] -- Documentation of the Graph Data Science client for Python users.
 * xref::operations-reference/appendix-a.adoc[Operations reference] -- Reference of all procedures contained in the Neo4j Graph Data Science library.
