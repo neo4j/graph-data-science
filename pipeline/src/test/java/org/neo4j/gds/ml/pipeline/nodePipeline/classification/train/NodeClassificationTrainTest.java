@@ -50,6 +50,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -178,8 +179,10 @@ class NodeClassificationTrainTest {
     void selectsTheBestModel(ClassificationMetricSpecification metricSpecification) {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addNodePropertyStep(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(nodeGraphStore, "someBogusProperty"));
         pipeline.addFeatureStep(NodeFeatureStep.of("a"));
         pipeline.addFeatureStep(NodeFeatureStep.of("b"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("someBogusProperty"));
 
         LogisticRegressionTrainConfig expectedWinner = LogisticRegressionTrainConfigImpl
             .builder()
@@ -228,6 +231,8 @@ class NodeClassificationTrainTest {
         );
 
         var result = ncTrain.run();
+
+        assertThat(result.classifier().data().featureDimension()).isEqualTo(3);
 
         var metric = metricSpecification
             .createMetrics(result.classIdMap(), result.classCounts())

@@ -91,7 +91,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
             .sum();
     }
 
-    public void addNodePropertyStep(NodePropertyStep step) {
+    public void addNodePropertyStep(ExecutableNodePropertyStep step) {
         validateUniqueMutateProperty(step);
         this.nodePropertySteps.add(step);
     }
@@ -146,7 +146,7 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
         }
     }
 
-    private void validateUniqueMutateProperty(NodePropertyStep step) {
+    private void validateUniqueMutateProperty(ExecutableNodePropertyStep step) {
         this.nodePropertySteps.forEach(nodePropertyStep -> {
             var newMutatePropertyName = step.config().get(MUTATE_PROPERTY_KEY);
             var existingMutatePropertyName = nodePropertyStep.config().get(MUTATE_PROPERTY_KEY);

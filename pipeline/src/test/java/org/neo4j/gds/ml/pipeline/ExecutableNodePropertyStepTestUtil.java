@@ -35,12 +35,13 @@ import java.util.Map;
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public class ExecutableNodePropertyStepTestUtil {
-    static class AddBogusNodePropertyStep implements ExecutableNodePropertyStep {
-        static final String PROPERTY = "someBogusProperty";
+    public static class NodeIdPropertyStep implements ExecutableNodePropertyStep {
         private final GraphStore graphStore;
+        private final String propertyName;
 
-        AddBogusNodePropertyStep(GraphStore graphStore) {
+        public NodeIdPropertyStep(GraphStore graphStore, String propertyName) {
             this.graphStore = graphStore;
+            this.propertyName = propertyName;
         }
 
         @Override
@@ -62,14 +63,14 @@ public class ExecutableNodePropertyStepTestUtil {
         ) {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),
-                PROPERTY,
+                propertyName,
                 new LongTestPropertyValues(nodeId -> nodeId)
             );
         }
 
         @Override
         public Map<String, Object> config() {
-            return Map.of(MUTATE_PROPERTY_KEY, PROPERTY);
+            return Map.of(MUTATE_PROPERTY_KEY, propertyName);
         }
 
         @Override

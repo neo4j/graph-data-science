@@ -379,7 +379,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         );
     }
 
-    //TODO: extract to component for sharing with NodeRegression
+    //TODO: extract to component for sharing with NodeRegression + add unit test
     private Features makeFeatures(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
         try {
             nodePropertyStepExecutor.executeNodePropertySteps(pipeline);

@@ -70,7 +70,7 @@ class PipelineExecutorTest {
         );
 
         assertThatNoException().isThrownBy(pipelineExecutor::compute);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, ExecutableNodePropertyStepTestUtil.AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
     }
 
     @Test
@@ -83,7 +83,7 @@ class PipelineExecutorTest {
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, ExecutableNodePropertyStepTestUtil.AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
     }
 
     @Test
@@ -121,7 +121,7 @@ class PipelineExecutorTest {
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(ExecutableNodePropertyStepTestUtil.PipelineExecutionTestExecuteNodeStepFailure.class);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, ExecutableNodePropertyStepTestUtil.AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
         assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, ExecutableNodePropertyStepTestUtil.FailingNodePropertyStep.PROPERTY)).isFalse();
     }
 
@@ -247,7 +247,7 @@ class PipelineExecutorTest {
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
-            return List.of(new ExecutableNodePropertyStepTestUtil.AddBogusNodePropertyStep(graphStore));
+            return List.of(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "someBogusProperty"));
         }
 
         @Override
@@ -281,7 +281,7 @@ class PipelineExecutorTest {
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
-            return List.of(new ExecutableNodePropertyStepTestUtil.AddBogusNodePropertyStep(graphStore), new ExecutableNodePropertyStepTestUtil.FailingNodePropertyStep());
+            return List.of(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "someBogusProperty"), new ExecutableNodePropertyStepTestUtil.FailingNodePropertyStep());
         }
 
         @Override
