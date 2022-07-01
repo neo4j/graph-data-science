@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
-import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
@@ -39,7 +38,6 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
@@ -82,13 +80,6 @@ class NodeClassificationToModelConverterTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
         pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
 
-
-        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
-            .testFraction(0.3)
-            .validationFolds(2)
-            .build()
-        );
-
         pipeline.addTrainerConfig(modelCandidate);
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline(PIPELINE_NAME)
@@ -110,6 +101,7 @@ class NodeClassificationToModelConverterTest {
             .build();
         var model = converter.toModel(ncResult, originalSchema).model();
 
+        // test model meta data
         assertThat(model.creator()).isEqualTo(USERNAME);
         assertThat(model.algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
         assertThat(model.data()).isInstanceOf(LogisticRegressionData.class);
@@ -117,28 +109,28 @@ class NodeClassificationToModelConverterTest {
         assertThat(model.graphSchema()).isEqualTo(originalSchema);
         assertThat(model.name()).isEqualTo(MODEL_NAME);
         assertThat(model.stored()).isFalse();
-        assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
+        assertThat(model.isPublished()).isFalse();
+        assertThat(model.customInfo().bestParameters()).isEqualTo(modelCandidate);
         assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
-        assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
+        assertThat(((Map<String, Object>) model.customInfo().metrics().get(metric.toString())).keySet())
             .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
 
-        // using explicit type intentionally :)
+        // check metrics
         NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-        var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
-        assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
-        var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
-        assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
-        var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
-        var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
-        assertThat(validationStats)
-            .usingRecursiveComparison()
-            .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-            .isEqualTo(Map.of("avg", 0.649999, "max", 0.799999, "min", 0.499999));
 
-        assertThat(trainStats)
+        var expectedMetrics = Map.of(
+            metric.toString(), Map.of(
+              "test",  0.799999,
+              "outerTrain", 0.666666,
+              "validation", Map.of("avg", 0.649999, "max", 0.799999, "min", 0.499999),
+              "train",   Map.of("avg", 0.89999, "max", 0.99999, "min", 0.79999)
+            )
+        );
+
+        assertThat(customInfo.metrics())
             .usingRecursiveComparison()
             .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-            .isEqualTo(Map.of("avg", 0.89999, "max", 0.99999, "min", 0.79999));
+            .isEqualTo(expectedMetrics);
 
         assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
         assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
