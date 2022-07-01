@@ -51,6 +51,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigI
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -154,12 +155,10 @@ class NodeClassificationTrainTest {
             1L
         );
 
-        var ncTrain = NodeClassificationTrain.create(
+        var ncTrain = createWithExecutionContext(
             relGraphStore,
-            relGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -221,12 +220,10 @@ class NodeClassificationTrainTest {
 
         var config = createConfig("model", GRAPH_NAME, metricSpecification, 1L);
 
-        var ncTrain = NodeClassificationTrain.create(
+        var ncTrain = createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -313,12 +310,10 @@ class NodeClassificationTrainTest {
             )
             .build();
 
-        var ncTrain = NodeClassificationTrain.create(
+        var ncTrain = createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -375,12 +370,10 @@ class NodeClassificationTrainTest {
             .metrics(List.of(ClassificationMetricSpecification.Parser.parse("OUT_OF_BAG_ERROR")))
             .build();
 
-        var ncTrain = NodeClassificationTrain.create(
+        var ncTrain = createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -420,12 +413,10 @@ class NodeClassificationTrainTest {
 
         var bananasConfig = createConfig("bananasModel", GRAPH_NAME, metricSpecification, 1337L);
 
-        var bananasTrain = NodeClassificationTrain.create(
+        var bananasTrain = createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             bananasPipeline,
             bananasConfig,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -446,12 +437,10 @@ class NodeClassificationTrainTest {
             metricSpecification,
             42L
         );
-        var arrayPropertyTrain = NodeClassificationTrain.create(
+        var arrayPropertyTrain = createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             arrayPipeline,
             arrayPropertyConfig,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -514,13 +503,11 @@ class NodeClassificationTrainTest {
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        NodeClassificationTrain.create(
+        createWithExecutionContext(
                 nodeGraphStore,
-                nodeGraphStore.getUnion(),
                 pipeline,
                 config,
-                ExecutionContext.EMPTY,
-                progressTracker
+            progressTracker
             )
             .run();
 
@@ -561,12 +548,10 @@ class NodeClassificationTrainTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        NodeClassificationTrain.create(
+        createWithExecutionContext(
             relGraphStore,
-            relGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             progressTracker
         ).run();
 
@@ -609,13 +594,11 @@ class NodeClassificationTrainTest {
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        NodeClassificationTrain.create(
+        createWithExecutionContext(
                 nodeGraphStore,
-                nodeGraphStore.getUnion(),
                 pipeline,
                 config,
-                ExecutionContext.EMPTY,
-                progressTracker
+            progressTracker
             )
             .run();
 
@@ -652,12 +635,10 @@ class NodeClassificationTrainTest {
             .concurrency(concurrency)
             .build();
 
-        Supplier<NodeClassificationTrain> algoSupplier = () -> NodeClassificationTrain.create(
+        Supplier<NodeClassificationTrain> algoSupplier = () -> createWithExecutionContext(
             nodeGraphStore,
-            nodeGraphStore.getUnion(),
             pipeline,
             config,
-            ExecutionContext.EMPTY,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -811,5 +792,26 @@ class NodeClassificationTrainTest {
             .map(ClassificationMetricSpecification.Parser::parse)
             .map(Arguments::of);
         return Stream.concat(singleClassMetrics, allClassMetrics);
+    }
+
+    static NodeClassificationTrain createWithExecutionContext(
+        GraphStore graphStore,
+        NodeClassificationTrainingPipeline pipeline,
+        NodeClassificationPipelineTrainConfig config,
+        ProgressTracker progressTracker
+    ) {
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            ExecutionContext.EMPTY,
+            graphStore,
+            config,
+            progressTracker
+        );
+        return NodeClassificationTrain.create(
+            graphStore,
+            pipeline,
+            config,
+            nodePropertyStepExecutor,
+            progressTracker
+        );
     }
 }

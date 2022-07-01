@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.LongMultiSet;
@@ -37,7 +36,6 @@ import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
@@ -256,37 +254,12 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
     public static NodeClassificationTrain create(
         GraphStore graphStore,
-        Graph graph,
-        NodeClassificationTrainingPipeline pipeline,
-        NodeClassificationPipelineTrainConfig config,
-        ExecutionContext executionContext,
-        ProgressTracker progressTracker
-    ) {
-
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            executionContext,
-            graphStore,
-            config,
-            progressTracker
-        );
-        return NodeClassificationTrain.create(
-            graphStore,
-            graph,
-            pipeline,
-            config,
-            nodePropertyStepExecutor,
-            progressTracker
-        );
-    }
-
-    public static NodeClassificationTrain create(
-        GraphStore graphStore,
-        Graph graph,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
         NodePropertyStepExecutor<?> nodePropertyStepExecutor,
         ProgressTracker progressTracker
     ) {
+        var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();

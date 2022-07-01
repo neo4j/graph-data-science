@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
@@ -68,17 +69,21 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
     ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
-        var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
-        var nodesGraph = graphStore.getGraph(nodeLabels);
         var toModelConverter = new NodeClassificationToModelConverter(pipeline, configuration);
+
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            executionContext,
+            graphStore,
+            configuration,
+            progressTracker
+        );
 
         return new NodeClassificationTrainAlgorithm(
             NodeClassificationTrain.create(
                 graphStore,
-                nodesGraph,
                 pipeline,
                 configuration,
-                executionContext,
+                nodePropertyStepExecutor,
                 progressTracker
             ),
             pipeline,
