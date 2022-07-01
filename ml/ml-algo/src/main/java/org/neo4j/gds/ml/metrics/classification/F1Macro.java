@@ -61,7 +61,7 @@ public class F1Macro implements ClassificationMetric{
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof F1Macro;
+        return o != null && this.getClass().equals(o.getClass());
     }
 
     @Override

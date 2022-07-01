@@ -63,7 +63,7 @@ public class F1Weighted implements ClassificationMetric {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof F1Weighted;
+        return o != null && this.getClass().equals(o.getClass());
     }
 
     @Override

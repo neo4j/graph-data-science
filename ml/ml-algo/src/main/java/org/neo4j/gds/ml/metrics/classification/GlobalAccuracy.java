@@ -74,7 +74,7 @@ public class GlobalAccuracy implements ClassificationMetric{
 
     @Override
     public boolean equals(Object obj) {
-        return this.getClass().equals(obj.getClass());
+        return obj != null && this.getClass().equals(obj.getClass());
     }
 
     @Override
