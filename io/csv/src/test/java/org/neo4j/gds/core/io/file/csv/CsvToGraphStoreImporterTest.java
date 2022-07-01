@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,7 +25,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.io.file.csv.CsvToGraphStoreImporter;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 
 import java.net.URISyntaxException;
@@ -37,7 +36,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
-class FileToGraphStoreImporterTest {
+class CsvToGraphStoreImporterTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})

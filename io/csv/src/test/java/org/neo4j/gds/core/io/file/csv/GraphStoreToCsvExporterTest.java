@@ -52,8 +52,6 @@ import java.util.stream.LongStream;
 import static java.util.function.Predicate.not;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.neo4j.gds.core.io.file.CsvSchemaConstants.GRAPH_PROPERTY_SCHEMA_COLUMNS;
-import static org.neo4j.gds.core.io.file.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphCapabilitiesWriter.GRAPH_CAPABILITIES_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphInfoVisitor.GRAPH_INFO_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvGraphPropertySchemaVisitor.GRAPH_PROPERTY_SCHEMA_FILE_NAME;
@@ -62,10 +60,12 @@ import static org.neo4j.gds.core.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipSchemaVisitor.RELATIONSHIP_SCHEMA_FILE_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
+import static org.neo4j.gds.core.io.file.csv.CsvSchemaConstants.GRAPH_PROPERTY_SCHEMA_COLUMNS;
+import static org.neo4j.gds.core.io.file.csv.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-public class GraphStoreToFileExporterTest extends CsvTest {
+public class GraphStoreToCsvExporterTest extends CsvTest {
 
     @GdlGraph
     private static final String GDL =

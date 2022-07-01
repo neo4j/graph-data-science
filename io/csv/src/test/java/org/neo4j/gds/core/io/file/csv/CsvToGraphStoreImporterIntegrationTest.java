@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -28,8 +28,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.io.file.csv.CsvToGraphStoreImporter;
-import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.ImmutableGraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -46,7 +46,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 
 @GdlExtension
-class FileToGraphStoreImporterIntegrationTest {
+class CsvToGraphStoreImporterIntegrationTest {
 
     @GdlGraph
     private static final String GDL =

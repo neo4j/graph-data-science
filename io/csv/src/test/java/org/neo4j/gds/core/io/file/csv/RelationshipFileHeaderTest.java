@@ -17,12 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.io.file.ImmutableHeaderProperty;
+import org.neo4j.gds.core.io.file.RelationshipFileHeader;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
