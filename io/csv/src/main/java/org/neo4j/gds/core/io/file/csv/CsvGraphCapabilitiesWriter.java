@@ -43,6 +43,7 @@ public class CsvGraphCapabilitiesWriter implements SimpleWriter<Capabilities> {
         this.fileLocation = fileLocation.resolve(GRAPH_CAPABILITIES_FILE_NAME);
     }
 
+    @Override
     public void write(Capabilities capabilities) throws IOException {
         var capabilitiesDTO = CapabilitiesDTO.from(capabilities);
         var resultFile = fileLocation.toFile();
