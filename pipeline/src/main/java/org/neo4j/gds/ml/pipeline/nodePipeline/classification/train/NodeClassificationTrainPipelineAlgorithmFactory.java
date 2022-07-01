@@ -70,6 +70,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
 
         var nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
         var nodesGraph = graphStore.getGraph(nodeLabels);
+        var toModelConverter = new NodeClassificationToModelConverter(pipeline, configuration);
 
         return new NodeClassificationTrainAlgorithm(
             NodeClassificationTrain.create(
@@ -81,6 +82,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
                 progressTracker
             ),
             pipeline,
+            toModelConverter,
             graphStore,
             configuration,
             progressTracker

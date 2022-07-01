@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
-import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
-import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,7 +35,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -49,7 +46,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.metrics.classification.F1Weighted;
 import org.neo4j.gds.ml.models.TrainingMethod;
@@ -155,74 +151,6 @@ class NodeClassificationTrainTest extends BaseProcTest {
             .yields());
 
         graphStoreWithRelationships = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME_WITH_RELATIONSHIPS).graphStore();
-    }
-
-    @Test
-    void trainsAModel() {
-        var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "testProc",
-            Map.of("mutateProperty", "pr")
-        ));
-        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
-        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addFeatureStep(NodeFeatureStep.of("pr"));
-
-        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-        var metric = metricSpecification.createMetrics(LocalIdMap.of(), new LongMultiSet()).findFirst().orElseThrow();
-
-        var modelCandidate = LogisticRegressionTrainConfig.of(Map.of("penalty", 1, "maxEpochs", 1));
-        pipeline.addTrainerConfig(modelCandidate);
-
-        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
-            .testFraction(0.3)
-            .validationFolds(2)
-            .build()
-        );
-
-        var config = createConfig(
-            "model",
-            GRAPH_NAME_WITH_RELATIONSHIPS,
-            metricSpecification,
-            1L
-        );
-
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var model = getModel(graphStoreWithRelationships, pipeline, config, caller);
-
-            assertThat(model.creator()).isEqualTo(getUsername());
-            assertThat(model.algoType()).isEqualTo(NodeClassificationTrainingPipeline.MODEL_TYPE);
-            assertThat(model.data()).isInstanceOf(LogisticRegressionData.class);
-            assertThat(model.trainConfig()).isEqualTo(config);
-            assertThat(model.graphSchema()).isEqualTo(graphStoreWithRelationships.schema());
-            assertThat(model.name()).isEqualTo("model");
-            assertThat(model.stored()).isFalse();
-            assertThat(model.customInfo().bestParameters().toMap()).isEqualTo(modelCandidate.toMap());
-            assertThat(model.customInfo().metrics().keySet()).containsExactly(metric.toString());
-            assertThat(((Map) model.customInfo().metrics().get(metric.toString())).keySet())
-                .containsExactlyInAnyOrder("train", "validation", "outerTrain", "test");
-
-            // using explicit type intentionally :)
-            NodeClassificationPipelineModelInfo customInfo = model.customInfo();
-            var testScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("test");
-            assertThat(testScore).isCloseTo(0.799999, Offset.offset(1e-5));
-            var outerTrainScore = (double) ((Map) customInfo.metrics().get(metric.toString())).get("outerTrain");
-            assertThat(outerTrainScore).isCloseTo(0.666666, Offset.offset(1e-5));
-            var validationStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("validation");
-            var trainStats = (Map) ((Map) customInfo.metrics().get(metric.toString())).get("train");
-            assertThat(validationStats)
-                .usingRecursiveComparison()
-                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-                .isEqualTo(Map.of("avg",0.649999, "max",0.799999, "min",0.499999));
-
-            assertThat(trainStats)
-                .usingRecursiveComparison()
-                .withComparatorForType(new DoubleComparator(1e-5), Double.class)
-                .isEqualTo(Map.of("avg",0.89999, "max",0.99999, "min",0.79999));
-
-            assertThat(customInfo.pipeline().nodePropertySteps()).isEqualTo(pipeline.nodePropertySteps());
-            assertThat(customInfo.pipeline().featureProperties()).isEqualTo(pipeline.featureProperties());
-        });
     }
 
     private Model<?, ?, NodeClassificationPipelineModelInfo> getModel(

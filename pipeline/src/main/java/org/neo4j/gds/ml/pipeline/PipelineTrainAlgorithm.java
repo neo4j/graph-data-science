@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.model.ModelConfig;
@@ -38,10 +37,12 @@ public abstract class PipelineTrainAlgorithm<
     protected final CONFIG config;
 
     private final PipelineTrainer<RESULT> pipelineTrainer;
+    private final ResultToModelConverter<MODEL_RESULT, RESULT> toModelConverter;
 
     public PipelineTrainAlgorithm(
         PipelineTrainer<RESULT> pipelineTrainer,
         TrainingPipeline<FEATURE_STEP> pipeline,
+        ResultToModelConverter<MODEL_RESULT, RESULT> toModelConverter,
         GraphStore graphStore,
         CONFIG config,
         ProgressTracker progressTracker
@@ -50,6 +51,7 @@ public abstract class PipelineTrainAlgorithm<
         this.pipelineTrainer = pipelineTrainer;
         this.pipelineTrainer.setTerminationFlag(terminationFlag);
         this.pipeline = pipeline;
+        this.toModelConverter = toModelConverter;
         this.graphStore = graphStore;
         this.config = config;
     }
@@ -63,10 +65,8 @@ public abstract class PipelineTrainAlgorithm<
             .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
         RESULT pipelineTrainResult = pipelineTrainer.run();
-        return transformResult(pipelineTrainResult, config, originalSchema);
+        return toModelConverter.toModel(pipelineTrainResult, originalSchema);
     }
-
-    protected abstract MODEL_RESULT transformResult(RESULT result, CONFIG config, GraphSchema originalSchema);
 
     @Override
     public void release() {

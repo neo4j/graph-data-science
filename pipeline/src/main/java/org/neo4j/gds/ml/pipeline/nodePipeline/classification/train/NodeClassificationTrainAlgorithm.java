@@ -20,15 +20,12 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
+import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
 
 public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
@@ -40,35 +37,11 @@ public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
     NodeClassificationTrainAlgorithm(
         PipelineTrainer<NodeClassificationTrainResult> pipelineTrainer,
         TrainingPipeline<NodeFeatureStep> pipeline,
+        ResultToModelConverter<NodeClassificationModelResult, NodeClassificationTrainResult> toModelConverter,
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        super(pipelineTrainer, pipeline, graphStore, config, progressTracker);
-    }
-
-    @Override
-    protected NodeClassificationModelResult transformResult(
-        NodeClassificationTrainResult inputResult,
-        NodeClassificationPipelineTrainConfig config,
-        GraphSchema originalSchema
-    ) {
-        var catalogModel = Model.of(
-            config.username(),
-            config.modelName(),
-            NodeClassificationTrainingPipeline.MODEL_TYPE,
-            originalSchema,
-            inputResult.classifier().data(),
-            config,
-            NodeClassificationPipelineModelInfo.of(
-                inputResult.trainingStatistics().winningModelTestMetrics(),
-                inputResult.trainingStatistics().winningModelOuterTrainMetrics(),
-                inputResult.trainingStatistics().bestCandidate(),
-                NodePropertyPredictPipeline.from(pipeline),
-                inputResult.classIdMap().originalIdsList()
-            )
-        );
-
-        return ImmutableNodeClassificationModelResult.of(catalogModel, inputResult.trainingStatistics());
+        super(pipelineTrainer, pipeline, toModelConverter, graphStore, config, progressTracker);
     }
 }
