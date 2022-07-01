@@ -114,7 +114,6 @@ public abstract class NodeVisitor extends ElementVisitor<PropertySchema> {
 
     abstract static class Builder<SELF extends Builder<SELF, VISITOR>, VISITOR extends NodeVisitor> {
         NodeSchema nodeSchema;
-        boolean reverseIdMap;
 
         SELF withNodeSchema(NodeSchema nodeSchema) {
             this.nodeSchema = nodeSchema;
