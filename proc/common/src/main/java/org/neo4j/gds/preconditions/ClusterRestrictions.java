@@ -22,14 +22,14 @@ package org.neo4j.gds.preconditions;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class ClusterRestrictions {
 
     private ClusterRestrictions() {}
 
-    public static void disallowRunningOnCluster(GraphDatabaseAPI api, String detail) throws IllegalStateException {
-        var neo4jMode = GraphDatabaseApiProxy.resolveDependency(api, Config.class).get(GraphDatabaseSettings.mode);
+    public static void disallowRunningOnCluster(GraphDatabaseService databaseService, String detail) throws IllegalStateException {
+        var neo4jMode = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class).get(GraphDatabaseSettings.mode);
         if (neo4jMode != GraphDatabaseSettings.Mode.SINGLE) {
             throw new IllegalStateException(
                 "The requested operation (" + detail +
