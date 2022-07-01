@@ -31,13 +31,14 @@ import org.neo4j.gds.compat.AbstractInMemoryNodePropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipPropertyCursor;
 import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.internal.recordstorage.InMemoryStorageReader433;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.RelationshipSelection;
 import org.neo4j.storageengine.api.StorageEntityCursor;
@@ -105,11 +106,9 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public GraphDatabaseAPI startAndGetInMemoryDatabase(
-        DatabaseManagementService dbms, String dbName
-    ) {
+    public GraphDatabaseService startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName) {
         dbms.startDatabase(dbName);
-        return (GraphDatabaseAPI) dbms.database(dbName);
+        return dbms.database(dbName);
     }
 
     @Override
@@ -158,7 +157,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public Edition dbmsEdition(GraphDatabaseAPI api) {
-        return api.dbmsInfo().edition;
+    public Edition dbmsEdition(GraphDatabaseService databaseService) {
+        return GraphDatabaseApiProxy.dbmsInfo(databaseService).edition;
     }
 }

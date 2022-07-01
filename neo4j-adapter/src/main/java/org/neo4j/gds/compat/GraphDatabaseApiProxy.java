@@ -34,6 +34,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.factory.DbmsInfo;
 import org.neo4j.kernel.impl.query.Neo4jTransactionalContextFactory;
 import org.neo4j.kernel.impl.query.QueryExecution;
 import org.neo4j.kernel.impl.query.QueryExecutionEngine;
@@ -98,6 +99,10 @@ public final class GraphDatabaseApiProxy {
 
     public static DatabaseLayout databaseLayout(GraphDatabaseService db) {
         return ((GraphDatabaseAPI) db).databaseLayout();
+    }
+
+    public static DbmsInfo dbmsInfo(GraphDatabaseService db) {
+        return ((GraphDatabaseAPI) db).dbmsInfo();
     }
 
     public static Node getNodeById(Transaction tx, long id) {

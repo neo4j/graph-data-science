@@ -34,9 +34,9 @@ import org.neo4j.gds.compat.GdsDatabaseManagementServiceBuilder;
 import org.neo4j.gds.compat.InMemoryStorageEngineBuilder;
 import org.neo4j.gds.compat.StorageEngineProxyApi;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.recordstorage.AbstractInMemoryRelationshipScanCursor;
 import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.storageengine.api.CommandCreationContext;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
@@ -88,9 +88,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public GraphDatabaseAPI startAndGetInMemoryDatabase(
-        DatabaseManagementService dbms, String dbName
-    ) {
+    public GraphDatabaseService startAndGetInMemoryDatabase(DatabaseManagementService dbms, String dbName) {
         return null;
     }
 
@@ -140,7 +138,7 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     }
 
     @Override
-    public Edition dbmsEdition(GraphDatabaseAPI api) {
+    public Edition dbmsEdition(GraphDatabaseService ignored) {
         throw cypherUnsupportedException();
     }
 

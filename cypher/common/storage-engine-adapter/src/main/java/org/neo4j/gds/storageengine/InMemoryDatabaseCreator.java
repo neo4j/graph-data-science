@@ -26,15 +26,15 @@ import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import static org.neo4j.gds.core.cypher.CypherGraphStoreCatalogHelper.setWrappedGraphStore;
 
 public class InMemoryDatabaseCreator {
 
-    public static void createDatabase(GraphDatabaseAPI api, String username, NamedDatabaseId databaseId, String graphName, String dbName) {
-        var dbms = GraphDatabaseApiProxy.resolveDependency(api, DatabaseManagementService.class);
+    public static void createDatabase(GraphDatabaseService databaseService, String username, NamedDatabaseId databaseId, String graphName, String dbName) {
+        var dbms = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseManagementService.class);
         var graphStoreWithConfig = GraphStoreCatalog.get(CatalogRequest.of(username, databaseId), graphName);
         var cypherGraphStore = new CypherGraphStore(graphStoreWithConfig.graphStore());
         setWrappedGraphStore(graphStoreWithConfig.config(), cypherGraphStore);
