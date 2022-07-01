@@ -37,35 +37,38 @@ public abstract class PipelineTrainAlgorithm<
     protected final CONFIG config;
 
     private final PipelineTrainer<RESULT> pipelineTrainer;
-    private final ResultToModelConverter<MODEL_RESULT, RESULT> toModelConverter;
+    private final ResultToModelConverter<MODEL_RESULT, RESULT> toCatalogModelConverter;
 
     public PipelineTrainAlgorithm(
         PipelineTrainer<RESULT> pipelineTrainer,
         TrainingPipeline<FEATURE_STEP> pipeline,
-        ResultToModelConverter<MODEL_RESULT, RESULT> toModelConverter,
+        ResultToModelConverter<MODEL_RESULT, RESULT> toCatalogModelConverter,
         GraphStore graphStore,
         CONFIG config,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.pipelineTrainer = pipelineTrainer;
-        this.pipelineTrainer.setTerminationFlag(terminationFlag);
         this.pipeline = pipeline;
-        this.toModelConverter = toModelConverter;
+        this.toCatalogModelConverter = toCatalogModelConverter;
         this.graphStore = graphStore;
         this.config = config;
     }
 
     @Override
     public MODEL_RESULT compute() {
+        pipelineTrainer.setTerminationFlag(terminationFlag);
+
         pipeline.validateTrainingParameterSpace();
         pipeline.validateBeforeExecution(graphStore, config);
+
         var originalSchema = graphStore
             .schema()
             .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
+
         RESULT pipelineTrainResult = pipelineTrainer.run();
-        return toModelConverter.toModel(pipelineTrainResult, originalSchema);
+        return toCatalogModelConverter.toModel(pipelineTrainResult, originalSchema);
     }
 
     @Override
