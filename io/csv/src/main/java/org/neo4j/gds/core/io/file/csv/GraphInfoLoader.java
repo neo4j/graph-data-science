@@ -90,6 +90,10 @@ public class GraphInfoLoader {
 
     static class RelationshipTypesDeserializer extends StdDeserializer<Map<RelationshipType, Long>> {
 
+        RelationshipTypesDeserializer() {
+            this(null);
+        }
+
         RelationshipTypesDeserializer(Class<?> vc) {
             super(vc);
         }
