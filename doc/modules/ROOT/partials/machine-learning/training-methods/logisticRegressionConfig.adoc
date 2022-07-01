@@ -1,16 +1,9 @@
 .Logistic regression configuration
-[opts="header",cols="3,4,2m,2,8"]
+[opts="header",cols="4,5,2m,2,8"]
 |===
 | Name                | Type                            | Default         | Optional | Description
 | penalty  footnote:log-scale[Ranges for this parameter are auto-tuned on a logarithmic scale.]
                       | Float or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]
                                                         | 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.
-| batchSize           | Integer or Map footnote:range[] | 100             | yes      | Number of nodes per batch.
-| minEpochs           | Integer or Map footnote:range[] | 1               | yes      | Minimum number of training epochs.
-| maxEpochs           | Integer or Mapfootnote:range[]  | 100             | yes      | Maximum number of training epochs.
-| learningRate footnote:log-scale[]
-                      | Float or Map footnote:range[]   | 0.001           | yes      | The learning rate determines the step size at each epoch while moving in the direction dictated by the Adam optimizer for minimizing the loss.
-| patience            | Integer or Map footnote:range[] | 1               | yes      | Maximum number of unproductive consecutive epochs.
-| tolerance  footnote:log-scale[]
-                      | Float or Map footnote:range[]   | 0.001           | yes      | The minimal improvement of the loss to be considered productive.
+include::partial$/machine-learning/training-methods/gradient-descent-common-config.adoc[]
 |===

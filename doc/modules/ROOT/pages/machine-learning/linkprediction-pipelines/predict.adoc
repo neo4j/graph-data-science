@@ -196,7 +196,7 @@ We specified `threshold` to filter out predictions with probability less than 45
 | "Will"    | "Greg"    | 0.6
 |===
 
-We can see, that our model predicts the most likely link is between Michael and Veselin.
+We can see, that our model predicts the most likely links are the five above.
 --
 
 

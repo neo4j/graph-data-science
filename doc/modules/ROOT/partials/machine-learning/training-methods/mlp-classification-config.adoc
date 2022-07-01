@@ -1,0 +1,5 @@
+.Multilayer Perceptron Classification configuration
+[opts="header",cols="4,5,2m,2,8"]
+|===
+include::partial$/machine-learning/training-methods/gradient-descent-common-config.adoc[]
+|===

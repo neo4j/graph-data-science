@@ -11,13 +11,6 @@ For the update we use the Adam optimizer as described in https://arxiv.org/pdf/1
 Statistics about the training are reported in the neo4j debug log.
 
 
-== Penalty
-
-This parameter defines the influence of the regularization term in the loss function.
-While the regularization can avoid overfitting, a high value can even lead to underfitting.
-The minimal value is zero, where the regularization term has no effect at all.
-
-
 == Max Epochs
 
 This parameter defines the maximum number of epochs for the training.

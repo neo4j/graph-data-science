@@ -18,6 +18,7 @@ The training methods currently support in the Neo4j Graph Data Science library a
 ** xref::machine-learning/training-methods/logistic-regression.adoc[Logistic regression]
 * Alpha
 ** xref::machine-learning/training-methods/random-forest.adoc[Random forest]
+** xref::machine-learning/training-methods/mlp.adoc[Multilayer Perceptron]
 
 **Regression**
 
