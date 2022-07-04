@@ -1,7 +1,7 @@
 [[migration-algorithms-link-prediction]]
 = Link Prediction
 
-The original alpha version of link prediction has been completely removed and incorporated into xref::machine-learning/linkprediction-pipelines/index.adoc[link prediction pipelines].
+The original alpha version of link prediction has been completely removed and incorporated into xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipelines].
 Before training a link prediction model, you must xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-creating-a-pipeline[create] and configure a training pipeline.
 
 
