@@ -1,6 +1,7 @@
 [[nodeclassification-pipelines-train]]
 [.beta]
 = Training the pipeline
+:description: This section describes training of Node classification pipelines in the Neo4j Graph Data Science library.
 
 include::partial$/algorithms/beta/beta-note.adoc[]
 

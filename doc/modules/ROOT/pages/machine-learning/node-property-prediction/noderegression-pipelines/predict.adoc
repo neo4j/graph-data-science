@@ -1,6 +1,7 @@
 [[noderegression-pipelines-predict]]
 [.alpha]
 = Applying a trained model for prediction
+:description: This section describes prediction using Node regression pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeRegression
 :entity: node
 :result: predicted property

@@ -1,6 +1,7 @@
 [[noderegression-pipelines-config]]
 [.alpha]
 = Configuring the pipeline
+:description: This section describes configuration of Node regression pipelines in the Neo4j Graph Data Science library.
 
 include::partial$/algorithms/alpha/alpha-note.adoc[]
 

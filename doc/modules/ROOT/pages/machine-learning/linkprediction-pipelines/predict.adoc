@@ -1,6 +1,7 @@
 [[algorithms-link-prediction-pipelines-predict]]
 [.beta]
 = Applying a trained model for prediction
+:description: This section describes prediction using Link prediction pipelines in the Neo4j Graph Data Science library.
 :modelType: LinkPrediction
 :entity: relationship
 

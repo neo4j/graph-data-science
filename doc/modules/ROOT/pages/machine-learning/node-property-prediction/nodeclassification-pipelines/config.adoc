@@ -1,6 +1,7 @@
 [[nodeclassification-pipelines-config]]
 [.beta]
 = Configuring the pipeline
+:description: This section describes configuration of Node classification pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeClassification
 :entity: node
 :max-trials: 10
