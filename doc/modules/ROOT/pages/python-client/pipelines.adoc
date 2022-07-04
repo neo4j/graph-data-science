@@ -1,7 +1,7 @@
 [[python-client-pipelines]]
 = Machine learning pipelines
 
-The Python client has special support for xref::machine-learning/linkprediction-pipelines/index.adoc[Link prediction pipelines] and xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node classification pipelines].
+The Python client has special support for xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link prediction pipelines] and xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines].
 The GDS pipelines are represented as pipeline objects.
 
 The Python method calls to _create_ the pipelines match their Cypher counterparts exactly.
@@ -14,7 +14,7 @@ include::partial$/pythonclient/python-client-gds-object.adoc[]
 
 == Node classification
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[node classification pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
@@ -71,7 +71,7 @@ There are two main differences when comparing the methods above that map to proc
 
 Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NCModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[node classification Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-nodeclassification-pipe-example]]
@@ -161,7 +161,7 @@ assert len(results) == H.node_count()
 
 == Link prediction
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/linkprediction-pipelines/index.adoc[link prediction pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
@@ -219,7 +219,7 @@ There are two main differences when comparing the methods above that map to proc
 
 Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `LPModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/linkprediction-pipelines/index.adoc[link prediction Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-linkprediction-pipe-example]]
@@ -306,7 +306,7 @@ assert result["relationshipsWritten"] == 5 * 2  # Undirected relationships
 
 == Node regression
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[node regression pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
@@ -360,7 +360,7 @@ There are two main differences when comparing the methods above that map to proc
 
 Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NRModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[node regression Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-noderegression-pipe-example]]
