@@ -1,4 +1,5 @@
 [[algorithms-link-prediction-pipelines-predict]]
+[.beta]
 = Applying a trained model for prediction
 :modelType: LinkPrediction
 :entity: relationship

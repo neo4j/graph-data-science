@@ -1,4 +1,5 @@
 [[nodeclassification-pipelines-predict]]
+[.beta]
 = Applying a trained model for prediction
 :modelType: NodeClassification
 :entity: node

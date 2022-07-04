@@ -1,4 +1,5 @@
 [[noderegression-pipelines-train]]
+[.alpha]
 = Training the pipeline
 
 The train mode, `gds.alpha.pipeline.nodeRegression.train`, is responsible for data splitting, feature extraction, model selection, training and storing a model for future use.

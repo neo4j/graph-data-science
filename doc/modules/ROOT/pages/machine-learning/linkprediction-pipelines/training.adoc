@@ -1,4 +1,5 @@
 [[linkprediction-pipelines-train]]
+[.beta]
 = Training the pipeline
 
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
