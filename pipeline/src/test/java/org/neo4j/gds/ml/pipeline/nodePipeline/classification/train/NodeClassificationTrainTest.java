@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
+import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
@@ -191,6 +193,8 @@ class NodeClassificationTrainTest {
             .build();
         pipeline.addTrainerConfig(expectedWinner);
 
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.DEFAULT);
+
         // Should NOT be the winning model, so give bad hyperparams.
         pipeline.addTrainerConfig(
             LogisticRegressionTrainConfigImpl.builder().penalty(1 * 2.0 / 3.0 * 0.5).maxEpochs(1).build()
@@ -248,6 +252,46 @@ class NodeClassificationTrainTest {
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
         assertThat(actualWinnerParams.toMap()).isEqualTo(expectedWinner.toMap());
+    }
+
+    @Test
+    void trainOnlWithMLP() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.setSplitConfig(SPLIT_CONFIG);
+        pipeline.addNodePropertyStep(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(nodeGraphStore, "someBogusProperty"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("a"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("b"));
+        pipeline.addFeatureStep(NodeFeatureStep.of("someBogusProperty"));
+
+        pipeline.addTrainerConfig(MLPClassifierTrainConfig.DEFAULT);
+
+        var metricSpecification = ClassificationMetricSpecification.Parser.parse("accuracy");
+        var config = createConfig("model", GRAPH_NAME, metricSpecification, 1L);
+
+        var ncTrain = createWithExecutionContext(
+            nodeGraphStore,
+            pipeline,
+            config,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var result = ncTrain.run();
+
+        assertThat(result.classifier().data().featureDimension()).isEqualTo(3);
+
+        var metric = metricSpecification
+            .createMetrics(result.classIdMap(), result.classCounts())
+            .findFirst()
+            .orElseThrow();
+
+        var validationStats = result.trainingStatistics().getValidationStats(metric);
+
+        assertThat(validationStats).hasSize(1);
+
+        assertThat(validationStats.get(0).avg()).isCloseTo(0.7, Offset.offset(0.01));
+
+        var actualWinnerParams = result.trainingStatistics().bestParameters();
+        assertThat(actualWinnerParams.toMap()).isEqualTo(MLPClassifierTrainConfig.DEFAULT.toMap());
     }
 
     @ParameterizedTest
