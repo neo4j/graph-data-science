@@ -21,19 +21,16 @@ package org.neo4j.gds.ml.pipeline;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -41,19 +38,16 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 @GdlExtension
 class PipelineExecutorTest {
@@ -76,7 +70,7 @@ class PipelineExecutorTest {
         );
 
         assertThatNoException().isThrownBy(pipelineExecutor::compute);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
     }
 
     @Test
@@ -89,7 +83,7 @@ class PipelineExecutorTest {
         );
 
         assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestFailure.class);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
     }
 
     @Test
@@ -126,9 +120,9 @@ class PipelineExecutorTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(PipelineExecutionTestExecuteNodeStepFailure.class);
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, AddBogusNodePropertyStep.PROPERTY)).isFalse();
-        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, FailingNodePropertyStep.PROPERTY)).isFalse();
+        assertThatThrownBy(pipelineExecutor::compute).isExactlyInstanceOf(ExecutableNodePropertyStepTestUtil.PipelineExecutionTestExecuteNodeStepFailure.class);
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, "someBogusProperty")).isFalse();
+        assertThat(graphStore.hasNodeProperty(NODE_LABEL_N, ExecutableNodePropertyStepTestUtil.FailingNodePropertyStep.PROPERTY)).isFalse();
     }
 
     @Test
@@ -178,14 +172,17 @@ class PipelineExecutorTest {
     private Task taskTree(TrainingPipeline<?> pipeline) {
         return Tasks.task(
             "FailingPipelineExecutor",
-            PipelineExecutor.nodePropertyStepTasks(pipeline.nodePropertySteps(), 10)
+            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), 10)
         );
     }
 
     private static final class PipelineExecutionTestFailure extends RuntimeException {}
-    private static final class PipelineExecutionTestExecuteNodeStepFailure extends RuntimeException {}
 
-    private static class PipelineExecutorTestConfig implements AlgoBaseConfig {
+    private static class PipelineExecutorTestConfig implements AlgoBaseConfig, GraphNameConfig {
+        @Override
+        public String graphName() {
+            return "test";
+        }
 
         @Override
         public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
@@ -193,11 +190,12 @@ class PipelineExecutorTest {
         }
     }
 
-    private static class SucceedingPipelineExecutor extends PipelineExecutor<AlgoBaseConfig, Pipeline<? extends FeatureStep>, String> {
+    private static class SucceedingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig>
+        extends PipelineExecutor<CONFIG, Pipeline<? extends FeatureStep>, String> {
         SucceedingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
-            AlgoBaseConfig config,
+            CONFIG config,
             ProgressTracker progressTracker
         ) {
             super(
@@ -222,11 +220,11 @@ class PipelineExecutorTest {
 
     }
 
-    private class FailingPipelineExecutor extends SucceedingPipelineExecutor {
+    private static class FailingPipelineExecutor<CONFIG extends AlgoBaseConfig & GraphNameConfig> extends PipelineExecutorTest.SucceedingPipelineExecutor<CONFIG> {
         FailingPipelineExecutor(
             Pipeline<? extends FeatureStep> pipelineStub,
             GraphStore graphStore,
-            AlgoBaseConfig config,
+            CONFIG config,
             ProgressTracker progressTracker
         ) {
             super(
@@ -239,78 +237,7 @@ class PipelineExecutorTest {
 
         @Override
         protected String execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-            throw new PipelineExecutionTestFailure();
-        }
-    }
-
-    private class AddBogusNodePropertyStep implements ExecutableNodePropertyStep {
-        static final String PROPERTY = "someBogusProperty";
-
-        @Override
-        public String procName() {
-            return "AddBogusNodePropertyStep";
-        }
-
-        @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
-            throw new MemoryEstimationNotImplementedException();
-        }
-
-        @Override
-        public void execute(
-            ExecutionContext executionContext,
-            String graphName,
-            Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
-        ) {
-            graphStore.addNodeProperty(
-                Set.of(NODE_LABEL_N),
-                PROPERTY,
-                new LongTestPropertyValues(nodeId -> nodeId)
-            );
-        }
-
-        @Override
-        public Map<String, Object> config() {
-            return Map.of(MUTATE_PROPERTY_KEY, PROPERTY);
-        }
-
-        @Override
-        public Map<String, Object> toMap() {
-            return Map.of();
-        }
-    }
-
-    private static class FailingNodePropertyStep implements ExecutableNodePropertyStep {
-        static final String PROPERTY = "failingStepProperty";
-        @Override
-        public String procName() {
-            return "FailingNodePropertyStep";
-        }
-
-        @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
-            throw new MemoryEstimationNotImplementedException();
-        }
-
-        @Override
-        public void execute(
-            ExecutionContext executionContext,
-            String graphName,
-            Collection<NodeLabel> nodeLabels,
-            Collection<RelationshipType> relTypes
-        ) {
-            throw new PipelineExecutionTestExecuteNodeStepFailure();
-        }
-
-        @Override
-        public Map<String, Object> config() {
-            return Map.of(MUTATE_PROPERTY_KEY, PROPERTY);
-        }
-
-        @Override
-        public Map<String, Object> toMap() {
-            return Map.of();
+            throw new PipelineExecutorTest.PipelineExecutionTestFailure();
         }
     }
 
@@ -320,7 +247,7 @@ class PipelineExecutorTest {
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
-            return List.of(new AddBogusNodePropertyStep());
+            return List.of(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "someBogusProperty"));
         }
 
         @Override
@@ -354,7 +281,7 @@ class PipelineExecutorTest {
 
         @Override
         public List<ExecutableNodePropertyStep> nodePropertySteps() {
-            return List.of(new AddBogusNodePropertyStep(), new FailingNodePropertyStep());
+            return List.of(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(graphStore, "someBogusProperty"), new ExecutableNodePropertyStepTestUtil.FailingNodePropertyStep());
         }
 
         @Override

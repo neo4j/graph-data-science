@@ -70,4 +70,5 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {}
+
 }

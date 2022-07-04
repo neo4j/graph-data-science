@@ -28,6 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.training.TrainingStatistics;
@@ -47,7 +48,7 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
         return Tasks.task(
             "Node Regression Train Pipeline",
             new ArrayList<>() {{
-                add(nodePropertyStepTasks(pipeline.nodePropertySteps(), nodeCount));
+                add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
                 addAll(NodeRegressionTrain.progressTasks(
                     pipeline.splitConfig(),
                     pipeline.numberOfModelSelectionTrials(),
@@ -83,7 +84,7 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
 
     @Override
     protected NodeRegressionTrainPipelineResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
-        PipelineExecutor.validateTrainingParameterSpace(pipeline);
+        pipeline.validateTrainingParameterSpace();
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
         var nodesGraph = graphStore.getGraph(nodeLabels);

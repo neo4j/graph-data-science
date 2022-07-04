@@ -25,22 +25,29 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 
-public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeClassificationTrainPipelineExecutor, NodeClassificationPipelineTrainConfig> {
+public class NodeClassificationTrainPipelineAlgorithmFactory extends
+    GraphStoreAlgorithmFactory<
+        NodeClassificationTrainAlgorithm,
+        NodeClassificationPipelineTrainConfig
+    > {
 
     private final ExecutionContext executionContext;
+    private static final String TASK_NAME = "Node Classification Train Pipeline";
 
     public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
 
     @Override
-    public NodeClassificationTrainPipelineExecutor build(
+    public NodeClassificationTrainAlgorithm build(
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig configuration,
         ProgressTracker progressTracker
@@ -51,14 +58,38 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             NodeClassificationTrainingPipeline.class
         );
 
+        return build(graphStore, configuration, pipeline, progressTracker);
+    }
+
+    public NodeClassificationTrainAlgorithm build(
+        GraphStore graphStore,
+        NodeClassificationPipelineTrainConfig configuration,
+        NodeClassificationTrainingPipeline pipeline,
+        ProgressTracker progressTracker
+    ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
-        return new NodeClassificationTrainPipelineExecutor(
-            pipeline,
-            configuration,
+        var toModelConverter = new NodeClassificationToModelConverter(pipeline, configuration);
+
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
-            configuration.graphName(),
+            configuration,
+            progressTracker
+        );
+
+        return new NodeClassificationTrainAlgorithm(
+            NodeClassificationTrain.create(
+                graphStore,
+                pipeline,
+                configuration,
+                nodePropertyStepExecutor,
+                progressTracker
+            ),
+            pipeline,
+            toModelConverter,
+            graphStore,
+            configuration,
             progressTracker
         );
     }
@@ -71,8 +102,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
             NodeClassificationTrainingPipeline.class
         );
 
-        return MemoryEstimations.builder(NodeClassificationTrainPipelineExecutor.class.getSimpleName())
-            .add("Pipeline executor", NodeClassificationTrainPipelineExecutor.estimate(
+        return MemoryEstimations.builder(NodeClassificationTrain.class.getSimpleName())
+            .add(NodeClassificationTrain.estimate(
                 pipeline,
                 configuration,
                 executionContext.modelCatalog()
@@ -82,15 +113,24 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends GraphStoreA
 
     @Override
     public String taskName() {
-        return "Node Classification Train Pipeline";
+        return TASK_NAME;
     }
 
     @Override
     public Task progressTask(GraphStore graphStore, NodeClassificationPipelineTrainConfig config) {
-        return NodeClassificationTrainPipelineExecutor.progressTask(
-            taskName(),
-            PipelineCatalog .getTyped(config.username(), config.pipeline(), NodeClassificationTrainingPipeline.class),
-            graphStore.nodeCount()
+
+        var pipeline = PipelineCatalog.getTyped(
+            config.username(),
+            config.pipeline(),
+            NodeClassificationTrainingPipeline.class
+        );
+        return progressTask(graphStore, pipeline);
+    }
+
+    public static Task progressTask(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
+        return Tasks.task(
+            TASK_NAME,
+            NodeClassificationTrain.progressTasks(pipeline, graphStore.nodeCount())
         );
     }
 }

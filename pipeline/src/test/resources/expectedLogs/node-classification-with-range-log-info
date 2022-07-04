@@ -1,6 +1,8 @@
 MY DUMMY TASK :: Start
 MY DUMMY TASK :: Train set size is 10
 MY DUMMY TASK :: Test set size is 5
+MY DUMMY TASK :: Execute node property steps :: Start
+MY DUMMY TASK :: Execute node property steps :: Finished
 MY DUMMY TASK :: Create validation folds :: Start
 MY DUMMY TASK :: Create validation folds 100%
 MY DUMMY TASK :: Create validation folds :: Finished

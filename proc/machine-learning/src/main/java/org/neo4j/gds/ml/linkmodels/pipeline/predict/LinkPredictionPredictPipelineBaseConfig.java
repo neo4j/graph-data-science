@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.MissingParameterExceptions;
 import org.neo4j.gds.model.ModelConfig;
@@ -41,12 +42,13 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionPredictPipelineBaseConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig, ModelConfig {
+public interface LinkPredictionPredictPipelineBaseConfig extends
+    AlgoBaseConfig,
+    GraphNameConfig,
+    SingleThreadedRandomSeedConfig,
+    ModelConfig {
 
     double DEFAULT_THRESHOLD = 0.0;
-
-    //TODO make this a parameter
-    String graphName();
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)

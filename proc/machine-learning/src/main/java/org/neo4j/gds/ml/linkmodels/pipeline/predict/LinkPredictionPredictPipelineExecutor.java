@@ -34,6 +34,7 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
@@ -100,7 +101,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         return Tasks.task(
             taskName,
-            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.relationshipCount()),
+            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.relationshipCount()),
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
@@ -116,7 +117,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         LinkPredictionPredictPipelineBaseConfig configuration,
         Classifier.ClassifierData classifierData
     ) {
-        MemoryEstimation maxOverNodePropertySteps = PipelineExecutor.estimateNodePropertySteps(
+        MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),

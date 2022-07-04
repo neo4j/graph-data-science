@@ -17,16 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.node.regression.predict;
+package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.GraphNameConfig;
-import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
-@Configuration
-public interface NodeRegressionPredictPipelineBaseConfig extends
-    AlgoBaseConfig,
-    GraphNameConfig,
-    ModelConfig {
+public interface PipelineTrainer<RESULT> {
+    void setTerminationFlag(TerminationFlag terminationFlag);
+    RESULT run();
 }

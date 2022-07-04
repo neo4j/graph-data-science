@@ -38,6 +38,7 @@ import org.neo4j.gds.ml.models.ClassifierFactory;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.nodeClassification.NodeClassificationPredict;
 import org.neo4j.gds.ml.pipeline.ImmutableGraphFilter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
@@ -77,7 +78,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     public static Task progressTask(String taskName, NodePropertyPredictPipeline pipeline, GraphStore graphStore) {
         return Tasks.task(
             taskName,
-            nodePropertyStepTasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
+            NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.nodeCount()),
             NodeClassificationPredict.progressTask(graphStore.nodeCount())
         );
     }
@@ -91,7 +92,7 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
         var classCount = model.customInfo().classes().size();
         var featureCount = model.data().featureDimension();
 
-        MemoryEstimation nodePropertyStepEstimation = PipelineExecutor.estimateNodePropertySteps(
+        MemoryEstimation nodePropertyStepEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),

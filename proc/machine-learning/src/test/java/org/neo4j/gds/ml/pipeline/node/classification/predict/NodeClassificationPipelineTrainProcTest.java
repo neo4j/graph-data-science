@@ -53,6 +53,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.Matchers.aMapWithSize;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 
@@ -122,6 +123,43 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
     @AfterEach
     void tearDown() {
         PipelineCatalog.removeAll();
+    }
+
+    @Test
+    void failsOnInvalidTargetProperty() {
+        var pipe = Map.<String, Object>of("pipeline", PIPELINE_NAME);
+
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.create($pipeline)",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.selectFeatures($pipeline, ['array', 'scalar'])",
+            pipe
+        );
+        runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.addLogisticRegression($pipeline, {penalty: 1000, maxEpochs: 1})",
+            pipe
+        );
+
+        var params = new HashMap<>(pipe);
+        params.put("graphName", GRAPH_NAME);
+        params.put("modelName", MODEL_NAME);
+
+        assertThatThrownBy(() -> runQuery(
+            "CALL gds.beta.pipeline.nodeClassification.train(" +
+            "   $graphName, {" +
+            "       pipeline: $pipeline," +
+            "       modelName: $modelName," +
+            "       targetProperty: 'INVALID_PROPERTY'," +
+            "       metrics: ['F1(class=1)', 'OUT_OF_BAG_ERROR']," +
+            "       randomSeed: 1" +
+            "})",
+            params
+        ))
+            .getRootCause()
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
     }
 
     @Test

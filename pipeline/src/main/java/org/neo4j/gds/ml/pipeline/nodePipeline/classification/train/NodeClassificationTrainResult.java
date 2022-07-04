@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.LongMultiSet;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.training.TrainingStatistics;
@@ -32,4 +33,10 @@ public interface NodeClassificationTrainResult {
     LocalIdMap classIdMap();
 
     LongMultiSet classCounts();
+
+    @ValueClass
+    interface NodeClassificationModelResult {
+        Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model();
+        TrainingStatistics trainingStatistics();
+    }
 }

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -36,11 +37,9 @@ import java.util.stream.Collectors;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
+public interface NodeClassificationPipelineTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig, TargetNodePropertyConfig {
 
     long serialVersionUID = 0x42L;
-
-    String graphName();
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification.Parser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification#specificationsToString")

@@ -26,25 +26,18 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.GraphStoreValidation;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
 public abstract class PipelineExecutor<
-    PIPELINE_CONFIG extends AlgoBaseConfig,
+    PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
     RESULT
     > extends Algorithm<RESULT> {
@@ -83,40 +76,6 @@ public abstract class PipelineExecutor<
             .filterRelationshipTypes(Set.copyOf(config.internalRelationshipTypes(graphStore)));
     }
 
-    public static MemoryEstimation estimateNodePropertySteps(
-        ModelCatalog modelCatalog,
-        List<ExecutableNodePropertyStep> nodePropertySteps,
-        List<String> nodeLabels,
-        List<String> relationshipTypes
-    ) {
-        var nodePropertyStepEstimations = nodePropertySteps
-            .stream()
-            .map(step -> step.estimate(modelCatalog, nodeLabels, relationshipTypes))
-            .collect(Collectors.toList());
-
-        // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
-        // Also, theoretically we clean the feature dataset after the node property steps have run, but we never account for this
-        // in the memory estimation.
-        return MemoryEstimations.maxEstimation("NodeProperty Steps", nodePropertyStepEstimations);
-    }
-
-    protected static Task nodePropertyStepTasks(List<ExecutableNodePropertyStep> nodePropertySteps, long featureInputSize) {
-        long volumeEstimation = 10 * featureInputSize;
-        return Tasks.task(
-            "Execute node property steps",
-            nodePropertySteps.stream()
-                .map(ExecutableNodePropertyStep::rootTaskName)
-                .map(taskName -> Tasks.leaf(taskName, volumeEstimation))
-                .collect(Collectors.toList())
-        );
-    }
-
-    public static void validateTrainingParameterSpace(TrainingPipeline pipeline) {
-        if (pipeline.numberOfModelSelectionTrials() == 0) {
-            throw new IllegalArgumentException("Need at least one model candidate for training.");
-        }
-    }
-
     public abstract Map<DatasetSplits, GraphFilter> splitDataset();
 
     protected abstract RESULT execute(Map<DatasetSplits, GraphFilter> dataSplits);
@@ -128,13 +87,17 @@ public abstract class PipelineExecutor<
         pipeline.validateBeforeExecution(graphStore, config);
 
         var dataSplits = splitDataset();
+        var graphFilter = dataSplits.get(DatasetSplits.FEATURE_INPUT);
+        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
+            executionContext,
+            graphStore,
+            config,
+            graphFilter.relationshipTypes(),
+            progressTracker
+        );
         try {
-            progressTracker.beginSubTask("Execute node property steps");
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
-            executeNodePropertySteps(dataSplits.get(DatasetSplits.FEATURE_INPUT));
-            progressTracker.endSubTask("Execute node property steps");
-
-            validate(graphStore, config);
+            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
 
             var result = execute(dataSplits);
             progressTracker.endSubTask();
@@ -144,22 +107,9 @@ public abstract class PipelineExecutor<
         }
     }
 
-    protected void validate(GraphStore graphStore, PIPELINE_CONFIG config) {
-        this.pipeline.validateFeatureProperties(graphStore, config);
-        GraphStoreValidation.validate(graphStore, config);
-    }
-
     @Override
     public void release() {
 
-    }
-
-    private void executeNodePropertySteps(GraphFilter graphFilter) {
-        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
-            progressTracker.beginSubTask();
-            step.execute(executionContext, graphName, graphFilter.nodeLabels(), graphFilter.relationshipTypes());
-            progressTracker.endSubTask();
-        }
     }
 
     protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {

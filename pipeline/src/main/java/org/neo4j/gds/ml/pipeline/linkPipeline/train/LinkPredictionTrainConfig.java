@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.LinkMetric;
@@ -33,9 +34,7 @@ import java.util.stream.Collectors;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, RandomSeedConfig {
-
-    String graphName();
+public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConfig, ModelConfig, RandomSeedConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, minInclusive = false)
