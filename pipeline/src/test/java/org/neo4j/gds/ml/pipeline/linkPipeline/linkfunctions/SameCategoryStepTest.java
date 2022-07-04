@@ -29,19 +29,20 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class SameCategoryStepTest {
 
     @Test
     void runSteps() {
         var graph = GdlFactory.of(
-            "(a1 {l: 2, d: 42.42, da: [0.0, 1.5]})-->(a2 {l: 2L, d: 42.42, da: [0.5, 1.5]})" +
-            "(a3 {l: 10, d: 42.42, da: [4.0, 1.5]})-->(a4 {l: 2L, d: 1337.42, da: [4.0, 1.5]})"
+            "(a1 {l: 2, d: 42.42})-->(a2 {l: 2L, d: 1337.42})" +
+            "(a3 {l: 10, d: 42.42})-->(a4 {l: 2L, d: 42.42})"
         ).build().getUnion();
 
         var step = LinkFeatureStepFactory.create(
             "SAME_CATEGORY",
-            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("l", "d", "da")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("l", "d")).build()
         );
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
@@ -51,8 +52,23 @@ class SameCategoryStepTest {
             TerminationFlag.RUNNING_TRUE
         );
 
-        assertThat(linkFeatures.get(0)).containsExactly(1, 1, 0);
-        assertThat(linkFeatures.get(1)).containsExactly(0, 0, 1);
+        assertThat(linkFeatures.get(0)).containsExactly(1, 0);
+        assertThat(linkFeatures.get(1)).containsExactly(0, 1);
+    }
+
+    @Test
+    void failOnArrayProperties() {
+        var graph = GdlFactory.of(
+            "(a1 {l: 2, da: [0.0, 1.5]})-->(a2 {l: 2L, da: [0.5, 1.5]})"
+        ).build().getUnion();
+
+        var step = LinkFeatureStepFactory.create(
+            "SAME_CATEGORY",
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("l", "da")).build()
+        );
+
+        assertThatThrownBy(() -> step.linkFeatureAppender(graph))
+            .hasMessageContaining("SAME_CATEGORY only supports combining numeric properties, but got node property `da` of type FLOAT_ARRAY.");
     }
 
 }

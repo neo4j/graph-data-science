@@ -29,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class SameCategoryStep implements LinkFeatureStep {
 
 
@@ -78,65 +80,13 @@ public class SameCategoryStep implements LinkFeatureStep {
     private LongLongPredicate sameCategoryPredicate(Graph graph, String nodeProperty) {
         var propertyValues = graph.nodeProperties(nodeProperty);
 
-
         switch (propertyValues.valueType()) {
             case LONG:
                 return (source, target) -> propertyValues.longValue(source) == propertyValues.longValue(target);
             case DOUBLE:
                 return (source, target) -> propertyValues.doubleValue(source) == propertyValues.doubleValue(target);
-            case DOUBLE_ARRAY:
-                return (source, target) -> {
-                    var sourceArray = propertyValues.doubleArrayValue(source);
-                    var targetArray = propertyValues.doubleArrayValue(target);
-
-                    boolean isSame = false;
-                    if (sourceArray.length == targetArray.length) {
-                        isSame = true;
-                        for (int i = 0; i < sourceArray.length; i++) {
-                            if (sourceArray[i] != targetArray[i]) {
-                                isSame = false;
-                                break;
-                            }
-                        }
-                    }
-                    return isSame;
-                };
-            case FLOAT_ARRAY:
-                return (source, target) -> {
-                    var sourceArray = propertyValues.floatArrayValue(source);
-                    var targetArray = propertyValues.floatArrayValue(target);
-
-                    boolean isSame = false;
-                    if (sourceArray.length == targetArray.length) {
-                        isSame = true;
-                        for (int i = 0; i < sourceArray.length; i++) {
-                            if (sourceArray[i] != targetArray[i]) {
-                                isSame = false;
-                                break;
-                            }
-                        }
-                    }
-                    return isSame;
-                };
-            case LONG_ARRAY:
-                return (source, target) -> {
-                    var sourceArray = propertyValues.longArrayValue(source);
-                    var targetArray = propertyValues.longArrayValue(target);
-
-                    boolean isSame = false;
-                    if (sourceArray.length == targetArray.length) {
-                        isSame = true;
-                        for (int i = 0; i < sourceArray.length; i++) {
-                            if (sourceArray[i] != targetArray[i]) {
-                                isSame = false;
-                                break;
-                            }
-                        }
-                    }
-                    return isSame;
-                };
             default:
-                throw new IllegalStateException();
+                throw new IllegalArgumentException(formatWithLocale("%s only supports combining numeric properties, but got node property `%s` of type %s.", name(), nodeProperty, propertyValues.valueType()));
         }
     }
 }
