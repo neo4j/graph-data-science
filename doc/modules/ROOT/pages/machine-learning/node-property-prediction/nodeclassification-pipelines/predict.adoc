@@ -1,6 +1,7 @@
 [[nodeclassification-pipelines-predict]]
 [.beta]
 = Applying a trained model for prediction
+:description: This section describes prediction using Node classification pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeClassification
 :entity: node
 :result: predicted property

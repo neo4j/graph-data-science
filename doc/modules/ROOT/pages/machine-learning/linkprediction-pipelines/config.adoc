@@ -1,6 +1,7 @@
 [[linkprediction-configure]]
 [.beta]
 = Configuring the pipeline
+:description: This section describes configuration of Link prediction pipelines in the Neo4j Graph Data Science library.
 :modelType: LinkPrediction
 :entity: relationship
 :max-trials: 10
