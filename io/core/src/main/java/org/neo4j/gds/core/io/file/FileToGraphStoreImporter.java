@@ -138,7 +138,7 @@ public abstract class FileToGraphStoreImporter {
         }
 
         var task = Tasks.task(
-            "Csv import",
+            "Graph store import",
             importTasks
         );
 

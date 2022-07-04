@@ -26,6 +26,7 @@ import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
 
@@ -47,10 +48,11 @@ public final class GraphStoreExporterUtil {
         Path path,
         GraphStoreToFileExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
+        TaskRegistryFactory taskRegistryFactory,
         Log log
     ) {
         try {
-            var exporter = GraphStoreToCsvExporter.create(graphStore, config, path, neoNodeProperties);
+            var exporter = GraphStoreToCsvExporter.create(graphStore, config, path, neoNodeProperties, taskRegistryFactory, log);
 
             var start = System.nanoTime();
             var exportedProperties = exporter.run();

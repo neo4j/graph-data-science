@@ -137,6 +137,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, exportConfig),
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
+            taskRegistryFactory,
             log
         );
 
