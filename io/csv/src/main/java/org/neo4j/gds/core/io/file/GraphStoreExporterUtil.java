@@ -53,13 +53,13 @@ public final class GraphStoreExporterUtil {
             var exporter = GraphStoreToCsvExporter.create(graphStore, config, path, neoNodeProperties);
 
             var start = System.nanoTime();
-            var importedProperties = exporter.run();
+            var exportedProperties = exporter.run();
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
             log.info("Export completed for '%s' in %s ms", config.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
-                importedProperties,
+                exportedProperties,
                 tookMillis
             );
         } catch (RuntimeException e) {
@@ -109,7 +109,7 @@ public final class GraphStoreExporterUtil {
 
     @ValueClass
     public interface ExportToCsvResult {
-        GraphStoreExporter.ImportedProperties importedProperties();
+        GraphStoreExporter.ExportedProperties importedProperties();
 
         long tookMillis();
     }
