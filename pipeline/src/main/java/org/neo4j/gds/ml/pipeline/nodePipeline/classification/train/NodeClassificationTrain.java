@@ -84,7 +84,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig trainConfig;
     private final GraphStore graphStore;
-    private final long nodeCount;
     private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
     private final IdMap nodeIdMap;
@@ -271,7 +270,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         return new NodeClassificationTrain(
             pipeline,
             config,
-            graph.nodeCount(),
             graphStore,
             labels,
             classIdMap,
@@ -287,7 +285,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private NodeClassificationTrain(
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        long nodeCount,
         GraphStore graphStore,
         HugeIntArray labels,
         LocalIdMap classIdMap,
@@ -300,7 +297,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     ) {
         this.graphStore = graphStore;
         this.pipeline = pipeline;
-        this.nodeCount = nodeCount;
         this.nodeIdMap = nodeIdMap;
         this.classificationMetrics = classificationMetrics;
         this.nodePropertyStepExecutor = nodePropertyStepExecutor;
@@ -323,7 +319,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
             trainConfig.concurrency(),
-            nodeCount,
+            nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,
             nodeIdMap::toMappedNodeId
