@@ -36,8 +36,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
-
 public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
     private final ExecutionContext executionContext;
@@ -90,24 +88,18 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         );
     }
 
-    public void executeNodePropertySteps(Pipeline<?> pipeline) {
+    public void executeNodePropertySteps(List<ExecutableNodePropertyStep> steps) {
         progressTracker.beginSubTask("Execute node property steps");
-        for (ExecutableNodePropertyStep step : pipeline.nodePropertySteps()) {
+        for (ExecutableNodePropertyStep step : steps) {
             progressTracker.beginSubTask();
             step.execute(executionContext, config.graphName(), nodeLabels, relTypes);
             progressTracker.endSubTask();
         }
-        pipeline.validateFeatureProperties(graphStore, config);
         progressTracker.endSubTask("Execute node property steps");
     }
 
-    public void cleanUpGraphStore(TrainingPipeline<?> pipeline) {
-        pipeline.nodePropertySteps().forEach(step -> {
-            var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
-            if (intermediateProperty instanceof String) {
-                graphStore.removeNodeProperty(((String) intermediateProperty));
-            }
-        });
+    public void cleanupIntermediateProperties(List<ExecutableNodePropertyStep> steps) {
+        steps.stream().map(ExecutableNodePropertyStep::nodeProperty).forEach(graphStore::removeNodeProperty);
     }
 
     public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(

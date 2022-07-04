@@ -355,7 +355,9 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     //TODO: extract to component for sharing with NodeRegression + add unit test
     private Features makeFeatures(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
         try {
-            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
+            nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
+            pipeline.validateFeatureProperties(graphStore, trainConfig);
+
             var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
             if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
                 return FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
@@ -364,7 +366,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
                 return FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
             }
         } finally {
-            nodePropertyStepExecutor.cleanUpGraphStore(pipeline);
+            nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
         }
     }
 

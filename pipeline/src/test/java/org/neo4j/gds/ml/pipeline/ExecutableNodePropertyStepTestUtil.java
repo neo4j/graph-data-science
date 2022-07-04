@@ -55,6 +55,11 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
+        public String nodeProperty() {
+            return propertyName;
+        }
+
+        @Override
         public void execute(
             ExecutionContext executionContext,
             String graphName,
@@ -89,6 +94,11 @@ public class ExecutableNodePropertyStepTestUtil {
         @Override
         public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
+        public String nodeProperty() {
+            return PROPERTY;
         }
 
         @Override
