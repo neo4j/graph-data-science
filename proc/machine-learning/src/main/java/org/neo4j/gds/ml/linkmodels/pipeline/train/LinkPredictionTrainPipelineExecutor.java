@@ -211,9 +211,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
         removeDataSplitRelationships(datasets);
-        super.cleanUpGraphStore(datasets);
+        super.additionalGraphStoreCleanup(datasets);
     }
 
     @ValueClass

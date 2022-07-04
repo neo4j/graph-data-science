@@ -103,7 +103,8 @@ public abstract class PipelineExecutor<
             progressTracker.endSubTask();
             return result;
         } finally {
-            cleanUpGraphStore(dataSplits);
+            nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
+            additionalGraphStoreCleanup(dataSplits);
         }
     }
 
@@ -112,8 +113,7 @@ public abstract class PipelineExecutor<
 
     }
 
-    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
-        pipeline.nodePropertySteps().forEach(step -> graphStore.removeNodeProperty(step.nodeProperty()));
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
     }
 
     @ValueClass
