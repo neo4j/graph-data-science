@@ -27,8 +27,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.ml.MLTrainResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionPipelineTrainConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineAlgorithmFactory;
-import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainingPipeline;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
@@ -40,11 +40,11 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.TRAIN;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
-import static org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainPipelineExecutor.NodeRegressionTrainPipelineResult;
+import static org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
 
 @GdsCallable(name = "gds.alpha.pipeline.nodeRegression.train", description = "Trains a node regression model based on a pipeline", executionMode = TRAIN)
 public class NodeRegressionPipelineTrainProc extends TrainProc<
-    NodeRegressionTrainPipelineExecutor,
+    NodeRegressionTrainAlgorithm,
     NodeRegressionTrainPipelineResult,
     NodeRegressionPipelineTrainConfig,
     NodeRegressionPipelineTrainProc.NRTrainResult
@@ -66,7 +66,7 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    public GraphStoreAlgorithmFactory<NodeRegressionTrainPipelineExecutor, NodeRegressionPipelineTrainConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<NodeRegressionTrainAlgorithm, NodeRegressionPipelineTrainConfig> algorithmFactory() {
         return new NodeRegressionTrainPipelineAlgorithmFactory(executionContext());
     }
 
@@ -76,7 +76,7 @@ public class NodeRegressionPipelineTrainProc extends TrainProc<
     }
 
     @Override
-    protected NRTrainResult constructProcResult(ComputationResult<NodeRegressionTrainPipelineExecutor, NodeRegressionTrainPipelineResult, NodeRegressionPipelineTrainConfig> computationResult) {
+    protected NRTrainResult constructProcResult(ComputationResult<NodeRegressionTrainAlgorithm, NodeRegressionTrainPipelineResult, NodeRegressionPipelineTrainConfig> computationResult) {
         return new NRTrainResult(computationResult.result(), computationResult.computeMillis());
     }
 

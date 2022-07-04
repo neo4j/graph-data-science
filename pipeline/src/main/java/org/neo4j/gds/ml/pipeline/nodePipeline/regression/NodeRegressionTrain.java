@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -33,15 +33,15 @@ import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
-import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.RegressionTrainerFactory;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.models.TrainerConfig;
-import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
+import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
@@ -54,24 +54,26 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class NodeRegressionTrain implements PipelineTrainer<NodeRegressionTrainResult> {
 
-    private final Features features;
     private final HugeDoubleArray targets;
     private final IdMap nodeIdMap;
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig trainConfig;
+    private final NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer;
     private final ProgressTracker progressTracker;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
     public static List<Task> progressTasks(
-        NodePropertyPredictionSplitConfig splitConfig,
-        int numberOfModelSelectionTrials,
+        NodePropertyTrainingPipeline pipeline,
         long nodeCount
     ) {
+        var splitConfig = pipeline.splitConfig();
         long trainSetSize = splitConfig.trainSetSize(nodeCount);
         long testSetSize = splitConfig.testSetSize(nodeCount);
         int validationFolds = splitConfig.validationFolds();
 
-        var tasks = new ArrayList<>(CrossValidation.progressTasks(validationFolds, numberOfModelSelectionTrials, trainSetSize));
+        var tasks = new ArrayList<Task>();
+        tasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
+        tasks.addAll(CrossValidation.progressTasks(validationFolds, pipeline.numberOfModelSelectionTrials(), trainSetSize));
         tasks.add(ClassifierTrainer.progressTask("Train best model", 5 * trainSetSize));
         tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
@@ -80,28 +82,22 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     }
 
     public static NodeRegressionTrain create(
-        Graph graph,
+        GraphStore graphStore,
         NodeRegressionTrainingPipeline pipeline,
-        NodeRegressionPipelineTrainConfig trainConfig,
+        NodeRegressionPipelineTrainConfig config,
+        NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
-        var targetNodeProperty = graph.nodeProperties(trainConfig.targetProperty());
+        var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
 
         HugeDoubleArray targets = HugeDoubleArray.newArray(graph.nodeCount());
         targets.setAll(targetNodeProperty::doubleValue);
 
-        Features features;
-        if (pipeline.trainingParameterSpace().getOrDefault(TrainingMethod.RandomForestRegression, List.of()).isEmpty()) {
-            features = FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
-        } else {
-            // Random forest uses feature vectors many times each.
-            features = FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
-        }
-
         return new NodeRegressionTrain(
             pipeline,
-            trainConfig,
-            features,
+            config,
+            nodeFeatureProducer,
             targets,
             graph,
             progressTracker
@@ -111,16 +107,16 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private NodeRegressionTrain(
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
-        Features features,
+        NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
         HugeDoubleArray targets,
         IdMap nodeIdMap,
         ProgressTracker progressTracker
     ) {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
+        this.nodeFeatureProducer = nodeFeatureProducer;
         this.nodeIdMap = nodeIdMap;
         this.progressTracker = progressTracker;
-        this.features = features;
         this.targets = targets;
     }
 
@@ -131,10 +127,11 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
     @Override
     public NodeRegressionTrainResult run() {
+        progressTracker.beginSubTask();
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
             trainConfig.concurrency(),
-            features.size(),
+            nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,
             nodeIdMap::toMappedNodeId
@@ -149,18 +146,22 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         List<Metric> metrics = List.copyOf(trainConfig.metrics());
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        findBestModelCandidate(splits.outerSplit().trainSet(), metrics, trainingStatistics);
+        var features = nodeFeatureProducer.makeFeatures(pipeline);
 
-        evaluateBestModel(splits.outerSplit(), trainingStatistics);
+        findBestModelCandidate(splits.outerSplit().trainSet(), metrics, features, trainingStatistics);
 
-        var retrainedModel = retrainBestModel(splits.allTrainingExamples(), trainingStatistics.bestParameters());
+        evaluateBestModel(splits.outerSplit(), features, trainingStatistics);
 
+        var retrainedModel = retrainBestModel(splits.allTrainingExamples(), features, trainingStatistics.bestParameters());
+
+        progressTracker.endSubTask();
         return ImmutableNodeRegressionTrainResult.of(retrainedModel, trainingStatistics);
     }
 
     private void findBestModelCandidate(
         ReadOnlyHugeLongArray trainNodeIds,
         List<Metric> metrics,
+        Features features,
         TrainingStatistics trainingStatistics
     ) {
         var crossValidation = new CrossValidation<>(
@@ -169,8 +170,19 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             metrics,
             pipeline.splitConfig().validationFolds(),
             trainConfig.randomSeed(),
-            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(trainSet, config, messageLogLevel),
-            this::registerMetricScores
+            (trainSet, config, metricsHandler, messageLogLevel) -> trainModel(
+                trainSet,
+                config,
+                features,
+                messageLogLevel
+            ),
+            (evaluationSet, regressor, scoreConsumer) -> registerMetricScores(
+                evaluationSet,
+                regressor,
+                features,
+                scoreConsumer
+            )
+
         );
 
         var modelCandidates = new RandomSearch(
@@ -191,6 +203,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private void registerMetricScores(
         ReadOnlyHugeLongArray evaluationSet,
         Regressor regressor,
+        Features features,
         MetricConsumer scoreConsumer
     ) {
         var localPredictions = HugeDoubleArray.newArray(evaluationSet.size());
@@ -214,28 +227,29 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
     private void evaluateBestModel(
         TrainingExamplesSplit outerSplit,
+        Features features,
         TrainingStatistics trainingStatistics
     ) {
         progressTracker.beginSubTask("Train best model");
-        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), LogLevel.INFO);
+        var bestRegressor = trainModel(outerSplit.trainSet(), trainingStatistics.bestParameters(), features, LogLevel.INFO);
         progressTracker.endSubTask("Train best model");
 
         progressTracker.beginSubTask("Evaluate on test data");
 
-        registerMetricScores(outerSplit.trainSet(), bestRegressor, trainingStatistics::addOuterTrainScore);
+        registerMetricScores(outerSplit.trainSet(), bestRegressor, features, trainingStatistics::addOuterTrainScore);
         var outerTrainMetrics = trainingStatistics.winningModelOuterTrainMetrics();
         progressTracker.logInfo(formatWithLocale("Final model metrics on full train set: %s", outerTrainMetrics));
 
-        registerMetricScores(outerSplit.testSet(), bestRegressor, trainingStatistics::addTestScore);
+        registerMetricScores(outerSplit.testSet(), bestRegressor, features, trainingStatistics::addTestScore);
         var testMetrics = trainingStatistics.winningModelTestMetrics();
         progressTracker.logInfo(formatWithLocale("Final model metrics on test set: %s", testMetrics));
 
         progressTracker.endSubTask("Evaluate on test data");
     }
 
-    private Regressor retrainBestModel(ReadOnlyHugeLongArray trainSet, TrainerConfig bestParameters) {
+    private Regressor retrainBestModel(ReadOnlyHugeLongArray trainSet, Features features, TrainerConfig bestParameters) {
         progressTracker.beginSubTask("Retrain best model");
-        var retrainedRegressor = trainModel(trainSet, bestParameters, LogLevel.INFO);
+        var retrainedRegressor = trainModel(trainSet, bestParameters, features, LogLevel.INFO);
         progressTracker.endSubTask("Retrain best model");
 
         return retrainedRegressor;
@@ -244,6 +258,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private Regressor trainModel(
         ReadOnlyHugeLongArray trainSet,
         TrainerConfig trainerConfig,
+        Features features,
         LogLevel messageLogLevel
     ) {
         var trainer = RegressionTrainerFactory.create(

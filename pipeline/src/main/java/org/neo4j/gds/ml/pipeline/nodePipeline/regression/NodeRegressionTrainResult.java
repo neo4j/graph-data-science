@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.models.Regressor;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
@@ -27,4 +28,10 @@ import org.neo4j.gds.ml.training.TrainingStatistics;
 public interface NodeRegressionTrainResult {
     Regressor regressor();
     TrainingStatistics trainingStatistics();
+
+    @ValueClass
+    interface NodeRegressionTrainPipelineResult {
+        Model<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> model();
+        TrainingStatistics trainingStatistics();
+    }
 }

@@ -23,8 +23,9 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
 
-public class NodeRegressionToModelConverter implements ResultToModelConverter<NodeRegressionTrainPipelineExecutor.NodeRegressionTrainPipelineResult, NodeRegressionTrainResult> {
+public class NodeRegressionToModelConverter implements ResultToModelConverter<NodeRegressionTrainPipelineResult, NodeRegressionTrainResult> {
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig config;
 
@@ -38,7 +39,7 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
     }
 
     @Override
-    public NodeRegressionTrainPipelineExecutor.NodeRegressionTrainPipelineResult toModel(
+    public NodeRegressionTrainPipelineResult toModel(
         NodeRegressionTrainResult trainResult,
         GraphSchema originalSchema
     ) {
