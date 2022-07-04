@@ -64,4 +64,6 @@ public abstract class NodePropertyTrainingPipeline extends TrainingPipeline<Node
             .flatMap(step -> step.inputNodeProperties().stream())
             .collect(Collectors.toList());
     }
+
+    public abstract boolean requireEagerFeatures();
 }
