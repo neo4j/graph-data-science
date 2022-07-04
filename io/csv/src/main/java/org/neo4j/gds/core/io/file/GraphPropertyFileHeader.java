@@ -17,26 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.api.schema.PropertySchema;
+
+import java.util.Map;
 
 @ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+public interface GraphPropertyFileHeader extends FileHeader<Map<String, PropertySchema>, PropertySchema> {
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
+    HeaderProperty propertyMapping();
+
+    @Override
+    default Map<String, PropertySchema> schemaForIdentifier(Map<String, PropertySchema> propertySchema) {
+        var graphPropertySchema = propertySchema.get(propertyMapping().propertyKey());
+        return Map.of(graphPropertySchema.key(), graphPropertySchema);
     }
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+    static GraphPropertyFileHeader of(String headerLine) {
+        return ImmutableGraphPropertyFileHeader.of(HeaderProperty.parse(0, headerLine));
     }
 }

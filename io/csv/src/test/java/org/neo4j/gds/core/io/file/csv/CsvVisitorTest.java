@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file.csv;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.api.schema.PropertySchema;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public abstract class CsvVisitorTest extends CsvTest {
+
+    protected abstract List<String> defaultHeaderColumns();
+
+    protected void assertCsvFiles(Collection<String> expectedFiles) {
+        for (String expectedFile : expectedFiles) {
+            assertThat(tempDir.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
+        }
     }
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+    void assertHeaderFile(String fileName, Map<String, ? extends PropertySchema> properties) {
+       assertHeaderFile(fileName, defaultHeaderColumns(), properties);
     }
 }

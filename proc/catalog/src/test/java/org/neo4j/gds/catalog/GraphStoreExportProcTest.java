@@ -49,7 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.core.utils.io.file.GraphStoreExporterUtil.EXPORT_DIR;
+import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.EXPORT_DIR;
 import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 

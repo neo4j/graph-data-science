@@ -17,26 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.schema;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.Aggregation;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+public interface InputRelationshipSchemaVisitor extends InputSchemaVisitor, RelationshipPropertySchema {
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
-    }
+    boolean relationshipType(RelationshipType relationshipType);
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+    boolean aggregation(Aggregation aggregation);
+
+    abstract class Adapter extends ElementSchemaVisitor implements InputRelationshipSchemaVisitor {
+        @Override
+        public boolean relationshipType(RelationshipType relationshipType) {
+            return true;
+        }
+
+        @Override
+        public boolean aggregation(Aggregation aggregation) {
+            return true;
+        }
     }
 }
