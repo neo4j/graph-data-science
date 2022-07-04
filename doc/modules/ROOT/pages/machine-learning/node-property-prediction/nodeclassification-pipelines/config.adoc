@@ -1,4 +1,5 @@
 [[nodeclassification-pipelines-config]]
+[.beta]
 = Configuring the pipeline
 :modelType: NodeClassification
 :entity: node

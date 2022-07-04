@@ -1,4 +1,5 @@
 [[noderegression-pipelines-predict]]
+[.alpha]
 = Applying a trained model for prediction
 :modelType: NodeRegression
 :entity: node

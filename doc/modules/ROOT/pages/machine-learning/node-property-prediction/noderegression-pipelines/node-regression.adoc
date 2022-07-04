@@ -1,4 +1,5 @@
 [[noderegression-pipelines]]
+[.alpha]
 = Node regression pipelines
 :description: This section describes Node regression pipelines in the Neo4j Graph Data Science library.
 :max-trials: 10

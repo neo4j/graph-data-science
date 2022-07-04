@@ -1,4 +1,5 @@
 [[nodeclassification-pipelines]]
+[.beta]
 = Node classification pipelines
 :description: This section describes Node classification pipelines in the Neo4j Graph Data Science library.
 :entity: node

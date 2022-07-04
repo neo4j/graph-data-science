@@ -1,4 +1,5 @@
 [[linkprediction-pipelines]]
+[.beta]
 = Link prediction pipelines
 :description: This section describes Link prediction pipelines in the Neo4j Graph Data Science library.
 :entity: relationship
