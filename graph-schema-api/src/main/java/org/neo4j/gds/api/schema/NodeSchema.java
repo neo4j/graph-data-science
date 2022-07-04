@@ -52,7 +52,14 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
     }
 
     static NodeSchema of(Map<NodeLabel, Map<String, PropertySchema>> properties) {
+        if (properties.isEmpty()) {
+            return empty();
+        }
         return NodeSchema.builder().properties(properties).build();
+    }
+
+    static NodeSchema empty() {
+        return builder().build();
     }
 
     static Builder builder() {
@@ -93,6 +100,14 @@ public interface NodeSchema extends ElementSchema<NodeSchema, NodeLabel, Propert
                 propertyMappings.remove(propertyName);
             });
             return this;
+        }
+
+        @Override
+        public NodeSchema build() {
+            if (this.properties.isEmpty()) {
+                addLabel(NodeLabel.ALL_NODES);
+            }
+            return super.build();
         }
     }
 }
