@@ -26,7 +26,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -107,11 +106,10 @@ class NodeRegressionTrainTest {
             graph,
             pipeline,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
-        NodeRegressionTrainResult result = nrTrain.compute();
+        NodeRegressionTrainResult result = nrTrain.run();
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(LinearRegressor.class);
@@ -151,11 +149,10 @@ class NodeRegressionTrainTest {
             graph,
             pipeline,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
-        NodeRegressionTrainResult result = nrTrain.compute();
+        NodeRegressionTrainResult result = nrTrain.run();
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(RandomForestRegressor.class);
@@ -197,9 +194,8 @@ class NodeRegressionTrainTest {
             graph,
             pipeline,
             trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        ).compute();
+            ProgressTracker.NULL_TRACKER
+        ).run();
 
         var trainingStatistics = result.trainingStatistics();
 
@@ -249,7 +245,7 @@ class NodeRegressionTrainTest {
 
         progressTracker.beginSubTask("MY CONTEXT");
 
-        NodeRegressionTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
+        NodeRegressionTrain.create(graph, pipeline, config, progressTracker).run();
 
         progressTracker.endSubTask("MY CONTEXT");
 
@@ -266,7 +262,7 @@ class NodeRegressionTrainTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 4})
-    void seededNodeClassification(int concurrency) {
+    void seededNodeRegression(int concurrency) {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
@@ -287,12 +283,11 @@ class NodeRegressionTrainTest {
             graph,
             pipeline,
             config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
+            ProgressTracker.NULL_TRACKER
         );
 
-        var firstResult = algoSupplier.get().compute();
-        var secondResult = algoSupplier.get().compute();
+        var firstResult = algoSupplier.get().run();
+        var secondResult = algoSupplier.get().run();
 
         assertThat(((LinearRegressionData) firstResult.regressor().data()).weights().data())
             .matches(matrix -> matrix.equals(

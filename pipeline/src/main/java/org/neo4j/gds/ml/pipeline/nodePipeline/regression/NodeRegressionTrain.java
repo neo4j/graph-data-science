@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
+import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
@@ -51,7 +52,7 @@ import java.util.TreeSet;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class NodeRegressionTrain {
+public final class NodeRegressionTrain implements PipelineTrainer<NodeRegressionTrainResult> {
 
     private final Features features;
     private final HugeDoubleArray targets;
@@ -59,7 +60,7 @@ public final class NodeRegressionTrain {
     private final NodeRegressionTrainingPipeline pipeline;
     private final NodeRegressionPipelineTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
-    private final TerminationFlag terminationFlag;
+    private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
     public static List<Task> progressTasks(
         NodePropertyPredictionSplitConfig splitConfig,
@@ -82,8 +83,7 @@ public final class NodeRegressionTrain {
         Graph graph,
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        ProgressTracker progressTracker
     ) {
         var targetNodeProperty = graph.nodeProperties(trainConfig.targetProperty());
 
@@ -104,8 +104,7 @@ public final class NodeRegressionTrain {
             features,
             targets,
             graph,
-            progressTracker,
-            terminationFlag
+            progressTracker
         );
     }
 
@@ -115,19 +114,23 @@ public final class NodeRegressionTrain {
         Features features,
         HugeDoubleArray targets,
         IdMap nodeIdMap,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        ProgressTracker progressTracker
     ) {
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
         this.nodeIdMap = nodeIdMap;
         this.progressTracker = progressTracker;
-        this.terminationFlag = terminationFlag;
         this.features = features;
         this.targets = targets;
     }
 
-    public NodeRegressionTrainResult compute() {
+    @Override
+    public void setTerminationFlag(TerminationFlag terminationFlag) {
+        this.terminationFlag = terminationFlag;
+    }
+
+    @Override
+    public NodeRegressionTrainResult run() {
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
             trainConfig.concurrency(),

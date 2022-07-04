@@ -91,9 +91,10 @@ public class NodeRegressionTrainPipelineExecutor extends PipelineExecutor<
 
         this.pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
-        NodeRegressionTrainResult trainResult = NodeRegressionTrain
-            .create(nodesGraph, pipeline, config, progressTracker, terminationFlag)
-            .compute();
+        var trainAlgo = NodeRegressionTrain.create(nodesGraph, pipeline, config, progressTracker);
+        trainAlgo.setTerminationFlag(terminationFlag);
+
+        var trainResult = trainAlgo.run();
 
         var catalogModel = Model.of(
             config.username(),
