@@ -55,6 +55,7 @@ import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
@@ -796,11 +797,12 @@ class NodeClassificationTrainTest {
             config,
             progressTracker
         );
+        var nodeFeatureProducer = new NodeFeatureProducer<>(nodePropertyStepExecutor, graphStore, config);
         return NodeClassificationTrain.create(
             graphStore,
             pipeline,
             config,
-            nodePropertyStepExecutor,
+            nodeFeatureProducer,
             progressTracker
         );
     }
