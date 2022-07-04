@@ -69,8 +69,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
     ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
-        var toModelConverter = new NodeClassificationToModelConverter(pipeline, configuration);
-
         var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
             executionContext,
             graphStore,
@@ -87,7 +85,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
                 progressTracker
             ),
             pipeline,
-            toModelConverter,
             graphStore,
             configuration,
             progressTracker

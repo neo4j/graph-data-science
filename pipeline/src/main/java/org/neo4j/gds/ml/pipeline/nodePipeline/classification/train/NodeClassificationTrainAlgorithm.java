@@ -23,9 +23,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
-import org.neo4j.gds.ml.pipeline.ResultToModelConverter;
-import org.neo4j.gds.ml.pipeline.TrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
 
 public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
@@ -36,12 +35,11 @@ public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
 
     NodeClassificationTrainAlgorithm(
         PipelineTrainer<NodeClassificationTrainResult> pipelineTrainer,
-        TrainingPipeline<NodeFeatureStep> pipeline,
-        ResultToModelConverter<NodeClassificationModelResult, NodeClassificationTrainResult> toModelConverter,
+        NodeClassificationTrainingPipeline pipeline,
         GraphStore graphStore,
         NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        super(pipelineTrainer, pipeline, toModelConverter, graphStore, config, progressTracker);
+        super(pipelineTrainer, pipeline, new NodeClassificationToModelConverter(pipeline, config), graphStore, config, progressTracker);
     }
 }
