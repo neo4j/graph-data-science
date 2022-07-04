@@ -4,6 +4,9 @@
 :modelType: LinkPrediction
 :entity: relationship
 
+include::partial$/algorithms/beta/beta-note.adoc[]
+
+
 In the previous sections we have seen how to build up a Link Prediction training pipeline and train it to produce a predictive model.
 After xref::machine-learning/linkprediction-pipelines/training.adoc[training], the runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].
 

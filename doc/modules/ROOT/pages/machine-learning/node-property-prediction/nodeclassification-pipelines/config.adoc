@@ -5,6 +5,8 @@
 :entity: node
 :max-trials: 10
 
+include::partial$/algorithms/beta/beta-note.adoc[]
+
 This page explains how to create and configure a node classification pipeline.
 
 

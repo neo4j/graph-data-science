@@ -5,7 +5,7 @@
 :entity: node
 :max-trials: 10
 
-
+include::partial$/algorithms/beta/beta-note.adoc[]
 
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.

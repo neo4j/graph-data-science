@@ -2,6 +2,9 @@
 [.alpha]
 = Training the pipeline
 
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
+
 The train mode, `gds.alpha.pipeline.nodeRegression.train`, is responsible for data splitting, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a regression model of type `NodeRegression`, which is then stored in the xref::model-catalog/index.adoc[model catalog].
 The regression model can be xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[applied] on a graph to predict property values for new nodes.

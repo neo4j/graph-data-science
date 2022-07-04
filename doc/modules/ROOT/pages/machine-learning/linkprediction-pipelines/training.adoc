@@ -2,6 +2,9 @@
 [.beta]
 = Training the pipeline
 
+include::partial$/algorithms/beta/beta-note.adoc[]
+
+
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a prediction model of type `LinkPrediction` being stored in the xref::model-catalog/index.adoc[model catalog] along with metrics collected during training.
 The model can be xref::machine-learning/linkprediction-pipelines/predict.adoc[applied] to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
