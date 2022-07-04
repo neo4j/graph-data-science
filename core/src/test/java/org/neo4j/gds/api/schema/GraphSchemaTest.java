@@ -60,7 +60,6 @@ class GraphSchemaTest {
         assertThat(graphSchema1.union(graphSchema2)).isEqualTo(graphSchemaUnion);
     }
 
-
     @Test
     void testUnionOfGraphPropertiesForSameProperties() {
         var prop1Schema = PropertySchema.of("prop1", ValueType.LONG, DefaultValue.of(42L), PropertyState.TRANSIENT);
