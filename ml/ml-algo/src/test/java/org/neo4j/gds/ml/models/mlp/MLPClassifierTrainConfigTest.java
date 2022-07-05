@@ -21,9 +21,11 @@ package org.neo4j.gds.ml.models.mlp;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class MLPClassifierTrainConfigTest {
 
@@ -32,6 +34,18 @@ class MLPClassifierTrainConfigTest {
         assertThatThrownBy(() -> MLPClassifierTrainConfig.of(Map.of("wrongkey1", 615, "wrongkey2", "value2")))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration keys: wrongkey1, wrongkey2");
+    }
+
+    @Test
+    void checkMLPSpecificConfigIsSet() {
+        var MLPConfig = MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", List.of(42,10)));
+        assertThat(MLPConfig.hiddenLayerSizes()).isEqualTo(List.of(42,10));
+    }
+
+    @Test
+    void checkHiddenLayerSizesTyoe() {
+        assertThatThrownBy(() -> MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", 42)))
+            .isInstanceOf(IllegalArgumentException.class);
     }
 
 }

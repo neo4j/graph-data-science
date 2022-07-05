@@ -32,6 +32,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 
+import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -39,25 +40,24 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class MLPClassifierTest {
 
-    private Weights<Matrix> inputWeights;
-    private Weights<Matrix> outputWeights;
-    private Weights<Vector> inputBias;
-    private Weights<Vector> outputBias;
+    private List<Weights<Matrix>> weights;
+
+    private List<Weights<Vector>> biases;
 
     @BeforeEach
     void setup() {
-        inputWeights = new Weights<>(new Matrix(new double[]{
+        weights = List.of(new Weights<>(new Matrix(new double[]{
             1,-1,1,-1,
             1,-1,1,-1,
             1,-1,1,-1,
             1,-1,1,-1
-        }, 4, 4));
-        outputWeights = new Weights<>(new Matrix(new double[]{
+        }, 4, 4)),
+            new Weights<>(new Matrix(new double[]{
             2,2,2,-2,
             1,1,1,-1
-        }, 2, 4));
-        inputBias = Weights.ofVector(1,1,1,1);
-        outputBias = Weights.ofVector(-1,-1);
+        }, 2, 4))
+        );
+        biases = List.of(Weights.ofVector(1,1,1,1), Weights.ofVector(-1,-1));
     }
 
     private static Stream<Arguments> inputs() {
@@ -74,10 +74,9 @@ class MLPClassifierTest {
     void shouldPredictProbabilities(double[] features, double[] expectedResult) {
         var modelData = ImmutableMLPClassifierData.of(
             2, 4,
-            inputWeights,
-            outputWeights,
-            inputBias,
-            outputBias
+            weights,
+            biases,
+            3
         );
         var predictor = new MLPClassifier(modelData);
         var result = predictor.predictProbabilities(features);
@@ -89,10 +88,9 @@ class MLPClassifierTest {
         var featureCount = 4;
         var modelData = ImmutableMLPClassifierData.of(
             2, 4,
-            inputWeights,
-            outputWeights,
-            inputBias,
-            outputBias
+            weights,
+            biases,
+            3
         );
 
         var classifier = new MLPClassifier(modelData);

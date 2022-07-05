@@ -26,30 +26,41 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 @ValueClass
 public interface MLPClassifierData extends Classifier.ClassifierData {
 
-    //1 hidden layer with fixed size
-    Weights<Matrix> inputWeights();
+    List<Weights<Matrix>> weights();
 
-    Weights<Matrix> outputWeights();
+    List<Weights<Vector>> biases();
 
-    Weights<Vector> inputBias();
-
-    Weights<Vector> outputBias();
+    int depth();
 
     default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
-    static MLPClassifierData create(int classCount, int featureCount) {
+    static MLPClassifierData create(int classCount, int featureCount, List<Integer> hiddenLayerSizes) {
+
+        Random random = new Random();
+        var weights = new ArrayList<Weights<Matrix>>();
+        var biases = new ArrayList<Weights<Vector>>();
+        var hiddenDepth = hiddenLayerSizes.size();
+        weights.add(generateWeights(hiddenLayerSizes.get(0), featureCount, random.nextLong()));
+        for (int i = 0; i < hiddenDepth-1; i++) {
+            weights.add(generateWeights(hiddenLayerSizes.get(i+1), hiddenLayerSizes.get(i), random.nextLong()));
+            biases.add(generateBias(hiddenLayerSizes.get(i), random.nextLong()));
+        }
+        biases.add(generateBias(hiddenLayerSizes.get(hiddenDepth-1), random.nextLong()));
+        biases.add(generateBias(classCount, random.nextLong()));
+        weights.add(generateWeights(classCount, hiddenLayerSizes.get(hiddenDepth-1), random.nextLong()));
 
         return ImmutableMLPClassifierData
             .builder()
-            .inputWeights(generateWeights(featureCount,featureCount,42L))
-            .outputWeights(generateWeights(classCount,featureCount,42L))
-            .inputBias(new Weights<>(Vector.create(0.1,featureCount)))
-            .outputBias(new Weights<>(Vector.create(0.1,classCount)))
+            .weights(weights)
+            .biases(biases)
+            .depth(hiddenDepth+2)
             .numberOfClasses(classCount)
             .featureDimension(featureCount)
             .build();
@@ -68,4 +79,15 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
             cols
         ));
     }
+
+    //TODO: Why weightBound 2/cols?
+    private static Weights<Vector> generateBias(int dim, long randomSeed) {
+        var weightBound = Math.sqrt(2d / dim);
+        double[] data = new Random(randomSeed)
+            .doubles(dim, -weightBound, weightBound)
+            .toArray();
+
+        return new Weights<>(new Vector(data));
+    }
+
 }

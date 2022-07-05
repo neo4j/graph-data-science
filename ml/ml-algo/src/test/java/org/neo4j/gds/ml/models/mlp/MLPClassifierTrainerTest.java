@@ -21,14 +21,17 @@ package org.neo4j.gds.ml.models.mlp;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestFeatures;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.ml.models.FeaturesFactory;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,47 +40,50 @@ class MLPClassifierTrainerTest {
     void shouldTrainMLPClassifier() {
         var trainer = new MLPClassifierTrainer(
             3,
-            MLPClassifierTrainConfig.DEFAULT,
+            MLPClassifierTrainConfig.of(Map.of("hiddenLayerSizes", List.of(3))),
             ProgressTracker.NULL_TRACKER,
             LogLevel.INFO,
             TerminationFlag.RUNNING_TRUE,
             1
         );
 
-        var features = FeaturesFactory.wrap(HugeObjectArray.of(
-            new double[]{0, 0, 0, 0},
-            new double[]{1, 1, 1, 1},
-            new double[]{2, 2, 2, 2}
-        ));
+        double[][] featuresArr = new double[5][3];
+        for (int i = 0; i < featuresArr.length; i++) {
+            for (int j = 0; j < featuresArr[i].length; j++) {
+                featuresArr[i][j] = ((double) i) / (j + 1);
+            }
+        }
+
+        var features = new TestFeatures(featuresArr);
 
         var classifier = trainer.train(features,
-            HugeIntArray.of(0,1,2),
-            ReadOnlyHugeLongArray.of(HugeLongArray.of(0,1,2))
+            HugeIntArray.of(0, 1, 1, 0, 2),
+            ReadOnlyHugeLongArray.of(HugeLongArray.of(0,1,2,3,4))
         );
 
         assertThat(classifier.numberOfClasses()).isEqualTo(3);
-        assertThat(classifier.data().featureDimension()).isEqualTo(4);
-        assertThat(classifier.data().inputWeights().data().data()).containsExactly(
-            new double[]{0.29764252720748297, 0.23493600330932676, -0.29469265588519583, -0.33943973808037514,
-                0.3357362252422812, 0.6720691797622892, -0.08395433109107091, -0.2155254692061487,
-                0.03945668522357953, 0.49094182364238215, 0.6838773288708201, 0.0010429659543524268,
-                0.35342071085232274, -0.1604186647033804, -0.45625573205400827, 0.1334309235888843},
-            Offset.offset(1e-08)
-        );
-        assertThat(classifier.data().inputBias().data().data()).containsExactly(
-            new double[]{0.20606770751781522, -5.657595534070115E-4, -0.002188323708040147, 0.0724123068580541},
-            Offset.offset(1e-08)
-        );
-        assertThat(classifier.data().outputWeights().data().data()).containsExactly(
-            new double[]{0.436148874745391, 0.14971951697007693, -0.36820487404763386, -0.22878729472693624,
-                0.26656769819031106, 0.6766669555233438, -0.08567435921149674, -0.4063956816876862,
-                -0.16236717778228524, 0.39414339181121, 0.669421629644905, -0.17332715738888166},
-            Offset.offset(1e-08)
-        );
-        assertThat(classifier.data().outputBias().data().data()).containsExactly(
-            new double[]{0.20394753938809024, 0.19027149349147854, 3.6469482110609635E-4},
-            Offset.offset(1e-08)
-        );
+        assertThat(classifier.data().featureDimension()).isEqualTo(3);
+
+        var weightsData = classifier.data().weights().stream().map(weightMatrix -> weightMatrix.data().data()).flatMapToDouble(Arrays::stream).toArray();
+        var biasesData = classifier.data().biases().stream().map(biasMatrix -> biasMatrix.data().data()).flatMapToDouble(Arrays::stream).toArray();
+
+        assertThat(weightsData).containsExactly(new double[]{0.3742928742667889, -0.09267558873141771, -0.03957981691897919, 0.4696514681074816,
+            0.07005287594529619, 0.18436928817228612, 0.12112573508213205, 0.023682004356143527,
+            0.1313380469025015, 0.36380259358761624, 0.5881314452692645, 0.6723783873849645,
+            -0.5526855635002939, -0.5395298871806025, -0.3040335066183237, -0.012537893706217162,
+
+            0.22468184066315902, 0.48547797877052584, -0.27373378268062304, -0.05271766149808099,
+            -0.5990212647594454, -0.724680534869662, -0.7664298515960261, -0.6670691413258012,
+            0.7543932497629441, 0.11159106680775155, 0.3255273402296144, -0.08927437603451849},
+
+            Offset.offset(1e-08));
+
+        assertThat(biasesData).containsExactly(new double[]{
+            0.20606770751781522, -5.657595534070115E-4, -0.002188323708040147, 0.0724123068580541,
+
+            0.20394753938809024, 0.19027149349147854, 3.6469482110609635E-4},
+
+            Offset.offset(1e-08));
 
     }
 

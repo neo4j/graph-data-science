@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.gradientdescent.Objective;
 import org.neo4j.gds.ml.models.Features;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MLPClassifierObjective implements Objective<MLPClassifierData> {
@@ -47,12 +48,10 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
     @Override
     public List<Weights<? extends Tensor<?>>> weights() {
-        return List.of(
-            classifier.data().inputWeights(),
-            classifier.data().outputWeights(),
-            classifier.data().inputBias(),
-            classifier.data().outputBias()
-        );
+        List<Weights<? extends Tensor<?>>> combinedWeights = new ArrayList<>();
+        combinedWeights.addAll(classifier.data().weights());
+        combinedWeights.addAll(classifier.data().biases());
+        return combinedWeights;
     }
 
     @Override
@@ -82,8 +81,6 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
 
         return new Constant<>(batchedTargets);
     }
-
-
 
     @Override
     public MLPClassifierData modelData() {

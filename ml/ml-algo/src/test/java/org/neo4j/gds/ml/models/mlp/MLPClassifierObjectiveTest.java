@@ -25,7 +25,12 @@ import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.ml.core.ComputationContext;
 import org.neo4j.gds.ml.core.batch.RangeBatch;
+import org.neo4j.gds.ml.core.functions.Weights;
+import org.neo4j.gds.ml.core.tensor.Matrix;
+import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.FeaturesFactory;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -33,12 +38,36 @@ class MLPClassifierObjectiveTest {
 
     @Test
     void shouldCalculateCrossEntropyLoss() {
-        var data = MLPClassifierData.create(3,2);
-        var classifier = new MLPClassifier(data);
+
+        //Fixed classifierData to avoid random weights&biases generation, in order to unit test objective function
+        class MLPObjectiveTestClassifierData implements MLPClassifierData {
+            @Override
+            public int numberOfClasses() {
+                return 3;
+            }
+            @Override
+            public int featureDimension() {
+                return 3;
+            }
+            @Override
+            public List<Weights<Matrix>> weights() {
+                return List.of(new Weights<>(new Matrix(6,3)), new Weights<>(new Matrix(3,6)));
+            }
+            @Override
+            public List<Weights<Vector>> biases() {
+                return List.of(new Weights<>(Vector.create(0.1,6)), new Weights<>(Vector.create(0.1,3)));
+            }
+            @Override
+            public int depth() {
+                return 3;
+            }
+        }
+
+        var classifier = new MLPClassifier(new MLPObjectiveTestClassifierData());
         var featuresHOA = HugeObjectArray.of(
-            new double[]{0.1, 1.1},
-            new double[]{0.2, 1.2},
-            new double[]{0.3, 1.3}
+            new double[]{1,1,1},
+            new double[]{1,1,2},
+            new double[]{1,1,3}
         );
         var features = FeaturesFactory.wrap(featuresHOA);
         var labels = HugeIntArray.of(1,2,3);
@@ -50,7 +79,7 @@ class MLPClassifierObjectiveTest {
         var ctx = new ComputationContext();
         var lossValue = ctx.forward(loss).value();
 
-        assertThat(lossValue).isCloseTo(1.2010265643776676, Offset.offset(1e-08));
+        assertThat(lossValue).isCloseTo(1.09861228866811, Offset.offset(1e-08));
     }
 
 }
