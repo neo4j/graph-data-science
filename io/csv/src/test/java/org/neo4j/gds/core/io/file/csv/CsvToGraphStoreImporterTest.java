@@ -75,7 +75,7 @@ class CsvToGraphStoreImporterTest {
 
         assertThat(graphStore.graphPropertyKeys()).containsExactly("prop1");
         assertThat(graphStore.graphProperty("prop1").values().longValues().toArray())
-            .containsExactly(LongStream.range(0, 10).toArray());
+            .containsExactlyInAnyOrder(LongStream.range(0, 10).toArray());
     }
 
     @Test
