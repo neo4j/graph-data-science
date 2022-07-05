@@ -317,7 +317,7 @@ YIELD
 | validationFolds       | Integer | 3       | Number of divisions of the training graph used during xref::machine-learning/linkprediction-pipelines/training.adoc[model selection].
 | testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
 | trainFraction         | Double  | 0.1     | Fraction of the <<def-test-complement,test-complement set>> reserved for training. Must be in the range (0, 1).
-| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref::machine-learning/linkprediction-pipelines/appendix.adoc#linkprediction-pipelines-classimbalance[here].
+| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
 |===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
