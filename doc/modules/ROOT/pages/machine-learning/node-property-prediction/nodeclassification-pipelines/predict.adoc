@@ -1,8 +1,13 @@
 [[nodeclassification-pipelines-predict]]
+[.beta]
 = Applying a trained model for prediction
+:description: This section describes prediction using Node classification pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeClassification
 :entity: node
 :result: predicted property
+
+include::partial$/algorithms/beta/beta-note.adoc[]
+
 
 In the previous sections we have seen how to build up a Node Classification training pipeline and train it to produce a classification pipeline.
 After xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training], the runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].

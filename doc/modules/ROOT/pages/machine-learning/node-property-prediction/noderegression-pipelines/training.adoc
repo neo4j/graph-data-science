@@ -1,5 +1,10 @@
 [[noderegression-pipelines-train]]
+[.alpha]
 = Training the pipeline
+:description: This section describes training of Node regression pipelines in the Neo4j Graph Data Science library.
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
 
 The train mode, `gds.alpha.pipeline.nodeRegression.train`, is responsible for data splitting, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a regression model of type `NodeRegression`, which is then stored in the xref::model-catalog/index.adoc[model catalog].

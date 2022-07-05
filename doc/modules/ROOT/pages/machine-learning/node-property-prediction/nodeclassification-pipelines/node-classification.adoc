@@ -1,10 +1,11 @@
 [[nodeclassification-pipelines]]
+[.beta]
 = Node classification pipelines
 :description: This section describes Node classification pipelines in the Neo4j Graph Data Science library.
 :entity: node
 :max-trials: 10
 
-
+include::partial$/algorithms/beta/beta-note.adoc[]
 
 
 Node Classification is a common machine learning task applied to graphs: training models to classify nodes.

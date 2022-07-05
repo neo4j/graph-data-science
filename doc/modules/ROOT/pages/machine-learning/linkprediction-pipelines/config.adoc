@@ -1,18 +1,14 @@
 [[linkprediction-configure]]
+[.beta]
 = Configuring the pipeline
+:description: This section describes configuration of Link prediction pipelines in the Neo4j Graph Data Science library.
 :modelType: LinkPrediction
 :entity: relationship
 :max-trials: 10
 
-This page explains how to create and configure a link prediction pipeline.
-It consists of the following sections:
+include::partial$/algorithms/beta/beta-note.adoc[]
 
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-creating-a-pipeline[Creating a pipeline]
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties]
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features]
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits]
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Adding model candidates]
-* xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-auto-tuning[Configuring the auto-tuning]
+This page explains how to create and configure a link prediction pipeline.
 
 
 [[linkprediction-creating-a-pipeline]]

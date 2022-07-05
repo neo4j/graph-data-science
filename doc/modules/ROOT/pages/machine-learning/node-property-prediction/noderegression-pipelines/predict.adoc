@@ -1,8 +1,13 @@
 [[noderegression-pipelines-predict]]
+[.alpha]
 = Applying a trained model for prediction
+:description: This section describes prediction using Node regression pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeRegression
 :entity: node
 :result: predicted property
+
+include::partial$/algorithms/alpha/alpha-note.adoc[]
+
 
 In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.
 After xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training], the produced, runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].

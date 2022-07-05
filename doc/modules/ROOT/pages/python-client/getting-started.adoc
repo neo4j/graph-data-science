@@ -148,4 +148,4 @@ Some notable exceptions to this are:
 * The Python client also contains specific functionality for inspecting graphs from the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog], using a client-side xref::python-client/graph-object.adoc[graph object].
 Similarly, models from the xref::model-catalog/index.adoc[GDS Model Catalog] can be inspected using a client-side xref::python-client/model-object.adoc[model object].
 * Cypher functions and procedures of GDS that take references to graphs and/or models as strings for input typically instead take xref::python-client/graph-object.adoc[graph objects] and/or xref::python-client/model-object.adoc[model objects] as input in the Python client API.
-* To configure and use xref::machine-learning.adoc[machine learning pipelines] in GDS, specific xref::python-client/pipelines.adoc[pipeline objects] are used in the Python client.
+* To configure and use xref::machine-learning/machine-learning.adoc[machine learning pipelines] in GDS, specific xref::python-client/pipelines.adoc[pipeline objects] are used in the Python client.

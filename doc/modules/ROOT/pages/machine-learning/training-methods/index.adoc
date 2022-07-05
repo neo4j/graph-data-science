@@ -3,7 +3,7 @@
 :description: This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
 
 
-xref::machine-learning/node-property-prediction/nodeclassification-pipelines/index.adoc[Node Classification Pipelines], xref::machine-learning/node-property-prediction/noderegression-pipelines/index.adoc[Node Regression Pipelines], and xref::machine-learning/linkprediction-pipelines/index.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
+xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipelines], xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipelines], and xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
 These methods have several hyperparameters that one can set to influence the training.
 The objective of this page is to give a brief overview of the methods, as well as advice on how to tune their hyperparameters.
 

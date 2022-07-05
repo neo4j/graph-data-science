@@ -1,5 +1,10 @@
 [[nodeclassification-pipelines-train]]
+[.beta]
 = Training the pipeline
+:description: This section describes training of Node classification pipelines in the Neo4j Graph Data Science library.
+
+include::partial$/algorithms/beta/beta-note.adoc[]
+
 
 The train mode, `gds.beta.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a classification model of type `NodeClassification`, which is then stored in the xref::model-catalog/index.adoc[model catalog].

@@ -1,7 +1,12 @@
 [[algorithms-link-prediction-pipelines-predict]]
+[.beta]
 = Applying a trained model for prediction
+:description: This section describes prediction using Link prediction pipelines in the Neo4j Graph Data Science library.
 :modelType: LinkPrediction
 :entity: relationship
+
+include::partial$/algorithms/beta/beta-note.adoc[]
+
 
 In the previous sections we have seen how to build up a Link Prediction training pipeline and train it to produce a predictive model.
 After xref::machine-learning/linkprediction-pipelines/training.adoc[training], the runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].

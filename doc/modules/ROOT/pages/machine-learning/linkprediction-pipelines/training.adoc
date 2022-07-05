@@ -1,5 +1,10 @@
 [[linkprediction-pipelines-train]]
+[.beta]
 = Training the pipeline
+:description: This section describes training of Link prediction pipelines in the Neo4j Graph Data Science library.
+
+include::partial$/algorithms/beta/beta-note.adoc[]
+
 
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
 Running this mode results in a prediction model of type `LinkPrediction` being stored in the xref::model-catalog/index.adoc[model catalog] along with metrics collected during training.

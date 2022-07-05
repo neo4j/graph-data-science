@@ -1,18 +1,14 @@
 [[nodeclassification-pipelines-config]]
+[.beta]
 = Configuring the pipeline
+:description: This section describes configuration of Node classification pipelines in the Neo4j Graph Data Science library.
 :modelType: NodeClassification
 :entity: node
 :max-trials: 10
 
-This page explains how to create and configure a node classification pipeline.
-It consists of the following sections:
+include::partial$/algorithms/beta/beta-note.adoc[]
 
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[Creating the pipeline]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Adding model candidates]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-auto-tuning[Configuring the auto-tuning]
+This page explains how to create and configure a node classification pipeline.
 
 
 [[nodeclassification-creating-a-pipeline]]
