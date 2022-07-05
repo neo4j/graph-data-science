@@ -96,7 +96,8 @@ public final class GraphStoreToCsvExporter {
                 index
             ),
             taskRegistryFactory,
-            log
+            log,
+            "Csv"
         );
     }
 

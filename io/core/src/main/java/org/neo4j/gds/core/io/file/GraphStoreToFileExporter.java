@@ -59,6 +59,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
 
     private final TaskRegistryFactory taskRegistryFactory;
     private final Log log;
+    private final String rootTaskName;
 
     public GraphStoreToFileExporter(
         GraphStore graphStore,
@@ -74,7 +75,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
         VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
         TaskRegistryFactory taskRegistryFactory,
-        Log log
+        Log log,
+        String rootTaskName
     ) {
         super(graphStore, config, neoNodeProperties);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
@@ -88,6 +90,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
         this.taskRegistryFactory = taskRegistryFactory;
         this.log = log;
+        this.rootTaskName = rootTaskName;
     }
 
     @Override
@@ -127,7 +130,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             importTasks.add(Tasks.leaf("Export graph properties"));
         }
 
-        var task = Tasks.task("Graph store export", importTasks);
+        var task = Tasks.task(rootTaskName + " export", importTasks);
         return new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
     }
 

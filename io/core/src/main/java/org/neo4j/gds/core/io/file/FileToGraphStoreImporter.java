@@ -108,6 +108,8 @@ public abstract class FileToGraphStoreImporter {
 
     protected abstract FileInput fileInput(Path importPath);
 
+    protected abstract String rootTaskName();
+
     public UserGraphStore run() {
         var fileInput = fileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
@@ -138,7 +140,7 @@ public abstract class FileToGraphStoreImporter {
         }
 
         var task = Tasks.task(
-            "Graph store import",
+           rootTaskName() + " import",
             importTasks
         );
 
