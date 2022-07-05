@@ -1,5 +1,5 @@
-[[linkprediction-appendix]]
-= Appendix
+[[linkprediction-theory]]
+= Theoretical considerations
 :description: This section discusses details around using Link prediction pipelines in the Neo4j Graph Data Science library.
 :modelType: LinkPrediction
 :entity: relationship

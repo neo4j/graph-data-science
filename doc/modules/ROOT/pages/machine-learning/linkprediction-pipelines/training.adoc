@@ -20,7 +20,7 @@ These graphs are internally managed and exist only for the duration of the train
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
 . Train each model candidate given by the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[parameter space] for each of the folds and evaluate the model on the respective validation set.
-The evaluation uses the specified xref::machine-learning/linkprediction-pipelines/appendix.adoc#linkprediction-pipelines-metrics[metric].
+The evaluation uses the specified xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[metric].
 . Declare as winner the model with the highest average metric across the folds.
 . Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
@@ -57,8 +57,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name                                                          | Type              | Default              | Optional | Description
 | modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
-| negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref::machine-learning/linkprediction-pipelines/appendix.adoc#linkprediction-pipelines-classimbalance[here].
-| metrics                                                       | List of String    | [`AUCPR`]            | no       | xref::machine-learning/linkprediction-pipelines/appendix.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
+| negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
+| metrics                                                       | List of String    | [`AUCPR`]            | no       | xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
 | xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
 | xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
@@ -266,6 +266,6 @@ RETURN
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 10` (and defaults filled for remaining parameters) was selected, and has a score of `0.77` on the test set.
-The score computed as the xref::machine-learning/linkprediction-pipelines/appendix.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
+The score computed as the xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 --

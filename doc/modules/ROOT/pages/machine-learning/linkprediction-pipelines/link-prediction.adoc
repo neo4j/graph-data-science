@@ -42,4 +42,4 @@ This segment is divided into the following pages:
 * xref::machine-learning/linkprediction-pipelines/config.adoc[Configuring the pipeline]
 * xref::machine-learning/linkprediction-pipelines/training.adoc[Training the pipeline]
 * xref::machine-learning/linkprediction-pipelines/predict.adoc[Applying a trained model for prediction]
-* xref::machine-learning/linkprediction-pipelines/appendix.adoc[Appendix]
+* xref::machine-learning/linkprediction-pipelines/theory.adoc[Theoretical considerations]
