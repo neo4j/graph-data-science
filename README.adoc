@@ -4,7 +4,7 @@ image:https://github.com/neo4j/graph-data-science/actions/workflows/gradle_cipr.
 image:https://img.shields.io/maven-central/v/org.neo4j.gds/proc.svg?label=Maven%20Central[https://search.maven.org/search?q=g:%22org.neo4j.gds%22%20AND%20a:%22proc%22]
 https://neo4j.com/docs/graph-data-science/preview/installation/[image:https://img.shields.io/badge/Documentation-latest-blue[Documentation]]
 https://discord.gg/neo4j[image:https://img.shields.io/discord/787399249741479977?label=Chat&logo=discord&style=flat-square[Discord]]
-https://community.neo4j.com/c/neo4j-graph-platform/graph-algorithms[image:https://img.shields.io/discourse/users?label=Forums&logo=discourse&server=https%3A%2F%2Fcommunity.neo4j.com&style=flat-square[Discourse users]]
+https://community.neo4j.com/[image:https://img.shields.io/discourse/users?label=Forums&logo=discourse&server=https%3A%2F%2Fcommunity.neo4j.com&style=flat-square[Discourse users]]
 
 This repository hosts the open sources of the Neo4j Graph Data Science (GDS) library.
 The GDS library is a plugin for the Neo4j graph database.
@@ -96,6 +96,17 @@ OpenGDS is available to build, use, and extend under the constraints of the GNU 
 To build your own algorithms using the Pregel API (see at https://neo4j.com/docs/graph-data-science/current/algorithms/pregel-api/#algorithms-pregel-api-example[docs]), we recommend starting with the https://github.com/neo4j/graph-data-science/tree/1.8.0/examples/pregel-bootstrap[pregel-bootstrap project].
 
 NOTE: The module on `master` depends on the unpublished version of this library. The GDS version can be changed in the `build.gradle` of the `pregel-bootstrap` module.
+
+
+== Python client
+
+The library comes with a Python client called `graphdatascience`. It enables users to write pure Python code to project graphs, run algorithms, as well as define and use machine learning pipelines in GDS.
+
+The API is designed to mimic the GDS Cypher procedure API in Python code. It abstracts the necessary operations of the Neo4j Python driver to offer a simpler surface.
+
+`graphdatascience` is only guaranteed to work with GDS versions 2.0+.
+
+You can find the `graphdatascience` source code https://github.com/neo4j/graph-data-science-client[here].
 
 
 == Developing with OpenGDS
@@ -217,7 +228,7 @@ To use the bundled JAR in Neo4j, place the JAR file in the `plugins` directory o
 For further instructions, see our https://neo4j.com/docs/graph-data-science/current/installation/[documentation].
 
 Preview of the documentation::
-A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/2.0-preview/.
+A preview of the latest documentation can be found at https://neo4j.com/docs/graph-data-science/2.2-preview/.
 
 
 == Contributing
