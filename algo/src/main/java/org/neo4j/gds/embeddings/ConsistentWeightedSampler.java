@@ -55,6 +55,10 @@ public class ConsistentWeightedSampler {
         double segmentCenter();
 
         double probability();
+
+        default boolean isCloseEnough(double query, double normalizedScaleFactor) {
+            return dist(query, segmentCenter()) < probability() / normalizedScaleFactor;
+        }
     }
 
     public long sample(long randomSeed) {
@@ -78,16 +82,18 @@ public class ConsistentWeightedSampler {
         }
     }
 
-    private double dist(double x, double y) {
-        double big = Math.max(x, y);
-        double small = Math.min(x, y);
-        return Math.min(big - small, small - big + 1);
+    private static double dist(double x, double y) {
+        if (x > y) {
+            return Math.min(x - y, y - x + 1);
+        } else {
+            return Math.min(y - x, x - y + 1);
+        }
     }
 
     private long circularLinearSearch(double query) {
         for (int idx = 0; idx < points.size(); idx++) {
             var point = points.get(idx);
-            if (dist(query, point.segmentCenter()) < point.probability() / (2.0 * SCALE_FACTOR)) {
+            if (point.isCloseEnough(query, 2.0 * SCALE_FACTOR)) {
                 return point.nodeId();
             }
         }
@@ -96,16 +102,16 @@ public class ConsistentWeightedSampler {
     }
 
     private long circularBinarySearch(double query) {
-        long low = 1L;
-        long high = 0L;
+        long low = 0L;
+        long high = points.size() - 1;
         long size = points.size();
 
         var lowPoint = points.get(low);
-        if (dist(query, lowPoint.segmentCenter()) < lowPoint.probability() / (2.0 * SCALE_FACTOR)) {
+        if (lowPoint.isCloseEnough(query, 2.0 * SCALE_FACTOR)) {
             return lowPoint.nodeId();
         }
         var highPoint = points.get(high);
-        if (dist(query, highPoint.segmentCenter()) < highPoint.probability() / (2.0 * SCALE_FACTOR)) {
+        if (highPoint.isCloseEnough(query, 2.0 * SCALE_FACTOR)) {
             return highPoint.nodeId();
         }
 
@@ -129,7 +135,7 @@ public class ConsistentWeightedSampler {
                 }
             }
             var midPoint = points.get(mid);
-            if (dist(query, midPoint.segmentCenter()) < midPoint.probability() / (2.0 * SCALE_FACTOR)) {
+            if (midPoint.isCloseEnough(query, 2.0 * SCALE_FACTOR)) {
                 return midPoint.nodeId();
             }
         }
