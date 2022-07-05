@@ -98,6 +98,17 @@ To build your own algorithms using the Pregel API (see at https://neo4j.com/docs
 NOTE: The module on `master` depends on the unpublished version of this library. The GDS version can be changed in the `build.gradle` of the `pregel-bootstrap` module.
 
 
+== Python client
+
+The library comes with a Python client called `graphdatascience`. It enables users to write pure Python code to project graphs, run algorithms, as well as define and use machine learning pipelines in GDS.
+
+The API is designed to mimic the GDS Cypher procedure API in Python code. It abstracts the necessary operations of the Neo4j Python driver to offer a simpler surface.
+
+`graphdatascience` is only guaranteed to work with GDS versions 2.0+.
+
+You can find the `graphdatascience` source code https://github.com/neo4j/graph-data-science-client[here].
+
+
 == Developing with OpenGDS
 
 OpenGDS is also available on https://search.maven.org/search?q=g:org.neo4j.gds[Maven Central].
