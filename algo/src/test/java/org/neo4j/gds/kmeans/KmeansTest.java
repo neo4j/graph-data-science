@@ -29,6 +29,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
 class KmeansTest {
@@ -64,9 +65,59 @@ class KmeansTest {
     @Inject
     private TestGraph lineGraph;
 
+    @GdlGraph(graphNamePrefix = "nan")
+    private static final String nanQuery =
+        "CREATE" +
+        "  (a {  kmeans: [0.21d, 0.0d]} )" +
+        "  (b {  kmeans: [2.0d, NaN]} )" +
+        "  (c {  kmeans: [2.1d, 0.0d]} )";
+
+    @Inject
+    private TestGraph nanGraph;
+
+
+    @GdlGraph(graphNamePrefix = "miss")
+    private static final String missQuery =
+        "CREATE" +
+        "  (a {  kmeans: [0.21d, 0.0d]} )" +
+        "  (b {  kmeans: [2.0d]} )" +
+        "  (c {  kmeans: [2.1d, 0.0d]} )";
+
+    @Inject
+    private TestGraph missGraph;
 
     @Inject
     private IdFunction idFunction;
+
+    @Test
+    void shouldThrowOnNan() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .k(2)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(nanGraph, kmeansConfig, kmeansContext);
+        assertThatThrownBy(kmeans::compute).hasMessageContaining(
+            "Input for K-Means should not contain any NaN values");
+
+    }
+
+    @Test
+    void shouldThrowOnDifferentDimensions() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .k(2)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        assertThatThrownBy(kmeans::compute).hasMessageContaining(
+            "All property arrays for K-Means should have the same number of dimensions");
+
+    }
 
     @Test
     void shouldRun() {
