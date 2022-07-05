@@ -22,7 +22,9 @@ package org.neo4j.gds.kmeans;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -32,6 +34,17 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicInteger;
+
+enum InputCondition {
+    NORMAL(0), NAN(1), UNEQUALDIMENSION(2);
+    public final int value;
+
+    private InputCondition(int value) {
+        this.value = value;
+    }
+
+}
 
 public class Kmeans extends Algorithm<KmeansResult> {
 
@@ -95,6 +108,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
     @Override
     public KmeansResult compute() {
         progressTracker.beginSubTask();
+
+        var inputCondition = checkInputValidity();
+        if (inputCondition == InputCondition.NAN) {
+            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
+        } else if (inputCondition == InputCondition.UNEQUALDIMENSION) {
+            throw new IllegalStateException(
+                "All property arrays for K-Means should have the same number of dimensions");
+        }
+
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
@@ -175,5 +197,43 @@ public class Kmeans extends Algorithm<KmeansResult> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
+    private InputCondition checkInputValidity() {
 
+        AtomicInteger inputState = new AtomicInteger(InputCondition.NORMAL.value);
+        ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
+            if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
+                var value = nodePropertyValues.floatArrayValue(nodeId);
+                if (value.length != dimensions) {
+                    inputState.set(InputCondition.UNEQUALDIMENSION.value);
+                } else {
+                    for (int dimension = 0; dimension < dimensions; ++dimension) {
+                        if (Float.isNaN(value[dimension])) {
+                            inputState.set(InputCondition.NAN.value);
+                            break;
+                        }
+                    }
+                }
+            } else {
+                var value = nodePropertyValues.doubleArrayValue(nodeId);
+                if (value.length != dimensions) {
+                    inputState.set(InputCondition.UNEQUALDIMENSION.value);
+                } else {
+                    for (int dimension = 0; dimension < dimensions; ++dimension) {
+                        if (Double.isNaN(value[dimension])) {
+                            inputState.set(InputCondition.NAN.value);
+                            break;
+                        }
+                    }
+                }
+            }
+
+        });
+        InputCondition inputCondition = InputCondition.NORMAL;
+        if (inputState.get() == InputCondition.UNEQUALDIMENSION.value) {
+            inputCondition = InputCondition.UNEQUALDIMENSION;
+        } else if (inputState.get() == InputCondition.NAN.value) {
+            inputCondition = InputCondition.NAN;
+        }
+        return inputCondition;
+    }
 }
