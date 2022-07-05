@@ -38,7 +38,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
 
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("noise", "z", "array")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("noise", "z", "array")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
@@ -68,7 +68,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     public void handlesZeroVectors() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("zeros")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("zeros")).build()
         );
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
@@ -88,7 +88,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     public void failsOnNaNValues() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(List.of("invalidValue", "z")).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("invalidValue", "z")).build()
         );
 
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(

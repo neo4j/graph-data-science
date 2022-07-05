@@ -22,8 +22,8 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.ImmutableLinkFeatureStepConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.LinkFeatureStepConfigurationImpl;
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ final class LinkFeatureStepFactoryTest {
         List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "hadaMard",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(HadamardFeatureStep.class);
@@ -48,7 +48,7 @@ final class LinkFeatureStepFactoryTest {
         List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "coSine",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(CosineFeatureStep.class);
@@ -60,7 +60,7 @@ final class LinkFeatureStepFactoryTest {
         List<String> nodeProperties = List.of("noise", "z", "array");
         var step = LinkFeatureStepFactory.create(
             "L2",
-            ImmutableLinkFeatureStepConfiguration.builder().nodeProperties(nodeProperties).build()
+            LinkFeatureStepConfigurationImpl.builder().nodeProperties(nodeProperties).build()
         );
 
         assertThat(step).isInstanceOf(L2FeatureStep.class);

@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
@@ -31,11 +30,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
 public interface LinkFeatureStepConfiguration {
 
-    // Why do we need to convert this?
     @Configuration.ConvertWith("fromObject")
     List<String> nodeProperties();
 
