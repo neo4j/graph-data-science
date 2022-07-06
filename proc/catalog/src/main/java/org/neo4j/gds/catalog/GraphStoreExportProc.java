@@ -96,7 +96,7 @@ public class GraphStoreExportProc extends BaseProc {
                 );
 
                 var start = System.nanoTime();
-                var importedProperties = exporter.run();
+                var exportedProperties = exporter.run();
                 var end = System.nanoTime();
 
                 return new DatabaseExportResult(
@@ -105,8 +105,8 @@ public class GraphStoreExportProc extends BaseProc {
                     graphStore.nodeCount(),
                     graphStore.relationshipCount(),
                     graphStore.relationshipTypes().size(),
-                    importedProperties.nodePropertyCount(),
-                    importedProperties.relationshipPropertyCount(),
+                    exportedProperties.nodePropertyCount(),
+                    exportedProperties.relationshipPropertyCount(),
                     java.util.concurrent.TimeUnit.NANOSECONDS.toMillis(end - start)
                 );
             }
@@ -137,6 +137,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, exportConfig),
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
+            taskRegistryFactory,
             log
         );
 

@@ -30,11 +30,17 @@ import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.logging.Log;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -51,6 +57,10 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final Supplier<ElementSchemaVisitor> graphPropertySchemaVisitorSupplier;
     private final Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier;
 
+    private final TaskRegistryFactory taskRegistryFactory;
+    private final Log log;
+    private final String rootTaskName;
+
     public GraphStoreToFileExporter(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
@@ -63,7 +73,10 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         Supplier<SimpleWriter<Capabilities>> graphCapabilitiesWriterSupplier,
         VisitorProducer<NodeVisitor> nodeVisitorSupplier,
         VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier,
-        VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier
+        VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
+        TaskRegistryFactory taskRegistryFactory,
+        Log log,
+        String rootTaskName
     ) {
         super(graphStore, config, neoNodeProperties);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
@@ -75,6 +88,9 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.relationshipSchemaVisitorSupplier = relationshipSchemaVisitorSupplier;
         this.graphPropertySchemaVisitorSupplier = graphPropertySchemaVisitorSupplier;
         this.graphCapabilitiesWriterSupplier = graphCapabilitiesWriterSupplier;
+        this.taskRegistryFactory = taskRegistryFactory;
+        this.log = log;
+        this.rootTaskName = rootTaskName;
     }
 
     @Override
@@ -87,9 +103,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             exportGraphPropertySchema(graphStoreInput);
             exportGraphCapabilities(graphStoreInput);
         }
-        exportNodes(graphStoreInput);
-        exportRelationships(graphStoreInput);
-        exportGraphProperties(graphStoreInput);
+        var progressTracker = createProgressTracker(graphStoreInput);
+        progressTracker.beginSubTask();
+        exportNodes(graphStoreInput, progressTracker);
+        exportRelationships(graphStoreInput, progressTracker);
+        exportGraphProperties(graphStoreInput, progressTracker);
+        progressTracker.endSubTask();
     }
 
     @Override
@@ -97,28 +116,59 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         return IdMappingType.ORIGINAL;
     }
 
-    private void exportNodes(CompatInput graphStoreInput) {
+    private ProgressTracker createProgressTracker(GraphStoreInput graphStoreInput) {
+        var graphInfo = graphStoreInput.metaDataStore().graphInfo();
+
+        var importTasks = new ArrayList<Task>();
+        importTasks.add(Tasks.leaf("Export nodes", graphInfo.nodeCount()));
+        importTasks.add(Tasks.leaf(
+            "Export relationships",
+            graphInfo.relationshipTypeCounts().values().stream().mapToLong(Long::longValue).sum()
+        ));
+
+        if (!graphStoreInput.metaDataStore().graphPropertySchema().isEmpty()) {
+            importTasks.add(Tasks.leaf("Export graph properties"));
+        }
+
+        var task = Tasks.task(rootTaskName + " export", importTasks);
+        return new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
+    }
+
+    private void exportNodes(
+        CompatInput graphStoreInput,
+        ProgressTracker progressTracker
+    ) {
+        progressTracker.beginSubTask();
         var nodeInput = graphStoreInput.nodes(Collector.EMPTY);
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner<>(nodeVisitorSupplier.apply(index), nodeInputIterator, ProgressTracker.NULL_TRACKER)
+            (index) -> new ElementImportRunner<>(nodeVisitorSupplier.apply(index), nodeInputIterator, progressTracker)
         );
 
         RunWithConcurrency.builder()
             .concurrency(config.writeConcurrency())
             .tasks(tasks)
             .run();
+        progressTracker.endSubTask();
     }
 
-    private void exportRelationships(CompatInput graphStoreInput) {
+    private void exportRelationships(
+        CompatInput graphStoreInput,
+        ProgressTracker progressTracker
+    ) {
+        progressTracker.beginSubTask();
         var relationshipInput = graphStoreInput.relationships(Collector.EMPTY);
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(
             config.writeConcurrency(),
-            (index) -> new ElementImportRunner<>(relationshipVisitorSupplier.apply(index), relationshipInputIterator, ProgressTracker.NULL_TRACKER)
+            (index) -> new ElementImportRunner<>(
+                relationshipVisitorSupplier.apply(index),
+                relationshipInputIterator,
+                progressTracker
+            )
         );
 
         RunWithConcurrency.builder()
@@ -126,21 +176,33 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             .tasks(tasks)
             .mayInterruptIfRunning(false)
             .run();
+        progressTracker.endSubTask();
     }
 
-    private void exportGraphProperties(GraphStoreInput graphStoreInput) {
-        var graphPropertyInput = graphStoreInput.graphProperties();
-        var graphPropertyInputIterator = graphPropertyInput.iterator();
+    private void exportGraphProperties(
+        GraphStoreInput graphStoreInput,
+        ProgressTracker progressTracker
+    ) {
+        if (!graphStoreInput.metaDataStore().graphPropertySchema().isEmpty()) {
+            progressTracker.beginSubTask();
+            var graphPropertyInput = graphStoreInput.graphProperties();
+            var graphPropertyInputIterator = graphPropertyInput.iterator();
 
-        var tasks = ParallelUtil.tasks(
-            config.writeConcurrency(),
-            (index) -> new ElementImportRunner<>(graphPropertyVisitorSupplier.apply(index), graphPropertyInputIterator, ProgressTracker.NULL_TRACKER)
-        );
+            var tasks = ParallelUtil.tasks(
+                config.writeConcurrency(),
+                (index) -> new ElementImportRunner<>(
+                    graphPropertyVisitorSupplier.apply(index),
+                    graphPropertyInputIterator,
+                    progressTracker
+                )
+            );
 
-        RunWithConcurrency.builder()
-            .concurrency(config.writeConcurrency())
-            .tasks(tasks)
-            .run();
+            RunWithConcurrency.builder()
+                .concurrency(config.writeConcurrency())
+                .tasks(tasks)
+                .run();
+            progressTracker.endSubTask();
+        }
     }
 
     private void exportUserName() {

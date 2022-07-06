@@ -19,12 +19,16 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.logging.Log;
+import org.neo4j.logging.NullLog;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -33,19 +37,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public final class GraphStoreToCsvExporter {
 
+    @TestOnly
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return create(graphStore, config, exportPath, Optional.empty());
+        return create(graphStore, config, exportPath, Optional.empty(), TaskRegistryFactory.empty(), NullLog.getInstance());
     }
 
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
         Path exportPath,
-        Optional<NeoNodeProperties> neoNodeProperties
+        Optional<NeoNodeProperties> neoNodeProperties,
+        TaskRegistryFactory taskRegistryFactory,
+        Log log
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
@@ -87,7 +94,10 @@ public final class GraphStoreToCsvExporter {
                 graphStore.schema().graphProperties(),
                 headerFiles,
                 index
-            )
+            ),
+            taskRegistryFactory,
+            log,
+            "Csv"
         );
     }
 

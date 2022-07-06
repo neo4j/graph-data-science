@@ -41,4 +41,9 @@ public class CsvToGraphStoreImporter extends FileToGraphStoreImporter {
     protected FileInput fileInput(Path importPath) {
         return new CsvFileInput(importPath);
     }
+
+    @Override
+    protected String rootTaskName() {
+        return "Csv";
+    }
 }

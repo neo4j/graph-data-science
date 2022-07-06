@@ -97,7 +97,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     protected abstract IdMappingType idMappingType();
 
-    public ImportedProperties run() {
+    public ExportedProperties run() {
         var metaDataStore = MetaDataStore.of(graphStore);
         var nodeStore = NodeStore.of(graphStore, neoNodeProperties);
         var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
@@ -122,11 +122,11 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
         long importedNodeProperties = (nodeStore.propertyCount() + neoNodeProperties.size()) * graphStore.nodeCount();
         long importedRelationshipProperties = relationshipStore.propertyCount();
-        return ImmutableImportedProperties.of(importedNodeProperties, importedRelationshipProperties);
+        return ImmutableExportedProperties.of(importedNodeProperties, importedRelationshipProperties);
     }
 
     @ValueClass
-    public interface ImportedProperties {
+    public interface ExportedProperties {
 
         long nodePropertyCount();
 
