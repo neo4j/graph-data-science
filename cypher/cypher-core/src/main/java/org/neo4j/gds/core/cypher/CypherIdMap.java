@@ -22,6 +22,7 @@ package org.neo4j.gds.core.cypher;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.IdMapAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
