@@ -707,6 +707,28 @@ class NodeClassificationTrainTest {
             .hasMessage("Need at least one model candidate for training.");
     }
 
+    @Test
+    void failGivenTooSmallTestSet() {
+        var pipeline = new NodeClassificationTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("scalar"));
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.001).build());
+
+        var config = NodeClassificationPipelineTrainConfigImpl.builder()
+            .pipeline("")
+            .username("myUser")
+            .graphName("dummy")
+            .modelName("myModel")
+            .targetProperty("t")
+            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(nodeGraphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeClassificationTrain.create(nodeGraphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
+            .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
+    }
+
     public static Stream<Arguments> trainerMethodConfigs() {
         return Stream.of(
             Arguments.of(

@@ -257,6 +257,8 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         ProgressTracker progressTracker
     ) {
         var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();

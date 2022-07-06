@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
@@ -272,6 +273,28 @@ class NodeRegressionTrainTest {
                 ((LinearRegressionData) secondResult.regressor().data()).weights().data(),
                 1e-10
             ));
+    }
+
+    @Test
+    void failGivenTooSmallTestSet() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("scalar"));
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.001).build());
+
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .pipeline("")
+            .username("myUser")
+            .graphName("dummy")
+            .modelName("myModel")
+            .targetProperty("target")
+            .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeRegressionTrain.create(graphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
+            .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
     }
 
     static NodeRegressionTrain createWithExecutionContext(
