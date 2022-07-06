@@ -185,6 +185,13 @@ class HugeLongPriorityQueueTest {
         Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
     }
 
+    @Test
+    void testSetZeroCost() {
+        HugeLongPriorityQueue priorityQueue = HugeLongPriorityQueue.min(2);
+        priorityQueue.set(1, 0);
+        Assertions.assertThat(priorityQueue.size()).isEqualTo(1);
+    }
+
     private double exclusiveDouble(double exclusiveMin, double exclusiveMax) {
         return RandomShortApi.Double(Math.nextUp(exclusiveMin), exclusiveMax);
     }
