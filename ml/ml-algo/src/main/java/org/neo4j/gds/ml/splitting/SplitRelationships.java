@@ -39,7 +39,7 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
         this.config = config;
     }
 
-    static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
+    public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
         // we cannot assume any compression of the relationships
         var pessimisticSizePerRel = configuration.hasRelationshipWeightProperty()
             ? Double.BYTES + 2 * Long.BYTES

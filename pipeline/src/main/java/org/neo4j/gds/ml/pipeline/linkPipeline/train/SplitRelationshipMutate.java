@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.splitting;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.ml.splitting.EdgeSplitter;
+import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
@@ -29,9 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.ImmutableSplitRelationshipsMutateConfig;
-import org.neo4j.gds.ml.splitting.SplitRelationshipMutate;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsAlgorithmFactory;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
@@ -123,7 +121,7 @@ public class RelationshipSplitter {
 
         var firstSplitEstimation = MemoryEstimations
             .builder("Test/Test-complement split")
-            .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(testSplitConfig))
+            .add(SplitRelationships.estimate(testSplitConfig))
             .build();
 
         SplitRelationshipsMutateConfig trainSplitConfig = ImmutableSplitRelationshipsMutateConfig.builder()
@@ -133,7 +131,7 @@ public class RelationshipSplitter {
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(new SplitRelationshipsAlgorithmFactory().memoryEstimation(trainSplitConfig))
+            .add(SplitRelationships.estimate(trainSplitConfig))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

@@ -148,8 +148,8 @@ public abstract class TrainingPipeline<FEATURE_STEP extends FeatureStep> impleme
 
     private void validateUniqueMutateProperty(ExecutableNodePropertyStep step) {
         this.nodePropertySteps.forEach(nodePropertyStep -> {
-            var newMutatePropertyName = step.config().get(MUTATE_PROPERTY_KEY);
-            var existingMutatePropertyName = nodePropertyStep.config().get(MUTATE_PROPERTY_KEY);
+            var newMutatePropertyName = step.nodeProperty();
+            var existingMutatePropertyName = nodePropertyStep.nodeProperty();
             if (newMutatePropertyName.equals(existingMutatePropertyName)) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "The value of `%s` is expected to be unique, but %s was already specified in the %s procedure.",

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +39,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -47,15 +48,12 @@ import org.neo4j.gds.ml.metrics.classification.OutOfBagError;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -68,6 +66,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
+import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.TestNodePropertyStepWithFixedEstimation;
 
 class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
@@ -367,11 +367,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
 
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.of(Map.of("penalty", 1)));
 
-        pipeline.addNodePropertyStep(NodePropertyStepFactory.createNodePropertyStep(
-            "degree",
-            Map.of("mutateProperty", "degree")
-        ));
-        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "degree")));
+        pipeline.addNodePropertyStep(new NodeIdPropertyStep(graphStore, "Id property step", "generated_id"));
+        pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "generated_id")));
 
         var config = LinkPredictionTrainConfigImpl.builder()
             .username(getUsername())
@@ -424,9 +421,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: Split relationships 100%",
                     "Link Prediction Train Pipeline :: Split relationships :: Finished",
                     "Link Prediction Train Pipeline :: Execute node property steps :: Start",
-                    "Link Prediction Train Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
-                    "Link Prediction Train Pipeline :: Execute node property steps :: DegreeCentrality 100%",
-                    "Link Prediction Train Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
+                    "Link Prediction Train Pipeline :: Execute node property steps :: Id property step :: Start",
+                    "Link Prediction Train Pipeline :: Execute node property steps :: Id property step 100%",
+                    "Link Prediction Train Pipeline :: Execute node property steps :: Id property step :: Finished",
                     "Link Prediction Train Pipeline :: Execute node property steps :: Finished",
                     "Link Prediction Train Pipeline :: Train set size is 9",
                     "Link Prediction Train Pipeline :: Test set size is 3",
@@ -446,13 +443,13 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: Select best model :: Best trial was Trial 1 with main validation metric 1.0000",
                     "Link Prediction Train Pipeline :: Select best model :: Finished",
                     "Link Prediction Train Pipeline :: Train best model :: Start",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6891",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6851",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.6812",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.4678",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.4667",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.4655",
-                    "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.4655. Did not converge",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6541",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6179",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.5843",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.1311",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.1309",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.1306",
+                    "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.1306. Did not converge",
                     "Link Prediction Train Pipeline :: Train best model 100%",
                     "Link Prediction Train Pipeline :: Train best model :: Finished",
                     "Link Prediction Train Pipeline :: Compute train metrics :: Start",
@@ -475,26 +472,19 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
     }
 
     static Stream<Arguments> estimationsForDiffNodeSteps() {
-        var degreeCentr = NodePropertyStepFactory.createNodePropertyStep(
-            "degree",
-            Map.of("mutateProperty", "degree")
-        );
-
-        var fastRP = NodePropertyStepFactory.createNodePropertyStep(
-            "fastRP",
-            Map.of("mutateProperty", "fastRP", "embeddingDimension", 512)
-        );
+        var lowMemoryStep = new TestNodePropertyStepWithFixedEstimation("lowMemoryStep", MemoryEstimations.of("Fixed", MemoryRange.of(1, 2)));
+        var highMemoryStep = new TestNodePropertyStepWithFixedEstimation("highMemoryStep", MemoryEstimations.of("Fixed", MemoryRange.of(6_000_000)));
 
         return Stream.of(
-            Arguments.of("only Degree", List.of(degreeCentr), MemoryRange.of(22_200, 696_440)),
-            Arguments.of("only FastRP", List.of(fastRP), MemoryRange.of(6_204_136)),
-            Arguments.of("Both", List.of(degreeCentr, fastRP), MemoryRange.of(6_204_136))
+            Arguments.of("low memory step", List.of(lowMemoryStep), MemoryRange.of(22_200, 696_440)),
+            Arguments.of("high memory step", List.of(highMemoryStep), MemoryRange.of(6_000_000)),
+            Arguments.of("both", List.of(lowMemoryStep, highMemoryStep), MemoryRange.of(6_000_000))
         );
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("estimationsForDiffNodeSteps")
-    void estimateWithDifferentNodePropertySteps(String desc, List<NodePropertyStep> nodePropertySteps, MemoryRange expectedRange) {
+    void estimateWithDifferentNodePropertySteps(String desc, List<ExecutableNodePropertyStep> nodePropertySteps, MemoryRange expectedRange) {
         var config = LinkPredictionTrainConfigImpl.builder()
             .username(getUsername())
             .modelName("DUMMY")
@@ -505,7 +495,7 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();
         pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
 
-        for (NodePropertyStep propertyStep : nodePropertySteps) {
+        for (ExecutableNodePropertyStep propertyStep : nodePropertySteps) {
             pipeline.addNodePropertyStep(propertyStep);
         }
 
