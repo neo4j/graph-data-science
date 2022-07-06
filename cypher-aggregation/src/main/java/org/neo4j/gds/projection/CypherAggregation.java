@@ -51,13 +51,13 @@ import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.ImmutableIdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
-import org.neo4j.gds.core.utils.paged.ShardedLongSet;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -110,8 +110,6 @@ public final class CypherAggregation extends BaseProc {
         // #result() is called twice, we cache the result of the first call to return it again in the second invocation
         private @Nullable AggregationResult result;
 
-        // Maps original ids to a smaller id space, which is used during graph construction
-        private @Nullable ShardedLongLongMap.Builder intermediateIdMapBuilder;
         private @Nullable String graphName;
         private @Nullable LazyIdMapBuilder idMapBuilder;
         private @Nullable List<RelationshipPropertySchema> relationshipPropertySchemas;
@@ -168,7 +166,6 @@ public final class CypherAggregation extends BaseProc {
             }
 
             if (this.idMapBuilder == null) {
-                this.intermediateIdMapBuilder = ShardedLongLongMap.builder(DEFAULT_CONCURRENCY);
                 this.idMapBuilder = newIdMapBuilder(
                     sourceNodeLabels,
                     sourceNodePropertyValues,
@@ -417,26 +414,24 @@ public final class CypherAggregation extends BaseProc {
             return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
         }
 
+        /**
+         * Adds the given node to the internal nodes builder and returns
+         * the intermediate node id which can be used for relationships.
+         *
+         * @return intermediate node id
+         */
         private long loadNode(
             @Nullable Object node,
             @Nullable NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             assert this.idMapBuilder != null;
-            assert this.intermediateIdMapBuilder != null;
 
             var originalNodeId = extractNodeId(node);
-            var intermediateNodeId = this.intermediateIdMapBuilder.containsOriginalId(originalNodeId)
-                ? this.intermediateIdMapBuilder.toMappedNodeId(originalNodeId)
-                : this.intermediateIdMapBuilder.addNode(originalNodeId);
 
-            if (nodeProperties == null) {
-                this.idMapBuilder.addNode(intermediateNodeId, nodeLabels);
-            } else {
-                this.idMapBuilder.addNodeWithProperties(intermediateNodeId, nodeProperties, nodeLabels);
-            }
-
-            return intermediateNodeId;
+            return nodeProperties == null
+                ? this.idMapBuilder.addNode(originalNodeId, nodeLabels)
+                : this.idMapBuilder.addNodeWithProperties(originalNodeId, nodeProperties, nodeLabels);
         }
 
         private static double loadOneRelationshipProperty(
@@ -511,12 +506,9 @@ public final class CypherAggregation extends BaseProc {
 
         private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
             assert this.idMapBuilder != null;
-            assert this.intermediateIdMapBuilder != null;
 
             var idMapAndProperties = this.idMapBuilder.build();
-            var internalIdMap = idMapAndProperties.idMap();
-            var intermediateIdMap = this.intermediateIdMapBuilder.build();
-            var nodes = new HighLimitIdMap(intermediateIdMap, internalIdMap);
+            var nodes = idMapAndProperties.idMap();
 
             var maybeNodeProperties = idMapAndProperties.nodeProperties();
 
@@ -548,7 +540,10 @@ public final class CypherAggregation extends BaseProc {
                 );
             });
 
-            return internalIdMap::toMappedNodeId;
+            // Relationships are added using their intermediate node ids.
+            // In order to map to the final internal ids, we need to use
+            // the mapping function of the wrapped id map.
+            return nodes.rootIdMap()::toMappedNodeId;
         }
 
         private void buildRelationshipsWithProperties(
@@ -731,11 +726,6 @@ final class HighLimitIdMap extends IdMapAdapter {
     }
 
     @Override
-    public IdMap rootIdMap() {
-        return this;
-    }
-
-    @Override
     public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
         var filteredInternalIdMap = super.withFilteredLabels(nodeLabels, concurrency);
         return new HighLimitIdMap(this.highToLowIdSpace, filteredInternalIdMap);
@@ -744,11 +734,12 @@ final class HighLimitIdMap extends IdMapAdapter {
 
 final class LazyIdMapBuilder implements PartialIdMap {
     private final AtomicBoolean isEmpty = new AtomicBoolean(true);
-    private final ShardedLongSet seenNodes;
+    private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
+
     private final NodesBuilder nodesBuilder;
 
     LazyIdMapBuilder(boolean hasLabelInformation, boolean hasProperties) {
-        this.seenNodes = ShardedLongSet.of(1);
+        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(DEFAULT_CONCURRENCY);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
@@ -758,14 +749,22 @@ final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     long addNode(long nodeId, @Nullable NodeLabelToken nodeLabels) {
-        if (seenNodes.addNode(nodeId)) {
-            isEmpty.lazySet(false);
-            if (nodeLabels == null) {
-                nodeLabels = NodeLabelTokens.empty();
-            }
-            this.nodesBuilder.addNode(nodeId, nodeLabels);
+        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+
+        // deduplication
+        if (intermediateId != IdMap.NOT_FOUND) {
+            return intermediateId;
         }
-        return nodeId;
+
+        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
+
+        isEmpty.lazySet(false);
+        if (nodeLabels == null) {
+            nodeLabels = NodeLabelTokens.empty();
+        }
+        this.nodesBuilder.addNode(intermediateId, nodeLabels);
+
+        return intermediateId;
     }
 
     long addNodeWithProperties(
@@ -773,19 +772,25 @@ final class LazyIdMapBuilder implements PartialIdMap {
         Map<String, Value> properties,
         @Nullable NodeLabelToken nodeLabels
     ) {
-        if (seenNodes.addNode(nodeId)) {
-            isEmpty.lazySet(false);
-            if (nodeLabels == null) {
-                nodeLabels = NodeLabelTokens.empty();
-            }
-            if (properties.isEmpty()) {
-                this.nodesBuilder.addNode(nodeId, nodeLabels);
-            } else {
-                this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
-            }
+        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+
+        // deduplication
+        if (intermediateId != IdMap.NOT_FOUND) {
+            return intermediateId;
         }
 
-        return nodeId;
+        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
+        isEmpty.lazySet(false);
+        if (nodeLabels == null) {
+            nodeLabels = NodeLabelTokens.empty();
+        }
+        if (properties.isEmpty()) {
+            this.nodesBuilder.addNode(intermediateId, nodeLabels);
+        } else {
+            this.nodesBuilder.addNode(intermediateId, properties, nodeLabels);
+        }
+
+        return intermediateId;
     }
 
     @Override
@@ -801,6 +806,16 @@ final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     NodesBuilder.IdMapAndProperties build() {
-        return this.nodesBuilder.build();
+        var idMapAndProperties = this.nodesBuilder.build();
+        var intermediateIdMap = this.intermediateIdMapBuilder.build();
+        var internalIdMap = idMapAndProperties.idMap();
+
+        var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
+
+        return ImmutableIdMapAndProperties
+            .builder()
+            .idMap(idMap)
+            .nodeProperties(idMapAndProperties.nodeProperties())
+            .build();
     }
 }

@@ -25,6 +25,7 @@ import org.eclipse.collections.api.map.primitive.MutableLongLongMap;
 import org.eclipse.collections.impl.SpreadFunctions;
 import org.eclipse.collections.impl.collection.mutable.AbstractMultiReaderMutableCollection;
 import org.eclipse.collections.impl.factory.primitive.LongLongMaps;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.IdMapAllocator;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -219,11 +220,6 @@ public final class ShardedLongLongMap {
             }
         }
 
-        public boolean containsOriginalId(long nodeId) {
-            var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
-            return shard.containsOriginalId(nodeId);
-        }
-
         public long toMappedNodeId(long nodeId) {
             var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
             return shard.toMappedNodeId(nodeId);
@@ -257,11 +253,7 @@ public final class ShardedLongLongMap {
             }
 
             long toMappedNodeId(long nodeId) {
-                return mapping.get(nodeId);
-            }
-
-            boolean containsOriginalId(long nodeId) {
-                return mapping.containsKey(nodeId);
+                return mapping.getIfAbsent(nodeId, IdMap.NOT_FOUND);
             }
 
             long addNode(long nodeId) {
