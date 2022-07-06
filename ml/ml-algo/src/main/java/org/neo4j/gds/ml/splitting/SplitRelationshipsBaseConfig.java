@@ -23,6 +23,9 @@ import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +33,7 @@ import java.util.Map;
 
 @ValueClass
 @Configuration
-public interface SplitRelationshipsBaseConfig {
+public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeedConfig, RelationshipWeightConfig {
 
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     double holdoutFraction();

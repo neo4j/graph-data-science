@@ -34,6 +34,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,25 +110,25 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         return Collections.emptyList();
     }
 
-    @Value.Derived
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig testSplit() {
+    default SplitRelationshipsBaseConfig testSplit(Optional<Long> randomSeed) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(testRelationshipType())
             .remainingRelationshipType(testComplementRelationshipType())
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .randomSeed(randomSeed)
             .build();
     }
 
-    @Value.Derived
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig trainSplit() {
+    default SplitRelationshipsBaseConfig trainSplit(Optional<Long> randomSeed) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(trainRelationshipType())
             .remainingRelationshipType(featureInputRelationshipType())
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .randomSeed(randomSeed)
             .build();
     }
 

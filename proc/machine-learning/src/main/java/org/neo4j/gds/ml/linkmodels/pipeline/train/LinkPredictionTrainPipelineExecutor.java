@@ -76,9 +76,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         );
 
         this.relationshipSplitter = new RelationshipSplitter(
-            graphName,
+            graphStore,
             pipeline.splitConfig(),
-            executionContext,
             progressTracker
         );
     }
@@ -129,8 +128,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
         this.relationshipSplitter.splitRelationships(
             graphStore,
-            config.relationshipTypes(),
-            config.nodeLabels(),
+            config.internalRelationshipTypes(graphStore),
+            config.nodeLabelIdentifiers(graphStore),
             config.randomSeed(),
             pipeline.relationshipWeightProperty()
         );

@@ -37,11 +37,9 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
@@ -89,19 +87,12 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                SplitRelationshipsMutateConfig config = computationResult.config();
+                // TODO could extract this into a separate class
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    computationResult.graphStore().addRelationshipType(
-                        config.remainingRelationshipType(),
-                        Optional.ofNullable(config.relationshipWeightProperty()),
-                        Optional.of(NumberType.FLOATING_POINT),
-                        computationResult.result().remainingRels()
-                    );
-                    computationResult.graphStore().addRelationshipType(
-                        config.holdoutRelationshipType(),
-                        Optional.of(EdgeSplitter.RELATIONSHIP_PROPERTY),
-                        Optional.of(NumberType.INTEGRAL),
-                        computationResult.result().selectedRels()
+                    SplitRelationshipMutate.mutate(
+                        computationResult.graphStore(),
+                        computationResult.result(),
+                        computationResult.config()
                     );
                 }
                 long holdoutWritten = computationResult.result().selectedRels().topology().elementCount();
