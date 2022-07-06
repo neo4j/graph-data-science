@@ -34,17 +34,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicInteger;
-
-enum InputCondition {
-    NORMAL(0), NAN(1), UNEQUALDIMENSION(2);
-    public final int value;
-
-    private InputCondition(int value) {
-        this.value = value;
-    }
-
-}
 
 public class Kmeans extends Algorithm<KmeansResult> {
 
@@ -109,13 +98,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
     public KmeansResult compute() {
         progressTracker.beginSubTask();
 
-        var inputCondition = checkInputValidity();
-        if (inputCondition == InputCondition.NAN) {
-            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
-        } else if (inputCondition == InputCondition.UNEQUALDIMENSION) {
-            throw new IllegalStateException(
-                "All property arrays for K-Means should have the same number of dimensions");
-        }
+        checkInputValidity();
+
 
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
@@ -197,43 +181,35 @@ public class Kmeans extends Algorithm<KmeansResult> {
         return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
-    private InputCondition checkInputValidity() {
-        AtomicInteger inputState = new AtomicInteger(InputCondition.NORMAL.value);
+    private void checkInputValidity() {
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (inputState.get() == InputCondition.NORMAL.value) {
-                if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
-                    var value = nodePropertyValues.floatArrayValue(nodeId);
-                    if (value.length != dimensions) {
-                        inputState.set(InputCondition.UNEQUALDIMENSION.value);
-                    } else {
-                        for (int dimension = 0; dimension < dimensions; ++dimension) {
-                            if (Float.isNaN(value[dimension])) {
-                                inputState.set(InputCondition.NAN.value);
-                                break;
-                            }
-                        }
-                    }
+            if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
+                var value = nodePropertyValues.floatArrayValue(nodeId);
+                if (value.length != dimensions) {
+                    throw new IllegalStateException(
+                        "All property arrays for K-Means should have the same number of dimensions");
                 } else {
-                    var value = nodePropertyValues.doubleArrayValue(nodeId);
-                    if (value.length != dimensions) {
-                        inputState.set(InputCondition.UNEQUALDIMENSION.value);
-                    } else {
-                        for (int dimension = 0; dimension < dimensions; ++dimension) {
-                            if (Double.isNaN(value[dimension])) {
-                                inputState.set(InputCondition.NAN.value);
-                                break;
-                            }
+                    for (int dimension = 0; dimension < dimensions; ++dimension) {
+                        if (Float.isNaN(value[dimension])) {
+                            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
                         }
                     }
                 }
+            } else {
+                var value = nodePropertyValues.doubleArrayValue(nodeId);
+                if (value.length != dimensions) {
+                    throw new IllegalStateException(
+                        "All property arrays for K-Means should have the same number of dimensions");
+                } else {
+                    for (int dimension = 0; dimension < dimensions; ++dimension) {
+                        if (Double.isNaN(value[dimension])) {
+                            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
+
+                        }
+                    }
+                }
+
             }
         });
-        InputCondition inputCondition = InputCondition.NORMAL;
-        if (inputState.get() == InputCondition.UNEQUALDIMENSION.value) {
-            inputCondition = InputCondition.UNEQUALDIMENSION;
-        } else if (inputState.get() == InputCondition.NAN.value) {
-            inputCondition = InputCondition.NAN;
-        }
-        return inputCondition;
     }
 }

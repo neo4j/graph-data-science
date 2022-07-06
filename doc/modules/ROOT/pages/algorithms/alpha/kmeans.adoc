@@ -23,7 +23,7 @@ For more information on this algorithm, see:
 [[algorithm-k-means-considerations]]
 == Considerations
 
-In order for K-Means to work properly, the property arrays for all nodes must have the same number of elements. In addition, they must consist solely of  well-defined float numbers and not contain any NaN values.
+In order for K-Means to work properly, the property arrays for all nodes must have the same number of elements. Also, they should contain exclusively numbers and not contain any NaN values.
 
 [[algorithms-k-means-syntax]]
 == Syntax
