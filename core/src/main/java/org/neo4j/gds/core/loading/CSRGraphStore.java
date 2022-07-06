@@ -231,6 +231,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<NodeLabel> nodeLabels() {
+        assert schema().nodeSchema().availableLabels().size() == nodes.availableNodeLabels().size();
         return nodes.availableNodeLabels();
     }
 
@@ -241,6 +242,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public Set<String> nodePropertyKeys() {
+        assert schema().nodeSchema().allProperties().size() == nodeProperties.keySet().size();
         return nodeProperties.keySet();
     }
 
@@ -251,7 +253,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Override
     public boolean hasNodeProperty(NodeLabel label, String propertyKey) {
-        return schema().nodeSchema().hasProperty(label, propertyKey);
+        return schema().nodeSchema().hasProperty(label, propertyKey) && hasNodeProperty(propertyKey);
     }
 
     @Override

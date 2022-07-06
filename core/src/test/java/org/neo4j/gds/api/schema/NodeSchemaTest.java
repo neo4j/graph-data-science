@@ -179,6 +179,21 @@ class NodeSchemaTest {
         assertThat(unionPropertySchema).containsExactlyInAnyOrderEntriesOf(expectedUnionSchema);
     }
 
+    @Test
+    void shouldCreateDeepCopiesWhenFiltering() {
+        var nodeLabel = NodeLabel.of("A");
+        var nodeSchema = NodeSchema.builder().addProperty(nodeLabel, "prop", ValueType.LONG).build();
+        var filteredNodeSchema = nodeSchema.filter(Set.of(nodeLabel));
+        NodeSchema.builder()
+            .from(filteredNodeSchema)
+            .addProperty(nodeLabel, "shouldNotExistInOriginalSchema", ValueType.LONG)
+            .build();
+
+        assertThat(nodeSchema.properties().get(nodeLabel))
+            .doesNotContainKey("shouldNotExistInOriginalSchema")
+            .containsOnlyKeys("prop");
+    }
+
     static Stream<Arguments> schemaAndHasProperties() {
         return Stream.of(
             Arguments.of(NodeSchema.builder().addLabel(NodeLabel.of("A")).build(), false),
