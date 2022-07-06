@@ -5,6 +5,7 @@
 :entity: node
 :result: embedding
 
+include::partial$algorithms/beta/beta-note.adoc[]
 
 Node2Vec is a node embedding algorithm that computes a vector representation of a node based on random walks in the graph.
 The neighborhood is sampled through random walks.

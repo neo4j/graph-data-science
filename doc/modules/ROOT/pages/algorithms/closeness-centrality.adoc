@@ -6,6 +6,7 @@
 :result: centrality
 :algorithm: Closeness Centrality
 
+include::partial$algorithms/beta/beta-note.adoc[]
 
 :directed:
 :undirected:
