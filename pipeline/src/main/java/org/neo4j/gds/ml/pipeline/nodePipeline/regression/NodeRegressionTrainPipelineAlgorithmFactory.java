@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 
@@ -62,13 +61,7 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
     ) {
         validateMainMetric(pipeline, configuration.metrics().get(0).toString());
 
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            executionContext,
-            graphStore,
-            configuration,
-            progressTracker
-        );
-        var nodeFeatureProducer = new NodeFeatureProducer<>(nodePropertyStepExecutor, graphStore, configuration);
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, configuration, executionContext, progressTracker);
 
         return new NodeRegressionTrainAlgorithm(
             NodeRegressionTrain.create(

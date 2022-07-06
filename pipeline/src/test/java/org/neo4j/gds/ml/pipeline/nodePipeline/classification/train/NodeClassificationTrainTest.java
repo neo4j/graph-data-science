@@ -53,7 +53,6 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
@@ -791,13 +790,7 @@ class NodeClassificationTrainTest {
         NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            ExecutionContext.EMPTY,
-            graphStore,
-            config,
-            progressTracker
-        );
-        var nodeFeatureProducer = new NodeFeatureProducer<>(nodePropertyStepExecutor, graphStore, config);
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, progressTracker);
         return NodeClassificationTrain.create(
             graphStore,
             pipeline,

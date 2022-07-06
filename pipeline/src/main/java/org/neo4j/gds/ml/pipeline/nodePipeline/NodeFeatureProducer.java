@@ -22,6 +22,8 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
@@ -40,6 +42,26 @@ public class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & GraphN
         this.stepExecutor = stepExecutor;
         this.graphStore = graphStore;
         this.trainConfig = trainConfig;
+    }
+
+    public static <PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> NodeFeatureProducer<PIPELINE_CONFIG> create(
+        GraphStore graphStore,
+        PIPELINE_CONFIG config,
+        ExecutionContext executionContext,
+        ProgressTracker progressTracker
+    ) {
+
+        return new NodeFeatureProducer<>(
+            NodePropertyStepExecutor.of(
+                executionContext,
+                graphStore,
+                config,
+                config.internalRelationshipTypes(graphStore),
+                progressTracker
+            ),
+            graphStore,
+            config
+        );
     }
 
     public Features makeFeatures(NodePropertyTrainingPipeline pipeline) {

@@ -45,7 +45,6 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
@@ -281,13 +280,7 @@ class NodeRegressionTrainTest {
         NodeRegressionPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            ExecutionContext.EMPTY,
-            graphStore,
-            config,
-            progressTracker
-        );
-        var nodeFeatureProducer = new NodeFeatureProducer<>(nodePropertyStepExecutor, graphStore, config);
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, progressTracker);
         return NodeRegressionTrain.create(
             graphStore,
             pipeline,

@@ -106,16 +106,6 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
         ExecutionContext executionContext,
         GraphStore graphStore,
         CONFIG config,
-        ProgressTracker progressTracker
-    ) {
-        return of(executionContext, graphStore, config, config.internalRelationshipTypes(graphStore), progressTracker);
-
-    }
-
-    public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(
-        ExecutionContext executionContext,
-        GraphStore graphStore,
-        CONFIG config,
         Collection<RelationshipType> relationshipTypes,
         ProgressTracker progressTracker
     ) {
