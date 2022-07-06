@@ -46,6 +46,16 @@ public interface PipelineTrainAlgorithmTest {
         );
     }
 
+    static DynamicTest trainsAModel(
+        PipelineTrainAlgorithm<?, ?, ?, ?> algorithm,
+        String expectedType
+    ) {
+        return DynamicTest.dynamicTest(
+            "trainsAModel",
+            () -> assertThat(algorithm.compute().model().algoType()).isEqualTo(expectedType)
+        );
+    }
+
     static <MODEL_RESULT extends CatalogModelContainer<?, ?, ?>> DynamicTest originalSchemaTest(
         PipelineTrainAlgorithm<?, MODEL_RESULT, ?, ?> algorithm,
         TrainingPipeline<?> pipeline

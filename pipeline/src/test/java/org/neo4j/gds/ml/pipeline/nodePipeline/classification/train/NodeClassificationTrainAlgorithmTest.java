@@ -95,6 +95,7 @@ class NodeClassificationTrainAlgorithmTest {
 
         return Stream.of(
             PipelineTrainAlgorithmTest.terminationFlagTest(algoSupplier.get()),
+            PipelineTrainAlgorithmTest.trainsAModel(algoSupplier.get(), NodeClassificationTrainingPipeline.MODEL_TYPE),
             PipelineTrainAlgorithmTest.originalSchemaTest(algoSupplier.get(), pipeline),
             PipelineTrainAlgorithmTest.testParameterSpaceValidation(pipelineWithoutCandidate -> factory.build(
                 graphStore,
