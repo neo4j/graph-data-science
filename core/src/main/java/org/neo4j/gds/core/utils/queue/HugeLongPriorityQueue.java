@@ -181,8 +181,13 @@ public abstract class HugeLongPriorityQueue implements PrimitiveLongIterable {
      */
     protected abstract boolean lessThan(long a, long b);
 
+    /**
+     * Adds the given element to the queue.
+     * If the element already exists, it's cost is overridden.
+     *
+     * @return true, if the element already existed, false otherwise.
+     */
     private boolean addCost(long element, double cost) {
-      //  double oldCost = costValues.get(element);
         boolean elementExists = costKeys.get(element);
         costKeys.set(element);
         costValues.set(element, cost);
