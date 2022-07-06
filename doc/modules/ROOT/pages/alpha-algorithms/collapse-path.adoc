@@ -3,7 +3,7 @@
 = Collapse Path
 :description: This section describes the Collapse Path algorithm in the Neo4j Graph Data Science library.
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-collapse-path-intro]]

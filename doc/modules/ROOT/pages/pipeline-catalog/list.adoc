@@ -2,6 +2,8 @@
 [[pipeline-catalog-list]]
 = Listing pipelines
 
+include::partial$/operations-reference/beta-note.adoc[]
+
 Information about pipelines in the catalog can be retrieved using the `gds.beta.pipeline.list()` procedure.
 
 

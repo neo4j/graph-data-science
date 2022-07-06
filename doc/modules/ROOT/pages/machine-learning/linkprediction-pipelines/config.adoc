@@ -6,7 +6,7 @@
 :entity: relationship
 :max-trials: 10
 
-include::partial$/algorithms/beta/beta-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 This page explains how to create and configure a link prediction pipeline.
 

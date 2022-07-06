@@ -6,7 +6,7 @@
 :entity: node
 :result: predicted property
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.

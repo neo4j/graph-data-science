@@ -7,7 +7,7 @@
 :entity: node
 :result: scaled properties
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-scale-properties-intro]]

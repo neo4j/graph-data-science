@@ -7,7 +7,7 @@
 :result: similarity score
 :algorithm: Filtered K-Nearest Neighbors
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 :directed:
 :undirected:

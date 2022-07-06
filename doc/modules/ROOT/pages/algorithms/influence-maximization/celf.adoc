@@ -7,7 +7,7 @@
 :algorithm: CELF
 
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 This topic includes:
 
@@ -29,7 +29,7 @@ The CELF algorithm is based on a "lazy-forward" optimization.
 [[alpha-algorithms-celf-syntax]]
 == Syntax
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 .CELF syntax per mode
 [.tabbed-example, caption = ]

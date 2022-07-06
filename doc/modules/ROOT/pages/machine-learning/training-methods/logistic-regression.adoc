@@ -2,6 +2,8 @@
 [.beta]
 = Logistic regression
 
+include::partial$/operations-reference/beta-note.adoc[]
+
 Logistic regression is a fundamental supervised machine learning classification method.
 This trains a model by minimizing a loss function which depends on a weight matrix and on the training data.
 The loss can be minimized for example using gradient descent.

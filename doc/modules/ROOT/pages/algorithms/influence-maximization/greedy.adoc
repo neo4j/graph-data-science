@@ -7,7 +7,7 @@
 :algorithm: Greedy
 
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 This topic includes:
 
@@ -29,7 +29,7 @@ For large networks xref::algorithms/influence-maximization/celf.adoc[CELF] algor
 [[alpha-algorithms-greedy-syntax]]
 == Syntax
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 .Greedy syntax per mode
 [.tabbed-example, caption = ]

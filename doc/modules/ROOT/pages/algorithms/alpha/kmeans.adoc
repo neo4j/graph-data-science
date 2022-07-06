@@ -6,7 +6,7 @@
 :result: cluster
 :algorithm: K-Means
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-k-means-intro]]

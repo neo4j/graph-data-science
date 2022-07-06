@@ -5,7 +5,7 @@
 :modelType: LinkPrediction
 :entity: relationship
 
-include::partial$/algorithms/beta/beta-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 
 In the previous sections we have seen how to build up a Link Prediction training pipeline and train it to produce a predictive model.

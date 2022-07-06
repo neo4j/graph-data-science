@@ -9,7 +9,7 @@ Harmonic centrality (also known as valued centrality) is a variant of closeness 
 As with many of the centrality algorithms, it originates from the field of social network analysis.
 // end::introduction[]
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-harmonic-centrality-context]]

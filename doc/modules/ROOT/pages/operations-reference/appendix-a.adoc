@@ -3,6 +3,8 @@
 = Operations reference
 :description: This chapter contains a reference of all the procedures and functions in the Neo4j Graph Data Science library.
 
+include::partial$/operations-reference/operation-tiers.adoc[]
+
 
 The operations in the Graph Data Science library can be divided into the following categories:
 

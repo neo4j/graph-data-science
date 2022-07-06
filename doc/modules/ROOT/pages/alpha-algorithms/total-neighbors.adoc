@@ -7,7 +7,7 @@
 Total Neighbors computes the closeness of nodes, based on the number of unique neighbors that they have.
 It is based on the idea that the more connected a node is, the more likely it is to receive new links.
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-linkprediction-total-neighbors-context]]

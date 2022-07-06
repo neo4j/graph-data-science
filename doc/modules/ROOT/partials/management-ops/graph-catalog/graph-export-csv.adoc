@@ -1,7 +1,8 @@
 [[catalog-graph-export-csv]]
 [.beta]
-
 = Export a named graph to CSV
+
+include::partial$/operations-reference/beta-note.adoc[]
 
 We can export projected graphs stored in the graph catalog to a set of CSV files.
 All nodes, relationships and properties present in a projected graph are exported.

@@ -2,6 +2,8 @@
 [.alpha]
 = Random forest
 
+include::partial$/operations-reference/alpha-note.adoc[]
+
 Random forest is a popular supervised machine learning method for classification and regression that consists of using several https://en.wikipedia.org/wiki/Decision_tree[decision trees], and combining the trees' predictions into an overall prediction.
 To train the random forest is to train each of its decision trees independently.
 Each decision tree is typically trained on a slightly different part of the training set, and may look at different features for its node splits.

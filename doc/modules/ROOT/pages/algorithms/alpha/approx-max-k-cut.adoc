@@ -7,7 +7,7 @@
 :algorithm: Approximate Maximum k-cut
 
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-approx-max-k-cut-intro]]
@@ -26,7 +26,7 @@ The 2-cut we outlined above would then not be a maximum 2-cut (with a cut cost o
 Maximum k-cut is the same as https://en.wikipedia.org/wiki/Maximum_cut[Maximum Cut] when `k = 2`.
 ====
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 === Applications

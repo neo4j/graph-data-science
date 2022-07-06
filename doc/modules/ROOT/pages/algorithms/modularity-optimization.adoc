@@ -4,7 +4,7 @@
 :description: This section describes the Modularity Optimization algorithm in the Neo4j Graph Data Science library.
 
 
-include::partial$/algorithms/beta/beta-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 
 [[algorithms-modularity-optimization-intro]]

@@ -2,6 +2,8 @@
 [[pipeline-catalog-drop]]
 = Removing pipelines
 
+include::partial$/operations-reference/beta-note.adoc[]
+
 If we no longer need a training pipeline, we can remove it from the catalog.
 
 

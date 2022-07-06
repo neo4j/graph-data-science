@@ -6,7 +6,7 @@
 
 The One Hot Encoding function is used to convert categorical data into a numerical format that can be used by Machine Learning libraries.
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 [[algorithms-one-hot-encoding-sample]]
 == One Hot Encoding sample

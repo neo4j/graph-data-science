@@ -53,6 +53,8 @@ Their Cypher signatures map to Python in much the same way as `gds.graph.project
 [.alpha]
 == Constructing a graph
 
+include::partial$/operations-reference/alpha-note.adoc[]
+
 Instead of projecting a graph from the Neo4j database it is also possible to construct new graphs using pandas `DataFrames` from the client.
 
 [source,python]

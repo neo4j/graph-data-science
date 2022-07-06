@@ -6,7 +6,7 @@
 
 link:https://en.wikipedia.org/wiki/Adamic/Adar_index[Adamic Adar] is a measure used to compute the closeness of nodes based on their shared neighbors.
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-linkprediction-adamic-adar-context]]

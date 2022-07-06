@@ -6,7 +6,7 @@
 :result: relationships
 :max-trials: 10
 
-include::partial$/algorithms/beta/beta-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 
 Link prediction is a common machine learning task applied to graphs: training a model to learn, between pairs of nodes in a graph, where relationships should exist.

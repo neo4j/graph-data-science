@@ -3,7 +3,7 @@
 = Random Walk
 :description: This section describes the Random Walk algorithm in the Neo4j Graph Data Science library.
 
-include::partial$algorithms/beta/beta-note.adoc[]
+include::partial$/operations-reference/beta-note.adoc[]
 
 Random Walk is an algorithm that provides random paths in a graph.
 

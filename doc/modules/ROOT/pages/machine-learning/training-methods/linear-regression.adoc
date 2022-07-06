@@ -2,6 +2,8 @@
 [.alpha]
 = Linear regression
 
+include::partial$/operations-reference/alpha-note.adoc[]
+
 Linear regression is a fundamental supervised machine learning regression method.
 This trains a model by minimizing a loss function which depends on a weight matrix and on the training data.
 The loss can be minimized for example using gradient descent.

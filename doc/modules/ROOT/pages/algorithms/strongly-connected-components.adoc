@@ -9,7 +9,7 @@ A set is considered a strongly connected component if there is a directed path b
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
 
 
-include::partial$/algorithms/alpha/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 
 [[algorithms-strongly-connected-components-context]]

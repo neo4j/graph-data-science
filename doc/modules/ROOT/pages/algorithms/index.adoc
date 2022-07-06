@@ -7,9 +7,6 @@ The Neo4j Graph Data Science (GDS) library contains many graph algorithms.
 The algorithms are divided into categories which represent different problem classes.
 The categories are listed in this chapter.
 
-[[algorithms-tiers]]
-include::partial$/algorithms/algorithm-tiers.adoc[]
-
 This chapter is divided into the following sections:
 
 * xref::algorithms/syntax.adoc[Syntax overview]
