@@ -59,7 +59,6 @@ public class RelationshipSplitter {
     }
 
     public void splitRelationships(
-        GraphStore graphStore,
         Collection<RelationshipType> relationshipTypes,
         Collection<NodeLabel> nodeLabels,
         Optional<Long> randomSeed,
@@ -74,13 +73,13 @@ public class RelationshipSplitter {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(randomSeed), nodeLabels, relationshipTypes, relationshipWeightProperty);
+        relationshipSplit(splitConfig.testSplit(randomSeed, relationshipWeightProperty), nodeLabels, relationshipTypes);
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(randomSeed), nodeLabels, List.of(testComplementRelationshipType), relationshipWeightProperty);
+        relationshipSplit(splitConfig.trainSplit(randomSeed, relationshipWeightProperty), nodeLabels, List.of(testComplementRelationshipType));
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -98,8 +97,8 @@ public class RelationshipSplitter {
         }
     }
 
-    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes, Optional<String> relationshipWeightProperty) {
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipWeightProperty);
+    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.ofNullable(splitConfig.relationshipWeightProperty()));
 
         var splitAlgo = new SplitRelationships(graph, graph, splitConfig);
 
@@ -108,14 +107,14 @@ public class RelationshipSplitter {
         SplitRelationshipMutate.mutate(graphStore, result, splitConfig);
     }
 
-    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes) {
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes, Optional<String> relationshipWeight) {
         List<String> checkRelTypes = relationshipTypes
             .stream()
             .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS.name : type)
             .collect(Collectors.toList());
 
         SplitRelationshipsMutateConfig testSplitConfig =  ImmutableSplitRelationshipsMutateConfig.builder()
-            .from(splitConfig.testSplit(Optional.empty()))
+            .from(splitConfig.testSplit(Optional.empty(), relationshipWeight))
             .relationshipTypes(checkRelTypes)
             .build();
 
@@ -125,7 +124,7 @@ public class RelationshipSplitter {
             .build();
 
         SplitRelationshipsMutateConfig trainSplitConfig = ImmutableSplitRelationshipsMutateConfig.builder()
-            .from(splitConfig.trainSplit(Optional.empty()))
+            .from(splitConfig.trainSplit(Optional.empty(), relationshipWeight))
             .relationshipTypes(List.of(splitConfig.testComplementRelationshipType()))
             .build();
 

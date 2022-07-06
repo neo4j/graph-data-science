@@ -111,23 +111,25 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     }
 
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig testSplit(Optional<Long> randomSeed) {
+    default SplitRelationshipsBaseConfig testSplit(Optional<Long> randomSeed, Optional<String> relationshipWeightProperty) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(testRelationshipType())
             .remainingRelationshipType(testComplementRelationshipType())
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
             .randomSeed(randomSeed)
             .build();
     }
 
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig trainSplit(Optional<Long> randomSeed) {
+    default SplitRelationshipsBaseConfig trainSplit(Optional<Long> randomSeed,  Optional<String> relationshipWeightProperty) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(trainRelationshipType())
             .remainingRelationshipType(featureInputRelationshipType())
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
             .randomSeed(randomSeed)
             .build();
     }
