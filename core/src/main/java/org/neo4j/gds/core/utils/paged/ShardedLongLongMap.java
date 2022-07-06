@@ -219,6 +219,16 @@ public final class ShardedLongLongMap {
             }
         }
 
+        public boolean containsOriginalId(long nodeId) {
+            var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
+            return shard.containsOriginalId(nodeId);
+        }
+
+        public long toMappedNodeId(long nodeId) {
+            var shard = findShard(nodeId, this.shards, this.shardShift, this.shardMask);
+            return shard.toMappedNodeId(nodeId);
+        }
+
         public ShardedLongLongMap build() {
             return ShardedLongLongMap.build(
                 this.nodeCount.get(),
@@ -244,6 +254,14 @@ public final class ShardedLongLongMap {
             private Shard(AtomicLong nextId) {
                 super();
                 this.nextId = nextId;
+            }
+
+            long toMappedNodeId(long nodeId) {
+                return mapping.get(nodeId);
+            }
+
+            boolean containsOriginalId(long nodeId) {
+                return mapping.containsKey(nodeId);
             }
 
             long addNode(long nodeId) {
