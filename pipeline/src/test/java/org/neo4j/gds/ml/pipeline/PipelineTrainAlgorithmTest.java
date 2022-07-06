@@ -19,12 +19,62 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-class PipelineTrainAlgorithmTest {
+import org.junit.jupiter.api.DynamicTest;
+import org.neo4j.gds.core.model.CatalogModelContainer;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
+import org.neo4j.graphdb.TransactionTerminatedException;
 
-    // Tests
-    // * passed correct graphSchema which does not include the temporary node properties
-    // * termination flag injected
-    // * calls into NodePropertyStep executor
-    // ... ?
+import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+public interface PipelineTrainAlgorithmTest {
+
+    static DynamicTest terminationFlagTest(
+        PipelineTrainAlgorithm<?, ?, ?, ?> algorithm
+    ) {
+        return DynamicTest.dynamicTest("terminationFlag", () ->
+            assertThatThrownBy(() -> {
+                algorithm.setTerminationFlag(() -> false);
+                algorithm.compute();
+            })
+                .isInstanceOf(TransactionTerminatedException.class)
+                .hasMessageContaining("The transaction has been terminated.")
+        );
+    }
+
+    static <MODEL_RESULT extends CatalogModelContainer<?, ?, ?>> DynamicTest originalSchemaTest(
+        PipelineTrainAlgorithm<?, MODEL_RESULT, ?, ?> algorithm,
+        TrainingPipeline<?> pipeline
+    ) {
+        return DynamicTest.dynamicTest("originalSchema", () -> {
+            MODEL_RESULT modelResult = algorithm.compute();
+            var schema = modelResult.model().graphSchema();
+            var nodeProperties = schema.nodeSchema().allProperties();
+            var pipeNodeProperties = pipeline.nodePropertySteps
+                .stream()
+                .map(ExecutableNodePropertyStep::nodeProperty)
+                .collect(Collectors.toList());
+
+            assertThat(pipeNodeProperties).isNotEmpty();
+            assertThat(nodeProperties).doesNotContainAnyElementsOf(pipeNodeProperties);
+
+        });
+    }
+
+    static <PIPELINE extends NodePropertyTrainingPipeline> DynamicTest testParameterSpaceValidation(
+        Function<PIPELINE, PipelineTrainAlgorithm<?, ?, ?, ?>> algorithmSupplier,
+        PIPELINE pipeline
+    ) {
+        return DynamicTest.dynamicTest("testParameterSpaceValidation", () -> {
+                pipeline.featureProperties().addAll(List.of("array", "scalar"));
+                var algorithm = algorithmSupplier.apply(pipeline);
+
+                assertThatThrownBy(algorithm::compute).hasMessageContaining("Need at least one model candidate for training.");
+            }
+        );
+    }
 }
