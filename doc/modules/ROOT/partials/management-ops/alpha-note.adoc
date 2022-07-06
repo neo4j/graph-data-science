@@ -1,3 +1,0 @@
-[.alpha-symbol]
-[.tier-note]
-This feature is in the alpha tier.

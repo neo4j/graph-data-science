@@ -4,7 +4,7 @@
 :description: This chapter explains how to import data using Apache Arrow™ into the Graph Data Science library.
 
 
-include::partial$/management-ops/alpha-note.adoc[]
+include::partial$/operations-reference/alpha-note.adoc[]
 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
