@@ -198,35 +198,35 @@ public class Kmeans extends Algorithm<KmeansResult> {
     }
 
     private InputCondition checkInputValidity() {
-
         AtomicInteger inputState = new AtomicInteger(InputCondition.NORMAL.value);
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
-            if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
-                var value = nodePropertyValues.floatArrayValue(nodeId);
-                if (value.length != dimensions) {
-                    inputState.set(InputCondition.UNEQUALDIMENSION.value);
-                } else {
-                    for (int dimension = 0; dimension < dimensions; ++dimension) {
-                        if (Float.isNaN(value[dimension])) {
-                            inputState.set(InputCondition.NAN.value);
-                            break;
+            if (inputState.get() == InputCondition.NORMAL.value) {
+                if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
+                    var value = nodePropertyValues.floatArrayValue(nodeId);
+                    if (value.length != dimensions) {
+                        inputState.set(InputCondition.UNEQUALDIMENSION.value);
+                    } else {
+                        for (int dimension = 0; dimension < dimensions; ++dimension) {
+                            if (Float.isNaN(value[dimension])) {
+                                inputState.set(InputCondition.NAN.value);
+                                break;
+                            }
                         }
                     }
-                }
-            } else {
-                var value = nodePropertyValues.doubleArrayValue(nodeId);
-                if (value.length != dimensions) {
-                    inputState.set(InputCondition.UNEQUALDIMENSION.value);
                 } else {
-                    for (int dimension = 0; dimension < dimensions; ++dimension) {
-                        if (Double.isNaN(value[dimension])) {
-                            inputState.set(InputCondition.NAN.value);
-                            break;
+                    var value = nodePropertyValues.doubleArrayValue(nodeId);
+                    if (value.length != dimensions) {
+                        inputState.set(InputCondition.UNEQUALDIMENSION.value);
+                    } else {
+                        for (int dimension = 0; dimension < dimensions; ++dimension) {
+                            if (Double.isNaN(value[dimension])) {
+                                inputState.set(InputCondition.NAN.value);
+                                break;
+                            }
                         }
                     }
                 }
             }
-
         });
         InputCondition inputCondition = InputCondition.NORMAL;
         if (inputState.get() == InputCondition.UNEQUALDIMENSION.value) {
