@@ -686,28 +686,6 @@ class NodeClassificationTrainTest {
     }
 
     @Test
-    void failEstimateOnEmptyParameterSpace() {
-        var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.featureProperties().addAll(List.of("array", "scalar"));
-
-        var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline("")
-            .username("myUser")
-            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
-            .modelName("myModel")
-            .concurrency(1)
-            .randomSeed(42L)
-            .targetProperty("t")
-            .relationshipTypes(List.of("SOME_REL"))
-            .nodeLabels(List.of("SOME_LABEL"))
-            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
-            .build();
-
-        assertThatThrownBy(() -> NodeClassificationTrain.estimate(pipeline, config, new OpenModelCatalog()))
-            .hasMessage("Need at least one model candidate for training.");
-    }
-
-    @Test
     void failGivenTooSmallTestSet() {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.featureProperties().addAll(List.of("scalar"));
