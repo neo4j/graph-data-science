@@ -1,4 +1,3 @@
-| Name                | Type                            | Default         | Optional | Description
 | batchSize           | Integer or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.] | 100             | yes      | Number of nodes per batch.
 | minEpochs           | Integer or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.] | 1               | yes      | Minimum number of training epochs.
 | maxEpochs           | Integer or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]  | 100             | yes      | Maximum number of training epochs.

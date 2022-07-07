@@ -24,7 +24,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import java.util.List;
 
 @ValueClass
-public interface ListParameter extends ConcreteParameter<List> {
+public interface ListParameter extends ConcreteParameter<List<Integer>> {
     static ListParameter of(List value) {
         return ImmutableListParameter.of(value);
     }

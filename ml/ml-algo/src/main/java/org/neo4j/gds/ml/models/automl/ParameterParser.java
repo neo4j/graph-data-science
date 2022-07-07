@@ -150,7 +150,9 @@ final class ParameterParser {
         }
 
         if (correctParameterType == List.class) {
-            return ListParameter.of((List) value);
+            //List of numbers from input are parsed as Long by default, we need to cast it to Integer
+            var intValues = ((List<Number>) value).stream().map(Number::intValue).collect(Collectors.toList());
+            return ListParameter.of(intValues);
         }
 
         throw new IllegalStateException(formatWithLocale(

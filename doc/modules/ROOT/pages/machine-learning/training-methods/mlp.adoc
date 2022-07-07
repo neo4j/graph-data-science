@@ -9,3 +9,9 @@ For classification, the size of the output layer is based on the number of class
 
 
 include::partial$/machine-learning/training-methods/gradient-descent-config-tuning.adoc[leveloffset =+ 1]
+
+include::partial$/machine-learning/training-methods/penalty-config-tuning.adoc[leveloffset =+ 1]
+
+
+== HiddenLayerSizes
+This parameter defines the shape of the neural network. Each entry represents the number of neurons in a layer. The length of the list defines the number of hidden layers. In general we want all hidden layer sizes to be larger than input/output layer sizes. Deeper and larger networks can theoretically approximate high degree surfaces better, at the expense of having more weights(and biases) that need to be trained.

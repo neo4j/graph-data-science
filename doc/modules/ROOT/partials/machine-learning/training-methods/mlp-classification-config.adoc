@@ -1,5 +1,13 @@
 .Multilayer Perceptron Classification configuration
 [opts="header",cols="4,5,2m,2,8"]
 |===
+| Name                | Type                            | Default         | Optional | Description
+
 include::partial$/machine-learning/training-methods/gradient-descent-common-config.adoc[]
+
+include::partial$/machine-learning/training-methods/penalty-common-config.adoc[]
+
+| hiddenLayerSizes
+| List of Integers
+| [100]            | yes      | List of integers representing number of neurons in each layer. The default value specifies an MLP with 1 hidden layer of 100 neurons.
 |===

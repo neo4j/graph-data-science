@@ -1,0 +1,3 @@
+| penalty  footnote:log-scale[Ranges for this parameter are auto-tuned on a logarithmic scale.]
+| Float or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]
+| 0.0             | yes      | Penalty used for the logistic regression. By default, no penalty is applied.

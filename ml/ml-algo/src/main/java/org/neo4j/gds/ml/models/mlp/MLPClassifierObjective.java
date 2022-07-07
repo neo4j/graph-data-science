@@ -80,7 +80,7 @@ public class MLPClassifierObjective implements Objective<MLPClassifierData> {
     }
 
     ConstantScale<Scalar> penaltyForBatch(Batch batch, long trainSize) {
-        List<Variable<Scalar>> L2Norms = classifier.data().weights().stream().map(L2NormSquared::new).collect(
+        List<Variable<?>> L2Norms = classifier.data().weights().stream().map(L2NormSquared::new).collect(
             Collectors.toList());
         return new ConstantScale<>(new ElementSum(L2Norms), batch.size() * penalty / trainSize);
     }

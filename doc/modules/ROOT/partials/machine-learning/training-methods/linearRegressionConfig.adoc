@@ -2,8 +2,8 @@
 [opts="header",cols="3,4,2m,2,8"]
 |===
 | Name                | Type                            | Default         | Optional | Description
-| penalty  footnote:log-scale[Ranges for this parameter are auto-tuned on a logarithmic scale.]
-                      | Float or Map footnote:range[A map should be of the form `{range: [minValue, maxValue]}`. It is used by auto-tuning.]
-                                                        | 0.0             | yes      | Penalty used for the linear regression. By default, no penalty is applied.
+
 include::partial$/machine-learning/training-methods/gradient-descent-common-config.adoc[]
+
+include::partial$/machine-learning/training-methods/penalty-common-config.adoc[]
 |===

@@ -107,7 +107,7 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void shouldSetMLPParams() {
         assertCypherResult(
-            "CALL gds.alpha.pipeline.nodeClassification.addMLP('myPipeline', {batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
+            "CALL gds.alpha.pipeline.nodeClassification.addMLP('myPipeline', {hiddenLayerSizes: [16,4], penalty: 0.1, batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
             List.of(Map.of(
                 "name", "myPipeline",
                 "splitConfig", NodeClassificationPipelineCompanion.DEFAULT_SPLIT_CONFIG,
@@ -116,14 +116,17 @@ class NodeClassificationPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                 "featureProperties", List.of(),
                 "parameterSpace", Map.of(
                     TrainingMethod.MLPClassification.toString(),
-                    List.of(MLPClassifierTrainConfigImpl.builder().batchSize(10)
-                        .minEpochs(2)
-                        .patience(2)
-                        .maxEpochs(2)
-                        .tolerance(0.0001)
-                        .learningRate(0.1)
-                        .build()
-                        .toMapWithTrainerMethod()),
+                    List.of(MLPClassifierTrainConfigImpl.builder()
+                            .hiddenLayerSizes(List.of(16,4))
+                            .penalty(0.1)
+                            .batchSize(10)
+                            .minEpochs(2)
+                            .patience(2)
+                            .maxEpochs(2)
+                            .tolerance(0.0001)
+                            .learningRate(0.1)
+                            .build()
+                            .toMapWithTrainerMethod()),
                     TrainingMethod.RandomForestClassification.toString(), List.of(),
                     TrainingMethod.LogisticRegression.toString(), List.of()
                     )))
