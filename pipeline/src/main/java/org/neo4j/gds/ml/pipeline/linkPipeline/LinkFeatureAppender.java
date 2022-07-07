@@ -31,4 +31,10 @@ public interface LinkFeatureAppender {
      * @param offset the start offset in each double[] where the features should be added
      */
     void appendFeatures(long source, long target, double[] linkFeatures, int offset);
+
+    /**
+     *
+     * @return the number of entries to append in to the existing features
+     */
+    int dimension();
 }

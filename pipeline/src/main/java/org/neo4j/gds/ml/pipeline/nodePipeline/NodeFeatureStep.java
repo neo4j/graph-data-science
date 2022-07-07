@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.FeatureStep;
-import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 
 import java.util.List;
 import java.util.Map;
@@ -53,11 +51,6 @@ public class NodeFeatureStep implements ToMapConvertible, FeatureStep {
     @Override
     public Map<String, Object> configuration() {
         return Map.of("nodeProperty", nodeProperty);
-    }
-
-    @Override
-    public int featureDimension(Graph graph) {
-        return FeatureStepUtil.propertyDimension(graph, nodeProperty);
     }
 
     @Override

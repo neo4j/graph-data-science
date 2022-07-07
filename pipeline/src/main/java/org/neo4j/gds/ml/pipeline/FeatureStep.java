@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.List;
@@ -32,6 +31,4 @@ public interface FeatureStep extends ToMapConvertible {
     String name();
 
     Map<String, Object> configuration();
-
-    int featureDimension(Graph graph);
 }

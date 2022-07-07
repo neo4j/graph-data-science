@@ -24,6 +24,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -36,10 +37,11 @@ public final class FeatureStepUtil {
     public static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
         return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
     }
-
     public static int propertyDimension(Graph graph, String nodeProperty) {
-        var nodeProperties = graph.nodeProperties(nodeProperty);
+        return propertyDimension(graph.nodeProperties(nodeProperty), nodeProperty);
+    }
 
+    public static int propertyDimension(NodePropertyValues nodeProperties, String propertyName) {
         int dimension = 0;
         switch (nodeProperties.valueType()) {
             case LONG:
@@ -54,7 +56,7 @@ public final class FeatureStepUtil {
                 dimension = nodeProperties.longArrayValue(0).length;
                 break;
             case UNKNOWN:
-                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
+                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyName));
         }
 
         return dimension;
@@ -109,5 +111,21 @@ public final class FeatureStepUtil {
                 featureStep
             ));
         });
+    }
+
+    public static void throwNanError(
+        String featureStep,
+        Collection<String> nodeProperties,
+        long source,
+        long target
+    ) {
+        throw new IllegalArgumentException(formatWithLocale(
+            "Encountered NaN when combining the nodeProperties %s for the node pair (%d, %d) when computing the %s feature vector. " +
+            "Either define a default value if its a stored property or check the nodePropertyStep.",
+            StringJoining.join(nodeProperties),
+            source,
+            target,
+            featureStep
+        ));
     }
 }

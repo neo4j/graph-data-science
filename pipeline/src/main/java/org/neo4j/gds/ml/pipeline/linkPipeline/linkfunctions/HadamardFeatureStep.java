@@ -44,52 +44,58 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
-        return (source, target, linkFeatures, startOffset) -> {
-            var localOffset = startOffset;
-            for (NodePropertyValues props : properties) {
-                var propertyType = props.valueType();
-                switch (propertyType) {
-                    case DOUBLE_ARRAY:
-                    case FLOAT_ARRAY: {
-                        var sourceArrayPropValues = props.doubleArrayValue(source);
-                        var targetArrayPropValues = props.doubleArrayValue(target);
-                        assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+        int dimension = FeatureStepUtil.totalPropertyDimension(graph, nodeProperties);
+
+        // TODO move out switch + validation
+        return new LinkFeatureAppender() {
+            @Override
+            public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+                var localOffset = offset;
+                for (NodePropertyValues props : properties) {
+                    var propertyType = props.valueType();
+                    switch (propertyType) {
+                        case DOUBLE_ARRAY:
+                        case FLOAT_ARRAY: {
+                            var sourceArrayPropValues = props.doubleArrayValue(source);
+                            var targetArrayPropValues = props.doubleArrayValue(target);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                                linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            }
+                            break;
                         }
-                        break;
-                    }
-                    case LONG_ARRAY: {
-                        var sourceArrayPropValues = props.longArrayValue(source);
-                        var targetArrayPropValues = props.longArrayValue(target);
-                        assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                        for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                            linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                        case LONG_ARRAY: {
+                            var sourceArrayPropValues = props.longArrayValue(source);
+                            var targetArrayPropValues = props.longArrayValue(target);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                                linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+                            }
+                            break;
                         }
-                        break;
+                        case LONG:
+                        case DOUBLE:
+                            linkFeatures[localOffset++] = props.doubleValue(source) * props.doubleValue(target);
+                            break;
+                        case UNKNOWN:
+                            throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                     }
-                    case LONG:
-                    case DOUBLE:
-                        linkFeatures[localOffset++] = props.doubleValue(source) * props.doubleValue(target);
-                        break;
-                    case UNKNOWN:
-                        throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
                 }
+
+                FeatureStepUtil.validateComputedFeatures(linkFeatures, offset, localOffset, () -> throwNanError(
+                    "hadamard",
+                    graph,
+                    nodeProperties,
+                    source,
+                    target
+                ));
             }
 
-            FeatureStepUtil.validateComputedFeatures(linkFeatures, startOffset, localOffset, () -> throwNanError(
-                "hadamard",
-                graph,
-                this.nodeProperties,
-                source,
-                target
-            ));
+            @Override
+            public int dimension() {
+                return dimension;
+            }
         };
-    }
-
-    @Override
-    public int featureDimension(Graph graph) {
-        return FeatureStepUtil.totalPropertyDimension(graph, nodeProperties);
     }
 
     @Override

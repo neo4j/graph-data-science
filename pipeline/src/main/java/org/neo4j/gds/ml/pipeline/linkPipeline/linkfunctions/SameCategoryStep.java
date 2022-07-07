@@ -57,11 +57,6 @@ public class SameCategoryStep implements LinkFeatureStep {
     }
 
     @Override
-    public int featureDimension(Graph graph) {
-        return nodeProperties.size();
-    }
-
-    @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
         var isSamePredicates = new ArrayList<LongLongPredicate>();
 
@@ -69,10 +64,18 @@ public class SameCategoryStep implements LinkFeatureStep {
             isSamePredicates.add(sameCategoryPredicate(graph, nodeProperty));
         }
 
-        return (src, trg, features, offset) -> {
-            int localOffset = offset;
-            for (LongLongPredicate predicate : isSamePredicates) {
-                features[localOffset++] = predicate.apply(src, trg) ? 1.0 : 0.0;
+        return new LinkFeatureAppender() {
+            @Override
+            public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+                int localOffset = offset;
+                for (LongLongPredicate predicate : isSamePredicates) {
+                    linkFeatures[localOffset++] = predicate.apply(source, target) ? 1.0 : 0.0;
+                }
+            }
+
+            @Override
+            public int dimension() {
+                return nodeProperties.size();
             }
         };
     }

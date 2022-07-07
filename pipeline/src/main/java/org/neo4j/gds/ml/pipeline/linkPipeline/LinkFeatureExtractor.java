@@ -43,16 +43,10 @@ import java.util.stream.Collectors;
 public final class LinkFeatureExtractor {
     private final List<LinkFeatureAppender> linkFeatureAppenders;
     private final int featureDimension;
-    private final List<Integer> featureDimensions;
 
-    private LinkFeatureExtractor(
-        List<LinkFeatureAppender> linkFeatureAppenders,
-        int featureDimension,
-        List<Integer> featureDimensions
-    ) {
+    private LinkFeatureExtractor(List<LinkFeatureAppender> linkFeatureAppenders) {
         this.linkFeatureAppenders = linkFeatureAppenders;
-        this.featureDimension = featureDimension;
-        this.featureDimensions = featureDimensions;
+        this.featureDimension = linkFeatureAppenders.stream().mapToInt(LinkFeatureAppender::dimension).sum();
     }
 
     public static LinkFeatureExtractor of(Graph graph, List<LinkFeatureStep> linkFeatureSteps) {
@@ -61,10 +55,7 @@ public final class LinkFeatureExtractor {
             .map(step -> step.linkFeatureAppender(graph))
             .collect(Collectors.toList());
 
-        var featureDimensions = linkFeatureSteps.stream().map(step -> step.featureDimension(graph)).collect(
-            Collectors.toList());
-        int featureDimension = featureDimensions.stream().mapToInt(Integer::intValue).sum();
-        return new LinkFeatureExtractor(linkFeatureProducers, featureDimension, featureDimensions);
+        return new LinkFeatureExtractor(linkFeatureProducers);
     }
 
     public static Features extractFeatures(
@@ -118,10 +109,9 @@ public final class LinkFeatureExtractor {
     public double[] extractFeatures(long source, long target) {
         var featuresForLink = new double[featureDimension];
         int featureOffset = 0;
-        for (int i = 0; i < linkFeatureAppenders.size(); i++) {
-            var featureProducer = linkFeatureAppenders.get(i);
+        for (LinkFeatureAppender featureProducer : linkFeatureAppenders) {
             featureProducer.appendFeatures(source, target, featuresForLink, featureOffset);
-            featureOffset += featureDimensions.get(i);
+            featureOffset += featureProducer.dimension();
         }
         return featuresForLink;
     }
