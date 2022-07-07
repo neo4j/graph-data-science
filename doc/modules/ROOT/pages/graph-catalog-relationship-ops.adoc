@@ -3,15 +3,15 @@
 :description: This section details the operations available over relationships and relationship properties stored in projected graphs within the Neo4j Graph Data Science library.
 
 
-The graphs in the Neo4j Graph Data Science Library support properties for relationships.
-We provide multiple operations to work with the stored relationship-properties in projected graphs.
+The Neo4j Graph Data Science Library provides multiple operations to work with relationships and their properties stored in a projected graphs.
 Relationship properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
 
+To inspect the relationship topology only, the `gds.beta.graph.relationships.stream` procedure can be used.
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
 To persist relationship types in a Neo4j database, we can use `gds.graph.writeRelationship`.
-Similar to streaming relationship properties, it is also possible to write back to Neo4j.
+Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
 
@@ -23,6 +23,46 @@ This is useful to free up main memory or to remove accidentally added relationsh
 .Syntax descriptions of the different operations over relationship types
 [.tabbed-example, caption=]
 ====
+
+[.include-with-stream]
+======
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.stream(
+    graphName: String,
+    relationshipTypes: List of Strings,
+    configuration: Map
+)
+YIELD
+    sourceNodeId: Integer,
+    targetNodeid: Integer,
+    relationshipType: String
+----
+
+[opts="header",cols="1,3,1,5"]
+|===
+| Name                   | Type                       | Optional | Description
+| graphName              | String                     | no       | The name under which the graph is stored in the catalog.
+| relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
+| configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
+|===
+
+.Configuration
+[opts="header",cols="1,1,1,7"]
+|===
+| Name                   | Type                  | Default | Description
+| concurrency            | Integer               | 4       | The number of concurrent threads. Note, this procedure is always running single-threaded.
+|===
+
+.Results
+[opts="header",cols="2,3,5"]
+|===
+| Name                  | Type                                                 | Description
+| sourceNodeId          | Integer                                              | The id of the source node for the relationship.
+| targetNodeId          | Integer                                              | The id of the target node for the relationship.
+| relationshipType      | Integer                                              | The type of the relationship.
+|===
+======
 
 [.include-with-stream-single-property]
 ======
@@ -283,10 +323,99 @@ CALL gds.nodeSimilarity.mutate('personsAndInstruments', {   // <1>
 
 === Stream
 
+
+[[catalog-graph-stream-relationship-topology-example]]
+==== Topology
+
+The most basic case for streaming relationship information from a named graph is streaming its topology.
+In this example below we stream relationship topology for all relationship types, represented by source, target and relationship type.
+
+[role=query-example]
+--
+.Stream all relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.stream(
+  'personsAndInstruments'                  // <1>
+)
+YIELD
+  sourceNodeId, targetNodeId, relationshipType
+RETURN
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType
+ORDER BY source ASC, target ASC
+----
+<1> The name of the projected graph.
+
+.Results
+[opts="header"]
+|===
+| source  | target        | relationshipType
+| "Alice" | "Bob"         | "SIMILAR"
+| "Alice" | "Bongos"      | "LIKES"
+| "Alice" | "Carol"       | "SIMILAR"
+| "Alice" | "Dave"        | "SIMILAR"
+| "Alice" | "Guitar"      | "LIKES"
+| "Alice" | "Synthesizer" | "LIKES"
+| "Bob"   | "Alice"       | "SIMILAR"
+| "Bob"   | "Dave"        | "SIMILAR"
+| "Bob"   | "Guitar"      | "LIKES"
+| "Bob"   | "Synthesizer" | "LIKES"
+| "Carol" | "Alice"       | "SIMILAR"
+| "Carol" | "Bongos"      | "LIKES"
+| "Carol" | "Dave"        | "SIMILAR"
+| "Dave"  | "Alice"       | "SIMILAR"
+| "Dave"  | "Bob"         | "SIMILAR"
+| "Dave"  | "Bongos"      | "LIKES"
+| "Dave"  | "Carol"       | "SIMILAR"
+| "Dave"  | "Guitar"      | "LIKES"
+| "Dave"  | "Synthesizer" | "LIKES"
+|===
+--
+
+As we can see from the results, we get two relationship types (`SIMILAR` and `LIKES`).
+We can further on filter the relationship types we want to stream.
+This can be achieved by passing a second argument to the procedure as demonstrated in the next example.
+
+[role=query-example]
+--
+.Stream a single relationship for specific relationship type:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.graph.relationships.stream(
+  'personsAndInstruments',                  // <1>
+  ['SIMILAR']                               // <2>
+)
+YIELD
+  sourceNodeId, targetNodeId, relationshipType
+RETURN
+  gds.util.asNode(sourceNodeId).name as source, gds.util.asNode(targetNodeId).name as target, relationshipType
+ORDER BY source ASC, target ASC
+----
+<1> The name of the projected graph.
+<2> List of relationship types we want to stream from, only use the ones we need.
+
+.Results
+[opts="header"]
+|===
+|  source | target  | relationshipType
+| "Alice" | "Bob"   | "SIMILAR"
+| "Alice" | "Carol" | "SIMILAR"
+| "Alice" | "Dave"  | "SIMILAR"
+| "Bob"   | "Alice" | "SIMILAR"
+| "Bob"   | "Dave"  | "SIMILAR"
+| "Carol" | "Alice" | "SIMILAR"
+| "Carol" | "Dave"  | "SIMILAR"
+| "Dave"  | "Alice" | "SIMILAR"
+| "Dave"  | "Bob"   | "SIMILAR"
+| "Dave"  | "Carol" | "SIMILAR"
+|===
+--
+
+
 [[catalog-graph-stream-single-relationship-property-example]]
 ==== Single property
 
-The most basic case for streaming relationship information from a named graph is a single property.
+The most basic case for streaming relationship properties from a named graph is a single property.
 In the example below we stream the relationship property `score`.
 
 [role=query-example]

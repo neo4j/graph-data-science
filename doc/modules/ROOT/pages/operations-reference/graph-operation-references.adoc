@@ -42,6 +42,7 @@
 .2+<.^|xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv`
 | `gds.beta.graph.export.csv.estimate`
+|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream`
 |===
 
 
