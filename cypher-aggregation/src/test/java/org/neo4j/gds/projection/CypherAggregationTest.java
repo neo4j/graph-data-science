@@ -359,6 +359,18 @@ class CypherAggregationTest extends BaseProcTest {
     }
 
     @Test
+    void testLabelsOnNodeWithoutLabel() {
+        runQuery("UNWIND [[0, []], [1, ['Label']]] AS idAndLabels " +
+                 "WITH idAndLabels[0] AS id, idAndLabels[1] AS labels " +
+                 "RETURN gds.alpha.graph.project('g', id, null, { sourceNodeLabels: labels })");
+
+        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graph = graphStore.getGraph(NodeLabel.of("Label"));
+
+        assertThat(graph.nodeCount()).isEqualTo(1);
+    }
+
+    @Test
     void testNodeProperties() {
         runQuery(
             "MATCH (s:B)-[:REL]->(t:B) RETURN " +

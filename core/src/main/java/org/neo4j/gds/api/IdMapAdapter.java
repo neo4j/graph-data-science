@@ -17,10 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.cypher;
+package org.neo4j.gds.api;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.collection.primitive.PrimitiveLongIterable;
 
 import java.util.Collection;
@@ -118,5 +117,10 @@ public abstract class IdMapAdapter implements IdMap {
     @Override
     public boolean hasLabel(long nodeId, NodeLabel label) {
         return idMap.hasLabel(nodeId, label);
+    }
+
+    @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
 }

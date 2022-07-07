@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.BaseProc;
@@ -30,6 +31,8 @@ import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.IdMapAdapter;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -40,6 +43,7 @@ import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.compress.AdjacencyCompressor;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -47,11 +51,13 @@ import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.ValueConverter;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.ImmutableIdMapAndProperties;
 import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
@@ -66,6 +72,7 @@ import org.neo4j.values.storable.Values;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -136,8 +143,8 @@ public final class CypherAggregation extends BaseProc {
 
             Map<String, Value> sourceNodePropertyValues = null;
             Map<String, Value> targetNodePropertyValues = null;
-            var sourceNodeLabels = NodeLabelTokens.empty();
-            var targetNodeLabels = NodeLabelTokens.empty();
+            @Nullable NodeLabelToken sourceNodeLabels = null;
+            @Nullable NodeLabelToken targetNodeLabels = null;
 
             if (nodesConfig != null) {
                 sourceNodePropertyValues = propertiesConfig("sourceNodeProperties", nodesConfig);
@@ -159,7 +166,12 @@ public final class CypherAggregation extends BaseProc {
             }
 
             if (this.idMapBuilder == null) {
-                this.idMapBuilder = new LazyIdMapBuilder();
+                this.idMapBuilder = newIdMapBuilder(
+                    sourceNodeLabels,
+                    sourceNodePropertyValues,
+                    targetNodeLabels,
+                    targetNodePropertyValues
+                );
             }
 
             Map<String, Value> relationshipProperties = null;
@@ -196,10 +208,10 @@ public final class CypherAggregation extends BaseProc {
 
             var relImporter = this.relImporters.computeIfAbsent(relationshipType, type -> newRelImporter());
 
-            var sourceNodeId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
+            var intermediateSourceId = loadNode(sourceNode, sourceNodeLabels, sourceNodePropertyValues);
 
             if (targetNode != null) {
-                var targetNodeId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
+                var intermediateTargetId = loadNode(targetNode, targetNodeLabels, targetNodePropertyValues);
 
                 if (this.relationshipPropertySchemas != null && !this.relationshipPropertySchemas.isEmpty()) {
                     assert relationshipProperties != null;
@@ -209,18 +221,30 @@ public final class CypherAggregation extends BaseProc {
                             relationshipProperties,
                             relationshipProperty
                         );
-                        relImporter.addFromInternal(sourceNodeId, targetNodeId, propertyValue);
+                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValue);
                     } else {
                         var propertyValues = loadMultipleRelationshipProperties(
                             relationshipProperties,
                             this.relationshipPropertySchemas
                         );
-                        relImporter.addFromInternal(sourceNodeId, targetNodeId, propertyValues);
+                        relImporter.addFromInternal(intermediateSourceId, intermediateTargetId, propertyValues);
                     }
                 } else {
-                    relImporter.addFromInternal(sourceNodeId, targetNodeId);
+                    relImporter.addFromInternal(intermediateSourceId, intermediateTargetId);
                 }
             }
+        }
+
+        @NotNull
+        private LazyIdMapBuilder newIdMapBuilder(
+            @Nullable NodeLabelToken sourceNodeLabels,
+            @Nullable Map<String, Value> sourceNodeProperties,
+            @Nullable NodeLabelToken targetNodeLabels,
+            @Nullable Map<String, Value> targetNodeProperties
+        ) {
+            boolean hasLabelInformation = !(sourceNodeLabels == null && targetNodeLabels == null);
+            boolean hasProperties = !(sourceNodeProperties == null && targetNodeProperties == null);
+            return new LazyIdMapBuilder(hasLabelInformation, hasProperties);
         }
 
         private void validateGraphName(String graphName) {
@@ -246,26 +270,25 @@ public final class CypherAggregation extends BaseProc {
             ));
         }
 
-        private @NotNull NodeLabelToken labelsConfig(
+        private @Nullable NodeLabelToken labelsConfig(
             Object node,
             String nodeLabelKey,
             @NotNull Map<String, Object> nodesConfig
         ) {
             var nodeLabelsEntry = nodesConfig.remove(nodeLabelKey);
-            var nodeLabels = tryLabelsConfig(node, nodeLabelsEntry);
-
-            if (nodeLabels == null) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
-                    nodeLabelKey,
-                    nodeLabelsEntry.getClass().getSimpleName()
-                ));
-            }
-
-            return nodeLabels;
+            return tryLabelsConfig(node, nodeLabelsEntry, nodeLabelKey);
         }
 
-        private @Nullable NodeLabelToken tryLabelsConfig(Object node, @Nullable Object nodeLabels) {
+        @Contract("_, null, _ -> null")
+        private @Nullable NodeLabelToken tryLabelsConfig(
+            Object node,
+            @Nullable Object nodeLabels,
+            String nodeLabelKey
+        ) {
+            if (nodeLabels == null || Boolean.FALSE.equals(nodeLabels)) {
+                return null;
+            }
+
             if (Boolean.TRUE.equals(nodeLabels)) {
                 if (node instanceof Node) {
                     return NodeLabelTokens.ofNullable(((Node) node).getLabels());
@@ -275,11 +298,17 @@ public final class CypherAggregation extends BaseProc {
                 );
             }
 
-            if (Boolean.FALSE.equals(nodeLabels)) {
-                nodeLabels = null;
+            var nodeLabelToken = NodeLabelTokens.ofNullable(nodeLabels);
+
+            if (nodeLabelToken == null) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
+                    nodeLabelKey,
+                    nodeLabels.getClass().getSimpleName()
+                ));
             }
 
-            return NodeLabelTokens.ofNullable(nodeLabels);
+            return nodeLabelToken;
         }
 
         private @Nullable RelationshipType typeConfig(
@@ -385,15 +414,24 @@ public final class CypherAggregation extends BaseProc {
             return new IllegalArgumentException("The node has to be either a NODE or an INTEGER, but got " + nodeType);
         }
 
+        /**
+         * Adds the given node to the internal nodes builder and returns
+         * the intermediate node id which can be used for relationships.
+         *
+         * @return intermediate node id
+         */
         private long loadNode(
             @Nullable Object node,
-            NodeLabelToken nodeLabels,
+            @Nullable NodeLabelToken nodeLabels,
             @Nullable Map<String, Value> nodeProperties
         ) {
             assert this.idMapBuilder != null;
-            return (nodeProperties == null)
-                ? this.idMapBuilder.addNode(extractNodeId(node), nodeLabels)
-                : this.idMapBuilder.addNodeWithProperties(extractNodeId(node), nodeProperties, nodeLabels);
+
+            var originalNodeId = extractNodeId(node);
+
+            return nodeProperties == null
+                ? this.idMapBuilder.addNode(originalNodeId, nodeLabels)
+                : this.idMapBuilder.addNodeWithProperties(originalNodeId, nodeProperties, nodeLabels);
         }
 
         private static double loadOneRelationshipProperty(
@@ -446,8 +484,8 @@ public final class CypherAggregation extends BaseProc {
                 .capabilities(ImmutableStaticCapabilities.of(true))
                 .databaseId(databaseId);
 
-            var nodes = buildNodesWithProperties(graphStoreBuilder);
-            buildRelationshipsWithProperties(graphStoreBuilder, nodes);
+            var valueMapper = buildNodesWithProperties(graphStoreBuilder);
+            buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
 
             var graphStore = graphStoreBuilder.schema(graphSchemaBuilder.build()).build();
             var config = GraphProjectFromCypherAggregationConfig.of(this.username, graphName);
@@ -466,17 +504,21 @@ public final class CypherAggregation extends BaseProc {
             return this.result;
         }
 
-        private PartialIdMap buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
+        private AdjacencyCompressor.ValueMapper buildNodesWithProperties(GraphStoreBuilder graphStoreBuilder) {
             assert this.idMapBuilder != null;
 
             var idMapAndProperties = this.idMapBuilder.build();
             var nodes = idMapAndProperties.idMap();
+
             var maybeNodeProperties = idMapAndProperties.nodeProperties();
 
             graphStoreBuilder.nodes(nodes);
 
             var nodeSchema = maybeNodeProperties
-                .map(nodeProperties -> GraphAggregator.nodeSchemaWithProperties(nodes.availableNodeLabels(), nodeProperties))
+                .map(nodeProperties -> GraphAggregator.nodeSchemaWithProperties(
+                    nodes.availableNodeLabels(),
+                    nodeProperties
+                ))
                 .orElseGet(() -> nodeSchemaWithoutProperties(nodes.availableNodeLabels()))
                 .unionProperties();
 
@@ -497,14 +539,24 @@ public final class CypherAggregation extends BaseProc {
                     allNodeProperties
                 );
             });
-            return nodes;
+
+            // Relationships are added using their intermediate node ids.
+            // In order to map to the final internal ids, we need to use
+            // the mapping function of the wrapped id map.
+            return nodes.rootIdMap()::toMappedNodeId;
         }
 
-        private void buildRelationshipsWithProperties(GraphStoreBuilder graphStoreBuilder, PartialIdMap nodes) {
+        private void buildRelationshipsWithProperties(
+            GraphStoreBuilder graphStoreBuilder,
+            AdjacencyCompressor.ValueMapper valueMapper
+        ) {
             var relationshipSchemaBuilder = RelationshipSchema.builder();
 
             this.relImporters.forEach((relationshipType, relImporter) -> {
-                var allRelationships = relImporter.buildAll(Optional.of(nodes::toMappedNodeId), Optional.empty());
+                var allRelationships = relImporter.buildAll(
+                    Optional.of(valueMapper),
+                    Optional.empty()
+                );
                 var propertyStore = CSRGraphStoreUtil.buildRelationshipPropertyStore(
                     allRelationships,
                     Objects.requireNonNullElse(this.relationshipPropertySchemas, List.of())
@@ -513,7 +565,11 @@ public final class CypherAggregation extends BaseProc {
                 var relType = relationshipType == null ? RelationshipType.ALL_RELATIONSHIPS : relationshipType;
 
                 propertyStore.relationshipProperties().forEach((propertyKey, relationshipProperties) -> {
-                    relationshipSchemaBuilder.addProperty(relType, propertyKey, relationshipProperties.propertySchema());
+                    relationshipSchemaBuilder.addProperty(
+                        relType,
+                        propertyKey,
+                        relationshipProperties.propertySchema()
+                    );
                 });
 
                 graphStoreBuilder.putRelationships(relType, allRelationships.get(0).topology());
@@ -635,37 +691,106 @@ public final class CypherAggregation extends BaseProc {
     }
 }
 
+final class HighLimitIdMap extends IdMapAdapter {
+
+    private final ShardedLongLongMap highToLowIdSpace;
+
+    HighLimitIdMap(ShardedLongLongMap intermediateIdMap, IdMap internalIdMap) {
+        super(internalIdMap);
+        this.highToLowIdSpace = intermediateIdMap;
+    }
+
+    @Override
+    public long toOriginalNodeId(long nodeId) {
+        return highToLowIdSpace.toOriginalNodeId(super.toOriginalNodeId(nodeId));
+    }
+
+    @Override
+    public long toMappedNodeId(long nodeId) {
+        return super.toMappedNodeId(this.highToLowIdSpace.toMappedNodeId(nodeId));
+    }
+
+    @Override
+    public long toRootNodeId(long nodeId) {
+        return highToLowIdSpace.toOriginalNodeId(super.toRootNodeId(nodeId));
+    }
+
+    @Override
+    public boolean contains(long nodeId) {
+        return super.contains(highToLowIdSpace.toMappedNodeId(nodeId));
+    }
+
+    @Override
+    public long highestNeoId() {
+        return highToLowIdSpace.maxOriginalId();
+    }
+
+    @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        var filteredInternalIdMap = super.withFilteredLabels(nodeLabels, concurrency);
+        return new HighLimitIdMap(this.highToLowIdSpace, filteredInternalIdMap);
+    }
+}
+
 final class LazyIdMapBuilder implements PartialIdMap {
     private final AtomicBoolean isEmpty = new AtomicBoolean(true);
+    private final ShardedLongLongMap.Builder intermediateIdMapBuilder;
+
     private final NodesBuilder nodesBuilder;
 
-    LazyIdMapBuilder() {
+    LazyIdMapBuilder(boolean hasLabelInformation, boolean hasProperties) {
+        this.intermediateIdMapBuilder = ShardedLongLongMap.builder(DEFAULT_CONCURRENCY);
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
-            .hasLabelInformation(true)
-            .hasProperties(true)
-            .deduplicateIds(true)
+            .hasLabelInformation(hasLabelInformation)
+            .hasProperties(hasProperties)
+            .deduplicateIds(false)
             .build();
     }
 
-    long addNode(long nodeId, NodeLabelToken nodeLabels) {
+    long addNode(long nodeId, @Nullable NodeLabelToken nodeLabels) {
+        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+
+        // deduplication
+        if (intermediateId != IdMap.NOT_FOUND) {
+            return intermediateId;
+        }
+
+        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
+
         isEmpty.lazySet(false);
-        this.nodesBuilder.addNode(nodeId, nodeLabels);
-        return nodeId;
+        if (nodeLabels == null) {
+            nodeLabels = NodeLabelTokens.empty();
+        }
+        this.nodesBuilder.addNode(intermediateId, nodeLabels);
+
+        return intermediateId;
     }
 
     long addNodeWithProperties(
         long nodeId,
         Map<String, Value> properties,
-        NodeLabelToken nodeLabels
+        @Nullable NodeLabelToken nodeLabels
     ) {
-        if (properties.isEmpty()) {
-            return addNode(nodeId, nodeLabels);
+        var intermediateId = this.intermediateIdMapBuilder.toMappedNodeId(nodeId);
+
+        // deduplication
+        if (intermediateId != IdMap.NOT_FOUND) {
+            return intermediateId;
         }
 
+        intermediateId = this.intermediateIdMapBuilder.addNode(nodeId);
         isEmpty.lazySet(false);
-        this.nodesBuilder.addNode(nodeId, properties, nodeLabels);
-        return nodeId;
+        if (nodeLabels == null) {
+            nodeLabels = NodeLabelTokens.empty();
+        }
+        if (properties.isEmpty()) {
+            this.nodesBuilder.addNode(intermediateId, nodeLabels);
+        } else {
+            this.nodesBuilder.addNode(intermediateId, properties, nodeLabels);
+        }
+
+        return intermediateId;
     }
 
     @Override
@@ -681,6 +806,16 @@ final class LazyIdMapBuilder implements PartialIdMap {
     }
 
     NodesBuilder.IdMapAndProperties build() {
-        return this.nodesBuilder.build();
+        var idMapAndProperties = this.nodesBuilder.build();
+        var intermediateIdMap = this.intermediateIdMapBuilder.build();
+        var internalIdMap = idMapAndProperties.idMap();
+
+        var idMap = new HighLimitIdMap(intermediateIdMap, internalIdMap);
+
+        return ImmutableIdMapAndProperties
+            .builder()
+            .idMap(idMap)
+            .nodeProperties(idMapAndProperties.nodeProperties())
+            .build();
     }
 }
