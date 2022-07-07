@@ -80,7 +80,6 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
         ));
     }
 
-    //TODO: Why weightBound 2/cols?
     private static Weights<Vector> generateBias(int dim, long randomSeed) {
         var weightBound = Math.sqrt(2d / dim);
         double[] data = new Random(randomSeed)
