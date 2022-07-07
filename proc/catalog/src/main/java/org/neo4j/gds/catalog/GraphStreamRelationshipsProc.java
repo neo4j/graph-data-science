@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.ProcPreconditions;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -31,6 +31,8 @@ import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -63,27 +65,47 @@ public class GraphStreamRelationshipsProc extends CatalogProc {
     }
 
     private static Stream<TopologyResult> streamRelationshipTopology(GraphStore graphStore, GraphStreamRelationshipsConfig config) {
-        var graph = graphStore.getGraph(config
-            .relationshipTypeIdentifiers(graphStore)
-            .toArray(RelationshipType[]::new));
+        var relationshipTypesAndGraphs = config.relationshipTypeIdentifiers(graphStore).stream()
+            .map(relationshipType -> Tuples.pair(relationshipType.name(), graphStore.getGraph(relationshipType)))
+            .collect(Collectors.toList());
 
         return ParallelUtil.parallelStream(
-            LongStream.range(0, graph.nodeCount()),
+            LongStream.range(0, graphStore.nodeCount()),
             config.concurrency(),
             nodeStream -> nodeStream
                 .boxed()
-                .flatMap(nodeId -> graph.streamRelationships(nodeId, Double.NaN))
-                .map(relationshipCursor -> new TopologyResult(relationshipCursor.sourceId(), relationshipCursor.targetId()))
+                .flatMap(nodeId -> relationshipTypesAndGraphs.stream().flatMap(graphAndRelationshipType -> {
+                    var relationshipType = graphAndRelationshipType.getOne();
+                    return graphAndRelationshipType.getTwo()
+                        .streamRelationships(nodeId, Double.NaN)
+                        .map(relationshipCursor -> new TopologyResult(relationshipCursor.sourceId(), relationshipCursor.targetId(), relationshipType));
+                }))
         );
     }
 
     public static class TopologyResult {
         public final long sourceNodeId;
         public final long targetNodeId;
+        public final String relationshipType;
 
-        public TopologyResult(long sourceNodeId, long targetNodeId) {
+        public TopologyResult(long sourceNodeId, long targetNodeId, String relationshipType) {
             this.sourceNodeId = sourceNodeId;
             this.targetNodeId = targetNodeId;
+            this.relationshipType = relationshipType;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TopologyResult that = (TopologyResult) o;
+            return sourceNodeId == that.sourceNodeId && targetNodeId == that.targetNodeId && relationshipType.equals(
+                that.relationshipType);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(sourceNodeId, targetNodeId, relationshipType);
         }
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.apache.commons.lang3.function.TriFunction;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,9 +27,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
-import org.neo4j.gds.api.ImmutableRelationshipCursor;
-import org.neo4j.gds.api.RelationshipCursor;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
+import org.neo4j.gds.catalog.GraphStreamRelationshipsProc.TopologyResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
@@ -36,7 +36,6 @@ import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,21 +68,22 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
 
     @Test
     void shouldStreamAllRelationships() {
-        var actualRelationships = new ArrayList<RelationshipCursor>();
+        var actualRelationships = new ArrayList<TopologyResult>();
 
         runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('graph')", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
-                row.getNumber("targetNodeId").longValue()
+                row.getNumber("targetNodeId").longValue(),
+                row.getString("relationshipType")
             )
         ));
 
         assertThat(actualRelationships).containsExactlyInAnyOrderElementsOf(
             List.of(
-                relationship(idFunction.of("a"), idFunction.of("b")),
-                relationship(idFunction.of("b"), idFunction.of("c")),
-                relationship(idFunction.of("c"), idFunction.of("b")),
-                relationship(idFunction.of("b"), idFunction.of("a"))
+                relationship(idFunction.of("a"), idFunction.of("b"), "REL1"),
+                relationship(idFunction.of("b"), idFunction.of("c"), "REL1"),
+                relationship(idFunction.of("c"), idFunction.of("b"), "REL2"),
+                relationship(idFunction.of("b"), idFunction.of("a"), "REL2")
             )
         );
     }
@@ -92,11 +92,11 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         return Stream.of(
             Arguments.of(
                 "REL1",
-                (BiFunction<Long, Long, RelationshipCursor>) GraphStreamRelationshipsProcTest::relationship
+                (TriFunction<Long, Long, String, TopologyResult>) GraphStreamRelationshipsProcTest::relationship
             ),
             Arguments.of(
                 "REL2",
-                (BiFunction<Long, Long, RelationshipCursor>) GraphStreamRelationshipsProcTest::reverseRelationship
+                (TriFunction<Long, Long, String, TopologyResult>) GraphStreamRelationshipsProcTest::reverseRelationship
             )
         );
     }
@@ -105,22 +105,23 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     @MethodSource("relTypesAndResultContainerFunction")
     void shouldStreamFilteredRelationships(
         String relType,
-        BiFunction<Long, Long, RelationshipCursor> resultContainerFunction
+        TriFunction<Long, Long, String, TopologyResult> resultContainerFunction
     ) {
-        var actualRelationships = new ArrayList<RelationshipCursor>();
+        var actualRelationships = new ArrayList<TopologyResult>();
         runQueryWithRowConsumer(
             "CALL gds.beta.graph.relationships.stream('graph', ['" + relType + "'])",
             row -> actualRelationships.add(
                 resultContainerFunction.apply(
                     row.getNumber("sourceNodeId").longValue(),
-                    row.getNumber("targetNodeId").longValue()
+                    row.getNumber("targetNodeId").longValue(),
+                    row.getString("relationshipType")
                 ))
         );
 
         assertThat(actualRelationships).containsExactlyInAnyOrderElementsOf(
             List.of(
-                relationship(idFunction.of("a"), idFunction.of("b")),
-                relationship(idFunction.of("b"), idFunction.of("c"))
+                relationship(idFunction.of("a"), idFunction.of("b"), relType),
+                relationship(idFunction.of("b"), idFunction.of("c"), relType)
             )
         );
     }
@@ -129,19 +130,20 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
     void shouldStreamInParallel() {
         runQuery("CALL gds.beta.graph.generate('generatedGraph', 10000, 5)");
 
-        var actualRelationships = new ArrayList<RelationshipCursor>();
+        var actualRelationships = new ArrayList<TopologyResult>();
         runQueryWithRowConsumer("CALL gds.beta.graph.relationships.stream('generatedGraph', ['*'], { concurrency: 4 })", row -> actualRelationships.add(
             relationship(
                 row.getNumber("sourceNodeId").longValue(),
-                row.getNumber("targetNodeId").longValue()
+                row.getNumber("targetNodeId").longValue(),
+                row.getString("relationshipType")
             )
         ));
 
-        var expectedRelationships = new ArrayList<RelationshipCursor>();
+        var expectedRelationships = new ArrayList<TopologyResult>();
         var generatedGraph = GraphStoreCatalog.get("", db.databaseId(), "generatedGraph").graphStore().getUnion();
         generatedGraph.forEachNode(nodeId -> {
             generatedGraph.forEachRelationship(nodeId, (source, target) -> expectedRelationships.add(
-                relationship(source, target)
+                relationship(source, target, "REL")
             ));
             return true;
         });
@@ -157,15 +159,15 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
             .hasMessageContaining("'NON_EXISTENT'");
     }
 
-    private static RelationshipCursor relationship(long sourceId, long targetId) {
-        return ImmutableRelationshipCursor.of(
+    private static TopologyResult relationship(long sourceId, long targetId, String relationshipType) {
+        return new TopologyResult(
             sourceId,
             targetId,
-            Double.NaN
+            relationshipType
         );
     }
 
-    private static RelationshipCursor reverseRelationship(long sourceId, long targetId) {
-        return relationship(targetId, sourceId);
+    private static TopologyResult reverseRelationship(long sourceId, long targetId, String relationshipType) {
+        return relationship(targetId, sourceId, relationshipType);
     }
 }
