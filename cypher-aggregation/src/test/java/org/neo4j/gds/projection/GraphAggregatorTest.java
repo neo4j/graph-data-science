@@ -20,9 +20,9 @@
 package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.HashMap;
 
@@ -34,12 +34,9 @@ class GraphAggregatorTest {
     void shouldImportHighNodeIds() {
         var userName = "neo4j";
         var graphName = "graph";
+        var namedDbId = Neo4jProxy.randomDatabaseId();
 
-        var aggregator = new CypherAggregation.GraphAggregator(
-            ProgressTimer.start(),
-            NamedDatabaseId.NAMED_SYSTEM_DATABASE_ID,
-            userName
-        );
+        var aggregator = new CypherAggregation.GraphAggregator(ProgressTimer.start(), namedDbId, userName);
 
         long source = 1L << 50;
         long target = (1L << 50) + 1;
@@ -51,7 +48,7 @@ class GraphAggregatorTest {
         assertThat(result.nodeCount()).isEqualTo(2);
         assertThat(result.relationshipCount()).isEqualTo(1);
 
-        var graphStoreWithConfig = GraphStoreCatalog.get(userName, NamedDatabaseId.NAMED_SYSTEM_DATABASE_ID, graphName);
+        var graphStoreWithConfig = GraphStoreCatalog.get(userName, namedDbId, graphName);
         var graphStore = graphStoreWithConfig.graphStore();
 
         assertThat(graphStore.nodes().toOriginalNodeId(0)).isEqualTo(source);
