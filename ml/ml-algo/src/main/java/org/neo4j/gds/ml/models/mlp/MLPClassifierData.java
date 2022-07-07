@@ -29,6 +29,7 @@ import org.neo4j.gds.ml.models.TrainingMethod;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.SplittableRandom;
 
 @ValueClass
 public interface MLPClassifierData extends Classifier.ClassifierData {
@@ -41,9 +42,8 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
 
     default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
-    static MLPClassifierData create(int classCount, int featureCount, List<Integer> hiddenLayerSizes) {
+    static MLPClassifierData create(int classCount, int featureCount, List<Integer> hiddenLayerSizes, SplittableRandom random) {
 
-        Random random = new Random();
         var weights = new ArrayList<Weights<Matrix>>();
         var biases = new ArrayList<Weights<Vector>>();
         var hiddenDepth = hiddenLayerSizes.size();

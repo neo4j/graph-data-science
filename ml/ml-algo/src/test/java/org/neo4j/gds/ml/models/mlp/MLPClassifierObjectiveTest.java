@@ -51,7 +51,7 @@ class MLPClassifierObjectiveTest {
             }
             @Override
             public List<Weights<Matrix>> weights() {
-                return List.of(new Weights<>(new Matrix(6,3)), new Weights<>(new Matrix(3,6)));
+                return List.of(new Weights<>(Matrix.create(0.1,6,3)), new Weights<>(Matrix.create(0.1,3,6)));
             }
             @Override
             public List<Weights<Vector>> biases() {
@@ -73,13 +73,21 @@ class MLPClassifierObjectiveTest {
         var labels = HugeIntArray.of(1,2,3);
 
 
-        var objective = new MLPClassifierObjective(classifier, features, labels);
+        var objective = new MLPClassifierObjective(classifier, features, labels, 0.1);
         var batch = new RangeBatch(0,2,3);
-        var loss = objective.loss(batch, 0);
         var ctx = new ComputationContext();
+
+        var crossEntropy = objective.crossEntropyLoss(batch);
+        var penalty = objective.penaltyForBatch(batch, 3);
+        var loss = objective.loss(batch, 3);
+
+        var crossEntropyValue = ctx.forward(crossEntropy).value();
+        var penaltyValue = ctx.forward(penalty).value();
         var lossValue = ctx.forward(loss).value();
 
-        assertThat(lossValue).isCloseTo(1.09861228866811, Offset.offset(1e-08));
+        assertThat(crossEntropyValue).isCloseTo(1.09861228866811, Offset.offset(1e-08));
+        assertThat(penaltyValue).isCloseTo(0.024000000000000014, Offset.offset(1e-08));
+        assertThat(lossValue).isCloseTo(1.12261228866811, Offset.offset(1e-08));
     }
 
 }

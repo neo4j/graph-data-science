@@ -79,6 +79,7 @@ public final class ClassifierTrainerFactory {
                 return new MLPClassifierTrainer(
                     numberOfClasses,
                     (MLPClassifierTrainConfig) config,
+                    randomSeed,
                     progressTracker,
                     messageLogLevel,
                     terminationFlag,

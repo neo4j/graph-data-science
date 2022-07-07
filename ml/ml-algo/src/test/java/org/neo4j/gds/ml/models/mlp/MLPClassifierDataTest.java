@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.models.mlp;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.SplittableRandom;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -30,7 +31,7 @@ class MLPClassifierDataTest {
     @Test
     void shouldCreateData() {
         var hiddenLayerSizes = List.of(24,18,12);
-        var data = MLPClassifierData.create(3, 4, hiddenLayerSizes);
+        var data = MLPClassifierData.create(3, 4, hiddenLayerSizes, new SplittableRandom(0l));
 
         var weights = data.weights();
         var biases = data.biases();

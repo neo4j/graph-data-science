@@ -49,7 +49,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
@@ -844,7 +844,7 @@ class LinkPredictionTrainTest {
                 TrainingMethod.RandomForestClassification
             ));
         pipeline.addTrainerConfig(
-            MLPClassifierTrainConfig.of(Map.of())
+            MLPClassifierTrainConfigImpl.builder().hiddenLayerSizes(List.of(1)).build()
         );
 
         pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));

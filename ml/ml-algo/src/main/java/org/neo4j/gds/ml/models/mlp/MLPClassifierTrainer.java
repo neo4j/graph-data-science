@@ -29,6 +29,8 @@ import org.neo4j.gds.ml.gradientdescent.Training;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.Features;
 
+import java.util.Optional;
+import java.util.SplittableRandom;
 import java.util.function.Supplier;
 
 public class MLPClassifierTrainer implements ClassifierTrainer {
@@ -36,6 +38,8 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
     private final int numberOfClasses;
 
     private final MLPClassifierTrainConfig trainConfig;
+
+    private final SplittableRandom random;
 
     private final ProgressTracker progressTracker;
 
@@ -47,6 +51,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
 
     public MLPClassifierTrainer(int numberOfClasses,
                                 MLPClassifierTrainConfig trainConfig,
+                                Optional<Long> randomSeed,
                                 ProgressTracker progressTracker,
                                 LogLevel messageLogLevel,
                                 TerminationFlag terminationFlag,
@@ -54,6 +59,7 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
     ) {
         this.numberOfClasses = numberOfClasses;
         this.trainConfig = trainConfig;
+        this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.progressTracker = progressTracker;
         this.messageLogLevel = messageLogLevel;
         this.terminationFlag = terminationFlag;
@@ -61,9 +67,9 @@ public class MLPClassifierTrainer implements ClassifierTrainer {
     }
     @Override
     public MLPClassifier train(Features features, HugeIntArray labels, ReadOnlyHugeLongArray trainSet) {
-        var data = MLPClassifierData.create(numberOfClasses, features.featureDimension(), trainConfig.hiddenLayerSizes());
+        var data = MLPClassifierData.create(numberOfClasses, features.featureDimension(), trainConfig.hiddenLayerSizes(), random);
         var classifier = new MLPClassifier(data);
-        var objective = new MLPClassifierObjective(classifier, features, labels);
+        var objective = new MLPClassifierObjective(classifier, features, labels, 0);
         var training = new Training(trainConfig, progressTracker, messageLogLevel, trainSet.size(), terminationFlag);
 
         Supplier<BatchQueue> queueSupplier = () -> BatchQueue.fromArray(trainSet, trainConfig.batchSize());
