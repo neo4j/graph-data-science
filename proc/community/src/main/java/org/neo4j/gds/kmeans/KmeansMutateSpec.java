@@ -82,6 +82,10 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
         if (executionContext.containsOutputField("averageDistanceToCentroid")) {
             builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
         }
+        
+        if (executionContext.containsOutputField("averageSilhouette")) {
+            builder.withAverageSilhouette(computationResult.result().averageSilhouette());
+        }
         builder.withCommunityFunction(computationResult.result().communities()::get)
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())

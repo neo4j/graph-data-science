@@ -67,6 +67,9 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
                 builder.withAverageDistanceToCentroid(computationResult.result().averageDistanceToCentroid());
             }
 
+            if (executionContext.containsOutputField("averageSilhouette")) {
+                builder.withAverageSilhouette(computationResult.result().averageSilhouette());
+            }
             builder.withCommunityFunction(computationResult.result().communities()::get)
                 .withPreProcessingMillis(computationResult.preProcessingMillis())
                 .withComputeMillis(computationResult.computeMillis())
