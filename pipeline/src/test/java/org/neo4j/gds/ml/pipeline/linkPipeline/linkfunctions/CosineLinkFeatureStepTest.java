@@ -34,7 +34,7 @@ import static org.assertj.core.data.Offset.offset;
 final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
 
     @Test
-    public void runCosineLinkFeatureStep() {
+    void runCosineLinkFeatureStep() {
 
         var step = LinkFeatureStepFactory.create(
             "cosine",
@@ -85,7 +85,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     }
 
     @Test
-    public void failsOnNaNValues() {
+    void failsOnNaNValues() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
             LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("invalidValue", "z")).build()

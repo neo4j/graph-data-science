@@ -28,7 +28,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -42,58 +41,27 @@ public class CosineFeatureStep implements LinkFeatureStep {
 
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
-        var nodeProperties = this.nodePropertyNames.stream().map(graph::nodeProperties).collect(Collectors.toList());
+        PartialL2WithNormsComputer[] partialL2WithNormsComputers = nodePropertyNames
+            .stream()
+            .map(nodePropertyName -> createComputer(graph, nodePropertyName))
+            .toArray(PartialL2WithNormsComputer[]::new);
 
-        // TODO UnionLinkFeatureAppender that keeps the context (squareNorms)
         return new LinkFeatureAppender() {
             @Override
             public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
-                var sourceSquareNorm = 0.0;
-                var targetSquareNorm = 0.0;
+                var partialResults = new CosineComputationResult();
 
-                for (NodePropertyValues props : nodeProperties) {
-                    var propertyType = props.valueType();
-                    switch (propertyType) {
-                        case DOUBLE_ARRAY:
-                        case FLOAT_ARRAY: {
-                            var sourceArrayPropValues = props.doubleArrayValue(source);
-                            var targetArrayPropValues = props.doubleArrayValue(target);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                linkFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG_ARRAY: {
-                            var sourceArrayPropValues = props.longArrayValue(source);
-                            var targetArrayPropValues = props.longArrayValue(target);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                linkFeatures[offset] += sourceArrayPropValues[i] * targetArrayPropValues[i];
-                                sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
-                                targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG:
-                        case DOUBLE: {
-                            linkFeatures[offset] += props.doubleValue(source) * props.doubleValue(target);
-                            sourceSquareNorm += props.doubleValue(source) * props.doubleValue(source);
-                            targetSquareNorm += props.doubleValue(target) * props.doubleValue(target);
-                            break;
-                        }
-                        case UNKNOWN:
-                            throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
-                    }
+                for (int i = 0; i < partialL2WithNormsComputers.length; i++) {
+                    partialL2WithNormsComputers[i].compute(source, target, partialResults);
                 }
-                double l2Norm = Math.sqrt(sourceSquareNorm * targetSquareNorm);
+                linkFeatures[offset] = partialResults.hadamardProduct;
+
+                double l2Norm = Math.sqrt(partialResults.sourceSquareNorm * partialResults.targetSquareNorm);
 
                 if (Double.isNaN(l2Norm)) {
                     FeatureStepUtil.throwNanError("cosine", graph, nodePropertyNames, source, target);
                 } else if (l2Norm != 0.0) {
-                    linkFeatures[offset] /= l2Norm;
+                    linkFeatures[offset] = partialResults.hadamardProduct / l2Norm;
                 }
             }
 
@@ -117,5 +85,156 @@ public class CosineFeatureStep implements LinkFeatureStep {
     @Override
     public Map<String, Object> configuration() {
         return Map.of("nodeProperties", nodePropertyNames);
+    }
+
+    PartialL2WithNormsComputer createComputer(Graph graph, String propertyName) {
+        var values = graph.nodeProperties(propertyName);
+
+        switch (values.valueType()) {
+            case DOUBLE_ARRAY:
+                return new DoubleArrayComputer(values);
+            case FLOAT_ARRAY:
+                return new FloatArrayComputer(values);
+            case LONG_ARRAY:
+                return new LongArrayComputer(values);
+            case LONG:
+                return new LongComputer(values);
+            case DOUBLE:
+                return new DoubleComputer(values);
+            default:
+                throw new IllegalStateException(formatWithLocale("Unsupported ValueType %s", values.valueType()));
+        }
+    }
+
+    private static class CosineComputationResult {
+        double sourceSquareNorm;
+        double targetSquareNorm;
+        double hadamardProduct;
+
+        CosineComputationResult() {
+            this.sourceSquareNorm = 0.0;
+            this.targetSquareNorm = 0.0;
+            this.hadamardProduct = 0.0;
+        }
+    }
+
+    private abstract static class PartialL2WithNormsComputer {
+
+        protected final NodePropertyValues values;
+
+        PartialL2WithNormsComputer(NodePropertyValues values) {
+            this.values = values;
+        }
+
+        abstract void compute(
+            long source,
+            long target,
+            CosineComputationResult result
+        );
+    }
+
+    private static class DoubleArrayComputer extends PartialL2WithNormsComputer {
+
+        DoubleArrayComputer(NodePropertyValues values) {
+            super(values);
+        }
+
+        @Override
+        void compute(
+            long source,
+            long target,
+            CosineComputationResult result
+        ) {
+            var sourceArrayPropValues = values.doubleArrayValue(source);
+            var targetArrayPropValues = values.doubleArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
+                result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class FloatArrayComputer extends PartialL2WithNormsComputer {
+
+        FloatArrayComputer(NodePropertyValues values) {
+            super(values);
+        }
+
+        @Override
+        void compute(
+            long source,
+            long target,
+            CosineComputationResult result
+        ) {
+            var sourceArrayPropValues = values.floatArrayValue(source);
+            var targetArrayPropValues = values.floatArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
+                result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class LongArrayComputer extends PartialL2WithNormsComputer {
+
+        LongArrayComputer(NodePropertyValues values) {
+            super(values);
+        }
+
+        @Override
+        void compute(
+            long source,
+            long target,
+            CosineComputationResult result
+        ) {
+            var sourceArrayPropValues = values.longArrayValue(source);
+            var targetArrayPropValues = values.longArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
+                result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class DoubleComputer extends PartialL2WithNormsComputer {
+
+        DoubleComputer(NodePropertyValues values) {
+            super(values);
+        }
+
+        @Override
+        void compute(
+            long source,
+            long target,
+            CosineComputationResult result
+        ) {
+            var sourceArrayPropValues = values.doubleValue(source);
+            var targetArrayPropValues = values.doubleValue(target);
+            result.hadamardProduct += sourceArrayPropValues * targetArrayPropValues;
+            result.sourceSquareNorm += sourceArrayPropValues * sourceArrayPropValues;
+            result.targetSquareNorm += targetArrayPropValues * targetArrayPropValues;
+        }
+    }
+
+    private static class LongComputer extends PartialL2WithNormsComputer {
+
+        LongComputer(NodePropertyValues values) {
+            super(values);
+        }
+
+        @Override
+        void compute(long source, long target, CosineComputationResult result) {
+            var sourceArrayPropValues = values.longValue(source);
+            var targetArrayPropValues = values.longValue(target);
+            result.hadamardProduct += sourceArrayPropValues * targetArrayPropValues;
+            result.sourceSquareNorm += sourceArrayPropValues * sourceArrayPropValues;
+            result.targetSquareNorm += targetArrayPropValues * targetArrayPropValues;
+        }
     }
 }
