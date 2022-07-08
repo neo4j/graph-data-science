@@ -22,8 +22,9 @@ package org.neo4j.gds.ml.gradientdescent;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.config.ToleranceConfig;
 
-public interface GradientDescentConfig extends ToMapConvertible {
+public interface GradientDescentConfig extends ToleranceConfig, ToMapConvertible {
 
     int DEFAULT_BATCH_SIZE = 100;
     int MAX_EPOCHS = 100;
