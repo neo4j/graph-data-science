@@ -315,9 +315,23 @@ public final class GraphFactory {
         } else {
             relationshipSchemaBuilder.addRelationshipType(relationshipType);
         }
+        return create(
+            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build(), Map.of()),
+            idMap,
+            nodeProperties,
+            relationships
+        );
+    }
+
+    public static HugeGraph create(
+        GraphSchema graphSchema,
+        IdMap idMap,
+        Map<String, NodePropertyValues> nodeProperties,
+        Relationships relationships
+    ) {
         return HugeGraph.create(
             idMap,
-            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build(), Map.of()),
+            graphSchema,
             nodeProperties,
             relationships.topology(),
             relationships.properties()

@@ -27,7 +27,9 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -117,7 +119,9 @@ public final class RandomGraphGenerator {
             generateNodes(nodesBuilder);
         }
 
-        IdMap idMap = nodesBuilder.build().idMap();
+        var idMap = nodesBuilder.build().idMap();
+        var nodePropertiesAndSchema = generateNodeProperties(idMap);
+
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(idMap)
             .orientation(orientation)
@@ -130,22 +134,23 @@ public final class RandomGraphGenerator {
 
         generateRelationships(relationshipsBuilder);
 
-        if (!nodePropertyProducers.isEmpty()) {
-            var nodeProperties = generateNodeProperties(idMap);
+        var relationships = relationshipsBuilder.build();
+        var relationshipSchema = relationshipSchema();
 
-            return GraphFactory.create(
-                idMap,
-                nodeProperties.nodeSchema(),
-                nodeProperties.nodeProperties(),
-                relationshipType,
-                relationshipsBuilder.build()
-            );
-        } else {
-            return GraphFactory.create(
-                idMap,
-                relationshipsBuilder.build()
-            );
-        }
+        var graphSchema = GraphSchema.of(nodePropertiesAndSchema.nodeSchema(), relationshipSchema, Map.of());
+
+        return GraphFactory.create(graphSchema, idMap, nodePropertiesAndSchema.nodeProperties(), relationships);
+    }
+
+    private RelationshipSchema relationshipSchema() {
+        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        relationshipSchemaBuilder.addRelationshipType(relationshipType);
+        maybeRelationshipPropertyProducer.ifPresent(pp -> relationshipSchemaBuilder.addProperty(
+            relationshipType,
+            pp.getPropertyName(),
+            pp.propertyType()
+        ));
+        return relationshipSchemaBuilder.build();
     }
 
     public RelationshipDistribution getRelationshipDistribution() {
@@ -214,35 +219,44 @@ public final class RandomGraphGenerator {
     }
 
     private NodePropertiesAndSchema generateNodeProperties(IdMap idMap) {
+        if (this.nodePropertyProducers.isEmpty()) {
+            var nodeSchemaBuilder = NodeSchema.builder();
+            idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+            return ImmutableNodePropertiesAndSchema.builder()
+                .nodeSchema(nodeSchemaBuilder.build())
+                .nodeProperties(Map.of())
+                .build();
+        }
+
         var propertyNameToLabels = new HashMap<String, List<NodeLabel>>();
         var propertyNameToProducers = new HashMap<String, PropertyProducer<?>>();
 
-        nodePropertyProducers.forEach((nodeLabel, propertyProducers) -> {
-                if (nodeLabel != NodeLabel.ALL_NODES && !idMap.availableNodeLabels().contains(nodeLabel)) {
-                    return;
-                }
+        this.nodePropertyProducers.forEach((nodeLabel, propertyProducers) -> {
+            if (nodeLabel != NodeLabel.ALL_NODES && !idMap.availableNodeLabels().contains(nodeLabel)) {
+                return;
+            }
 
-                propertyProducers.forEach(propertyProducer -> {
-                    // map property names to all labels for that property
-                    propertyNameToLabels
-                        .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
-                        .add(nodeLabel);
-                    // group producers by property name
-                    propertyNameToProducers.merge(
-                        propertyProducer.getPropertyName(),
-                        propertyProducer,
-                        (first, second) -> {
-                            if (!first.equals(second)) {
-                                throw new IllegalArgumentException(formatWithLocale(
-                                    "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
-                                    first.getPropertyName(),
-                                    first,
-                                    second
-                                ));
-                            }
-                            return first;
+            propertyProducers.forEach(propertyProducer -> {
+                // map property names to all labels for that property
+                propertyNameToLabels
+                    .computeIfAbsent(propertyProducer.getPropertyName(), ignore -> new ArrayList<>())
+                    .add(nodeLabel);
+                // group producers by property name
+                propertyNameToProducers.merge(
+                    propertyProducer.getPropertyName(),
+                    propertyProducer,
+                    (first, second) -> {
+                        if (!first.equals(second)) {
+                            throw new IllegalArgumentException(formatWithLocale(
+                                "Duplicate node properties with name [%s]. The first property producer is [%s], the second one is [%s].",
+                                first.getPropertyName(),
+                                first,
+                                second
+                            ));
                         }
-                    );
+                        return first;
+                    }
+                );
                 });
             }
         );
@@ -264,7 +278,8 @@ public final class RandomGraphGenerator {
                 if (nodeLabel == NodeLabel.ALL_NODES) {
                     idMap
                         .availableNodeLabels()
-                        .forEach(actualNodeLabel -> nodeSchemaBuilder.addProperty(actualNodeLabel,
+                        .forEach(actualNodeLabel -> nodeSchemaBuilder.addProperty(
+                            actualNodeLabel,
                             propertyKey,
                             property.valueType()
                         ));
@@ -280,7 +295,10 @@ public final class RandomGraphGenerator {
     }
 
     @SuppressWarnings("unchecked")
-    private NodePropertyValues generateProperties(PrimitiveIterator.OfLong nodes, PropertyProducer<?> propertyProducer) {
+    private NodePropertyValues generateProperties(
+        PrimitiveIterator.OfLong nodes,
+        PropertyProducer<?> propertyProducer
+    ) {
         switch (propertyProducer.propertyType()) {
             case LONG:
                 var longValues = HugeLongArray.newArray(nodeCount);
