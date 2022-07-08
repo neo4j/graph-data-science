@@ -76,10 +76,7 @@ final class L2LinkFeatureStepTest {
 
     @Test
     void handlesZeroVectors() {
-        var step = LinkFeatureStepFactory.create(
-            "L2",
-            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("zeros")).build()
-        );
+        var step = new L2FeatureStep(List.of("zeros"));
 
         var linkFeatures = LinkFeatureExtractor.extractFeatures(
             graph,
@@ -95,7 +92,7 @@ final class L2LinkFeatureStepTest {
     }
 
     @Test
-    public void failsOnNaNValues() {
+    void failsOnNaNValues() {
         var step = new L2FeatureStep(List.of("invalidValue", "z"));
 
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(
