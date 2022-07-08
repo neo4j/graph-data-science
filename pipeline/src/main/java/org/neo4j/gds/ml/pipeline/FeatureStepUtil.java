@@ -23,10 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -34,9 +31,6 @@ public final class FeatureStepUtil {
 
     private FeatureStepUtil() {}
 
-    public static int totalPropertyDimension(Graph graph, List<String> nodeProperties) {
-        return nodeProperties.stream().mapToInt(property -> FeatureStepUtil.propertyDimension(graph, property)).sum();
-    }
     public static int propertyDimension(Graph graph, String nodeProperty) {
         return propertyDimension(graph.nodeProperties(nodeProperty), nodeProperty);
     }
@@ -62,20 +56,6 @@ public final class FeatureStepUtil {
         return dimension;
     }
 
-    static boolean isNaN(long nodeId, NodePropertyValues nodeProperty) {
-        switch (nodeProperty.valueType()) {
-            case DOUBLE:
-                return Double.isNaN(nodeProperty.doubleValue(nodeId));
-            case DOUBLE_ARRAY:
-            case FLOAT_ARRAY:
-                return Arrays.stream(nodeProperty.doubleArrayValue(nodeId)).anyMatch(Double::isNaN);
-            case UNKNOWN:
-                throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", nodeProperty));
-            default:
-                return false;
-        }
-    }
-
     public static void validateComputedFeatures(
         double[] linkFeatures,
         int startOffset,
@@ -87,30 +67,6 @@ public final class FeatureStepUtil {
                 throwError.run();
             }
         }
-    }
-
-    public static void throwNanError(
-        String featureStep,
-        Graph graph,
-        List<String> nodeProperties,
-        long source,
-        long target
-    ) {
-        nodeProperties.forEach(propertyKey -> {
-            var property = graph.nodeProperties(propertyKey);
-            var nanNodes = Stream
-                .of(source, target)
-                .filter(node -> !isNaN(node, property))
-                .map(Object::toString);
-
-            throw new IllegalArgumentException(formatWithLocale(
-                "Encountered NaN in the nodeProperty `%s` for nodes %s when computing the %s feature vector. " +
-                "Either define a default value if its a stored property or check the nodePropertyStep",
-                propertyKey,
-                StringJoining.join(nanNodes),
-                featureStep
-            ));
-        });
     }
 
     public static void throwNanError(

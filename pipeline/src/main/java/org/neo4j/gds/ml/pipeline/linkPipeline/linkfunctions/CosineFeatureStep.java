@@ -59,7 +59,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
                 double l2Norm = Math.sqrt(partialResults.sourceSquareNorm * partialResults.targetSquareNorm);
 
                 if (Double.isNaN(l2Norm)) {
-                    FeatureStepUtil.throwNanError("cosine", graph, nodePropertyNames, source, target);
+                    FeatureStepUtil.throwNanError("cosine", nodePropertyNames, source, target);
                 } else if (l2Norm != 0.0) {
                     linkFeatures[offset] = partialResults.hadamardProduct / l2Norm;
                 }
