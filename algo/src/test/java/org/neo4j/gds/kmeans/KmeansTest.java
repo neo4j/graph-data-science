@@ -136,6 +136,7 @@ class KmeansTest {
         var centers = result.centers();
 
         var averageDistance = result.averageDistanceToCentroid();
+        
 
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
         assertThat(communities.get(2)).isEqualTo(communities.get(3));
@@ -151,6 +152,7 @@ class KmeansTest {
 
         //distances are  anyway checked above, so we just take their mean as one last confirmation
         assertThat(averageDistance).isCloseTo(distances.stream().sum() / 4.0, Offset.offset(1e-4));
+
     }
 
     @Test
@@ -215,5 +217,43 @@ class KmeansTest {
             .isEqualTo(communities.get(3))
             .isEqualTo(communities.get(4));
         assertThat(communities.get(0)).isNotEqualTo(communities.get(1));
+    }
+
+    @Test
+    void shouldComputeSilhouetteCorrectly() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .k(2)
+            .computeSilhouette(true)
+            .build();
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var result = kmeans.compute();
+
+        var silhouette = result.silhouette();
+        var averageSilhouette = result.averageSilhouette();
+
+        // d(a,b) =1   d(a,c)= sqrt(101^2 + 99^2)   d(a,d)=sqrt(101^2 + 99^2)
+        // s(a) = 1 -1/sqrt(101^2+99^2)
+        assertThat(silhouette.get(0)).isCloseTo(0.99292928571, Offset.offset(1e-4));
+
+        //d(b,c) =  sqrt(101^2 + 98^2)  d(b,d) = sqrt(99^2 + 100^2)
+        // s(b) = 1 - 2/(sqrt(101^2 + 98^2) + sqrt(99^2 + 100^2))
+        assertThat(silhouette.get(1)).isCloseTo(0.99289384777, Offset.offset(1e-4));
+
+
+        //d(c,d) = sqrt(8)
+        //s(c) = 1 - 2*sqrt(8) / (sqrt(101^2 + 99^2) + sqrt(101^2 + 98^2) )
+        assertThat(silhouette.get(2)).isCloseTo(0.97995151331, Offset.offset(1e-4));
+
+        //s(d) = 1 - 2*sqrt(8) / (sqrt(101^2 + 99^2) + sqrt(99^2 + 100^2) )
+        assertThat(silhouette.get(3)).isCloseTo(0.97995050342, Offset.offset(1e-4));
+
+        assertThat(averageSilhouette).isCloseTo((silhouette.get(0) + silhouette.get(1) + silhouette.get(2) + silhouette.get(
+            3)) / 4.0, Offset.offset(1e-4));
+
     }
 }
