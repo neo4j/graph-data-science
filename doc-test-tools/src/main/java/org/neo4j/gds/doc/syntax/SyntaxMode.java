@@ -33,6 +33,7 @@ public enum SyntaxMode {
     GRAPH_PROJECT_CYPHER_AGGREGATION("graph-project-cypher-aggregation-syntax"),
     STREAM_NODE_PROPERTIES("stream-node-properties-syntax"),
     STREAM_SINGLE_PROPERTY("include-with-stream-single-property"),
+    STREAM_TOPOLOGY("include-with-stream-topology"),
     GRAPH_EXISTS("graph-exists-syntax"),
     MODEL_EXISTS("model-exists-syntax"),
     GRAPH_EXPORT("graph-export-syntax"),

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -30,7 +29,6 @@ import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,31 +38,10 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
-
-    @Configuration.Parameter
-    Optional<String> graphName();
+public interface GraphStreamRelationshipPropertiesConfig extends GraphStreamRelationshipsConfig {
 
     @Configuration.Parameter
     List<String> relationshipProperties();
-
-    @Configuration.Parameter
-    @Value.Default
-    default List<String> relationshipTypes() {
-        return Collections.singletonList(ElementProjection.PROJECT_ALL);
-    }
-
-    @Configuration.Ignore
-    default Collection<RelationshipType> relationshipTypeIdentifiers(GraphStore graphStore) {
-        return relationshipTypes().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : relationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
-    }
-
-    @Value.Default
-    default int concurrency() {
-        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
-    }
 
     @Configuration.Ignore
     default void validate(GraphStore graphStore) {
@@ -118,8 +95,8 @@ public interface GraphStreamRelationshipPropertiesConfig extends BaseConfig {
         CypherMapWrapper config
     ) {
         return new GraphStreamRelationshipPropertiesConfigImpl(
-            Optional.of(graphName),
             relationshipProperties,
+            Optional.of(graphName),
             relationshipTypes,
             config
         );
