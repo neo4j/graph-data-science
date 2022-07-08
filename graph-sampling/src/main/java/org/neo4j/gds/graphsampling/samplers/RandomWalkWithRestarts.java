@@ -269,7 +269,7 @@ public class RandomWalkWithRestarts {
 
     private void walk(MutableLong currentNode, long startNode, Graph inputGraph, Random rng) {
         int degree = inputGraph.degree(currentNode.getValue());
-        if (degree == 0 || rng.nextDouble() < config.returnProbability()) {
+        if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
             currentNode.setValue(startNode);
             return;
         }

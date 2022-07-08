@@ -80,7 +80,7 @@ class RandomWalkWithRestartsTest {
         var config = ImmutableRandomWalkWithRestartsConfig.builder()
             .startNode(idFunction.of("a"))
             .samplingRatio(0.5)
-            .returnProbability(0.1)
+            .restartProbability(0.1)
             .randomSeed(42L)
             .build();
 
@@ -117,7 +117,7 @@ class RandomWalkWithRestartsTest {
             .addNodeLabels("M", "X")
             .addRelationshipType("R1")
             .samplingRatio(0.5)
-            .returnProbability(0.1)
+            .restartProbability(0.1)
             .randomSeed(42L)
             .build();
 
@@ -134,7 +134,7 @@ class RandomWalkWithRestartsTest {
             .addRelationshipType("R1")
             .startNode(idFunction.of("x"))
             .samplingRatio(0.999999999)
-            .returnProbability(0.0000000001)
+            .restartProbability(0.0000000001)
             .randomSeed(42L)
             .build();
 
@@ -149,7 +149,7 @@ class RandomWalkWithRestartsTest {
         var config = ImmutableRandomWalkWithRestartsConfig.builder()
             .samplingRatio(0.5)
             .startNode(idFunction.of("a"))
-            .returnProbability(0.1)
+            .restartProbability(0.1)
             .randomSeed(42L)
             .build();
 

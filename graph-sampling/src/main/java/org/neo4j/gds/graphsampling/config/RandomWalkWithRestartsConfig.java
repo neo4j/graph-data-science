@@ -37,7 +37,7 @@ public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
 
     @Value.Default
     @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
-    default double returnProbability() {
+    default double restartProbability() {
         return 0.1;
     }
 
