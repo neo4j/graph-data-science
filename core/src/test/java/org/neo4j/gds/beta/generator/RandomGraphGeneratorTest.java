@@ -22,11 +22,16 @@ package org.neo4j.gds.beta.generator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
@@ -440,5 +445,132 @@ class RandomGraphGeneratorTest {
         );
 
         assertEquals(actualRelCount.get(), graph.relationshipCount());
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("expectedSchemas")
+    void shouldProduceCorrectSchema(
+        String name,
+        RandomGraphGenerator generator,
+        NodeSchema expectedNodeSchema,
+        RelationshipSchema expectedRelationshipSchema
+    ) {
+        var graph = generator.generate();
+
+        assertThat(graph.schema().nodeSchema()).isEqualTo(expectedNodeSchema);
+        assertThat(graph.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
+    }
+
+    static Stream<Arguments> expectedSchemas() {
+        return Stream.of(
+            Arguments.of(
+                "default",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema.builder().build(),
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL")).build()
+            ),
+            Arguments.of(
+                "node label",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("REL")).build()
+            ),
+            Arguments.of(
+                "relationship type",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .relationshipType(RelationshipType.of("FOOBAR"))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema.builder().build(),
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR")).build()
+            ),
+            Arguments.of(
+                "node label and relationship type",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                    .relationshipType(RelationshipType.of("FOOBAR"))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema.builder().addLabel(NodeLabel.of("A")).build(),
+                RelationshipSchema.builder().addRelationshipType(RelationshipType.of("FOOBAR")).build()
+            ),
+            Arguments.of(
+                "node label and node property",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                    .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema
+                    .builder()
+                    .addLabel(NodeLabel.of("A"))
+                    .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG)
+                    .build(),
+                RelationshipSchema
+                    .builder()
+                    .addRelationshipType(RelationshipType.of("REL"))
+                    .build()
+            ),
+            Arguments.of(
+                "relationship type and node property",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .relationshipType(RelationshipType.of("FOOBAR"))
+                    .relationshipPropertyProducer(PropertyProducer.randomDouble("relProperty", 0, 42))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema.builder().build(),
+                RelationshipSchema
+                    .builder()
+                    .addRelationshipType(RelationshipType.of("FOOBAR"))
+                    .addProperty(RelationshipType.of("FOOBAR"), "relProperty", ValueType.DOUBLE)
+                    .build()
+            ),
+            Arguments.of(
+                "node label, node property, relationship type and relationship property",
+                RandomGraphGenerator
+                    .builder()
+                    .nodeCount(10)
+                    .averageDegree(1)
+                    .nodeLabelProducer(nodeId -> NodeLabelTokens.ofNodeLabels(NodeLabel.of("A")))
+                    .nodePropertyProducer(PropertyProducer.randomLong("nodeProp", 0, 42))
+                    .relationshipType(RelationshipType.of("FOOBAR"))
+                    .relationshipPropertyProducer(PropertyProducer.randomDouble("relProp", 0, 42))
+                    .relationshipDistribution(RelationshipDistribution.RANDOM)
+                    .build(),
+                NodeSchema
+                    .builder()
+                    .addLabel(NodeLabel.of("A"))
+                    .addProperty(NodeLabel.of("A"), "nodeProp", ValueType.LONG)
+                    .build(),
+                RelationshipSchema
+                    .builder()
+                    .addRelationshipType(RelationshipType.of("FOOBAR"))
+                    .addProperty(RelationshipType.of("FOOBAR"), "relProp", ValueType.DOUBLE)
+                    .build()
+            )
+        );
     }
 }

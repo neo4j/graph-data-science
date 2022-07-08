@@ -50,7 +50,6 @@ import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -286,38 +285,49 @@ public final class GraphFactory {
         return initRelationshipsBuilder().nodes(idMap).build().build();
     }
 
+    /**
+     * Creates a {@link org.neo4j.gds.core.huge.HugeGraph} from the given node and relationship data.
+     *
+     * The node schema will be inferred from the available node labels.
+     * The relationship schema will use default relationship type {@code "REL"}.
+     * If a relationship property is present, the default relationship property key {@code "property"}
+     * will be used.
+     */
     public static HugeGraph create(IdMap idMap, Relationships relationships) {
         var nodeSchemaBuilder = NodeSchema.builder();
         idMap.availableNodeLabels().forEach(nodeSchemaBuilder::addLabel);
+        var nodeSchema = nodeSchemaBuilder.build();
+
+        var relationshipSchemaBuilder = RelationshipSchema.builder();
+        if (relationships.properties().isPresent()) {
+            relationshipSchemaBuilder.addProperty(
+                RelationshipType.of("REL"),
+                "property",
+                ValueType.DOUBLE
+            );
+        } else {
+            relationshipSchemaBuilder.addRelationshipType(RelationshipType.of("REL"));
+        }
+
+        var relationshipSchema = relationshipSchemaBuilder.build();
+
         return create(
+            GraphSchema.of(nodeSchema, relationshipSchema, Map.of()),
             idMap,
-            nodeSchemaBuilder.build(),
-            Collections.emptyMap(),
-            RelationshipType.of("REL"),
+            Map.of(),
             relationships
         );
     }
 
     public static HugeGraph create(
+        GraphSchema graphSchema,
         IdMap idMap,
-        NodeSchema nodeSchema,
         Map<String, NodePropertyValues> nodeProperties,
-        RelationshipType relationshipType,
         Relationships relationships
     ) {
-        var relationshipSchemaBuilder = RelationshipSchema.builder();
-        if (relationships.properties().isPresent()) {
-            relationshipSchemaBuilder.addProperty(
-                relationshipType,
-                "property",
-                ValueType.DOUBLE
-            );
-        } else {
-            relationshipSchemaBuilder.addRelationshipType(relationshipType);
-        }
         return HugeGraph.create(
             idMap,
-            GraphSchema.of(nodeSchema, relationshipSchemaBuilder.build(), Map.of()),
+            graphSchema,
             nodeProperties,
             relationships.topology(),
             relationships.properties()
