@@ -28,9 +28,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.pipeline.FeatureStepUtil.throwNanError;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class HadamardFeatureStep implements LinkFeatureStep {
@@ -43,59 +41,36 @@ public class HadamardFeatureStep implements LinkFeatureStep {
 
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
-        var properties = nodeProperties.stream().map(graph::nodeProperties).collect(Collectors.toList());
-        int dimension = FeatureStepUtil.totalPropertyDimension(graph, nodeProperties);
+        var appenderPerProperty = new LinkFeatureAppender[nodeProperties.size()];
 
-        // TODO move out switch + validation
-        return new LinkFeatureAppender() {
-            @Override
-            public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
-                var localOffset = offset;
-                for (NodePropertyValues props : properties) {
-                    var propertyType = props.valueType();
-                    switch (propertyType) {
-                        case DOUBLE_ARRAY:
-                        case FLOAT_ARRAY: {
-                            var sourceArrayPropValues = props.doubleArrayValue(source);
-                            var targetArrayPropValues = props.doubleArrayValue(target);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG_ARRAY: {
-                            var sourceArrayPropValues = props.longArrayValue(source);
-                            var targetArrayPropValues = props.longArrayValue(target);
-                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                linkFeatures[localOffset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
-                            }
-                            break;
-                        }
-                        case LONG:
-                        case DOUBLE:
-                            linkFeatures[localOffset++] = props.doubleValue(source) * props.doubleValue(target);
-                            break;
-                        case UNKNOWN:
-                            throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
-                    }
-                }
+        for (int idx = 0, nodePropertiesSize = nodeProperties.size(); idx < nodePropertiesSize; idx++) {
+            String propertyName = nodeProperties.get(idx);
+            var props = graph.nodeProperties(propertyName);
+            var propertyType = props.valueType();
 
-                FeatureStepUtil.validateComputedFeatures(linkFeatures, offset, localOffset, () -> throwNanError(
-                    "hadamard",
-                    graph,
-                    nodeProperties,
-                    source,
-                    target
-                ));
+            var dimension = FeatureStepUtil.propertyDimension(graph, propertyName);
+
+            switch (propertyType) {
+                case DOUBLE_ARRAY:
+                    appenderPerProperty[idx] = new HadamardDoubleArrayFeatureAppender(props, dimension);
+                    break;
+                case FLOAT_ARRAY:
+                    appenderPerProperty[idx] = new HadamardFloatArrayFeatureAppender(props, dimension);
+                    break;
+                case LONG_ARRAY:
+                    appenderPerProperty[idx] = new HadamardLongArrayFeatureAppender(props, dimension);
+                    break;
+                case LONG:
+                    appenderPerProperty[idx] = new HadamardFeatureStep.HadamardLongFeatureAppender(props, dimension);
+                case DOUBLE:
+                    appenderPerProperty[idx] = new HadamardFeatureStep.HadamardDoubleFeatureAppender(props, dimension);
+                    break;
+                case UNKNOWN:
+                    throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
             }
+        }
 
-            @Override
-            public int dimension() {
-                return dimension;
-            }
-        };
+        return new UnionLinkFeatureAppender(appenderPerProperty, name(), nodeProperties);
     }
 
     @Override
@@ -111,5 +86,75 @@ public class HadamardFeatureStep implements LinkFeatureStep {
     @Override
     public String name() {
         return LinkFeatureStepFactory.HADAMARD.name();
+    }
+
+    private static class HadamardDoubleArrayFeatureAppender extends SinglePropertyFeatureAppender {
+        HadamardDoubleArrayFeatureAppender(NodePropertyValues props, int dimension) {
+            super(props, dimension);
+        }
+
+        @Override
+        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+            var sourceArrayPropValues = props.doubleArrayValue(source);
+            var targetArrayPropValues = props.doubleArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                linkFeatures[offset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class HadamardFloatArrayFeatureAppender extends SinglePropertyFeatureAppender {
+        HadamardFloatArrayFeatureAppender(NodePropertyValues props, int dimension) {
+            super(props, dimension);
+        }
+
+        @Override
+        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+            var sourceArrayPropValues = props.floatArrayValue(source);
+            var targetArrayPropValues = props.floatArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                linkFeatures[offset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class HadamardLongArrayFeatureAppender extends SinglePropertyFeatureAppender {
+        HadamardLongArrayFeatureAppender(NodePropertyValues props, int dimension) {
+            super(props, dimension);
+        }
+
+        @Override
+        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+            var sourceArrayPropValues = props.longArrayValue(source);
+            var targetArrayPropValues = props.longArrayValue(target);
+            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                linkFeatures[offset++] = sourceArrayPropValues[i] * targetArrayPropValues[i];
+            }
+        }
+    }
+
+    private static class HadamardLongFeatureAppender extends SinglePropertyFeatureAppender {
+        HadamardLongFeatureAppender(NodePropertyValues props, int dimension) {
+            super(props, dimension);
+        }
+
+        @Override
+        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+            linkFeatures[offset] = props.longValue(source) * props.longValue(target);
+        }
+    }
+
+    private static class HadamardDoubleFeatureAppender extends SinglePropertyFeatureAppender {
+        HadamardDoubleFeatureAppender(NodePropertyValues props, int dimension) {
+            super(props, dimension);
+        }
+
+        @Override
+        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+            linkFeatures[offset] = props.doubleValue(source) * props.doubleValue(target);
+        }
     }
 }

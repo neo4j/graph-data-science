@@ -88,22 +88,7 @@ public class L2FeatureStep implements LinkFeatureStep {
         return LinkFeatureStepFactory.L2.name();
     }
 
-    private static abstract class L2FeatureAppender implements LinkFeatureAppender {
-        protected final NodePropertyValues props;
-        private final int dimension;
-
-        L2FeatureAppender(NodePropertyValues props, int dimension) {
-            this.props = props;
-            this.dimension = dimension;
-        }
-
-        @Override
-        public int dimension() {
-            return dimension;
-        }
-    }
-
-    private static class L2DoubleArrayFeatureAppender extends L2FeatureAppender {
+    private static class L2DoubleArrayFeatureAppender extends SinglePropertyFeatureAppender {
 
         L2DoubleArrayFeatureAppender(NodePropertyValues props, int dimension) {
             super(props, dimension);
@@ -123,7 +108,7 @@ public class L2FeatureStep implements LinkFeatureStep {
         }
     }
 
-    private static class L2FloatArrayFeatureAppender extends L2FeatureAppender {
+    private static class L2FloatArrayFeatureAppender extends SinglePropertyFeatureAppender {
 
         L2FloatArrayFeatureAppender(NodePropertyValues props, int dimension) {
             super(props, dimension);
@@ -143,7 +128,7 @@ public class L2FeatureStep implements LinkFeatureStep {
         }
     }
 
-    private static class L2FLongArrayFeatureAppender extends L2FeatureAppender {
+    private static class L2FLongArrayFeatureAppender extends SinglePropertyFeatureAppender {
 
         L2FLongArrayFeatureAppender(NodePropertyValues props, int dimension) {
             super(props, dimension);
@@ -163,7 +148,7 @@ public class L2FeatureStep implements LinkFeatureStep {
         }
     }
 
-    private static class L2DoubleFeatureAppender extends L2FeatureAppender {
+    private static class L2DoubleFeatureAppender extends SinglePropertyFeatureAppender {
 
         L2DoubleFeatureAppender(NodePropertyValues props, int dimension) {
             super(props, dimension);
@@ -175,7 +160,7 @@ public class L2FeatureStep implements LinkFeatureStep {
         }
     }
 
-    private static class L2LongFeatureAppender extends L2FeatureAppender {
+    private static class L2LongFeatureAppender extends SinglePropertyFeatureAppender {
 
         L2LongFeatureAppender(NodePropertyValues props, int dimension) {
             super(props, dimension);

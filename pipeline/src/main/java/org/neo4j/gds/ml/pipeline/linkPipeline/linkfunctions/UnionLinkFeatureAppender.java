@@ -48,7 +48,8 @@ class UnionLinkFeatureAppender implements LinkFeatureAppender {
     public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
         var localOffset = offset;
 
-        for (LinkFeatureAppender linkFeatureAppender : appenderPerProperty) {
+        for (int i = 0, appenderPerPropertyLength = appenderPerProperty.length; i < appenderPerPropertyLength; i++) {
+            LinkFeatureAppender linkFeatureAppender = appenderPerProperty[i];
             linkFeatureAppender.appendFeatures(source, target, linkFeatures, localOffset);
             localOffset += linkFeatureAppender.dimension();
         }
