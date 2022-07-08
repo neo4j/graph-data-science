@@ -48,4 +48,6 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
     }
 
     MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes);
+
+    String nodeProperty();
 }

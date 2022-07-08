@@ -27,11 +27,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -53,8 +53,8 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
@@ -544,8 +544,7 @@ class NodeClassificationTrainTest {
             pipeline,
             nodeGraphStore.nodeCount()
         );
-        var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId());
 
         createWithExecutionContext(
                 nodeGraphStore,
@@ -555,65 +554,12 @@ class NodeClassificationTrainTest {
             )
             .run();
 
-        assertThat(testLog.getMessages(INFO))
+        assertThat(progressTracker.log().getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-classification-log"));
-    }
 
-    @Test
-    void shouldLogWarnings() {
-        var pipeline = new NodeClassificationTrainingPipeline();
-
-        pipeline.addFeatureStep(NodeFeatureStep.of("array"));
-        pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
-        pipeline.addTrainerConfig(LogisticRegressionTrainConfig.DEFAULT);
-
-        var metricSpecification = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
-
-        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder()
-            .testFraction(0.3)
-            .validationFolds(2)
-            .build()
-        );
-
-        var config = createConfig(
-            "model",
-            GRAPH_NAME_WITH_RELATIONSHIPS,
-            metricSpecification,
-            1L
-        );
-
-        var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(
-            NodeClassificationTrainPipelineAlgorithmFactory.progressTask(relGraphStore, pipeline),
-            log,
-            1,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-
-        createWithExecutionContext(
-            relGraphStore,
-            pipeline,
-            config,
-            progressTracker
-        ).run();
-
-        assertThat(log.getMessages(TestLog.WARN))
-            .extracting(removingThreadId())
-            .containsExactly(
-                "Node Classification Train Pipeline :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
-                "Proceeding with such a small set might lead to unreliable results.",
-                "Node Classification Train Pipeline :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
-                "Proceeding with such small sets might lead to unreliable results."
-            );
-
-        assertThat(log.getMessages(TestLog.INFO))
-            .extracting(removingThreadId())
-            .contains(
-                "Node Classification Train Pipeline :: Train set size is 6",
-                "Node Classification Train Pipeline :: Test set size is 3"
-            );
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test
@@ -740,25 +686,25 @@ class NodeClassificationTrainTest {
     }
 
     @Test
-    void failEstimateOnEmptyParameterSpace() {
+    void failGivenTooSmallTestSet() {
         var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.featureProperties().addAll(List.of("array", "scalar"));
+        pipeline.featureProperties().addAll(List.of("scalar"));
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.001).build());
 
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline("")
             .username("myUser")
-            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
+            .graphName("dummy")
             .modelName("myModel")
-            .concurrency(1)
-            .randomSeed(42L)
             .targetProperty("t")
-            .relationshipTypes(List.of("SOME_REL"))
-            .nodeLabels(List.of("SOME_LABEL"))
             .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
             .build();
 
-        assertThatThrownBy(() -> NodeClassificationTrain.estimate(pipeline, config, new OpenModelCatalog()))
-            .hasMessage("Need at least one model candidate for training.");
+        var nodeFeatureProducer = NodeFeatureProducer.create(nodeGraphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeClassificationTrain.create(nodeGraphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
+            .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
     }
 
     public static Stream<Arguments> trainerMethodConfigs() {
@@ -844,17 +790,12 @@ class NodeClassificationTrainTest {
         NodeClassificationPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        var nodePropertyStepExecutor = NodePropertyStepExecutor.of(
-            ExecutionContext.EMPTY,
-            graphStore,
-            config,
-            progressTracker
-        );
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, progressTracker);
         return NodeClassificationTrain.create(
             graphStore,
             pipeline,
             config,
-            nodePropertyStepExecutor,
+            nodeFeatureProducer,
             progressTracker
         );
     }

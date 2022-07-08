@@ -64,9 +64,7 @@ public interface NodePropertyPredictionSplitConfig extends ToMapConvertible {
 
     @Value.Derived
     @Configuration.Ignore
-    default void validateMinNumNodesInSplitSets(
-        Graph graph
-    ) {
+    default void validateMinNumNodesInSplitSets(Graph graph) {
         long numberNodesInTestSet = (long) (graph.nodeCount() * testFraction());
         long numberNodesInTrainSet = graph.nodeCount() - numberNodesInTestSet;
         long numberNodesInValidationSet = numberNodesInTrainSet / validationFolds();

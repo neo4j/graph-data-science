@@ -17,20 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
+package org.neo4j.gds.core.model;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.model.CatalogModelContainer;
-import org.neo4j.gds.ml.models.Regressor;
-import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.model.ModelConfig;
 
-@ValueClass
-public interface NodeRegressionTrainResult {
-    Regressor regressor();
-    TrainingStatistics trainingStatistics();
-
-    @ValueClass
-    interface NodeRegressionTrainPipelineResult extends CatalogModelContainer<Regressor.RegressorData, NodeRegressionPipelineTrainConfig, NodeRegressionPipelineModelInfo> {
-        TrainingStatistics trainingStatistics();
-    }
+public interface CatalogModelContainer<DATA, CONFIG extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> {
+    Model<DATA, CONFIG, INFO> model();
 }

@@ -25,15 +25,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
@@ -45,6 +45,7 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestRegressor;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfig;
 import org.neo4j.gds.ml.models.randomforest.RandomForestRegressorTrainerConfigImpl;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfigImpl;
 
@@ -53,6 +54,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
@@ -78,7 +80,7 @@ class NodeRegressionTrainTest {
         "({scalar: 42.5,    target:  85 }),";
 
     @Inject
-    TestGraph graph;
+    GraphStore graphStore;
 
     @Test
     void trainWithOnlyLR() {
@@ -103,15 +105,9 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var nrTrain = NodeRegressionTrain.create(
-            graph,
-            pipeline,
-            trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var nrTrain = createWithExecutionContext(graphStore, pipeline, trainConfig, ProgressTracker.NULL_TRACKER);
 
-        NodeRegressionTrainResult result = nrTrain.compute();
+        NodeRegressionTrainResult result = nrTrain.run();
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(LinearRegressor.class);
@@ -147,15 +143,9 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var nrTrain = NodeRegressionTrain.create(
-            graph,
-            pipeline,
-            trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        var nrTrain = createWithExecutionContext(graphStore, pipeline, trainConfig, ProgressTracker.NULL_TRACKER);
 
-        NodeRegressionTrainResult result = nrTrain.compute();
+        NodeRegressionTrainResult result = nrTrain.run();
         var trainingStatistics = result.trainingStatistics();
 
         assertThat(result.regressor()).isInstanceOf(RandomForestRegressor.class);
@@ -193,13 +183,7 @@ class NodeRegressionTrainTest {
             .metrics(evaluationMetrics)
             .build();
 
-        NodeRegressionTrainResult result = NodeRegressionTrain.create(
-            graph,
-            pipeline,
-            trainConfig,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        ).compute();
+        NodeRegressionTrainResult result = createWithExecutionContext(graphStore, pipeline, trainConfig, ProgressTracker.NULL_TRACKER).run();
 
         var trainingStatistics = result.trainingStatistics();
 
@@ -241,17 +225,13 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTasks = NodeRegressionTrain.progressTasks(pipeline.splitConfig(), MAX_TRIALS, graph.nodeCount());
+        var progressTasks = NodeRegressionTrain.progressTasks(pipeline, graphStore.nodeCount());
         var progressTask = Tasks.task("MY CONTEXT", progressTasks);
 
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        progressTracker.beginSubTask("MY CONTEXT");
-
-        NodeRegressionTrain.create(graph, pipeline, config, progressTracker, TerminationFlag.RUNNING_TRUE).compute();
-
-        progressTracker.endSubTask("MY CONTEXT");
+        createWithExecutionContext(graphStore, pipeline, config, progressTracker).run();
 
         assertThat(testLog.getMessages(INFO))
             .extracting(removingThreadId())
@@ -266,7 +246,7 @@ class NodeRegressionTrainTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 4})
-    void seededNodeClassification(int concurrency) {
+    void seededNodeRegression(int concurrency) {
         var pipeline = new NodeRegressionTrainingPipeline();
 
         pipeline.addFeatureStep(NodeFeatureStep.of("scalar"));
@@ -283,21 +263,53 @@ class NodeRegressionTrainTest {
             .concurrency(concurrency)
             .build();
 
-        Supplier<NodeRegressionTrain> algoSupplier = () -> NodeRegressionTrain.create(
-            graph,
-            pipeline,
-            config,
-            ProgressTracker.NULL_TRACKER,
-            TerminationFlag.RUNNING_TRUE
-        );
+        Supplier<NodeRegressionTrain> algoSupplier = () -> createWithExecutionContext(graphStore, pipeline, config, ProgressTracker.NULL_TRACKER);
 
-        var firstResult = algoSupplier.get().compute();
-        var secondResult = algoSupplier.get().compute();
+        var firstResult = algoSupplier.get().run();
+        var secondResult = algoSupplier.get().run();
 
         assertThat(((LinearRegressionData) firstResult.regressor().data()).weights().data())
             .matches(matrix -> matrix.equals(
                 ((LinearRegressionData) secondResult.regressor().data()).weights().data(),
                 1e-10
             ));
+    }
+
+    @Test
+    void failGivenTooSmallTestSet() {
+        var pipeline = new NodeRegressionTrainingPipeline();
+        pipeline.featureProperties().addAll(List.of("scalar"));
+        pipeline.setSplitConfig(NodePropertyPredictionSplitConfigImpl.builder().testFraction(0.001).build());
+
+        var config = NodeRegressionPipelineTrainConfigImpl.builder()
+            .pipeline("")
+            .username("myUser")
+            .graphName("dummy")
+            .modelName("myModel")
+            .targetProperty("target")
+            .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR))
+            .build();
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, ProgressTracker.NULL_TRACKER);
+
+        // we are mostly interested in the fact that the validation method is called
+        assertThatThrownBy(() -> NodeRegressionTrain.create(graphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
+            .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
+    }
+
+    static NodeRegressionTrain createWithExecutionContext(
+        GraphStore graphStore,
+        NodeRegressionTrainingPipeline pipeline,
+        NodeRegressionPipelineTrainConfig config,
+        ProgressTracker progressTracker
+    ) {
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, config, ExecutionContext.EMPTY, progressTracker);
+        return NodeRegressionTrain.create(
+            graphStore,
+            pipeline,
+            config,
+            nodeFeatureProducer,
+            progressTracker
+        );
     }
 }

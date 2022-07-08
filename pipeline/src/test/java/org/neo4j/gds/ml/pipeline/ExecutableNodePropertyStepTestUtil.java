@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
@@ -38,20 +39,31 @@ public class ExecutableNodePropertyStepTestUtil {
     public static class NodeIdPropertyStep implements ExecutableNodePropertyStep {
         private final GraphStore graphStore;
         private final String propertyName;
+        private String procName;
 
         public NodeIdPropertyStep(GraphStore graphStore, String propertyName) {
+            this(graphStore, "AddBogusNodePropertyStep", propertyName);
+        }
+
+        public NodeIdPropertyStep(GraphStore graphStore, String procName, String propertyName) {
             this.graphStore = graphStore;
             this.propertyName = propertyName;
+            this.procName = procName;
         }
 
         @Override
         public String procName() {
-            return "AddBogusNodePropertyStep";
+            return procName;
         }
 
         @Override
         public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
+        public String nodeProperty() {
+            return propertyName;
         }
 
         @Override
@@ -79,6 +91,52 @@ public class ExecutableNodePropertyStepTestUtil {
         }
     }
 
+    static class TestNodePropertyStepWithFixedEstimation implements ExecutableNodePropertyStep {
+
+        private MemoryEstimation memoryEstimation;
+        private String procName;
+
+        public TestNodePropertyStepWithFixedEstimation(String procName, MemoryEstimation memoryEstimation) {
+            this.memoryEstimation = memoryEstimation;
+            this.procName = procName;
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public void execute(
+            ExecutionContext executionContext,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+            throw new NotImplementedException();
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return Map.of();
+        }
+
+        @Override
+        public String procName() {
+            return procName;
+        }
+
+        @Override
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
+            return memoryEstimation;
+        }
+
+        @Override
+        public String nodeProperty() {
+            throw new NotImplementedException();
+        }
+    }
+
     static class FailingNodePropertyStep implements ExecutableNodePropertyStep {
         static final String PROPERTY = "failingStepProperty";
         @Override
@@ -89,6 +147,11 @@ public class ExecutableNodePropertyStepTestUtil {
         @Override
         public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
             throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
+        public String nodeProperty() {
+            return PROPERTY;
         }
 
         @Override

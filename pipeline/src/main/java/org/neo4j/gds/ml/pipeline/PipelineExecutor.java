@@ -34,8 +34,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
-
 public abstract class PipelineExecutor<
     PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig,
     PIPELINE extends Pipeline<?>,
@@ -95,15 +93,18 @@ public abstract class PipelineExecutor<
             graphFilter.relationshipTypes(),
             progressTracker
         );
+
         try {
             // we are not validating the size of the feature-input graph as not every nodePropertyStep needs relationships
-            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
+            nodePropertyStepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
+            pipeline.validateFeatureProperties(graphStore, config);
 
             var result = execute(dataSplits);
             progressTracker.endSubTask();
             return result;
         } finally {
-            cleanUpGraphStore(dataSplits);
+            nodePropertyStepExecutor.cleanupIntermediateProperties(pipeline.nodePropertySteps());
+            additionalGraphStoreCleanup(dataSplits);
         }
     }
 
@@ -112,17 +113,7 @@ public abstract class PipelineExecutor<
 
     }
 
-    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
-        removeNodeProperties(graphStore, config.nodeLabelIdentifiers(graphStore));
-    }
-
-    private void removeNodeProperties(GraphStore graphstore, Iterable<NodeLabel> nodeLabels) {
-        pipeline.nodePropertySteps().forEach(step -> {
-            var intermediateProperty = step.config().get(MUTATE_PROPERTY_KEY);
-            if (intermediateProperty instanceof String) {
-                graphstore.removeNodeProperty(((String) intermediateProperty));
-            }
-        });
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
     }
 
     @ValueClass

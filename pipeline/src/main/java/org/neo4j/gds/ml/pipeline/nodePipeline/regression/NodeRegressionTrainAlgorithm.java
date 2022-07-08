@@ -17,29 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
+package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.PipelineTrainAlgorithm;
-import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationTrainResult.NodeClassificationModelResult;
+import org.neo4j.gds.ml.pipeline.nodePipeline.regression.NodeRegressionTrainResult.NodeRegressionTrainPipelineResult;
 
-public class NodeClassificationTrainAlgorithm extends PipelineTrainAlgorithm<
-    NodeClassificationTrainResult,
-    NodeClassificationModelResult,
-    NodeClassificationPipelineTrainConfig,
+public class NodeRegressionTrainAlgorithm extends PipelineTrainAlgorithm<
+    NodeRegressionTrainResult,
+    NodeRegressionTrainPipelineResult,
+    NodeRegressionPipelineTrainConfig,
     NodeFeatureStep> {
 
-    NodeClassificationTrainAlgorithm(
-        PipelineTrainer<NodeClassificationTrainResult> pipelineTrainer,
-        NodeClassificationTrainingPipeline pipeline,
+    NodeRegressionTrainAlgorithm(
+        NodeRegressionTrain pipelineTrainer,
+        NodeRegressionTrainingPipeline pipeline,
         GraphStore graphStore,
-        NodeClassificationPipelineTrainConfig config,
+        NodeRegressionPipelineTrainConfig config,
         ProgressTracker progressTracker
     ) {
-        super(pipelineTrainer, pipeline, new NodeClassificationToModelConverter(pipeline, config), graphStore, config, progressTracker);
+        super(pipelineTrainer, pipeline, new NodeRegressionToModelConverter(pipeline, config), graphStore, config, progressTracker);
     }
+
 }

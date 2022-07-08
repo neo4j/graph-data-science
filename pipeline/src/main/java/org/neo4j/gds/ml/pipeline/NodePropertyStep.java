@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
+
 public final class NodePropertyStep implements ExecutableNodePropertyStep {
     private final GdsCallableFinder.GdsCallableDefinition callableDefinition;
     private final Map<String, Object> config;
@@ -59,6 +61,11 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     @Override
     public Map<String, Object> config() {
         return config;
+    }
+
+    @Override
+    public String nodeProperty() {
+        return (String) config().get(MUTATE_PROPERTY_KEY);
     }
 
     @Override

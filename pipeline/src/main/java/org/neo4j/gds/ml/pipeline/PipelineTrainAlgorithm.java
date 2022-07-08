@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.model.ModelConfig;
 
@@ -29,7 +30,7 @@ import java.util.Set;
 
 public abstract class PipelineTrainAlgorithm<
     RESULT,
-    MODEL_RESULT,
+    MODEL_RESULT extends CatalogModelContainer<?, CONFIG, ?>,
     CONFIG extends AlgoBaseConfig & ModelConfig,
     FEATURE_STEP extends FeatureStep> extends Algorithm<MODEL_RESULT> {
     protected final TrainingPipeline<FEATURE_STEP> pipeline;

@@ -21,7 +21,11 @@ package org.neo4j.gds.ml.nodePropertyPrediction;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.InspectableTestProgressTracker;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +33,7 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 class NodeSplitterTest {
 
@@ -73,6 +78,39 @@ class NodeSplitterTest {
             result2.add(originalIds2.get((int) id));
         }
         assertThat(result1).isEqualTo(result2);
+    }
+
+    @Test
+    void shouldLogWarnings() {
+        var progressTracker = new InspectableTestProgressTracker(Tasks.leaf("DUMMY"), "", new JobId());
+        int numberOfExamples = 12;
+        var splitter = new NodeSplitter(
+            4,
+            numberOfExamples,
+            progressTracker,
+            i -> i,
+            i -> i
+        );
+
+        double testFraction = 0.25;
+        int validationFolds = 3;
+        splitter.split(testFraction, validationFolds, Optional.of(42L));
+
+        assertThat(progressTracker.log().getMessages(TestLog.WARN))
+            .extracting(removingThreadId())
+            .containsExactly(
+                "DUMMY :: The specified `testFraction` leads to a very small test set with only 3 node(s). " +
+                "Proceeding with such a small set might lead to unreliable results.",
+                "DUMMY :: The specified `validationFolds` leads to very small validation sets with only 3 node(s). " +
+                "Proceeding with such small sets might lead to unreliable results."
+            );
+
+        assertThat(progressTracker.log().getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "DUMMY :: Train set size is 9",
+                "DUMMY :: Test set size is 3"
+            );
     }
 
     @NotNull

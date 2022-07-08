@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.train;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -211,15 +212,13 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     }
 
     @Override
-    protected void cleanUpGraphStore(Map<DatasetSplits, GraphFilter> datasets) {
+    protected void additionalGraphStoreCleanup(Map<DatasetSplits, GraphFilter> datasets) {
         removeDataSplitRelationships(datasets);
-        super.cleanUpGraphStore(datasets);
+        super.additionalGraphStoreCleanup(datasets);
     }
 
     @ValueClass
-    public interface LinkPredictionTrainPipelineResult {
-        Model<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> model();
-
+    public interface LinkPredictionTrainPipelineResult extends CatalogModelContainer<Classifier.ClassifierData, LinkPredictionTrainConfig, LinkPredictionModelInfo> {
         TrainingStatistics trainingStatistics();
     }
 }

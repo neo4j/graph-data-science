@@ -23,10 +23,14 @@ import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 
-public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeRegressionTrainPipelineExecutor, NodeRegressionPipelineTrainConfig> {
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
+
+public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgorithmFactory<NodeRegressionTrainAlgorithm, NodeRegressionPipelineTrainConfig> {
 
     private final ExecutionContext executionContext;
 
@@ -35,7 +39,7 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
     }
 
     @Override
-    public NodeRegressionTrainPipelineExecutor build(
+    public NodeRegressionTrainAlgorithm build(
         GraphStore graphStore,
         NodeRegressionPipelineTrainConfig configuration,
         ProgressTracker progressTracker
@@ -46,14 +50,34 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             NodeRegressionTrainingPipeline.class
         );
 
-        return new NodeRegressionTrainPipelineExecutor(
+        return build(graphStore, configuration, pipeline, progressTracker);
+    }
+
+    public NodeRegressionTrainAlgorithm build(
+        GraphStore graphStore,
+        NodeRegressionPipelineTrainConfig configuration,
+        NodeRegressionTrainingPipeline pipeline,
+        ProgressTracker progressTracker
+    ) {
+        validateMainMetric(pipeline, configuration.metrics().get(0).toString());
+
+        var nodeFeatureProducer = NodeFeatureProducer.create(graphStore, configuration, executionContext, progressTracker);
+
+        return new NodeRegressionTrainAlgorithm(
+            NodeRegressionTrain.create(
+                graphStore,
+                pipeline,
+                configuration,
+                nodeFeatureProducer,
+                progressTracker
+            ),
             pipeline,
-            configuration,
-            executionContext,
             graphStore,
+            configuration,
             progressTracker
         );
     }
+
 
     @Override
     public String taskName() {
@@ -68,6 +92,16 @@ public class NodeRegressionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             NodeRegressionTrainingPipeline.class
         );
 
-        return NodeRegressionTrainPipelineExecutor.progressTask(pipeline, graphStore.nodeCount());
+        return progressTask(pipeline, graphStore.nodeCount());
+    }
+
+    public static Task progressTask(NodeRegressionTrainingPipeline pipeline, long nodeCount) {
+        return Tasks.task(
+            "Node Regression Train Pipeline",
+            NodeRegressionTrain.progressTasks(
+                pipeline,
+                nodeCount
+            )
+        );
     }
 }

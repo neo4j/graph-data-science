@@ -1,6 +1,8 @@
 MY CONTEXT :: Start
 MY CONTEXT :: Train set size is 6
 MY CONTEXT :: Test set size is 7
+MY CONTEXT :: Execute node property steps :: Start
+MY CONTEXT :: Execute node property steps :: Finished
 MY CONTEXT :: Create validation folds :: Start
 MY CONTEXT :: Create validation folds 100%
 MY CONTEXT :: Create validation folds :: Finished

@@ -47,7 +47,6 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.Features;
-import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
@@ -57,6 +56,7 @@ import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
+import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 import org.neo4j.gds.ml.splitting.FractionSplitter;
@@ -74,7 +74,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor.tasks;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -83,15 +82,13 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
     private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig trainConfig;
-    private final GraphStore graphStore;
-    private final long nodeCount;
     private final HugeIntArray targets;
     private final LocalIdMap classIdMap;
     private final IdMap nodeIdMap;
     private final List<Metric> metrics;
     private final List<ClassificationMetric> classificationMetrics;
     private final LongMultiSet classCounts;
-    private final NodePropertyStepExecutor<?> nodePropertyStepExecutor;
+    private final NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer;
     private final ProgressTracker progressTracker;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
@@ -189,7 +186,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         int validationFolds = splitConfig.validationFolds();
 
         var tasks = new ArrayList<Task>();
-        tasks.add(tasks(pipeline.nodePropertySteps(), nodeCount));
+        tasks.add(NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), nodeCount));
         tasks.addAll(CrossValidation.progressTasks(
             validationFolds,
             pipeline.numberOfModelSelectionTrials(),
@@ -256,10 +253,12 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         GraphStore graphStore,
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        NodePropertyStepExecutor<?> nodePropertyStepExecutor,
+        NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
         var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+
         var targetNodeProperty = graph.nodeProperties(config.targetProperty());
         var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();
@@ -271,15 +270,13 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         return new NodeClassificationTrain(
             pipeline,
             config,
-            graph.nodeCount(),
-            graphStore,
             labels,
             classIdMap,
             graph,
             metrics,
             classificationMetrics,
             classCounts,
-            nodePropertyStepExecutor,
+            nodeFeatureProducer,
             progressTracker
         );
     }
@@ -287,23 +284,19 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     private NodeClassificationTrain(
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig config,
-        long nodeCount,
-        GraphStore graphStore,
         HugeIntArray labels,
         LocalIdMap classIdMap,
         IdMap nodeIdMap,
         List<Metric> metrics,
         List<ClassificationMetric> classificationMetrics,
         LongMultiSet classCounts,
-        NodePropertyStepExecutor<?> nodePropertyStepExecutor,
+        NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
-        this.graphStore = graphStore;
         this.pipeline = pipeline;
-        this.nodeCount = nodeCount;
         this.nodeIdMap = nodeIdMap;
         this.classificationMetrics = classificationMetrics;
-        this.nodePropertyStepExecutor = nodePropertyStepExecutor;
+        this.nodeFeatureProducer = nodeFeatureProducer;
         this.trainConfig = config;
         this.targets = labels;
         this.classIdMap = classIdMap;
@@ -323,7 +316,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
             trainConfig.concurrency(),
-            nodeCount,
+            nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,
             nodeIdMap::toMappedNodeId
@@ -335,7 +328,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        var features = makeFeatures(graphStore, pipeline);
+        var features = nodeFeatureProducer.makeFeatures(pipeline);
 
         findBestModelCandidate(nodeSplits.outerSplit().trainSet(), features, trainingStatistics);
 
@@ -350,22 +343,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             classIdMap,
             classCounts
         );
-    }
-
-    //TODO: extract to component for sharing with NodeRegression + add unit test
-    private Features makeFeatures(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
-        try {
-            nodePropertyStepExecutor.executeNodePropertySteps(pipeline);
-            var graph = graphStore.getGraph(trainConfig.nodeLabelIdentifiers(graphStore));
-            if (pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
-                return FeaturesFactory.extractLazyFeatures(graph, pipeline.featureProperties());
-            } else {
-                // Random forest uses feature vectors many times each.
-                return FeaturesFactory.extractEagerFeatures(graph, pipeline.featureProperties());
-            }
-        } finally {
-            nodePropertyStepExecutor.cleanUpGraphStore(pipeline);
-        }
     }
 
     private void findBestModelCandidate(ReadOnlyHugeLongArray trainNodeIds, Features features, TrainingStatistics trainingStatistics) {
