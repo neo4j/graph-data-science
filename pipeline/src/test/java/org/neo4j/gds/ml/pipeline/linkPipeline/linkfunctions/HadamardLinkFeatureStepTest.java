@@ -90,7 +90,7 @@ final class HadamardLinkFeatureStepTest extends FeatureStepBaseTest {
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ))
-            .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the hadamard feature vector. " +
-                        "Either define a default value if its a stored property or check the nodePropertyStep");
+            .hasMessage("Encountered NaN when combining the nodeProperties ['invalidValue', 'z'] for the node pair (0, 1) when computing the HADAMARD feature vector. " +
+                        "Either define a default value if its a stored property or check the nodePropertyStep.");
     }
 }

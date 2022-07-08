@@ -86,19 +86,14 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
 
     @Test
     void failsOnNaNValues() {
-        var step = LinkFeatureStepFactory.create(
-            "cosine",
-            LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("invalidValue", "z")).build()
-        );
-
         assertThatThrownBy(() -> LinkFeatureExtractor.extractFeatures(
             graph,
-            List.of(step),
+            List.of(new CosineFeatureStep(List.of("invalidValue", "z"))),
             4,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         ))
-            .hasMessage("Encountered NaN in the nodeProperty `invalidValue` for nodes ['1'] when computing the cosine feature vector. " +
-                        "Either define a default value if its a stored property or check the nodePropertyStep");
+            .hasMessage("Encountered NaN when combining the nodeProperties ['invalidValue', 'z'] for the node pair (0, 1) when computing the COSINE feature vector. " +
+                        "Either define a default value if its a stored property or check the nodePropertyStep.");
     }
 }
