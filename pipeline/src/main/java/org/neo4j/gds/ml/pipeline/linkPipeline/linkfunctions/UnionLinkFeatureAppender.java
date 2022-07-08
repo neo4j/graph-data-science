@@ -22,26 +22,26 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 
 import static org.neo4j.gds.ml.pipeline.FeatureStepUtil.throwNanError;
 
 class UnionLinkFeatureAppender implements LinkFeatureAppender {
-    private final ArrayList<LinkFeatureAppender> appenderPerProperty;
+    private final LinkFeatureAppender[] appenderPerProperty;
     private final String featureStepName;
     private final Collection<String> inputNodeProperties;
     private final int dimension;
 
     public UnionLinkFeatureAppender(
-        ArrayList<LinkFeatureAppender> appenderPerProperty,
+        LinkFeatureAppender[] appenderPerProperty,
         String featureStepName,
         Collection<String> inputNodeProperties
     ) {
         this.appenderPerProperty = appenderPerProperty;
         this.featureStepName = featureStepName;
         this.inputNodeProperties = inputNodeProperties;
-        this.dimension = appenderPerProperty.stream().mapToInt(LinkFeatureAppender::dimension).sum();
+        this.dimension = Arrays.stream(appenderPerProperty).mapToInt(LinkFeatureAppender::dimension).sum();
     }
 
     @Override
@@ -54,7 +54,11 @@ class UnionLinkFeatureAppender implements LinkFeatureAppender {
         }
 
         // TODO is this the right place to validate (rather expensive)
-        FeatureStepUtil.validateComputedFeatures(linkFeatures, offset, localOffset, () -> throwNanError(featureStepName, inputNodeProperties, source, target)
+        FeatureStepUtil.validateComputedFeatures(
+            linkFeatures,
+            offset,
+            localOffset,
+            () -> throwNanError(featureStepName, inputNodeProperties, source, target)
         );
     }
 

@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,46 +40,27 @@ public class L2FeatureStep implements LinkFeatureStep {
 
     @Override
     public LinkFeatureAppender linkFeatureAppender(Graph graph) {
-        var appenderPerProperty = new ArrayList<LinkFeatureAppender>();
+        var appenderPerProperty = new LinkFeatureAppender[nodeProperties.size()];
 
-        for (String propertyName : nodeProperties) {
+        for (int idx = 0, nodePropertiesSize = nodeProperties.size(); idx < nodePropertiesSize; idx++) {
+            String propertyName = nodeProperties.get(idx);
             var props = graph.nodeProperties(propertyName);
             var propertyType = props.valueType();
 
             switch (propertyType) {
                 case DOUBLE_ARRAY:
                 case FLOAT_ARRAY:
-                    appenderPerProperty.add(
-                        new LinkFeatureAppender() {
-                            @Override
-                            public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
-                                var sourceArrayPropValues = props.doubleArrayValue(source);
-                                var targetArrayPropValues = props.doubleArrayValue(target);
-                                assert sourceArrayPropValues.length == targetArrayPropValues.length;
-                                for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                    linkFeatures[offset++] = Math.pow(
-                                        sourceArrayPropValues[i] - targetArrayPropValues[i],
-                                        2
-                                    );
-                                }
-                            }
-
-                            @Override
-                            public int dimension() {
-                                return FeatureStepUtil.propertyDimension(graph, propertyName);
-                            }
-                        }
-                    );
-                    break;
-                case LONG_ARRAY:
-                    appenderPerProperty.add(new LinkFeatureAppender() {
+                    appenderPerProperty[idx] = new LinkFeatureAppender() {
                         @Override
                         public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
-                            var sourceArrayPropValues = props.longArrayValue(source);
-                            var targetArrayPropValues = props.longArrayValue(target);
+                            var sourceArrayPropValues = props.doubleArrayValue(source);
+                            var targetArrayPropValues = props.doubleArrayValue(target);
                             assert sourceArrayPropValues.length == targetArrayPropValues.length;
                             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                                linkFeatures[offset++] = Math.pow(sourceArrayPropValues[i] - targetArrayPropValues[i], 2);
+                                linkFeatures[offset++] = Math.pow(
+                                    sourceArrayPropValues[i] - targetArrayPropValues[i],
+                                    2
+                                );
                             }
                         }
 
@@ -88,11 +68,32 @@ public class L2FeatureStep implements LinkFeatureStep {
                         public int dimension() {
                             return FeatureStepUtil.propertyDimension(graph, propertyName);
                         }
-                    });
+                    };
+                    break;
+                case LONG_ARRAY:
+                    appenderPerProperty[idx] = new LinkFeatureAppender() {
+                        @Override
+                        public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
+                            var sourceArrayPropValues = props.longArrayValue(source);
+                            var targetArrayPropValues = props.longArrayValue(target);
+                            assert sourceArrayPropValues.length == targetArrayPropValues.length;
+                            for (int i = 0; i < sourceArrayPropValues.length; i++) {
+                                linkFeatures[offset++] = Math.pow(
+                                    sourceArrayPropValues[i] - targetArrayPropValues[i],
+                                    2
+                                );
+                            }
+                        }
+
+                        @Override
+                        public int dimension() {
+                            return FeatureStepUtil.propertyDimension(graph, propertyName);
+                        }
+                    };
                     break;
                 case LONG:
                 case DOUBLE:
-                    appenderPerProperty.add(new LinkFeatureAppender() {
+                    appenderPerProperty[idx] = new LinkFeatureAppender() {
                         @Override
                         public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
                             linkFeatures[offset] = Math.pow(props.doubleValue(source) - props.doubleValue(target), 2);
@@ -102,7 +103,7 @@ public class L2FeatureStep implements LinkFeatureStep {
                         public int dimension() {
                             return FeatureStepUtil.propertyDimension(graph, propertyName);
                         }
-                    });
+                    };
                     break;
                 case UNKNOWN:
                     throw new IllegalStateException(formatWithLocale("Unknown ValueType %s", propertyType));
