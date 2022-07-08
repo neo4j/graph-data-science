@@ -66,7 +66,7 @@ public interface PipelineTrainAlgorithmTest {
             var nodeProperties = schema.nodeSchema().allProperties();
             var pipeNodeProperties = pipeline.nodePropertySteps
                 .stream()
-                .map(ExecutableNodePropertyStep::nodeProperty)
+                .map(ExecutableNodePropertyStep::mutateNodeProperty)
                 .collect(Collectors.toList());
 
             assertThat(pipeNodeProperties).isNotEmpty();

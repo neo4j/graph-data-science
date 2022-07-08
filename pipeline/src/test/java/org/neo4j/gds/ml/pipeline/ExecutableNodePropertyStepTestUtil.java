@@ -63,7 +63,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public String nodeProperty() {
+        public String mutateNodeProperty() {
             return propertyName;
         }
 
@@ -135,7 +135,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public String nodeProperty() {
+        public String mutateNodeProperty() {
            return nodeProperty;
         }
     }
@@ -153,7 +153,7 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public String nodeProperty() {
+        public String mutateNodeProperty() {
             return PROPERTY;
         }
 

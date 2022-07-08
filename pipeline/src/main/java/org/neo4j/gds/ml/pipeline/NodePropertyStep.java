@@ -64,8 +64,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
     }
 
     @Override
-    public String nodeProperty() {
-        return (String) config().get(MUTATE_PROPERTY_KEY);
+    public String mutateNodeProperty() {
+        return config().get(MUTATE_PROPERTY_KEY).toString();
     }
 
     @Override
