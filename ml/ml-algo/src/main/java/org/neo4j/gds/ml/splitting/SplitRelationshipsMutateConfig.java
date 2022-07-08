@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.splitting;
 import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface SplitRelationshipsMutateConfig extends MutateConfig, SplitRelationshipsBaseConfig {

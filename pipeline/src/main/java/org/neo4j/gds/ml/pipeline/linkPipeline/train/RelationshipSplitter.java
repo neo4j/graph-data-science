@@ -29,10 +29,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
-import org.neo4j.gds.ml.splitting.ImmutableSplitRelationshipsMutateConfig;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
-import org.neo4j.gds.ml.splitting.SplitRelationshipsMutateConfig;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,7 +46,7 @@ public class RelationshipSplitter {
     private final LinkPredictionSplitConfig splitConfig;
     private final ProgressTracker progressTracker;
     private final GraphStore graphStore;
-    private TerminationFlag terminationFlag;
+    private final TerminationFlag terminationFlag;
 
     RelationshipSplitter(
         GraphStore graphStore,
@@ -74,16 +72,17 @@ public class RelationshipSplitter {
 
         var testComplementRelationshipType = RelationshipType.of(splitConfig.testComplementRelationshipType());
 
+
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(randomSeed, relationshipWeightProperty), nodeLabels, relationshipTypes);
+        relationshipSplit(splitConfig.testSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels, relationshipTypes);
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(randomSeed, relationshipWeightProperty), nodeLabels, List.of(testComplementRelationshipType));
+        relationshipSplit(splitConfig.trainSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels, List.of(testComplementRelationshipType));
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -116,29 +115,22 @@ public class RelationshipSplitter {
     }
 
     static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes, Optional<String> relationshipWeight) {
-        List<String> checkRelTypes = relationshipTypes
+        var checkRelTypes = relationshipTypes
             .stream()
-            .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS.name : type)
+            .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(type))
             .collect(Collectors.toList());
 
-        SplitRelationshipsMutateConfig testSplitConfig =  ImmutableSplitRelationshipsMutateConfig.builder()
-            .from(splitConfig.testSplit(Optional.empty(), relationshipWeight))
-            .relationshipTypes(checkRelTypes)
-            .build();
+        // randomSeed does not matter for memory estimation
+        Optional<Long> randomSeed = Optional.empty();
 
         var firstSplitEstimation = MemoryEstimations
             .builder("Test/Test-complement split")
-            .add(SplitRelationships.estimate(testSplitConfig))
-            .build();
-
-        SplitRelationshipsMutateConfig trainSplitConfig = ImmutableSplitRelationshipsMutateConfig.builder()
-            .from(splitConfig.trainSplit(Optional.empty(), relationshipWeight))
-            .relationshipTypes(List.of(splitConfig.testComplementRelationshipType()))
+            .add(SplitRelationships.estimate(splitConfig.testSplit(checkRelTypes, randomSeed, relationshipWeight)))
             .build();
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(trainSplitConfig))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(List.of(RelationshipType.of(splitConfig.testComplementRelationshipType())), randomSeed, relationshipWeight)))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

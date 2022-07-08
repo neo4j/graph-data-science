@@ -111,25 +111,35 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     }
 
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig testSplit(Optional<Long> randomSeed, Optional<String> relationshipWeightProperty) {
+    default SplitRelationshipsBaseConfig testSplit(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
+    ) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(testRelationshipType())
             .remainingRelationshipType(testComplementRelationshipType())
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
+            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
             .randomSeed(randomSeed)
             .build();
     }
 
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig trainSplit(Optional<Long> randomSeed,  Optional<String> relationshipWeightProperty) {
+    default SplitRelationshipsBaseConfig trainSplit(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
+    ) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(trainRelationshipType())
             .remainingRelationshipType(featureInputRelationshipType())
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
+            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
             .randomSeed(randomSeed)
             .build();
     }
