@@ -40,6 +40,8 @@ public abstract class SilhouetteTask implements Runnable {
 
     final int k;
     final int dimensions;
+
+    double averageSilhouette;
     final NodePropertyValues nodePropertyValues;
 
     abstract double distance(long nodeA, long nodeB);
@@ -64,6 +66,7 @@ public abstract class SilhouetteTask implements Runnable {
         this.silhouette = silhouette;
         this.nodesInCluster = nodesInCluster;
         this.clusterDistance = new double[k];
+        this.averageSilhouette = 0d;
 
     }
 
@@ -97,10 +100,14 @@ public abstract class SilhouetteTask implements Runnable {
                     );
                 }
                 double ai = clusterDistance[clusterId] / ((double) (nodesInCluster[clusterId] - 1));
-                silhouette.set(nodeId, (bi - ai) / Math.max(ai, bi));
+                double nodeSilhouette = (bi - ai) / Math.max(ai, bi);
+                silhouette.set(nodeId, nodeSilhouette);
+                averageSilhouette += nodeSilhouette;
             }
         }
     }
+
+    public double getAverageSilhouette() {return averageSilhouette / (double) (communities.size());}
 
     public static SilhouetteTask createTask(
         NodePropertyValues nodePropertyValues,

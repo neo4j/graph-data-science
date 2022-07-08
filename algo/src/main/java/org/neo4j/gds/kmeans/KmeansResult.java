@@ -37,4 +37,6 @@ public interface KmeansResult {
 
     @Nullable
     HugeDoubleArray silhouette();
+
+    double averageSilhouette();
 }

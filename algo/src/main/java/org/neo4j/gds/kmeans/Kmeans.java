@@ -59,6 +59,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private HugeDoubleArray silhouette;
 
+    private double averageSilhouette;
+
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -128,7 +130,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCenters[i] = nodePropertyValues.doubleArrayValue(i);
             }
-            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0, silhouette);
+            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0, silhouette, 0.0);
         }
         long nodeCount = graph.nodeCount();
 
@@ -230,7 +232,14 @@ public class Kmeans extends Algorithm<KmeansResult> {
             calculateSilhouette(nodesInCluster);
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance, silhouette);
+        return ImmutableKmeansResult.of(
+            bestCommunities,
+            distanceFromCenter,
+            bestCenters,
+            bestDistance,
+            silhouette,
+            averageSilhouette
+        );
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {
@@ -302,5 +311,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
             ),
             Optional.of((int) nodeCount / concurrency)
         );
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
+
+        for (var task : tasks) {
+            averageSilhouette += task.getAverageSilhouette();
+        }
+
     }
 }
