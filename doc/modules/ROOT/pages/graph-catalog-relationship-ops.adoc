@@ -24,7 +24,7 @@ This is useful to free up main memory or to remove accidentally added relationsh
 [.tabbed-example, caption=]
 ====
 
-[.include-with-stream]
+[.include-with-stream-topology]
 ======
 [source, cypher, role=noplay]
 ----
@@ -35,10 +35,11 @@ CALL gds.beta.graph.relationships.stream(
 )
 YIELD
     sourceNodeId: Integer,
-    targetNodeid: Integer,
+    targetNodeId: Integer,
     relationshipType: String
 ----
 
+.Parameters
 [opts="header",cols="1,3,1,5"]
 |===
 | Name                   | Type                       | Optional | Description
