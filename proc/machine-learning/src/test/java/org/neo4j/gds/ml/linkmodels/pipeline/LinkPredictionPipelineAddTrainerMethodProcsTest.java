@@ -151,7 +151,7 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
     @Test
     void addMLP() {
         assertCypherResult(
-                "CALL gds.alpha.pipeline.linkPrediction.addMLP('myPipeline', {batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
+                "CALL gds.alpha.pipeline.linkPrediction.addMLP('myPipeline', {hiddenLayerSizes: [16,4], penalty: 0.1, batchSize: 10, minEpochs: 2, patience: 2, maxEpochs: 2, tolerance: 1e-4, learningRate: 0.1})",
                 List.of(Map.of("name",
                         "myPipeline",
                         "splitConfig", DEFAULT_SPLIT_CONFIG,
@@ -161,6 +161,8 @@ class LinkPredictionPipelineAddTrainerMethodProcsTest extends BaseProcTest {
                         "parameterSpace", Map.of(
                                 TrainingMethod.MLPClassification.toString(),
                                 List.of(MLPClassifierTrainConfigImpl.builder()
+                                        .hiddenLayerSizes(List.of(16,4))
+                                        .penalty(0.1)
                                         .batchSize(10)
                                         .minEpochs(2)
                                         .patience(2)

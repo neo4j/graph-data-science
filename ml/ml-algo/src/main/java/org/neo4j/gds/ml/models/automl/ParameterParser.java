@@ -25,6 +25,7 @@ import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.DoubleRangeParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.IntegerRangeParameter;
+import org.neo4j.gds.ml.models.automl.hyperparameter.ListParameter;
 import org.neo4j.gds.ml.models.automl.hyperparameter.StringParameter;
 
 import java.util.HashMap;
@@ -136,7 +137,7 @@ final class ParameterParser {
 
     private static ConcreteParameter<?> parseConcreteNonNumericParameter(String key, Object value) {
         var correctParameterType = NON_NUMERIC_PARAMETERS.get(key);
-        if (correctParameterType != value.getClass()) {
+        if (!correctParameterType.isInstance(value)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Parameter `%s` must be of the type `%s`.",
                 key,
@@ -146,6 +147,12 @@ final class ParameterParser {
 
         if (correctParameterType == String.class) {
             return StringParameter.of((String) value);
+        }
+
+        if (correctParameterType == List.class) {
+            //List of numbers from input are parsed as Long by default, we need to cast it to Integer
+            var intValues = ((List<Number>) value).stream().map(Number::intValue).collect(Collectors.toList());
+            return ListParameter.of(intValues);
         }
 
         throw new IllegalStateException(formatWithLocale(

@@ -26,36 +26,48 @@ import org.neo4j.gds.ml.core.tensor.Vector;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.TrainingMethod;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.SplittableRandom;
 
 @ValueClass
 public interface MLPClassifierData extends Classifier.ClassifierData {
 
-    //1 hidden layer with fixed size
-    Weights<Matrix> inputWeights();
+    List<Weights<Matrix>> weights();
 
-    Weights<Matrix> outputWeights();
+    List<Weights<Vector>> biases();
 
-    Weights<Vector> inputBias();
-
-    Weights<Vector> outputBias();
+    int depth();
 
     default TrainingMethod trainerMethod() {return TrainingMethod.MLPClassification;}
 
-    static MLPClassifierData create(int classCount, int featureCount) {
+    static MLPClassifierData create(int classCount, int featureCount, List<Integer> hiddenLayerSizes, SplittableRandom random) {
+
+        var weights = new ArrayList<Weights<Matrix>>();
+        var biases = new ArrayList<Weights<Vector>>();
+        var hiddenDepth = hiddenLayerSizes.size();
+        weights.add(generateWeights(hiddenLayerSizes.get(0), featureCount, random.nextLong()));
+        biases.add(generateBias(hiddenLayerSizes.get(0), random.nextLong()));
+        for (int i = 0; i < hiddenDepth-1; i++) {
+            weights.add(generateWeights(hiddenLayerSizes.get(i+1), hiddenLayerSizes.get(i), random.nextLong()));
+            biases.add(generateBias(hiddenLayerSizes.get(i+1), random.nextLong()));
+        }
+        weights.add(generateWeights(classCount, hiddenLayerSizes.get(hiddenDepth-1), random.nextLong()));
+        biases.add(generateBias(classCount, random.nextLong()));
 
         return ImmutableMLPClassifierData
             .builder()
-            .inputWeights(generateWeights(featureCount,featureCount,42L))
-            .outputWeights(generateWeights(classCount,featureCount,42L))
-            .inputBias(new Weights<>(Vector.create(0.1,featureCount)))
-            .outputBias(new Weights<>(Vector.create(0.1,classCount)))
+            .weights(weights)
+            .biases(biases)
+            .depth(hiddenDepth+2)
             .numberOfClasses(classCount)
             .featureDimension(featureCount)
             .build();
     }
 
     //TODO: Refactor to use LayerFactory and ActivationFunction in algo.embeddings.graphsage
+    //bounds for weights and biases are from Kaiming initialization for Relu: https://arxiv.org/abs/1502.01852
     private static Weights<Matrix> generateWeights(int rows, int cols, long randomSeed) {
         var weightBound = Math.sqrt(2d / cols);
         double[] data = new Random(randomSeed)
@@ -68,4 +80,14 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
             cols
         ));
     }
+
+    private static Weights<Vector> generateBias(int dim, long randomSeed) {
+        var weightBound = Math.sqrt(2d / dim);
+        double[] data = new Random(randomSeed)
+            .doubles(dim, -weightBound, weightBound)
+            .toArray();
+
+        return new Weights<>(new Vector(data));
+    }
+
 }

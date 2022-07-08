@@ -47,7 +47,7 @@ import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionData;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfigImpl;
-import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfig;
+import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
@@ -191,7 +191,7 @@ class NodeClassificationTrainTest {
             .build();
         pipeline.addTrainerConfig(expectedWinner);
 
-        pipeline.addTrainerConfig(MLPClassifierTrainConfig.DEFAULT);
+        pipeline.addTrainerConfig(MLPClassifierTrainConfigImpl.builder().hiddenLayerSizes(List.of(2)).build());
 
         // Should NOT be the winning model, so give bad hyperparams.
         pipeline.addTrainerConfig(
@@ -253,7 +253,7 @@ class NodeClassificationTrainTest {
     }
 
     @Test
-    void trainOnlWithMLP() {
+    void trainOnlyWithMLP() {
         var pipeline = new NodeClassificationTrainingPipeline();
         pipeline.setSplitConfig(SPLIT_CONFIG);
         pipeline.addNodePropertyStep(new ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep(nodeGraphStore, "someBogusProperty"));
@@ -261,7 +261,9 @@ class NodeClassificationTrainTest {
         pipeline.addFeatureStep(NodeFeatureStep.of("b"));
         pipeline.addFeatureStep(NodeFeatureStep.of("someBogusProperty"));
 
-        pipeline.addTrainerConfig(MLPClassifierTrainConfig.DEFAULT);
+        var mlpTrainerConfig = MLPClassifierTrainConfigImpl.builder().hiddenLayerSizes(List.of(6,4)).build();
+
+        pipeline.addTrainerConfig(mlpTrainerConfig);
 
         var metricSpecification = ClassificationMetricSpecification.Parser.parse("accuracy");
         var config = createConfig("model", GRAPH_NAME, metricSpecification, 1L);
@@ -286,10 +288,10 @@ class NodeClassificationTrainTest {
 
         assertThat(validationStats).hasSize(1);
 
-        assertThat(validationStats.get(0).avg()).isCloseTo(0.7, Offset.offset(0.01));
+        assertThat(validationStats.get(0).avg()).isCloseTo(0.8, Offset.offset(0.01));
 
         var actualWinnerParams = result.trainingStatistics().bestParameters();
-        assertThat(actualWinnerParams.toMap()).isEqualTo(MLPClassifierTrainConfig.DEFAULT.toMap());
+        assertThat(actualWinnerParams.toMap()).isEqualTo(mlpTrainerConfig.toMap());
     }
 
     @ParameterizedTest

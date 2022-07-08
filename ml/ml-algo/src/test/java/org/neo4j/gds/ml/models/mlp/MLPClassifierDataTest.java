@@ -21,28 +21,33 @@ package org.neo4j.gds.ml.models.mlp;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+import java.util.SplittableRandom;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class MLPClassifierDataTest {
 
     @Test
     void shouldCreateData() {
-        var data = MLPClassifierData.create(3, 4);
-        var inputMatrix = data.inputWeights().data();
-        var outputMatrix = data.outputWeights().data();
-        var inputBias = data.inputBias().data();
-        var outputBias = data.outputBias().data();
+        var hiddenLayerSizes = List.of(24,18,12);
+        var data = MLPClassifierData.create(3, 4, hiddenLayerSizes, new SplittableRandom(0l));
 
-        assertThat(inputMatrix.rows()).isEqualTo(4);
-        assertThat(inputMatrix.cols()).isEqualTo(4);
+        var weights = data.weights();
+        var biases = data.biases();
 
-        assertThat(outputMatrix.rows()).isEqualTo(3);
-        assertThat(outputMatrix.cols()).isEqualTo(4);
+        assertThat(weights.size()).isEqualTo(4);
+        assertThat(biases.size()).isEqualTo(4);
 
-        assertThat(inputBias.length()).isEqualTo(4);
+        assertThat(weights.get(0).data().dimensions()).containsExactly(24,4);
+        assertThat(weights.get(1).data().dimensions()).containsExactly(18, 24);
+        assertThat(weights.get(2).data().dimensions()).containsExactly(12,18);
+        assertThat(weights.get(3).data().dimensions()).containsExactly(3,12);
 
-        assertThat(outputBias.length()).isEqualTo(3);
-
+        assertThat(biases.get(0).data().length()).isEqualTo(24);
+        assertThat(biases.get(1).data().length()).isEqualTo(18);
+        assertThat(biases.get(2).data().length()).isEqualTo(12);
+        assertThat(biases.get(3).data().length()).isEqualTo(3);
     }
 
 }

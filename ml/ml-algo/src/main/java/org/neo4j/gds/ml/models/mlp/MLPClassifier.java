@@ -58,22 +58,18 @@ public final class MLPClassifier implements Classifier {
     }
 
     Variable<Matrix> predictionsVariable(Constant<Matrix> batchFeatures) {
-        var inputWeights = data.inputWeights();
-        var outputWeights = data.outputWeights();
-        var inputBias = data.inputBias();
-        var outputBias = data.outputBias();
 
-        var hiddenLayerInput = new MatrixVectorSum(MatrixMultiplyWithTransposedSecondOperand.of(
-            batchFeatures,
-            inputWeights
-        ), inputBias);
+        Variable<Matrix> outputFromPrevLayer;
+        Variable<Matrix> inputToNextLayer = batchFeatures;
+        for (int i = 0; i < data.depth()-1; i++) {
+            outputFromPrevLayer = inputToNextLayer;
+            inputToNextLayer = new Relu(
+                new MatrixVectorSum(
+                    MatrixMultiplyWithTransposedSecondOperand.of(outputFromPrevLayer, data.weights().get(i)),
+                    data.biases().get(i)),
+                0);
+        }
 
-        var hiddenLayerOutput = new Relu(hiddenLayerInput, 0);
-
-        var softmaxInput = new MatrixVectorSum(
-            MatrixMultiplyWithTransposedSecondOperand.of(hiddenLayerOutput, outputWeights),
-            outputBias);
-
-        return new Softmax(softmaxInput);
+        return new Softmax(inputToNextLayer);
     }
 }
