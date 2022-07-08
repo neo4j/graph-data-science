@@ -76,7 +76,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         this.relationshipSplitter = new RelationshipSplitter(
             graphStore,
             pipeline.splitConfig(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 

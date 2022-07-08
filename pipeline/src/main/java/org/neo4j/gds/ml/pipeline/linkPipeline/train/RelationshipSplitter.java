@@ -23,6 +23,7 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,15 +48,18 @@ public class RelationshipSplitter {
     private final LinkPredictionSplitConfig splitConfig;
     private final ProgressTracker progressTracker;
     private final GraphStore graphStore;
+    private TerminationFlag terminationFlag;
 
     RelationshipSplitter(
         GraphStore graphStore,
         LinkPredictionSplitConfig splitConfig,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         this.graphStore = graphStore;
         this.splitConfig = splitConfig;
         this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
     }
 
     public void splitRelationships(
@@ -98,9 +102,13 @@ public class RelationshipSplitter {
     }
 
     private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
+        // the split config is generated internally and the input should be fully validated already
+        splitConfig.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.ofNullable(splitConfig.relationshipWeightProperty()));
 
         var splitAlgo = new SplitRelationships(graph, graph, splitConfig);
+        splitAlgo.setTerminationFlag(terminationFlag);
 
         EdgeSplitter.SplitResult result = splitAlgo.compute();
 

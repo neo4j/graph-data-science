@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -94,7 +95,8 @@ class RelationshipSplitterTest {
         RelationshipSplitter relationshipSplitter = new RelationshipSplitter(
             graphStore,
             splitConfig,
-            ProgressTracker.NULL_TRACKER
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
         );
 
         relationshipSplitter.splitRelationships(List.of(RelationshipType.of("REL")), List.of(NodeLabel.of("N")),  Optional.of(42L), Optional.of("weight"));
