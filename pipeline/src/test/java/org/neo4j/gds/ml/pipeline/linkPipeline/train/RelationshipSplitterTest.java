@@ -105,17 +105,16 @@ class RelationshipSplitterTest {
                 splitConfig.trainRelationshipType(),
                 splitConfig.testRelationshipType(),
                 splitConfig.featureInputRelationshipType(),
-                "REL"
+                RelationshipType.of("REL")
             )
-            .map(RelationshipType::of)
             .collect(Collectors.toList());
 
         assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(expectedRelTypes);
 
         var expectedRelProperties = Map.of(
-            RelationshipType.of(splitConfig.featureInputRelationshipType()), Set.of("weight"),
-            RelationshipType.of(splitConfig.trainRelationshipType()), Set.of("label"),
-            RelationshipType.of(splitConfig.testRelationshipType()), Set.of("label"),
+            splitConfig.featureInputRelationshipType(), Set.of("weight"),
+            splitConfig.trainRelationshipType(), Set.of("label"),
+            splitConfig.testRelationshipType(), Set.of("label"),
             RelationshipType.of("REL"), Set.of("weight")
         );
 
