@@ -55,13 +55,15 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
             var result = computationResult.result();
             var communities = result.communities();
             var distances = result.distanceFromCenter();
+            var silhuette = result.silhouette();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
                 .mapToObj(nodeId -> new KmeansStreamProc.StreamResult(
                     graph.toOriginalNodeId(nodeId),
                     communities.get(nodeId),
-                    distances.get(nodeId)
+                    distances.get(nodeId),
+                    silhuette == null ? -1 : silhuette.get(nodeId)
                 ));
         };
     }
