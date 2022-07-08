@@ -26,10 +26,9 @@ import org.neo4j.values.storable.NumberType;
 
 import java.util.Optional;
 
-// TODO figure out a better place
-public final class SplitRelationshipMutate {
+public final class SplitRelationshipGraphStoreMutator {
 
-    private SplitRelationshipMutate() {}
+    private SplitRelationshipGraphStoreMutator() {}
 
     public static void mutate(GraphStore graphStore, EdgeSplitter.SplitResult splitResult, SplitRelationshipsBaseConfig config) {
         graphStore.addRelationshipType(

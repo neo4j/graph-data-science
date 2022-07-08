@@ -32,7 +32,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.SplitRelationshipMutate;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.SplitRelationshipGraphStoreMutator;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.procedure.Description;
@@ -88,9 +88,8 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
                 ComputationResult<SplitRelationships, SplitResult, SplitRelationshipsMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                // TODO could extract this into a separate class
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
-                    SplitRelationshipMutate.mutate(
+                    SplitRelationshipGraphStoreMutator.mutate(
                         computationResult.graphStore(),
                         computationResult.result(),
                         computationResult.config()

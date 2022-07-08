@@ -112,7 +112,7 @@ public class RelationshipSplitter {
 
         EdgeSplitter.SplitResult result = splitAlgo.compute();
 
-        SplitRelationshipMutate.mutate(graphStore, result, splitConfig);
+        SplitRelationshipGraphStoreMutator.mutate(graphStore, result, splitConfig);
     }
 
     static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes, Optional<String> relationshipWeight) {
