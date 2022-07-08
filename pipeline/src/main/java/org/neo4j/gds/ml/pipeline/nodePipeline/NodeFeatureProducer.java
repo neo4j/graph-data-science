@@ -28,13 +28,13 @@ import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.FeaturesFactory;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 
-public class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
+public final class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & GraphNameConfig> {
 
     private final NodePropertyStepExecutor<PIPELINE_CONFIG> stepExecutor;
     private final GraphStore graphStore;
     private final PIPELINE_CONFIG trainConfig;
 
-    public NodeFeatureProducer(
+    private NodeFeatureProducer(
         NodePropertyStepExecutor<PIPELINE_CONFIG> stepExecutor,
         GraphStore graphStore,
         PIPELINE_CONFIG trainConfig
@@ -64,7 +64,7 @@ public class NodeFeatureProducer<PIPELINE_CONFIG extends AlgoBaseConfig & GraphN
         );
     }
 
-    public Features makeFeatures(NodePropertyTrainingPipeline pipeline) {
+    public Features procedureFeatures(NodePropertyTrainingPipeline pipeline) {
         try {
             stepExecutor.executeNodePropertySteps(pipeline.nodePropertySteps());
             pipeline.validateFeatureProperties(graphStore, trainConfig);

@@ -256,25 +256,23 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
-        var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
-        pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+        // we dont resolve the relationships as for extracting the classes they are irrelevant
+        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
+        var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
+        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, nodesGraph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();
-        var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
-        var metrics = config.metrics(classIdMap, classCounts);
-        var classificationMetrics = classificationMetrics(metrics);
 
         return new NodeClassificationTrain(
             pipeline,
             config,
-            labels,
+            labelsAndClassCounts.labels(),
             classIdMap,
-            graph,
-            metrics,
-            classificationMetrics,
+            nodesGraph,
+            config.metrics(classIdMap, classCounts),
+            classificationMetrics(config.metrics(classIdMap, classCounts)),
             classCounts,
             nodeFeatureProducer,
             progressTracker
@@ -328,7 +326,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        var features = nodeFeatureProducer.makeFeatures(pipeline);
+        var features = nodeFeatureProducer.procedureFeatures(pipeline);
 
         findBestModelCandidate(nodeSplits.outerSplit().trainSet(), features, trainingStatistics);
 

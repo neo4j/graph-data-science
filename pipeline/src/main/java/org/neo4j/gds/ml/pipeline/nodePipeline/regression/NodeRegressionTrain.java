@@ -88,12 +88,13 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
-        var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
-        pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
 
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
+        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
-        HugeDoubleArray targets = HugeDoubleArray.newArray(graph.nodeCount());
+        var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
+
+        HugeDoubleArray targets = HugeDoubleArray.newArray(nodesGraph.nodeCount());
         targets.setAll(targetNodeProperty::doubleValue);
 
         return new NodeRegressionTrain(
@@ -101,7 +102,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             config,
             nodeFeatureProducer,
             targets,
-            graph,
+            nodesGraph,
             progressTracker
         );
     }
@@ -148,7 +149,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         List<Metric> metrics = List.copyOf(trainConfig.metrics());
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        var features = nodeFeatureProducer.makeFeatures(pipeline);
+        var features = nodeFeatureProducer.procedureFeatures(pipeline);
 
         findBestModelCandidate(splits.outerSplit().trainSet(), metrics, features, trainingStatistics);
 
