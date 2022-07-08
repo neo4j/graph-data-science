@@ -62,7 +62,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     private final ProgressTracker progressTracker;
     private TerminationFlag terminationFlag = TerminationFlag.RUNNING_TRUE;
 
-    public static List<Task> progressTasks(
+    public static Task progressTask(
         NodePropertyTrainingPipeline pipeline,
         long nodeCount
     ) {
@@ -78,7 +78,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
 
-        return tasks;
+        return Tasks.task("Node Regression Train Pipeline", tasks);
     }
 
     public static NodeRegressionTrain create(

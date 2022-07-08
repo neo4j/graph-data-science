@@ -1,49 +1,49 @@
-MY CONTEXT :: Start
-MY CONTEXT :: Train set size is 6
-MY CONTEXT :: Test set size is 7
-MY CONTEXT :: Execute node property steps :: Start
-MY CONTEXT :: Execute node property steps :: Finished
-MY CONTEXT :: Create validation folds :: Start
-MY CONTEXT :: Create validation folds 100%
-MY CONTEXT :: Create validation folds :: Finished
-MY CONTEXT :: Select best model :: Start
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Start
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=3, minSplitSize=2, minLeafSize=1}
-MY CONTEXT :: Select best model :: Trial 1 of 2 50%
-MY CONTEXT :: Select best model :: Trial 1 of 2 100%
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Finished
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Start
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2, minSplitSize=2, minLeafSize=1}
-MY CONTEXT :: Select best model :: Trial 2 of 2 50%
-MY CONTEXT :: Select best model :: Trial 2 of 2 100%
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Finished
-MY CONTEXT :: Select best model :: Best trial was Trial 1 with main validation metric 189.7867
-MY CONTEXT :: Select best model :: Finished
-MY CONTEXT :: Train best model :: Start
-MY CONTEXT :: Train best model :: trained decision tree 1 out of 5
-MY CONTEXT :: Train best model :: trained decision tree 2 out of 5
-MY CONTEXT :: Train best model :: trained decision tree 3 out of 5
-MY CONTEXT :: Train best model :: trained decision tree 4 out of 5
-MY CONTEXT :: Train best model :: trained decision tree 5 out of 5
-MY CONTEXT :: Train best model 100%
-MY CONTEXT :: Train best model :: Finished
-MY CONTEXT :: Evaluate on test data :: Start
-MY CONTEXT :: Evaluate on test data :: Final model metrics on full train set: {MEAN_SQUARED_ERROR=168.2666}
-MY CONTEXT :: Evaluate on test data :: Final model metrics on test set: {MEAN_SQUARED_ERROR=646.7657}
-MY CONTEXT :: Evaluate on test data 100%
-MY CONTEXT :: Evaluate on test data :: Finished
-MY CONTEXT :: Retrain best model :: Start
-MY CONTEXT :: Retrain best model :: trained decision tree 1 out of 5
-MY CONTEXT :: Retrain best model :: trained decision tree 2 out of 5
-MY CONTEXT :: Retrain best model :: trained decision tree 3 out of 5
-MY CONTEXT :: Retrain best model :: trained decision tree 4 out of 5
-MY CONTEXT :: Retrain best model :: trained decision tree 5 out of 5
-MY CONTEXT :: Retrain best model 100%
-MY CONTEXT :: Retrain best model :: Finished
-MY CONTEXT :: Finished
+Node Regression Train Pipeline :: Start
+Node Regression Train Pipeline :: Train set size is 6
+Node Regression Train Pipeline :: Test set size is 7
+Node Regression Train Pipeline :: Execute node property steps :: Start
+Node Regression Train Pipeline :: Execute node property steps :: Finished
+Node Regression Train Pipeline :: Create validation folds :: Start
+Node Regression Train Pipeline :: Create validation folds 100%
+Node Regression Train Pipeline :: Create validation folds :: Finished
+Node Regression Train Pipeline :: Select best model :: Start
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Start
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=3, minSplitSize=2, minLeafSize=1}
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 50%
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 100%
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Finished
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Start
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Method: RandomForest, Parameters: {numberOfSamplesRatio=1.0, numberOfDecisionTrees=5, maxDepth=2, minSplitSize=2, minLeafSize=1}
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 50%
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 100%
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Main validation metric (MEAN_SQUARED_ERROR): 189.7867
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Validation metrics: {MEAN_SQUARED_ERROR=189.7866}
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Training metrics: {MEAN_SQUARED_ERROR=272.2666}
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Finished
+Node Regression Train Pipeline :: Select best model :: Best trial was Trial 1 with main validation metric 189.7867
+Node Regression Train Pipeline :: Select best model :: Finished
+Node Regression Train Pipeline :: Train best model :: Start
+Node Regression Train Pipeline :: Train best model :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Train best model :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Train best model :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Train best model :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Train best model :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Train best model 100%
+Node Regression Train Pipeline :: Train best model :: Finished
+Node Regression Train Pipeline :: Evaluate on test data :: Start
+Node Regression Train Pipeline :: Evaluate on test data :: Final model metrics on full train set: {MEAN_SQUARED_ERROR=168.2666}
+Node Regression Train Pipeline :: Evaluate on test data :: Final model metrics on test set: {MEAN_SQUARED_ERROR=646.7657}
+Node Regression Train Pipeline :: Evaluate on test data 100%
+Node Regression Train Pipeline :: Evaluate on test data :: Finished
+Node Regression Train Pipeline :: Retrain best model :: Start
+Node Regression Train Pipeline :: Retrain best model :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Retrain best model :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Retrain best model :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Retrain best model :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Retrain best model :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Retrain best model 100%
+Node Regression Train Pipeline :: Retrain best model :: Finished
+Node Regression Train Pipeline :: Finished

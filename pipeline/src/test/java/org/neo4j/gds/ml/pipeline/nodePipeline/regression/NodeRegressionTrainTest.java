@@ -23,13 +23,10 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.ResourceUtil;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -225,23 +222,23 @@ class NodeRegressionTrainTest {
             .metrics(List.of(RegressionMetrics.MEAN_SQUARED_ERROR.name()))
             .build();
 
-        var progressTasks = NodeRegressionTrain.progressTasks(pipeline, graphStore.nodeCount());
-        var progressTask = Tasks.task("MY CONTEXT", progressTasks);
+        var progressTask = NodeRegressionTrain.progressTask(pipeline, graphStore.nodeCount());
 
-        var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId());
 
         createWithExecutionContext(graphStore, pipeline, config, progressTracker).run();
 
-        assertThat(testLog.getMessages(INFO))
+        assertThat(progressTracker.log().getMessages(INFO))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-info"));
 
-        assertThat(testLog.getMessages(DEBUG))
+        assertThat(progressTracker.log().getMessages(DEBUG))
             .extracting(removingThreadId())
             .extracting(keepingFixedNumberOfDecimals(4))
             .containsExactlyElementsOf(ResourceUtil.lines("expectedLogs/node-regression-with-range-log-debug"));
+
+        progressTracker.assertValidProgressEvolution();
     }
 
     @ParameterizedTest

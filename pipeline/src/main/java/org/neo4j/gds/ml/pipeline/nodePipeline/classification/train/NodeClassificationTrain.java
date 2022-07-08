@@ -179,7 +179,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         return builder.build();
     }
 
-    public static List<Task> progressTasks(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
+    public static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
         var splitConfig = pipeline.splitConfig();
         long trainSetSize = splitConfig.trainSetSize(nodeCount);
         long testSetSize = splitConfig.testSetSize(nodeCount);
@@ -197,7 +197,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
 
-        return tasks;
+        return Tasks.task("Node Classification Train Pipeline", tasks);
     }
 
     @NotNull

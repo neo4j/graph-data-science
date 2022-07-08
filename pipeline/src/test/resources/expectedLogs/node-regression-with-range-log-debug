@@ -1,28 +1,28 @@
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Starting fold 1 training
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 1 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 2 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 3 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 4 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 5 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Finished fold 1 training
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Starting fold 2 training
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 1 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 2 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 3 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 4 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: trained decision tree 5 out of 5
-MY CONTEXT :: Select best model :: Trial 1 of 2 :: Finished fold 2 training
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Starting fold 1 training
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 1 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 2 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 3 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 4 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 5 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Finished fold 1 training
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Starting fold 2 training
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 1 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 2 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 3 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 4 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: trained decision tree 5 out of 5
-MY CONTEXT :: Select best model :: Trial 2 of 2 :: Finished fold 2 training
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Starting fold 1 training
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Finished fold 1 training
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Starting fold 2 training
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 1 of 2 :: Finished fold 2 training
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Starting fold 1 training
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Finished fold 1 training
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Starting fold 2 training
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 1 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 2 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 3 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 4 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: trained decision tree 5 out of 5
+Node Regression Train Pipeline :: Select best model :: Trial 2 of 2 :: Finished fold 2 training
