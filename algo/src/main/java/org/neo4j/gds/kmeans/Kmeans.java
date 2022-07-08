@@ -49,12 +49,15 @@ public class Kmeans extends Algorithm<KmeansResult> {
     private final NodePropertyValues nodePropertyValues;
     private final int dimensions;
 
+    private final boolean computeSilhouette;
     private double[][] bestCenters;
 
     private HugeDoubleArray distanceFromCenter;
     private final KmeansIterationStopper kmeansIterationStopper;
 
     private final int maximumNumberOfRestarts;
+
+    private HugeDoubleArray silhouette;
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -69,6 +72,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             config.numberOfRestarts(),
             config.deltaThreshold(),
             nodeProperties,
+            config.computeSilhouette(),
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -84,6 +88,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         int maximumNumberOfRestarts,
         double deltaThreshold,
         NodePropertyValues nodePropertyValues,
+        boolean computeSilhouette,
         SplittableRandom random
     ) {
         super(progressTracker);
@@ -102,7 +107,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         );
         this.maximumNumberOfRestarts = maximumNumberOfRestarts;
         this.distanceFromCenter = HugeDoubleArray.newArray(graph.nodeCount());
-
+        this.computeSilhouette = computeSilhouette;
     }
 
     @Override
@@ -122,7 +127,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCenters[i] = nodePropertyValues.doubleArrayValue(i);
             }
-            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0);
+            return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, 0.0, silhouette);
         }
         long nodeCount = graph.nodeCount();
 
@@ -214,7 +219,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             }
         }
         progressTracker.endSubTask();
-        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance);
+        return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance, silhouette);
     }
 
     private void recomputeCenters(ClusterManager clusterManager, List<KmeansTask> tasks) {

@@ -60,6 +60,11 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         return 1;
     }
 
+    @Value.Default
+    default boolean computeSilhouette() {
+        return false;
+    }
+
     String nodeProperty();
 
     @Configuration.GraphStoreValidationCheck
