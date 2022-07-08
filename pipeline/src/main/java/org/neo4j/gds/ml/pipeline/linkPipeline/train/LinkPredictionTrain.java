@@ -119,11 +119,6 @@ public final class LinkPredictionTrain {
         return tasks;
     }
 
-    @Deprecated
-    public static long estimateMemory() {
-        return MemoryUsage.sizeOfInstance(ImmutableModelStats.class) * 2 + Double.BYTES * 2;
-    }
-
     public LinkPredictionTrainResult compute() {
         progressTracker.beginSubTask("Extract train features");
         var trainData = extractFeaturesAndLabels(
@@ -328,7 +323,11 @@ public final class LinkPredictionTrain {
             // this assumes the training is independent of the relationship set size
             .add("Outer train stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .add("Test stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
-            .fixed("Best model stats", numberOfMetrics * estimateMemory())
+            .fixed("Best model stats", MemoryRange
+                .of(MemoryUsage.sizeOfInstance(ImmutableModelStats.class))
+                .times(2)
+                .add(Double.BYTES * 2)
+                .times(numberOfMetrics))
             .build();
     }
 
