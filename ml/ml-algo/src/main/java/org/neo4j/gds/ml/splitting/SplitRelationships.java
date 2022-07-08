@@ -30,16 +30,16 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
 
     private final Graph graph;
     private final Graph masterGraph;
-    private final SplitRelationshipsMutateConfig config;
+    private final SplitRelationshipsBaseConfig config;
 
-    public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsMutateConfig config) {
+    public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsBaseConfig config) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.config = config;
     }
 
-    static MemoryEstimation estimate(SplitRelationshipsMutateConfig configuration) {
+    public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
         // we cannot assume any compression of the relationships
         var pessimisticSizePerRel = configuration.hasRelationshipWeightProperty()
             ? Double.BYTES + 2 * Long.BYTES

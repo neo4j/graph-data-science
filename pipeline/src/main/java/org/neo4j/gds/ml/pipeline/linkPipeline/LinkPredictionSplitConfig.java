@@ -34,6 +34,7 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -109,25 +110,37 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         return Collections.emptyList();
     }
 
-    @Value.Derived
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig testSplit() {
+    default SplitRelationshipsBaseConfig testSplit(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
+    ) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(testRelationshipType())
             .remainingRelationshipType(testComplementRelationshipType())
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
+            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .randomSeed(randomSeed)
             .build();
     }
 
-    @Value.Derived
     @Configuration.Ignore
-    default SplitRelationshipsBaseConfig trainSplit() {
+    default SplitRelationshipsBaseConfig trainSplit(
+        Collection<RelationshipType> relationshipTypes,
+        Optional<Long> randomSeed,
+        Optional<String> relationshipWeightProperty
+    ) {
         return SplitRelationshipsBaseConfigImpl.builder()
             .holdoutRelationshipType(trainRelationshipType())
             .remainingRelationshipType(featureInputRelationshipType())
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
+            .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
+            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .randomSeed(randomSeed)
             .build();
     }
 

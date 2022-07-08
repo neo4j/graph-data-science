@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.train;
+package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
@@ -38,8 +38,6 @@ import org.neo4j.gds.ml.pipeline.PipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrain;
-import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
 import java.util.ArrayList;
@@ -48,9 +46,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.ml.linkmodels.pipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
-import static org.neo4j.gds.ml.linkmodels.pipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.splitEstimation;
 import static org.neo4j.gds.ml.util.TrainingSetWarnings.warnForSmallRelationshipSets;
 
 public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
@@ -76,10 +74,10 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         );
 
         this.relationshipSplitter = new RelationshipSplitter(
-            graphName,
+            graphStore,
             pipeline.splitConfig(),
-            executionContext,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
@@ -106,7 +104,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     ) {
         pipeline.validateTrainingParameterSpace();
 
-        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes());
+        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes(), pipeline.relationshipWeightProperty());
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
@@ -128,9 +126,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     @Override
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
         this.relationshipSplitter.splitRelationships(
-            graphStore,
-            config.relationshipTypes(),
-            config.nodeLabels(),
+            config.internalRelationshipTypes(graphStore),
+            config.nodeLabelIdentifiers(graphStore),
             config.randomSeed(),
             pipeline.relationshipWeightProperty()
         );

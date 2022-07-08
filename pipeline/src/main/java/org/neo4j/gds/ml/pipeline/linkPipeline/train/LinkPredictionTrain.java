@@ -26,7 +26,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -51,7 +50,6 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
-import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
 
@@ -75,7 +73,7 @@ public final class LinkPredictionTrain {
     private final TerminationFlag terminationFlag;
 
 
-    public static LocalIdMap makeClassIdMap() {
+    private static LocalIdMap makeClassIdMap() {
         return LocalIdMap.of((long) EdgeSplitter.NEGATIVE, (long) EdgeSplitter.POSITIVE);
     }
 
@@ -269,20 +267,6 @@ public final class LinkPredictionTrain {
                 trainingStatistics.addTestScore(metric, score);
             });
         progressTracker.endSubTask("Compute test metrics");
-    }
-
-    private List<TrainingExamplesSplit> trainValidationSplits(
-        ReadOnlyHugeLongArray trainRelationshipIds,
-        HugeLongArray actualLabels
-    ) {
-        var splitter = new StratifiedKFoldSplitter(
-            pipeline.splitConfig().validationFolds(),
-            trainRelationshipIds,
-            actualLabels::get,
-            config.randomSeed(),
-            new TreeSet<>(classIdMap.originalIdsList())
-        );
-        return splitter.splits();
     }
 
     private void computeTrainMetric(

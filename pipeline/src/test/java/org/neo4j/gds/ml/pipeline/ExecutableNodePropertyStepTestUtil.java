@@ -32,6 +32,7 @@ import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 
@@ -91,14 +92,16 @@ public class ExecutableNodePropertyStepTestUtil {
         }
     }
 
-    static class TestNodePropertyStepWithFixedEstimation implements ExecutableNodePropertyStep {
+    public static class TestNodePropertyStepWithFixedEstimation implements ExecutableNodePropertyStep {
 
         private MemoryEstimation memoryEstimation;
         private String procName;
+        private String nodeProperty;
 
         public TestNodePropertyStepWithFixedEstimation(String procName, MemoryEstimation memoryEstimation) {
             this.memoryEstimation = memoryEstimation;
             this.procName = procName;
+            this.nodeProperty = UUID.randomUUID().toString();
         }
 
         @Override
@@ -133,7 +136,7 @@ public class ExecutableNodePropertyStepTestUtil {
 
         @Override
         public String nodeProperty() {
-            throw new NotImplementedException();
+           return nodeProperty;
         }
     }
 

@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor;
 
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.validateMainMetric;
 
