@@ -59,6 +59,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private HugeDoubleArray silhouette;
 
+
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
         NodePropertyValues nodeProperties = graph.nodeProperties(nodeWeightProperty);
@@ -139,6 +140,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
         KmeansSampler sampler = new KmeansUniformSampler();
 
+        long[] nodesInCluster = new long[k];
 
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
@@ -168,7 +170,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
             List<Long> initialCenterIds = sampler.sampleClusters(random, nodePropertyValues, nodeCount, k);
             clusterManager.initializeCenters(initialCenterIds);
-
             //
             int iteration = 0;
             while (true) {
@@ -209,14 +210,24 @@ public class Kmeans extends Algorithm<KmeansResult> {
                         distanceFromCenter.set(v, currentDistanceFromCenter.get(v));
                     });
                     bestCenters = clusterManager.getCenters();
+                    if (computeSilhouette) {
+                        nodesInCluster = clusterManager.getNodesInCluster();
+                    }
                 }
             } else {
                 bestCommunities = currentCommunities;
                 distanceFromCenter = currentDistanceFromCenter;
                 bestCenters = clusterManager.getCenters();
                 bestDistance = distanceFromClusterCentre;
+                if (computeSilhouette) {
+                    nodesInCluster = clusterManager.getNodesInCluster();
+                }
 
             }
+        }
+
+        if (computeSilhouette) {
+            calculateSilhouette(nodesInCluster);
         }
         progressTracker.endSubTask();
         return ImmutableKmeansResult.of(bestCommunities, distanceFromCenter, bestCenters, bestDistance, silhouette);
@@ -271,5 +282,25 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
             }
         });
+    }
+
+    private void calculateSilhouette(long[] nodesInCluster) {
+        var nodeCount = graph.nodeCount();
+        this.silhouette = HugeDoubleArray.newArray(nodeCount);
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> SilhouetteTask.createTask(
+                nodePropertyValues,
+                bestCommunities,
+                silhouette,
+                k,
+                dimensions,
+                nodesInCluster,
+                partition,
+                progressTracker
+            ),
+            Optional.of((int) nodeCount / concurrency)
+        );
     }
 }
