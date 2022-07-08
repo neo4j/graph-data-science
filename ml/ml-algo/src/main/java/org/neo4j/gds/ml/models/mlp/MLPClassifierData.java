@@ -48,13 +48,13 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
         var biases = new ArrayList<Weights<Vector>>();
         var hiddenDepth = hiddenLayerSizes.size();
         weights.add(generateWeights(hiddenLayerSizes.get(0), featureCount, random.nextLong()));
+        biases.add(generateBias(hiddenLayerSizes.get(0), random.nextLong()));
         for (int i = 0; i < hiddenDepth-1; i++) {
             weights.add(generateWeights(hiddenLayerSizes.get(i+1), hiddenLayerSizes.get(i), random.nextLong()));
-            biases.add(generateBias(hiddenLayerSizes.get(i), random.nextLong()));
+            biases.add(generateBias(hiddenLayerSizes.get(i+1), random.nextLong()));
         }
-        biases.add(generateBias(hiddenLayerSizes.get(hiddenDepth-1), random.nextLong()));
-        biases.add(generateBias(classCount, random.nextLong()));
         weights.add(generateWeights(classCount, hiddenLayerSizes.get(hiddenDepth-1), random.nextLong()));
+        biases.add(generateBias(classCount, random.nextLong()));
 
         return ImmutableMLPClassifierData
             .builder()
@@ -67,6 +67,7 @@ public interface MLPClassifierData extends Classifier.ClassifierData {
     }
 
     //TODO: Refactor to use LayerFactory and ActivationFunction in algo.embeddings.graphsage
+    //bounds for weights and biases are from Kaiming initialization for Relu: https://arxiv.org/abs/1502.01852
     private static Weights<Matrix> generateWeights(int rows, int cols, long randomSeed) {
         var weightBound = Math.sqrt(2d / cols);
         double[] data = new Random(randomSeed)

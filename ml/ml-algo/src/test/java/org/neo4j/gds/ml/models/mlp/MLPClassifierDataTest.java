@@ -39,14 +39,10 @@ class MLPClassifierDataTest {
         assertThat(weights.size()).isEqualTo(4);
         assertThat(biases.size()).isEqualTo(4);
 
-        assertThat(weights.get(0).data().rows()).isEqualTo(24);
-        assertThat(weights.get(0).data().cols()).isEqualTo(4);
-        assertThat(weights.get(1).data().rows()).isEqualTo(18);
-        assertThat(weights.get(1).data().cols()).isEqualTo(24);
-        assertThat(weights.get(2).data().rows()).isEqualTo(12);
-        assertThat(weights.get(2).data().cols()).isEqualTo(18);
-        assertThat(weights.get(3).data().rows()).isEqualTo(3);
-        assertThat(weights.get(3).data().cols()).isEqualTo(12);
+        assertThat(weights.get(0).data().dimensions()).containsExactly(24,4);
+        assertThat(weights.get(1).data().dimensions()).containsExactly(18, 24);
+        assertThat(weights.get(2).data().dimensions()).containsExactly(12,18);
+        assertThat(weights.get(3).data().dimensions()).containsExactly(3,12);
 
         assertThat(biases.get(0).data().length()).isEqualTo(24);
         assertThat(biases.get(1).data().length()).isEqualTo(18);
