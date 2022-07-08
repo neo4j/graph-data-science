@@ -79,26 +79,26 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Value.Default
     @Configuration.Ignore
-    default String testRelationshipType() {
-        return "_TEST_";
+    default RelationshipType testRelationshipType() {
+        return RelationshipType.of("_TEST_");
     }
 
     @Value.Default
     @Configuration.Ignore
-    default String testComplementRelationshipType() {
-        return "_TEST_COMPLEMENT_";
+    default RelationshipType testComplementRelationshipType() {
+        return RelationshipType.of("_TEST_COMPLEMENT_");
     }
 
     @Value.Default
     @Configuration.Ignore
-    default String trainRelationshipType() {
-        return "_TRAIN_";
+    default RelationshipType trainRelationshipType() {
+        return RelationshipType.of("_TRAIN_");
     }
 
     @Value.Default
     @Configuration.Ignore
-    default String featureInputRelationshipType() {
-        return "_FEATURE_INPUT_";
+    default RelationshipType featureInputRelationshipType() {
+        return RelationshipType.of("_FEATURE_INPUT_");
     }
 
     @Override
@@ -117,8 +117,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
-            .holdoutRelationshipType(testRelationshipType())
-            .remainingRelationshipType(testComplementRelationshipType())
+            .holdoutRelationshipType(testRelationshipType().name)
+            .remainingRelationshipType(testComplementRelationshipType().name)
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
@@ -134,8 +134,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
-            .holdoutRelationshipType(trainRelationshipType())
-            .remainingRelationshipType(featureInputRelationshipType())
+            .holdoutRelationshipType(trainRelationshipType().name)
+            .remainingRelationshipType(featureInputRelationshipType().name)
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
@@ -158,7 +158,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
         );
 
         var invalidTypes = reservedTypes
-            .filter(reservedType -> graphStore.hasRelationshipType(RelationshipType.of(reservedType)))
+            .filter(graphStore::hasRelationshipType)
+            .map(RelationshipType::name)
             .collect(Collectors.toList());
 
         if (!invalidTypes.isEmpty()) {
@@ -219,10 +220,10 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .nodeCount(nodeCount)
             // matches the relCount of the original GraphStore and thus lower than the sum of all relationshipCounts
             .relCountUpperBound(relationshipCount)
-            .putRelationshipCount(RelationshipType.of(testRelationshipType()), expectedSetSizes.testSize())
-            .putRelationshipCount(RelationshipType.of(testComplementRelationshipType()), expectedSetSizes.testComplementSize())
-            .putRelationshipCount(RelationshipType.of(trainRelationshipType()), expectedSetSizes.trainSize())
-            .putRelationshipCount(RelationshipType.of(featureInputRelationshipType()), expectedSetSizes.featureInputSize())
+            .putRelationshipCount(testRelationshipType(), expectedSetSizes.testSize())
+            .putRelationshipCount(testComplementRelationshipType(), expectedSetSizes.testComplementSize())
+            .putRelationshipCount(trainRelationshipType(), expectedSetSizes.trainSize())
+            .putRelationshipCount(featureInputRelationshipType(), expectedSetSizes.featureInputSize())
             .build();
     }
 }

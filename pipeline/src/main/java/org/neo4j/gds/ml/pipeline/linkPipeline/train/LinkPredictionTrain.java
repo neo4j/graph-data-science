@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -118,11 +117,6 @@ public final class LinkPredictionTrain {
         );
 
         return tasks;
-    }
-
-    @Deprecated
-    public static long estimateMemory() {
-        return MemoryUsage.sizeOfInstance(ImmutableModelStats.class) * 2 + Double.BYTES * 2;
     }
 
     public LinkPredictionTrainResult compute() {
@@ -315,12 +309,12 @@ public final class LinkPredictionTrain {
             .max("Features and labels", List.of(
                 LinkFeaturesAndLabelsExtractor.estimate(
                     fudgedLinkFeatureDim,
-                    relCounts -> relCounts.get(RelationshipType.of(splitConfig.trainRelationshipType())),
+                    relCounts -> relCounts.get(splitConfig.trainRelationshipType()),
                     "Train"
                 ),
                 LinkFeaturesAndLabelsExtractor.estimate(
                     fudgedLinkFeatureDim,
-                    relCounts -> relCounts.get(RelationshipType.of(splitConfig.testRelationshipType())),
+                    relCounts -> relCounts.get(splitConfig.testRelationshipType()),
                     "Test"
                 )
             ))
@@ -329,7 +323,11 @@ public final class LinkPredictionTrain {
             // this assumes the training is independent of the relationship set size
             .add("Outer train stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
             .add("Test stats map", TrainingStatistics.memoryEstimationStatsMap(numberOfMetrics, 1, 1))
-            .fixed("Best model stats", numberOfMetrics * estimateMemory())
+            .fixed("Best model stats", MemoryRange
+                .of(MemoryUsage.sizeOfInstance(ImmutableModelStats.class))
+                .times(2)
+                .add(Double.BYTES * 2)
+                .times(numberOfMetrics))
             .build();
     }
 
@@ -362,7 +360,7 @@ public final class LinkPredictionTrain {
                 "Cross-Validation splitting",
                 StratifiedKFoldSplitter.memoryEstimation(
                     splitConfig.validationFolds(),
-                    dim -> dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType()))
+                    dim -> dim.relationshipCounts().get(splitConfig.trainRelationshipType())
                 )
             )
             .add(maxEstimationOverModelCandidates)
@@ -386,7 +384,7 @@ public final class LinkPredictionTrain {
             "Training", dim ->
                 ClassifierTrainerFactory.memoryEstimation(
                     trainerConfig,
-                    unused -> dim.relationshipCounts().get(RelationshipType.of(splitConfig.trainRelationshipType())),
+                    unused -> dim.relationshipCounts().get(splitConfig.trainRelationshipType()),
                     2,
                     linkFeatureDimension,
                     true
@@ -402,7 +400,7 @@ public final class LinkPredictionTrain {
                 (dim, threads) -> {
                     long trainSetSize = dim
                         .relationshipCounts()
-                        .get(RelationshipType.of(splitConfig.trainRelationshipType()));
+                        .get(splitConfig.trainRelationshipType());
                     return MemoryRange.of(SignedProbabilities.estimateMemory(trainSetSize));
                 }
             ).build();

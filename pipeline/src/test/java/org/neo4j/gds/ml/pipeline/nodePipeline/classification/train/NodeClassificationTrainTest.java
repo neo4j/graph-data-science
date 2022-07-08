@@ -36,8 +36,6 @@ import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -540,10 +538,7 @@ class NodeClassificationTrainTest {
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
-        var progressTask = progressTask(
-            pipeline,
-            nodeGraphStore.nodeCount()
-        );
+        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
         var progressTracker = new InspectableTestProgressTracker(progressTask, config.username(), config.jobId());
 
         createWithExecutionContext(
@@ -580,7 +575,7 @@ class NodeClassificationTrainTest {
         var metrics = ClassificationMetricSpecification.Parser.parse("F1(class=1)");
         var config = createConfig("bananasModel", GRAPH_NAME, metrics, 42L);
 
-        var progressTask = progressTask(pipeline, nodeGraphStore.nodeCount());
+        var progressTask = NodeClassificationTrain.progressTask(pipeline, nodeGraphStore.nodeCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
@@ -747,13 +742,6 @@ class NodeClassificationTrainTest {
         );
     }
 
-
-    private static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
-        return Tasks.task(
-            "MY DUMMY TASK",
-            NodeClassificationTrain.progressTasks(pipeline, nodeCount)
-        );
-    }
 
     private NodeClassificationPipelineTrainConfig createConfig(
         String modelName,

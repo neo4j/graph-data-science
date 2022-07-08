@@ -25,7 +25,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
@@ -40,7 +39,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
     > {
 
     private final ExecutionContext executionContext;
-    private static final String TASK_NAME = "Node Classification Train Pipeline";
 
     public NodeClassificationTrainPipelineAlgorithmFactory(ExecutionContext executionContext) {
         this.executionContext = executionContext;
@@ -106,7 +104,7 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
 
     @Override
     public String taskName() {
-        return TASK_NAME;
+        return "Node Classification Train Pipeline";
     }
 
     @Override
@@ -121,9 +119,6 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
     }
 
     public static Task progressTask(GraphStore graphStore, NodeClassificationTrainingPipeline pipeline) {
-        return Tasks.task(
-            TASK_NAME,
-            NodeClassificationTrain.progressTasks(pipeline, graphStore.nodeCount())
-        );
+        return NodeClassificationTrain.progressTask(pipeline, graphStore.nodeCount());
     }
 }

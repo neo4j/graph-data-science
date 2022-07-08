@@ -99,7 +99,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     }
 
     public void cleanupIntermediateProperties(List<ExecutableNodePropertyStep> steps) {
-        steps.stream().map(ExecutableNodePropertyStep::nodeProperty).forEach(graphStore::removeNodeProperty);
+        steps.stream().map(ExecutableNodePropertyStep::mutateNodeProperty).forEach(graphStore::removeNodeProperty);
     }
 
     public static <CONFIG extends AlgoBaseConfig & GraphNameConfig> NodePropertyStepExecutor<CONFIG> of(

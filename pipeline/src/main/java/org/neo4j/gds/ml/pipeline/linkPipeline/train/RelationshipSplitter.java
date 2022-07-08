@@ -70,7 +70,7 @@ public class RelationshipSplitter {
 
         splitConfig.validateAgainstGraphStore(graphStore);
 
-        var testComplementRelationshipType = RelationshipType.of(splitConfig.testComplementRelationshipType());
+        var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
 
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
@@ -90,8 +90,7 @@ public class RelationshipSplitter {
     }
 
     private void validateTestSplit(GraphStore graphStore) {
-        String testRelationshipType = splitConfig.testRelationshipType();
-        if (graphStore.getGraph(RelationshipType.of(testRelationshipType)).relationshipCount() <= 0) {
+        if (graphStore.getGraph(splitConfig.testRelationshipType()).relationshipCount() <= 0) {
             throw new IllegalStateException(formatWithLocale(
                 SPLIT_ERROR_TEMPLATE,
                 "Test",
@@ -130,7 +129,7 @@ public class RelationshipSplitter {
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(splitConfig.trainSplit(List.of(RelationshipType.of(splitConfig.testComplementRelationshipType())), randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(List.of(splitConfig.testComplementRelationshipType()), randomSeed, relationshipWeight)))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

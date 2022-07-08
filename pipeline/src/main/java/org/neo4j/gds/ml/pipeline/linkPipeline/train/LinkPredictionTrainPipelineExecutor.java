@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.CatalogModelContainer;
@@ -110,7 +109,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            List.of(pipeline.splitConfig().featureInputRelationshipType())
+            List.of(pipeline.splitConfig().featureInputRelationshipType().name)
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
@@ -135,14 +134,11 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         var splitConfig = pipeline.splitConfig();
 
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        var trainRelationshipTypes = RelationshipType.listOf(splitConfig.trainRelationshipType());
-        var testRelationshipTypes = RelationshipType.listOf(splitConfig.testRelationshipType());
-        var featureInputRelationshipType = RelationshipType.listOf(splitConfig.featureInputRelationshipType());
 
         return Map.of(
-            DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, trainRelationshipTypes),
-            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, testRelationshipTypes),
-            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, featureInputRelationshipType)
+            DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.trainRelationshipType())),
+            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.testRelationshipType())),
+            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.featureInputRelationshipType()))
         );
     }
 

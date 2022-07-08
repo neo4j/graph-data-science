@@ -33,7 +33,6 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig config
     ) {
-
         this.pipeline = pipeline;
         this.config = config;
     }

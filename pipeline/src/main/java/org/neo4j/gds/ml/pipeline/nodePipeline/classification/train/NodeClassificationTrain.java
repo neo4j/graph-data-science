@@ -179,7 +179,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         return builder.build();
     }
 
-    public static List<Task> progressTasks(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
+    public static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
         var splitConfig = pipeline.splitConfig();
         long trainSetSize = splitConfig.trainSetSize(nodeCount);
         long testSetSize = splitConfig.testSetSize(nodeCount);
@@ -197,7 +197,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         tasks.add(Tasks.leaf("Evaluate on test data", testSetSize));
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
 
-        return tasks;
+        return Tasks.task("Node Classification Train Pipeline", tasks);
     }
 
     @NotNull
@@ -256,25 +256,23 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         NodeFeatureProducer<NodeClassificationPipelineTrainConfig> nodeFeatureProducer,
         ProgressTracker progressTracker
     ) {
-        var graph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
-        pipeline.splitConfig().validateMinNumNodesInSplitSets(graph);
+        // we dont resolve the relationships as for extracting the classes they are irrelevant
+        var nodesGraph = graphStore.getGraph(config.nodeLabelIdentifiers(graphStore));
+        pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
-        var targetNodeProperty = graph.nodeProperties(config.targetProperty());
-        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, graph.nodeCount());
+        var targetNodeProperty = nodesGraph.nodeProperties(config.targetProperty());
+        var labelsAndClassCounts = extractLabelsAndClassCounts(targetNodeProperty, nodesGraph.nodeCount());
         LongMultiSet classCounts = labelsAndClassCounts.classCounts();
-        var labels = labelsAndClassCounts.labels();
         var classIdMap = LocalIdMap.ofSorted(classCounts.keys());
-        var metrics = config.metrics(classIdMap, classCounts);
-        var classificationMetrics = classificationMetrics(metrics);
 
         return new NodeClassificationTrain(
             pipeline,
             config,
-            labels,
+            labelsAndClassCounts.labels(),
             classIdMap,
-            graph,
-            metrics,
-            classificationMetrics,
+            nodesGraph,
+            config.metrics(classIdMap, classCounts),
+            classificationMetrics(config.metrics(classIdMap, classCounts)),
             classCounts,
             nodeFeatureProducer,
             progressTracker
@@ -328,7 +326,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
 
         var trainingStatistics = new TrainingStatistics(metrics);
 
-        var features = nodeFeatureProducer.makeFeatures(pipeline);
+        var features = nodeFeatureProducer.procedureFeatures(pipeline);
 
         findBestModelCandidate(nodeSplits.outerSplit().trainSet(), features, trainingStatistics);
 
