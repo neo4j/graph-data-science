@@ -83,12 +83,47 @@ class KmeansStreamProcTest extends BaseProcTest {
             .addParameter("nodeProperty", "kmeans")
             .addParameter("randomSeed", 19)
             .addParameter("concurrency", 1)
-            .yields("nodeId", "communityId", "distanceFromCentroid");
+            .addParameter("computeSilhouette", true)
+            .yields("nodeId", "communityId", "distanceFromCentroid", "silhouette");
         assertCypherResult(algoQuery, List.of(
-            Map.of("nodeId", 0L, "communityId", 0L, "distanceFromCentroid", 0.5),
-            Map.of("nodeId", 1L, "communityId", 1L, "distanceFromCentroid", Math.sqrt(2)),
-            Map.of("nodeId", 2L, "communityId", 0L, "distanceFromCentroid", 0.5),
-            Map.of("nodeId", 3L, "communityId", 1L, "distanceFromCentroid", Math.sqrt(2))
+            Map.of("nodeId",
+                0L,
+                "communityId",
+                0L,
+                "distanceFromCentroid",
+                0.5, "silhouette",
+                0.9929292857150108
+            ),
+            Map.of(
+                "nodeId",
+                1L,
+                "communityId",
+                1L,
+                "distanceFromCentroid",
+                Math.sqrt(2),
+                "silhouette",
+                0.9799515133128792
+            ),
+            Map.of(
+                "nodeId",
+                2L,
+                "communityId",
+                0L,
+                "distanceFromCentroid",
+                0.5,
+                "silhouette",
+                0.9928938477702276
+            ),
+            Map.of(
+                "nodeId",
+                3L,
+                "communityId",
+                1L,
+                "distanceFromCentroid",
+                Math.sqrt(2),
+                "silhouette",
+                0.9799505034216922
+            )
 
         ));
     }

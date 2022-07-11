@@ -72,6 +72,7 @@ class KmeansWriteProcTest extends BaseProcTest {
             .addParameter("k", 3)
             .addParameter("nodeProperty", "weights")
             .addParameter("writeProperty", "communityId")
+            .addParameter("computeSilhouette", true)
             .yields();
 
 
@@ -86,7 +87,8 @@ class KmeansWriteProcTest extends BaseProcTest {
                     "nodePropertiesWritten",
                     "configuration",
                     "centroids",
-                    "averageDistanceToCentroid"
+                    "averageDistanceToCentroid",
+                    "averageSilhouette"
                 );
 
             var softAssertions = new SoftAssertions();
@@ -147,6 +149,10 @@ class KmeansWriteProcTest extends BaseProcTest {
                     .asInstanceOf(LIST)
                     .isNotEmpty();
             }
+
+            softAssertions.assertThat(resultRow.get("averageSilhouette"))
+                .isNotNull()
+                .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d);
 
             softAssertions.assertAll();
 

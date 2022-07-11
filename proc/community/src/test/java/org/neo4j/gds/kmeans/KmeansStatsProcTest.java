@@ -70,6 +70,7 @@ class KmeansStatsProcTest extends BaseProcTest {
             .statsMode()
             .addParameter("k", 3)
             .addParameter("nodeProperty", "weights")
+            .addParameter("computeSilhouette", true)
             .yields();
 
         runQuery(query, result -> {
@@ -81,7 +82,8 @@ class KmeansStatsProcTest extends BaseProcTest {
                     "postProcessingMillis",
                     "configuration",
                     "centroids",
-                    "averageDistanceToCentroid"
+                    "averageDistanceToCentroid",
+                    "averageSilhouette"
                 );
 
             while (result.hasNext()) {
@@ -122,6 +124,9 @@ class KmeansStatsProcTest extends BaseProcTest {
                         .asInstanceOf(LIST)
                         .isNotEmpty();
                 }
+                assertThat(resultRow.get("averageSilhouette"))
+                    .isNotNull()
+                    .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d);
             }
 
             return true;

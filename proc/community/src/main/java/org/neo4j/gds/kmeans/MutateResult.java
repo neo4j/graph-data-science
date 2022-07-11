@@ -40,6 +40,7 @@ public class MutateResult extends StatsResult {
         @Nullable Map<String, Object> communityDistribution,
         @Nullable List<List<Double>> centroids,
         @Nullable double averageDistanceToCentroid,
+        @Nullable double averageSilhouette,
         Map<String, Object> configuration
     ) {
         super(
@@ -49,6 +50,7 @@ public class MutateResult extends StatsResult {
             communityDistribution,
             centroids,
             averageDistanceToCentroid,
+            averageSilhouette,
             configuration
         );
         this.mutateMillis = mutateMillis;
@@ -59,6 +61,7 @@ public class MutateResult extends StatsResult {
         private List<List<Double>> centroids;
         private double averageDistanceToCentroid;
 
+        private double averageSilhouette;
         Builder(
             ProcedureCallContext context,
             int concurrency
@@ -77,6 +80,7 @@ public class MutateResult extends StatsResult {
                 communityHistogramOrNull(),
                 centroids,
                 averageDistanceToCentroid,
+                averageSilhouette,
                 config.toMap()
             );
         }
@@ -88,6 +92,11 @@ public class MutateResult extends StatsResult {
 
         public Builder withAverageDistanceToCentroid(double averageDistanceToCentroid) {
             this.averageDistanceToCentroid = averageDistanceToCentroid;
+            return this;
+        }
+
+        public Builder withAverageSilhouette(double averageSilhouette) {
+            this.averageSilhouette = averageSilhouette;
             return this;
         }
     }

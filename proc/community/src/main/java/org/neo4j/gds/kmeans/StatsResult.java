@@ -32,6 +32,7 @@ public class StatsResult extends StandardStatsResult {
     public final Map<String, Object> communityDistribution;
     public final List<List<Double>> centroids;
     public final double averageDistanceToCentroid;
+    public final double averageSilhouette;
     public StatsResult(
         long preProcessingMillis,
         long computeMillis,
@@ -39,12 +40,14 @@ public class StatsResult extends StandardStatsResult {
         @Nullable Map<String, Object> communityDistribution,
         @Nullable List<List<Double>> centroids,
         @Nullable double averageDistanceToCentroid,
+        @Nullable double averageSilhouette,
         Map<String, Object> configuration
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
         this.communityDistribution = communityDistribution;
         this.centroids = centroids;
         this.averageDistanceToCentroid = averageDistanceToCentroid;
+        this.averageSilhouette = averageSilhouette;
     }
 
     static final class Builder extends AbstractCommunityResultBuilder<StatsResult> {
@@ -54,6 +57,7 @@ public class StatsResult extends StandardStatsResult {
 
         private List<List<Double>> centroids;
         private double averageDistanceToCentroid;
+        private double averageSilhouette;
         @Override
         public StatsResult buildResult() {
             return new StatsResult(
@@ -63,6 +67,7 @@ public class StatsResult extends StandardStatsResult {
                 communityHistogramOrNull(),
                 centroids,
                 averageDistanceToCentroid,
+                averageSilhouette,
                 config.toMap()
             );
         }
@@ -74,6 +79,11 @@ public class StatsResult extends StandardStatsResult {
 
         public Builder withAverageDistanceToCentroid(double averageDistanceToCentroid) {
             this.averageDistanceToCentroid = averageDistanceToCentroid;
+            return this;
+        }
+
+        public Builder withAverageSilhouette(double averageSilhouette) {
+            this.averageSilhouette = averageSilhouette;
             return this;
         }
     }

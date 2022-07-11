@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -33,4 +34,9 @@ public interface KmeansResult {
     double[][] centers();
 
     double averageDistanceToCentroid();
+
+    @Nullable
+    HugeDoubleArray silhouette();
+
+    double averageSilhouette();
 }

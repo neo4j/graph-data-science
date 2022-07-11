@@ -57,6 +57,9 @@ abstract class ClusterManager {
 
     abstract double[][] getCenters();
 
+    public long[] getNodesInCluster() {
+        return nodesInCluster;
+    }
 
     static ClusterManager createClusterManager(NodePropertyValues values, int dimensions, int k) {
         if (values.valueType() == ValueType.FLOAT_ARRAY) {

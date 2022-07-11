@@ -45,7 +45,8 @@ CALL gds.alpha.kmeans.stream(
 YIELD
   nodeId: Integer,
   communityId: Integer,
-  distanceFromCentroid: Float
+  distanceFromCentroid: Float,
+  silhouette: Float
 
 ----
 
@@ -66,6 +67,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | nodeId                    | Integer   | Node ID.
 | communityId               | Integer   | The community ID.
 | distanceFromCentroid      | Float     | Distance of the node from the centroid of its community.
+| silhouette      | Float     | Silhouette score  of the node.
 |===
 ======
 
@@ -86,6 +88,7 @@ YIELD
   communityDistribution: Map,
   centroids: List of List of Float,
   averageDistanceToCentroid: Float,
+  averageSilhouette: Float,
   configuration: Map
 ----
 
@@ -109,6 +112,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float| Average distance between node and centroid.
+| averageSilhouette | Float| Average silhouette score over all nodes.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -131,6 +135,7 @@ YIELD
   communityDistribution: Map,
   centroids: List of List of Float,
   averageDistanceToCentroid: Float,
+  averageSilhouette: Float,
   configuration: Map
 
 ----
@@ -157,6 +162,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float | Average distance between node and centroid.
+| averageSilhouette | Float| Average silhouette score over all nodes.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -180,6 +186,7 @@ YIELD
   communityDistribution: Map,
   centroids: List of List of Float,
   averageDistanceToCentroid: Float,
+  averageSilhouette: Float,
   configuration: Map
 ----
 
@@ -205,6 +212,7 @@ include::partial$/algorithms/alpha/kmeans/specific-configuration.adoc[]
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float | Average distance between node and centroid.
+| averageSilhouette | Float| Average silhouette score over all nodes.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======

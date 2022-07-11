@@ -72,6 +72,7 @@ class KmeansMutateProcTest extends BaseProcTest {
             .addParameter("k", 3)
             .addParameter("nodeProperty", "weights")
             .addParameter("mutateProperty", "communityId")
+            .addParameter("computeSilhouette", true)
             .yields();
 
 
@@ -86,7 +87,8 @@ class KmeansMutateProcTest extends BaseProcTest {
                     "nodePropertiesWritten",
                     "configuration",
                     "centroids",
-                    "averageDistanceToCentroid"
+                    "averageDistanceToCentroid",
+                    "averageSilhouette"
                 );
 
             while(result.hasNext()) {
@@ -143,6 +145,9 @@ class KmeansMutateProcTest extends BaseProcTest {
                         .asInstanceOf(LIST)
                         .isNotEmpty();
                 }
+                assertThat(resultRow.get("averageSilhouette"))
+                    .isNotNull()
+                    .asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(-1d).isLessThanOrEqualTo(1d);
             }
 
             return true;
