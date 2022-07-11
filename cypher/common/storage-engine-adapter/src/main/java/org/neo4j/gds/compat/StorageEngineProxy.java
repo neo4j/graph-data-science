@@ -37,23 +37,9 @@ import org.neo4j.storageengine.api.StorageReader;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
-import java.util.ServiceLoader;
-
 public final class StorageEngineProxy {
 
-    private static final StorageEngineProxyApi IMPL;
-
-    static {
-        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-        var storageEngineProxyFactory = ServiceLoader
-            .load(StorageEngineProxyFactory.class)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .filter(f -> f.canLoad(neo4jVersion))
-            .findFirst()
-            .orElseThrow(() -> new LinkageError("Could not load the " + StorageEngineProxy.class + " implementation for " + neo4jVersion));
-        IMPL = storageEngineProxyFactory.load();
-    }
+    private static final StorageEngineProxyApi IMPL = ProxyUtil.findProxy(StorageEngineProxyFactory.class);
 
     private StorageEngineProxy() {}
 
