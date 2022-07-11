@@ -53,6 +53,6 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                        | Operation
-|Remove graph property from a named graph           | `gds.alpha.graph.removeGraphProperty`
+|Remove graph property from a named graph           | `gds.alpha.graph.graphProperty.drop`
 |Stream a graph property to the procedure caller    | `gds.alpha.graph.streamGraphProperty`
 |===
