@@ -38,9 +38,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphRemoveNodePropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ)
+    @Procedure(name = "gds.graph.nodeProperties.drop", mode = READ)
     @Description("Removes node properties from a projected graph.")
-    public Stream<Result> run(
+    public Stream<Result> dropNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -62,14 +62,24 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         // removing
         long propertiesRemoved = runWithExceptionLogging(
             "Node property removal failed",
-            () -> removeNodeProperties(graphStore, config)
+            () -> dropNodeProperties(graphStore, config)
         );
         // result
         return Stream.of(new Result(graphName, nodeProperties, propertiesRemoved));
     }
 
+    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
+    @Description("Removes node properties from a projected graph.")
+    public Stream<Result> run(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return dropNodeProperties(graphName, nodeProperties, configuration);
+    }
+
     @NotNull
-    private Long removeNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
+    private Long dropNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
         var removedPropertiesCount = new MutableLong(0);
 
         config.nodeProperties().forEach(propertyKey -> {
