@@ -50,7 +50,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(name = "gds.graph.relationships.write", mode = WRITE)
+    @Procedure(name = "gds.graph.relationship.write", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
     public Stream<Result> writeRelationships(
         @Name(value = "graphName") String graphName,
