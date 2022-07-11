@@ -36,7 +36,7 @@ public abstract class AbstractLinkFeatureAppenderFactory {
     protected abstract LinkFeatureAppender longAppender(NodePropertyValues props, int dimension);
     protected abstract LinkFeatureAppender doubleAppender(NodePropertyValues props, int dimension);
 
-    public LinkFeatureAppender createAppender(Graph graph, String propertyName) {
+    private LinkFeatureAppender createAppender(Graph graph, String propertyName) {
         var props = graph.nodeProperties(propertyName);
         var propertyType = props.valueType();
 
@@ -58,7 +58,7 @@ public abstract class AbstractLinkFeatureAppenderFactory {
         }
     }
 
-    public LinkFeatureAppender[] createAppenders(Graph graph, List<String> propertyNames) {
+    LinkFeatureAppender[] createAppenders(Graph graph, List<String> propertyNames) {
         var appenderPerProperty = new LinkFeatureAppender[propertyNames.size()];
         for (int idx = 0, nodePropertiesSize = propertyNames.size(); idx < nodePropertiesSize; idx++) {
             appenderPerProperty[idx] = createAppender(graph, propertyNames.get(idx));

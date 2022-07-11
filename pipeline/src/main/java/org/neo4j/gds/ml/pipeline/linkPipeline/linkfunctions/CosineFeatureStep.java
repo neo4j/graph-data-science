@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.pipeline.FeatureStepUtil;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
@@ -51,17 +52,17 @@ public class CosineFeatureStep implements LinkFeatureStep {
             public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
                 var partialResults = new CosineComputationResult();
 
-                for (int i = 0; i < partialL2WithNormsComputers.length; i++) {
-                    partialL2WithNormsComputers[i].compute(source, target, partialResults);
+                for (PartialL2WithNormsComputer partialL2WithNormsComputer : partialL2WithNormsComputers) {
+                    partialL2WithNormsComputer.compute(source, target, partialResults);
                 }
-                linkFeatures[offset] = partialResults.hadamardProduct;
+                linkFeatures[offset] = partialResults.dotProduct;
 
                 double l2Norm = Math.sqrt(partialResults.sourceSquareNorm * partialResults.targetSquareNorm);
 
                 if (Double.isNaN(l2Norm)) {
                     FeatureStepUtil.throwNanError(name(), nodePropertyNames, source, target);
                 } else if (l2Norm != 0.0) {
-                    linkFeatures[offset] = partialResults.hadamardProduct / l2Norm;
+                    linkFeatures[offset] = partialResults.dotProduct / l2Norm;
                 }
             }
 
@@ -87,7 +88,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
         return Map.of("nodeProperties", nodePropertyNames);
     }
 
-    PartialL2WithNormsComputer createComputer(Graph graph, String propertyName) {
+    private PartialL2WithNormsComputer createComputer(NodePropertyContainer graph, String propertyName) {
         var values = graph.nodeProperties(propertyName);
 
         switch (values.valueType()) {
@@ -109,12 +110,12 @@ public class CosineFeatureStep implements LinkFeatureStep {
     private static class CosineComputationResult {
         double sourceSquareNorm;
         double targetSquareNorm;
-        double hadamardProduct;
+        double dotProduct;
 
         CosineComputationResult() {
             this.sourceSquareNorm = 0.0;
             this.targetSquareNorm = 0.0;
-            this.hadamardProduct = 0.0;
+            this.dotProduct = 0.0;
         }
     }
 
@@ -149,7 +150,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
             var targetArrayPropValues = values.doubleArrayValue(target);
             assert sourceArrayPropValues.length == targetArrayPropValues.length;
             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.dotProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
                 result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
                 result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
             }
@@ -172,7 +173,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
             var targetArrayPropValues = values.floatArrayValue(target);
             assert sourceArrayPropValues.length == targetArrayPropValues.length;
             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.dotProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
                 result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
                 result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
             }
@@ -195,7 +196,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
             var targetArrayPropValues = values.longArrayValue(target);
             assert sourceArrayPropValues.length == targetArrayPropValues.length;
             for (int i = 0; i < sourceArrayPropValues.length; i++) {
-                result.hadamardProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
+                result.dotProduct += sourceArrayPropValues[i] * targetArrayPropValues[i];
                 result.sourceSquareNorm += sourceArrayPropValues[i] * sourceArrayPropValues[i];
                 result.targetSquareNorm += targetArrayPropValues[i] * targetArrayPropValues[i];
             }
@@ -216,7 +217,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
         ) {
             var sourceArrayPropValues = values.doubleValue(source);
             var targetArrayPropValues = values.doubleValue(target);
-            result.hadamardProduct += sourceArrayPropValues * targetArrayPropValues;
+            result.dotProduct += sourceArrayPropValues * targetArrayPropValues;
             result.sourceSquareNorm += sourceArrayPropValues * sourceArrayPropValues;
             result.targetSquareNorm += targetArrayPropValues * targetArrayPropValues;
         }
@@ -232,7 +233,7 @@ public class CosineFeatureStep implements LinkFeatureStep {
         void compute(long source, long target, CosineComputationResult result) {
             var sourceArrayPropValues = values.longValue(source);
             var targetArrayPropValues = values.longValue(target);
-            result.hadamardProduct += sourceArrayPropValues * targetArrayPropValues;
+            result.dotProduct += sourceArrayPropValues * targetArrayPropValues;
             result.sourceSquareNorm += sourceArrayPropValues * sourceArrayPropValues;
             result.targetSquareNorm += targetArrayPropValues * targetArrayPropValues;
         }

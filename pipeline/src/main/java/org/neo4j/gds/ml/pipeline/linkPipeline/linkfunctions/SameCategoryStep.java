@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions;
 
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureAppender;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureStepFactory;
@@ -80,7 +81,7 @@ public class SameCategoryStep implements LinkFeatureStep {
         };
     }
 
-    private LongLongPredicate sameCategoryPredicate(Graph graph, String nodeProperty) {
+    private LongLongPredicate sameCategoryPredicate(NodePropertyContainer graph, String nodeProperty) {
         var propertyValues = graph.nodeProperties(nodeProperty);
 
         switch (propertyValues.valueType()) {

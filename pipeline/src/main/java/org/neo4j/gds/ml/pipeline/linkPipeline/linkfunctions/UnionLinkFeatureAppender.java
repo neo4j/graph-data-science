@@ -33,7 +33,7 @@ class UnionLinkFeatureAppender implements LinkFeatureAppender {
     private final Collection<String> inputNodeProperties;
     private final int dimension;
 
-    public UnionLinkFeatureAppender(
+    UnionLinkFeatureAppender(
         LinkFeatureAppender[] appenderPerProperty,
         String featureStepName,
         Collection<String> inputNodeProperties
@@ -48,13 +48,11 @@ class UnionLinkFeatureAppender implements LinkFeatureAppender {
     public void appendFeatures(long source, long target, double[] linkFeatures, int offset) {
         var localOffset = offset;
 
-        for (int i = 0, appenderPerPropertyLength = appenderPerProperty.length; i < appenderPerPropertyLength; i++) {
-            LinkFeatureAppender linkFeatureAppender = appenderPerProperty[i];
+        for (LinkFeatureAppender linkFeatureAppender : appenderPerProperty) {
             linkFeatureAppender.appendFeatures(source, target, linkFeatures, localOffset);
             localOffset += linkFeatureAppender.dimension();
         }
 
-        // TODO is this the right place to validate (rather expensive)
         FeatureStepUtil.validateComputedFeatures(
             linkFeatures,
             offset,
