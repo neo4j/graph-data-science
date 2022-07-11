@@ -37,9 +37,9 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Delete the relationship type for a given graph stored in the graph-catalog.";
 
-    @Procedure(name = "gds.graph.deleteRelationships", mode = READ)
+    @Procedure(name = "gds.graph.relationships.drop", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<Result> delete(
+    public Stream<Result> dropRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
@@ -58,6 +58,15 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
             relationshipType,
             deletionResult
         ));
+    }
+
+    @Procedure(name = "gds.graph.deleteRelationships", mode = READ, deprecatedBy = "gds.graph.relationships.drop")
+    @Description(DESCRIPTION)
+    public Stream<Result> delete(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipType") String relationshipType
+    ) {
+        return dropRelationships(graphName, relationshipType);
     }
 
     @SuppressWarnings("unused")
