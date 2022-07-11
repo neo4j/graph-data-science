@@ -283,7 +283,7 @@ To inspect which community each node belongs to we can xref::graph-catalog-node-
 .Stream node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('myGraph', 'community')
+CALL gds.graph.nodeProperty.stream('myGraph', 'community')
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name as name, propertyValue AS community
 ----
@@ -352,7 +352,7 @@ Let us now xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-pr
 .Stream node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('myGraph', 'weightedCommunity')
+CALL gds.graph.nodeProperty.stream('myGraph', 'weightedCommunity')
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
 ----

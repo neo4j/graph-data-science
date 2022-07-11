@@ -224,7 +224,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertyForLabel() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp1', " +
             "   ['A']" +
@@ -243,7 +243,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertyForLabelSubset() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp2'" +
             ")  YIELD nodeId, propertyValue " +
@@ -267,7 +267,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp3'" +
             ")  YIELD nodeId, propertyValue " +
@@ -288,7 +288,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodeProperty() {
         assertError(
-            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3')",
+            "CALL gds.graph.nodeProperty.stream($graph, 'newNodeProp3')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one node projection to contain property key(s) ['newNodeProp3']."
         );
@@ -297,7 +297,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
         assertError(
-            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', ['A'])",
+            "CALL gds.graph.nodeProperty.stream($graph, 'newNodeProp3', ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
             "Could not find property key(s) ['newNodeProp3'] for label A. " +

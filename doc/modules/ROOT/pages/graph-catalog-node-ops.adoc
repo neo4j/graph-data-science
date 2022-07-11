@@ -27,7 +27,7 @@ This is useful to free up main memory or to remove accidentally added node prope
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty(
+CALL gds.graph.nodeProperty.stream(
     graphName: String,
     nodeProperties: String,
     nodeLabels: String or List of Strings,
@@ -259,7 +259,7 @@ In the following, we stream the previously computed scores `score`.
 .Stream the `score` node property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score')
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score')
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
 ORDER BY score DESC
@@ -288,7 +288,7 @@ The procedure can be configured to stream just the properties for specific node 
 .Stream the `score` property for `Person` nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score', ['Person'])
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
 ORDER BY score DESC
