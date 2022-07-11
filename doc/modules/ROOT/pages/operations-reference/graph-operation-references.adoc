@@ -25,7 +25,7 @@
 |xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller] | `gds.graph.nodeProperties.stream`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller] | `gds.graph.relationshipProperty.stream`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller] | `gds.graph.relationshipProperties.stream`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j] | `gds.graph.writeNodeProperties`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j] | `gds.graph.nodeProperties.write`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j] | `gds.graph.writeRelationship`
 |xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export`
 |===

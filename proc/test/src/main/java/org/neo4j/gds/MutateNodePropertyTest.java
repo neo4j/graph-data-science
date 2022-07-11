@@ -87,7 +87,7 @@ public interface MutateNodePropertyTest<ALGORITHM extends Algorithm<RESULT>, CON
         );
 
         String graphWriteQuery =
-            "CALL gds.graph.writeNodeProperties(" +
+            "CALL gds.graph.nodeProperties.write(" +
             "   $graph, " +
             "   [$property]" +
             ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten";

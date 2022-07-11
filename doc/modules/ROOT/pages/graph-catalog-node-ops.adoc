@@ -10,7 +10,7 @@ Node properties are either added during the graph projection or when using the `
 To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
-To persist the values in a Neo4j database, we can use `gds.graph.writeNodeProperties`.
+To persist the values in a Neo4j database, we can use `gds.graph.nodeProperties.write`.
 Similar to streaming node properties, it is also possible to write those back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 
@@ -119,7 +119,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties(
+CALL gds.graph.nodeProperties.write(
     graphName: String,
     nodeProperties: String or List of Strings,
     nodeLabels: String or List of Strings,
@@ -351,7 +351,7 @@ To write the 'score' property for all node labels in the social graph, we use th
 .Write the `score` property back to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties('socialGraph', ['score'])
+CALL gds.graph.nodeProperties.write('socialGraph', ['score'])
 YIELD propertiesWritten
 ----
 
@@ -375,7 +375,7 @@ In the following example, we will only write back the scores of the `Person` nod
 .Write node properties of a specific projected node label to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties('socialGraph', ['score'], ['Person'])
+CALL gds.graph.nodeProperties.write('socialGraph', ['score'], ['Person'])
 YIELD propertiesWritten
 ----
 

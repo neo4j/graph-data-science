@@ -117,12 +117,12 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {
         // no labels -> defaults to PROJECT_ALL
-        "CALL gds.graph.writeNodeProperties(" +
+        "CALL gds.graph.nodeProperties.write(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2']" +
         ") YIELD writeMillis, graphName, nodeProperties, propertiesWritten",
         // explicit PROJECT_ALL
-        "CALL gds.graph.writeNodeProperties(" +
+        "CALL gds.graph.nodeProperties.write(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2'], " +
         "   ['*']" +
@@ -158,7 +158,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void writeLoadedNodePropertiesForLabel() {
         assertCypherResult(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'], ['A'])",
+            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2'], ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
@@ -189,7 +189,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void writeLoadedNodePropertiesForLabelSubset() {
         assertCypherResult(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])",
+            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2'])",
             Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
@@ -226,7 +226,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         assertCypherResult(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp3'])",
+            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp3'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "writeMillis", Matchers.greaterThan(-1L),
@@ -284,7 +284,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodeProperties() {
         assertError(
-            "CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
+            "CALL gds.graph.nodeProperties.write($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one node projection to contain property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']."
         );
@@ -293,7 +293,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
         assertError(
-            "CALL gds.graph.writeNodeProperties(" +
+            "CALL gds.graph.nodeProperties.write(" +
             "   $graph, " +
             "   ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], " +
             "   ['A'] " +
