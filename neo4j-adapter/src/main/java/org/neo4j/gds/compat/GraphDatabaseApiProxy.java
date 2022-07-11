@@ -106,12 +106,14 @@ public final class GraphDatabaseApiProxy {
         return tx.execute(query, params);
     }
 
-    public static QueryExecution runQueryWithoutClosingTheResult(InternalTransaction tx,
-                                                                 String query,
-                                                                 Map<String, Object> params,
-                                                                 TransactionalContextFactory contextFactory,
-                                                                 QueryExecutionEngine executionEngine,
-                                                                 QuerySubscriber subscriber) {
+    public static QueryExecution runQueryWithoutClosingTheResult(
+        InternalTransaction tx,
+        String query,
+        Map<String, Object> params,
+        TransactionalContextFactory contextFactory,
+        QueryExecutionEngine executionEngine,
+        QuerySubscriber subscriber
+    ) {
         var convertedParams = ValueUtils.asMapValue(params);
         var context = contextFactory.newContext(tx, query, convertedParams);
         try {

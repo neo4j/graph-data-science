@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,23 +37,22 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class NodeSubscriber implements QuerySubscriber {
 
     private static final String ID_COLUMN = "id";
-    private static final NodeLabelToken ALL_NODES_LABEL = NodeLabelTokens.of(ALL_NODES);
+    private static final int UNINITIALIZED = -1;
 
     static final String LABELS_COLUMN = "labels";
     static final Set<String> RESERVED_COLUMNS = Set.of(ID_COLUMN, LABELS_COLUMN);
     static final Set<String> REQUIRED_COLUMNS = Set.of(ID_COLUMN);
 
-    private static final int UNINITIALIZED = -1;
+    private final ProgressTracker progressTracker;
+
     private long rows;
     private long maxNeoId = 0;
     private NodesBuilder nodesBuilder;
-    private final ProgressTracker progressTracker;
 
     private long neoId = -1L;
     private SequenceValue labels = VirtualValues.EMPTY_LIST;
@@ -127,7 +125,6 @@ class NodeSubscriber implements QuerySubscriber {
             }
 
             labels = (SequenceValue) value;
-
         } else {//properties
             if ( value != Values.NO_VALUE) {
                 properties.put(fieldNames[offset], ValueConverter.toValue(value));
@@ -145,7 +142,7 @@ class NodeSubscriber implements QuerySubscriber {
                 LABELS_COLUMN
             ));
         } else if (labels.isEmpty()) {
-            nodesBuilder.addNode(neoId, properties, ALL_NODES_LABEL);
+            nodesBuilder.addNode(neoId, properties);
         } else {
             nodesBuilder.addNode(neoId, properties, NodeLabelTokens.of(labels));
         }
@@ -154,12 +151,12 @@ class NodeSubscriber implements QuerySubscriber {
     }
 
     @Override
-    public void onError(Throwable throwable) throws Exception {
+    public void onError(Throwable throwable) {
         if (throwable instanceof RuntimeException) {
             this.error = Optional.of((RuntimeException) throwable);
         } else if (throwable instanceof QueryExecutionKernelException) {
             this.error = Optional.of(((QueryExecutionKernelException) throwable).asUserException());
-        }   else {
+        } else {
             this.error = Optional.of(new RuntimeException(throwable));
         }
     }

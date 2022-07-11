@@ -23,7 +23,6 @@ import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.QueryExecution;
@@ -102,15 +101,6 @@ abstract class CypherRecordLoader<R> {
     abstract Set<String> getMandatoryColumns();
 
     abstract Set<String> getReservedColumns();
-
-    Collection<String> getPropertyColumns(Result queryResult) {
-        Predicate<String> contains = getReservedColumns()::contains;
-        return queryResult
-            .columns()
-            .stream()
-            .filter(contains.negate())
-            .collect(Collectors.toList());
-    }
 
     Collection<String> getPropertyColumns(QueryExecution queryResult) {
         Predicate<String> contains = getReservedColumns()::contains;
