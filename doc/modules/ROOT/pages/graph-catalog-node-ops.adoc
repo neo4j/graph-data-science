@@ -165,7 +165,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties(
+CALL gds.graph.nodeProperties.drop(
     graphName: String,
     nodeProperties: String or List of Strings,
     configuration: Map
@@ -402,7 +402,7 @@ If the `nodeLabels` parameter is specified, it is required that _all_ given node
 .Remove the `score` property from all projected nodes in the `socialGraph`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties('socialGraph', ['score'])
+CALL gds.graph.nodeProperties.drop('socialGraph', ['score'])
 YIELD propertiesRemoved
 ----
 

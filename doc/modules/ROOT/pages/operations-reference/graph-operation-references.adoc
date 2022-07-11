@@ -18,7 +18,7 @@
 | `gds.graph.exists`
 | `_gds.graph.exists_`
 |xref::graph-list.adoc[List graphs] | `gds.graph.list`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Remove node properties from a named graph] | `gds.graph.removeNodeProperties`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Remove node properties from a named graph] | `gds.graph.nodeProperties.drop`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph] | `gds.graph.deleteRelationships`
 |xref::graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
 |xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller] | `gds.graph.streamNodeProperty`

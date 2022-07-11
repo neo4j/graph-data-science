@@ -99,7 +99,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     @Test
     void removeNodeProperties() {
         assertCypherResult(
-            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2'])",
+            "CALL gds.graph.nodeProperties.drop($graphName, ['nodeProp1', 'nodeProp2'])",
             Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES),
             List.of(Map.of(
                 "graphName", TEST_GRAPH_SAME_PROPERTIES,
@@ -112,7 +112,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodeProperty() {
         assertError(
-            "CALL gds.graph.removeNodeProperties($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
+            "CALL gds.graph.nodeProperties.drop($graphName, ['nodeProp1', 'nodeProp2', 'nodeProp3'])",
             Map.of("graphName", TEST_GRAPH_DIFFERENT_PROPERTIES),
             "Could not find property key(s) ['nodeProp3']. Defined keys: ['nodeProp1', 'nodeProp2']"
         );
@@ -133,7 +133,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         List<String> propertiesToRemove = List.of("fastrp", "nodeProp1", "nodeProp2");
 
         assertCypherResult(
-            "CALL gds.graph.removeNodeProperties( $graphName, $nodeProperties)",
+            "CALL gds.graph.nodeProperties.drop( $graphName, $nodeProperties)",
             Map.of("graphName", TEST_GRAPH_SAME_PROPERTIES, "nodeProperties", propertiesToRemove),
             List.of(Map.of(
                 "graphName", TEST_GRAPH_SAME_PROPERTIES,
