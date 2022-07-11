@@ -283,7 +283,7 @@ Next, we will verify that the relationship property `numberOfPages` was correctl
 .Stream the relationship property `numberOfPages` from the projected graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('readWithProperties', 'numberOfPages')
+CALL gds.graph.relationshipProperty.stream('readWithProperties', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
 RETURN
   gds.util.asNode(sourceNodeId).name AS person,
@@ -345,7 +345,7 @@ Next, we will verify that the `READ` relationships were correctly aggregated.
 .Stream the relationship property `numberOfReads` of the projected graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('readCount', 'numberOfReads')
+CALL gds.graph.relationshipProperty.stream('readCount', 'numberOfReads')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfReads
 RETURN
   gds.util.asNode(sourceNodeId).name AS person,
@@ -401,7 +401,7 @@ Next, we will verify that the relationship property `numberOfPages` were correct
 .Stream the relationship property `numberOfPages` of the projected graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('readSums', 'numberOfPages')
+CALL gds.graph.relationshipProperty.stream('readSums', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
 RETURN
   gds.util.asNode(sourceNodeId).name AS person,
@@ -459,7 +459,7 @@ Next, we will verify that the relationship property `numberOfPages` was correctl
 .Stream the relationship property `numberOfPages` from the projected graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty('existingNumberOfPages', 'numberOfPages')
+CALL gds.graph.relationshipProperty.stream('existingNumberOfPages', 'numberOfPages')
 YIELD sourceNodeId, targetNodeId, propertyValue AS numberOfPages
 RETURN
   gds.util.asNode(sourceNodeId).name AS person,

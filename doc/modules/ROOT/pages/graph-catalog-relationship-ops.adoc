@@ -69,7 +69,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
     graphName: String,
     relationshipProperties: List of String,
     relationshipTypes: List of Strings,
@@ -424,7 +424,7 @@ In the example below we stream the relationship property `score`.
 .Stream a single relationship property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
   'personsAndInstruments',                  // <1>
   'score'                                   // <2>
 )
@@ -471,7 +471,7 @@ We can further on filter the relationship types we want to stream, this is demon
 .Stream a single relationship property for specific relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
   'personsAndInstruments',                  // <1>
   'score',                                  // <2>
   ['SIMILAR']                               // <3>

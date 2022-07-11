@@ -222,7 +222,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedRelationshipPropertyForType() {
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperty(" +
+            "CALL gds.graph.relationshipProperty.stream(" +
             "   '%s', " +
             "   'relProp1', " +
             "   ['REL1']" +
@@ -240,7 +240,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedRelationshipPropertyForTypeSubset() {
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperty(" +
+            "CALL gds.graph.relationshipProperty.stream(" +
             "   '%s', " +
             "   'newRelProp2'" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
@@ -269,7 +269,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperty(" +
+            "CALL gds.graph.relationshipProperty.stream(" +
             "   '%s', " +
             "   'newRelProp3'" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, propertyValue " +
@@ -285,7 +285,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingRelationshipProperty() {
         assertError(
-            "CALL gds.graph.streamRelationshipProperty($graph, 'relProp3')",
+            "CALL gds.graph.relationshipProperty.stream($graph, 'relProp3')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one relationship projection to contain property key(s) ['relProp3']."
         );
@@ -294,7 +294,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingRelationshipPropertyForSpecificType() {
         assertError(
-            "CALL gds.graph.streamRelationshipProperty($graph, 'relProp3', ['REL1'])",
+            "CALL gds.graph.relationshipProperty.stream($graph, 'relProp3', ['REL1'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
             "Could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
