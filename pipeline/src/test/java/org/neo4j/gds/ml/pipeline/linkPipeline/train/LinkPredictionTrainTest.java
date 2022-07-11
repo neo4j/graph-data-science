@@ -352,6 +352,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -374,6 +377,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -397,6 +403,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -427,6 +436,9 @@ class LinkPredictionTrainTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .concurrency(concurrency)
             .build();
@@ -481,6 +493,9 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .randomSeed(42L)
                 .concurrency(4)
                 .build(),
@@ -575,6 +590,9 @@ class LinkPredictionTrainTest {
                 .username("DUMMY")
                 .modelName("DUMMY")
                 .graphName("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .pipeline("DUMMY")
                 .concurrency(4)
                 .build(),
@@ -641,6 +659,9 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .concurrency(4)
                 .build(),
             progressTracker,
@@ -860,6 +881,9 @@ class LinkPredictionTrainTest {
             .username("DUMMY")
             .modelName(modelName)
             .graphName("g")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .metrics(metrics.stream().map(Metric::name).collect(Collectors.toList()))
             .negativeClassWeight(1)

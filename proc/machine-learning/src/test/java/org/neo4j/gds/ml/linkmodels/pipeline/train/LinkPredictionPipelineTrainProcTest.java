@@ -157,6 +157,10 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
             "   { " +
+            "     targetRelationshipType: 'REL', " +
+            "     contextRelationshipTypes: ['*'], " +
+            "     sourceNodeLabel: 'N', " +
+            "     targetNodeLabel: 'N'," +
             "     pipeline: 'pipe1'," +
             "     modelName: 'trainedModel1'," +
             "     metrics: ['AUCPR', 'OUT_OF_BAG_ERROR']," +
@@ -178,7 +182,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(12)
+                    "configuration", aMapWithSize(14)
                 ))
         );
 
@@ -196,7 +200,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         assertError("CALL gds.beta.pipeline.linkPrediction.train(" +
                     "   $graphName, " +
-                    "   { pipeline: 'pipe2', modelName: 'trainedModel2', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { pipeline: 'pipe2', modelName: 'trainedModel2', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
                     ")",
             Map.of("graphName", GRAPH_NAME),
             "Training a Link prediction pipeline requires at least one feature. You can add features with the procedure `gds.beta.pipeline.linkPrediction.addFeature`.");
@@ -209,7 +213,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'l2', {nodeProperties: ['missingNodeProperty']})");
         assertError(
-            "CALL gds.beta.pipeline.linkPrediction.train('g', {modelName: 'm', pipeline: 'pipe', concurrency:2})",
+            "CALL gds.beta.pipeline.linkPrediction.train('g', {modelName: 'm', pipeline: 'pipe', concurrency:2, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N'})",
             "Node properties [missingNodeProperty] defined in the feature steps do not exist in the graph or part of the pipeline"
         );
     }
@@ -233,7 +237,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe4', modelName: 'trainedModel4', negativeClassWeight: 1.0, randomSeed: 1337, nodeLabels: ['N'] }" +
+            "   { pipeline: 'pipe4', modelName: 'trainedModel4', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")",
             Map.of("graphName", GRAPH_NAME),
             List.of(
@@ -250,7 +254,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                         Matchers.hasKey("bestParameters")
                     ),
                     "trainMillis", greaterThan(-1L),
-                    "configuration", aMapWithSize(12)
+                    "configuration", aMapWithSize(14)
                 ))
         );
         GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
@@ -271,7 +275,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe5', modelName: 'trainedModel5', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe5', modelName: 'trainedModel5', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', contextRelationshipTypes: $relFilter, sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")";
 
         Map<String, Object> firstModelInfo = runQuery(
@@ -302,10 +306,10 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe6', modelName: 'trainedModel6', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe6', modelName: 'trainedModel6', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")";
 
-        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
+        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME));
         var data1 = modelData("trainedModel6");
 
         runQuery("CALL gds.beta.model.drop('trainedModel6')");
@@ -327,10 +331,10 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         String trainQuery =
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe7', modelName: 'trainedModel7', negativeClassWeight: 1.0, randomSeed: 1337, relationshipTypes: $relFilter }" +
+            "   { pipeline: 'pipe7', modelName: 'trainedModel7', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")";
 
-        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME, "relFilter", List.of("*")));
+        runQuery(trainQuery, Map.of("graphName", GRAPH_NAME));
         var data1 = modelData("trainedModel7");
 
         runQuery("CALL gds.beta.model.drop('trainedModel7')");
@@ -348,7 +352,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
 
         var query = "CALL gds.beta.pipeline.linkPrediction.train.estimate(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337}" +
+            "   { pipeline: 'pipe', modelName: 'trainedModel', negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', contextRelationshipTypes: ['*'], sourceNodeLabel: '*', targetNodeLabel: '*'}" +
             ") YIELD bytesMin, bytesMax, nodeCount, relationshipCount";
         assertCypherMemoryEstimation(
             db,
@@ -372,6 +376,9 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, {" +
             "       pipeline: $pipeline," +
+            "       targetRelationshipType: 'REL', " +
+            "       sourceNodeLabel: 'N', " +
+            "       targetNodeLabel: 'N'," +
             "       modelName: $modelName," +
             "       metrics: ['OUT_OF_BAG_ERROR', 'AUCPR']," +
             "       randomSeed: 1" +
@@ -395,13 +402,16 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, {" +
             "       pipeline: $pipeline," +
+            "       targetRelationshipType: 'REL', " +
+            "       sourceNodeLabel: '*', " +
+            "       targetNodeLabel: '*'," +
             "       modelName: $modelName," +
             "       metrics: ['OUT_OF_BAG_ERROR', 'AUCPR']," +
             "       randomSeed: 1" +
             "}) YIELD modelInfo" +
             " RETURN modelInfo.metrics.OUT_OF_BAG_ERROR.validation.min AS min_oob",
             Map.of("graphName", GRAPH_NAME, "pipeline", "pipe", "modelName", "anything"),
-            List.of(Map.of("min_oob", 0.5))
+            List.of(Map.of("min_oob", 0.4))
         );
     }
 

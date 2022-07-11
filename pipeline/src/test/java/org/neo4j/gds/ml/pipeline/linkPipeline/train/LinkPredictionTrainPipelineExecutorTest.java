@@ -150,6 +150,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .username(getUsername())
             .modelName("model")
             .graphName(GRAPH_NAME)
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .negativeClassWeight(1)
             .randomSeed(1337L)
@@ -207,6 +210,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .username(getUsername())
             .modelName("model")
             .graphName(GRAPH_NAME)
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .metrics(List.of(OutOfBagError.OUT_OF_BAG_ERROR.name()))
             .pipeline("DUMMY")
             .negativeClassWeight(1)
@@ -245,6 +251,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .builder()
             .username(getUsername())
             .graphName(GRAPH_NAME)
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .modelName("foo")
             .pipeline("bar")
             .build();
@@ -291,7 +300,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .modelName("foo")
             .graphName(GRAPH_NAME)
             .pipeline("bar")
-            .nodeLabels(List.of(NODE_LABEL.name))
+            .sourceNodeLabel(NODE_LABEL.name)
+            .targetNodeLabel(NODE_LABEL.name)
+            .targetRelationshipType("REL")
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
@@ -335,6 +346,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .modelName("foo")
             .graphName(graphName)
             .pipeline("bar")
+            .targetRelationshipType("_TEST_")
+            .contextRelationshipTypes(List.of("*"))
+            .sourceNodeLabel("*")
+            .targetNodeLabel("*")
             .build();
 
         TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {
@@ -374,6 +389,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .username(getUsername())
             .modelName("model")
             .graphName(GRAPH_NAME)
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .negativeClassWeight(1)
             .randomSeed(1337L)
@@ -489,6 +507,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .username(getUsername())
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .build();
 
@@ -516,6 +537,9 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         LinkPredictionTrainingPipeline pipeline = new LinkPredictionTrainingPipeline();

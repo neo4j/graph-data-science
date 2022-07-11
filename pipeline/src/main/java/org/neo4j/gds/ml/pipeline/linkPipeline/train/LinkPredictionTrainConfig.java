@@ -31,6 +31,7 @@ import org.neo4j.gds.model.ModelConfig;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -43,6 +44,33 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     }
 
     String pipeline();
+
+    String targetRelationshipType();
+
+    String sourceNodeLabel();
+
+    String targetNodeLabel();
+
+    default List<String> contextRelationshipTypes() {
+        return List.of();
+    }
+
+    @Override
+    @Configuration.Ignore
+    @Configuration.Key(RELATIONSHIP_TYPES_KEY)
+    default List<String> relationshipTypes() {
+        return Stream.concat(
+                contextRelationshipTypes().stream(),
+                Stream.of(targetRelationshipType())
+            )
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return Stream.of(sourceNodeLabel(), targetNodeLabel()).distinct().collect(Collectors.toList());
+    }
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
     @Configuration.ToMapValue("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#metricsToNames")

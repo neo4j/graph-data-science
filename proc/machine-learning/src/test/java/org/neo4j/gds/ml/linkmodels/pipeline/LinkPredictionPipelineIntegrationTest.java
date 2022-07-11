@@ -66,7 +66,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(p:Ignore {noise: -1, z: -1, array: [1.0]}), ";
+        "(p:N {noise: -1, z: -1, array: [1.0]}), ";
 
     @Neo4jGraph
     static String GRAPH =
@@ -89,10 +89,10 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(n)-[:REL]->(o), " +
         "(a)-[:REL]->(p), " +
 
-        "(a)-[:IGNORED]->(e), " +
-        "(m)-[:IGNORED]->(a), " +
-        "(m)-[:IGNORED]->(b), " +
-        "(m)-[:IGNORED]->(c) ";
+        "(a)-[:REL]->(e), " +
+        "(m)-[:REL]->(a), " +
+        "(m)-[:REL]->(b), " +
+        "(m)-[:REL]->(c) ";
 
     private GraphStore graphStore;
 
@@ -111,9 +111,8 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
         String createQuery = GdsCypher.call(GRAPH_NAME)
             .graphProject()
-            .withNodeLabels("N", "Ignore")
+            .withNodeLabels("N")
             .withRelationshipType("REL", Orientation.UNDIRECTED)
-            .withRelationshipType("IGNORED", Orientation.UNDIRECTED)
             .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
             .yields();
 
@@ -145,7 +144,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")" +
             " YIELD modelInfo" +
             " RETURN modelInfo.modelType AS modelType",
@@ -195,7 +194,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.train(" +
             "   $graphName, " +
-            "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337 }" +
+            "   { pipeline: 'pipe', modelName: $modelName, negativeClassWeight: 1.0, randomSeed: 1337, targetRelationshipType: 'REL', sourceNodeLabel: 'N', targetNodeLabel: 'N' }" +
             ")" +
             " YIELD modelInfo" +
             " RETURN modelInfo.modelType AS modelType",
