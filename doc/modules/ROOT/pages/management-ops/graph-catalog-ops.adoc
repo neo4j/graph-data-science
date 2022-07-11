@@ -31,7 +31,7 @@ This chapter explains the available graph catalog operations.
 | xref::graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
 | xref::graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
 | xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
-| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.deleteRelationships]              | Deletes relationships of a given relationship type from a named graph.
+| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
 | xref::graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
 | xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                      | Streams a single node property stored in a named graph.
 | xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.

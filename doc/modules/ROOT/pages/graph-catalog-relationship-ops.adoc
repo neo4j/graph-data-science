@@ -219,7 +219,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.deleteRelationships(
+CALL gds.graph.relationships.drop(
     graphName: String,
     relationshipType: String
 )
@@ -704,7 +704,7 @@ If we still want to delete these relationships we need to xref::graph-drop.adoc[
 .Delete all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.deleteRelationships(
+CALL gds.graph.relationships.drop(
   'personsAndInstruments',            // <1>
   'SIMILAR'                           // <2>
 )
