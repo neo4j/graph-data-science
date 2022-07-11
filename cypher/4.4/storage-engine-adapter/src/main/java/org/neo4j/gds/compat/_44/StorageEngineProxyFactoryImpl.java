@@ -36,4 +36,9 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
     public StorageEngineProxyApi load() {
         return new StorageEngineProxyImpl();
     }
+
+    @Override
+    public String description() {
+        return "Storage Engine 4.4";
+    }
 }
