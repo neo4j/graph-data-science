@@ -61,7 +61,8 @@ public class RelationshipSplitter {
     }
 
     public void splitRelationships(
-        Collection<RelationshipType> relationshipTypes,
+        RelationshipType targetRelationshipType,
+        Collection<RelationshipType> contextRelationshipTypes,
         Collection<NodeLabel> nodeLabels,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
@@ -76,13 +77,13 @@ public class RelationshipSplitter {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels);
+        relationshipSplit(splitConfig.testSplit(targetRelationshipType, randomSeed, relationshipWeightProperty), nodeLabels);
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(List.of(splitConfig.testComplementRelationshipType()), randomSeed, relationshipWeightProperty), nodeLabels);
+        relationshipSplit(splitConfig.trainSplit(contextRelationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels);
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -113,23 +114,25 @@ public class RelationshipSplitter {
         SplitRelationshipGraphStoreMutator.mutate(graphStore, result, splitConfig);
     }
 
-    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, List<String> relationshipTypes, Optional<String> relationshipWeight) {
-        var checkRelTypes = relationshipTypes
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, List<String> contextRelationshipType, Optional<String> relationshipWeight) {
+        var checkContextRelTypes = contextRelationshipType
             .stream()
             .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(type))
             .collect(Collectors.toList());
+
+        var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL) ?RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(targetRelationshipType);
 
         // randomSeed does not matter for memory estimation
         Optional<Long> randomSeed = Optional.empty();
 
         var firstSplitEstimation = MemoryEstimations
             .builder("Test/Test-complement split")
-            .add(SplitRelationships.estimate(splitConfig.testSplit(checkRelTypes, randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.testSplit(checkTargetRelType, randomSeed, relationshipWeight)))
             .build();
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(splitConfig.trainSplit(List.of(splitConfig.testComplementRelationshipType()), randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(checkContextRelTypes, randomSeed, relationshipWeight)))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

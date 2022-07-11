@@ -33,6 +33,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,7 +113,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig testSplit(
-        Collection<RelationshipType> relationshipTypes,
+        RelationshipType targetRelationshipType,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
@@ -122,14 +123,14 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .relationshipTypes(List.of(targetRelationshipType.name))
             .randomSeed(randomSeed)
             .build();
     }
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig trainSplit(
-        Collection<RelationshipType> relationshipTypes,
+        Collection<RelationshipType> contextRelationshipTypes,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
@@ -139,7 +140,8 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .relationshipTypes(Stream.concat(contextRelationshipTypes.stream(), Stream.of(testComplementRelationshipType())).map(RelationshipType::name).collect(
+                    Collectors.toList()))
             .randomSeed(randomSeed)
             .build();
     }

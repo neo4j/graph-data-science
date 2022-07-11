@@ -20,7 +20,10 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
@@ -29,6 +32,7 @@ import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -64,6 +68,24 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
                 Stream.of(targetRelationshipType())
             )
             .collect(Collectors.toList());
+    }
+
+    @Value.Check
+    default void validate() {
+        if (targetRelationshipType().equals(ElementProjection.PROJECT_ALL)) {
+            throw new IllegalArgumentException("'*' is not allowed as targetRelationshipType.");
+        }
+    }
+
+    @Configuration.Ignore
+    default RelationshipType internalTargetRelationshipType() {
+        return RelationshipType.of(targetRelationshipType());
+    }
+
+    default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
+        return contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.relationshipTypes()
+            : contextRelationshipTypes().stream().map(RelationshipType::new).collect(Collectors.toList());
     }
 
     @Override

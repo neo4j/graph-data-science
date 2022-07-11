@@ -103,7 +103,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     ) {
         pipeline.validateTrainingParameterSpace();
 
-        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes(), pipeline.relationshipWeightProperty());
+        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.targetRelationshipType(), configuration.contextRelationshipTypes(), pipeline.relationshipWeightProperty());
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
@@ -125,7 +125,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     @Override
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
         this.relationshipSplitter.splitRelationships(
-            config.internalRelationshipTypes(graphStore),
+            config.internalTargetRelationshipType(),
+            config.internalContextRelationshipType(graphStore),
             config.nodeLabelIdentifiers(graphStore),
             config.randomSeed(),
             pipeline.relationshipWeightProperty()
