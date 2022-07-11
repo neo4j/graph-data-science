@@ -10,7 +10,7 @@ To inspect the relationship topology only, the `gds.beta.graph.relationships.str
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
-To persist relationship types in a Neo4j database, we can use `gds.graph.writeRelationship`.
+To persist relationship types in a Neo4j database, we can use `gds.graph.relationship.write`.
 Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
@@ -169,7 +169,7 @@ a|
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
     graphName: String,
     relationshipType: String,
     relationshipProperty: String,
@@ -629,7 +629,7 @@ NOTE: Relationships are always written using a single thread.
 .Write relationships to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
   'personsAndInstruments',        // <1>
   'SIMILAR'                       // <2>
 )
@@ -666,7 +666,7 @@ To write relationship properties, these have to be explicitly specified.
 .Write relationships and their properties to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
   'personsAndInstruments',          // <1>
   'SIMILAR',                        // <2>
   'score'                           // <3>

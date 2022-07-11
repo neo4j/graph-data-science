@@ -49,7 +49,7 @@ There is also a procedure `gds.beta.pipeline.linkPrediction.addNodeProperty` to 
 
 The API for link prediction classification is the same as before, but with different procedures.
 These procedures are `gds.beta.pipeline.linkPrediction.predict.[mutate,stream]`.
-However, there's no longer a `write` mode for link prediction classification, but it's still possible to emulate this behavior using the `mutate` mode followed by `gds.graph.writeRelationships`.
+However, there's no longer a `write` mode for link prediction classification, but it's still possible to emulate this behavior using the `mutate` mode followed by `gds.graph.relationship.write`.
 
 .Prediction procedure replacements:
 [options=header, cols="m,m"]

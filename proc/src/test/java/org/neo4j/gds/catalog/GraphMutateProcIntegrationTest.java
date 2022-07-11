@@ -227,7 +227,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         });
 
         String writeRelationshipTypeQuery = formatWithLocale(
-            "CALL gds.graph.writeRelationship(" +
+            "CALL gds.graph.relationship.write(" +
             "   '%s', " +
             "   'SIMILAR_TO', " +
             "   'similarity'" +
