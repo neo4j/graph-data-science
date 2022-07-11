@@ -51,9 +51,9 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
     @Context
     public NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder;
 
-    @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE)
+    @Procedure(name = "gds.graph.nodeProperties.write", mode = WRITE)
     @Description("Writes the given node properties to an online Neo4j database.")
-    public Stream<Result> run(
+    public Stream<Result> writeNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
@@ -86,6 +86,17 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         }
         // result
         return Stream.of(builder.build());
+    }
+
+    @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
+    @Description("Writes the given node properties to an online Neo4j database.")
+    public Stream<Result> run(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
     }
 
     private long writeNodeProperties(GraphStore graphStore, GraphWriteNodePropertiesConfig config) {
