@@ -24,4 +24,6 @@ public interface ProxyFactory<T> {
     boolean canLoad(Neo4jVersion version);
 
     T load();
+
+    String description();
 }
