@@ -305,6 +305,9 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 .username(getUsername())
                 .modelName("model")
                 .pipeline("DUMMY")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .targetRelationshipType("T")
                 .graphName(GRAPH_NAME)
                 .negativeClassWeight(1.0)
                 .build(),

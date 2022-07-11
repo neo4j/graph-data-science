@@ -217,7 +217,10 @@ For more details on `estimate` in general, see xref::common-usage/memory-estimat
 ----
 CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
   pipeline: 'pipe',
-  modelName: 'lp-pipeline-model'
+  modelName: 'lp-pipeline-model',
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS'
 })
 YIELD requiredMemory
 ----
@@ -243,6 +246,9 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS',
   randomSeed: 42
 }) YIELD modelInfo, modelSelectionStats
 RETURN

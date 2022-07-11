@@ -61,7 +61,6 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
 
     @Override
     @Configuration.Ignore
-    @Configuration.Key(RELATIONSHIP_TYPES_KEY)
     default List<String> relationshipTypes() {
         return Stream.concat(
                 contextRelationshipTypes().stream(),
@@ -82,6 +81,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         return RelationshipType.of(targetRelationshipType());
     }
 
+    @Configuration.Ignore
     default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
         return contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
             ? graphStore.relationshipTypes()
