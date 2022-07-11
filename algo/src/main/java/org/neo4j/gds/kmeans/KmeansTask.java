@@ -146,7 +146,7 @@ public abstract class KmeansTask implements Runnable {
         return distance / communities.size();
     }
 
-    private void calculateDistance(long startNode, long endNode) {
+    private void calculateInitialAssignmentDistance(long startNode, long endNode) {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
@@ -157,20 +157,29 @@ public abstract class KmeansTask implements Runnable {
         }
     }
 
-    private void calculateDistance(long startNode, long endNode, int lastAssignedCluster) {
+    private void calculateInitialAssignmentDistance(long startNode, long endNode, int lastAssignedCluster) {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
             double nodeCenterDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
-            if (distanceFromCenter.get(nodeId) <= 0) {
-                continue;
+            if (distanceFromCenter.get(nodeId) > 0) {
+
+                if (lastAssignedCluster == 0) {
+                    distanceFromCenter.set(nodeId, nodeCenterDistance);
+                    distance += nodeCenterDistance;
+                    communities.set(nodeId, 0);
+
+                } else if (distanceFromCenter.get(nodeId) > nodeCenterDistance) {
+                    distanceFromCenter.set(nodeId, nodeCenterDistance);
+                    distance += nodeCenterDistance;
+                    communities.set(nodeId, lastAssignedCluster);
+
+                }
             }
-            if (lastAssignedCluster == 0) {
-                distanceFromCenter.set(nodeId, nodeCenterDistance);
-                distance += nodeCenterDistance;
-            } else if (distanceFromCenter.get(nodeId) > nodeCenterDistance) {
-                distanceFromCenter.set(nodeId, nodeCenterDistance);
-                distance += nodeCenterDistance;
+            if (lastAssignedCluster == -1) {
+                int commnunityId = communities.get(nodeId);
+                communitySizes[commnunityId]++;
+                updateAfterAssignment(nodeId, commnunityId);
             }
         }
     }
@@ -182,9 +191,9 @@ public abstract class KmeansTask implements Runnable {
         if (phase == TaskPhase.ITERATION) {
             assignNodesToClusters(startNode, endNode);
         } else if (phase == TaskPhase.INITIAL) {
-            calculateDistance(startNode, endNode);
+            calculateInitialAssignmentDistance(startNode, endNode);
         } else {
-            calculateDistance(startNode, endNode, clusterManager.getCurrentlyAssigned());
+            calculateInitialAssignmentDistance(startNode, endNode, clusterManager.getCurrentlyAssigned());
 
         }
     }
