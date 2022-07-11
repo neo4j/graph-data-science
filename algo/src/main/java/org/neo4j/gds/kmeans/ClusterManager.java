@@ -33,11 +33,18 @@ abstract class ClusterManager {
     final int dimensions;
     final int k;
 
+    int currentlyAssigned;
+
     ClusterManager(NodePropertyValues values, int dimensions, int k) {
         this.dimensions = dimensions;
         this.k = k;
         this.nodePropertyValues = values;
         this.nodesInCluster = new long[k];
+        this.currentlyAssigned = 0;
+    }
+
+    public int getCurrentlyAssigned() {
+        return currentlyAssigned;
     }
 
     abstract void initialAssignCluster(int i, long id);
@@ -49,10 +56,14 @@ abstract class ClusterManager {
     abstract void updateFromTask(KmeansTask task);
 
     void initializeCenters(List<Long> initialCenterIds) {
-        int clusterUpdateId = 0;
+        currentlyAssigned = 0;
         for (Long currentId : initialCenterIds) {
-            initialAssignCluster(clusterUpdateId++, currentId);
+            initialAssignCluster(currentlyAssigned++, currentId);
         }
+    }
+
+    void assignNewCenter(long id) {
+        initialAssignCluster(currentlyAssigned++, id);
     }
 
     abstract double[][] getCenters();
