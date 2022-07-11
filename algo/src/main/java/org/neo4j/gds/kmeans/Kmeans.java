@@ -298,7 +298,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
         var tasks = PartitionUtils.rangePartition(
             concurrency,
-            graph.nodeCount(),
+            nodeCount,
             partition -> SilhouetteTask.createTask(
                 nodePropertyValues,
                 bestCommunities,
