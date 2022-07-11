@@ -76,13 +76,13 @@ public class RelationshipSplitter {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels, relationshipTypes);
+        relationshipSplit(splitConfig.testSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels);
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(relationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels, List.of(testComplementRelationshipType));
+        relationshipSplit(splitConfig.trainSplit(List.of(splitConfig.testComplementRelationshipType()), randomSeed, relationshipWeightProperty), nodeLabels);
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -99,11 +99,11 @@ public class RelationshipSplitter {
         }
     }
 
-    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels, Collection<RelationshipType> relationshipTypes) {
+    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels) {
         // the split config is generated internally and the input should be fully validated already
-        splitConfig.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
+        splitConfig.graphStoreValidation(graphStore, nodeLabels, splitConfig.internalRelationshipTypes(graphStore));
 
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, Optional.ofNullable(splitConfig.relationshipWeightProperty()));
+        var graph = graphStore.getGraph(nodeLabels, splitConfig.internalRelationshipTypes(graphStore), Optional.ofNullable(splitConfig.relationshipWeightProperty()));
 
         var splitAlgo = new SplitRelationships(graph, graph, splitConfig);
         splitAlgo.setTerminationFlag(terminationFlag);
