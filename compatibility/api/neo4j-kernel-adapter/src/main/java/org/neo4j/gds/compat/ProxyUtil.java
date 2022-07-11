@@ -37,11 +37,15 @@ public final class ProxyUtil {
             .load(factoryClass)
             .stream()
             .map(ServiceLoader.Provider::get)
-            .filter(f -> f.canLoad(neo4jVersion))
+            .filter(f -> {
+                var canLoad = f.canLoad(neo4jVersion);
+                log.info("GDS compatibility for %s: %s", f, canLoad ? "available" : "not available");
+                return canLoad;
+            })
             .findFirst()
             .orElseThrow(() -> new LinkageError("GDS is not compatible with Neo4j version: " + neo4jVersion));
         var proxy = proxyFactory.load();
-        log.info("Loaded compatibility proxy layer: %s", proxy.getClass());
+        log.info("Loaded compatibility proxy layer: %s", proxy);
 
         return proxy;
     }
