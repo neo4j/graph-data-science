@@ -157,14 +157,35 @@ public abstract class KmeansTask implements Runnable {
         }
     }
 
+    private void calculateDistance(long startNode, long endNode, int lastAssignedCluster) {
+
+
+        for (long nodeId = startNode; nodeId < endNode; nodeId++) {
+            double nodeCenterDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
+            if (distanceFromCenter.get(nodeId) <= 0) {
+                continue;
+            }
+            if (lastAssignedCluster == 0) {
+                distanceFromCenter.set(nodeId, nodeCenterDistance);
+                distance += nodeCenterDistance;
+            } else if (distanceFromCenter.get(nodeId) > nodeCenterDistance) {
+                distanceFromCenter.set(nodeId, nodeCenterDistance);
+                distance += nodeCenterDistance;
+            }
+        }
+    }
+
     @Override
     public void run() {
         var startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
         if (phase == TaskPhase.ITERATION) {
             assignNodesToClusters(startNode, endNode);
-        } else {
+        } else if (phase == TaskPhase.INITIAL) {
             calculateDistance(startNode, endNode);
+        } else {
+            calculateDistance(startNode, endNode, clusterManager.getCurrentlyAssigned());
+
         }
     }
 }
@@ -272,7 +293,7 @@ final class FloatKmeansTask extends KmeansTask {
 }
 
 enum TaskPhase {
-    ITERATION, DISTANCE
+    INITIAL, ITERATION, DISTANCE
 }
 
 
