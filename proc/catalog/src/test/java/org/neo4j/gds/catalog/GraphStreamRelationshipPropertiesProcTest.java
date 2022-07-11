@@ -103,13 +103,13 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {
         // no labels -> defaults to PROJECT_ALL
-        "CALL gds.graph.streamRelationshipProperties(" +
+        "CALL gds.graph.relationshipProperties.stream(" +
         "   '%s', " +
         "   ['relProp1', 'relProp2']" +
         ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
         "RETURN gds.util.asNode(sourceNodeId).id AS source, gds.util.asNode(targetNodeId).id AS target, relationshipType, relationshipProperty, propertyValue",
         // explicit PROJECT_ALL
-        "CALL gds.graph.streamRelationshipProperties(" +
+        "CALL gds.graph.relationshipProperties.stream(" +
         "   '%s', " +
         "   ['relProp1', 'relProp2'], " +
         "   ['*']" +
@@ -135,7 +135,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedRelationshipPropertiesForType() {
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperties(" +
+            "CALL gds.graph.relationshipProperties.stream(" +
             "   '%s', " +
             "   ['relProp1', 'relProp2'], " +
             "   ['REL1']" +
@@ -155,7 +155,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedRelationshipPropertiesForTypeSubset() {
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperties(" +
+            "CALL gds.graph.relationshipProperties.stream(" +
             "   '%s', " +
             "   ['newRelProp1', 'newRelProp2']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
@@ -189,7 +189,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         graphStore.addRelationshipType(RelationshipType.of("NEW_REL"), Optional.of("newRelProp3"), Optional.of(NumberType.FLOATING_POINT), relImporter.build());
 
         String graphStreamQuery = formatWithLocale(
-            "CALL gds.graph.streamRelationshipProperties(" +
+            "CALL gds.graph.relationshipProperties.stream(" +
             "   '%s', " +
             "   ['newRelProp3']" +
             ") YIELD sourceNodeId, targetNodeId, relationshipType, relationshipProperty, propertyValue " +
@@ -204,7 +204,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingRelationshipProperties() {
-        assertError("CALL gds.graph.streamRelationshipProperties($graph, ['newRelProp1', 'newRelProp2', 'newRelProp3'])",
+        assertError("CALL gds.graph.relationshipProperties.stream($graph, ['newRelProp1', 'newRelProp2', 'newRelProp3'])",
                 Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one relationship projection to contain property key(s) ['newRelProp1', 'newRelProp2', 'newRelProp3']."
         );
@@ -212,7 +212,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void shouldFailOnNonExistingRelationshipPropertiesForSpecificType() {
-        assertError("CALL gds.graph.streamRelationshipProperties($graph, ['relProp1', 'relProp2', 'relProp3'], ['REL1'] )",
+        assertError("CALL gds.graph.relationshipProperties.stream($graph, ['relProp1', 'relProp2', 'relProp3'], ['REL1'] )",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
             "Could not find property key(s) ['relProp3'] for label REL1. Defined keys: ['relProp1', 'relProp2']"
@@ -304,7 +304,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnDisjunctCombinationsOfRelationshipTypeAndProperty() {
         assertError(
-            "CALL gds.graph.streamRelationshipProperties($graph, ['newRelProp1', 'newRelProp2'], ['REL2'])",
+            "CALL gds.graph.relationshipProperties.stream($graph, ['newRelProp1', 'newRelProp2'], ['REL2'])",
             Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
             "Expecting all specified relationship projections to have all given properties defined. " +
             "Could not find property key(s) ['newRelProp2'] for label REL2. Defined keys: ['newRelProp1']"

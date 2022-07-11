@@ -118,7 +118,7 @@ a|
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
     graphName: String,
     relationshipProperties: List of String,
     relationshipTypes: List of Strings,
@@ -513,7 +513,7 @@ It is also possible to stream multiple relationship properties.
 .Stream multiple relationship properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
   'personsAndInstruments',                      // <1>
   ['score', 'strength'],                        // <2>
   ['LIKES']                                     // <3>
@@ -563,7 +563,7 @@ Similar to the multiple relationship properties we can stream properties for mul
 .Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
   'personsAndInstruments',                          // <1>
   ['score'],                                        // <2>
   ['LIKES', 'SIMILAR']                              // <3>

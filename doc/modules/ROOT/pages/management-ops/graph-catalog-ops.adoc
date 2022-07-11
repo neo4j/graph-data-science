@@ -37,7 +37,7 @@ This chapter explains the available graph catalog operations.
 | xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.
 | xref::graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]       | Streams relationship topologies stored in a named graph.
 | xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperty]      | Streams a single relationship property stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperties]    | Streams relationship properties stored in a named graph.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperties.stream]    | Streams relationship properties stored in a named graph.
 | xref::graph-catalog-node-ops.adoc[gds.graph.writeNodeProperties]                     | Writes node properties stored in a named graph to Neo4j.
 | xref::graph-catalog-relationship-ops.adoc[gds.graph.writeRelationship]               | Writes relationships stored in a named graph to Neo4j.
 | xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
