@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 
+
 public abstract class KmeansTask implements Runnable {
     ClusterManager clusterManager;
     final ProgressTracker progressTracker;
@@ -43,7 +44,7 @@ public abstract class KmeansTask implements Runnable {
 
     double distance;
 
-    boolean calculateDistancePhase;
+    TaskPhase phase;
 
     long getNumAssignedAtCenter(int ith) {
         return communitySizes[ith];
@@ -76,7 +77,7 @@ public abstract class KmeansTask implements Runnable {
         this.partition = partition;
         this.progressTracker = progressTracker;
         this.communitySizes = new long[k];
-        this.calculateDistancePhase = false;
+        this.phase = TaskPhase.ITERATION;
         this.distance = 0d;
     }
 
@@ -115,7 +116,7 @@ public abstract class KmeansTask implements Runnable {
     }
 
     void switchToDistanceCalculation() {
-        calculateDistancePhase = true;
+        phase = TaskPhase.DISTANCE;
     }
 
     private void assignNodesToClusters(long startNode, long endNode) {
@@ -160,7 +161,7 @@ public abstract class KmeansTask implements Runnable {
     public void run() {
         var startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
-        if (!calculateDistancePhase) {
+        if (phase == TaskPhase.ITERATION) {
             assignNodesToClusters(startNode, endNode);
         } else {
             calculateDistance(startNode, endNode);
@@ -267,5 +268,11 @@ final class FloatKmeansTask extends KmeansTask {
         }
     }
 
+
 }
+
+enum TaskPhase {
+    ITERATION, DISTANCE
+}
+
 
