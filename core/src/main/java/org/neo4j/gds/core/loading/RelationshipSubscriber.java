@@ -49,6 +49,7 @@ class RelationshipSubscriber implements QuerySubscriber {
     private final CypherRelationshipLoader.Context loaderContext;
     private final ProgressTracker progressTracker;
     private double[] propertyValueBuffer;
+    private double[] defaultValues;
     private final boolean throwOnUnMappedNodeIds;
 
     private int sourceOffset = UNINITIALIZED;
@@ -73,7 +74,6 @@ class RelationshipSubscriber implements QuerySubscriber {
         this.throwOnUnMappedNodeIds = throwOnUnMappedNodeIds;
     }
 
-    private double[] defaultValues;
     void initialize(String[] fieldNames, ObjectDoubleMap<String> propertyDefaultValueByName) {
         this.defaultValues = new double[fieldNames.length];
         for (int i = 0; i < fieldNames.length; i++) {
@@ -88,7 +88,7 @@ class RelationshipSubscriber implements QuerySubscriber {
                     typeOffset = i;
                     break;
                 default:
-                    defaultValues[i] = propertyDefaultValueByName.get(fieldNames);
+                    defaultValues[i] = propertyDefaultValueByName.get(fieldNames[i]);
                     break;
             }
         }
