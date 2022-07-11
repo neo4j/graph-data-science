@@ -36,4 +36,9 @@ public class SettingProxyFactoryImpl implements SettingProxyFactory {
     public SettingProxyApi load() {
         return new SettingProxyImpl();
     }
+
+    @Override
+    public String description() {
+        return "Neo4j Settings 4.x";
+    }
 }
