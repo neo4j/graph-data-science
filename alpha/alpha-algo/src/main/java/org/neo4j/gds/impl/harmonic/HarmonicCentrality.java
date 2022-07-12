@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
-import org.neo4j.gds.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
 import java.util.concurrent.ExecutorService;
 
@@ -60,7 +60,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicCentrality> {
             inverseFarness.update(nodeId, currentValue -> currentValue + (len * (1.0 / depth)));
         };
 
-        MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+        MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
             graph.nodeCount(),
             graph,
             consumer

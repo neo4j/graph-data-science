@@ -53,7 +53,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class MultiSourceBFSTest extends BaseTest {
+final class MultiSourceBFSAccessMethodsTest extends BaseTest {
 
     private static final String DB_CYPHER =
             "CREATE" +
@@ -78,7 +78,7 @@ final class MultiSourceBFSTest extends BaseTest {
             graph -> {
                 BfsConsumer bfsConsumerMock = mock(BfsConsumer.class);
                 BfsWithPredecessorConsumer bfsWithPredecessorConsumerMock = mock(BfsWithPredecessorConsumer.class);
-                MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessing(
+                MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessing(
                     graph,
                     (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
                     (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
@@ -119,7 +119,7 @@ final class MultiSourceBFSTest extends BaseTest {
     void testWithANP() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1)),
@@ -142,7 +142,7 @@ final class MultiSourceBFSTest extends BaseTest {
     void testPredecessorWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
-            MultiSourceBFS msbfs = MultiSourceBFS.predecessorProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessingWithoutSourceNodes(
                 graph,
                 (i, d, s) -> {},
                 (i, p, d, s) -> mock.accept(i + 1, p + 1, d, toList(s, x -> x + 1))
@@ -193,7 +193,7 @@ final class MultiSourceBFSTest extends BaseTest {
     void testANPWithAllSources() {
         withGraph(DB_CYPHER, graph -> {
             BfsConsumer mock = mock(BfsConsumer.class);
-            MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                 graph.nodeCount(),
                 graph,
                 (i, d, s) -> mock.accept(i + 1, d, toList(s, x -> x + 1))
@@ -234,7 +234,7 @@ final class MultiSourceBFSTest extends BaseTest {
                 gb -> gb.newGridBuilder().createGrid(8, 4),
                 graph -> {
                     Set<Pair<Long, Integer>> seen = new HashSet<>();
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
@@ -258,7 +258,7 @@ final class MultiSourceBFSTest extends BaseTest {
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
@@ -286,11 +286,11 @@ final class MultiSourceBFSTest extends BaseTest {
     void testSize() {
         int maxNodes = 100;
         // [ last i, expected source from, expected source to ]
-        int[] state = {-1, 0, MultiSourceBFS.OMEGA};
+        int[] state = {-1, 0, MultiSourceBFSConstants.OMEGA};
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
-                    MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                             graph.nodeCount(),
                             graph,
                             (i, d, s) -> {
@@ -299,7 +299,7 @@ final class MultiSourceBFSTest extends BaseTest {
                                     // we complete a source chunk and start again for the next one
                                     state[1] = state[2];
                                     state[2] = Math.min(
-                                            state[2] + MultiSourceBFS.OMEGA,
+                                        state[2] + MultiSourceBFSConstants.OMEGA,
                                             maxNodes);
                                 }
                                 state[0] = (int) i;
@@ -355,7 +355,7 @@ final class MultiSourceBFSTest extends BaseTest {
         final long[] sources = new long[sourceCount];
         Arrays.setAll(sources, i -> i);
         final int[][] seen = new int[nodeCount][sourceCount];
-        MultiSourceBFS msbfs = MultiSourceBFS.aggregatedNeighborProcessing(
+        MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 nodeCount,
                 iter,
                 (nodeId, depth, sourceNodeIds) -> {

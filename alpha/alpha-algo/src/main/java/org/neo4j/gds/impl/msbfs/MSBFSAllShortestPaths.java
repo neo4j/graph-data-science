@@ -21,7 +21,7 @@ package org.neo4j.gds.impl.msbfs;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -94,7 +94,7 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
 
         @Override
         public void run() {
-            MultiSourceBFS.aggregatedNeighborProcessingWithoutSourceNodes(
+            MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                     graph.nodeCount(),
                     graph,
                     (target, distance, sources) -> {

@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.ANPStrategy;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.BfsSources;
-import org.neo4j.gds.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -121,13 +121,13 @@ public class CollapsePath extends Algorithm<Relationships> {
 
     private static class TraversalToEdgeMSBFSStrategy extends ANPStrategy {
 
-        static MultiSourceBFS initializeMultiSourceBFS(
+        static MultiSourceBFSRunnable initializeMultiSourceBFS(
             Graph[] graphs,
             BfsConsumer perNodeAction,
             boolean allowSelfLoops,
             long[] startNodes
         ) {
-            return MultiSourceBFS.createWithoutSeensNext(
+            return MultiSourceBFSRunnable.createWithoutSeensNext(
                 graphs[0].nodeCount(),
                 graphs[0],
                 new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),

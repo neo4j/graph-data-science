@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
-import org.neo4j.gds.msbfs.MultiSourceBFS;
+import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -111,7 +111,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
             component.add(nodeId, len);
             progressTracker.logProgress();
         };
-        MultiSourceBFS
+        MultiSourceBFSAccessMethods
             .aggregatedNeighborProcessingWithoutSourceNodes(nodeCount, graph, consumer)
             .run(concurrency, executorService);
         progressTracker.endSubTask();

@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.msbfs;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
-interface ExecutionStrategy {
+final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
+    LocalHugeLongArray(final long size) {
+        super(() -> HugeLongArray.newArray(size));
+    }
 
-    void run(
-        RelationshipIterator relationships,
-        long totalNodeCount,
-        SourceNodes sourceNodes,
-        HugeLongArray visitSet,
-        HugeLongArray visitNextSet,
-        HugeLongArray seenSet,
-        @Nullable HugeLongArray seenNextSet
-    );
+    @Override
+    public HugeLongArray get() {
+        HugeLongArray values = super.get();
+        values.fill(0L);
+        return values;
+    }
 }

@@ -27,10 +27,8 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
-import java.util.AbstractCollection;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -64,10 +62,7 @@ import java.util.concurrent.TimeUnit;
  * <p>
  * [1]: <a href="http://www.vldb.org/pvldb/vol8/p449-then.pdf">The More the Merrier: Efficient Multi-Source Graph Traversal</a>
  */
-public final class MultiSourceBFS implements Runnable {
-
-    // the number of sources that can be traversed simultaneously by a single thread
-    public static final int OMEGA = 64;
+public final class MultiSourceBFSAccessMethods {
 
     private final CloseableThreadLocal<HugeLongArray> visits;
     private final CloseableThreadLocal<HugeLongArray> visitsNext;
@@ -84,7 +79,7 @@ public final class MultiSourceBFS implements Runnable {
     private final int sourceNodeCount;
     private final long nodeOffset;
 
-    public static MultiSourceBFS aggregatedNeighborProcessingWithoutSourceNodes(
+    public static MultiSourceBFSAccessMethods aggregatedNeighborProcessingWithoutSourceNodes(
         long nodeCount,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction
@@ -96,23 +91,22 @@ public final class MultiSourceBFS implements Runnable {
         );
     }
 
-    public static MultiSourceBFS aggregatedNeighborProcessing(
+    public static MultiSourceBFSAccessMethods aggregatedNeighborProcessing(
         long nodeCount,
         RelationshipIterator relationships,
         BfsConsumer perNodeAction,
         long[] sourceNodes
     ) {
-        return createWithoutSeensNext(
+        return createWithoutSeensNextOrStartNodeTraversal(
             nodeCount,
             relationships,
             new ANPStrategy(perNodeAction),
-            false,
             sourceNodes
         );
     }
 
     // only used from tests
-    public static MultiSourceBFS predecessorProcessingWithoutSourceNodes(
+    public static MultiSourceBFSAccessMethods predecessorProcessingWithoutSourceNodes(
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction
@@ -124,7 +118,7 @@ public final class MultiSourceBFS implements Runnable {
         );
     }
 
-    public static MultiSourceBFS predecessorProcessing(
+    public static MultiSourceBFSAccessMethods predecessorProcessing(
         Graph graph,
         BfsConsumer perNodeAction,
         BfsWithPredecessorConsumer perNeighborAction,
@@ -138,7 +132,7 @@ public final class MultiSourceBFS implements Runnable {
         );
     }
 
-    private static MultiSourceBFS createWithoutSeensNextOrSourceNodesOrStartNodeTraversal(
+    private static MultiSourceBFSAccessMethods createWithoutSeensNextOrSourceNodesOrStartNodeTraversal(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy
@@ -147,7 +141,7 @@ public final class MultiSourceBFS implements Runnable {
         var visitsNext = new LocalHugeLongArray(nodeCount);
         var seens = new LocalHugeLongArray(nodeCount);
 
-        return new MultiSourceBFS(
+        return new MultiSourceBFSAccessMethods(
             visits,
             visitsNext,
             seens,
@@ -162,18 +156,17 @@ public final class MultiSourceBFS implements Runnable {
             );
     }
 
-    public static MultiSourceBFS createWithoutSeensNext(
+    private static MultiSourceBFSAccessMethods createWithoutSeensNextOrStartNodeTraversal(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
-        boolean allowStartNodeTraversal,
         long[] sourceNodes
     ) {
         var visits = new LocalHugeLongArray(nodeCount);
         var visitsNext = new LocalHugeLongArray(nodeCount);
         var seens = new LocalHugeLongArray(nodeCount);
 
-        return new MultiSourceBFS(
+        return new MultiSourceBFSAccessMethods(
             visits,
             visitsNext,
             seens,
@@ -181,14 +174,14 @@ public final class MultiSourceBFS implements Runnable {
             nodeCount,
             relationships,
             strategy,
-            allowStartNodeTraversal,
+            false,
             sourceNodes,
             0,
             0
             );
     }
 
-    private static MultiSourceBFS createWithoutSourceNodesOrStartNodeTraversal(
+    private static MultiSourceBFSAccessMethods createWithoutSourceNodesOrStartNodeTraversal(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy
@@ -198,7 +191,7 @@ public final class MultiSourceBFS implements Runnable {
         var seens = new LocalHugeLongArray(nodeCount);
         var seensNext = new LocalHugeLongArray(nodeCount);
 
-        return new MultiSourceBFS(
+        return new MultiSourceBFSAccessMethods(
             visits,
             visitsNext,
             seens,
@@ -216,7 +209,7 @@ public final class MultiSourceBFS implements Runnable {
     /**
      * @param sourceNodes at least one source node must be provided
      */
-    private static MultiSourceBFS createWithoutStartNodeTraversal(
+    private static MultiSourceBFSAccessMethods createWithoutStartNodeTraversal(
         long nodeCount,
         RelationshipIterator relationships,
         ExecutionStrategy strategy,
@@ -233,7 +226,7 @@ public final class MultiSourceBFS implements Runnable {
         var seens = new LocalHugeLongArray(nodeCount);
         var seensNext = new LocalHugeLongArray(nodeCount);
 
-        return new MultiSourceBFS(
+        return new MultiSourceBFSAccessMethods(
             visits,
             visitsNext,
             seens,
@@ -251,7 +244,7 @@ public final class MultiSourceBFS implements Runnable {
     /**
      * There is just one constructor, and it only does assignments.
      */
-    private MultiSourceBFS(
+    private MultiSourceBFSAccessMethods(
         CloseableThreadLocal<HugeLongArray> visits,
         CloseableThreadLocal<HugeLongArray> visitsNext,
         CloseableThreadLocal<HugeLongArray> seens,
@@ -293,55 +286,6 @@ public final class MultiSourceBFS implements Runnable {
             .run();
     }
 
-    /**
-     * Runs MS-BFS, always single-threaded. Requires that there are at most
-     * 64 source nodes. If there are more, {@link #run(int, ExecutorService)} must be used.
-     */
-    @Override
-    public void run() {
-        assert sourceLength() <= OMEGA : "more than " + OMEGA + " sources not supported";
-
-        var visitSet = visits.get();
-        var visitNextSet = visitsNext.get();
-        var seenSet = seens.get();
-        var seenNextSet = seensNext != null ? seensNext.get() : null;
-
-        SourceNodes sourceNodes = this.sourceNodes == null
-            ? prepareOffsetSources(visitSet, seenSet)
-            : prepareSpecifiedSources(visitSet, seenSet, this.sourceNodes, allowStartNodeTraversal);
-
-        strategy.run(relationships, nodeCount, sourceNodes, visitSet, visitNextSet, seenSet, seenNextSet);
-    }
-
-    private SourceNodes prepareOffsetSources(HugeLongArray visitSet, HugeLongArray seenSet) {
-        var localNodeCount = this.sourceNodeCount;
-        var nodeOffset = this.nodeOffset;
-
-        for (int i = 0; i < localNodeCount; ++i) {
-            seenSet.set(nodeOffset + i, 1L << i);
-            visitSet.or(nodeOffset + i, 1L << i);
-        }
-
-        return new SourceNodes(nodeOffset, localNodeCount);
-    }
-
-    private static SourceNodes prepareSpecifiedSources(
-        HugeLongArray visitSet,
-        HugeLongArray seenSet,
-        long[] sourceNodes,
-        boolean allowStartNodeTraversal
-    ) {
-        for (int i = 0; i < sourceNodes.length; ++i) {
-            long nodeId = sourceNodes[i];
-            if (!allowStartNodeTraversal) {
-                seenSet.set(nodeId, 1L << i);
-            }
-            visitSet.or(nodeId, 1L << i);
-        }
-
-        return new SourceNodes(sourceNodes);
-    }
-
     private long sourceLength() {
         if (sourceNodes != null) {
             return sourceNodes.length;
@@ -354,7 +298,7 @@ public final class MultiSourceBFS implements Runnable {
 
     private int numberOfThreads() {
         long sourceLength = sourceLength();
-        long threads = ParallelUtil.threadCount(OMEGA, sourceLength);
+        long threads = ParallelUtil.threadCount(MultiSourceBFSConstants.OMEGA, sourceLength);
         if ((int) threads != threads) {
             throw new IllegalArgumentException("Unable run MS-BFS on " + sourceLength + " sources.");
         }
@@ -362,13 +306,13 @@ public final class MultiSourceBFS implements Runnable {
     }
 
     // lazily creates MS-BFS instances for OMEGA sized source chunks
-    private Collection<MultiSourceBFS> allSourceBfss(int threads) {
+    private Collection<MultiSourceBFSRunnable> allSourceBfss(int threads) {
         if (sourceNodes == null) {
             long sourceLength = nodeCount;
             return new ParallelMultiSources(threads, sourceLength) {
                 @Override
-                MultiSourceBFS next(final long from, final int length) {
-                    return new MultiSourceBFS(
+                MultiSourceBFSRunnable next(final long from, final int length) {
+                    return new MultiSourceBFSRunnable(
                         visits,
                         visitsNext,
                         seens,
@@ -388,8 +332,8 @@ public final class MultiSourceBFS implements Runnable {
         int sourceLength = sourceNodes.length;
         return new ParallelMultiSources(threads, sourceLength) {
             @Override
-            MultiSourceBFS next(final long from, final int length) {
-                return new MultiSourceBFS(
+            MultiSourceBFSRunnable next(final long from, final int length) {
+                return new MultiSourceBFSRunnable(
                     visits,
                     visitsNext,
                     seens,
@@ -418,122 +362,5 @@ public final class MultiSourceBFS implements Runnable {
                 " .. " + (nodeOffset + sourceNodeCount) +
                 " (" + sourceNodeCount +
                 ")}";
-    }
-
-    static final class SourceNodes implements BfsSources {
-        private final long[] sourceNodes;
-        private final int maxPos;
-        private final int startPos;
-        private final long offset;
-        private long sourceMask;
-        private int pos;
-
-        private SourceNodes(long[] sourceNodes) {
-            assert sourceNodes.length <= OMEGA;
-            this.sourceNodes = sourceNodes;
-            this.maxPos = sourceNodes.length;
-            this.offset = 0L;
-            this.startPos = -1;
-        }
-
-        private SourceNodes(long offset, int length) {
-            assert length <= OMEGA;
-            this.sourceNodes = null;
-            this.maxPos = length;
-            this.offset = offset;
-            this.startPos = -1;
-        }
-
-        void reset() {
-            this.pos = startPos;
-            fetchNext();
-        }
-
-        void reset(long sourceMask) {
-            assert sourceMask != 0;
-            this.sourceMask = sourceMask;
-            reset();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return pos < maxPos;
-        }
-
-        @Override
-        public long nextLong() {
-            int current = this.pos;
-            fetchNext();
-            return sourceNodes != null ? sourceNodes[current] : (long) current + offset;
-        }
-
-        @Override
-        public int size() {
-            // reset() _always_ calls into fetchNext() which
-            // finds the right-most set bit, updates pos to
-            // its position and flips it. The correct size()
-            // is therefore the number of set bits + 1.
-            // Note, that this is under the assumption that
-            // the source mask is never 0 on reset.
-            return Long.bitCount(sourceMask) + 1;
-        }
-
-        private void fetchNext() {
-            pos = Long.numberOfTrailingZeros(sourceMask);
-            sourceMask ^= Long.lowestOneBit(sourceMask);
-        }
-    }
-
-    private abstract static class ParallelMultiSources extends AbstractCollection<MultiSourceBFS> implements Iterator<MultiSourceBFS> {
-        private final int threads;
-        private final long sourceLength;
-        private long start = 0L;
-        private int i = 0;
-
-        private ParallelMultiSources(int threads, long sourceLength) {
-            this.threads = threads;
-            this.sourceLength = sourceLength;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return i < threads;
-        }
-
-        @Override
-        public int size() {
-            return threads;
-        }
-
-        @Override
-        public Iterator<MultiSourceBFS> iterator() {
-            start = 0L;
-            i = 0;
-            return this;
-        }
-
-        @Override
-        public MultiSourceBFS next() {
-            int len = (int) Math.min(OMEGA, sourceLength - start);
-            MultiSourceBFS bfs = next(start, len);
-            start += len;
-            i++;
-            return bfs;
-        }
-
-        abstract MultiSourceBFS next(long from, int length);
-    }
-
-    private static final class LocalHugeLongArray extends CloseableThreadLocal<HugeLongArray> {
-        private LocalHugeLongArray(final long size) {
-            super(() -> HugeLongArray.newArray(size));
-        }
-
-        @Override
-        public HugeLongArray get() {
-            HugeLongArray values = super.get();
-            values.fill(0L);
-            return values;
-        }
     }
 }

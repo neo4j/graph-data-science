@@ -54,7 +54,7 @@ public class ANPStrategy implements ExecutionStrategy {
     public void run(
         RelationshipIterator relationships,
         long totalNodeCount,
-        MultiSourceBFS.SourceNodes sourceNodes,
+        SourceNodes sourceNodes,
         HugeLongArray visitSet,
         HugeLongArray visitNextSet,
         HugeLongArray seenSet,
