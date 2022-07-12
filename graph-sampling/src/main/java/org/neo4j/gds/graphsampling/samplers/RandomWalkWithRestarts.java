@@ -128,6 +128,7 @@ public class RandomWalkWithRestarts {
         return idMapAndProperties.idMap();
     }
 
+    // taken/inspired from FilterRelationships::filterRelationships
     private void filterRelationshipsAndProperties(
         IdMap sampledNodes,
         Map<RelationshipType, Relationships.Topology> topologies,
@@ -135,7 +136,7 @@ public class RandomWalkWithRestarts {
     ) {
         for (RelationshipType relType : config.internalRelationshipTypes(inputGraphStore)) {
             var relPropertyKeys = new ArrayList<>(inputGraphStore.relationshipPropertyKeys(relType));
-            var relationships = filterRelationships(sampledNodes, relType, relPropertyKeys);
+            var relationships = filterRelationshipType(sampledNodes, relType, relPropertyKeys);
             var topology = relationships.get(0).topology();
             if (topology.elementCount() > 0) {
                 topologies.put(relType, topology);
@@ -144,7 +145,8 @@ public class RandomWalkWithRestarts {
         }
     }
 
-    private List<Relationships> filterRelationships(
+    // taken/inspired from RelationshipsFilter::filterRelationshipType
+    private List<Relationships> filterRelationshipType(
         IdMap sampledNodes,
         RelationshipType relType,
         ArrayList<String> relPropertyKeys
