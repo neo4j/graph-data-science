@@ -528,6 +528,11 @@ public class HugeGraph implements CSRGraph {
         return idMap.hasLabel(nodeId, label);
     }
 
+    @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return idMap.withFilteredLabels(nodeLabels, concurrency);
+    }
+
     private static class ParallelRelationshipsDegreeCounter implements RelationshipConsumer {
         private long previousNodeId;
         private int degree;

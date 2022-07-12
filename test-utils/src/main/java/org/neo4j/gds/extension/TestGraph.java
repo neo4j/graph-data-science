@@ -20,9 +20,13 @@
 package org.neo4j.gds.extension;
 
 import com.carrotsearch.hppc.BitSet;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CSRGraphAdapter;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
+
+import java.util.Collection;
 
 public class TestGraph extends CSRGraphAdapter {
 
@@ -60,6 +64,11 @@ public class TestGraph extends CSRGraphAdapter {
     @Override
     public CSRGraph concurrentCopy() {
         return new TestGraph(csrGraph.concurrentCopy(), idFunction, name);
+    }
+
+    @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return csrGraph.withFilteredLabels(nodeLabels, concurrency);
     }
 
     @Override
