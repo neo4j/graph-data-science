@@ -168,7 +168,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             int numberOfTasks = tasks.size();
 
             KmeansSampler sampler = KmeansSampler.createSampler(
-                SamplerType.UNIFORM,
+                KmeansSampler.SamplerType.UNIFORM,
                 random,
                 nodePropertyValues,
                 clusterManager,

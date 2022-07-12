@@ -24,8 +24,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
@@ -36,6 +36,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -100,5 +101,17 @@ class KmeansStreamConfigTest {
         return Arrays.stream(ValueType.values())
             .filter(t -> t != ValueType.DOUBLE_ARRAY && t != ValueType.FLOAT_ARRAY)
             .map(Arguments::of);
+    }
+
+    @Test
+    void shouldFailOnInvalidSampler() {
+        var userInput = CypherMapWrapper.create(Map.of("nodeProperty", "foo", "initialSampler", "foo"));
+        assertThatThrownBy(() -> KmeansStreamConfig.of(userInput)).hasMessageContaining("is not supported");
+    }
+
+    @Test
+    void shouldBeCaseIgnorant() {
+        var userInput = CypherMapWrapper.create(Map.of("nodeProperty", "foo", "initialSampler", "unIfoRm"));
+        assertThatNoException().isThrownBy(() -> KmeansStreamConfig.of(userInput));
     }
 }
