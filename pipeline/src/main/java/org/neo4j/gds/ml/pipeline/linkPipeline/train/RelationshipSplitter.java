@@ -33,9 +33,7 @@ import org.neo4j.gds.ml.splitting.SplitRelationships;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -62,7 +60,6 @@ public class RelationshipSplitter {
 
     public void splitRelationships(
         RelationshipType targetRelationshipType,
-        Collection<RelationshipType> contextRelationshipTypes,
         Collection<NodeLabel> nodeLabels,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
@@ -83,7 +80,7 @@ public class RelationshipSplitter {
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(contextRelationshipTypes, randomSeed, relationshipWeightProperty), nodeLabels);
+        relationshipSplit(splitConfig.trainSplit(randomSeed, relationshipWeightProperty), nodeLabels);
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -114,12 +111,7 @@ public class RelationshipSplitter {
         SplitRelationshipGraphStoreMutator.mutate(graphStore, result, splitConfig);
     }
 
-    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, List<String> contextRelationshipType, Optional<String> relationshipWeight) {
-        var checkContextRelTypes = contextRelationshipType
-            .stream()
-            .map(type -> type.equals(ElementProjection.PROJECT_ALL) ? RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(type))
-            .collect(Collectors.toList());
-
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight) {
         var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL) ?RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(targetRelationshipType);
 
         // randomSeed does not matter for memory estimation
@@ -132,7 +124,7 @@ public class RelationshipSplitter {
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(splitConfig.trainSplit(checkContextRelTypes, randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(randomSeed, relationshipWeight)))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

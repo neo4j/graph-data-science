@@ -130,7 +130,6 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig trainSplit(
-        Collection<RelationshipType> contextRelationshipTypes,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
@@ -140,8 +139,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(Stream.concat(contextRelationshipTypes.stream(), Stream.of(testComplementRelationshipType())).map(RelationshipType::name).collect(
-                    Collectors.toList()))
+            .relationshipTypes(List.of(testComplementRelationshipType().name))
             .randomSeed(randomSeed)
             .build();
     }

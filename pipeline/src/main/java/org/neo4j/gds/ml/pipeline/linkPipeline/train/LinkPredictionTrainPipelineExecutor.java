@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
@@ -103,7 +104,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     ) {
         pipeline.validateTrainingParameterSpace();
 
-        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.targetRelationshipType(), configuration.contextRelationshipTypes(), pipeline.relationshipWeightProperty());
+        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.targetRelationshipType(), pipeline.relationshipWeightProperty());
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
@@ -126,7 +127,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
         this.relationshipSplitter.splitRelationships(
             config.internalTargetRelationshipType(),
-            config.internalContextRelationshipType(graphStore),
             config.nodeLabelIdentifiers(graphStore),
             config.randomSeed(),
             pipeline.relationshipWeightProperty()
@@ -139,7 +139,8 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         return Map.of(
             DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.trainRelationshipType())),
             DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.testRelationshipType())),
-            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.featureInputRelationshipType()))
+            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, Stream.concat(Stream.of(splitConfig.featureInputRelationshipType()), config.internalContextRelationshipType(graphStore).stream()).collect(
+                Collectors.toList()))
         );
     }
 
