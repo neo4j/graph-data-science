@@ -7,7 +7,7 @@ The graphs in the Neo4j Graph Data Science Library support properties for nodes.
 We provide multiple operations to work with the stored node-properties in projected graphs.
 Node properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
 
-To inspect stored values, the `gds.graph.streamNodeProperties` procedure can be used.
+To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
 To persist the values in a Neo4j database, we can use `gds.graph.writeNodeProperties`.
@@ -72,7 +72,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties(
+CALL gds.graph.nodeProperties.stream(
     graphName: String,
     nodeProperties: String or List of Strings,
     nodeLabels: String or List of Strings,
@@ -316,7 +316,7 @@ We can also stream several properties at once.
 .Stream multiple node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties('socialGraph', ['score', 'age'])
+CALL gds.graph.nodeProperties.stream('socialGraph', ['score', 'age'])
 YIELD nodeId, nodeProperty, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, nodeProperty, propertyValue
 ORDER BY name, nodeProperty

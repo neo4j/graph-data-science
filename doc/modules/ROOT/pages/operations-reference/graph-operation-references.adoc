@@ -22,7 +22,7 @@
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph] | `gds.graph.deleteRelationships`
 |xref::graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
 |xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller] | `gds.graph.streamNodeProperty`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller] | `gds.graph.streamNodeProperties`
+|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller] | `gds.graph.nodeProperties.stream`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller] | `gds.graph.streamRelationshipProperty`
 |xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller] | `gds.graph.streamRelationshipProperties`
 |xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j] | `gds.graph.writeNodeProperties`
