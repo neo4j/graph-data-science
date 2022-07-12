@@ -140,12 +140,20 @@ public class Kmeans extends Algorithm<KmeansResult> {
         double bestDistance = Double.POSITIVE_INFINITY;
         bestCommunities.setAll(v -> UNASSIGNED);
 
-        KmeansSampler sampler = new KmeansUniformSampler();
 
         long[] nodesInCluster = new long[k];
 
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
+
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
+            KmeansSampler sampler = KmeansSampler.createSampler(
+                random,
+                nodePropertyValues,
+                clusterManager,
+                nodeCount,
+                k
+            );
+
             currentCommunities.setAll(v -> UNASSIGNED);
 
             var tasks = PartitionUtils.rangePartition(
@@ -170,8 +178,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
             //Initialization do initial center computation and assignment
             //Temporary:
 
-            List<Long> initialCenterIds = sampler.sampleClusters(random, nodePropertyValues, nodeCount, k);
-            clusterManager.initializeCenters(initialCenterIds);
+            sampler.performInitialSampling();
+
             //
             int iteration = 0;
             while (true) {

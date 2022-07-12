@@ -146,7 +146,7 @@ public abstract class KmeansTask implements Runnable {
         return distance / communities.size();
     }
 
-    private void calculateInitialAssignmentDistance(long startNode, long endNode) {
+    private void calculateInitialDistance(long startNode, long endNode) {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
@@ -190,8 +190,8 @@ public abstract class KmeansTask implements Runnable {
         long endNode = startNode + partition.nodeCount();
         if (phase == TaskPhase.ITERATION) {
             assignNodesToClusters(startNode, endNode);
-        } else if (phase == TaskPhase.INITIAL) {
-            calculateInitialAssignmentDistance(startNode, endNode);
+        } else if (phase == TaskPhase.DISTANCE) {
+            calculateInitialDistance(startNode, endNode);
         } else {
             calculateInitialAssignmentDistance(startNode, endNode, clusterManager.getCurrentlyAssigned());
 

@@ -21,14 +21,37 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-import java.util.List;
 import java.util.SplittableRandom;
 
-public interface KmeansSampler {
-    public List<Long> sampleClusters(
+public abstract class KmeansSampler {
+
+    final SplittableRandom random;
+    final int k;
+    final long nodeCount;
+    final ClusterManager clusterManager;
+
+
+    public abstract void performInitialSampling();
+
+    public KmeansSampler(
         SplittableRandom random,
-        NodePropertyValues nodePropertyValues,
+        ClusterManager clusterManager,
         long nodeCount,
         int k
-    );
+    ) {
+        this.random = random;
+        this.nodeCount = nodeCount;
+        this.clusterManager = clusterManager;
+        this.k = k;
+    }
+
+    public static KmeansSampler createSampler(
+        SplittableRandom random,
+        NodePropertyValues nodePropertyValues,
+        ClusterManager clusterManager,
+        long nodeCount,
+        int k
+    ) {
+        return new KmeansUniformSampler(random, clusterManager, nodeCount, k);
+    }
 }

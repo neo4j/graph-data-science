@@ -19,21 +19,29 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.SplittableRandom;
 
-public class KmeansUniformSampler implements KmeansSampler {
+public class KmeansUniformSampler extends KmeansSampler {
 
     @Override
-    public List<Long> sampleClusters(
+    public void performInitialSampling() {
+        var initialCentroids = sampleClusters();
+        clusterManager.initializeCenters(initialCentroids);
+    }
+
+    public KmeansUniformSampler(
         SplittableRandom random,
-        NodePropertyValues nodePropertyValues,
+        ClusterManager clusterManager,
         long nodeCount,
         int k
+    ) {
+        super(random, clusterManager, nodeCount, k);
+    }
+
+    private List<Long> sampleClusters(
     ) {
         HashSet<Long> sampled = new HashSet<>();
         while (sampled.size() < k) {
