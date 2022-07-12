@@ -47,7 +47,7 @@ abstract class ClusterManager {
         return currentlyAssigned;
     }
 
-    abstract void initialAssignCluster(int i, long id);
+    abstract void initialAssignCluster(long id);
 
     abstract void reset();
 
@@ -58,14 +58,10 @@ abstract class ClusterManager {
     void initializeCentroids(List<Long> initialCentroidIds) {
         currentlyAssigned = 0;
         for (Long currentId : initialCentroidIds) {
-            initialAssignCluster(currentlyAssigned++, currentId);
+            initialAssignCluster(currentId);
         }
     }
-
-    void assignNewCentroid(long id) {
-        initialAssignCluster(currentlyAssigned++, id);
-    }
-
+    
     abstract double[][] getCentroids();
 
     public long[] getNodesInCluster() {
@@ -121,9 +117,9 @@ class FloatClusterManager extends ClusterManager {
     }
 
     @Override
-    public void initialAssignCluster(int i, long id) {
+    public void initialAssignCluster(long id) {
         float[] cluster = nodePropertyValues.floatArrayValue(id);
-        System.arraycopy(cluster, 0, centroids[i], 0, cluster.length);
+        System.arraycopy(cluster, 0, centroids[currentlyAssigned++], 0, cluster.length);
     }
 
     @Override
@@ -204,9 +200,9 @@ class DoubleClusterManager extends ClusterManager {
     }
 
     @Override
-    public void initialAssignCluster(int i, long id) {
+    public void initialAssignCluster(long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
-        System.arraycopy(cluster, 0, centroids[i], 0, cluster.length);
+        System.arraycopy(cluster, 0, centroids[currentlyAssigned++], 0, cluster.length);
     }
 
     @Override

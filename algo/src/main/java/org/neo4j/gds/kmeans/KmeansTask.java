@@ -129,7 +129,7 @@ public abstract class KmeansTask implements Runnable {
         phase = newPhase;
     }
 
-    private void assignNodeToCentroids(long startNode, long endNode) {
+    private void assignNodeToCentroid(long startNode, long endNode) {
         swaps = 0;
 
         reset();
@@ -157,7 +157,7 @@ public abstract class KmeansTask implements Runnable {
     }
 
     public double getSquaredDistance() {
-        return distance / communities.size();
+        return squaredDistance;
     }
 
     private void calculateFinalDistance(long startNode, long endNode) {
@@ -171,25 +171,25 @@ public abstract class KmeansTask implements Runnable {
         }
     }
 
-    private void distanceFromLastSampledCentroid(long startNode, long endNode, int lastAssignedCluster) {
-
+    private void distanceFromLastSampledCentroid(long startNode, long endNode, int numAssigned) {
+        squaredDistance = 0;
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            double nodeCentroidDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
             if (distanceFromCentroid.get(nodeId) > -1) {
-
-                if (lastAssignedCluster == 0) {
+                double nodeCentroidDistance = clusterManager.euclidean(nodeId, numAssigned - 1);
+                if (numAssigned == 1) {
                     distanceFromCentroid.set(nodeId, nodeCentroidDistance);
                     squaredDistance += nodeCentroidDistance * nodeCentroidDistance;
                     communities.set(nodeId, 0);
 
                 } else if (distanceFromCentroid.get(nodeId) > nodeCentroidDistance) {
                     distanceFromCentroid.set(nodeId, nodeCentroidDistance);
-                    distance += nodeCentroidDistance;
-                    communities.set(nodeId, lastAssignedCluster);
-
+                    squaredDistance += nodeCentroidDistance * nodeCentroidDistance;
+                    communities.set(nodeId, numAssigned - 1);
+                } else {
+                    squaredDistance += distanceFromCentroid.get(nodeId) * distanceFromCentroid.get(nodeId);
                 }
             }
-            if (lastAssignedCluster == k - 1) {
+            if (numAssigned == k) {
                 if (distanceFromCentroid.get(nodeId) <= -1) {
                     communities.set(nodeId, (int) -distanceFromCentroid.get(nodeId) - 1);
                     distanceFromCentroid.set(nodeId, 0);
@@ -206,7 +206,7 @@ public abstract class KmeansTask implements Runnable {
         var startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
         if (phase == TaskPhase.ITERATION) {
-            assignNodeToCentroids(startNode, endNode);
+            assignNodeToCentroid(startNode, endNode);
         } else if (phase == TaskPhase.DISTANCE) {
             calculateFinalDistance(startNode, endNode);
         } else {

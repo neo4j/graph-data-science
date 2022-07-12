@@ -61,10 +61,12 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
 
     @Override
     public void performInitialSampling() {
-        long firstId = random.nextLong();
+        long firstId = random.nextLong(nodeCount);
 
         BitSet bitSet = new BitSet(nodeCount);
-        clusterManager.initialAssignCluster(0, firstId);
+        clusterManager.initialAssignCluster(firstId);
+        distanceFromClosestCentroid.set(firstId, -1);
+
         for (int i = 1; i < k; ++i) {
 
             RunWithConcurrency.builder()
@@ -79,6 +81,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
             }
             long nextNode = -1;
 
+            //This is fail-case in case of overflow
             if (!(Double.isInfinite(squaredDistance) || squaredDistance <= 0)) {
 
                 double x = random.nextDouble() * squaredDistance;
@@ -86,7 +89,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
 
                 for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
                     double distanceFromCentroid = distanceFromClosestCentroid.get(nodeId);
-                    if (distanceFromCentroid == -1) {
+                    if (distanceFromCentroid <= -1) {
                         continue;
                     }
                     curr += distanceFromCentroid * distanceFromCentroid;
@@ -105,7 +108,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
                 }
             }
             bitSet.set(nextNode);
-            clusterManager.initialAssignCluster(i, nextNode);
+            clusterManager.initialAssignCluster(nextNode);
             distanceFromClosestCentroid.set(nextNode, -(i + 1));
         }
         //nowe we have k clusters and distanceFromClusterAlso for each node closest communit in 0...k-2
