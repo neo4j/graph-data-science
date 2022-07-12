@@ -50,9 +50,9 @@ public class GraphWriteRelationshipProc extends CatalogProc {
     @Context
     public RelationshipExporterBuilder<? extends RelationshipExporter> relationshipExporterBuilder;
 
-    @Procedure(name = "gds.graph.writeRelationship", mode = WRITE)
+    @Procedure(name = "gds.graph.relationship.write", mode = WRITE)
     @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
-    public Stream<Result> run(
+    public Stream<Result> writeRelationships(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType,
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
@@ -88,6 +88,17 @@ public class GraphWriteRelationshipProc extends CatalogProc {
 
         // result
         return Stream.of(builder.build());
+    }
+
+    @Procedure(name = "gds.graph.writeRelationship", mode = WRITE, deprecatedBy = "gds.graph.relationships.write")
+    @Description("Writes the given relationship and an optional relationship property to an online Neo4j database.")
+    public Stream<Result> run(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipType") String relationshipType,
+        @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
     }
 
     private long writeRelationshipType(

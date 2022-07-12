@@ -98,7 +98,7 @@ class ClosenessCentralityMutateProcTest extends ClosenessCentralityProcTest<Clos
 
         assertCypherResult(
             formatWithLocale(
-                "CALL gds.graph.streamNodeProperties('graph',['%1$s']) YIELD nodeId, propertyValue AS %1$s",
+                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) YIELD nodeId, propertyValue AS %1$s",
                 MUTATE_PROPERTY
             ),
             expectedCentralityResult

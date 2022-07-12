@@ -54,22 +54,22 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
     @Test
     void failWhenNoSuchGraph() {
         assertError(
-            "CALL gds.graph.deleteRelationships('foo', 'bar')",
+            "CALL gds.graph.relationships.drop('foo', 'bar')",
             "Graph with name `foo` does not exist on database `neo4j`."
         );
     }
 
     @Test
     void failWhenNoSuchRelType() {
-        assertError("CALL gds.graph.deleteRelationships('g', 'bar')", "No relationship type 'bar' found in graph 'g'.");
+        assertError("CALL gds.graph.relationships.drop('g', 'bar')", "No relationship type 'bar' found in graph 'g'.");
     }
 
     @Test
     void failWhenDeletingLastRelType() {
         // deleting one is fine
-        runQuery("CALL gds.graph.deleteRelationships('g', 'T1')");
+        runQuery("CALL gds.graph.relationships.drop('g', 'T1')");
 
-        String query2 = "CALL gds.graph.deleteRelationships('g', 'T2')";
+        String query2 = "CALL gds.graph.relationships.drop('g', 'T2')";
 
         assertError(
             query2,
@@ -80,7 +80,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldDeleteRelationshipType() {
-        String query = "CALL gds.graph.deleteRelationships('g', 'T1')";
+        String query = "CALL gds.graph.relationships.drop('g', 'T1')";
         assertCypherResult(query, Collections.singletonList(map(
             "graphName", "g",
             "relationshipType", "T1",
@@ -91,7 +91,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @Test
     void shouldDeleteRelationshipTypeWithProperties() {
-        String query = "CALL gds.graph.deleteRelationships('g', 'T2')";
+        String query = "CALL gds.graph.relationships.drop('g', 'T2')";
         assertCypherResult(query, Collections.singletonList(map(
             "graphName", "g",
             "relationshipType", "T2",

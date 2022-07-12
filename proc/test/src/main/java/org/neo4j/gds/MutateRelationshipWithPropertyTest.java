@@ -92,7 +92,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         );
 
         String graphWriteQuery =
-            "CALL gds.graph.writeRelationship(" +
+            "CALL gds.graph.relationship.write(" +
             "   $graph, " +
             "   $relationshipType, " +
             "   $relationshipProperty " +

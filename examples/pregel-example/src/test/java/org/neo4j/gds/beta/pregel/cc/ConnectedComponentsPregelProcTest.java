@@ -217,7 +217,7 @@ class ConnectedComponentsPregelProcTest extends BaseProcTest {
             assertTrue(row.getBoolean("didConverge"));
         });
 
-        var streamQuery = "CALL gds.graph.streamNodeProperty('" + DEFAULT_GRAPH_NAME + "', 'value_" + COMPONENT + "') " +
+        var streamQuery = "CALL gds.graph.nodeProperty.stream('" + DEFAULT_GRAPH_NAME + "', 'value_" + COMPONENT + "') " +
                           "YIELD nodeId, propertyValue " +
                           "RETURN nodeId, propertyValue AS value";
 

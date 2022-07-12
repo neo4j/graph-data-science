@@ -30,16 +30,16 @@ This chapter explains the available graph catalog operations.
 | xref::graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
 | xref::graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
 | xref::graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
-| xref::graph-catalog-node-ops.adoc[gds.graph.removeNodeProperties]                    | Removes node properties from a named graph.
-| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.deleteRelationships]              | Deletes relationships of a given relationship type from a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
+| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
 | xref::graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
-| xref::graph-catalog-node-ops.adoc[gds.graph.streamNodeProperty]                      | Streams a single node property stored in a named graph.
-| xref::graph-catalog-node-ops.adoc[gds.graph.streamNodeProperties]                    | Streams node properties stored in a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                      | Streams a single node property stored in a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.
 | xref::graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]       | Streams relationship topologies stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperty]      | Streams a single relationship property stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.streamRelationshipProperties]    | Streams relationship properties stored in a named graph.
-| xref::graph-catalog-node-ops.adoc[gds.graph.writeNodeProperties]                     | Writes node properties stored in a named graph to Neo4j.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.writeRelationship]               | Writes relationships stored in a named graph to Neo4j.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperty.stream]      | Streams a single relationship property stored in a named graph.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperties.stream]    | Streams relationship properties stored in a named graph.
+| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.write]                     | Writes node properties stored in a named graph to Neo4j.
+| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]               | Writes relationships stored in a named graph to Neo4j.
 | xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
 | xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
 |===

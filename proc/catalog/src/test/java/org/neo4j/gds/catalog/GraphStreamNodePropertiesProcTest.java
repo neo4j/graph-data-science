@@ -101,13 +101,13 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @ParameterizedTest
     @ValueSource(strings = {
         // no labels -> defaults to PROJECT_ALL
-        "CALL gds.graph.streamNodeProperties(" +
+        "CALL gds.graph.nodeProperties.stream(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2']" +
         ") YIELD nodeId, nodeProperty, propertyValue " +
         "RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
         // explicit PROJECT_ALL
-        "CALL gds.graph.streamNodeProperties(" +
+        "CALL gds.graph.nodeProperties.stream(" +
         "   '%s', " +
         "   ['newNodeProp1', 'newNodeProp2'], " +
         "   ['*']" +
@@ -141,7 +141,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertiesForLabel() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperties('%s', ['newNodeProp1', 'newNodeProp2'], ['A'])" +
+            "CALL gds.graph.nodeProperties.stream('%s', ['newNodeProp1', 'newNodeProp2'], ['A'])" +
             " YIELD nodeId, nodeProperty, propertyValue" +
             " RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
             TEST_GRAPH_SAME_PROPERTIES
@@ -160,7 +160,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertiesForLabelSubset() {
         assertCypherResult(
-            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2']) " +
+            "CALL gds.graph.nodeProperties.stream($graph, ['newNodeProp1', 'newNodeProp2']) " +
             " YIELD nodeId, nodeProperty, propertyValue " +
             " RETURN gds.util.asNode(nodeId).id AS id, nodeProperty, propertyValue",
             Map.of("graph", TEST_GRAPH_DIFFERENT_PROPERTIES),
@@ -183,7 +183,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperties(" +
+            "CALL gds.graph.nodeProperties.stream(" +
             "   '%s', " +
             "   ['newNodeProp3']" +
             ")  YIELD nodeId, nodeProperty, propertyValue " +
@@ -204,7 +204,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodeProperties() {
         assertError(
-            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
+            "CALL gds.graph.nodeProperties.stream($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one node projection to contain property key(s) ['newNodeProp1', 'newNodeProp2', 'newNodeProp3']."
         );
@@ -213,7 +213,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodePropertiesForSpecificLabel() {
         assertError(
-            "CALL gds.graph.streamNodeProperties($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], ['A'])",
+            "CALL gds.graph.nodeProperties.stream($graph, ['newNodeProp1', 'newNodeProp2', 'newNodeProp3'], ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
             "Could not find property key(s) ['newNodeProp3'] for label A. " +
@@ -224,7 +224,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertyForLabel() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp1', " +
             "   ['A']" +
@@ -243,7 +243,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void streamLoadedNodePropertyForLabelSubset() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp2'" +
             ")  YIELD nodeId, propertyValue " +
@@ -267,7 +267,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         graphStore.addNodeProperty(Set.of(NodeLabel.of("A"), NodeLabel.of("B")), "newNodeProp3", identityProperties);
 
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.streamNodeProperty(" +
+            "CALL gds.graph.nodeProperty.stream(" +
             "   '%s', " +
             "   'newNodeProp3'" +
             ")  YIELD nodeId, propertyValue " +
@@ -288,7 +288,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodeProperty() {
         assertError(
-            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3')",
+            "CALL gds.graph.nodeProperty.stream($graph, 'newNodeProp3')",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting at least one node projection to contain property key(s) ['newNodeProp3']."
         );
@@ -297,7 +297,7 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingNodePropertyForSpecificLabel() {
         assertError(
-            "CALL gds.graph.streamNodeProperty($graph, 'newNodeProp3', ['A'])",
+            "CALL gds.graph.nodeProperty.stream($graph, 'newNodeProp3', ['A'])",
             Map.of("graph", TEST_GRAPH_SAME_PROPERTIES),
             "Expecting all specified node projections to have all given properties defined. " +
             "Could not find property key(s) ['newNodeProp3'] for label A. " +

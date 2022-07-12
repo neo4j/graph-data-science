@@ -18,15 +18,31 @@
 | `gds.graph.exists`
 | `_gds.graph.exists_`
 |xref::graph-list.adoc[List graphs] | `gds.graph.list`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Remove node properties from a named graph] | `gds.graph.removeNodeProperties`
-|xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph] | `gds.graph.deleteRelationships`
+.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
+| `gds.graph.nodeProperties.drop`
+| `gds.graph.removeNodeProperties` (deprecated)
+.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph]
+| `gds.graph.relationships.drop`
+| `gds.graph.deleteRelationships` (deprecated)
 |xref::graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller] | `gds.graph.streamNodeProperty`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller] | `gds.graph.streamNodeProperties`
-|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller] | `gds.graph.streamRelationshipProperty`
-|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller] | `gds.graph.streamRelationshipProperties`
-|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j] | `gds.graph.writeNodeProperties`
-|xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j] | `gds.graph.writeRelationship`
+.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller]
+| `gds.graph.nodeProperty.stream`
+| `gds.graph.streamNodeProperty` (deprecated)
+.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller]
+| `gds.graph.nodeProperties.stream`
+| `gds.graph.streamNodeProperties` (deprecated)
+.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
+| `gds.graph.relationshipProperty.stream`
+| `gds.graph.streamRelationshipProperty` (deprecated)
+.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
+| `gds.graph.relationshipProperties.stream`
+| `gds.graph.streamRelationshipProperties` (deprecated)
+.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
+| `gds.graph.nodeProperties.write`
+| `gds.graph.writeNodeProperties`
+.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j]
+| `gds.graph.relationship.write`
+| `gds.graph.writeRelationship`
 |xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export`
 |===
 
@@ -53,6 +69,6 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                        | Operation
-|Remove graph property from a named graph           | `gds.alpha.graph.removeGraphProperty`
-|Stream a graph property to the procedure caller    | `gds.alpha.graph.streamGraphProperty`
+|Drop a graph property from a named graph           | `gds.alpha.graph.graphProperty.drop`
+|Stream a graph property to the procedure caller    | `gds.alpha.graph.graphProperty.stream`
 |===

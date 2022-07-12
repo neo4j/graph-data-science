@@ -85,7 +85,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     @Test
     void writeRelationship() {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.writeRelationship('%s', 'NEW_REL1')" +
+            "CALL gds.graph.relationship.write('%s', 'NEW_REL1')" +
             "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME
         );
@@ -122,7 +122,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         int relationshipsWritten
     ) {
         String graphWriteQuery = formatWithLocale(
-            "CALL gds.graph.writeRelationship('%s', '%s', '%s')" +
+            "CALL gds.graph.relationship.write('%s', '%s', '%s')" +
             "YIELD writeMillis, graphName, relationshipType, relationshipProperty, relationshipsWritten, propertiesWritten",
             TEST_GRAPH_NAME,
             relType,
@@ -153,7 +153,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingRelationshipType() {
         assertError(
-            "CALL gds.graph.writeRelationship($graph, 'NEW_REL42')",
+            "CALL gds.graph.relationship.write($graph, 'NEW_REL42')",
             Map.of("graph", TEST_GRAPH_NAME),
             "Relationship type `NEW_REL42` not found. " +
             "Available types: ['NEW_REL1', 'NEW_REL2']"
@@ -163,7 +163,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
     @Test
     void shouldFailOnNonExistingRelationshipProperty() {
         assertError(
-            "CALL gds.graph.writeRelationship($graph, 'NEW_REL1', 'nonExisting')",
+            "CALL gds.graph.relationship.write($graph, 'NEW_REL1', 'nonExisting')",
             Map.of("graph", TEST_GRAPH_NAME),
             "Relationship property `nonExisting` not found for relationship type 'NEW_REL1'. " +
             "Available properties: ['newRelProp1', 'newRelProp2']"

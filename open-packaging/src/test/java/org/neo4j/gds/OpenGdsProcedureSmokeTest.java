@@ -43,8 +43,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
     private static final List<String> PROCEDURES = asList(
-        "gds.alpha.graph.streamGraphProperty",
-        "gds.alpha.graph.removeGraphProperty",
+        "gds.alpha.graph.graphProperty.stream",
+        "gds.alpha.graph.graphProperty.drop",
         
         "gds.alpha.create.cypherdb",
 
@@ -310,6 +310,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.beta.graph.relationships.stream",
 
         "gds.graph.deleteRelationships",
+        "gds.graph.relationships.drop",
         "gds.graph.drop",
         "gds.graph.exists",
         "gds.graph.list",
@@ -318,11 +319,17 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.graph.project.cypher.estimate",
         "gds.graph.project.estimate",
         "gds.graph.streamNodeProperties",
+        "gds.graph.nodeProperties.stream",
         "gds.graph.streamNodeProperty",
+        "gds.graph.nodeProperty.stream",
         "gds.graph.streamRelationshipProperties",
+        "gds.graph.relationshipProperties.stream",
         "gds.graph.streamRelationshipProperty",
+        "gds.graph.relationshipProperty.stream",
         "gds.graph.writeNodeProperties",
+        "gds.graph.nodeProperties.write",
         "gds.graph.writeRelationship",
+        "gds.graph.relationship.write",
 
         "gds.labelPropagation.mutate",
         "gds.labelPropagation.mutate.estimate",
@@ -382,6 +389,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.shortestPath.yens.write.estimate",
 
         "gds.graph.removeNodeProperties",
+        "gds.graph.nodeProperties.drop",
 
         "gds.wcc.mutate",
         "gds.wcc.mutate.estimate",
@@ -479,7 +487,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 334;
+        int expectedCount = 342;
         assertEquals(
             expectedCount,
             registeredProcedures.size(),

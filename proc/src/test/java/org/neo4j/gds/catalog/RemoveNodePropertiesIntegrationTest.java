@@ -71,7 +71,7 @@ public class RemoveNodePropertiesIntegrationTest extends BaseProcTest {
         assertNotEquals(graphBefore.availableNodeProperties(), graphAfterMutate.availableNodeProperties());
 
         assertCypherResult(
-            "CALL gds.graph.removeNodeProperties('testGraph', ['componentId']) YIELD propertiesRemoved",
+            "CALL gds.graph.nodeProperties.drop('testGraph', ['componentId']) YIELD propertiesRemoved",
             singletonList(map("propertiesRemoved", 4L))
         );
         Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), db.databaseId(), "testGraph").graphStore().getUnion();

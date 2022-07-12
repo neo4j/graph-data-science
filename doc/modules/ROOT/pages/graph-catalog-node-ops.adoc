@@ -7,10 +7,10 @@ The graphs in the Neo4j Graph Data Science Library support properties for nodes.
 We provide multiple operations to work with the stored node-properties in projected graphs.
 Node properties are either added during the graph projection or when using the `mutate` mode of our graph algorithms.
 
-To inspect stored values, the `gds.graph.streamNodeProperties` procedure can be used.
+To inspect stored values, the `gds.graph.nodeProperties.stream` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
-To persist the values in a Neo4j database, we can use `gds.graph.writeNodeProperties`.
+To persist the values in a Neo4j database, we can use `gds.graph.nodeProperties.write`.
 Similar to streaming node properties, it is also possible to write those back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 
@@ -27,7 +27,7 @@ This is useful to free up main memory or to remove accidentally added node prope
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty(
+CALL gds.graph.nodeProperty.stream(
     graphName: String,
     nodeProperties: String,
     nodeLabels: String or List of Strings,
@@ -72,7 +72,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties(
+CALL gds.graph.nodeProperties.stream(
     graphName: String,
     nodeProperties: String or List of Strings,
     nodeLabels: String or List of Strings,
@@ -119,7 +119,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties(
+CALL gds.graph.nodeProperties.write(
     graphName: String,
     nodeProperties: String or List of Strings,
     nodeLabels: String or List of Strings,
@@ -165,7 +165,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties(
+CALL gds.graph.nodeProperties.drop(
     graphName: String,
     nodeProperties: String or List of Strings,
     configuration: Map
@@ -259,7 +259,7 @@ In the following, we stream the previously computed scores `score`.
 .Stream the `score` node property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score')
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score')
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
 ORDER BY score DESC
@@ -288,7 +288,7 @@ The procedure can be configured to stream just the properties for specific node 
 .Stream the `score` property for `Person` nodes:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperty('socialGraph', 'score', ['Person'])
+CALL gds.graph.nodeProperty.stream('socialGraph', 'score', ['Person'])
 YIELD nodeId, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, propertyValue AS score
 ORDER BY score DESC
@@ -316,7 +316,7 @@ We can also stream several properties at once.
 .Stream multiple node properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamNodeProperties('socialGraph', ['score', 'age'])
+CALL gds.graph.nodeProperties.stream('socialGraph', ['score', 'age'])
 YIELD nodeId, nodeProperty, propertyValue
 RETURN gds.util.asNode(nodeId).name AS name, nodeProperty, propertyValue
 ORDER BY name, nodeProperty
@@ -351,7 +351,7 @@ To write the 'score' property for all node labels in the social graph, we use th
 .Write the `score` property back to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties('socialGraph', ['score'])
+CALL gds.graph.nodeProperties.write('socialGraph', ['score'])
 YIELD propertiesWritten
 ----
 
@@ -375,7 +375,7 @@ In the following example, we will only write back the scores of the `Person` nod
 .Write node properties of a specific projected node label to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeNodeProperties('socialGraph', ['score'], ['Person'])
+CALL gds.graph.nodeProperties.write('socialGraph', ['score'], ['Person'])
 YIELD propertiesWritten
 ----
 
@@ -402,7 +402,7 @@ If the `nodeLabels` parameter is specified, it is required that _all_ given node
 .Remove the `score` property from all projected nodes in the `socialGraph`:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.removeNodeProperties('socialGraph', ['score'])
+CALL gds.graph.nodeProperties.drop('socialGraph', ['score'])
 YIELD propertiesRemoved
 ----
 

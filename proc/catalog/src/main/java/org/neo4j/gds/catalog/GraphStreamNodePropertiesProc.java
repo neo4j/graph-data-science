@@ -42,9 +42,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamNodePropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.streamNodeProperties", mode = READ)
+    @Procedure(name = "gds.graph.nodeProperties.stream", mode = READ)
     @Description("Streams the given node properties.")
-    public Stream<PropertiesResult> streamProperties(
+    public Stream<PropertiesResult> streamNodeProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
@@ -66,12 +66,23 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-       return streamNodeProperties(graphStore, config, PropertiesResult::new);
+        return streamNodeProperties(graphStore, config, PropertiesResult::new);
     }
 
-    @Procedure(name = "gds.graph.streamNodeProperty", mode = READ)
+    @Procedure(name = "gds.graph.streamNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.stream")
+    @Description("Streams the given node properties.")
+    public Stream<PropertiesResult> streamProperties(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return streamNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
+    }
+
+    @Procedure(name = "gds.graph.nodeProperty.stream", mode = READ)
     @Description("Streams the given node property.")
-    public Stream<PropertyResult> streamProperty(
+    public Stream<PropertyResult> streamNodeProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") String nodeProperty,
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
@@ -94,6 +105,17 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         config.validate(graphStore);
 
         return streamNodeProperties(graphStore, config, (nodeId, propertyName, propertyValue) -> new PropertyResult(nodeId,propertyValue));
+    }
+
+    @Procedure(name = "gds.graph.streamNodeProperty", mode = READ, deprecatedBy = "gds.graph.nodeProperty.stream")
+    @Description("Streams the given node property.")
+    public Stream<PropertyResult> streamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") String nodeProperty,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return streamNodeProperty(graphName, nodeProperty, nodeLabels, configuration);
     }
 
     private <R> Stream<R> streamNodeProperties(GraphStore graphStore, GraphExportNodePropertiesConfig config, ResultProducer<R> producer) {

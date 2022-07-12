@@ -100,7 +100,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
         assertNotEquals(graphBefore.relationshipCount(), graphAfterMutate.relationshipCount());
 
         assertCypherResult(
-            "CALL gds.graph.deleteRelationships('testGraph2', 'SIM') YIELD deletedProperties",
+            "CALL gds.graph.relationships.drop('testGraph2', 'SIM') YIELD deletedProperties",
             singletonList(map("deletedProperties", map("foo", 2L)))
         );
         Graph graphAfterDelete = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH2).graphStore().getUnion();
@@ -112,7 +112,7 @@ class DeleteRelationshipsIntegrationTest extends BaseProcTest {
         runQuery("CALL gds.nodeSimilarity.mutate('testGraph', {mutateRelationshipType: 'SIM', mutateProperty: 'foo'})");
 
         assertCypherResult(
-            "CALL gds.graph.deleteRelationships('testGraph', 'TYPE') YIELD deletedProperties",
+            "CALL gds.graph.relationships.drop('testGraph', 'TYPE') YIELD deletedProperties",
             singletonList(map("deletedProperties", map()))
         );
     }

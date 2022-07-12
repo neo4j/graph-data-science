@@ -216,7 +216,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
 
         // write new properties and relationships to Neo
         String writeNodePropertiesQuery = formatWithLocale(
-            "CALL gds.graph.writeNodeProperties(" +
+            "CALL gds.graph.nodeProperties.write(" +
             "   '%s', " +
             "   ['pageRank', 'louvain', 'labelPropagation', 'wcc']" +
             ")",
@@ -227,7 +227,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         });
 
         String writeRelationshipTypeQuery = formatWithLocale(
-            "CALL gds.graph.writeRelationship(" +
+            "CALL gds.graph.relationship.write(" +
             "   '%s', " +
             "   'SIMILAR_TO', " +
             "   'similarity'" +

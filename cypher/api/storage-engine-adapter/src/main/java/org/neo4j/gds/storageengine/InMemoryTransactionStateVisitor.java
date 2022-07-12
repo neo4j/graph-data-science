@@ -68,7 +68,7 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
     ) {
         if (!removed.isEmpty()) {
             throw new UnsupportedOperationException(
-                "Removing single node properties is not supported. Use the `gds.graph.removeNodeProperties` procedure " +
+                "Dropping single node properties is not supported. Use the `gds.graph.nodeProperties.drop` procedure " +
                 "instead to drop the entire property from the graph."
             );
         }

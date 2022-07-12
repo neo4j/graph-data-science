@@ -22,12 +22,12 @@ package org.neo4j.gds.catalog;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ProcPreconditions;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -46,9 +46,9 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
 
-    @Procedure(name = "gds.graph.streamRelationshipProperties", mode = READ)
+    @Procedure(name = "gds.graph.relationshipProperties.stream", mode = READ)
     @Description("Streams the given relationship properties.")
-    public Stream<PropertiesResult> streamProperties(
+    public Stream<PropertiesResult> streamRelationshipProperties(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") List<String> relationshipProperties,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
@@ -73,9 +73,20 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
        return streamRelationshipProperties(graphStore, config, PropertiesResult::new);
     }
 
-    @Procedure(name = "gds.graph.streamRelationshipProperty", mode = READ)
+    @Procedure(name = "gds.graph.streamRelationshipProperties", mode = READ, deprecatedBy = "gds.graph.relationshipProperties.stream")
+    @Description("Streams the given relationship properties.")
+    public Stream<PropertiesResult> streamProperties(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipProperties") List<String> relationshipProperties,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return streamRelationshipProperties(graphName, relationshipProperties, relationshipTypes, configuration);
+    }
+
+    @Procedure(name = "gds.graph.relationshipProperty.stream", mode = READ)
     @Description("Streams the given relationship property.")
-    public Stream<PropertyResult> streamProperty(
+    public Stream<PropertyResult> streamRelationshipProperty(
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipProperties") String relationshipProperty,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
@@ -107,6 +118,17 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
                 propertyValue
             )
         );
+    }
+
+    @Procedure(name = "gds.graph.streamRelationshipProperty", mode = READ, deprecatedBy = "gds.graph.relationshipProperty.stream")
+    @Description("Streams the given relationship property.")
+    public Stream<PropertyResult> streamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipProperties") String relationshipProperty,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return streamRelationshipProperty(graphName, relationshipProperty, relationshipTypes, configuration);
     }
 
     private <R> Stream<R> streamRelationshipProperties(GraphStore graphStore, GraphStreamRelationshipPropertiesConfig config, ResultProducer<R> producer) {

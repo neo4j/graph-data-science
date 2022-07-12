@@ -10,7 +10,7 @@ To inspect the relationship topology only, the `gds.beta.graph.relationships.str
 To inspect stored relationship property values, the `streamRelationshipProperties` procedure can be used.
 This is useful if we ran multiple algorithms in `mutate` mode and want to retrieve some or all of the results.
 
-To persist relationship types in a Neo4j database, we can use `gds.graph.writeRelationship`.
+To persist relationship types in a Neo4j database, we can use `gds.graph.relationship.write`.
 Similar to streaming relationship topologies or properties, it is also possible to write back to Neo4j.
 This is similar to what an algorithm `write` execution mode does, but allows more fine-grained control over the operations.
 By default, no relationship properties will be written. To write relationship properties, these have to be explicitly specified.
@@ -69,7 +69,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
     graphName: String,
     relationshipProperties: List of String,
     relationshipTypes: List of Strings,
@@ -118,7 +118,7 @@ a|
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
     graphName: String,
     relationshipProperties: List of String,
     relationshipTypes: List of Strings,
@@ -169,7 +169,7 @@ a|
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
     graphName: String,
     relationshipType: String,
     relationshipProperty: String,
@@ -219,7 +219,7 @@ YIELD
 ======
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.deleteRelationships(
+CALL gds.graph.relationships.drop(
     graphName: String,
     relationshipType: String
 )
@@ -424,7 +424,7 @@ In the example below we stream the relationship property `score`.
 .Stream a single relationship property:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
   'personsAndInstruments',                  // <1>
   'score'                                   // <2>
 )
@@ -471,7 +471,7 @@ We can further on filter the relationship types we want to stream, this is demon
 .Stream a single relationship property for specific relationship type:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperty(
+CALL gds.graph.relationshipProperty.stream(
   'personsAndInstruments',                  // <1>
   'score',                                  // <2>
   ['SIMILAR']                               // <3>
@@ -513,7 +513,7 @@ It is also possible to stream multiple relationship properties.
 .Stream multiple relationship properties:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
   'personsAndInstruments',                      // <1>
   ['score', 'strength'],                        // <2>
   ['LIKES']                                     // <3>
@@ -563,7 +563,7 @@ Similar to the multiple relationship properties we can stream properties for mul
 .Stream relationship properties of a multiple relationship projections:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.streamRelationshipProperties(
+CALL gds.graph.relationshipProperties.stream(
   'personsAndInstruments',                          // <1>
   ['score'],                                        // <2>
   ['LIKES', 'SIMILAR']                              // <3>
@@ -629,7 +629,7 @@ NOTE: Relationships are always written using a single thread.
 .Write relationships to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
   'personsAndInstruments',        // <1>
   'SIMILAR'                       // <2>
 )
@@ -666,7 +666,7 @@ To write relationship properties, these have to be explicitly specified.
 .Write relationships and their properties to Neo4j:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.writeRelationship(
+CALL gds.graph.relationship.write(
   'personsAndInstruments',          // <1>
   'SIMILAR',                        // <2>
   'score'                           // <3>
@@ -704,7 +704,7 @@ If we still want to delete these relationships we need to xref::graph-drop.adoc[
 .Delete all relationships of type `SIMILAR` from a named graph:
 [source, cypher, role=noplay]
 ----
-CALL gds.graph.deleteRelationships(
+CALL gds.graph.relationships.drop(
   'personsAndInstruments',            // <1>
   'SIMILAR'                           // <2>
 )
