@@ -44,6 +44,8 @@ public abstract class KmeansTask implements Runnable {
 
     double distance;
 
+    double squaredDistance = 0;
+
     TaskPhase phase;
 
     long getNumAssignedAtCluster(int ith) {
@@ -146,6 +148,10 @@ public abstract class KmeansTask implements Runnable {
         return distance / communities.size();
     }
 
+    public double getSquaredDistance() {
+        return distance / communities.size();
+    }
+
     private void calculateFinalDistance(long startNode, long endNode) {
 
 
@@ -160,22 +166,26 @@ public abstract class KmeansTask implements Runnable {
     private void distanceFromLastSampledCentroid(long startNode, long endNode, int lastAssignedCluster) {
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            double nodeCenterDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
-            if (distanceFromCentroid.get(nodeId) > 0) {
+            double nodeCentroidDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
+            if (distanceFromCentroid.get(nodeId) > -1) {
 
                 if (lastAssignedCluster == 0) {
-                    distanceFromCentroid.set(nodeId, nodeCenterDistance);
-                    distance += nodeCenterDistance;
+                    distanceFromCentroid.set(nodeId, nodeCentroidDistance);
+                    squaredDistance += nodeCentroidDistance * nodeCentroidDistance;
                     communities.set(nodeId, 0);
 
-                } else if (distanceFromCentroid.get(nodeId) > nodeCenterDistance) {
-                    distanceFromCentroid.set(nodeId, nodeCenterDistance);
-                    distance += nodeCenterDistance;
+                } else if (distanceFromCentroid.get(nodeId) > nodeCentroidDistance) {
+                    distanceFromCentroid.set(nodeId, nodeCentroidDistance);
+                    distance += nodeCentroidDistance;
                     communities.set(nodeId, lastAssignedCluster);
 
                 }
             }
-            if (lastAssignedCluster == -1) {
+            if (lastAssignedCluster == k - 1) {
+                if (distanceFromCentroid.get(nodeId) <= -1) {
+                    communities.set(nodeId, (int) -distanceFromCentroid.get(nodeId) - 1);
+                    distanceFromCentroid.set(nodeId, 0);
+                }
                 int communityId = communities.get(nodeId);
                 communitySizes[communityId]++;
                 updateAfterAssignmentToCentroid(nodeId, communityId);

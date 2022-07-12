@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.kmeans;
 
+
+import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
@@ -27,30 +29,41 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 
-public class KmeansPlusPlusSampler implements KmeansSampler {
+public class KmeansPlusPlusSampler extends KmeansSampler {
 
-    @Override
-    public List<Long> sampleClusters(
-        SplittableRandom random,
-        NodePropertyValues nodePropertyValues,
-        long nodeCount,
-        int k
-    ) {
-        return null;
-    }
+    private List<KmeansTask> tasks;
+    private int concurrency;
+    private HugeDoubleArray distanceFromClosestCentroid;
+    private ExecutorService executorService;
 
-    public void temp(
+    private NodePropertyValues nodePropertyValues;
+
+
+    public KmeansPlusPlusSampler(
         SplittableRandom random,
         ClusterManager clusterManager,
-        List<KmeansTask> tasks,
-        int k,
-        int concurrency,
         long nodeCount,
-        HugeDoubleArray currentDistanceFromCenter,
-        ExecutorService executorService
+        int k,
+        NodePropertyValues nodePropertyValues,
+        HugeDoubleArray distanceFromClosestCentroid,
+        int concurrency,
+        ExecutorService executorService,
+        List<KmeansTask> tasks
     ) {
+        super(random, clusterManager, nodeCount, k);
+        this.nodePropertyValues = nodePropertyValues;
+        this.distanceFromClosestCentroid = distanceFromClosestCentroid;
+        this.executorService = executorService;
+        this.tasks = tasks;
+        this.concurrency = concurrency;
+    }
+
+
+    @Override
+    public void performInitialSampling() {
         long firstId = random.nextLong();
 
+        BitSet bitSet = new BitSet(nodeCount);
         clusterManager.initialAssignCluster(0, firstId);
         for (int i = 1; i < k; ++i) {
 
@@ -60,23 +73,40 @@ public class KmeansPlusPlusSampler implements KmeansSampler {
                 .executor(executorService)
                 .run();
 
-            double distanceFromClusterCentre = 0;
+            double squaredDistance = 0;
             for (KmeansTask task : tasks) {
-                distanceFromClusterCentre += task.getDistanceFromClusterNormalized();
+                squaredDistance += task.getSquaredDistance();
             }
-            double x = random.nextDouble() * distanceFromClusterCentre;
-            double curr = 0;
             long nextNode = -1;
-            for (long nodeId = 0; nodeId < nodeCount; ++nodeId) { //something like that (smpling incorrect tho)
-                if (curr > x) {
 
-                    break;
-                } else {
-                    curr += currentDistanceFromCenter.get(nodeId);
-                    nextNode = nodeId;
+            if (!(Double.isInfinite(squaredDistance) || squaredDistance <= 0)) {
+
+                double x = random.nextDouble() * squaredDistance;
+                double curr = 0;
+
+                for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
+                    double distanceFromCentroid = distanceFromClosestCentroid.get(nodeId);
+                    if (distanceFromCentroid == -1) {
+                        continue;
+                    }
+                    curr += distanceFromCentroid * distanceFromCentroid;
+
+                    if (x <= curr) {
+                        nextNode = nodeId;
+                        break;
+                    }
+
                 }
             }
+            if (nextNode == -1) {
+                nextNode = random.nextLong(nodeCount);
+                while (bitSet.get(nextNode)) {
+                    nextNode = random.nextLong(nodeCount);
+                }
+            }
+            bitSet.set(nextNode);
             clusterManager.initialAssignCluster(i, nextNode);
+            distanceFromClosestCentroid.set(nextNode, -(i + 1));
         }
         //nowe we have k clusters and distanceFromClusterAlso for each node closest communit in 0...k-2
 
@@ -85,5 +115,8 @@ public class KmeansPlusPlusSampler implements KmeansSampler {
             .tasks(tasks)
             .executor(executorService)
             .run();
+
+
     }
 }
+
