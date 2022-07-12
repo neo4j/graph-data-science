@@ -29,7 +29,7 @@ public class KmeansUniformSampler extends KmeansSampler {
     @Override
     public void performInitialSampling() {
         var initialCentroids = sampleClusters();
-        clusterManager.initializeCenters(initialCentroids);
+        clusterManager.initializeCentroids(initialCentroids);
     }
 
     public KmeansUniformSampler(

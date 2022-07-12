@@ -34,7 +34,7 @@ public abstract class KmeansTask implements Runnable {
     final Partition partition;
     final NodePropertyValues nodePropertyValues;
 
-    final HugeDoubleArray distanceFromCenter;
+    final HugeDoubleArray distanceFromCentroid;
 
     final HugeIntArray communities;
     final long[] communitySizes;
@@ -46,7 +46,7 @@ public abstract class KmeansTask implements Runnable {
 
     TaskPhase phase;
 
-    long getNumAssignedAtCenter(int ith) {
+    long getNumAssignedAtCluster(int ith) {
         return communitySizes[ith];
     }
 
@@ -56,13 +56,13 @@ public abstract class KmeansTask implements Runnable {
 
     abstract void reset();
 
-    abstract void updateAfterAssignment(long nodeId, int community);
+    abstract void updateAfterAssignmentToCentroid(long nodeId, int community);
 
     KmeansTask(
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
-        HugeDoubleArray distanceFromCenter,
+        HugeDoubleArray distanceFromCentroid,
         int k,
         int dimensions,
         Partition partition,
@@ -71,7 +71,7 @@ public abstract class KmeansTask implements Runnable {
         this.clusterManager = clusterManager;
         this.nodePropertyValues = nodePropertyValues;
         this.communities = communities;
-        this.distanceFromCenter = distanceFromCenter;
+        this.distanceFromCentroid = distanceFromCentroid;
         this.k = k;
         this.dimensions = dimensions;
         this.partition = partition;
@@ -85,7 +85,7 @@ public abstract class KmeansTask implements Runnable {
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
-        HugeDoubleArray distanceFromCenter,
+        HugeDoubleArray distanceFromCentroid,
         int k,
         int dimensions,
         Partition partition,
@@ -96,7 +96,7 @@ public abstract class KmeansTask implements Runnable {
                 clusterManager,
                 nodePropertyValues,
                 communities,
-                distanceFromCenter,
+                distanceFromCentroid,
                 k,
                 dimensions,
                 partition,
@@ -107,7 +107,7 @@ public abstract class KmeansTask implements Runnable {
             clusterManager,
             nodePropertyValues,
             communities,
-            distanceFromCenter,
+            distanceFromCentroid,
             k,
             dimensions,
             partition,
@@ -119,13 +119,13 @@ public abstract class KmeansTask implements Runnable {
         phase = TaskPhase.DISTANCE;
     }
 
-    private void assignNodesToClusters(long startNode, long endNode) {
+    private void assignNodeToCentroids(long startNode, long endNode) {
         swaps = 0;
 
         reset();
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            int closestCommunity = clusterManager.findClosestCenter(nodeId);
+            int closestCommunity = clusterManager.findClosestCentroid(nodeId);
             communitySizes[closestCommunity]++;
             int previousCommunity = communities.get(nodeId);
             if (closestCommunity != previousCommunity) {
@@ -137,49 +137,48 @@ public abstract class KmeansTask implements Runnable {
             //we keep as is and do a subtraction when a node changes its cluster.
             //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
             // or avoid calculating their distance from other nodes etc...
-            updateAfterAssignment(nodeId, closestCommunity);
+            updateAfterAssignmentToCentroid(nodeId, closestCommunity);
 
         }
     }
 
-    public double getDistanceFromClusterNormalized() {
+    public double getDistanceFromCentroidNormalized() {
         return distance / communities.size();
     }
 
-    private void calculateInitialDistance(long startNode, long endNode) {
+    private void calculateFinalDistance(long startNode, long endNode) {
 
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-            double nodeCenterDistance = clusterManager.euclidean(nodeId, communities.get(nodeId));
-            distance += nodeCenterDistance;
-            distanceFromCenter.set(nodeId, nodeCenterDistance);
+            double nodeCentroidDistance = clusterManager.euclidean(nodeId, communities.get(nodeId));
+            distance += nodeCentroidDistance;
+            distanceFromCentroid.set(nodeId, nodeCentroidDistance);
 
         }
     }
 
-    private void calculateInitialAssignmentDistance(long startNode, long endNode, int lastAssignedCluster) {
-
+    private void distanceFromLastSampledCentroid(long startNode, long endNode, int lastAssignedCluster) {
 
         for (long nodeId = startNode; nodeId < endNode; nodeId++) {
             double nodeCenterDistance = clusterManager.euclidean(nodeId, lastAssignedCluster);
-            if (distanceFromCenter.get(nodeId) > 0) {
+            if (distanceFromCentroid.get(nodeId) > 0) {
 
                 if (lastAssignedCluster == 0) {
-                    distanceFromCenter.set(nodeId, nodeCenterDistance);
+                    distanceFromCentroid.set(nodeId, nodeCenterDistance);
                     distance += nodeCenterDistance;
                     communities.set(nodeId, 0);
 
-                } else if (distanceFromCenter.get(nodeId) > nodeCenterDistance) {
-                    distanceFromCenter.set(nodeId, nodeCenterDistance);
+                } else if (distanceFromCentroid.get(nodeId) > nodeCenterDistance) {
+                    distanceFromCentroid.set(nodeId, nodeCenterDistance);
                     distance += nodeCenterDistance;
                     communities.set(nodeId, lastAssignedCluster);
 
                 }
             }
             if (lastAssignedCluster == -1) {
-                int commnunityId = communities.get(nodeId);
-                communitySizes[commnunityId]++;
-                updateAfterAssignment(nodeId, commnunityId);
+                int communityId = communities.get(nodeId);
+                communitySizes[communityId]++;
+                updateAfterAssignmentToCentroid(nodeId, communityId);
             }
         }
     }
@@ -189,11 +188,11 @@ public abstract class KmeansTask implements Runnable {
         var startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
         if (phase == TaskPhase.ITERATION) {
-            assignNodesToClusters(startNode, endNode);
+            assignNodeToCentroids(startNode, endNode);
         } else if (phase == TaskPhase.DISTANCE) {
-            calculateInitialDistance(startNode, endNode);
+            calculateFinalDistance(startNode, endNode);
         } else {
-            calculateInitialAssignmentDistance(startNode, endNode, clusterManager.getCurrentlyAssigned());
+            distanceFromLastSampledCentroid(startNode, endNode, clusterManager.getCurrentlyAssigned());
 
         }
     }
@@ -227,7 +226,7 @@ final class DoubleKmeansTask extends KmeansTask {
 
     }
 
-    double[] getCenterContribution(int ith) {
+    double[] getCentroidContribution(int ith) {
         return communityCoordinateSums[ith];
     }
 
@@ -240,7 +239,7 @@ final class DoubleKmeansTask extends KmeansTask {
     }
 
     @Override
-    void updateAfterAssignment(long nodeId, int community) {
+    void updateAfterAssignmentToCentroid(long nodeId, int community) {
         var property = nodePropertyValues.doubleArrayValue(nodeId);
         communities.set(nodeId, community);
         for (int j = 0; j < dimensions; ++j) {
@@ -277,7 +276,7 @@ final class FloatKmeansTask extends KmeansTask {
         this.communityCoordinateSums = new float[k][dimensions];
     }
 
-    float[] getCenterContribution(int ith) {
+    float[] getCentroidContribution(int ith) {
         return communityCoordinateSums[ith];
     }
 
@@ -290,7 +289,7 @@ final class FloatKmeansTask extends KmeansTask {
     }
 
     @Override
-    void updateAfterAssignment(long nodeId, int community) {
+    void updateAfterAssignmentToCentroid(long nodeId, int community) {
         var property = nodePropertyValues.floatArrayValue(nodeId);
         communities.set(nodeId, community);
         for (int j = 0; j < dimensions; ++j) {

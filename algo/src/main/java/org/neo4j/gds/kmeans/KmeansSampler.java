@@ -20,8 +20,11 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 
+import java.util.List;
 import java.util.SplittableRandom;
+import java.util.concurrent.ExecutorService;
 
 public abstract class KmeansSampler {
 
@@ -46,12 +49,35 @@ public abstract class KmeansSampler {
     }
 
     public static KmeansSampler createSampler(
+        SamplerType samplerType,
         SplittableRandom random,
         NodePropertyValues nodePropertyValues,
         ClusterManager clusterManager,
         long nodeCount,
-        int k
+        int k,
+        int concurrency,
+        HugeDoubleArray distanceFromCenter,
+        ExecutorService executorService,
+        List<KmeansTask> tasks
     ) {
-        return new KmeansUniformSampler(random, clusterManager, nodeCount, k);
+        if (samplerType == SamplerType.UNIFORM) {
+            return new KmeansUniformSampler(random, clusterManager, nodeCount, k);
+        } else
+            return new KmeansPlusPlusSampler(
+                random,
+                clusterManager,
+                nodeCount,
+                k,
+                nodePropertyValues,
+                distanceFromCenter,
+                concurrency,
+                executorService,
+                tasks
+            );
     }
+
+}
+
+enum SamplerType {
+    UNIFORM, KMEANSPP;
 }
