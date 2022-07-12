@@ -122,7 +122,7 @@ public class RandomWalkWithRestarts {
                 }
                 seen.set(currentNode.getValue());
             }
-            walk(currentNode, startNode, inputGraph, rng);
+            currentNode.setValue(walkStep(currentNode, startNode, inputGraph, rng));
         }
         var idMapAndProperties = nodesBuilder.build();
         return idMapAndProperties.idMap();
@@ -230,15 +230,13 @@ public class RandomWalkWithRestarts {
         return GraphSchema.of(nodeSchema, relationshipSchema, inputGraphStore.schema().graphProperties());
     }
 
-    private void walk(MutableLong currentNode, long startNode, Graph inputGraph, Random rng) {
+    private long walkStep(MutableLong currentNode, long startNode, Graph inputGraph, Random rng) {
         int degree = inputGraph.degree(currentNode.getValue());
         if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
-            currentNode.setValue(startNode);
-            return;
+            return startNode;
         }
         int targetOffset = rng.nextInt(degree);
-        long target = getTarget(inputGraph, currentNode.getValue(), targetOffset);
-        currentNode.setValue(target);
+        return getTarget(inputGraph, currentNode.getValue(), targetOffset);
     }
 
     private long getTarget(RelationshipIterator inputGraph, long sourceNode, int targetOffset) {
