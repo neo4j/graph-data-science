@@ -114,6 +114,7 @@ class RandomWalkWithRestartsTest {
     @Test
     void shouldFilterGraph() {
         var config = ImmutableRandomWalkWithRestartsConfig.builder()
+            .startNode(idFunction.of("e"))
             .addNodeLabels("M", "X")
             .addRelationshipType("R1")
             .samplingRatio(0.5)
@@ -125,6 +126,13 @@ class RandomWalkWithRestartsTest {
 
         var subgraph = rwr.sample();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(3);
+        var expectedGraph =
+            "  (e:M {prop: 50, attr: 48})" +
+            ", (f:M {prop: 51, attr: 48})" +
+            ", (g:M {prop: 52})" +
+            ", (e)-[:R1 {distance: 5.8}]->(f)" +
+            ", (f)-[:R1 {distance: 9.9}]->(g)";
+        assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
     }
 
     @Test

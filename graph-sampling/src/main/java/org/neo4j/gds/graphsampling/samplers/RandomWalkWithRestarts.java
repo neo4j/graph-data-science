@@ -76,11 +76,11 @@ public class RandomWalkWithRestarts {
 
         IdMap sampledNodes = sampleNodes(inputGraph, rng);
 
-        var nodePropertyStore = filterNodeProperties(inputGraph, sampledNodes);
+        var nodePropertyStore = filterNodeProperties(sampledNodes);
 
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
-        filterRelationshipsAndProperties(inputGraph, sampledNodes, topologies, relPropertyStores);
+        filterRelationshipsAndProperties(sampledNodes, topologies, relPropertyStores);
 
         var filteredSchema = filterSchema(sampledNodes, topologies);
 
@@ -131,14 +131,15 @@ public class RandomWalkWithRestarts {
         return idMapAndProperties.idMap();
     }
 
-    private NodePropertyStore filterNodeProperties(IdMap inputGraph, IdMap sampledNodes) {
+    private NodePropertyStore filterNodeProperties(IdMap sampledNodes) {
+        IdMap inputNodes = inputGraphStore.nodes();
         var builder = NodePropertyStore.builder();
 
         inputGraphStore.nodePropertyKeys().forEach(propertyKey -> {
             var nodeProperty = inputGraphStore.nodeProperty(propertyKey);
 
             NodesFilter.NodePropertiesBuilder<?> nodePropertiesBuilder = NodesFilter.getPropertiesBuilder(
-                inputGraph,
+                inputNodes,
                 nodeProperty.values(),
                 config.concurrency()
             );
@@ -147,7 +148,7 @@ public class RandomWalkWithRestarts {
                 sampledNodes.nodeCount(),
                 config.concurrency(),
                 filteredNode -> {
-                    var inputNode = inputGraph.toMappedNodeId(sampledNodes.toOriginalNodeId(filteredNode));
+                    var inputNode = inputNodes.toMappedNodeId(sampledNodes.toOriginalNodeId(filteredNode));
                     nodePropertiesBuilder.accept(inputNode, filteredNode);
                 }
             );
@@ -165,14 +166,13 @@ public class RandomWalkWithRestarts {
     }
 
     private void filterRelationshipsAndProperties(
-        IdMap inputGraph,
         IdMap sampledNodes,
         Map<RelationshipType, Relationships.Topology> topologies,
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores
     ) {
         for (RelationshipType relType : config.internalRelationshipTypes(inputGraphStore)) {
             var relPropertyKeys = new ArrayList<>(inputGraphStore.relationshipPropertyKeys(relType));
-            var relationships = filterRelationships(inputGraph, sampledNodes, relType, relPropertyKeys);
+            var relationships = filterRelationships(sampledNodes, relType, relPropertyKeys);
             var topology = relationships.get(0).topology();
             if (topology.elementCount() > 0) {
                 topologies.put(relType, topology);
@@ -182,11 +182,11 @@ public class RandomWalkWithRestarts {
     }
 
     private List<Relationships> filterRelationships(
-        IdMap inputGraph,
         IdMap sampledNodes,
         RelationshipType relType,
         ArrayList<String> relPropertyKeys
     ) {
+        IdMap inputNodes = inputGraphStore.nodes();
         var propertyConfigs = relPropertyKeys
             .stream()
             .map(key -> GraphFactory.PropertyConfig.of(
@@ -206,11 +206,11 @@ public class RandomWalkWithRestarts {
         for (long nodeId = 0; nodeId < sampledNodes.nodeCount(); nodeId++) {
 
             compositeIterator.forEachRelationship(
-                inputGraph.toMappedNodeId(sampledNodes.toOriginalNodeId(nodeId)),
+                inputNodes.toMappedNodeId(sampledNodes.toOriginalNodeId(nodeId)),
                 (source, target, properties) -> {
-                    var neoTarget = inputGraph.toOriginalNodeId(target);
+                    var neoTarget = inputNodes.toOriginalNodeId(target);
                     var mappedTarget = sampledNodes.toMappedNodeId(neoTarget);
-                    var neoSource = inputGraph.toOriginalNodeId(source);
+                    var neoSource = inputNodes.toOriginalNodeId(source);
 
                     if (mappedTarget != NOT_FOUND) {
 

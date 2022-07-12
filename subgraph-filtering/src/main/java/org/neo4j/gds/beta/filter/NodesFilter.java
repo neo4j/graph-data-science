@@ -114,7 +114,7 @@ public final class NodesFilter {
             .build();
     }
 
-    private static NodePropertyStore filterNodeProperties(
+    public static NodePropertyStore filterNodeProperties(
         GraphStore inputGraphStore,
         IdMap filteredIdMap,
         int concurrency,
