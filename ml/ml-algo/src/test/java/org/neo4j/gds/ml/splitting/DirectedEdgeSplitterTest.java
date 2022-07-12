@@ -54,7 +54,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void split() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -89,7 +89,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 2.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 2.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -137,7 +137,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -162,7 +162,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -175,7 +175,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
@@ -183,7 +183,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void shouldPreserveRelationshipWeights() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
         EdgeSplitter.SplitResult split = splitter.split(graph, 0.01);
         var maybeProp = split.remainingRels().properties();
         assertThat(maybeProp).isPresent();

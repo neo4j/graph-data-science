@@ -19,14 +19,20 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.LongAdder;
 
 
 /**
@@ -39,8 +45,8 @@ import java.util.Optional;
  */
 public class UndirectedEdgeSplitter extends EdgeSplitter {
 
-    public UndirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
-        super(maybeSeed, negativeSamplingRatio);
+    public UndirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, int concurrency) {
+        super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
     @TestOnly
@@ -62,6 +68,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             throw new IllegalArgumentException("EdgeSplitter requires master graph to be UNDIRECTED");
         }
 
+        var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
+        var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
+        LongLongPredicate isValidNodePair = (s, t) -> sourceNodesWithRequiredNodeLabels.contains(s) && targetNodesWithRequiredNodeLabels.contains(t);
+
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
         RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
@@ -71,11 +81,28 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
-        var positiveSamples = (long) (graph.relationshipCount() * holdoutFraction) / 2;
+        LongAdder validRelationshipCountAdder = new LongAdder();
+        var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partition -> (Runnable)()->{
+            var concurrentGraph = graph.concurrentCopy();
+            partition.consume(nodeId -> {
+                if (sourceNodesWithRequiredNodeLabels.contains(nodeId)) {
+                    concurrentGraph.forEachRelationship(nodeId, (s, t) ->{
+                        if (targetNodesWithRequiredNodeLabels.contains(t)) validRelationshipCountAdder.increment();
+                        return true;
+                    });
+                }
+            });
+        }, Optional.empty());
+
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
+
+        var validRelationshipCount = validRelationshipCountAdder.longValue();
+
+        var positiveSamples = (long) (validRelationshipCount * holdoutFraction) / 2;
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
-        var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction) / 2;
+        var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction) / 2;
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
-        var edgesRemaining = new MutableLong(graph.relationshipCount());
+        var edgesRemaining = new MutableLong(validRelationshipCount);
 
         graph.forEachNode(nodeId -> {
             positiveSampling(
@@ -84,7 +111,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 remainingRelsConsumer,
                 positiveSamplesRemaining,
                 edgesRemaining,
-                nodeId
+                nodeId,
+                isValidNodePair
             );
 
             negativeSampling(
@@ -106,13 +134,14 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         RelationshipWithPropertyConsumer remainingRelsConsumer,
         MutableLong positiveSamplesRemaining,
         MutableLong edgesRemaining,
-        long nodeId
+        long nodeId,
+        LongLongPredicate isValidNodePair
     ) {
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
             if (source == target) {
                 edgesRemaining.decrementAndGet();
             }
-            if (source < target) {
+            if (source < target && (isValidNodePair.apply(source, target) || isValidNodePair.apply(target, source))) {
                 // we handle also reverse edge here
                 // the effect of self-loops are disregarded
                 if (sample(2 * positiveSamplesRemaining.doubleValue() / edgesRemaining.doubleValue())) {

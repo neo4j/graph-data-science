@@ -58,7 +58,7 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
                 Optional.empty()
             );
         }
-        return new SplitRelationships(graph, masterGraph, configuration);
+        return new SplitRelationships(graph, masterGraph, configuration, configuration.internalSourceLabels(graphStore), configuration.internalTargetLabels(graphStore));
     }
 
     @Override

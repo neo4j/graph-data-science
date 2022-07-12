@@ -21,17 +21,19 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
+import java.util.Collection;
 import java.util.Optional;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
 
-    public DirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio) {
-        super(maybeSeed, negativeSamplingRatio);
+    public DirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, int concurrency) {
+        super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
     @TestOnly

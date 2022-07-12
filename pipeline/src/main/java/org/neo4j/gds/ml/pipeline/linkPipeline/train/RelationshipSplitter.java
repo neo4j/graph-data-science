@@ -103,7 +103,7 @@ public class RelationshipSplitter {
 
         var graph = graphStore.getGraph(nodeLabels, splitConfig.internalRelationshipTypes(graphStore), Optional.ofNullable(splitConfig.relationshipWeightProperty()));
 
-        var splitAlgo = new SplitRelationships(graph, graph, splitConfig);
+        var splitAlgo = new SplitRelationships(graph, graph, splitConfig, splitConfig.internalSourceLabels(graphStore), splitConfig.internalTargetLabels(graphStore));
         splitAlgo.setTerminationFlag(terminationFlag);
 
         EdgeSplitter.SplitResult result = splitAlgo.compute();

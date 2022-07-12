@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
@@ -35,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -50,14 +52,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
-    static String gdl = "(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)";
+    static String gdl = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A)";
 
     @Inject
     TestGraph graph;
 
     @Test
     void split() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -88,7 +90,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 2.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 2.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -131,7 +133,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1, huuuuugeDenseGraph.availableNodeLabels(), huuuuugeDenseGraph.availableNodeLabels(), 4);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -167,8 +169,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(Optional.of(12L), 1).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(Optional.of(12L), 1).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(Optional.of(12L), 1, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(Optional.of(12L), 1, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -197,8 +199,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty(), 1.0).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty(), 1.0).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty(), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty(), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -216,7 +218,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -227,9 +229,47 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(1000, sum);
     }
 
+    //    static String gdl = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A)";
+    //A-T-B
+    //B-T-A
+    //A-T-A
+    @Test
+    void splitWithFiltering() {
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 2.0, List.of(NodeLabel.of("A")), List.of(NodeLabel.of("A")), 4);
+        //Only want A-T-A
+
+        // select 20%, which is 1 (undirected) rels in this graph
+        var result = splitter.split(graph, .2);
+
+        var remainingRels = result.remainingRels();
+        // 1 positive selected reduces remaining
+        assertEquals(8L, remainingRels.topology().elementCount());
+        assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isNotEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            // it selected 2,5 (neg), 4,2 (neg) and 3,2 (pos) relationships
+            assertEquals(3L, topology.elementCount());
+            assertRelExists(topology, graph.toMappedNodeId("n3"), graph.toMappedNodeId("n2"));
+            assertRelExists(topology, graph.toMappedNodeId("n3"), graph.toMappedNodeId("n6"));
+            assertRelExists(topology, graph.toMappedNodeId("n5"), graph.toMappedNodeId("n3"));
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
+            assertEquals(3L, p.elementCount());
+            assertRelProperties(p, graph.toMappedNodeId("n4"), POSITIVE);
+            assertRelProperties(p, graph.toMappedNodeId("n3"), NEGATIVE);
+            assertRelProperties(p, graph.toMappedNodeId("n5"), NEGATIVE);
+        });
+
+    }
+
     @Test
     void samplesWithinBounds() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
@@ -237,7 +277,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void shouldPreserveRelationshipWeights() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
         EdgeSplitter.SplitResult split = splitter.split(graph, 0.01);
         var maybeProp = split.remainingRels().properties();
         assertThat(maybeProp).isPresent();

@@ -20,11 +20,14 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
+import java.util.Collection;
 
 public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
 
@@ -32,11 +35,17 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
     private final Graph masterGraph;
     private final SplitRelationshipsBaseConfig config;
 
-    public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsBaseConfig config) {
+    private final Collection<NodeLabel> sourceLabels;
+
+    private final Collection<NodeLabel> targetLabels;
+
+    public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsBaseConfig config, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.config = config;
+        this.sourceLabels = sourceLabels;
+        this.targetLabels = targetLabels;
     }
 
     public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
@@ -65,8 +74,8 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
     @Override
     public EdgeSplitter.SplitResult compute() {
         var splitter = graph.isUndirected()
-            ? new UndirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio())
-            : new DirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio());
+            ? new UndirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio(), sourceLabels, targetLabels, config.concurrency())
+            : new DirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio(), sourceLabels, targetLabels, config.concurrency());
         return splitter.split(graph, masterGraph, config.holdoutFraction());
     }
 
