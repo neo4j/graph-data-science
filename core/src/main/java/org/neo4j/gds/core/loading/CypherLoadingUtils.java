@@ -20,6 +20,8 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.graphdb.Result;
+import org.neo4j.kernel.impl.query.QueryExecution;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
 
 import java.util.NoSuchElementException;
 
@@ -30,6 +32,18 @@ final class CypherLoadingUtils {
             return row.get(propertyName);
         } catch (IllegalArgumentException | NoSuchElementException e) {
             return null;
+        }
+    }
+
+    public static void consume(QueryExecution execution) {
+        try {
+            execution.consumeAll();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 

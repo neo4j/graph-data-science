@@ -27,7 +27,7 @@ import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Map;
 import java.util.Set;
@@ -56,14 +56,14 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
     }
 
     @Override
-    BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+    BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
         progressTracker.beginSubTask("Nodes");
         progressTracker.setVolume(nodeCount);
-        var queryResult = runLoadingQuery(tx);
 
-        var propertyColumns = getPropertyColumns(queryResult);
-
-        var hasLabelInformation = queryResult.columns().contains(NodeRowVisitor.LABELS_COLUMN);
+        var nodeSubscriber = new NodeSubscriber(progressTracker);
+        var subscription = runLoadingQuery(tx, nodeSubscriber);
+        var propertyColumns = getPropertyColumns(subscription);
+        var hasLabelInformation = columnsContains(subscription, NodeSubscriber.LABELS_COLUMN);
 
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .nodeCount(nodeCount)
@@ -72,25 +72,22 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
             .hasProperties(!propertyColumns.isEmpty())
             .build();
 
-        var visitor = new NodeRowVisitor(
-            nodesBuilder,
-            propertyColumns,
-            hasLabelInformation,
-            progressTracker
-        );
-
-        queryResult.accept(visitor);
-
-        if (visitor.error().isPresent()) {
-            nodesBuilder.close(visitor.error().get());
+        nodeSubscriber.initialize(subscription.fieldNames(), this.nodesBuilder);
+        try {
+            CypherLoadingUtils.consume(subscription);
+        } catch (RuntimeException e) {
+            nodesBuilder.close(e);
+        }
+        if (nodeSubscriber.error().isPresent()) {
+            nodesBuilder.close(nodeSubscriber.error().get());
         }
 
-        long rows = visitor.rows();
+        long rows = nodeSubscriber.rows();
         if (rows == 0) {
             nodesBuilder.close(new IllegalArgumentException("Node-Query returned no nodes"));
         }
         progressTracker.endSubTask("Nodes");
-        return new BatchLoadResult(rows, visitor.maxId());
+        return new BatchLoadResult(rows, nodeSubscriber.maxId());
     }
 
     @Override
@@ -112,12 +109,12 @@ class CypherNodeLoader extends CypherRecordLoader<IdMapAndProperties> {
 
     @Override
     Set<String> getMandatoryColumns() {
-        return NodeRowVisitor.REQUIRED_COLUMNS;
+        return NodeSubscriber.REQUIRED_COLUMNS;
     }
 
     @Override
     Set<String> getReservedColumns() {
-        return NodeRowVisitor.RESERVED_COLUMNS;
+        return NodeSubscriber.RESERVED_COLUMNS;
     }
 
     @Override

@@ -37,10 +37,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,19 +103,14 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
     }
 
     @Override
-    BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
+    BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
         progressTracker.beginSubTask("Relationships");
-        Result queryResult = runLoadingQuery(tx);
 
-        List<String> allColumns = queryResult.columns();
+        var subscriber = new RelationshipSubscriber(idMap, loaderContext, cypherConfig.validateRelationships(), progressTracker);
+        var subscription = runLoadingQuery(tx, subscriber);
 
-        // If the user specifies property mappings, we use those.
-        // Otherwise, we create new property mappings from the result columns.
-        // We do that only once, as each batch has the same columns.
-        Collection<String> propertyColumns = getPropertyColumns(queryResult);
         if (!initializedFromResult) {
-
-            List<PropertyMapping> propertyMappings = propertyColumns
+            List<PropertyMapping> propertyMappings = getPropertyColumns(subscription)
                 .stream()
                 .map(propertyColumn -> PropertyMapping.of(
                     propertyColumn,
@@ -131,27 +124,10 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
 
             initializedFromResult = true;
         }
-
-        boolean isAnyRelTypeQuery = !allColumns.contains(RelationshipRowVisitor.TYPE_COLUMN);
-
-        if (isAnyRelTypeQuery) {
-            loaderContext.getOrCreateRelationshipsBuilder(RelationshipType.ALL_RELATIONSHIPS);
-        }
-
-        var visitor = new RelationshipRowVisitor(
-            idMap,
-            loaderContext,
-            propertyKeyIdsByName,
-            propertyDefaultValueByName,
-            isAnyRelTypeQuery,
-            cypherConfig.validateRelationships(),
-            progressTracker
-        );
-
-        queryResult.accept(visitor);
-
+        subscriber.initialize(subscription.fieldNames(), propertyDefaultValueByName);
+        CypherLoadingUtils.consume(subscription);
         progressTracker.endSubTask("Relationships");
-        return new BatchLoadResult(visitor.rows(), -1L);
+        return new BatchLoadResult(subscriber.rows(), -1L);
     }
 
     @Override
@@ -172,12 +148,12 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipsAndProper
 
     @Override
     Set<String> getMandatoryColumns() {
-        return RelationshipRowVisitor.REQUIRED_COLUMNS;
+        return RelationshipSubscriber.REQUIRED_COLUMNS;
     }
 
     @Override
     Set<String> getReservedColumns() {
-        return RelationshipRowVisitor.RESERVED_COLUMNS;
+        return RelationshipSubscriber.RESERVED_COLUMNS;
     }
 
     @Override

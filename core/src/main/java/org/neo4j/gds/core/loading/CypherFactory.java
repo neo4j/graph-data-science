@@ -137,17 +137,16 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 CypherRecordLoader.QueryType.NODE,
                 cypherConfig,
                 loadingContext
-            ).load(tx);
+            ).load(ktx.internalTransaction());
 
             progressTracker.beginSubTask("Loading");
-
             var idMapAndProperties = new CypherNodeLoader(
                 nodeQuery(),
                 nodeCount.rows(),
                 cypherConfig,
                 loadingContext,
                 progressTracker
-            ).load(tx);
+            ).load(ktx.internalTransaction());
 
             var relationshipsAndProperties = new CypherRelationshipLoader(
                 relationshipQuery(),
@@ -155,7 +154,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
                 cypherConfig,
                 loadingContext,
                 progressTracker
-            ).load(tx);
+            ).load(ktx.internalTransaction());
 
             var graphStore = createGraphStore(
                 idMapAndProperties,
@@ -214,7 +213,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         if (nodeEstimation == null) {
             nodeEstimation = runEstimationQuery(
                 nodeQuery(),
-                NodeRowVisitor.RESERVED_COLUMNS
+                NodeSubscriber.RESERVED_COLUMNS
             );
         }
         return nodeEstimation;
@@ -224,7 +223,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
         if (relationshipEstimation == null) {
             relationshipEstimation = runEstimationQuery(
                 relationshipQuery(),
-                RelationshipRowVisitor.RESERVED_COLUMNS
+                RelationshipSubscriber.RESERVED_COLUMNS
             );
         }
         return relationshipEstimation;

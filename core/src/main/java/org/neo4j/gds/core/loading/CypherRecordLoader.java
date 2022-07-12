@@ -20,15 +20,19 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.graphdb.Result;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.query.QueryExecution;
+import org.neo4j.kernel.impl.query.QueryExecutionEngine;
+import org.neo4j.kernel.impl.query.QuerySubscriber;
+import org.neo4j.kernel.impl.query.TransactionalContextFactory;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -38,6 +42,7 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingT
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 abstract class CypherRecordLoader<R> {
+
 
     enum QueryType {
         NODE, RELATIONSHIP;
@@ -54,6 +59,8 @@ abstract class CypherRecordLoader<R> {
 
     private final long recordCount;
     private final String loadQuery;
+    private final QueryExecutionEngine executionEngine;
+    private final TransactionalContextFactory contextFactory;
 
     CypherRecordLoader(
         String loadQuery,
@@ -65,9 +72,11 @@ abstract class CypherRecordLoader<R> {
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
         this.loadingContext = loadingContext;
+        this.executionEngine =  GraphDatabaseApiProxy.executionEngine(loadingContext.api());
+        this.contextFactory = GraphDatabaseApiProxy.contextFactory(loadingContext.api());
     }
 
-    final R load(Transaction transaction) {
+    final R load(InternalTransaction transaction) {
         try {
             int bufferSize = (int) Math.min(recordCount, RecordsBatchBuffer.DEFAULT_BUFFER_SIZE);
             BatchLoadResult result = loadSingleBatch(transaction, bufferSize);
@@ -81,7 +90,7 @@ abstract class CypherRecordLoader<R> {
     abstract QueryType queryType();
 
     abstract BatchLoadResult loadSingleBatch(
-        Transaction tx,
+        InternalTransaction tx,
         int bufferSize
     );
 
@@ -93,18 +102,32 @@ abstract class CypherRecordLoader<R> {
 
     abstract Set<String> getReservedColumns();
 
-    Collection<String> getPropertyColumns(Result queryResult) {
+    Collection<String> getPropertyColumns(QueryExecution queryResult) {
         Predicate<String> contains = getReservedColumns()::contains;
-        return queryResult
-            .columns()
-            .stream()
+        return Arrays.stream(queryResult.fieldNames())
             .filter(contains.negate())
             .collect(Collectors.toList());
     }
 
-    Result runLoadingQuery(Transaction tx) {
-        Result result = runQueryWithoutClosingTheResult(tx, loadQuery, cypherConfig.parameters());
-        validateMandatoryColumns(List.copyOf(result.columns()));
+    boolean columnsContains(QueryExecution queryResult, String name) {
+        for (String fieldName : queryResult.fieldNames()) {
+            if (fieldName.equals(name)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    QueryExecution runLoadingQuery(InternalTransaction tx, QuerySubscriber subscriber) {
+        var result = runQueryWithoutClosingTheResult(
+            tx,
+            loadQuery,
+            cypherConfig.parameters(),
+            contextFactory,
+            executionEngine,
+            subscriber
+        );
+        validateMandatoryColumns(Arrays.asList(result.fieldNames()));
         return result;
     }
 

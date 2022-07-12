@@ -21,7 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Set;
 
@@ -42,10 +42,10 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     }
 
     @Override
-    BatchLoadResult loadSingleBatch(Transaction tx, int bufferSize) {
-        ResultCountingVisitor visitor = new ResultCountingVisitor();
-        runLoadingQuery(tx).accept(visitor);
-        return new BatchLoadResult(visitor.rows(), -1L);
+    BatchLoadResult loadSingleBatch(InternalTransaction tx, int bufferSize) {
+        var subscriber = new ResultCountingSubscriber();
+        CypherLoadingUtils.consume(runLoadingQuery(tx, subscriber));
+        return new BatchLoadResult(subscriber.rows(), -1L);
     }
 
     @Override
@@ -61,15 +61,15 @@ class CountingCypherRecordLoader extends CypherRecordLoader<BatchLoadResult> {
     @Override
     Set<String> getMandatoryColumns() {
         return queryType == QueryType.NODE
-            ? NodeRowVisitor.REQUIRED_COLUMNS
-            : RelationshipRowVisitor.REQUIRED_COLUMNS;
+            ? NodeSubscriber.REQUIRED_COLUMNS
+            : RelationshipSubscriber.REQUIRED_COLUMNS;
     }
 
     @Override
     Set<String> getReservedColumns() {
         return queryType == QueryType.NODE
-            ? NodeRowVisitor.RESERVED_COLUMNS
-            : RelationshipRowVisitor.RESERVED_COLUMNS;
+            ? NodeSubscriber.RESERVED_COLUMNS
+            : RelationshipSubscriber.RESERVED_COLUMNS;
     }
 
     @Override
