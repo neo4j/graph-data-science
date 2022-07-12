@@ -198,14 +198,17 @@ public class Kmeans extends Algorithm<KmeansResult> {
             while (true) {
                 long numberOfSwaps = 0;
                 //assign each node to a centroid
-                RunWithConcurrency.builder()
-                    .concurrency(concurrency)
-                    .tasks(tasks)
-                    .executor(executorService)
-                    .run();
 
-                for (KmeansTask task : tasks) {
-                    numberOfSwaps += task.getSwaps();
+                if (samplerType != KmeansSampler.SamplerType.KMEANSPP || iteration > 0) {
+                    RunWithConcurrency.builder()
+                        .concurrency(concurrency)
+                        .tasks(tasks)
+                        .executor(executorService)
+                        .run();
+
+                    for (KmeansTask task : tasks) {
+                        numberOfSwaps += task.getSwaps();
+                    }
                 }
                 recomputeCentroids(clusterManager, tasks);
 
