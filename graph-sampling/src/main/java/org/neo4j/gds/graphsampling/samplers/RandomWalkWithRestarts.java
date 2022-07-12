@@ -32,15 +32,13 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.properties.nodes.NodeProperty;
-import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.values.storable.NumberType;
 
@@ -76,7 +74,7 @@ public class RandomWalkWithRestarts {
 
         IdMap sampledNodes = sampleNodes(inputGraph, rng);
 
-        var nodePropertyStore = filterNodeProperties(sampledNodes);
+        var nodePropertyStore = NodesFilter.filterNodeProperties(inputGraphStore, sampledNodes, config.concurrency(), ProgressTracker.NULL_TRACKER);
 
         Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
         Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
@@ -129,40 +127,6 @@ public class RandomWalkWithRestarts {
         }
         var idMapAndProperties = nodesBuilder.build();
         return idMapAndProperties.idMap();
-    }
-
-    private NodePropertyStore filterNodeProperties(IdMap sampledNodes) {
-        IdMap inputNodes = inputGraphStore.nodes();
-        var builder = NodePropertyStore.builder();
-
-        inputGraphStore.nodePropertyKeys().forEach(propertyKey -> {
-            var nodeProperty = inputGraphStore.nodeProperty(propertyKey);
-
-            NodesFilter.NodePropertiesBuilder<?> nodePropertiesBuilder = NodesFilter.getPropertiesBuilder(
-                inputNodes,
-                nodeProperty.values(),
-                config.concurrency()
-            );
-
-            ParallelUtil.parallelForEachNode(
-                sampledNodes.nodeCount(),
-                config.concurrency(),
-                filteredNode -> {
-                    var inputNode = inputNodes.toMappedNodeId(sampledNodes.toOriginalNodeId(filteredNode));
-                    nodePropertiesBuilder.accept(inputNode, filteredNode);
-                }
-            );
-
-            builder.putProperty(
-                propertyKey,
-                NodeProperty.of(
-                    propertyKey,
-                    nodeProperty.propertyState(),
-                    nodePropertiesBuilder.build(sampledNodes.nodeCount(), sampledNodes)
-                )
-            );
-        });
-        return builder.build();
     }
 
     private void filterRelationshipsAndProperties(
