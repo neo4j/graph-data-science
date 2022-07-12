@@ -65,7 +65,7 @@ public abstract class KmeansSampler {
     ) {
         if (samplerType == SamplerType.UNIFORM) {
             return new KmeansUniformSampler(random, clusterManager, nodeCount, k);
-        } else
+        } else {
             return new KmeansPlusPlusSampler(
                 random,
                 clusterManager,
@@ -77,6 +77,7 @@ public abstract class KmeansSampler {
                 executorService,
                 tasks
             );
+        }
     }
 
 

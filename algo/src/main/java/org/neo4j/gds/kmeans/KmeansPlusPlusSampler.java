@@ -116,6 +116,9 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
             .executor(executorService)
             .run();
 
+        for (KmeansTask task : tasks) {
+            task.switchToPhase(TaskPhase.ITERATION);
+        }
 
     }
 }

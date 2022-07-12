@@ -59,6 +59,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private HugeDoubleArray silhouette;
 
+    private final KmeansSampler.SamplerType samplerType;
+
     private double averageSilhouette;
 
 
@@ -76,6 +78,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             config.deltaThreshold(),
             nodeProperties,
             config.computeSilhouette(),
+            config.initialSampler(),
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -92,6 +95,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         double deltaThreshold,
         NodePropertyValues nodePropertyValues,
         boolean computeSilhouette,
+        KmeansSampler.SamplerType initialSampler,
         SplittableRandom random
     ) {
         super(progressTracker);
@@ -111,6 +115,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.maximumNumberOfRestarts = maximumNumberOfRestarts;
         this.distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         this.computeSilhouette = computeSilhouette;
+        this.samplerType = initialSampler;
     }
 
     @Override
@@ -154,6 +159,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 concurrency,
                 nodeCount,
                 partition -> KmeansTask.createTask(
+                    samplerType,
                     clusterManager,
                     nodePropertyValues,
                     currentCommunities,
@@ -168,7 +174,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             int numberOfTasks = tasks.size();
 
             KmeansSampler sampler = KmeansSampler.createSampler(
-                KmeansSampler.SamplerType.UNIFORM,
+                samplerType,
                 random,
                 nodePropertyValues,
                 clusterManager,
@@ -208,7 +214,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 }
             }
             for (KmeansTask task : tasks) {
-                task.switchToDistanceCalculation();
+                task.switchToPhase(TaskPhase.DISTANCE);
             }
             RunWithConcurrency.builder()
                 .concurrency(concurrency)

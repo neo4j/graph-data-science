@@ -61,6 +61,7 @@ public abstract class KmeansTask implements Runnable {
     abstract void updateAfterAssignmentToCentroid(long nodeId, int community);
 
     KmeansTask(
+        KmeansSampler.SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
@@ -79,11 +80,16 @@ public abstract class KmeansTask implements Runnable {
         this.partition = partition;
         this.progressTracker = progressTracker;
         this.communitySizes = new long[k];
-        this.phase = TaskPhase.ITERATION;
+        if (samplerType == KmeansSampler.SamplerType.UNIFORM) {
+            this.phase = TaskPhase.ITERATION;
+        } else {
+            this.phase = TaskPhase.INITIAL;
+        }
         this.distance = 0d;
     }
 
     static KmeansTask createTask(
+        KmeansSampler.SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
@@ -95,6 +101,7 @@ public abstract class KmeansTask implements Runnable {
     ) {
         if (clusterManager instanceof DoubleClusterManager) {
             return new DoubleKmeansTask(
+                samplerType,
                 clusterManager,
                 nodePropertyValues,
                 communities,
@@ -106,6 +113,7 @@ public abstract class KmeansTask implements Runnable {
             );
         }
         return new FloatKmeansTask(
+            samplerType,
             clusterManager,
             nodePropertyValues,
             communities,
@@ -117,8 +125,8 @@ public abstract class KmeansTask implements Runnable {
         );
     }
 
-    void switchToDistanceCalculation() {
-        phase = TaskPhase.DISTANCE;
+    void switchToPhase(TaskPhase newPhase) {
+        phase = newPhase;
     }
 
     private void assignNodeToCentroids(long startNode, long endNode) {
@@ -213,6 +221,7 @@ final class DoubleKmeansTask extends KmeansTask {
     private final double[][] communityCoordinateSums;
 
     DoubleKmeansTask(
+        KmeansSampler.SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
@@ -223,6 +232,7 @@ final class DoubleKmeansTask extends KmeansTask {
         ProgressTracker progressTracker
     ) {
         super(
+            samplerType,
             clusterManager,
             nodePropertyValues,
             communities,
@@ -264,6 +274,7 @@ final class FloatKmeansTask extends KmeansTask {
     private final float[][] communityCoordinateSums;
 
     FloatKmeansTask(
+        KmeansSampler.SamplerType samplerType,
         ClusterManager clusterManager,
         NodePropertyValues nodePropertyValues,
         HugeIntArray communities,
@@ -274,6 +285,7 @@ final class FloatKmeansTask extends KmeansTask {
         ProgressTracker progressTracker
     ) {
         super(
+            samplerType,
             clusterManager,
             nodePropertyValues,
             communities,
