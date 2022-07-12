@@ -151,21 +151,45 @@ props = G.node_properties("MyLabel")
 
 == Using a graph object
 
-The primary use case for a graph object is to pass it to algorithms.
-The syntax for doing that follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
+The primary use case for a graph object is to pass it to algorithms, but it's also the input to most methods of the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
+
+
+=== Input to algorithms
+
+The Python client syntax for using a `Graph` as input to an algorithm follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
 
 include::partial$/pythonclient/python-client-syntax.adoc[]
 
-For example, to run the WCC on a graph `G`, and then drop the graph, do the following:
+
+=== The graph catalog
+
+All procedures of the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog] have corresponding Python methods in the client.
+Of those catalog procedures that take a graph name string as input, their Python client equivalents instead take a `Graph` object, with the exception of `gds.graph.exists` which still takes a graph name string.
+
+Below are some examples of how the GDS Graph Catalog can be used via the client:
 
 [source,python]
 ----
 G, _ = gds.graph.project(...)
 
-res = gds.wcc.stream(G)
+res = gds.graph.streamNodeProperty(G, ...)
 
 gds.graph.drop(G)  # same as G.drop()
 ----
 
-In most Cypher operations where a graph name is required, the graph object is used in the Python client instead.
-In some cases where this does not make sense, such as for `gds.graph.exist()`, where a graph name string is used instead.
+
+==== Streaming properties
+
+The calls xref:graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[`gds.graph.streamNodeProperties`] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[`gds.graph.streamRelationshipProperties`] have additional functionality in the client.
+
+
+===== Separate columns
+
+Setting the client only optional keyword parameter `separate_property_columns=True` (it defaults to `False`) for `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` returns a pandas `DataFrame` in which each property requested has its own column.
+Note that this is different from the default behavior for which there would only be one column called `propertyValue` that contains all properties requested interleaved for each node or relationship.
+
+
+[.enterprise-edition]
+===== Arrow flight server support
+
+If the xref::installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS is enabled, the client `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` calls are greatly sped up.
