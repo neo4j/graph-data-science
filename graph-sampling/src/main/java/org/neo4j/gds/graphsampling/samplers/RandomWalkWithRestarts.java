@@ -48,7 +48,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -96,14 +95,13 @@ public class RandomWalkWithRestarts {
     }
 
     private IdMap sampleNodes(Graph inputGraph, Random rng) {
-        var sampledNodes = new AtomicLong();
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
             .maxOriginalId(inputGraph.highestNeoId())
             .hasProperties(false)
             .hasLabelInformation(hasLabelInformation)
-            .deduplicateIds(true)
+            .deduplicateIds(false)
             .build();
 
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
@@ -111,18 +109,19 @@ public class RandomWalkWithRestarts {
         var currentNode = new MutableLong(startNode);
         // must keep track of this because nodesBuilder may not have flushed its buffer, so importedNodes cannot be used atm
         var seen = HugeAtomicBitSet.create(inputGraph.nodeCount());
-        while (sampledNodes.get() < expectedNodes) {
-            long originalId = inputGraph.toOriginalNodeId(currentNode.getValue());
-            if (hasLabelInformation) {
-                var nodeLabelList = inputGraph.nodeLabels(currentNode.getValue());
-                var nodeLabels = new NodeLabel[nodeLabelList.size()];
-                nodeLabelList.toArray(nodeLabels);
-                nodesBuilder.addNode(originalId, nodeLabels);
-            } else {
-                nodesBuilder.addNode(originalId);
+        while (seen.cardinality() < expectedNodes) {
+            if (!seen.get(currentNode.getValue())) {
+                long originalId = inputGraph.toOriginalNodeId(currentNode.getValue());
+                if (hasLabelInformation) {
+                    var nodeLabelList = inputGraph.nodeLabels(currentNode.getValue());
+                    var nodeLabels = new NodeLabel[nodeLabelList.size()];
+                    nodeLabelList.toArray(nodeLabels);
+                    nodesBuilder.addNode(originalId, nodeLabels);
+                } else {
+                    nodesBuilder.addNode(originalId);
+                }
+                seen.set(currentNode.getValue());
             }
-            seen.set(currentNode.getValue());
-            sampledNodes.set(seen.cardinality());
             walk(currentNode, startNode, inputGraph, rng);
         }
         var idMapAndProperties = nodesBuilder.build();
