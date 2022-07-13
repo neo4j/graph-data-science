@@ -51,17 +51,17 @@ import java.util.stream.IntStream;
 
 import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
-final class RelationshipsFilter {
+public final class RelationshipsFilter {
 
     @ValueClass
-    interface FilteredRelationships {
+    public interface FilteredRelationships {
 
         Map<RelationshipType, Relationships.Topology> topology();
 
         Map<RelationshipType, RelationshipPropertyStore> propertyStores();
     }
 
-    static FilteredRelationships filterRelationships(
+    public static FilteredRelationships filterRelationships(
         GraphStore graphStore,
         Expression expression,
         IdMap inputNodes,
@@ -108,7 +108,7 @@ final class RelationshipsFilter {
                         NumberType.FLOATING_POINT,
                         PropertyState.PERSISTENT,
                         properties,
-                        DefaultValue.forDouble(),
+                        DefaultValue.of(properties.defaultPropertyValue()),
                         Aggregation.NONE
                     )
                 );
@@ -127,7 +127,7 @@ final class RelationshipsFilter {
     }
 
     @ValueClass
-    interface FilteredRelationship {
+    public interface FilteredRelationship {
         RelationshipType relationshipType();
 
         Relationships.Topology topology();
@@ -135,7 +135,7 @@ final class RelationshipsFilter {
         Map<String, Relationships.Properties> properties();
     }
 
-    private static FilteredRelationship filterRelationshipType(
+    static FilteredRelationship filterRelationshipType(
         GraphStore graphStore,
         Expression relationshipExpr,
         IdMap inputNodes,
@@ -150,7 +150,7 @@ final class RelationshipsFilter {
 
         var propertyConfigs = propertyKeys
             .stream()
-            .map(key -> GraphFactory.PropertyConfig.of(Aggregation.NONE, DefaultValue.forDouble()))
+            .map(key -> GraphFactory.PropertyConfig.of(Aggregation.NONE, graphStore.relationshipPropertyValues(relType, key).defaultValue()))
             .collect(Collectors.toList());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()

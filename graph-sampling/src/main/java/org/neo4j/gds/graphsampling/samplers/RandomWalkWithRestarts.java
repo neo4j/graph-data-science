@@ -19,39 +19,30 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import org.apache.commons.lang3.mutable.MutableInt;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
-import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.RelationshipProperty;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Relationships;
-import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.beta.filter.GraphStoreFilter;
+import org.neo4j.gds.beta.filter.ImmutableFilteredNodes;
 import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.beta.filter.RelationshipsFilter;
+import org.neo4j.gds.beta.filter.expression.EvaluationContext;
+import org.neo4j.gds.beta.filter.expression.Expression;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
-import org.neo4j.values.storable.NumberType;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
 public class RandomWalkWithRestarts {
     private final RandomWalkWithRestartsConfig config;
@@ -73,13 +64,41 @@ public class RandomWalkWithRestarts {
 
         IdMap sampledNodes = sampleNodes(inputGraph, rng);
 
-        var nodePropertyStore = NodesFilter.filterNodeProperties(inputGraphStore, sampledNodes, config.concurrency(), ProgressTracker.NULL_TRACKER);
+        var nodePropertyStore = NodesFilter.filterNodeProperties(
+            inputGraphStore,
+            sampledNodes,
+            config.concurrency(),
+            ProgressTracker.NULL_TRACKER
+        );
 
-        Map<RelationshipType, Relationships.Topology> topologies = new HashMap<>();
-        Map<RelationshipType, RelationshipPropertyStore> relPropertyStores = new HashMap<>();
-        filterRelationshipsAndProperties(sampledNodes, topologies, relPropertyStores);
+        var relTypeFilterExpression = new Expression() {
+            private final List<String> types = config
+                .internalRelationshipTypes(inputGraphStore)
+                .stream()
+                .map(RelationshipType::name)
+                .collect(Collectors.toList());
 
-        var filteredSchema = filterSchema(sampledNodes, topologies);
+            @Override
+            public double evaluate(EvaluationContext context) {
+                return context.hasLabelsOrTypes(types) ? Expression.TRUE : Expression.FALSE;
+            }
+        };
+        var filteredRelationships = RelationshipsFilter.filterRelationships(
+            inputGraphStore,
+            relTypeFilterExpression,
+            inputGraphStore.nodes(),
+            sampledNodes,
+            config.concurrency(),
+            Map.of(),
+            Pools.DEFAULT,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var filteredSchema = GraphStoreFilter.filterSchema(
+            inputGraphStore.schema(),
+            ImmutableFilteredNodes.of(sampledNodes, nodePropertyStore),
+            filteredRelationships
+        );
 
         return new GraphStoreBuilder()
             .databaseId(inputGraphStore.databaseId())
@@ -87,8 +106,8 @@ public class RandomWalkWithRestarts {
             .schema(filteredSchema)
             .nodes(sampledNodes)
             .nodePropertyStore(nodePropertyStore)
-            .relationships(topologies)
-            .relationshipPropertyStores(relPropertyStores)
+            .relationships(filteredRelationships.topology())
+            .relationshipPropertyStores(filteredRelationships.propertyStores())
             .concurrency(config.concurrency())
             .build();
 
@@ -126,110 +145,6 @@ public class RandomWalkWithRestarts {
         }
         var idMapAndProperties = nodesBuilder.build();
         return idMapAndProperties.idMap();
-    }
-
-    // taken/inspired from FilterRelationships::filterRelationships
-    private void filterRelationshipsAndProperties(
-        IdMap sampledNodes,
-        Map<RelationshipType, Relationships.Topology> topologies,
-        Map<RelationshipType, RelationshipPropertyStore> relPropertyStores
-    ) {
-        for (RelationshipType relType : config.internalRelationshipTypes(inputGraphStore)) {
-            var relPropertyKeys = new ArrayList<>(inputGraphStore.relationshipPropertyKeys(relType));
-            var relationships = filterRelationshipType(sampledNodes, relType, relPropertyKeys);
-            var topology = relationships.get(0).topology();
-            if (topology.elementCount() > 0) {
-                topologies.put(relType, topology);
-                relPropertyStores.put(relType, relationshipPropertyStore(relPropertyKeys, relationships));
-            }
-        }
-    }
-
-    // taken/inspired from RelationshipsFilter::filterRelationshipType
-    private List<Relationships> filterRelationshipType(
-        IdMap sampledNodes,
-        RelationshipType relType,
-        ArrayList<String> relPropertyKeys
-    ) {
-        IdMap inputNodes = inputGraphStore.nodes();
-        var propertyConfigs = relPropertyKeys
-            .stream()
-            .map(key -> GraphFactory.PropertyConfig.of(
-                Aggregation.NONE,
-                inputGraphStore.relationshipPropertyValues(relType, key).defaultValue()
-            ))
-            .collect(Collectors.toList());
-
-        var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-            .nodes(sampledNodes)
-            .concurrency(config.concurrency())
-            .addAllPropertyConfigs(propertyConfigs)
-            .build();
-
-        var compositeIterator = inputGraphStore.getCompositeRelationshipIterator(relType, relPropertyKeys);
-
-        for (long nodeId = 0; nodeId < sampledNodes.nodeCount(); nodeId++) {
-
-            compositeIterator.forEachRelationship(
-                inputNodes.toMappedNodeId(sampledNodes.toOriginalNodeId(nodeId)),
-                (source, target, properties) -> {
-                    var neoTarget = inputNodes.toOriginalNodeId(target);
-                    var mappedTarget = sampledNodes.toMappedNodeId(neoTarget);
-                    var neoSource = inputNodes.toOriginalNodeId(source);
-
-                    if (mappedTarget != NOT_FOUND) {
-
-                        if (properties.length == 0) {
-                            relationshipsBuilder.add(neoSource, neoTarget);
-                        } else if (properties.length == 1) {
-                            relationshipsBuilder.add(neoSource, neoTarget, properties[0]);
-                        } else {
-                            relationshipsBuilder.add(neoSource, neoTarget, properties);
-                        }
-                    }
-                    return true;
-                }
-            );
-        }
-
-        return relationshipsBuilder.buildAll();
-    }
-
-
-    private RelationshipPropertyStore relationshipPropertyStore(
-        ArrayList<String> relPropertyKeys,
-        List<Relationships> relationships
-    ) {
-        var properties = IntStream.range(0, relPropertyKeys.size())
-            .boxed()
-            .collect(Collectors.toMap(
-                relPropertyKeys::get,
-                idx -> relationships.get(idx).properties().orElseThrow(IllegalStateException::new)
-            ));
-
-        var propertyStoreBuilder = RelationshipPropertyStore.builder();
-        properties.forEach((propertyKey, propertiesForKey) -> propertyStoreBuilder.putIfAbsent(
-            propertyKey,
-            RelationshipProperty.of(
-                propertyKey,
-                NumberType.FLOATING_POINT,
-                PropertyState.PERSISTENT,
-                propertiesForKey,
-                DefaultValue.of(propertiesForKey.defaultPropertyValue()),
-                Aggregation.NONE
-            )
-        ));
-
-        return propertyStoreBuilder.build();
-    }
-
-    private GraphSchema filterSchema(IdMap sampledNodes, Map<RelationshipType, Relationships.Topology> topologies) {
-        var nodeSchema = inputGraphStore.schema().nodeSchema().filter(sampledNodes.availableNodeLabels());
-        var relationshipSchema = inputGraphStore.schema()
-            .relationshipSchema()
-            .filter(topologies.keySet());
-
-        return GraphSchema.of(nodeSchema, relationshipSchema, inputGraphStore.schema().graphProperties());
     }
 
     private long walkStep(MutableLong currentNode, long startNode, Graph inputGraph, Random rng) {
