@@ -36,7 +36,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     double holdoutFraction();
 
-    @Configuration.DoubleRange(min = 0.0, minInclusive = false)
+    @Configuration.DoubleRange(min = 0.0)
     double negativeSamplingRatio();
 
     @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
