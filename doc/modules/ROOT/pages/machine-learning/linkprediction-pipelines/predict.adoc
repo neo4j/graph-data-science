@@ -26,7 +26,7 @@ If the predict and train graphs are distinct, it is also beneficial that they ha
 
 == Search strategies
 
-To predict the best links, GDS offers two different search strategies.
+To find the best possible new links, GDS offers two different search strategies.
 
 [[algorithms-link-prediction-pipelines-predict-exhaustive-search]]
 === Exhaustive Search
