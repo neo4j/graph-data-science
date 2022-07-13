@@ -19,15 +19,12 @@
  */
 package org.neo4j.gds.graphsampling.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
-@ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
@@ -35,7 +32,6 @@ public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
     Optional<Long> startNode();
     Optional<Long> randomSeed();
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
     default double restartProbability() {
         return 0.1;
@@ -44,7 +40,6 @@ public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
     /**
      * The ratio of nodes that we wish to sample.
      */
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
     default double samplingRatio() {
         return 0.15;

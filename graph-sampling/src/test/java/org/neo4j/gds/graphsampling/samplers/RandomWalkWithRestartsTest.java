@@ -28,8 +28,9 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.graphsampling.config.ImmutableRandomWalkWithRestartsConfig;
+import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +78,7 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldSampleAndFilterSchema() {
-        var config = ImmutableRandomWalkWithRestartsConfig.builder()
+        var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNode(idFunction.of("a"))
             .samplingRatio(0.5)
             .restartProbability(0.1)
@@ -88,35 +89,39 @@ class RandomWalkWithRestartsTest {
 
         var subgraph = rwr.sample();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(7);
-        assertThat(graphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M")))).usingRecursiveComparison().isEqualTo(subgraph.schema().nodeSchema());
-        assertThat(graphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1")))).usingRecursiveComparison().isEqualTo(subgraph.schema().relationshipSchema());
+        assertThat(graphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
+            .usingRecursiveComparison()
+            .isEqualTo(subgraph.schema().nodeSchema());
+        assertThat(graphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
+            .usingRecursiveComparison()
+            .isEqualTo(subgraph.schema().relationshipSchema());
         assertThat(graphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
         assertThat(graphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
 
         var expectedGraph =
-        "  (a:N {prop: 46})" +
-        ", (b:N {prop: 47})" +
-        ", (c:N {prop: 48, attr: 48})" +
-        ", (d:N {prop: 49, attr: 48})" +
-        ", (e:M {prop: 50, attr: 48})" +
-        ", (f:M {prop: 51, attr: 48})" +
-        ", (g:M {prop: 52})" +
-        ", (e)-[:R1]->(d)" +
-        ", (a)-[:R1 {distance: 5.8}]->(b)" +
-        ", (a)-[:R1 {distance: 4.8}]->(c)" +
-        ", (c)-[:R1 {distance: 5.8}]->(d)" +
-        ", (d)-[:R1 {distance: 2.6}]->(e)" +
-        ", (e)-[:R1 {distance: 5.8}]->(f)" +
-        ", (f)-[:R1 {distance: 9.9}]->(g)";
+            "  (a:N {prop: 46})" +
+            ", (b:N {prop: 47})" +
+            ", (c:N {prop: 48, attr: 48})" +
+            ", (d:N {prop: 49, attr: 48})" +
+            ", (e:M {prop: 50, attr: 48})" +
+            ", (f:M {prop: 51, attr: 48})" +
+            ", (g:M {prop: 52})" +
+            ", (e)-[:R1]->(d)" +
+            ", (a)-[:R1 {distance: 5.8}]->(b)" +
+            ", (a)-[:R1 {distance: 4.8}]->(c)" +
+            ", (c)-[:R1 {distance: 5.8}]->(d)" +
+            ", (d)-[:R1 {distance: 2.6}]->(e)" +
+            ", (e)-[:R1 {distance: 5.8}]->(f)" +
+            ", (f)-[:R1 {distance: 9.9}]->(g)";
         assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
     }
 
     @Test
     void shouldFilterGraph() {
-        var config = ImmutableRandomWalkWithRestartsConfig.builder()
+        var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNode(idFunction.of("e"))
-            .addNodeLabels("M", "X")
-            .addRelationshipType("R1")
+            .nodeLabels(List.of("M", "X"))
+            .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .randomSeed(42L)
@@ -137,9 +142,9 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldRestartOnDeadEnd() {
-        var config = ImmutableRandomWalkWithRestartsConfig.builder()
-            .addNodeLabels("Z")
-            .addRelationshipType("R1")
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .nodeLabels(List.of("Z"))
+            .relationshipTypes(List.of("R1"))
             .startNode(idFunction.of("x"))
             .samplingRatio(0.999999999)
             .restartProbability(0.0000000001)
@@ -154,7 +159,7 @@ class RandomWalkWithRestartsTest {
 
     @Test
     void shouldBeDeterministic() {
-        var config = ImmutableRandomWalkWithRestartsConfig.builder()
+        var config = RandomWalkWithRestartsConfigImpl.builder()
             .samplingRatio(0.5)
             .startNode(idFunction.of("a"))
             .restartProbability(0.1)
@@ -174,7 +179,4 @@ class RandomWalkWithRestartsTest {
                 .build())
             .isEqualTo(subgraph2);
     }
-
-    //TODO: add some kind of maxTries parameter and test that if a startnode fails to produce sufficient samples, sampling terminates (thanks to picking a new startnode)
-    //TODO: test here or in proc test that it works when there is no label information. not sure if we can test this with GDL
 }
