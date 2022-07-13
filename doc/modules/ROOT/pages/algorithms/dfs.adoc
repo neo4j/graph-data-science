@@ -49,7 +49,7 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 
 NOTE: The algorithm is single-threaded and changing the `concurrency` parameter has no effect on the runtime.
 
-include::specific-configuration.adoc
+include::partial$/algorithms/dfs/specific-configuration.adoc[]
 
 .Results
 [opts="header",cols="1,1,6"]
