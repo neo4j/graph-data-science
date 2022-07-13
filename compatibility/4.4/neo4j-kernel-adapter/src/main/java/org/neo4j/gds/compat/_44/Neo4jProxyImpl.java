@@ -283,7 +283,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
         KernelTransaction transaction,
         int labelId,
-        int batchSize
+        int batchSize,
+        boolean allowPartitionedScan
     ) {
         var read = transaction.dataRead();
         return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
