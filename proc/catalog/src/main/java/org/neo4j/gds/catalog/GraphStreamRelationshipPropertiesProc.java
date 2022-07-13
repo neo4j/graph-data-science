@@ -88,7 +88,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
     @Description("Streams the given relationship property.")
     public Stream<PropertyResult> streamRelationshipProperty(
         @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipProperties") String relationshipProperty,
+        @Name(value = "relationshipProperty") String relationshipProperty,
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
