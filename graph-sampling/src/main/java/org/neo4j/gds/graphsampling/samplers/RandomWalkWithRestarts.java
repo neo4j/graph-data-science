@@ -20,98 +20,33 @@
 package org.neo4j.gds.graphsampling.samplers;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.beta.filter.GraphStoreFilter;
-import org.neo4j.gds.beta.filter.ImmutableFilteredNodes;
-import org.neo4j.gds.beta.filter.NodesFilter;
-import org.neo4j.gds.beta.filter.RelationshipsFilter;
-import org.neo4j.gds.beta.filter.expression.EvaluationContext;
-import org.neo4j.gds.beta.filter.expression.Expression;
-import org.neo4j.gds.core.concurrency.Pools;
-import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
-public class RandomWalkWithRestarts {
-    private final RandomWalkWithRestartsConfig config;
+public class RandomWalkWithRestarts implements NodesSampler {
+
     private final GraphStore inputGraphStore;
+    private final RandomWalkWithRestartsConfig config;
 
-    public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config, GraphStore inputGraphStore) {
-        this.config = config;
+    public RandomWalkWithRestarts(
+        GraphStore inputGraphStore,
+        RandomWalkWithRestartsConfig config
+    ) {
         this.inputGraphStore = inputGraphStore;
+        this.config = config;
     }
 
-    public GraphStore sample() {
-        var inputGraph = inputGraphStore.getGraph(
-            config.nodeLabelIdentifiers(inputGraphStore),
-            config.internalRelationshipTypes(inputGraphStore),
-            Optional.empty()
-        );
+    @Override
+    public IdMap sampleNodes(Graph inputGraph) {
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
 
-        IdMap sampledNodes = sampleNodes(inputGraph, rng);
-
-        var nodePropertyStore = NodesFilter.filterNodeProperties(
-            inputGraphStore,
-            sampledNodes,
-            config.concurrency(),
-            ProgressTracker.NULL_TRACKER
-        );
-
-        var relTypeFilterExpression = new Expression() {
-            private final List<String> types = config
-                .internalRelationshipTypes(inputGraphStore)
-                .stream()
-                .map(RelationshipType::name)
-                .collect(Collectors.toList());
-
-            @Override
-            public double evaluate(EvaluationContext context) {
-                return context.hasLabelsOrTypes(types) ? Expression.TRUE : Expression.FALSE;
-            }
-        };
-        var filteredRelationships = RelationshipsFilter.filterRelationships(
-            inputGraphStore,
-            relTypeFilterExpression,
-            inputGraphStore.nodes(),
-            sampledNodes,
-            config.concurrency(),
-            Map.of(),
-            Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
-        );
-
-        var filteredSchema = GraphStoreFilter.filterSchema(
-            inputGraphStore.schema(),
-            ImmutableFilteredNodes.of(sampledNodes, nodePropertyStore),
-            filteredRelationships
-        );
-
-        return new GraphStoreBuilder()
-            .databaseId(inputGraphStore.databaseId())
-            .capabilities(inputGraphStore.capabilities())
-            .schema(filteredSchema)
-            .nodes(sampledNodes)
-            .nodePropertyStore(nodePropertyStore)
-            .relationships(filteredRelationships.topology())
-            .relationshipPropertyStores(filteredRelationships.propertyStores())
-            .concurrency(config.concurrency())
-            .build();
-    }
-
-    private IdMap sampleNodes(Graph inputGraph, SplittableRandom rng) {
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())

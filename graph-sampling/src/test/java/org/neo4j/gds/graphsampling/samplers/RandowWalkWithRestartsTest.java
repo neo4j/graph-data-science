@@ -19,28 +19,26 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.TestSupport.assertGraphEquals;
-import static org.neo4j.gds.TestSupport.fromGdl;
 
 @GdlExtension
-class RandomWalkWithRestartsTest {
+class RandowWalkWithRestartsTest {
 
-    @GdlGraph
+    @GdlGraph(idOffset = 42)
     private static final String DB_CYPHER =
         "CREATE" +
         "  (x:Z {prop: 42})" +
@@ -76,6 +74,14 @@ class RandomWalkWithRestartsTest {
     @Inject
     private IdFunction idFunction;
 
+    Graph getGraph(RandomWalkWithRestartsConfig config) {
+        return graphStore.getGraph(
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore),
+            Optional.empty()
+        );
+    }
+
     @Test
     void shouldSampleAndFilterSchema() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
@@ -85,35 +91,26 @@ class RandomWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config, graphStore);
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
 
-        var subgraph = rwr.sample();
-        assertThat(subgraph.getUnion().nodeCount()).isEqualTo(7);
-        assertThat(graphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
-            .usingRecursiveComparison()
-            .isEqualTo(subgraph.schema().nodeSchema());
-        assertThat(graphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
-            .usingRecursiveComparison()
-            .isEqualTo(subgraph.schema().relationshipSchema());
-        assertThat(graphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
-        assertThat(graphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
+        assertThat(nodes.nodeCount()).isEqualTo(7);
 
-        var expectedGraph =
-            "  (a:N {prop: 46})" +
-            ", (b:N {prop: 47})" +
-            ", (c:N {prop: 48, attr: 48})" +
-            ", (d:N {prop: 49, attr: 48})" +
-            ", (e:M {prop: 50, attr: 48})" +
-            ", (f:M {prop: 51, attr: 48})" +
-            ", (g:M {prop: 52})" +
-            ", (e)-[:R1]->(d)" +
-            ", (a)-[:R1 {distance: 5.8}]->(b)" +
-            ", (a)-[:R1 {distance: 4.8}]->(c)" +
-            ", (c)-[:R1 {distance: 5.8}]->(d)" +
-            ", (d)-[:R1 {distance: 2.6}]->(e)" +
-            ", (e)-[:R1 {distance: 5.8}]->(f)" +
-            ", (f)-[:R1 {distance: 9.9}]->(g)";
-        assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
+        assertThat(nodes.contains(idFunction.of("a"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("b"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("c"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("d"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("e"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("f"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("g"))).isTrue();
+
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("a")))).containsExactly(NodeLabel.of("N"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("b")))).containsExactly(NodeLabel.of("N"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("c")))).containsExactly(NodeLabel.of("N"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("d")))).containsExactly(NodeLabel.of("N"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("e")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("f")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("g")))).containsExactly(NodeLabel.of("M"));
     }
 
     @Test
@@ -127,17 +124,18 @@ class RandomWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config, graphStore);
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
 
-        var subgraph = rwr.sample();
-        assertThat(subgraph.getUnion().nodeCount()).isEqualTo(3);
-        var expectedGraph =
-            "  (e:M {prop: 50, attr: 48})" +
-            ", (f:M {prop: 51, attr: 48})" +
-            ", (g:M {prop: 52})" +
-            ", (e)-[:R1 {distance: 5.8}]->(f)" +
-            ", (f)-[:R1 {distance: 9.9}]->(g)";
-        assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
+        assertThat(nodes.nodeCount()).isEqualTo(3);
+
+        assertThat(nodes.contains(idFunction.of("e"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("f"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("g"))).isTrue();
+
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("e")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("f")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("g")))).containsExactly(NodeLabel.of("M"));
     }
 
     @Test
@@ -151,10 +149,10 @@ class RandomWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config, graphStore);
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
 
-        var subgraph = rwr.sample();
-        assertThat(subgraph.getUnion().nodeCount()).isEqualTo(4);
+        assertThat(nodes.nodeCount()).isEqualTo(4);
     }
 
     @Test
@@ -166,17 +164,14 @@ class RandomWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(config, graphStore);
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
 
-        var subgraph1 = rwr.sample();
-        var subgraph2 = rwr.sample();
+        var nodes1 = rwr.sampleNodes(getGraph(config));
+        var nodes2 = rwr.sampleNodes(getGraph(config));
 
-        assertThat(subgraph1)
-            .usingRecursiveComparison(RecursiveComparisonConfiguration
-                .builder()
-                .withComparatorForType(Double::compare, Double.class)
-                .withIgnoredFields("modificationTime")
-                .build())
-            .isEqualTo(subgraph2);
+        assertThat(nodes1.nodeCount()).isEqualTo(nodes2.nodeCount());
+        for (int i = 0; i < nodes1.nodeCount(); i++) {
+            assertThat(nodes1.toOriginalNodeId(i)).isEqualTo(nodes2.toOriginalNodeId(i));
+        }
     }
 }
