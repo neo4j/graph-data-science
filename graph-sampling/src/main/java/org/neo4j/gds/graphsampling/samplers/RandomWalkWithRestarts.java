@@ -41,7 +41,7 @@ import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 public class RandomWalkWithRestarts {
@@ -59,8 +59,7 @@ public class RandomWalkWithRestarts {
             config.internalRelationshipTypes(inputGraphStore),
             Optional.empty()
         );
-        var rng = new Random();
-        config.randomSeed().ifPresent(rng::setSeed);
+        var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
 
         IdMap sampledNodes = sampleNodes(inputGraph, rng);
 
@@ -110,10 +109,9 @@ public class RandomWalkWithRestarts {
             .relationshipPropertyStores(filteredRelationships.propertyStores())
             .concurrency(config.concurrency())
             .build();
-
     }
 
-    private IdMap sampleNodes(Graph inputGraph, Random rng) {
+    private IdMap sampleNodes(Graph inputGraph, SplittableRandom rng) {
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
@@ -144,15 +142,17 @@ public class RandomWalkWithRestarts {
             currentNode.setValue(walkStep(currentNode, startNode, inputGraph, rng));
         }
         var idMapAndProperties = nodesBuilder.build();
+
         return idMapAndProperties.idMap();
     }
 
-    private long walkStep(MutableLong currentNode, long startNode, Graph inputGraph, Random rng) {
+    private long walkStep(MutableLong currentNode, long startNode, Graph inputGraph, SplittableRandom rng) {
         int degree = inputGraph.degree(currentNode.getValue());
         if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
             return startNode;
         }
         int targetOffset = rng.nextInt(degree);
+
         return inputGraph.getNeighbor(currentNode.getValue(), targetOffset);
     }
 }
