@@ -275,7 +275,7 @@ It may therefore be a more viable option to use a search strategy that only look
 [[algorithms-link-prediction-pipelines-predict-examples-approximate]]
 === Approximate search
 
-To avoid possibly having to run for a very long time considering all possible new links, we can use the <<algorithms-link-prediction-pipelines-predict-approximate-search, approximate search strategy>>.
+To avoid possibly having to run for a very long time considering all possible new links, we can use the xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-approximate-search[approximate search strategy].
 
 [role=query-example, group=lp]
 --
