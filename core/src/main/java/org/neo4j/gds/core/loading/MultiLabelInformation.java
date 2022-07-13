@@ -217,8 +217,15 @@ public final class MultiLabelInformation implements LabelInformation {
                 }));
         }
 
-        public MultiLabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
+        public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
             var labelInformation = buildInner(nodeCount, mappedIdFn);
+
+            if (labelInformation.isEmpty()) {
+                return new SingleLabelInformation.Builder(NodeLabel.ALL_NODES).build(nodeCount, mappedIdFn);
+            }
+            else if (labelInformation.size() == 1) {
+                return new SingleLabelInformation.Builder(labelInformation.keySet().iterator().next()).build(nodeCount, mappedIdFn);
+            }
 
             // set the whole range for '*' projections
             for (NodeLabel starLabel : starNodeLabelMappings) {
