@@ -30,7 +30,7 @@ This is useful to free up main memory or to remove accidentally added relationsh
 ----
 CALL gds.graph.streamRelationshipProperty(
     graphName: String,
-    relationshipProperties: List of String,
+    relationshipProperties: String,
     relationshipTypes: List of Strings,
     configuration: Map
 )
@@ -46,7 +46,7 @@ YIELD
 |===
 | Name                   | Type                       | Optional | Description
 | graphName              | String                     | no       | The name under which the graph is stored in the catalog.
-| relationshipProperties | List of String             | no       | The relationship properties in the graph to stream.
+| relationshipProperties | String                     | no       | The relationship property in the graph to stream.
 | relationshipTypes      | List of Strings            | yes      | The relationship types to stream the relationship properties for graph.
 | configuration          | Map                        | yes      | Additional parameters to configure streamNodeProperties.
 |===
