@@ -81,7 +81,7 @@ public abstract class KmeansSampler {
     }
 
 
-    enum SamplerType {
+    public enum SamplerType {
         UNIFORM, KMEANSPP;
 
         private static final List<String> VALUES = Arrays
