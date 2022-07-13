@@ -45,9 +45,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class MultiLabelInformation implements LabelInformation {
 
-    private static final List<NodeLabel> ALL_NODES_LABELS = List.of(NodeLabel.ALL_NODES);
-    private static final Set<NodeLabel> ALL_NODES_LABEL_SET = Set.of(NodeLabel.ALL_NODES);
-
     private final Map<NodeLabel, BitSet> labelInformation;
 
     private MultiLabelInformation(Map<NodeLabel, BitSet> labelInformation) {
@@ -91,7 +88,7 @@ public final class MultiLabelInformation implements LabelInformation {
 
     @Override
     public boolean hasLabel(long nodeId, NodeLabel nodeLabel) {
-        if (labelInformation.isEmpty() && nodeLabel.equals(NodeLabel.ALL_NODES)) {
+        if (nodeLabel.equals(NodeLabel.ALL_NODES)) {
             return true;
         }
         var bitSet = labelInformation.get(nodeLabel);
@@ -100,39 +97,29 @@ public final class MultiLabelInformation implements LabelInformation {
 
     @Override
     public Set<NodeLabel> availableNodeLabels() {
-        return labelInformation.isEmpty()
-            ? ALL_NODES_LABEL_SET
-            : labelSet();
+        return labelSet();
     }
 
     @Override
     public List<NodeLabel> nodeLabelsForNodeId(long nodeId) {
-        if (isEmpty()) {
-            return ALL_NODES_LABELS;
-        } else {
-            List<NodeLabel> labels = new ArrayList<>();
-            forEach((nodeLabel, bitSet) -> {
-                if (bitSet.get(nodeId)) {
-                    labels.add(nodeLabel);
-                }
-                return true;
-            });
-            return labels;
-        }
+        List<NodeLabel> labels = new ArrayList<>();
+        forEach((nodeLabel, bitSet) -> {
+            if (bitSet.get(nodeId)) {
+                labels.add(nodeLabel);
+            }
+            return true;
+        });
+        return labels;
     }
 
     @Override
     public void forEachNodeLabel(long nodeId, IdMap.NodeLabelConsumer consumer) {
-        if (isEmpty()) {
-            consumer.accept(NodeLabel.ALL_NODES);
-        } else {
-            forEach((nodeLabel, bitSet) -> {
-                if (bitSet.get(nodeId)) {
-                    return consumer.accept(nodeLabel);
-                }
-                return true;
-            });
-        }
+        forEach((nodeLabel, bitSet) -> {
+            if (bitSet.get(nodeId)) {
+                return consumer.accept(nodeLabel);
+            }
+            return true;
+        });
     }
 
     @Override
