@@ -38,6 +38,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -459,6 +460,46 @@ class RandomGraphGeneratorTest {
 
         assertThat(graph.schema().nodeSchema()).isEqualTo(expectedNodeSchema);
         assertThat(graph.schema().relationshipSchema()).isEqualTo(expectedRelationshipSchema);
+    }
+
+    @Test
+    void shouldGenerateWithCorrectIdMap() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .build()
+            .generate();
+
+        assertThat(graph.availableNodeLabels()).containsExactly(NodeLabel.ALL_NODES);
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.ALL_NODES), 4);
+        assertThat(filteredIdMap.nodeCount()).isEqualTo(100);
+    }
+
+    @Test
+    void shouldGenerateWithCorrectIdMapWithLabelProducer() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(100)
+            .nodeLabelProducer((nodeId) ->
+                nodeId % 2 == 0
+                    ? NodeLabelTokens.of("LABEL1")
+                    : NodeLabelTokens.of("LABEL2"))
+            .averageDegree(1)
+            .relationshipDistribution(RelationshipDistribution.UNIFORM)
+            .seed(123L)
+            .aggregation(Aggregation.SINGLE)
+            .orientation(Orientation.UNDIRECTED)
+            .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
+            .build()
+            .generate();
+
+        assertThat(graph.availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("LABEL1"), NodeLabel.of("LABEL2"));
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), 4);
+        assertThat(filteredIdMap.nodeCount()).isEqualTo(50);
     }
 
     static Stream<Arguments> expectedSchemas() {

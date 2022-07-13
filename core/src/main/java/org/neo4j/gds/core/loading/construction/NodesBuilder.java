@@ -96,7 +96,9 @@ public final class NodesBuilder {
         this.concurrency = concurrency;
         this.elementIdentifierLabelTokenMapping = elementIdentifierLabelTokenMapping;
         this.idMapBuilder = idMapBuilder;
-        this.labelInformationBuilder = LabelInformation.builder(maxOriginalId + 1);
+        this.labelInformationBuilder = !hasLabelInformation
+            ? LabelInformation.single(NodeLabel.ALL_NODES)
+            : LabelInformation.builder(maxOriginalId + 1);
         this.labelTokenNodeLabelMapping = labelTokenNodeLabelMapping;
         this.nextLabelId = 0;
         this.lock = new ReentrantLock(true);
