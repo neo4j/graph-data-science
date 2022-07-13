@@ -19,7 +19,13 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import org.apache.commons.lang3.mutable.MutableInt;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
+
+import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,5 +46,33 @@ abstract class EdgeSplitterBaseTest {
         for (double property : values) {
             assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(property);
         }
+    }
+
+    void assertRelSamplingProperties(Relationships relationships, Graph inputGraph, double negativeSamplingRatio) {
+        MutableInt positiveCount = new MutableInt();
+        inputGraph.forEachNode(source -> {
+            var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
+            var propertyCursor = relationships.properties().get().propertiesList().propertyCursor(source);
+            while (targetNodeCursor.hasNextVLong()) {
+                boolean edgeIsPositive = Double.longBitsToDouble(propertyCursor.nextLong()) == EdgeSplitter.POSITIVE;
+                if (edgeIsPositive) positiveCount.increment();
+                assertThat(edgeIsPositive)
+                    .isEqualTo(inputGraph.exists(source, targetNodeCursor.nextVLong()));
+            }
+            return true;
+        });
+        assertThat(relationships.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
+    }
+
+    void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
+        idmap.forEachNode(sourceNode -> {
+            var targetNodeCursor = topology.adjacencyList().adjacencyCursor(sourceNode);
+            while (targetNodeCursor.hasNextVLong()) {
+                assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty();
+                assertThat(idmap.nodeLabels(targetNodeCursor.nextVLong()).stream().filter(targetLabels::contains)).isNotEmpty();
+            }
+            return true;
+        });
+
     }
 }

@@ -70,6 +70,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
         var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
+
+        //TODO Shortcut predicate impl to return true if bitSet contains all
         LongLongPredicate isValidNodePair = (s, t) -> sourceNodesWithRequiredNodeLabels.contains(s) && targetNodesWithRequiredNodeLabels.contains(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
@@ -85,12 +87,17 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partition -> (Runnable)()->{
             var concurrentGraph = graph.concurrentCopy();
             partition.consume(nodeId -> {
-                if (sourceNodesWithRequiredNodeLabels.contains(nodeId)) {
                     concurrentGraph.forEachRelationship(nodeId, (s, t) ->{
-                        if (targetNodesWithRequiredNodeLabels.contains(t)) validRelationshipCountAdder.increment();
+                        if (s < t) {
+                            //If one directed edge has valid labels, then increment count by 2 for undirected graph to get correct total positiveSamples count.
+                            //because we only do directed positiveSampling, which is choosing one of the positive undirected relationship.
+                            //Otherwise, if sourceNodeLabels != targetNodeLabels, positiveSamples will be too small.
+                            if (isValidNodePair.apply(s,t) || isValidNodePair.apply(t,s)) {
+                                validRelationshipCountAdder.add(2);
+                            }
+                        }
                         return true;
                     });
-                }
             });
         }, Optional.empty());
 
@@ -102,7 +109,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
         var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction) / 2;
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
-        var edgesRemaining = new MutableLong(validRelationshipCount);
+        var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
 
         graph.forEachNode(nodeId -> {
             positiveSampling(
@@ -110,7 +117,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 selectedRelsBuilder,
                 remainingRelsConsumer,
                 positiveSamplesRemaining,
-                edgesRemaining,
+                candidateEdgesRemaining,
                 nodeId,
                 isValidNodePair
             );
@@ -133,29 +140,31 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
         MutableLong positiveSamplesRemaining,
-        MutableLong edgesRemaining,
+        MutableLong candidateEdgesRemaining,
         long nodeId,
         LongLongPredicate isValidNodePair
     ) {
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
-            if (source == target) {
-                edgesRemaining.decrementAndGet();
-            }
-            if (source < target && (isValidNodePair.apply(source, target) || isValidNodePair.apply(target, source))) {
+            assert source != target;
+            if (source < target) {
                 // we handle also reverse edge here
                 // the effect of self-loops are disregarded
-                if (sample(2 * positiveSamplesRemaining.doubleValue() / edgesRemaining.doubleValue())) {
-                    positiveSamplesRemaining.decrementAndGet();
-                    if (sample(0.5)) {
-                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
+                if ((isValidNodePair.apply(source, target) || isValidNodePair.apply(target, source))) {
+                    if (sample(2 * positiveSamplesRemaining.doubleValue() / candidateEdgesRemaining.doubleValue())) {
+                        positiveSamplesRemaining.decrementAndGet();
+                        if ((isValidNodePair.apply(source, target))) {
+                            selectedRelsBuilder.addFromInternal(graph.toRootNodeId(source), graph.toRootNodeId(target), POSITIVE);
+                        } else {
+                            selectedRelsBuilder.addFromInternal(graph.toRootNodeId(target), graph.toRootNodeId(source), POSITIVE);
+                        }
                     } else {
-                        selectedRelsBuilder.addFromInternal(graph.toRootNodeId(target), graph.toRootNodeId(source), POSITIVE);
+                        remainingRelsConsumer.accept(source, target, weight);
                     }
+                    // because of reverse edge
+                    candidateEdgesRemaining.addAndGet(-2);
                 } else {
                     remainingRelsConsumer.accept(source, target, weight);
                 }
-                // because of reverse edge
-                edgesRemaining.addAndGet(-2);
             }
             return true;
         });
