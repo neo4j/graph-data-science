@@ -20,7 +20,6 @@
 package org.neo4j.gds.graphsampling.samplers;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -34,6 +33,7 @@ import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
@@ -130,10 +130,8 @@ public class RandomWalkWithRestarts {
             if (!seen.get(currentNode.getValue())) {
                 long originalId = inputGraph.toOriginalNodeId(currentNode.getValue());
                 if (hasLabelInformation) {
-                    var nodeLabelList = inputGraph.nodeLabels(currentNode.getValue());
-                    var nodeLabels = new NodeLabel[nodeLabelList.size()];
-                    nodeLabelList.toArray(nodeLabels);
-                    nodesBuilder.addNode(originalId, nodeLabels);
+                    var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode.getValue()));
+                    nodesBuilder.addNode(originalId, nodeLabelToken);
                 } else {
                     nodesBuilder.addNode(originalId);
                 }
