@@ -31,7 +31,7 @@ final class ICLazyForwardThread implements Runnable {
     private final long[] seedSetNodes;
     private int seedNodeCounter;
 
-    private Partition partition;
+    private final Partition partition;
     private long candidateNodeId;
 
     private double localSpread;
@@ -43,32 +43,31 @@ final class ICLazyForwardThread implements Runnable {
 
     private final double propagationProbability;
 
-    public ICLazyForwardThread(
+    ICLazyForwardThread(
         Partition partition,
         Graph graph,
         long[] seedSetNodes,
         double propagationProbability
     ) {
-        this.localGraph = graph.concurrentCopy();
-        active = new BitSet(graph.nodeCount());
-        newActive = HugeLongArrayStack.newStack(graph.nodeCount());
+        this.localGraph = graph;
+        this.active = new BitSet(graph.nodeCount());
+        this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
         this.propagationProbability = propagationProbability;
         this.seedSetNodes = seedSetNodes;
-        seedNodeCounter = 1;
+        this.seedNodeCounter = 1;
         this.partition = partition;
     }
 
-    public void incrementSeedNode() {
-        seedNodeCounter++;
+    void incrementSeedNode() {
+        this.seedNodeCounter++;
     }
 
-
-    public void setCandidateNodeId(long candidateNodeId) {
+    void setCandidateNodeId(long candidateNodeId) {
         this.candidateNodeId = candidateNodeId;
     }
 
     public double getSpread() {
-        return localSpread;
+        return this.localSpread;
     }
 
     private void initDataStructures() {
@@ -80,7 +79,6 @@ final class ICLazyForwardThread implements Runnable {
             active.set(seedSetNodes[i]);
         }
     }
-
 
     public void run() {
         //Loop over the Monte-Carlo simulations
@@ -111,7 +109,4 @@ final class ICLazyForwardThread implements Runnable {
             }
         }
     }
-
-
-
 }

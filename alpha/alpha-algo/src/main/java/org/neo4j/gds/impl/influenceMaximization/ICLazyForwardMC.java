@@ -29,15 +29,12 @@ import java.util.concurrent.ExecutorService;
 
 final class ICLazyForwardMC {
 
-    private final Graph graph;
-    private final double propagationProbability;
-    private final int monteCarloSimulations;
 
-    private final long[] seedSetNodes;
+    private final int monteCarloSimulations;
 
     private final int concurrency;
 
-    private List<ICLazyForwardThread> tasks;
+    private final List<ICLazyForwardThread> tasks;
 
     private final ExecutorService executorService;
 
@@ -50,21 +47,26 @@ final class ICLazyForwardMC {
         int concurrency,
         ExecutorService executorService
     ) {
-        this.graph = graph.concurrentCopy();
-        this.propagationProbability = propagationProbability;
+//
         this.monteCarloSimulations = monteCarloSimulations;
-        this.seedSetNodes = seedSetNodes;
+
         this.tasks = PartitionUtils.rangePartition(
             concurrency,
             monteCarloSimulations,
-            partition -> new ICLazyForwardThread(partition, graph, seedSetNodes, propagationProbability),
-            Optional.of((int) monteCarloSimulations / concurrency)
+            // should we copy the array when we initialise the threads?
+            partition -> new ICLazyForwardThread(
+                partition,
+                graph.concurrentCopy(),
+                seedSetNodes,
+                propagationProbability
+            ),
+            Optional.of(monteCarloSimulations / concurrency)
         );
         this.concurrency = concurrency;
         this.executorService = executorService;
     }
 
-    public double runForCandidate(long candidateId) {
+    double runForCandidate(long candidateId) {
         for (var task : tasks) {
             task.setCandidateNodeId(candidateId);
         }
@@ -73,14 +75,14 @@ final class ICLazyForwardMC {
             .tasks(tasks)
             .executor(executorService)
             .run();
-        double spread = 0;
+        double spread = 0d;
         for (var task : tasks) {
             spread += task.getSpread();
         }
         return spread / monteCarloSimulations;
     }
 
-    public void incrementSeedNode() {
+    void incrementSeedNode() {
         for (var task : tasks) {
             task.incrementSeedNode();
         }
