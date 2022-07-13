@@ -258,6 +258,11 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return filteredIdMap.withFilteredLabels(nodeLabels, concurrency);
+    }
+
+    @Override
     public NodePropertyValues nodeProperties(String propertyKey) {
         NodePropertyValues properties = csrGraph.nodeProperties(propertyKey);
         if (properties == null) {

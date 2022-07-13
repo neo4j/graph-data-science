@@ -168,6 +168,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public IdMap withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+        return graph.withFilteredLabels(nodeLabels, concurrency);
+    }
+
+    @Override
     public NodePropertyValues nodeProperties(String propertyKey) {
         return graph.nodeProperties(propertyKey);
     }
