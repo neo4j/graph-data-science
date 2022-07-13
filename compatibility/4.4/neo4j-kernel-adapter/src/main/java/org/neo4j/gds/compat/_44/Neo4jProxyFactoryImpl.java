@@ -36,4 +36,9 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
     public Neo4jProxyApi load() {
         return new Neo4jProxyImpl();
     }
+
+    @Override
+    public String description() {
+        return "Neo4j 4.4";
+    }
 }

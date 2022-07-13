@@ -33,6 +33,8 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class Settings {
 
     public static Setting<Boolean> authEnabled() {
@@ -94,19 +96,58 @@ public final class Settings {
         return GraphDatabaseSettings.store_internal_log_path;
     }
 
-    public static Setting<Boolean> onlineBackupEnabled() {
+    public static <T> T disableOnlineBackup(T builder, SetConfig<T, Boolean> setConfig) {
+        return tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.OnlineBackupSettings",
+            "online_backup_enabled",
+            Boolean.FALSE
+        );
+    }
+
+    public static <T> T disableReplication(T builder, SetConfig<T, Boolean> setConfig) {
+        builder = tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.EnterpriseEditionInternalSettings",
+            "enable_replication",
+            Boolean.FALSE
+        );
+        builder = tryConfigure(
+            builder,
+            setConfig,
+            "com.neo4j.configuration.EnterpriseEditionInternalSettings",
+            "replication_enabled",
+            Boolean.FALSE
+        );
+        return builder;
+    }
+
+    public static <T, U> T tryConfigure(
+        T builder,
+        SetConfig<T, U> setConfig,
+        String className,
+        String settingName,
+        U settingValue
+    ) {
+        var lookup = MethodHandles.lookup();
         try {
-            Class<?> onlineSettingsClass = Class.forName(
-                "com.neo4j.configuration.OnlineBackupSettings");
-            var onlineBackupEnabled = MethodHandles
-                .lookup()
-                .findStaticGetter(onlineSettingsClass, "online_backup_enabled", Setting.class)
-                .invoke();
+            var settingsClass = Class.forName(className);
+            var settingHandle = lookup.findStaticGetter(settingsClass, settingName, Setting.class);
             //noinspection unchecked
-            return (Setting<Boolean>) onlineBackupEnabled;
+            var setting = (Setting<U>) settingHandle.invoke();
+            return setConfig.set(builder, setting, settingValue);
+        } catch (ClassNotFoundException | NoSuchFieldException e) {
+            // Setting is not available on this version
+            return builder;
         } catch (Throwable e) {
-            throw new IllegalStateException(
-                "The online_backup_enabled setting requires Neo4j Enterprise Edition to be available.");
+            // Actually applying the setting failed
+            throw new IllegalStateException(formatWithLocale(
+                "The %s setting could not be configured: %s",
+                settingName,
+                e.getMessage()
+            ), e);
         }
     }
 
@@ -132,5 +173,9 @@ public final class Settings {
 
     private Settings() {
         throw new UnsupportedOperationException();
+    }
+
+    public interface SetConfig<T, S> {
+        T set(T config, Setting<S> setting, S value);
     }
 }

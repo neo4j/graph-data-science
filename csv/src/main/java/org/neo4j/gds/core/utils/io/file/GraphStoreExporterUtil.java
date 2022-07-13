@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.io.file;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.GraphStoreExportSettings;
+import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.utils.io.GraphStoreExporter;
 import org.neo4j.gds.core.utils.io.NeoNodeProperties;
 import org.neo4j.graphdb.config.Configuration;

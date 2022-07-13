@@ -26,7 +26,6 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -50,8 +49,10 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -67,7 +68,7 @@ import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -75,36 +76,10 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Optional;
-import java.util.ServiceLoader;
 
-@SuppressForbidden(reason = "This is the best we can do at the moment")
 public final class Neo4jProxy {
 
-    private static final Neo4jProxyApi IMPL;
-
-    static {
-        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-        Neo4jProxyFactory neo4jProxyFactory = ServiceLoader
-            .load(Neo4jProxyFactory.class)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .filter(f -> f.canLoad(neo4jVersion))
-            .findFirst()
-            .orElseThrow(() -> new LinkageError("Could not load the " + Neo4jProxy.class + " implementation for " + neo4jVersion));
-        IMPL = neo4jProxyFactory.load();
-        var log = LogBuilders.outputStreamLog(
-            System.out,
-            Optional.empty(),
-            Optional.empty(),
-            Optional.empty()
-        );
-        log.info("Loaded compatibility layer: %s", IMPL.getClass());
-        log.info("Loaded version: %s", neo4jVersion);
-        log.info("Java vendor: %s", System.getProperty("java.vendor"));
-        log.info("Java version: %s", System.getProperty("java.version"));
-        log.info("Java home: %s", System.getProperty("java.home"));
-    }
+    private static final Neo4jProxyApi IMPL = ProxyUtil.findProxy(Neo4jProxyFactory.class);
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return IMPL.newDb(dbms);
@@ -348,6 +323,14 @@ public final class Neo4jProxy {
         return IMPL.testLog();
     }
 
+    public static Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return IMPL.getUserLog(logService, loggingClass);
+    }
+
+    public static Log getInternalLog(LogService logService, Class<?> loggingClass) {
+        return IMPL.getInternalLog(logService, loggingClass);
+    }
+
     public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return IMPL.virtualRelationship(id, startNode, endNode, type);
     }
@@ -360,10 +343,10 @@ public final class Neo4jProxy {
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
         PageCache pageCache,
-        LogProvider logProvider,
+        LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
-        return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logProvider, pageCacheTracer);
+        return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logService, pageCacheTracer);
     }
 
     public static boolean isNotNumericIndex(IndexCapability indexCapability) {
@@ -393,23 +376,37 @@ public final class Neo4jProxy {
     public static SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
-        LogProvider logProvider
+        LogService logService
     ) {
-        return IMPL.createSllPolicyLoader(fileSystem, config, logProvider);
+        return IMPL.createSllPolicyLoader(fileSystem, config, logService);
     }
 
     public static RecordFormats recordFormatSelector(
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogProvider internalLogProvider,
+        LogService logService,
         DependencyResolver dependencyResolver
     ) {
-        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, internalLogProvider, dependencyResolver);
+        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, dependencyResolver);
     }
 
     public static NamedDatabaseId randomDatabaseId() {
         return IMPL.randomDatabaseId();
+    }
+
+    public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
+        return IMPL.executionMonitor(compatExecutionMonitor);
+    }
+
+    public static UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        boolean internal
+    ) {
+        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal);
     }
 
     private Neo4jProxy() {

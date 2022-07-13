@@ -17,37 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat.unsupported;
+package org.neo4j.gds.compat._44;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.StorageEngineProxyApi;
-import org.neo4j.gds.compat.StorageEngineProxyFactory;
-
-import java.util.Collection;
-import java.util.EnumSet;
+import org.neo4j.gds.compat.SettingProxyApi;
+import org.neo4j.gds.compat.SettingProxyFactory;
 
 @ServiceProvider
-public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory {
-
-    private static final Collection<Neo4jVersion> incompatibleVersions = EnumSet.of(
-        Neo4jVersion.V_4_4_7_drop10,
-        Neo4jVersion.V_4_4_8_drop10,
-        Neo4jVersion.V_5_0_drop40
-    );
+public class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return incompatibleVersions.contains(version);
+        return version != Neo4jVersion.V_5_0_drop40;
     }
 
     @Override
-    public StorageEngineProxyApi load() {
-        return new StorageEngineProxyImpl();
+    public SettingProxyApi load() {
+        return new SettingProxyImpl();
     }
 
     @Override
     public String description() {
-        return "Storage Engine (Unsupported)";
+        return "Neo4j Settings 4.x";
     }
 }

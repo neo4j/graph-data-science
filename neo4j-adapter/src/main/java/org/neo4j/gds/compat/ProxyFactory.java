@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.annotations.service.Service;
+public interface ProxyFactory<T> {
 
-@Service
-public interface StorageEngineProxyFactory extends ProxyFactory<StorageEngineProxyApi> {
+    boolean canLoad(Neo4jVersion version);
+
+    T load();
+
+    String description();
 }

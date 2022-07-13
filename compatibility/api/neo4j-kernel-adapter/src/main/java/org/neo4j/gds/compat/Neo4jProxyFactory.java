@@ -22,9 +22,5 @@ package org.neo4j.gds.compat;
 import org.neo4j.annotations.service.Service;
 
 @Service
-public interface Neo4jProxyFactory {
-
-    boolean canLoad(Neo4jVersion version);
-
-    Neo4jProxyApi load();
+public interface Neo4jProxyFactory extends ProxyFactory<Neo4jProxyApi> {
 }

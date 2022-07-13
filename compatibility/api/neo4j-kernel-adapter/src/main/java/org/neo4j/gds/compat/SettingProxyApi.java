@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.annotations.service.Service;
-
-@Service
-public interface StorageEngineProxyFactory extends ProxyFactory<StorageEngineProxyApi> {
+public interface SettingProxyApi {
+    // public, otherwise checkstyle complains that "'<' is preceded with whitespace."
+    public <T> org.neo4j.graphdb.config.Setting<T> setting(Setting<T> setting);
 }

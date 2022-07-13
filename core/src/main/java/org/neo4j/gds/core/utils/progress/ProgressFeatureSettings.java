@@ -25,8 +25,8 @@ import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
-import static org.neo4j.configuration.SettingImpl.newBuilder;
 import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
 @ServiceProvider
 public final class ProgressFeatureSettings implements SettingsDeclaration {

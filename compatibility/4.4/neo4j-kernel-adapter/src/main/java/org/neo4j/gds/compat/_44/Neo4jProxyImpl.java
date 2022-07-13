@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat._44;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
@@ -28,7 +29,9 @@ import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.database.DatabaseManager;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -56,6 +59,7 @@ import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.Cursor;
@@ -72,8 +76,10 @@ import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
+import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
+import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
@@ -98,9 +104,8 @@ import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
-import org.neo4j.logging.LogProvider;
+import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
-import org.neo4j.logging.internal.NullLogService;
 import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
@@ -113,6 +118,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -474,6 +480,18 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return logService.getUserLog(loggingClass);
+    }
+
+    @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public Log getInternalLog(LogService logService, Class<?> loggingClass) {
+        return logService.getInternalLog(loggingClass);
+    }
+
+    @Override
     public Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
         return new VirtualRelationshipImpl(id, startNode, endNode, type);
     }
@@ -484,18 +502,19 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public RecordFormats selectRecordFormatForStore(
         DatabaseLayout databaseLayout,
         FileSystemAbstraction fs,
         PageCache pageCache,
-        LogProvider logProvider,
+        LogService logService,
         PageCacheTracer pageCacheTracer
     ) {
         return RecordFormatSelector.selectForStore(
             (RecordDatabaseLayout) databaseLayout,
             fs,
             pageCache,
-            NullLogService.getInstance().getInternalLogProvider(),
+            logService.getInternalLogProvider(),
             PageCacheTracer.NULL
         );
     }
@@ -531,27 +550,92 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public SslPolicyLoader createSllPolicyLoader(
         FileSystemAbstraction fileSystem,
         Config config,
-        LogProvider logProvider
+        LogService logService
     ) {
-        return SslPolicyLoader.create(config, logProvider);
+        return SslPolicyLoader.create(config, logService.getInternalLogProvider());
     }
 
     @Override
+    @SuppressForbidden(reason = "This is the compat specific use")
     public RecordFormats recordFormatSelector(
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogProvider internalLogProvider,
+        LogService logService,
         DependencyResolver dependencyResolver
     ) {
-        return RecordFormatSelector.selectForConfig(databaseConfig, internalLogProvider);
+        return RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider());
     }
 
     @Override
     public NamedDatabaseId randomDatabaseId() {
         return TestDatabaseIdRepository.randomNamedDatabaseId();
+    }
+
+    @Override
+    public ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
+        return new ExecutionMonitor.Adapter(
+            compatExecutionMonitor.clock(),
+            compatExecutionMonitor.checkIntervalMillis(),
+            TimeUnit.MILLISECONDS
+        ) {
+
+            @Override
+            public void initialize(DependencyResolver dependencyResolver) {
+                compatExecutionMonitor.initialize(dependencyResolver);
+            }
+
+            @Override
+            public void start(StageExecution execution) {
+                compatExecutionMonitor.start(execution);
+            }
+
+            @Override
+            public void end(StageExecution execution, long totalTimeMillis) {
+                compatExecutionMonitor.end(execution, totalTimeMillis);
+            }
+
+            @Override
+            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
+                compatExecutionMonitor.done(successful, totalTimeMillis, additionalInformation);
+            }
+
+            @Override
+            public void check(StageExecution execution) {
+                compatExecutionMonitor.check(execution);
+            }
+        };
+    }
+
+    @Override
+    @SuppressFBWarnings("NP_LOAD_OF_KNOWN_NULL_VALUE") // We assign nulls because it makes the code more readable
+    public UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        boolean internal
+    ) {
+        String deprecated = null;    // no depracation
+        String category = null;      // No predefined categpry (like temporal or math)
+        var allowed = new String[0]; // empty allow - related to advanced function permissions
+        var caseInsensitive = false; // case sensitive name match
+        var isBuiltIn = false;       // is built in; never true for GDS
+        return new UserFunctionSignature(
+            name,
+            inputSignature,
+            type,
+            deprecated,
+            allowed,
+            description,
+            category,
+            caseInsensitive,
+            isBuiltIn,
+            internal
+        );
     }
 }

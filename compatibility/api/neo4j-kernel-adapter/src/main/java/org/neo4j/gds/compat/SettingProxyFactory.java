@@ -19,23 +19,8 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.configuration.Description;
-import org.neo4j.configuration.SettingsDeclaration;
-import org.neo4j.graphdb.config.Setting;
+import org.neo4j.annotations.service.Service;
 
-import java.nio.file.Path;
-
-import static org.neo4j.configuration.SettingImpl.newBuilder;
-import static org.neo4j.configuration.SettingValueParsers.PATH;
-
-@ServiceProvider
-public class GraphStoreExportSettings implements SettingsDeclaration {
-
-    @Description("Sets the export location for file based exports.")
-    public static final Setting<Path> export_location_setting = newBuilder(
-        "gds.export.location",
-        PATH,
-        null
-    ).build();
+@Service
+public interface SettingProxyFactory extends ProxyFactory<SettingProxyApi> {
 }

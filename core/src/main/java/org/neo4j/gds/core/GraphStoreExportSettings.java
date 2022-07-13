@@ -17,25 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.internal;
+package org.neo4j.gds.core;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Description;
-import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
-import static org.neo4j.configuration.SettingValueParsers.BOOL;
+import java.nio.file.Path;
+
+import static org.neo4j.configuration.SettingValueParsers.PATH;
 import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
 @ServiceProvider
-public class MemoryEstimationSettings implements SettingsDeclaration {
+public class GraphStoreExportSettings implements SettingsDeclaration {
 
-    @Description("Use maximum memory estimation in procedure memory guard.")
-    @DocumentedDefaultValue("false")
-    public static final Setting<Boolean> validate_using_max_memory_estimation = newBuilder(
-        "gds.validate_using_max_memory_estimation",
-        BOOL,
-        false
+    @Description("Sets the export location for file based exports.")
+    public static final Setting<Path> export_location_setting = newBuilder(
+        "gds.export.location",
+        PATH,
+        null
     ).build();
 }

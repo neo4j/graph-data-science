@@ -19,17 +19,19 @@
  */
 package org.neo4j.gds.core.utils;
 
+import org.apache.commons.io.output.WriterOutputStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.compat.WriterLogBuilder;
+import org.neo4j.gds.compat.OutputStreamLogBuilder;
+import org.neo4j.gds.graphbuilder.GraphBuilder;
 import org.neo4j.logging.Level;
 import org.neo4j.logging.Log;
 
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -73,9 +75,7 @@ class ProgressLoggingTest extends BaseTest {
     }
 
     private static Log testLogger(StringWriter writer) {
-        return new WriterLogBuilder(writer)
-            .level(Level.DEBUG)
-            .category("Test")
-            .build();
+        var outStream = new WriterOutputStream(writer, StandardCharsets.UTF_8);
+        return new OutputStreamLogBuilder(outStream).level(Level.DEBUG).category("Test").build();
     }
 }

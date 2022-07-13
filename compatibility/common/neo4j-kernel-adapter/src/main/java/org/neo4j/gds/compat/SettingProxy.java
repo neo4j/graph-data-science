@@ -19,8 +19,16 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.annotations.service.Service;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.configuration.SettingValueParser;
 
-@Service
-public interface StorageEngineProxyFactory extends ProxyFactory<StorageEngineProxyApi> {
+public final class SettingProxy {
+
+    private static final SettingProxyApi IMPL = ProxyUtil.findProxy(SettingProxyFactory.class);
+
+    public static <T> Setting.Builder<T> newBuilder(String name, SettingValueParser<T> parser, @Nullable T defaultValue) {
+        return ImmutableSetting.builder(name, parser, defaultValue).convert(IMPL::setting);
+    }
+
+    private SettingProxy() {}
 }
