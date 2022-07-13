@@ -63,6 +63,10 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private double averageSilhouette;
 
+    private double bestDistance;
+
+    private long[] nodesInCluster;
+
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -116,6 +120,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         this.computeSilhouette = computeSilhouette;
         this.samplerType = initialSampler;
+        this.nodesInCluster = new long[k];
     }
 
     @Override
@@ -142,11 +147,10 @@ public class Kmeans extends Algorithm<KmeansResult> {
         var currentCommunities = HugeIntArray.newArray(nodeCount);
         var currentDistanceFromCentroid = HugeDoubleArray.newArray(nodeCount);
 
-        double bestDistance = Double.POSITIVE_INFINITY;
+        bestDistance = Double.POSITIVE_INFINITY;
         bestCommunities.setAll(v -> UNASSIGNED);
 
 
-        long[] nodesInCluster = new long[k];
 
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
 
@@ -189,7 +193,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
             assert numberOfTasks <= concurrency;
 
             //Initialization do initial centroid computation and assignment
-            //Temporary:
 
             sampler.performInitialSampling();
 
@@ -198,7 +201,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
             while (true) {
                 long numberOfSwaps = 0;
                 //assign each node to a centroid
-
                 if (samplerType != KmeansSampler.SamplerType.KMEANSPP || iteration > 0) {
                     RunWithConcurrency.builder()
                         .concurrency(concurrency)
@@ -216,44 +218,20 @@ public class Kmeans extends Algorithm<KmeansResult> {
                     break;
                 }
             }
-            for (KmeansTask task : tasks) {
-                task.switchToPhase(TaskPhase.DISTANCE);
-            }
-            RunWithConcurrency.builder()
-                .concurrency(concurrency)
-                .tasks(tasks)
-                .executor(executorService)
-                .run();
-            double distanceFromClusterCentre = 0;
-            for (KmeansTask task : tasks) {
-                distanceFromClusterCentre += task.getDistanceFromCentroidNormalized();
-            }
-            if (restartIteration >= 1) {
-                if (distanceFromClusterCentre < bestDistance) {
-                    bestDistance = distanceFromClusterCentre;
-                    ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
-                        bestCommunities.set(v, currentCommunities.get(v));
-                        distanceFromCentroid.set(v, currentDistanceFromCentroid.get(v));
-                    });
-                    bestCentroids = clusterManager.getCentroids();
-                    if (computeSilhouette) {
-                        nodesInCluster = clusterManager.getNodesInCluster();
-                    }
-                }
-            } else {
-                bestCommunities = currentCommunities;
-                distanceFromCentroid = currentDistanceFromCentroid;
-                bestCentroids = clusterManager.getCentroids();
-                bestDistance = distanceFromClusterCentre;
-                if (computeSilhouette) {
-                    nodesInCluster = clusterManager.getNodesInCluster();
-                }
 
-            }
+            double averageDistanceFromCentroid = calculatedistancePhase(tasks);
+            updateBestSolution(
+                restartIteration,
+                clusterManager,
+                averageDistanceFromCentroid,
+                currentCommunities,
+                currentDistanceFromCentroid
+            );
+
         }
 
         if (computeSilhouette) {
-            calculateSilhouette(nodesInCluster);
+            calculateSilhouette();
         }
         progressTracker.endSubTask();
         return ImmutableKmeansResult.of(
@@ -317,7 +295,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         });
     }
 
-    private void calculateSilhouette(long[] nodesInCluster) {
+    private void calculateSilhouette() {
         var nodeCount = graph.nodeCount();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
         var tasks = PartitionUtils.rangePartition(
@@ -346,4 +324,52 @@ public class Kmeans extends Algorithm<KmeansResult> {
         }
 
     }
+
+    private double calculatedistancePhase(List<KmeansTask> tasks) {
+        for (KmeansTask task : tasks) {
+            task.switchToPhase(TaskPhase.DISTANCE);
+        }
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .executor(executorService)
+            .run();
+        double averageDistanceFromCentroid = 0;
+        for (KmeansTask task : tasks) {
+            averageDistanceFromCentroid += task.getDistanceFromCentroidNormalized();
+        }
+        return averageDistanceFromCentroid;
+    }
+
+    private void updateBestSolution(
+        int restartIteration,
+        ClusterManager clusterManager,
+        double averageDistanceFromCentroid,
+        HugeIntArray currentCommunities,
+        HugeDoubleArray currentDistanceFromCentroid
+    ) {
+        if (restartIteration >= 1) {
+            if (averageDistanceFromCentroid < bestDistance) {
+                bestDistance = averageDistanceFromCentroid;
+                ParallelUtil.parallelForEachNode(graph, concurrency, v -> {
+                    bestCommunities.set(v, currentCommunities.get(v));
+                    distanceFromCentroid.set(v, currentDistanceFromCentroid.get(v));
+                });
+                bestCentroids = clusterManager.getCentroids();
+                if (computeSilhouette) {
+                    nodesInCluster = clusterManager.getNodesInCluster();
+                }
+            }
+        } else {
+            bestCommunities = currentCommunities;
+            distanceFromCentroid = currentDistanceFromCentroid;
+            bestCentroids = clusterManager.getCentroids();
+            bestDistance = averageDistanceFromCentroid;
+            if (computeSilhouette) {
+                nodesInCluster = clusterManager.getNodesInCluster();
+            }
+
+        }
+    }
+
 }
