@@ -82,6 +82,21 @@ public final class FeatureToggleProc {
     }
 
     @Internal
+    @Procedure("gds.features.usePartitionedScan")
+    @Description("Toggle whether the new partitioned scan API should be used.")
+    public void usePartitionedScan(@Name(value = "usePartitionedScan") boolean usePartitionedScan) {
+        GdsFeatureToggles.USE_PARTITIONED_SCAN.toggle(usePartitionedScan);
+    }
+
+    @Internal
+    @Procedure("gds.features.usePartitionedScan.reset")
+    @Description("Set the behavior of whether to use the new partitioned scan API to the default. That value is returned.")
+    public Stream<FeatureState> resetUsePartitionedScan() {
+        GdsFeatureToggles.USE_PARTITIONED_SCAN.reset();
+        return Stream.of(new FeatureState(GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()));
+    }
+
+    @Internal
     @Procedure("gds.features.maxArrayLengthShift")
     @Description("Toggle how large arrays are allowed to get before they are being paged; value is a power of two.")
     public void maxArrayLengthShift(@Name(value = "maxArrayLengthShift") long maxArrayLengthShift) {
