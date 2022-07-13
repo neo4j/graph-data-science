@@ -238,20 +238,6 @@ public class RandomWalkWithRestarts {
             return startNode;
         }
         int targetOffset = rng.nextInt(degree);
-        return getTarget(inputGraph, currentNode.getValue(), targetOffset);
-    }
-
-    private long getTarget(RelationshipIterator inputGraph, long sourceNode, int targetOffset) {
-        var targetsRemaining = new MutableInt(targetOffset);
-        var target = new MutableLong();
-        inputGraph.forEachRelationship(sourceNode, (src, trg) -> {
-            if (targetsRemaining.getValue() == 0) {
-                target.setValue(trg);
-                return false;
-            }
-            targetsRemaining.decrement();
-            return true;
-        });
-        return target.getValue();
+        return inputGraph.getNeighbor(currentNode.getValue(), targetOffset);
     }
 }

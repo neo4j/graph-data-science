@@ -27,6 +27,8 @@ import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -119,5 +121,48 @@ class CSRGraphStoreTest {
 
         assertThat(graphStore.graphProperty("longProp")).isNotNull();
         assertThat(graphStore.schema().graphProperties()).containsEntry("longProp", PropertySchema.of("longProp", ValueType.LONG));
+    }
+
+    @Test
+    void getNeighborIsConsistentWithRelationshipIteration() {
+        var factory = GdlFactory.of(
+            " (a)-[:T]->(b)" +
+            ", (b)-[:T]->(a)" +
+            ", (b)-[:T]->(c)" +
+            ", (a)-[:T]->(b)" +
+            ", (b)-[:T]->(a)" +
+            ", (b)-[:T]->(b)" +
+            ", (b)-[:T]->(c)"
+        );
+        var graphStore = factory.build();
+        var graph = graphStore.getUnion();
+
+        var expected = new HashMap<Long, List<Long>>();
+        var actual = new HashMap<Long, List<Long>>();
+        for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
+            var expectedNeighbors = new ArrayList<Long>();
+            expected.put(nodeId, expectedNeighbors);
+            graph.forEachRelationship(nodeId, (src, trg) -> {
+                expectedNeighbors.add(trg);
+                return true;
+            });
+
+            var actualNeighbors = new ArrayList<Long>();
+            actual.put(nodeId, actualNeighbors);
+            for (int offset = 0; offset < graph.degree(nodeId); offset++) {
+                actualNeighbors.add(graph.getNeighbor(nodeId, offset));
+            }
+        }
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void outOfBoundNeighborShouldThrow() {
+        var factory = GdlFactory.of(" (a)-[:T]->(b)");
+        var graphStore = factory.build();
+        var graph = graphStore.getUnion();
+
+        assertThatThrownBy(() -> graph.getNeighbor(0, 1)).hasMessageContaining("Offset 1 is out of bounds for node 0 with degree 1.");
+        assertThatThrownBy(() -> graph.getNeighbor(1, 0)).hasMessageContaining("Offset 0 is out of bounds for node 1 with degree 0.");
     }
 }
