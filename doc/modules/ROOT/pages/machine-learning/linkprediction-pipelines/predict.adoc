@@ -27,6 +27,33 @@ Finally, the configured `topN` predictions are stored back to the projected grap
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
 
+== Considerations
+
+To find the best links, we need to search through all possible links defined as a pair of nodes.
+GDS offers two different search strategies.
+
+[[algorithms-link-prediction-pipelines-predict-exhaustive-search]]
+=== Exhaustive Search
+
+The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
+For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
+The exhaustive search will find all the best links, but has a potentially long runtime.
+
+[[algorithms-link-prediction-pipelines-predict-approximate-search]]
+=== Approximate Search
+
+As an exhaustive every node pair is not feasible with larger graphs, GDS also offers an approximate search.
+To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
+
+The approximate search strategy lets us leverage the xref::algorithms/knn.adoc[K-Nearest Neighbors algorithm] with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
+Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions, i.e. the best predictions that would be made by exhaustive search.
+
+The initial set of considered links for each node is picked at random and then refined in multiple iterations based of previously predicted links.
+The number of iterations is limited by the configuration parameter `maxIterations`, and we also limit the number of random links considered between kNN iterations using `randomJoins`.
+The algorithm may stop earlier if the link predictions per node only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
+See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more details on how the search works.
+
+
 
 == Syntax
 
@@ -208,15 +235,8 @@ We can see, that our model predicts the most likely links are the five above.
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
 === Mutate
 
-In these examples we will show how to write the predictions to your projected graph.
+In this example we will show how to write the predictions to your projected graph.
 We will use the model `lp-pipeline-model`, that we trained in the xref::machine-learning/linkprediction-pipelines/training.adoc[train example].
-
-
-[[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]
-==== Exhaustive search
-
-The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
-For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
 
 [role=query-example, group=lp]
 --
@@ -253,17 +273,9 @@ It may therefore be a more viable option to use a search strategy that only look
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-approximate]]
-==== Approximate search
+=== Approximate search
 
-To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
-
-The approximate search strategy lets us leverage the xref::algorithms/knn.adoc[K-Nearest Neighbors algorithm] with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
-Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions, i.e. the best predictions that would be made by exhaustive search.
-
-The initial set of considered links for each node is picked at random and then refined in multiple iterations based of previously predicted links.
-The number of iterations is limited by the configuration parameter `maxIterations`, and we also limit the number of random links considered between kNN iterations using `randomJoins`.
-The algorithm may stop earlier if the link predictions per node only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
-See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more details on how the search works.
+To avoid possibly having to run for a very long time considering all possible new links, we can use the <<algorithms-link-prediction-pipelines-predict-approximate-search, approximate search strategy>>.
 
 [role=query-example, group=lp]
 --
