@@ -220,10 +220,10 @@ public final class MultiLabelInformation implements LabelInformation {
         public LabelInformation build(long nodeCount, LongUnaryOperator mappedIdFn) {
             var labelInformation = buildInner(nodeCount, mappedIdFn);
 
-            if (labelInformation.isEmpty()) {
+            if (labelInformation.isEmpty() && starNodeLabelMappings.isEmpty()) {
                 return new SingleLabelInformation.Builder(NodeLabel.ALL_NODES).build(nodeCount, mappedIdFn);
             }
-            else if (labelInformation.size() == 1) {
+            else if (labelInformation.size() == 1 && starNodeLabelMappings.isEmpty()) {
                 return new SingleLabelInformation.Builder(labelInformation.keySet().iterator().next()).build(nodeCount, mappedIdFn);
             }
 
