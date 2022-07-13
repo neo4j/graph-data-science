@@ -72,7 +72,7 @@ class SysInfoProcTest extends BaseProcTest {
         var isInteger = new Condition<>(v -> (v instanceof Long) || (v instanceof Integer), "isInteger");
 
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(42) // this is actually the min number of entries :)
+            .hasSizeGreaterThanOrEqualTo(43)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())

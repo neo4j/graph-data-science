@@ -106,7 +106,11 @@ public class SysInfoProc {
             .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureMaxArrayLengthShift", GdsFeatureToggles.MAX_ARRAY_LENGTH_SHIFT.get()))
             .add(value("featurePropertyValueIndex", GdsFeatureToggles.USE_PROPERTY_VALUE_INDEX.isEnabled()))
-            .add(value("featureParallelPropertyValueIndex", GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()))
+            .add(value(
+                "featureParallelPropertyValueIndex",
+                GdsFeatureToggles.USE_PARALLEL_PROPERTY_VALUE_INDEX.isEnabled()
+            ))
+            .add(value("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value("featureShardedIdMap", GdsFeatureToggles.USE_SHARDED_ID_MAP.isEnabled()))
             .add(value("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled()))
