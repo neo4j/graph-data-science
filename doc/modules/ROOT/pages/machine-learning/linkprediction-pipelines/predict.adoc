@@ -21,11 +21,31 @@ When using the model for prediction, the relationships of the input graph are us
 First, the input graph is fed into the feature pipeline and therefore influences predictions if there is at least one step in the pipeline which uses the input relationships (typically any node property step does).
 Second, predictions are carried out on each node pair that is not connected in the input graph.
 
-The predicted links are sorted by score before the ones having score below the configured `threshold` are discarded.
-Finally, the configured `topN` predictions are stored back to the projected graph.
-
 It is necessary that the predict graph contains the properties that the pipeline requires and that the used array properties have the same dimensions as in the train graph.
 If the predict and train graphs are distinct, it is also beneficial that they have similar origins and semantics, so that the model is able to generalize well.
+
+== Search strategies
+
+To find the best possible new links, GDS offers two different search strategies.
+
+[[algorithms-link-prediction-pipelines-predict-exhaustive-search]]
+=== Exhaustive Search
+
+The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
+For each such node pair the trained model is used to predict whether they should be connected by a link or not.
+The exhaustive search will find all the best links, but has a potentially long runtime.
+
+[[algorithms-link-prediction-pipelines-predict-approximate-search]]
+=== Approximate Search
+
+To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count), GDS offers an approximate search strategy.
+
+The approximate search strategy lets us leverage the xref::algorithms/knn.adoc[K-Nearest Neighbors algorithm] with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
+Accuracy in this context refers to how close the result is to the very best new possible links according to our models predictions, i.e. the best predictions that would be made by exhaustive search.
+
+The initial set of considered links for each node is picked at random and then refined in multiple iterations based of previously predicted links.
+See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more details on how the search works.
+
 
 
 == Syntax
@@ -189,6 +209,7 @@ CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
 ----
 
 We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+As the default samplingRate is `1`, we use the xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
 
 .Results
 [opts="header"]
@@ -208,15 +229,8 @@ We can see, that our model predicts the most likely links are the five above.
 [[algorithms-link-prediction-pipelines-predict-examples-mutate]]
 === Mutate
 
-In these examples we will show how to write the predictions to your projected graph.
+In this example we will show how to write the predictions to your projected graph.
 We will use the model `lp-pipeline-model`, that we trained in the xref::machine-learning/linkprediction-pipelines/training.adoc[train example].
-
-
-[[algorithms-link-prediction-pipelines-predict-examples-exhaustive]]
-==== Exhaustive search
-
-The exhaustive search will simply run through all possible new links, that is, check all node pairs that are not already connected by a relationship.
-For each such node pair the model we trained will be used to predict whether there they should be connected be a link or not.
 
 [role=query-example, group=lp]
 --
@@ -232,6 +246,7 @@ CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
 ----
 
 We specify `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+As the default samplingRate is `1`, we use the xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
 Note that we omit setting the `sampleRate` in our configuration as it defaults to 1 implying that the exhaustive search strategy is used.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
@@ -253,17 +268,9 @@ It may therefore be a more viable option to use a search strategy that only look
 
 
 [[algorithms-link-prediction-pipelines-predict-examples-approximate]]
-==== Approximate search
+=== Approximate search
 
-To avoid possibly having to run for a very long time considering all possible new links (due to the inherent quadratic complexity over node count) we can use an approximate search strategy.
-
-The approximate search strategy lets us leverage the xref::algorithms/knn.adoc[K-Nearest Neighbors algorithm] with our model's prediction function as its similarity measure to trade off lower runtime for accuracy.
-Accuracy in this context refers to how close we are in finding the very best actual new possible links according to our models predictions, i.e. the best predictions that would be made by exhaustive search.
-
-The initial set of considered links for each node is picked at random and then refined in multiple iterations based of previously predicted links.
-The number of iterations is limited by the configuration parameter `maxIterations`, and we also limit the number of random links considered between kNN iterations using `randomJoins`.
-The algorithm may stop earlier if the link predictions per node only change by a small amount, which can be controlled by the configuration parameter `deltaThreshold`.
-See the xref::algorithms/knn.adoc[K-Nearest Neighbors documentation] for more details on how the search works.
+To avoid possibly having to run for a very long time considering all possible new links, we can use the xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-approximate-search[approximate search strategy].
 
 [role=query-example, group=lp]
 --
@@ -285,7 +292,8 @@ CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
 ----
 
 In order to use the approximate strategy we make sure to set the `sampleRate` explicitly to a value `< 1.0`.
-In this small example we set `topK = 1` to only get one link predicted for each node.
+For this small example, we limit the search by setting the `maxIterations` to `3` and `randomJoins` to `2` .
+Also, we set `topK = 1` to get one predicted link for each node.
 Because we are using the `UNDIRECTED` orientation, we will write twice as many relationships to the in-memory graph.
 
 .Results
