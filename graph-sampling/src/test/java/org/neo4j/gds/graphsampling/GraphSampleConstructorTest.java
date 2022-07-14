@@ -145,6 +145,7 @@ class GraphSampleConstructorTest {
             .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
+            .concurrency(1)
             .randomSeed(42L)
             .build();
 
@@ -201,6 +202,7 @@ class GraphSampleConstructorTest {
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
             .restartProbability(0.1)
+            .concurrency(1)
             .randomSeed(42L)
             .build();
 

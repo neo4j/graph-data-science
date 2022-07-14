@@ -26,17 +26,25 @@ import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.SplittableRandom;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double ALPHA = 0.9;
     private static final double QUALITY_THRESHOLD = 0.05;
-
     private final GraphStore inputGraphStore;
     private final RandomWalkWithRestartsConfig config;
     private final SplittableRandom rng;
@@ -48,12 +56,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
         this.inputGraphStore = inputGraphStore;
         this.config = config;
         this.rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
-
     }
 
     @Override
     public IdMap sampleNodes(Graph inputGraph) {
-
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
@@ -64,63 +70,35 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .build();
 
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        LongDoubleMap walkQualityPerStartNode = initializeQualityMap(inputGraph);
-        long currentNode = select(walkQualityPerStartNode);
-        long currentStartNode = currentNode;
-        int addedNodes = 0;
-        int walkLength = 1;
+        var walkQualityPerStartNode = initializeQualityMap(inputGraph);
+        var startNodes = Collections.synchronizedList(new ArrayList<Long>(Arrays
+            .stream(walkQualityPerStartNode.keys().toArray())
+            .boxed()
+            .collect(Collectors.toList())));
+        var numberOfStartNodes = new AtomicInteger(startNodes.size());
+        var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
+        var tasks = ParallelUtil.tasks(config.concurrency(), () ->
+            new Walker(
+                startNodes,
+                numberOfStartNodes,
+                seenNodes,
+                expectedNodes,
+                new LongDoubleHashMap(walkQualityPerStartNode),
+                rng.split(),
+                inputGraph.concurrentCopy(),
+                hasLabelInformation,
+                config,
+                nodesBuilder
+            )
+        );
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .run();
 
-        var seen = HugeAtomicBitSet.create(inputGraph.nodeCount());
-        while (seen.cardinality() < expectedNodes) {
-            if (!seen.get(currentNode)) {
-                long originalId = inputGraph.toOriginalNodeId(currentNode);
-                if (hasLabelInformation) {
-                    var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode));
-                    nodesBuilder.addNode(originalId, nodeLabelToken);
-                } else {
-                    nodesBuilder.addNode(originalId);
-                }
-                seen.set(currentNode);
-                addedNodes++;
-            }
-
-            // walk a step
-            int degree = inputGraph.degree(currentNode);
-            if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
-                // walk ended, so check if we need to add a new startNode
-                double walkQuality = ((double) addedNodes) / walkLength;
-                double oldQuality = walkQualityPerStartNode.get(currentStartNode);
-                walkQualityPerStartNode.put(currentStartNode, ALPHA * oldQuality + (1 - ALPHA) * walkQuality);
-
-                double expectedQuality = expectedQuality(walkQualityPerStartNode);
-                if (expectedQuality < QUALITY_THRESHOLD) {
-                    long newNode = rng.nextLong(inputGraph.nodeCount());
-                    walkQualityPerStartNode.put(newNode, 1.0);
-                }
-
-                currentStartNode = select(walkQualityPerStartNode);
-                currentNode = currentStartNode;
-                addedNodes = 0;
-                walkLength = 1;
-            } else {
-                int targetOffset = rng.nextInt(degree);
-                currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
-                walkLength++;
-            }
-
-        }
         var idMapAndProperties = nodesBuilder.build();
 
         return idMapAndProperties.idMap();
-    }
-
-    private double expectedQuality(LongDoubleMap walkQualityPerStartNode) {
-        double sumOfQualities = valueSum(walkQualityPerStartNode);
-        double sumOfSquaredQualities = 0.0;
-        for (DoubleCursor quality : walkQualityPerStartNode.values()) {
-            sumOfSquaredQualities += quality.value * quality.value;
-        }
-        return sumOfSquaredQualities / sumOfQualities;
     }
 
     private LongDoubleMap initializeQualityMap(Graph inputGraph) {
@@ -135,25 +113,136 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return qualityMap;
     }
 
-    private long select(LongDoubleMap qualityMap) {
-        double sum = valueSum(qualityMap);
-        double sample = rng.nextDouble(sum);
-        double traversedSum = 0.0;
-        for (LongDoubleCursor cursor : qualityMap) {
-            traversedSum += cursor.value;
-            if (traversedSum >= sample) {
-                return cursor.key;
+    static class Walker implements Runnable {
+
+        private final List<Long> startNodes;
+        private final AtomicInteger numberOfStartNodes;
+        private final HugeAtomicBitSet seenNodes;
+        private final long expectedNodes;
+        private final LongDoubleHashMap walkQualityPerStartNode;
+        private final SplittableRandom rng;
+        private final Graph inputGraph;
+        private final boolean hasLabelInformation;
+        private final RandomWalkWithRestartsConfig config;
+        private final NodesBuilder nodesBuilder;
+
+        Walker(
+            List<Long> startNodes,
+            AtomicInteger numberOfStartNodes,
+            HugeAtomicBitSet seenNodes,
+            long expectedNodes,
+            LongDoubleHashMap walkQualityPerStartNode,
+            SplittableRandom rng,
+            Graph inputGraph,
+            boolean hasLabelInformation,
+            RandomWalkWithRestartsConfig config,
+            NodesBuilder nodesBuilder
+        ) {
+            this.startNodes = startNodes;
+            this.numberOfStartNodes = numberOfStartNodes;
+            this.seenNodes = seenNodes;
+            this.expectedNodes = expectedNodes;
+            this.walkQualityPerStartNode = walkQualityPerStartNode;
+            this.rng = rng;
+            this.inputGraph = inputGraph;
+            this.hasLabelInformation = hasLabelInformation;
+            this.config = config;
+            this.nodesBuilder = nodesBuilder;
+        }
+
+        @Override
+        public void run() {
+            long currentNode = nextStartNode();
+            long currentStartNode = currentNode;
+            int addedNodes = 0;
+            int nodesConsidered = 1;
+
+            while (seenNodes.cardinality() < expectedNodes) {
+                if (!seenNodes.getAndSet(currentNode)) {
+                    long originalId = inputGraph.toOriginalNodeId(currentNode);
+                    if (hasLabelInformation) {
+                        var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode));
+                        nodesBuilder.addNode(originalId, nodeLabelToken);
+                    } else {
+                        nodesBuilder.addNode(originalId);
+                    }
+                    addedNodes++;
+                }
+
+                // walk a step
+                int degree = inputGraph.degree(currentNode);
+                if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
+                    // walk ended, so check if we need to add a new startNode
+                    double walkQuality = ((double) addedNodes) / nodesConsidered;
+                    double oldQuality = walkQualityPerStartNode.get(currentStartNode);
+                    walkQualityPerStartNode.put(
+                        currentStartNode,
+                        ALPHA * oldQuality + (1 - ALPHA) * walkQuality
+                    );
+
+                    updateLocalStartNodes();
+
+                    double expectedQuality = expectedQuality(walkQualityPerStartNode);
+                    if (expectedQuality < QUALITY_THRESHOLD) {
+                        int localNumberOfStartNodes = walkQualityPerStartNode.size();
+                        // If another thread added a new start node, then quality has probably increased enough for now.
+                        if (numberOfStartNodes.compareAndSet(localNumberOfStartNodes, localNumberOfStartNodes + 1)) {
+                            long newNode = rng.nextLong(inputGraph.nodeCount());
+                            startNodes.add(newNode);
+                        }
+                    }
+
+                    currentStartNode = nextStartNode();
+                    currentNode = currentStartNode;
+                    addedNodes = 0;
+                    nodesConsidered = 1;
+                } else {
+                    int targetOffset = rng.nextInt(degree);
+                    currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
+                    nodesConsidered++;
+                }
             }
         }
-        throw new IllegalStateException("Something went wrong :(");
+
+        // Make sure using all possible start nodes added by all threads.
+        private void updateLocalStartNodes() {
+            if (walkQualityPerStartNode.size() < startNodes.size()) {
+                for (int i = walkQualityPerStartNode.size(); i < startNodes.size(); i++) {
+                    walkQualityPerStartNode.put(startNodes.get(i), 1.0);
+                }
+            }
+        }
+
+        private long nextStartNode() {
+            double sum = valueSum(walkQualityPerStartNode);
+            double sample = rng.nextDouble(sum);
+            double traversedSum = 0.0;
+            for (LongDoubleCursor cursor : walkQualityPerStartNode) {
+                traversedSum += cursor.value;
+                if (traversedSum >= sample) {
+                    return cursor.key;
+                }
+            }
+            throw new IllegalStateException("Something went wrong :(");
+        }
+
+        private double expectedQuality(LongDoubleMap walkQualityPerStartNode) {
+            double sumOfQualities = valueSum(walkQualityPerStartNode);
+            double sumOfSquaredQualities = 0.0;
+            for (DoubleCursor quality : walkQualityPerStartNode.values()) {
+                sumOfSquaredQualities += quality.value * quality.value;
+            }
+            return sumOfSquaredQualities / sumOfQualities;
+        }
+
+        private double valueSum(LongDoubleMap qualityMap) {
+            double sum = 0.0;
+            for (DoubleCursor quality : qualityMap.values()) {
+                sum += quality.value;
+            }
+            return sum;
+        }
     }
 
-    private double valueSum(LongDoubleMap qualityMap) {
-        double sum = 0.0;
-        for (DoubleCursor quality : qualityMap.values()) {
-            sum += quality.value;
-        }
-        return sum;
-    }
 
 }
