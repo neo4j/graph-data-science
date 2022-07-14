@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import com.carrotsearch.hppc.predicates.LongLongPredicate;
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
@@ -62,6 +64,13 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         var negativeSamples = (long) (negativeSamplingRatio * graph.relationshipCount() * holdoutFraction);
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
 
+        var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
+        MutableLong sourceNodeCount = new MutableLong(sourceNodesWithRequiredNodeLabels.nodeCount());
+        var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
+
+        LongPredicate isValidSourceNode = sourceNodesWithRequiredNodeLabels::contains;
+        LongPredicate isValidTargetNode = targetNodesWithRequiredNodeLabels::contains;
+        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
         graph.forEachNode(nodeId -> {
             positiveSampling(
                 graph,
@@ -76,7 +85,10 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 masterGraph,
                 selectedRelsBuilder,
                 negativeSamplesRemaining,
-                nodeId
+                nodeId,
+                isValidSourceNode,
+                isValidTargetNode,
+                sourceNodeCount
             );
             return true;
         });

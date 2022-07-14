@@ -46,7 +46,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.NEGATIVE;
-import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -66,7 +65,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void split() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        double negativeSamplingRatio = 1.0;
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -81,23 +81,17 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
             // it selected 2,5 (neg) and 3,2 (pos) relationships
-            assertEquals(2L, topology.elementCount());
-            assertRelExists(topology, 2, 5);
-            assertRelExists(topology, 3, 2);
+            assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
-
-        var selectedProperties = selectedRels.properties().get();
-        assertEquals(2, selectedProperties.elementCount());
-        assertRelProperties(selectedProperties, 3, POSITIVE);
-        assertRelProperties(selectedProperties, 2, NEGATIVE);
     }
 
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 2.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        double negativeSamplingRatio = 2.0;
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -111,19 +105,9 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 2,5 (neg), 4,2 (neg) and 3,2 (pos) relationships
-            assertEquals(3L, topology.elementCount());
-            assertRelExists(topology, 3, 2);
-            assertRelExists(topology, 2, 5);
-            assertRelExists(topology, 4, 2);
+            assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
-        });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(3L, p.elementCount());
-            assertRelProperties(p, 3, POSITIVE);
-            assertRelProperties(p, 2, NEGATIVE);
-            assertRelProperties(p, 4, NEGATIVE);
         });
     }
 
@@ -255,13 +239,9 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            assertEquals(3L, topology.elementCount());
             assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
-        });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(3L, p.elementCount());
         });
 
         assertNodeLabelFilter(selectedRels.topology(), sourceNodeLabels, targetNodeLabels, graph);
@@ -287,16 +267,11 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            assertEquals(6L, topology.elementCount());
             assertRelSamplingProperties(selectedRels, multiLabelGraph, negativeSamplingRatio);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(6L, p.elementCount());
-        });
 
-        //Current failing because NodeLabel filtering not implemented for negative Sampling yet.
         assertNodeLabelFilter(selectedRels.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
 
     }

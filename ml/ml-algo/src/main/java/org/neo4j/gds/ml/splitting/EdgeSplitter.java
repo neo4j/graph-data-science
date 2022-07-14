@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.splitting;
 
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -111,13 +112,19 @@ public abstract class EdgeSplitter {
         Graph masterGraph,
         RelationshipsBuilder selectedRelsBuilder,
         MutableLong negativeSamplesRemaining,
-        long nodeId
+        long nodeId,
+        LongPredicate isValidSourceNode,
+        LongPredicate isValidTargetNode,
+        MutableLong validSourceNodeCount
     ) {
+        if (!isValidSourceNode.apply(nodeId)) {
+            return;
+        }
         var masterDegree = masterGraph.degree(nodeId);
         var negativeEdgeCount = samplesPerNode(
             (masterGraph.nodeCount() - 1) - masterDegree,
             negativeSamplesRemaining.doubleValue(),
-            graph.nodeCount() - nodeId
+            validSourceNodeCount.getAndDecrement()
         );
 
         var neighbours = new HashSet<Long>(masterDegree);
@@ -133,7 +140,7 @@ public abstract class EdgeSplitter {
         for (int i = 0; i < negativeEdgeCount; i++) {
             var negativeTarget = randomNodeId(graph);
             // no self-relationships
-            if (!neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
+            if (isValidTargetNode.apply(negativeTarget) && !neighbours.contains(negativeTarget) && negativeTarget != nodeId) {
                 negativeSamplesRemaining.decrementAndGet();
                 selectedRelsBuilder.addFromInternal(graph.toRootNodeId(nodeId), graph.toRootNodeId(negativeTarget), NEGATIVE);
             } else if (retries-- > 0) {

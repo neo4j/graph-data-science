@@ -59,6 +59,7 @@ abstract class EdgeSplitterBaseTest {
                 assertThat(edgeIsPositive)
                     .isEqualTo(inputGraph.exists(source, targetNodeCursor.nextVLong()));
             }
+            assertThat(propertyCursor.hasNextLong()).isFalse();
             return true;
         });
         assertThat(relationships.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));

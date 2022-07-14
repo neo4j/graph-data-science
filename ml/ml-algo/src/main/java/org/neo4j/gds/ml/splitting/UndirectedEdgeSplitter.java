@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import com.carrotsearch.hppc.predicates.LongLongPredicate;
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
@@ -69,10 +70,13 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         }
 
         var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
+        MutableLong sourceNodeCount = new MutableLong(sourceNodesWithRequiredNodeLabels.nodeCount());
         var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
 
         //TODO Shortcut predicate impl to return true if bitSet contains all
-        LongLongPredicate isValidNodePair = (s, t) -> sourceNodesWithRequiredNodeLabels.contains(s) && targetNodesWithRequiredNodeLabels.contains(t);
+        LongPredicate isValidSourceNode = sourceNodesWithRequiredNodeLabels::contains;
+        LongPredicate isValidTargetNode = targetNodesWithRequiredNodeLabels::contains;
+        LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
@@ -127,7 +131,10 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 masterGraph,
                 selectedRelsBuilder,
                 negativeSamplesRemaining,
-                nodeId
+                nodeId,
+                isValidSourceNode,
+                isValidTargetNode,
+                sourceNodeCount
             );
             return true;
         });
