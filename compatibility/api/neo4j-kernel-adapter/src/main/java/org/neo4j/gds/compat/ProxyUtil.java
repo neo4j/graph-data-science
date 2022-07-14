@@ -39,7 +39,7 @@ public final class ProxyUtil {
             .map(ServiceLoader.Provider::get)
             .filter(f -> {
                 var canLoad = f.canLoad(neo4jVersion);
-                log.info("GDS compatibility for %s: %s", f, canLoad ? "available" : "not available");
+                log.info("GDS compatibility for %s: %s", f.description(), canLoad ? "available" : "not available");
                 return canLoad;
             })
             .findFirst()
