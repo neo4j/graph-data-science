@@ -73,9 +73,9 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         MutableLong sourceNodeCount = new MutableLong(sourceNodesWithRequiredNodeLabels.nodeCount());
         var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
 
-        //TODO Shortcut predicate impl to return true if bitSet contains all
-        LongPredicate isValidSourceNode = sourceNodesWithRequiredNodeLabels::contains;
-        LongPredicate isValidTargetNode = targetNodesWithRequiredNodeLabels::contains;
+        //TODO Pass in graphStore to avoid mapping to rootNodeIds
+        LongPredicate isValidSourceNode = node -> sourceNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);

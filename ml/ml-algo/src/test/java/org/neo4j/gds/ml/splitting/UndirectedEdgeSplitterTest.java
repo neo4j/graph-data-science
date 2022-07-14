@@ -264,6 +264,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
+        assertRelInGraph(remainingRels, multiLabelGraph);
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {

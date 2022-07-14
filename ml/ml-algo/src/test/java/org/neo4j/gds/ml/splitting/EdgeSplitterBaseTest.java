@@ -74,6 +74,21 @@ abstract class EdgeSplitterBaseTest {
             }
             return true;
         });
+    }
 
+    void assertRelInGraph(Relationships relationships, Graph inputGraph) {
+        inputGraph.forEachNode(source -> {
+            var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
+            var propertyCursor = relationships.properties().map(p -> p.propertiesList().propertyCursor(source));
+            while (targetNodeCursor.hasNextVLong()) {
+                var targetNode = targetNodeCursor.nextVLong();
+                assertThat(inputGraph.exists(source, targetNode)).isTrue();
+                propertyCursor.ifPresent(cursor -> {
+                    assertThat(inputGraph.relationshipProperty(source, targetNode)).isEqualTo(Double.longBitsToDouble(cursor.nextLong()));
+                });
+
+            }
+            return true;
+        });
     }
 }

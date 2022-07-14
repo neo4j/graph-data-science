@@ -195,10 +195,11 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var remainingRels = result.remainingRels();
         // 1 positive selected reduces remaining
-        assertRelSamplingProperties(remainingRels, multiLabelGraph, negativeSamplingRatio);
+        assertEquals(4L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
+        assertRelInGraph(remainingRels, multiLabelGraph);
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {

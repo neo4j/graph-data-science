@@ -60,8 +60,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         MutableLong negativeSourceNodeCount = new MutableLong(positiveSourceNodeCount.longValue());
         var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
 
-        LongPredicate isValidSourceNode = sourceNodesWithRequiredNodeLabels::contains;
-        LongPredicate isValidTargetNode = targetNodesWithRequiredNodeLabels::contains;
+        LongPredicate isValidSourceNode = node -> sourceNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
