@@ -301,20 +301,12 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void zeroNegativeSamples() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 0.0);
+        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 0.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
 
-        try (var adjacencyProperties = result.selectedRels().properties().orElseThrow().propertiesList()) {
-            graph.forEachNode(nodeId -> {
-                PropertyCursor cursor = adjacencyProperties.propertyCursor(0);
-                while (cursor.hasNextLong()) {
-                    assertThat(Double.longBitsToDouble(cursor.nextLong())).isEqualTo(POSITIVE);
-                }
-                return true;
-            });
-        }
+        assertRelSamplingProperties(result.selectedRels(), graph, 0.0);
     }
 
     private boolean relationshipsAreEqual(IdMap mapping, Relationships r1, Relationships r2) {
