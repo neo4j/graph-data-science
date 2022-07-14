@@ -83,7 +83,7 @@ class RandowWalkWithRestartsTest {
     }
 
     @Test
-    void shouldSampleAndFilterSchema() {
+    void shouldSample() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
@@ -114,7 +114,7 @@ class RandowWalkWithRestartsTest {
     }
 
     @Test
-    void shouldFilterGraph() {
+    void shouldSampleWithFiltering() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNodes(List.of(idFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
@@ -173,5 +173,40 @@ class RandowWalkWithRestartsTest {
         for (int i = 0; i < nodes1.nodeCount(); i++) {
             assertThat(nodes1.toOriginalNodeId(i)).isEqualTo(nodes2.toOriginalNodeId(i));
         }
+    }
+
+    @Test
+    void shouldNotExploreNewStartNode() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x")))
+            .samplingRatio(4.0 / graphStore.nodeCount() + 0.001)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(4);
+
+        assertThat(nodes.contains(idFunction.of("x"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x1"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x2"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x3"))).isTrue();
+    }
+
+    @Test
+    void shouldExploreNewStartNode() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x")))
+            .samplingRatio(5.0 / graphStore.nodeCount() + 0.001)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(5);
     }
 }

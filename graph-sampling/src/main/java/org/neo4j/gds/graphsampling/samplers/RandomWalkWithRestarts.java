@@ -27,11 +27,13 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.SplittableRandom;
-import java.util.stream.Collectors;
 
 public class RandomWalkWithRestarts implements NodesSampler {
+    private static final double ALPHA = 0.9;
+    private static final double QUALITY_THRESHOLD = 0.05;
 
     private final GraphStore inputGraphStore;
     private final RandomWalkWithRestartsConfig config;
@@ -60,9 +62,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .build();
 
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        final List<Long> startNodes = getStartNodes(inputGraph);
-        var currentNode = startNodes.get(rng.nextInt(startNodes.size()));
-        // must keep track of this because nodesBuilder may not have flushed its buffer, so importedNodes cannot be used atm
+        var walkQualityPerStartNode = initializeQualityMap(inputGraph);
+        long currentNode = select(walkQualityPerStartNode);
+        long currentStartNode = currentNode;
+        int addedNodes = 0;
+        int nodesConsidered = 1;
+
         var seen = HugeAtomicBitSet.create(inputGraph.nodeCount());
         while (seen.cardinality() < expectedNodes) {
             if (!seen.get(currentNode)) {
@@ -74,28 +79,62 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     nodesBuilder.addNode(originalId);
                 }
                 seen.set(currentNode);
+                addedNodes++;
             }
-            currentNode  = walkStep(currentNode, startNodes, inputGraph, rng);
+
+            // walk a step
+            int degree = inputGraph.degree(currentNode);
+            if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
+                // walk ended, so check if we need to add a new startNode
+                double walkQuality = ((double) addedNodes) / nodesConsidered;
+                walkQualityPerStartNode.compute(currentStartNode, (nodeId, oldQuality) -> ALPHA * oldQuality + (1 - ALPHA) * walkQuality);
+                double sumOfSquaredQualities = walkQualityPerStartNode.values().stream().mapToDouble(d -> d * d).sum();
+                double sumOfQualities = walkQualityPerStartNode.values().stream().mapToDouble(d -> d).sum();
+                double expectedQuality = sumOfSquaredQualities / sumOfQualities;
+                if (expectedQuality < QUALITY_THRESHOLD) {
+                    long newNode = rng.nextLong(inputGraph.nodeCount());
+                    walkQualityPerStartNode.put(newNode, 1.0);
+                }
+
+                currentStartNode = select(walkQualityPerStartNode);
+                currentNode = currentStartNode;
+                addedNodes = 0;
+                nodesConsidered = 1;
+            } else {
+                int targetOffset = rng.nextInt(degree);
+                currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
+                nodesConsidered++;
+            }
+
         }
         var idMapAndProperties = nodesBuilder.build();
 
         return idMapAndProperties.idMap();
     }
 
-    private List<Long> getStartNodes(Graph inputGraph) {
+    private Map<Long, Double> initializeQualityMap(Graph inputGraph) {
+        var qualityMap = new HashMap<Long, Double>();
         if (!config.startNodes().isEmpty()) {
-            return config.startNodes().stream().map(inputGraph::toMappedNodeId).collect(Collectors.toList());
+            config.startNodes().forEach(nodeId -> {
+                qualityMap.put(inputGraph.toMappedNodeId(nodeId), 1.0);
+            });
+        } else {
+            qualityMap.put(rng.nextLong(inputGraph.nodeCount()), 1.0);
         }
-        return List.of(rng.nextLong(inputGraph.nodeCount()));
+        return qualityMap;
     }
 
-    private long walkStep(long currentNode, List<Long> startNodes, Graph inputGraph, SplittableRandom rng) {
-        int degree = inputGraph.degree(currentNode);
-        if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
-            return startNodes.get(rng.nextInt(startNodes.size()));
+    private long select(Map<Long, Double> qualityMap) {
+        double sum = qualityMap.values().stream().mapToDouble(d -> d).sum();
+        double sample = rng.nextDouble(sum);
+        double traversedSum = 0.0;
+        for (Map.Entry<Long, Double> entry : qualityMap.entrySet()) {
+            traversedSum += entry.getValue();
+            if (traversedSum >= sample) {
+                return entry.getKey();
+            }
         }
-        int targetOffset = rng.nextInt(degree);
-
-        return inputGraph.getNeighbor(currentNode, targetOffset);
+        throw new IllegalStateException("Something went wrong :(");
     }
+
 }
