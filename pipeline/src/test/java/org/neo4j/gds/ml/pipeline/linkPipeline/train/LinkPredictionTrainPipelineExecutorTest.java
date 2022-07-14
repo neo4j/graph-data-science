@@ -232,8 +232,8 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             var actualModel = result.model();
             assertThat(actualModel.customInfo().toMap()).containsEntry("metrics",
                 Map.of("OUT_OF_BAG_ERROR", Map.of(
-                    "test", 0.75,
-                    "validation", Map.of("avg", 0.75, "max", 0.75, "min", 0.75))
+                    "test", 0.875,
+                    "validation", Map.of("avg", 0.875, "max", 1.0, "min", 0.75))
                 )
             );
             assertThat((Map) actualModel.customInfo().toMap().get("metrics")).containsOnlyKeys("OUT_OF_BAG_ERROR");
@@ -461,13 +461,13 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
                     "Link Prediction Train Pipeline :: Select best model :: Best trial was Trial 1 with main validation metric 1.0000",
                     "Link Prediction Train Pipeline :: Select best model :: Finished",
                     "Link Prediction Train Pipeline :: Train best model :: Start",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6541",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6179",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.5843",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.1311",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.1309",
-                    "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.1306",
-                    "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.1306. Did not converge",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 1 with loss 0.6603",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 2 with loss 0.6296",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 3 with loss 0.6007",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 98 with loss 0.1622",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 99 with loss 0.1618",
+                    "Link Prediction Train Pipeline :: Train best model :: Epoch 100 with loss 0.1614",
+                    "Link Prediction Train Pipeline :: Train best model :: terminated after 100 out of 100 epochs. Initial loss: 0.6931, Last loss: 0.1614. Did not converge",
                     "Link Prediction Train Pipeline :: Train best model 100%",
                     "Link Prediction Train Pipeline :: Train best model :: Finished",
                     "Link Prediction Train Pipeline :: Compute train metrics :: Start",

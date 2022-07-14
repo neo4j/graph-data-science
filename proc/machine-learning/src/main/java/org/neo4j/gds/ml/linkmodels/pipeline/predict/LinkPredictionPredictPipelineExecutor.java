@@ -73,10 +73,9 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         // For prediction, we don't split the input graph but generate the features and predict over the whole graph
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
-            ImmutableGraphFilter.of(
-                config.nodeLabelIdentifiers(graphStore),
-                config.internalRelationshipTypes(graphStore)
-            )
+            ImmutableGraphFilter.builder()
+                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+                .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
         );
     }
 

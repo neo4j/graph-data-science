@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -32,7 +31,6 @@ import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
 import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 
-import java.util.Collection;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -60,7 +58,8 @@ public class RelationshipSplitter {
 
     public void splitRelationships(
         RelationshipType targetRelationshipType,
-        Collection<NodeLabel> nodeLabels,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
@@ -74,13 +73,13 @@ public class RelationshipSplitter {
         // Relationship sets: test, train, feature-input, test-complement. The nodes are always the same.
         // 1. Split base graph into test, test-complement
         //      Test also includes newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.testSplit(targetRelationshipType, randomSeed, relationshipWeightProperty), nodeLabels);
+        relationshipSplit(splitConfig.testSplit(targetRelationshipType, sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeightProperty));
         validateTestSplit(graphStore);
 
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(randomSeed, relationshipWeightProperty), nodeLabels);
+        relationshipSplit(splitConfig.trainSplit(sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeightProperty));
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -97,11 +96,11 @@ public class RelationshipSplitter {
         }
     }
 
-    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig, Collection<NodeLabel> nodeLabels) {
+    private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig) {
         // the split config is generated internally and the input should be fully validated already
-        splitConfig.graphStoreValidation(graphStore, nodeLabels, splitConfig.internalRelationshipTypes(graphStore));
+        splitConfig.graphStoreValidation(graphStore, splitConfig.nodeLabelIdentifiers(graphStore), splitConfig.internalRelationshipTypes(graphStore));
 
-        var graph = graphStore.getGraph(nodeLabels, splitConfig.internalRelationshipTypes(graphStore), Optional.ofNullable(splitConfig.relationshipWeightProperty()));
+        var graph = graphStore.getGraph(splitConfig.nodeLabelIdentifiers(graphStore), splitConfig.internalRelationshipTypes(graphStore), Optional.ofNullable(splitConfig.relationshipWeightProperty()));
 
         var splitAlgo = new SplitRelationships(graph, graph, splitConfig, splitConfig.internalSourceLabels(graphStore), splitConfig.internalTargetLabels(graphStore));
         splitAlgo.setTerminationFlag(terminationFlag);
@@ -111,7 +110,7 @@ public class RelationshipSplitter {
         SplitRelationshipGraphStoreMutator.mutate(graphStore, result, splitConfig);
     }
 
-    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight) {
+    static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight, String sourceNodeLabel, String targetNodeLabel) {
         var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL) ?RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(targetRelationshipType);
 
         // randomSeed does not matter for memory estimation
@@ -119,12 +118,12 @@ public class RelationshipSplitter {
 
         var firstSplitEstimation = MemoryEstimations
             .builder("Test/Test-complement split")
-            .add(SplitRelationships.estimate(splitConfig.testSplit(checkTargetRelType, randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.testSplit(checkTargetRelType, sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeight)))
             .build();
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(splitConfig.trainSplit(randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeight)))
             .build();
 
         return MemoryEstimations.builder("Split relationships")

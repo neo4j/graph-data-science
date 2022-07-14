@@ -114,10 +114,14 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig testSplit(
         RelationshipType targetRelationshipType,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
+            .sourceNodeLabels(List.of(sourceNodeLabel))
+            .targetNodeLabels(List.of(targetNodeLabel))
             .holdoutRelationshipType(testRelationshipType().name)
             .remainingRelationshipType(testComplementRelationshipType().name)
             .holdoutFraction(testFraction())
@@ -130,10 +134,14 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig trainSplit(
+        String sourceNodeLabel,
+        String targetNodeLabel,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
+            .sourceNodeLabels(List.of(sourceNodeLabel))
+            .targetNodeLabels(List.of(targetNodeLabel))
             .holdoutRelationshipType(trainRelationshipType().name)
             .remainingRelationshipType(featureInputRelationshipType().name)
             .holdoutFraction(trainFraction())
