@@ -32,6 +32,7 @@ import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, RandomSeedConfig {
 
@@ -94,4 +95,6 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
     default KmeansSampler.SamplerType initialSampler() {
         return KmeansSampler.SamplerType.UNIFORM;
     }
+
+    List<List<Double>> seedCentroids();
 }

@@ -22,11 +22,14 @@ package org.neo4j.gds.kmeans;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -255,5 +258,44 @@ class KmeansTest {
         assertThat(averageSilhouette).isCloseTo((silhouette.get(0) + silhouette.get(1) + silhouette.get(2) + silhouette.get(
             3)) / 4.0, Offset.offset(1e-4));
 
+    }
+
+    @Test
+    void shouldNotWorkForRestartsAndSeeds() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .seedCentroids(List.of(List.of(1d), List.of(2d)))
+            .k(2)
+            .numberOfRestarts(10)
+            .computeSilhouette(true)
+            .build();
+
+        var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
+        assertThatThrownBy(() -> kmeansAlgorithmFactory.build(
+            lineGraph,
+            kmeansConfig,
+            ProgressTracker.NULL_TRACKER
+        )).hasMessageContaining("cannot be run");
+    }
+
+    @Test
+    void shouldNotDifferentSeedAndK() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .seedCentroids(List.of(List.of(1d)))
+            .k(2)
+            .computeSilhouette(true)
+            .build();
+
+        var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
+        assertThatThrownBy(() -> kmeansAlgorithmFactory.build(
+            lineGraph,
+            kmeansConfig,
+            ProgressTracker.NULL_TRACKER
+        )).hasMessageContaining("Incorrect");
     }
 }
