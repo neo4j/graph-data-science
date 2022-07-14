@@ -32,6 +32,7 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeedConfig, RelationshipWeightConfig {
@@ -49,6 +50,12 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     default List<String> targetNodeLabels() {
         return List.of(ElementProjection.PROJECT_ALL);
     };
+
+    @Configuration.Ignore
+    @Override
+    default List<String> nodeLabels() {
+        return Stream.of(sourceNodeLabels(), targetNodeLabels()).flatMap(List::stream).distinct().collect(Collectors.toList());
+    }
 
     @Configuration.Ignore
     default Collection<NodeLabel> internalSourceLabels(GraphStore graphStore) {

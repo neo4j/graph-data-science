@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SplitRelationshipsMutateConfig extends MutateConfig, SplitRelationshipsBaseConfig {
+public interface SplitRelationshipsMutateConfig extends SplitRelationshipsBaseConfig, MutateConfig {
 
     @Configuration.Ignore
     @Value.Derived
