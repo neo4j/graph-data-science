@@ -144,6 +144,27 @@ final class AdjacencyDecompressingReader {
         return block[targetPos];
     }
 
+    long advanceBy(int remaining) {
+        int pos = this.pos;
+        long[] block = this.block;
+        int available = remaining;
+
+        // skip blocks until we have either not enough available to decode or have advanced far enough
+        while (available > CHUNK_SIZE - pos) {
+            int skippedInThisBlock = CHUNK_SIZE - pos;
+            int needToDecode = Math.min(CHUNK_SIZE, available - skippedInThisBlock);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
+            available -= skippedInThisBlock;
+            pos = 0;
+        }
+
+        // last block
+        int targetPos = pos + available;
+        // we need to consume including targetPos, not to it, therefore +1
+        this.pos = 1 + targetPos;
+        return block[targetPos];
+    }
+
     private int findPosStrictlyGreaterInBlock(long target, int pos, int limit, long[] block) {
         return findPosInBlock(1L + target, pos, limit, block);
     }

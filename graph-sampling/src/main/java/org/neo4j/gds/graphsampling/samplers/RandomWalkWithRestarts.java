@@ -27,6 +27,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -162,7 +163,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
                     int targetOffset = rng.nextInt(degree);
-                    currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
+                    currentNode = inputGraph.nthTarget(currentNode, targetOffset);
+                    assert currentNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "'is bound by the degree but no target could be found";
                     nodesConsidered++;
                 }
             }

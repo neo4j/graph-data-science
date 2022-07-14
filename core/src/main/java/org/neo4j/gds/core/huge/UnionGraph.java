@@ -256,6 +256,19 @@ public final class UnionGraph implements CSRGraph {
     }
 
     @Override
+    public long nthTarget(long nodeId, int offset) {
+        int remaining = offset;
+        for (CSRGraph graph : graphs) {
+            var localDegree = graph.degree(nodeId);
+            if (localDegree > remaining) {
+                return graph.nthTarget(nodeId, remaining);
+            }
+            remaining -= localDegree;
+        }
+        return NOT_FOUND;
+    }
+
+    @Override
     public void canRelease(boolean canRelease) {
         for (Graph graph : graphs) {
             graph.canRelease(canRelease);

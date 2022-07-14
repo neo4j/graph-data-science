@@ -77,6 +77,11 @@ public class TestAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
+    public long advanceBy(int n) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
         throw new UnsupportedOperationException();
     }

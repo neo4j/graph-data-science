@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -28,8 +26,6 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 
 import java.util.Optional;
 import java.util.Set;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface Graph extends IdMap, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
 
@@ -87,24 +83,27 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      */
     Optional<NodeFilteredGraph> asNodeFilteredGraph();
 
-    default long getNeighbor(long nodeId, int offset) {
-        if (offset >= degree(nodeId)) {
-            throw new IllegalStateException(formatWithLocale(
-                "Offset %d is out of bounds for node %d with degree %d.",
-                offset,
-                toOriginalNodeId(nodeId),
-                degree(nodeId)
-            ));
-        }
-        var targetsRemaining = new MutableInt(offset);
-        var target = new MutableLong();
-        forEachRelationship(nodeId, (src, trg) -> {
-            if (targetsRemaining.getAndDecrement() == 0) {
-                target.setValue(trg);
-                return false;
+    default long nthTarget(long nodeId, int offset) {
+        class FindNth implements RelationshipConsumer {
+            private int remaining = offset;
+            private long target = NOT_FOUND;
+
+            @Override
+            public boolean accept(long sourceNodeId, long targetNodeId) {
+                if (remaining-- == 0) {
+                    target = targetNodeId;
+                    return false;
+                }
+                return true;
             }
-            return true;
-        });
-        return target.getValue();
+        }
+
+        if (offset >= degree(nodeId)) {
+            return NOT_FOUND;
+        }
+
+        var findN = new FindNth();
+        forEachRelationship(nodeId, findN);
+        return findN.target;
     }
 }

@@ -84,6 +84,15 @@ public interface AdjacencyCursor extends AutoCloseable {
     long advance(long nodeId);
 
     /**
+     * Advance this cursor by {@code n} elements.
+     * For a cursor in its initial position, this is equivalent to {@code nth}.
+     *
+     * @param n the number of elements to advance by. Must be positive.
+     * @return the target after the advancement or {@link org.neo4j.gds.api.AdjacencyCursor#NOT_FOUND -1} if the cursor is exhausted.
+     */
+    long advanceBy(int n);
+
+    /**
      * Create a shallow copy of this cursor.
      * Iteration state is copied and will advance independently from this cursor.
      * The underlying data might be shared between instances.
@@ -142,6 +151,11 @@ public interface AdjacencyCursor extends AutoCloseable {
 
         @Override
         public long advance(long nodeId) {
+            return NOT_FOUND;
+        }
+
+        @Override
+        public long advanceBy(int n) {
             return NOT_FOUND;
         }
 

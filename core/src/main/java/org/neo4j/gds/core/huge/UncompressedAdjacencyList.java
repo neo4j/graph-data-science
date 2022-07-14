@@ -318,6 +318,18 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         }
 
         @Override
+        public long advanceBy(int n) {
+            assert n >= 0;
+
+            offset += n;
+            if (offset >= limit) {
+                offset = limit;
+                return NOT_FOUND;
+            }
+            return currentPage[offset];
+        }
+
+        @Override
         public void close() {
             pages = null;
             currentPage = null;

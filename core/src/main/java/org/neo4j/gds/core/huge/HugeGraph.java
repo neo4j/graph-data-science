@@ -387,6 +387,16 @@ public class HugeGraph implements CSRGraph {
         return cursor.advance(targetNodeId) == targetNodeId;
     }
 
+    @Override
+    public long nthTarget(long nodeId, int offset) {
+        if (offset >= degree(nodeId)) {
+            return NOT_FOUND;
+        }
+
+        var cursor = adjacencyCursorForIteration(nodeId);
+        return cursor.advanceBy(offset);
+    }
+
     private void runForEach(long sourceId, RelationshipConsumer consumer) {
         var adjacencyCursor = adjacencyCursorForIteration(sourceId);
         consumeAdjacentNodes(sourceId, adjacencyCursor, consumer);
