@@ -33,10 +33,17 @@ import java.util.stream.Collectors;
 final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<CompositeNodeCursor, int[]> {
 
     private final int[] labelIds;
+    private final boolean allowPartitionedScan;
 
-    MultipleNodeLabelIndexBasedScanner(int[] labelIds, int prefetchSize, TransactionContext transaction) {
+    MultipleNodeLabelIndexBasedScanner(
+        int[] labelIds,
+        int prefetchSize,
+        TransactionContext transaction,
+        boolean allowPartitionedScan
+    ) {
         super(prefetchSize, transaction, labelIds);
         this.labelIds = labelIds;
+        this.allowPartitionedScan = allowPartitionedScan;
     }
 
     @Override
@@ -50,7 +57,12 @@ final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedSc
 
     @Override
     StoreScan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction, int[] labelIds) {
-        return new CompositeNodeScan(Neo4jProxy.entityCursorScan(transaction, labelIds, batchSize()));
+        return new CompositeNodeScan(Neo4jProxy.entityCursorScan(
+            transaction,
+            labelIds,
+            batchSize(),
+            allowPartitionedScan
+        ));
     }
 
     @Override

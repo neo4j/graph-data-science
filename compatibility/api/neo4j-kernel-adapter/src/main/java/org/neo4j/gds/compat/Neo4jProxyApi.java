@@ -102,7 +102,8 @@ public interface Neo4jProxyApi {
     List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
         int[] labelIds,
-        int batchSize
+        int batchSize,
+        boolean allowPartitionedScan
     );
 
     PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
