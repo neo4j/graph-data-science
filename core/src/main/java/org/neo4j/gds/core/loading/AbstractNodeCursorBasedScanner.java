@@ -25,11 +25,11 @@ import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.impl.store.format.standard.NodeRecordFormat;
 
-abstract class AbstractNodeCursorBasedScanner<EntityCursor extends Cursor, Attachment>
-    extends AbstractCursorBasedScanner<NodeReference, EntityCursor, Attachment> {
+abstract class AbstractNodeCursorBasedScanner<EntityCursor extends Cursor>
+    extends AbstractCursorBasedScanner<NodeReference, EntityCursor> {
 
-    AbstractNodeCursorBasedScanner(int prefetchSize, TransactionContext transaction, Attachment attachment) {
-        super(prefetchSize, transaction, attachment);
+    AbstractNodeCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
+        super(prefetchSize, transaction);
     }
 
     @Override

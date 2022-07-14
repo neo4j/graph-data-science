@@ -25,7 +25,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor, Attachment>
+abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor>
     implements StoreScanner<Reference> {
 
     private final class ScanCursor implements StoreScanner.ScanCursor<Reference> {
@@ -78,12 +78,11 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     private final TransactionContext.SecureTransaction transaction;
 
-    private final StoreScan<EntityCursor> entityCursorScan;
+    private volatile StoreScan<EntityCursor> entityCursorScan;
 
-    AbstractCursorBasedScanner(int prefetchSize, TransactionContext transactionContext, Attachment attachment) {
+    AbstractCursorBasedScanner(int prefetchSize, TransactionContext transactionContext) {
         this.transaction = transactionContext.fork();
         this.prefetchSize = prefetchSize;
-        this.entityCursorScan = entityCursorScan(this.transaction.kernelTransaction(), attachment);
     }
 
     @Override
@@ -93,6 +92,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
 
     @Override
     public final StoreScanner.ScanCursor<Reference> createCursor(KernelTransaction transaction) {
+        var entityCursorScan = createEntityCursorScan();
         EntityCursor entityCursor = entityCursor(transaction);
         Reference reference = cursorReference(transaction, entityCursor);
         return new ScanCursor(
@@ -103,11 +103,28 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         );
     }
 
+    private StoreScan<EntityCursor> createEntityCursorScan() {
+        var scan = this.entityCursorScan;
+        if (scan != null) {
+            return scan;
+        }
+        synchronized (this) {
+            scan = this.entityCursorScan;
+            if (scan != null) {
+                return scan;
+            }
+
+            scan = entityCursorScan(this.transaction.kernelTransaction());
+            this.entityCursorScan = scan;
+            return scan;
+        }
+    }
+
     abstract int recordsPerPage();
 
     abstract EntityCursor entityCursor(KernelTransaction transaction);
 
-    abstract StoreScan<EntityCursor> entityCursorScan(KernelTransaction transaction, Attachment attachment);
+    abstract StoreScan<EntityCursor> entityCursorScan(KernelTransaction transaction);
 
     abstract Reference cursorReference(KernelTransaction transaction, EntityCursor cursor);
 

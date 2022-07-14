@@ -28,12 +28,12 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.format.standard.RelationshipRecordFormat;
 
-public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor, Void> {
+public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor> {
 
     public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorBasedScanner::new;
 
     private RelationshipScanCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
-        super(prefetchSize, transaction, null);
+        super(prefetchSize, transaction);
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
     }
 
     @Override
-    StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
+    StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction) {
         return Neo4jProxy.scanToStoreScan(transaction.dataRead().allRelationshipsScan(), batchSize());
     }
 
