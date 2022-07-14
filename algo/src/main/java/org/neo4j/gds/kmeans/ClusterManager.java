@@ -89,6 +89,8 @@ abstract class ClusterManager {
         }
         return community;
     }
+
+    public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);
 }
 
 class FloatClusterManager extends ClusterManager {
@@ -152,6 +154,19 @@ class FloatClusterManager extends ClusterManager {
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new float[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = (float) value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
+    }
+
 
 }
 
@@ -208,6 +223,19 @@ class DoubleClusterManager extends ClusterManager {
     @Override
     public double[][] getCentroids() {
         return centroids;
+    }
+
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new double[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
     }
 
 }

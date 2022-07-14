@@ -67,6 +67,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private long[] nodesInCluster;
 
+    private final List<List<Double>> seededCentroids;
+
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -83,6 +85,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             nodeProperties,
             config.computeSilhouette(),
             config.initialSampler(),
+            config.seedCentroids(),
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -100,6 +103,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         NodePropertyValues nodePropertyValues,
         boolean computeSilhouette,
         KmeansSampler.SamplerType initialSampler,
+        List<List<Double>> seededCentroids,
         SplittableRandom random
     ) {
         super(progressTracker);
@@ -120,6 +124,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         this.computeSilhouette = computeSilhouette;
         this.samplerType = initialSampler;
+        this.seededCentroids = seededCentroids;
         this.nodesInCluster = new long[k];
     }
 
@@ -153,6 +158,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
 
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
+
 
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
 
@@ -193,9 +199,11 @@ public class Kmeans extends Algorithm<KmeansResult> {
             assert numberOfTasks <= concurrency;
 
             //Initialization do initial centroid computation and assignment
-
-            sampler.performInitialSampling();
-
+            if (seededCentroids.size() > 0) {
+                clusterManager.assignSeededCentroids(seededCentroids);
+            } else {
+                sampler.performInitialSampling();
+            }
             //
             int iteration = 0;
             while (true) {
