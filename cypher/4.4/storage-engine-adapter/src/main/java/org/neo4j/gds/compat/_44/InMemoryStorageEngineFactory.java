@@ -77,6 +77,13 @@ public class InMemoryStorageEngineFactory extends AbstractInMemoryStorageEngineF
     private final AbstractInMemoryMetaDataProvider metadataProvider = new InMemoryMetaDataProviderImpl();
 
     @Override
+    public boolean storageExists(
+        FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout, PageCache pageCache
+    ) {
+        return false;
+    }
+
+    @Override
     public RollingUpgradeCompatibility rollingUpgradeCompatibility() {
         return null;
     }

@@ -39,13 +39,6 @@ public abstract class AbstractInMemoryStorageEngineFactory implements StorageEng
         return Collections.emptyList();
     }
 
-    @Override
-    public boolean storageExists(
-        FileSystemAbstraction fileSystem, DatabaseLayout databaseLayout, PageCache pageCache
-    ) {
-        return false;
-    }
-
     protected abstract AbstractInMemoryMetaDataProvider metadataProvider();
 
     protected abstract SchemaRuleMigrationAccess schemaRuleMigrationAccess();
