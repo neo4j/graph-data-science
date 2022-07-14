@@ -102,7 +102,7 @@ public class Training {
 
         var consumers = executeBatches(concurrency, objective, queueSupplier.get());
         var prevWeightGradients = avgWeightGradients(consumers);
-        var initialLoss = totalLoss(consumers);
+        var initialLoss = avgLoss(consumers);
         progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale("Initial loss %s", initialLoss));
         while (!stopper.terminated()) {
             // each loop represents one epoch
@@ -111,7 +111,7 @@ public class Training {
             consumers = executeBatches(concurrency, objective, queueSupplier.get());
             prevWeightGradients = avgWeightGradients(consumers);
 
-            double loss = totalLoss(consumers);
+            double loss = avgLoss(consumers);
             losses.add(loss);
             stopper.registerLoss(loss);
             progressTracker.logMessage(messageLogLevel, StringFormatting.formatWithLocale(
@@ -156,8 +156,8 @@ public class Training {
         return averageTensors(localGradientSums, numberOfBatches);
     }
 
-    private double totalLoss(List<ObjectiveUpdateConsumer> consumers) {
-        return consumers.stream().mapToDouble(ObjectiveUpdateConsumer::lossSum).sum();
+    private double avgLoss(List<ObjectiveUpdateConsumer> consumers) {
+        return consumers.stream().mapToDouble(ObjectiveUpdateConsumer::lossSum).sum() / consumers.stream().mapToInt(ObjectiveUpdateConsumer::consumedBatches).sum();
     }
 
     static class ObjectiveUpdateConsumer implements Consumer<Batch> {
