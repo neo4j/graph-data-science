@@ -25,7 +25,7 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor, Integer> {
+final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor> {
 
     private final int labelId;
     private final boolean allowPartitionedScan;
@@ -36,7 +36,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
         TransactionContext transaction,
         boolean allowPartitionedScan
     ) {
-        super(prefetchSize, transaction, labelId);
+        super(prefetchSize, transaction);
         this.labelId = labelId;
         this.allowPartitionedScan = allowPartitionedScan;
     }
@@ -47,7 +47,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
     }
 
     @Override
-    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction) {
         return Neo4jProxy.nodeLabelIndexScan(
             transaction,
             labelId,
