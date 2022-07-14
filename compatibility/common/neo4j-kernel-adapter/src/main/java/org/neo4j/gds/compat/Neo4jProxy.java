@@ -124,9 +124,10 @@ public final class Neo4jProxy {
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
         KernelTransaction transaction,
         int[] labelIds,
-        int batchSize
+        int batchSize,
+        boolean allowPartitionedScan
     ) {
-        return IMPL.entityCursorScan(transaction, labelIds, batchSize);
+        return IMPL.entityCursorScan(transaction, labelIds, batchSize, allowPartitionedScan);
     }
 
     public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
