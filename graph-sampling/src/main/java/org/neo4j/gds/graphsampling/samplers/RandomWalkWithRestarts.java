@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -28,12 +27,15 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
+import java.util.List;
 import java.util.SplittableRandom;
+import java.util.stream.Collectors;
 
 public class RandomWalkWithRestarts implements NodesSampler {
 
     private final GraphStore inputGraphStore;
     private final RandomWalkWithRestartsConfig config;
+    private final SplittableRandom rng;
 
     public RandomWalkWithRestarts(
         GraphStore inputGraphStore,
@@ -41,11 +43,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
     ) {
         this.inputGraphStore = inputGraphStore;
         this.config = config;
+        this.rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
+
     }
 
     @Override
     public IdMap sampleNodes(Graph inputGraph) {
-        var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
 
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
@@ -57,35 +60,42 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .build();
 
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        final long startNode = config.startNode().map(inputGraph::toMappedNodeId).orElse(0L);
-        var currentNode = new MutableLong(startNode);
+        final List<Long> startNodes = getStartNodes(inputGraph);
+        var currentNode = startNodes.get(rng.nextInt(startNodes.size()));
         // must keep track of this because nodesBuilder may not have flushed its buffer, so importedNodes cannot be used atm
         var seen = HugeAtomicBitSet.create(inputGraph.nodeCount());
         while (seen.cardinality() < expectedNodes) {
-            if (!seen.get(currentNode.getValue())) {
-                long originalId = inputGraph.toOriginalNodeId(currentNode.getValue());
+            if (!seen.get(currentNode)) {
+                long originalId = inputGraph.toOriginalNodeId(currentNode);
                 if (hasLabelInformation) {
-                    var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode.getValue()));
+                    var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode));
                     nodesBuilder.addNode(originalId, nodeLabelToken);
                 } else {
                     nodesBuilder.addNode(originalId);
                 }
-                seen.set(currentNode.getValue());
+                seen.set(currentNode);
             }
-            currentNode.setValue(walkStep(currentNode, startNode, inputGraph, rng));
+            currentNode  = walkStep(currentNode, startNodes, inputGraph, rng);
         }
         var idMapAndProperties = nodesBuilder.build();
 
         return idMapAndProperties.idMap();
     }
 
-    private long walkStep(MutableLong currentNode, long startNode, Graph inputGraph, SplittableRandom rng) {
-        int degree = inputGraph.degree(currentNode.getValue());
+    private List<Long> getStartNodes(Graph inputGraph) {
+        if (!config.startNodes().isEmpty()) {
+            return config.startNodes().stream().map(inputGraph::toMappedNodeId).collect(Collectors.toList());
+        }
+        return List.of(rng.nextLong(inputGraph.nodeCount()));
+    }
+
+    private long walkStep(long currentNode, List<Long> startNodes, Graph inputGraph, SplittableRandom rng) {
+        int degree = inputGraph.degree(currentNode);
         if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
-            return startNode;
+            return startNodes.get(rng.nextInt(startNodes.size()));
         }
         int targetOffset = rng.nextInt(degree);
 
-        return inputGraph.getNeighbor(currentNode.getValue(), targetOffset);
+        return inputGraph.getNeighbor(currentNode, targetOffset);
     }
 }

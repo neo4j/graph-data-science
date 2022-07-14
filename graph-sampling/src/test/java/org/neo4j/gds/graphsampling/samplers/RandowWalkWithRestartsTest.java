@@ -85,7 +85,7 @@ class RandowWalkWithRestartsTest {
     @Test
     void shouldSampleAndFilterSchema() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("a"))
+            .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .randomSeed(42L)
@@ -116,7 +116,7 @@ class RandowWalkWithRestartsTest {
     @Test
     void shouldFilterGraph() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("e"))
+            .startNodes(List.of(idFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
@@ -143,7 +143,7 @@ class RandowWalkWithRestartsTest {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .nodeLabels(List.of("Z"))
             .relationshipTypes(List.of("R1"))
-            .startNode(idFunction.of("x"))
+            .startNodes(List.of(idFunction.of("x")))
             .samplingRatio(0.999999999)
             .restartProbability(0.0000000001)
             .randomSeed(42L)
@@ -159,7 +159,7 @@ class RandowWalkWithRestartsTest {
     void shouldBeDeterministic() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .samplingRatio(0.5)
-            .startNode(idFunction.of("a"))
+            .startNodes(List.of(idFunction.of("a")))
             .restartProbability(0.1)
             .randomSeed(42L)
             .build();

@@ -23,13 +23,16 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.List;
 import java.util.Optional;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
 
-    Optional<Long> startNode();
+    default List<Long> startNodes() {
+        return List.of();
+    }
     Optional<Long> randomSeed();
 
     @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
