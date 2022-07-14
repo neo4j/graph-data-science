@@ -207,3 +207,42 @@ For example, given the relationship `[:REL { foo: 42.0, bar: 13.37 }]` that conn
 Note, that the relationship type column stores the relationship type encoded as an integer.
 The corresponding string value needs to be retrieved from the corresponding dictionary value vector.
 That vector can be loaded from the dictionary provider using the encoding id of the type field.
+
+
+== Stream relationship topology
+
+To stream the topology of one or more relationship types, the client needs to encode that information in the ticket as follows:
+
+----
+{
+    graph_name: "my_graph",
+    database_name: "database_name",
+    procedure_name: "gds.graph.relationshipProperties.stream",
+    configuration: {
+        relationship_types: "REL"
+    }
+}
+----
+
+The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[procedure].
+The specific configuration needs to include the following keys:
+
+[[arrow-relationship-topology-export]]
+[opts=header,cols="1m,1,1"]
+|===
+| Name                    | Type                      | Description
+| relationship_types      | String or List of Strings | Stream only properties for relationships with the given type.
+|===
+
+The schema of the result records is identical to the corresponding procedure:
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| sourceNodeId  | targetNodeId  | relationshipType
+| 0             | 1             | 0
+|===
+
+Note, that the relationship type column stores the relationship type encoded as an integer.
+The corresponding string value needs to be retrieved from the corresponding dictionary value vector.
+That vector can be loaded from the dictionary provider using the encoding id of the type field.
