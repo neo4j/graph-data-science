@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
@@ -34,6 +35,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,6 +54,13 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Inject
     TestGraph graph;
+
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multiLabel")
+    static String gdlMultiLabel = "(n1 :A)-[:T {foo: 5} ]->(n2 :C)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :D)";
+
+    @Inject
+    TestGraph multiLabelGraph;
+
 
     @Test
     void split() {
@@ -171,6 +181,34 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         }
 
         assertEquals(1000, sum);
+    }
+
+    @Test
+    void splitWithFilteringWithDifferentSourceTargetLabels() {
+        Collection<NodeLabel> sourceNodeLabels = List.of(NodeLabel.of("A"), NodeLabel.of("B"));
+        Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("C"), NodeLabel.of("D"));
+        double negativeSamplingRatio = 2.0;
+        var splitter = new DirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, sourceNodeLabels, targetNodeLabels, 4);
+
+        // select 60%, which is 2*0.6 rounded down to 1 rel in this graph. 3 were invalid.
+        var result = splitter.split(multiLabelGraph, .6);
+
+        var remainingRels = result.remainingRels();
+        // 1 positive selected reduces remaining
+        assertRelSamplingProperties(remainingRels, multiLabelGraph, negativeSamplingRatio);
+        assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
+        assertFalse(remainingRels.topology().isMultiGraph());
+        assertThat(remainingRels.properties()).isNotEmpty();
+
+        var selectedRels = result.selectedRels();
+        assertThat(selectedRels.topology()).satisfies(topology -> {
+            assertRelSamplingProperties(selectedRels, multiLabelGraph, negativeSamplingRatio);
+            assertEquals(Orientation.NATURAL, topology.orientation());
+            assertFalse(topology.isMultiGraph());
+        });
+
+        assertNodeLabelFilter(selectedRels.topology(), sourceNodeLabels, targetNodeLabels, multiLabelGraph);
+
     }
 
     @Test
