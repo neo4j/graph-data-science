@@ -169,7 +169,7 @@ public final class GraphStoreFilter {
         return filter.equals(ElementProjection.PROJECT_ALL) ? "true" : filter;
     }
 
-    private static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, RelationshipsFilter.FilteredRelationships filteredRelationships) {
+    public static GraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, RelationshipsFilter.FilteredRelationships filteredRelationships) {
         var nodeSchema = inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels());
         RelationshipSchema relationshipSchema = inputGraphSchema
             .relationshipSchema()

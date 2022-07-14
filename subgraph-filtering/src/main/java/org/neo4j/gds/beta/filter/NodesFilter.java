@@ -50,7 +50,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 
-final class NodesFilter {
+public final class NodesFilter {
 
     @ValueClass
     interface FilteredNodes {
@@ -114,7 +114,7 @@ final class NodesFilter {
             .build();
     }
 
-    private static NodePropertyStore filterNodeProperties(
+    public static NodePropertyStore filterNodeProperties(
         GraphStore inputGraphStore,
         IdMap filteredIdMap,
         int concurrency,
@@ -160,7 +160,7 @@ final class NodesFilter {
         return builder.build();
     }
 
-    private static NodePropertiesBuilder<?> getPropertiesBuilder(
+    public static NodePropertiesBuilder<?> getPropertiesBuilder(
         IdMap idMap,
         NodePropertyValues inputNodePropertyValues,
         int concurrency
@@ -175,7 +175,7 @@ final class NodesFilter {
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
                     @Override
-                    void accept(long inputNode, long filteredNode) {
+                    public void accept(long inputNode, long filteredNode) {
 
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longValue(inputNode));
                     }
@@ -189,7 +189,7 @@ final class NodesFilter {
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
                     @Override
-                    void accept(long inputNode, long filteredNode) {
+                    public void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleValue(inputNode));
                     }
                 };
@@ -202,7 +202,7 @@ final class NodesFilter {
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
                     @Override
-                    void accept(long inputNode, long filteredNode) {
+                    public void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.doubleArrayValue(inputNode));
                     }
                 };
@@ -216,7 +216,7 @@ final class NodesFilter {
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
                     @Override
-                    void accept(long inputNode, long filteredNode) {
+                    public void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.floatArrayValue(inputNode));
                     }
                 };
@@ -230,7 +230,7 @@ final class NodesFilter {
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {
                     @Override
-                    void accept(long inputNode, long filteredNode) {
+                    public void accept(long inputNode, long filteredNode) {
                         propertyBuilder.set(idMap.toOriginalNodeId(inputNode), inputProperties.longArrayValue(inputNode));
                     }
                 };
@@ -310,7 +310,7 @@ final class NodesFilter {
         }
     }
 
-    private abstract static class NodePropertiesBuilder<T extends InnerNodePropertiesBuilder> {
+    public abstract static class NodePropertiesBuilder<T extends InnerNodePropertiesBuilder> {
         final NodePropertyValues inputProperties;
         final T propertyBuilder;
 
@@ -319,9 +319,9 @@ final class NodesFilter {
             this.propertyBuilder = propertyBuilder;
         }
 
-        abstract void accept(long inputNode, long filteredNode);
+        public abstract void accept(long inputNode, long filteredNode);
 
-        NodePropertyValues build(long size, IdMap idMap) {
+        public NodePropertyValues build(long size, IdMap idMap) {
             return propertyBuilder.build(size, idMap);
         }
     }

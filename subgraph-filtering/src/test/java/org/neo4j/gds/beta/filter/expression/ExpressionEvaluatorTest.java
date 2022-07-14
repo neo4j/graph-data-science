@@ -387,7 +387,7 @@ class ExpressionEvaluatorTest {
         }
 
         @Override
-        boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
+        public boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
             throw new UnsupportedOperationException();
         }
     };
@@ -424,7 +424,7 @@ class ExpressionEvaluatorTest {
 
         @Override
         @Value.Derived
-        boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
+        public boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
             return labelsOrTypes().containsAll(labelsOrTypes);
         }
     }
