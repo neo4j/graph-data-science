@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
@@ -82,18 +83,34 @@ public abstract class KmeansSampler {
 
 
     public enum SamplerType {
-        UNIFORM, KMEANSPP;
+        UNIFORM("UNIFORM", "UNIFORM"), KMEANSPP("KMEANS++", "KMEANSPP");
 
-        private static final List<String> VALUES = Arrays
+        private String samplerName;
+        private String samplerType;
+
+        SamplerType(String samplerName, String samplerType) {
+            this.samplerName = samplerName;
+            this.samplerType = samplerType;
+        }
+
+        public String getSamplerName() {
+            return this.samplerName;
+        }
+
+        public String getSamplerType() {
+            return this.samplerType;
+        }
+
+
+        private static final Map<String, String> VALUES = Arrays
             .stream(SamplerType.values())
-            .map(SamplerType::name)
-            .collect(Collectors.toList());
+            .collect(Collectors.toMap(sampler -> sampler.getSamplerName(), sampler -> sampler.getSamplerType()));
 
         public static SamplerType parse(Object input) {
             if (input instanceof String) {
                 var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
-                if (VALUES.contains(inputString)) {
-                    return SamplerType.valueOf(inputString);
+                if (VALUES.containsKey(inputString)) {
+                    return SamplerType.valueOf(VALUES.get(inputString));
                 }
 
                 throw new IllegalArgumentException(String.format(
