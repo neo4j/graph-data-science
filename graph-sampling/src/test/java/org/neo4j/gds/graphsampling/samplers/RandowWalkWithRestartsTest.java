@@ -198,7 +198,6 @@ class RandowWalkWithRestartsTest {
             .startNodes(List.of(idFunction.of("x")))
             .samplingRatio(5.0 / graphStore.nodeCount() + 0.001)
             .restartProbability(0.1)
-            .randomSeed(42L)
             .build();
 
         var rwr = new RandomWalkWithRestarts(graphStore, config);
@@ -213,7 +212,6 @@ class RandowWalkWithRestartsTest {
             .startNodes(List.of(idFunction.of("x"), idFunction.of("a"), idFunction.of("h"), idFunction.of("j")))
             .samplingRatio(1)
             .restartProbability(0.05)
-            .randomSeed(42L)
             .build();
 
         var rwr = new RandomWalkWithRestarts(graphStore, config);
