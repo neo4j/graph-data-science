@@ -72,16 +72,16 @@ final class ICInitThread implements Runnable {
         long startNode = partition.startNode();
 
         long endNode = startNode + partition.nodeCount();
-        SplittableRandom[] splittableRandom = new SplittableRandom[monteCarloSimulations];
+        SplittableRandom[] splittableRandoms = new SplittableRandom[monteCarloSimulations];
         for (int i = 0; i < monteCarloSimulations; i++) {
-            splittableRandom[i] = new SplittableRandom(i);
+            splittableRandoms[i] = new SplittableRandom(i);
         }
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
 
             double nodeSpread = 0d;
             for (int simulation = 0; simulation < monteCarloSimulations; ++simulation) {
                 initDataStructures(nodeId);
-                var rand = splittableRandom[simulation];
+                var rand = splittableRandoms[simulation];
                 //For each newly active node, find its neighbors that become activated
                 while (!newActive.isEmpty()) {
                     //Determine neighbors that become infected

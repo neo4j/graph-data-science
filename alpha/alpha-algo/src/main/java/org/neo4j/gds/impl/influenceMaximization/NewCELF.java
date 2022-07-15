@@ -122,11 +122,10 @@ public class NewCELF extends Algorithm<NewCELF> {
             return true;
         });
         long highestNode = spreads.top();
-        double highestScore = spreads.cost(highestNode);
+        gain = spreads.cost(highestNode);
         spreads.pop();
-        seedSetNodes.put(highestNode, highestScore);
+        seedSetNodes.put(highestNode, gain);
         seedSetNodesArray[0] = highestNode;
-        gain = highestScore;
     }
 
     private void lazyForwardPart() {
@@ -147,9 +146,7 @@ public class NewCELF extends Algorithm<NewCELF> {
             do {
 
                 highestNode = spreads.top();
-                if (highestNode == -1) {
-                    highestNode = -1;
-                }
+
                 //Recalculate the spread of the top node
                 double spread = independentCascade.runForCandidate(highestNode);
                 spreads.set(highestNode, spread - gain);
