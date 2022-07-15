@@ -68,7 +68,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         long currentNode = select(walkQualityPerStartNode);
         long currentStartNode = currentNode;
         int addedNodes = 0;
-        int nodesConsidered = 1;
+        int walkLength = 1;
 
         var seen = HugeAtomicBitSet.create(inputGraph.nodeCount());
         while (seen.cardinality() < expectedNodes) {
@@ -88,7 +88,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             int degree = inputGraph.degree(currentNode);
             if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
                 // walk ended, so check if we need to add a new startNode
-                double walkQuality = ((double) addedNodes) / nodesConsidered;
+                double walkQuality = ((double) addedNodes) / walkLength;
                 double oldQuality = walkQualityPerStartNode.get(currentStartNode);
                 walkQualityPerStartNode.put(currentStartNode, ALPHA * oldQuality + (1 - ALPHA) * walkQuality);
 
@@ -101,11 +101,11 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 currentStartNode = select(walkQualityPerStartNode);
                 currentNode = currentStartNode;
                 addedNodes = 0;
-                nodesConsidered = 1;
+                walkLength = 1;
             } else {
                 int targetOffset = rng.nextInt(degree);
                 currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
-                nodesConsidered++;
+                walkLength++;
             }
 
         }
