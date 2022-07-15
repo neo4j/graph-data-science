@@ -209,4 +209,19 @@ class RandowWalkWithRestartsTest {
 
         assertThat(nodes.nodeCount()).isEqualTo(5);
     }
+
+    @Test
+    void shouldUseMultipleStartNodes() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x"), idFunction.of("a"), idFunction.of("h"), idFunction.of("j")))
+            .samplingRatio(1)
+            .restartProbability(0.05)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(14);
+    }
 }
