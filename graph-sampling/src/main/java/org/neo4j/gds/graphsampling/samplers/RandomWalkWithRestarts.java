@@ -24,7 +24,6 @@ import com.carrotsearch.hppc.LongCollection;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
 import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.cursors.DoubleCursor;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -36,7 +35,7 @@ import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class RandomWalkWithRestarts implements NodesSampler {
-    private static final double ALPHA = 0.9;
+    private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD = 0.05;
     private final RandomWalkWithRestartsConfig config;
     private final SplittableRandom rng;
@@ -49,21 +48,24 @@ public class RandomWalkWithRestarts implements NodesSampler {
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        var walkQualityPerStartNode = initializeQualityMap(inputGraph);
-        var startNodes = new ConcurrentIndexedLongList(walkQualityPerStartNode.keys());
+        var walkQualitiesMap = initializeQualityMap(inputGraph);
+        var startNodes = new ConcurrentIndexedLongList(walkQualitiesMap.keys());
         var numberOfStartNodes = new AtomicInteger(startNodes.size());
         var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            new Walker(
-                startNodes,
-                numberOfStartNodes,
-                seenNodes,
-                expectedNodes,
-                new LongDoubleHashMap(walkQualityPerStartNode),
-                rng.split(),
-                inputGraph.concurrentCopy(),
-                config
-            )
+            {
+                var threadRng = this.rng.split();
+                return new Walker(
+                    startNodes,
+                    numberOfStartNodes,
+                    seenNodes,
+                    expectedNodes,
+                    new WalkQualities(new LongDoubleHashMap(walkQualitiesMap), threadRng),
+                    threadRng,
+                    inputGraph.concurrentCopy(),
+                    config
+                );
+            }
         );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
@@ -91,7 +93,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final AtomicInteger numberOfStartNodes;
         private final HugeAtomicBitSet seenNodes;
         private final long expectedNodes;
-        private final LongDoubleHashMap walkQualityPerStartNode;
+        private final WalkQualities walkQualities;
         private final SplittableRandom rng;
         private final Graph inputGraph;
         private final RandomWalkWithRestartsConfig config;
@@ -101,7 +103,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             AtomicInteger numberOfStartNodes,
             HugeAtomicBitSet seenNodes,
             long expectedNodes,
-            LongDoubleHashMap walkQualityPerStartNode,
+            WalkQualities walkQualities,
             SplittableRandom rng,
             Graph inputGraph,
             RandomWalkWithRestartsConfig config
@@ -110,7 +112,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.numberOfStartNodes = numberOfStartNodes;
             this.seenNodes = seenNodes;
             this.expectedNodes = expectedNodes;
-            this.walkQualityPerStartNode = walkQualityPerStartNode;
+            this.walkQualities = walkQualities;
             this.rng = rng;
             this.inputGraph = inputGraph;
             this.config = config;
@@ -118,7 +120,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         @Override
         public void run() {
-            long currentNode = nextStartNode();
+            long currentNode = walkQualities.nextStartNode();
             long currentStartNode = currentNode;
             int addedNodes = 0;
             int nodesConsidered = 1;
@@ -133,18 +135,13 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
                     // walk ended, so check if we need to add a new startNode
                     double walkQuality = ((double) addedNodes) / nodesConsidered;
-                    double oldQuality = walkQualityPerStartNode.get(currentStartNode);
-                    walkQualityPerStartNode.put(
-                        currentStartNode,
-                        ALPHA * oldQuality + (1 - ALPHA) * walkQuality
-                    );
+                    walkQualities.updateNodeQuality(currentStartNode, walkQuality);
 
                     updateLocalStartNodes();
 
-                    double expectedQuality = expectedQuality(walkQualityPerStartNode);
-                    if (expectedQuality < QUALITY_THRESHOLD) {
+                    if (walkQualities.expectedQuality() < QUALITY_THRESHOLD) {
                         // If another thread added a new start node, then quality has probably increased enough for now.
-                        int localNumberOfStartNodes = walkQualityPerStartNode.size();
+                        int localNumberOfStartNodes = walkQualities.size();
                         if (numberOfStartNodes.compareAndSet(localNumberOfStartNodes, localNumberOfStartNodes + 1)) {
                             long newNode;
                             do {
@@ -153,7 +150,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
                         }
                     }
 
-                    currentStartNode = nextStartNode();
+                    currentStartNode = walkQualities.nextStartNode();
                     currentNode = currentStartNode;
                     addedNodes = 0;
                     nodesConsidered = 1;
@@ -167,19 +164,52 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         // Make sure using all possible start nodes added by all threads.
         private void updateLocalStartNodes() {
-            if (walkQualityPerStartNode.size() >= startNodes.size()) {
+            if (walkQualities.size() >= startNodes.size()) {
                 return;
             }
-            for (int i = walkQualityPerStartNode.size(); i < startNodes.size(); i++) {
-                walkQualityPerStartNode.put(startNodes.get(i), 1.0);
+            for (int i = walkQualities.size(); i < startNodes.size(); i++) {
+                walkQualities.addNode(startNodes.get(i));
             }
         }
+    }
 
-        private long nextStartNode() {
-            double sum = valueSum(walkQualityPerStartNode);
+    static class WalkQualities {
+        private final LongDoubleMap qualities;
+        private final SplittableRandom rng;
+        private double sum;
+        private double sumOfSquares;
+
+        WalkQualities(LongDoubleMap qualities, SplittableRandom rng) {
+            this.qualities = qualities;
+            this.rng = rng;
+            this.sum = qualities.size();
+            this.sumOfSquares = qualities.size();
+        }
+
+        void addNode(long nodeId) {
+            qualities.put(nodeId, 1.0);
+            sum += 1.0;
+            sumOfSquares += 1.0;
+        }
+
+        void updateNodeQuality(long nodeId, double walkQuality) {
+            double previousQuality = qualities.get(nodeId);
+            double updatedQuality = QUALITY_MOMENTUM * previousQuality + (1 - QUALITY_MOMENTUM) * walkQuality;
+
+            sum += updatedQuality - previousQuality;
+            sumOfSquares += updatedQuality * updatedQuality - previousQuality * previousQuality;
+
+            qualities.put(nodeId, updatedQuality);
+        }
+
+        double expectedQuality() {
+            return sumOfSquares / sum;
+        }
+
+        long nextStartNode() {
             double sample = rng.nextDouble(sum);
             double traversedSum = 0.0;
-            for (LongDoubleCursor cursor : walkQualityPerStartNode) {
+            for (LongDoubleCursor cursor : qualities) {
                 traversedSum += cursor.value;
                 if (traversedSum >= sample) {
                     return cursor.key;
@@ -188,21 +218,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
             throw new IllegalStateException("Something went wrong :(");
         }
 
-        private double expectedQuality(LongDoubleMap walkQualityPerStartNode) {
-            double sumOfQualities = valueSum(walkQualityPerStartNode);
-            double sumOfSquaredQualities = 0.0;
-            for (DoubleCursor quality : walkQualityPerStartNode.values()) {
-                sumOfSquaredQualities += quality.value * quality.value;
-            }
-            return sumOfSquaredQualities / sumOfQualities;
-        }
-
-        private double valueSum(LongDoubleMap qualityMap) {
-            double sum = 0.0;
-            for (DoubleCursor quality : qualityMap.values()) {
-                sum += quality.value;
-            }
-            return sum;
+        int size() {
+            return qualities.size();
         }
     }
 
