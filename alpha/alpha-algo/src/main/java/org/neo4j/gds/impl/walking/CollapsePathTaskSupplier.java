@@ -20,7 +20,9 @@
 package org.neo4j.gds.impl.walking;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MSBFSConstants;
 import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
@@ -28,22 +30,39 @@ import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
-public class CollapsePathTaskSupplier implements Supplier<Runnable> {
+public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
+    private final AtomicLong globalSharedBatchOffset = new AtomicLong(0);
+
     private final RelationshipIterator[] relationshipIterators;
-    private final AtomicLong globalSharedBatchOffset;
     private final long nodeCount;
     private final BfsConsumer bfsConsumer;
     private final boolean allowSelfLoops;
 
-    CollapsePathTaskSupplier(
+    static Supplier<Runnable> create(
+        RelationshipsBuilder relationshipsBuilder,
+        boolean allowSelfLoops,
+        Graph[] graphs,
+        long nodeCount
+    ) {
+        var traversalConsumer = allowSelfLoops
+            ? new TraversalConsumer(relationshipsBuilder, graphs.length)
+            : new NoLoopTraversalConsumer(relationshipsBuilder, graphs.length);
+
+        return new CollapsePathTaskSupplier(
+            graphs,
+            nodeCount,
+            traversalConsumer,
+            allowSelfLoops
+        );
+    }
+
+    private CollapsePathTaskSupplier(
         RelationshipIterator[] relationshipIterators,
-        AtomicLong globalSharedBatchOffset,
         long nodeCount,
         BfsConsumer bfsConsumer,
         boolean allowSelfLoops
     ) {
         this.relationshipIterators = relationshipIterators;
-        this.globalSharedBatchOffset = globalSharedBatchOffset;
         this.nodeCount = nodeCount;
         this.bfsConsumer = bfsConsumer;
         this.allowSelfLoops = allowSelfLoops;

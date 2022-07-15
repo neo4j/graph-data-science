@@ -31,7 +31,6 @@ import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public class CollapsePath extends Algorithm<Relationships> {
@@ -65,18 +64,11 @@ public class CollapsePath extends Algorithm<Relationships> {
             .executorService(executorService)
             .build();
 
-        var traversalConsumer = allowSelfLoops
-            ? new TraversalConsumer(relImporter, graphs.length)
-            : new NoLoopTraversalConsumer(relImporter, graphs.length);
-
-        AtomicLong globalSharedBatchOffset = new AtomicLong(0);
-
-        Supplier<Runnable> collapsePathTaskSupplier = new CollapsePathTaskSupplier(
+        Supplier<Runnable> collapsePathTaskSupplier = CollapsePathTaskSupplier.create(
+            relImporter,
+            allowSelfLoops,
             graphs,
-            globalSharedBatchOffset,
-            nodeCount,
-            traversalConsumer,
-            allowSelfLoops
+            nodeCount
         );
 
         var tasks = ParallelUtil.tasks(concurrency, collapsePathTaskSupplier);
