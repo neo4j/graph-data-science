@@ -96,5 +96,8 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         return KmeansSampler.SamplerType.UNIFORM;
     }
 
-    List<List<Double>> seedCentroids();
+    @Value.Default
+    default List<List<Double>> seedCentroids() {
+        return List.of();
+    }
 }
