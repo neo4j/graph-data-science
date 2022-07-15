@@ -20,8 +20,8 @@
 package org.neo4j.gds.graphsampling.samplers;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 public interface NodesSampler {
-    IdMap sampleNodes(Graph inputGraph);
+    HugeAtomicBitSet sampleNodes(Graph inputGraph);
 }

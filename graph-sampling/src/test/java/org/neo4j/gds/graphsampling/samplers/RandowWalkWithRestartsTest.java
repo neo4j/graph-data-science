@@ -20,7 +20,6 @@
 package org.neo4j.gds.graphsampling.samplers;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
@@ -71,9 +70,6 @@ class RandowWalkWithRestartsTest {
     @Inject
     private GraphStore graphStore;
 
-    @Inject
-    private IdFunction idFunction;
-
     Graph getGraph(RandomWalkWithRestartsConfig config) {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
@@ -81,6 +77,9 @@ class RandowWalkWithRestartsTest {
             Optional.empty()
         );
     }
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void shouldSample() {
@@ -90,26 +89,19 @@ class RandowWalkWithRestartsTest {
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var rwr = new RandomWalkWithRestarts(config);
+        var graph = getGraph(config);
+        var nodes = rwr.sampleNodes(graph);
 
-        assertThat(nodes.nodeCount()).isEqualTo(7);
+        assertThat(nodes.cardinality()).isEqualTo(7);
 
-        assertThat(nodes.contains(idFunction.of("a"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("b"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("c"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("d"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("e"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("f"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("g"))).isTrue();
-
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("a")))).containsExactly(NodeLabel.of("N"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("b")))).containsExactly(NodeLabel.of("N"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("c")))).containsExactly(NodeLabel.of("N"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("d")))).containsExactly(NodeLabel.of("N"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("e")))).containsExactly(NodeLabel.of("M"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("f")))).containsExactly(NodeLabel.of("M"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("g")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("a")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("b")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("c")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("d")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("e")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("f")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("g")))).isTrue();
     }
 
     @Test
@@ -119,21 +111,19 @@ class RandowWalkWithRestartsTest {
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
+            .concurrency(1)
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var rwr = new RandomWalkWithRestarts(config);
+        var graph = getGraph(config);
+        var nodes = rwr.sampleNodes(graph);
 
-        assertThat(nodes.nodeCount()).isEqualTo(3);
+        assertThat(nodes.cardinality()).isEqualTo(3);
 
-        assertThat(nodes.contains(idFunction.of("e"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("f"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("g"))).isTrue();
-
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("e")))).containsExactly(NodeLabel.of("M"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("f")))).containsExactly(NodeLabel.of("M"));
-        assertThat(nodes.nodeLabels(nodes.toMappedNodeId(idFunction.of("g")))).containsExactly(NodeLabel.of("M"));
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("e")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("f")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("g")))).isTrue();
     }
 
     @Test
@@ -146,10 +136,10 @@ class RandowWalkWithRestartsTest {
             .restartProbability(0.0000000001)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var rwr = new RandomWalkWithRestarts(config);
         var nodes = rwr.sampleNodes(getGraph(config));
 
-        assertThat(nodes.nodeCount()).isEqualTo(4);
+        assertThat(nodes.cardinality()).isEqualTo(4);
     }
 
     @Test
@@ -162,14 +152,14 @@ class RandowWalkWithRestartsTest {
             .randomSeed(42L)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var rwr = new RandomWalkWithRestarts(config);
 
         var nodes1 = rwr.sampleNodes(getGraph(config));
         var nodes2 = rwr.sampleNodes(getGraph(config));
 
-        assertThat(nodes1.nodeCount()).isEqualTo(nodes2.nodeCount());
-        for (int i = 0; i < nodes1.nodeCount(); i++) {
-            assertThat(nodes1.toOriginalNodeId(i)).isEqualTo(nodes2.toOriginalNodeId(i));
+        assertThat(nodes1.cardinality()).isEqualTo(nodes2.cardinality());
+        for (int i = 0; i < nodes1.size(); i++) {
+            assertThat(nodes1.get(i)).isEqualTo(nodes2.get(i));
         }
     }
 
@@ -181,15 +171,16 @@ class RandowWalkWithRestartsTest {
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var rwr = new RandomWalkWithRestarts(config);
+        var graph = getGraph(config);
+        var nodes = rwr.sampleNodes(graph);
 
-        assertThat(nodes.nodeCount()).isEqualTo(4);
+        assertThat(nodes.cardinality()).isEqualTo(4);
 
-        assertThat(nodes.contains(idFunction.of("x"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("x1"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("x2"))).isTrue();
-        assertThat(nodes.contains(idFunction.of("x3"))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x2")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x3")))).isTrue();
     }
 
     @Test
@@ -200,10 +191,10 @@ class RandowWalkWithRestartsTest {
             .restartProbability(0.1)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var rwr = new RandomWalkWithRestarts(config);
         var nodes = rwr.sampleNodes(getGraph(config));
 
-        assertThat(nodes.nodeCount()).isEqualTo(5);
+        assertThat(nodes.cardinality()).isEqualTo(5);
     }
 
     @Test
@@ -214,9 +205,9 @@ class RandowWalkWithRestartsTest {
             .restartProbability(0.05)
             .build();
 
-        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var rwr = new RandomWalkWithRestarts(config);
         var nodes = rwr.sampleNodes(getGraph(config));
 
-        assertThat(nodes.nodeCount()).isEqualTo(14);
+        assertThat(nodes.cardinality()).isEqualTo(14);
     }
 }

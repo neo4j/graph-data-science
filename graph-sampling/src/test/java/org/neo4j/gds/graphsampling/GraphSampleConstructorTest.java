@@ -24,11 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.collections.HugeSparseLongArray;
-import org.neo4j.gds.core.loading.ArrayIdMap;
-import org.neo4j.gds.core.loading.LabelInformation;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -36,12 +32,8 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 import org.neo4j.gds.graphsampling.samplers.NodesSampler;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
@@ -88,56 +80,22 @@ class GraphSampleConstructorTest {
 
     class TestNodesSampler implements NodesSampler {
 
-        private final IdMap idMap;
+        private final List<Long> originalIds;
 
-        TestNodesSampler(List<Long> originalIds, Map<NodeLabel, List<Long>> nodeLabels) {
-            long nodeCount = originalIds.size();
-            var mappedToOriginal = HugeLongArray.newArray(nodeCount);
-            mappedToOriginal.setAll(nodeId -> originalIds.get((int) nodeId));
-
-            var originalToMappedBuilder = HugeSparseLongArray.builder(IdMap.NOT_FOUND, nodeCount);
-            for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
-                originalToMappedBuilder.set(originalIds.get(nodeId), nodeId);
-            }
-            var originalToMapped = originalToMappedBuilder.build();
-
-            var labelInfoBuilder = LabelInformation.builder(10);
-            nodeLabels.forEach((label, nodes) -> {
-                nodes.forEach(originalId -> labelInfoBuilder.addNodeIdToLabel(label, originalId));
-            });
-
-            this.idMap = new ArrayIdMap(
-                mappedToOriginal,
-                originalToMapped,
-                labelInfoBuilder.build(nodeCount, originalToMapped::get),
-                nodeCount,
-                originalIds.stream().mapToLong(Long::longValue).max().getAsLong()
-            );
+        TestNodesSampler(List<Long> originalIds) {
+            this.originalIds = originalIds;
         }
 
         @Override
-        public IdMap sampleNodes(Graph inputGraph) {
-            return idMap;
-        }
-    }
-
-    Map<NodeLabel, List<Long>> nobeLabels(List<Long> originalIds) {
-        var nodeLabels = new HashMap<NodeLabel, List<Long>>();
-
-        for (var label : graphStore.nodeLabels()) {
-            var graph = graphStore.getGraph(label);
-            var nodeIds = new ArrayList<Long>();
-
-            graph.forEachNode(nodeId -> nodeIds.add(graph.toOriginalNodeId(nodeId)));
-            var validNodeIds = nodeIds.stream().filter(originalIds::contains).collect(Collectors.toList());
-
-            if (!validNodeIds.isEmpty()) {
-                nodeLabels.put(label, validNodeIds);
+        public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+            var bitset = HugeAtomicBitSet.create(inputGraph.nodeCount());
+            for (long originalId : originalIds) {
+                bitset.set(inputGraph.toMappedNodeId(originalId));
             }
+            return bitset;
         }
-
-        return nodeLabels;
     }
+
 
     @Test
     void shouldSampleAndFilterSchema() {
@@ -162,7 +120,7 @@ class GraphSampleConstructorTest {
         var rwrGraphConstructor = new GraphSampleConstructor(
             config,
             graphStore,
-            new TestNodesSampler(originalIds, nobeLabels(originalIds))
+            new TestNodesSampler(originalIds)
         );
 
         var subgraph = rwrGraphConstructor.construct();
@@ -215,7 +173,7 @@ class GraphSampleConstructorTest {
         var rwrGraphConstructor = new GraphSampleConstructor(
             config,
             graphStore,
-            new TestNodesSampler(originalIds, nobeLabels(originalIds))
+            new TestNodesSampler(originalIds)
         );
 
         var subgraph = rwrGraphConstructor.construct();

@@ -27,13 +27,8 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.DoubleCursor;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
-import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
@@ -43,30 +38,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double ALPHA = 0.9;
     private static final double QUALITY_THRESHOLD = 0.05;
-    private final GraphStore inputGraphStore;
     private final RandomWalkWithRestartsConfig config;
     private final SplittableRandom rng;
 
-    public RandomWalkWithRestarts(
-        GraphStore inputGraphStore,
-        RandomWalkWithRestartsConfig config
-    ) {
-        this.inputGraphStore = inputGraphStore;
+    public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
         this.rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
     }
 
     @Override
-    public IdMap sampleNodes(Graph inputGraph) {
-        boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
-        var nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(config.concurrency())
-            .maxOriginalId(inputGraph.highestNeoId())
-            .hasProperties(false)
-            .hasLabelInformation(hasLabelInformation)
-            .deduplicateIds(false)
-            .build();
-
+    public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var walkQualityPerStartNode = initializeQualityMap(inputGraph);
         var startNodes = new ConcurrentIndexedLongList(walkQualityPerStartNode.keys());
@@ -81,9 +62,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 new LongDoubleHashMap(walkQualityPerStartNode),
                 rng.split(),
                 inputGraph.concurrentCopy(),
-                hasLabelInformation,
-                config,
-                nodesBuilder
+                config
             )
         );
         RunWithConcurrency.builder()
@@ -91,9 +70,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .tasks(tasks)
             .run();
 
-        var idMapAndProperties = nodesBuilder.build();
-
-        return idMapAndProperties.idMap();
+        return seenNodes;
     }
 
     private LongDoubleMap initializeQualityMap(Graph inputGraph) {
@@ -117,9 +94,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final LongDoubleHashMap walkQualityPerStartNode;
         private final SplittableRandom rng;
         private final Graph inputGraph;
-        private final boolean hasLabelInformation;
         private final RandomWalkWithRestartsConfig config;
-        private final NodesBuilder nodesBuilder;
 
         Walker(
             ConcurrentIndexedLongList startNodes,
@@ -129,9 +104,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             LongDoubleHashMap walkQualityPerStartNode,
             SplittableRandom rng,
             Graph inputGraph,
-            boolean hasLabelInformation,
-            RandomWalkWithRestartsConfig config,
-            NodesBuilder nodesBuilder
+            RandomWalkWithRestartsConfig config
         ) {
             this.startNodes = startNodes;
             this.numberOfStartNodes = numberOfStartNodes;
@@ -140,9 +113,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.walkQualityPerStartNode = walkQualityPerStartNode;
             this.rng = rng;
             this.inputGraph = inputGraph;
-            this.hasLabelInformation = hasLabelInformation;
             this.config = config;
-            this.nodesBuilder = nodesBuilder;
         }
 
         @Override
@@ -154,13 +125,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
             while (seenNodes.cardinality() < expectedNodes) {
                 if (!seenNodes.getAndSet(currentNode)) {
-                    long originalId = inputGraph.toOriginalNodeId(currentNode);
-                    if (hasLabelInformation) {
-                        var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(currentNode));
-                        nodesBuilder.addNode(originalId, nodeLabelToken);
-                    } else {
-                        nodesBuilder.addNode(originalId);
-                    }
                     addedNodes++;
                 }
 
