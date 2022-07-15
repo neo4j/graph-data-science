@@ -43,6 +43,7 @@ public class NewCELF extends Algorithm<NewCELF> {
     private final int concurrency;
 
     private final Graph graph;
+    private long randomSeedStart;
     private final LongDoubleScatterMap seedSetNodes;
 
     private final long[] seedSetNodesArray;
@@ -62,10 +63,12 @@ public class NewCELF extends Algorithm<NewCELF> {
         double propagationProbability,
         int monteCarloSimulations,
         ExecutorService executorService,
-        int concurrency
+        int concurrency,
+        long randomSeedStart
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
+        this.randomSeedStart = randomSeedStart;
         long nodeCount = graph.nodeCount();
 
         this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
@@ -92,6 +95,9 @@ public class NewCELF extends Algorithm<NewCELF> {
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
+        for (var value : seedSetNodesArray) {
+            System.out.println(value + " ");
+        }
         return this;
     }
 
@@ -106,7 +112,8 @@ public class NewCELF extends Algorithm<NewCELF> {
                 graph,
                 propagationProbability,
                 monteCarloSimulations,
-                singleSpreadArray
+                singleSpreadArray,
+                randomSeedStart
             ),
             Optional.of((int) graph.nodeCount() / concurrency)
         );
@@ -137,9 +144,10 @@ public class NewCELF extends Algorithm<NewCELF> {
             graph,
             propagationProbability,
             monteCarloSimulations,
-            seedSetNodesArray,
+            seedSetNodesArray.clone(),
             concurrency,
-            executorService
+            executorService,
+            randomSeedStart
         );
         HugeIntArray lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         for (int i = 1; i < seedSetCount; i++) {
@@ -159,10 +167,16 @@ public class NewCELF extends Algorithm<NewCELF> {
             highestScore = spreads.cost(spreads.top());
             highestNode = spreads.pop();
 
-            seedSetNodes.put(highestNode, highestScore + gain);
+            seedSetNodes.put(highestNode, highestScore);
             seedSetNodesArray[i] = highestNode;
             gain += highestScore;
-            independentCascade.incrementSeedNode();
+            independentCascade.incrementSeedNode(highestNode);
+            System.out.print("===========================");
+            for (int q = 0; q <= i; ++q) {
+                System.out.print(seedSetNodesArray[q] + " ");
+            }
+            System.out.println();
+
         }
     }
 

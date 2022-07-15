@@ -44,7 +44,8 @@ final class ICLazyForwardMC {
         int monteCarloSimulations,
         long[] seedSetNodes,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        long randomSeedStart
     ) {
 
         var tasks = PartitionUtils.rangePartition(
@@ -54,8 +55,9 @@ final class ICLazyForwardMC {
             partition -> new ICLazyForwardThread(
                 partition,
                 graph.concurrentCopy(),
-                seedSetNodes,
-                propagationProbability
+                seedSetNodes.clone(),
+                propagationProbability,
+                randomSeedStart
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
@@ -93,9 +95,9 @@ final class ICLazyForwardMC {
         return spread / monteCarloSimulations;
     }
 
-    void incrementSeedNode() {
+    void incrementSeedNode(long newSetNode) {
         for (var task : tasks) {
-            task.incrementSeedNode();
+            task.incrementSeedNode(newSetNode);
         }
     }
 

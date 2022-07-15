@@ -19,16 +19,15 @@
  */
 package org.neo4j.gds.impl.influenceMaximization;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.Pools;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 final class CELFTest {
@@ -92,16 +91,19 @@ final class CELFTest {
     void testSpreadFirstGraph() {
         CELF celf = new CELF(graph, 10, 0.2, 10, Pools.DEFAULT, 2);
         celf.compute();
+        var softAssertions = new SoftAssertions();
 
-        assertThat(celf.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);
-        assertThat(celf.getNodeSpread(idFunction.of("b"))).isEqualTo(4.4);
-        assertThat(celf.getNodeSpread(idFunction.of("c"))).isEqualTo(5.4);
-        assertThat(celf.getNodeSpread(idFunction.of("d"))).isEqualTo(6.4);
-        assertThat(celf.getNodeSpread(idFunction.of("e"))).isEqualTo(7.4);
-        assertThat(celf.getNodeSpread(idFunction.of("f"))).isEqualTo(8.4);
-        assertThat(celf.getNodeSpread(idFunction.of("g"))).isEqualTo(9.4);
-        assertThat(celf.getNodeSpread(idFunction.of("h"))).isEqualTo(10.4);
-        assertThat(celf.getNodeSpread(idFunction.of("i"))).isEqualTo(11.4);
-        assertThat(celf.getNodeSpread(idFunction.of("j"))).isEqualTo(12.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("b"))).isEqualTo(4.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("c"))).isEqualTo(5.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("d"))).isEqualTo(6.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("e"))).isEqualTo(7.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("f"))).isEqualTo(8.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("g"))).isEqualTo(9.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("h"))).isEqualTo(10.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("i"))).isEqualTo(11.4);
+        softAssertions.assertThat(celf.getNodeSpread(idFunction.of("j"))).isEqualTo(12.4);
+
+        softAssertions.assertAll();
     }
 }

@@ -29,6 +29,7 @@ import java.util.SplittableRandom;
 final class ICLazyForwardThread implements Runnable {
 
     private final long[] seedSetNodes;
+    private long randomSeedStart;
     private int seedNodeCounter;
 
     private final Partition partition;
@@ -47,19 +48,21 @@ final class ICLazyForwardThread implements Runnable {
         Partition partition,
         Graph graph,
         long[] seedSetNodes,
-        double propagationProbability
+        double propagationProbability,
+        long randomSeedStart
     ) {
         this.localGraph = graph;
         this.active = new BitSet(graph.nodeCount());
         this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
         this.propagationProbability = propagationProbability;
         this.seedSetNodes = seedSetNodes;
+        this.randomSeedStart = randomSeedStart;
         this.seedNodeCounter = 1;
         this.partition = partition;
     }
 
-    void incrementSeedNode() {
-        this.seedNodeCounter++;
+    void incrementSeedNode(long newSetNode) {
+        seedSetNodes[this.seedNodeCounter++] = newSetNode;
     }
 
     void setCandidateNodeId(long candidateNodeId) {
@@ -70,14 +73,18 @@ final class ICLazyForwardThread implements Runnable {
         return this.localSpread;
     }
 
+
     private void initDataStructures() {
         active.clear();
         newActive.push(candidateNodeId);
         active.set(candidateNodeId);
+        System.out.print("[");
         for (int i = 0; i < seedNodeCounter; ++i) {
+            System.out.print(seedSetNodes[i] + " ");
             newActive.push(seedSetNodes[i]);
             active.set(seedSetNodes[i]);
         }
+        System.out.println("]");
     }
 
     public void run() {
@@ -88,16 +95,20 @@ final class ICLazyForwardThread implements Runnable {
 
         for (long seed = startingSeed; seed < endingSeed; seed++) {
             initDataStructures();
-            SplittableRandom rand = new SplittableRandom(seed);
+            System.out.println(seed + " " + startingSeed + " " + endingSeed);
             localSpread += newActive.size();
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected
                 long nodeId = newActive.pop();
+                SplittableRandom rand = new SplittableRandom(seed + randomSeedStart);
+                long finalSeed = seed;
                 localGraph.forEachRelationship(nodeId, (source, target) ->
                 {
-                    if (rand.nextDouble() < propagationProbability) {
+                    double prob = rand.nextDouble();
+                    if (prob < propagationProbability) {
                         if (!active.get(target)) {
+                            System.out.println("[trial: " + finalSeed + "] " + nodeId + " enables " + target + " by getting " + prob);
                             //Add newly activated nodes to the set of activated nodes
                             localSpread++;
                             newActive.push(target);
@@ -107,6 +118,8 @@ final class ICLazyForwardThread implements Runnable {
                     return true;
                 });
             }
+
+            //localSpread -= seedNodeCounter;
         }
     }
 }

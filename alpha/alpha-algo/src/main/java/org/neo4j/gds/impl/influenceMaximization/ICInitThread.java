@@ -40,13 +40,15 @@ final class ICInitThread implements Runnable {
     private BitSet active;
 
     private HugeLongArrayStack newActive;
+    private long randomSeedStart;
 
     ICInitThread(
         Partition partition,
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
-        HugeDoubleArray singleSpreadArray
+        HugeDoubleArray singleSpreadArray,
+        long randomSeedStart
     ) {
 
         this.partition = partition;
@@ -58,6 +60,7 @@ final class ICInitThread implements Runnable {
         active = new BitSet(graph.nodeCount());
         newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
+        this.randomSeedStart = randomSeedStart;
     }
 
     private void initDataStructures(long candidateNodeId) {
@@ -72,20 +75,18 @@ final class ICInitThread implements Runnable {
         long startNode = partition.startNode();
 
         long endNode = startNode + partition.nodeCount();
-        SplittableRandom[] splittableRandoms = new SplittableRandom[monteCarloSimulations];
-        for (int i = 0; i < monteCarloSimulations; i++) {
-            splittableRandoms[i] = new SplittableRandom(i);
-        }
+       
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
 
             double nodeSpread = 0d;
             for (int simulation = 0; simulation < monteCarloSimulations; ++simulation) {
                 initDataStructures(nodeId);
-                var rand = splittableRandoms[simulation];
                 //For each newly active node, find its neighbors that become activated
                 while (!newActive.isEmpty()) {
                     //Determine neighbors that become infected
                     long nextExaminedNode = newActive.pop();
+                    var rand = new SplittableRandom(randomSeedStart + simulation);
+
                     localGraph.forEachRelationship(nextExaminedNode, (source, target) ->
                     {
                         if (rand.nextDouble() < propagationProbability) {
