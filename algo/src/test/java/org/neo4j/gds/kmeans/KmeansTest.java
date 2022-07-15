@@ -269,7 +269,6 @@ class KmeansTest {
             .seedCentroids(List.of(List.of(1d), List.of(2d)))
             .k(2)
             .numberOfRestarts(10)
-            .computeSilhouette(true)
             .build();
 
         var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
@@ -281,14 +280,13 @@ class KmeansTest {
     }
 
     @Test
-    void shouldNotDifferentSeedAndK() {
+    void shouldNotWorkForDifferentSeedAndK() {
         var kmeansConfig = ImmutableKmeansStreamConfig.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
             .seedCentroids(List.of(List.of(1d)))
             .k(2)
-            .computeSilhouette(true)
             .build();
 
         var kmeansAlgorithmFactory = new KmeansAlgorithmFactory<>();
@@ -297,5 +295,53 @@ class KmeansTest {
             kmeansConfig,
             ProgressTracker.NULL_TRACKER
         )).hasMessageContaining("Incorrect");
+    }
+
+    @Test
+    void shouldNotWorkForSeedingWithWrongDimensions() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .seedCentroids(List.of(List.of(1d, 2d)))
+            .k(1)
+            .build();
+
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        assertThatThrownBy(kmeans::compute).hasMessageContaining("same");
+    }
+
+    @Test
+    void shouldNotWorkForSeedingWithNaN() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .seedCentroids(List.of(List.of(Double.NaN, 2.0)))
+            .k(1)
+            .build();
+
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        assertThatThrownBy(kmeans::compute).hasMessageContaining("NaN");
+    }
+
+    @Test
+    void shouldWithSeededCentroids() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .seedCentroids(List.of(List.of(5.0, 0.0), List.of(100.0d, 0.0d)))
+            .k(2)
+            .build();
+
+        var kmeansContext = ImmutableKmeansContext.builder().build();
+        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
+        var result = kmeans.compute();
+        assertThat(result.communities().toArray()).isEqualTo(new int[]{0, 0, 0, 0, 0});
+        var secondCentroid = result.centers()[1];
+        assertThat(secondCentroid).isEqualTo(new double[]{100.0d, 0.0d});
     }
 }

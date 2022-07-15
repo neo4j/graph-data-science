@@ -272,6 +272,21 @@ public class Kmeans extends Algorithm<KmeansResult> {
     }
 
     private void checkInputValidity() {
+        if (seededCentroids.size() > 0) {
+            for (List<Double> centroid : seededCentroids) {
+                if (centroid.size() != dimensions) {
+                    throw new IllegalStateException(
+                        "All property arrays for K-Means should have the same number of dimensions");
+                } else {
+                    for (double value : centroid) {
+                        if (Double.isNaN(value)) {
+                            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
+                        }
+                    }
+                }
+
+            }
+        }
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
             if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
                 var value = nodePropertyValues.floatArrayValue(nodeId);
@@ -298,10 +313,10 @@ public class Kmeans extends Algorithm<KmeansResult> {
                         }
                     }
                 }
-
             }
         });
     }
+
 
     private void calculateSilhouette() {
         var nodeCount = graph.nodeCount();
