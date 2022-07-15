@@ -47,14 +47,14 @@ public class NeighborhoodSampler {
         }
 
         if (graph.hasRelationshipProperty()) {
-            return new WeightedUniformSampler(randomSeed)
+            return new WeightedUniformSampler(randomSeed + nodeId)
                 .sample(
                     concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                     degree,
                     numberOfSamples
                 );
         } else {
-            return new UniformSampler(randomSeed).sample(
+            return new UniformSampler(randomSeed + nodeId).sample(
                 concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                 degree,
                 numberOfSamples
