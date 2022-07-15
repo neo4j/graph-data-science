@@ -98,6 +98,15 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
                 throw new RuntimeException(e);
             }
         });
+
+        removed.forEach(removedLabelToken -> {
+            try {
+                var labelName = tokenHolders.labelTokens().getTokenById((int) removedLabelToken).name();
+                graphStore.removeLabelFromNode(id, NodeLabel.of(labelName));
+            } catch (TokenNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
