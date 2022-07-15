@@ -22,25 +22,19 @@ package org.neo4j.gds.impl.walking;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.msbfs.ANPStrategy;
-import org.neo4j.gds.msbfs.BfsConsumer;
-import org.neo4j.gds.msbfs.BfsSources;
-import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 public class CollapsePath extends Algorithm<Relationships> {
-
     private final Graph[] graphs;
     private final long nodeCount;
     private final boolean allowSelfLoops;
@@ -75,36 +69,17 @@ public class CollapsePath extends Algorithm<Relationships> {
             ? new TraversalConsumer(relImporter, graphs.length)
             : new NoLoopTraversalConsumer(relImporter, graphs.length);
 
-        AtomicLong batchOffset = new AtomicLong(0);
+        AtomicLong globalSharedBatchOffset = new AtomicLong(0);
 
-        var tasks = ParallelUtil.tasks(concurrency, () -> () -> {
-            var currentOffset = 0L;
-            long[] startNodes = new long[64];
-            var localGraphs = new Graph[graphs.length];
+        Supplier<Runnable> collapsePathTaskSupplier = new CollapsePathTaskSupplier(
+            graphs,
+            globalSharedBatchOffset,
+            nodeCount,
+            traversalConsumer,
+            allowSelfLoops
+        );
 
-            for (int i = 0; i < graphs.length; i++) {
-                localGraphs[i] = graphs[i].concurrentCopy();
-            }
-
-            while ((currentOffset = batchOffset.getAndAdd(64)) < nodeCount) {
-                if (currentOffset + 64 >= nodeCount) {
-                    startNodes = new long[(int) (nodeCount - currentOffset)];
-                }
-                for (long j = currentOffset; j < Math.min(currentOffset + 64, nodeCount); j++) {
-                    startNodes[(int) (j - currentOffset)] = j;
-                }
-
-                var multiSourceBFS = TraversalToEdgeMSBFSStrategy.initializeMultiSourceBFS(
-                    localGraphs,
-                    traversalConsumer,
-                    allowSelfLoops,
-                    startNodes
-                );
-
-                multiSourceBFS.run();
-            }
-
-        });
+        var tasks = ParallelUtil.tasks(concurrency, collapsePathTaskSupplier);
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)
@@ -117,90 +92,5 @@ public class CollapsePath extends Algorithm<Relationships> {
     @Override
     public void release() {
 
-    }
-
-    private static class TraversalToEdgeMSBFSStrategy extends ANPStrategy {
-
-        static MultiSourceBFSRunnable initializeMultiSourceBFS(
-            Graph[] graphs,
-            BfsConsumer perNodeAction,
-            boolean allowSelfLoops,
-            long[] startNodes
-        ) {
-            return MultiSourceBFSRunnable.createWithoutSeensNext(
-                graphs[0].nodeCount(),
-                graphs[0],
-                new TraversalToEdgeMSBFSStrategy(graphs, perNodeAction),
-                allowSelfLoops,
-                startNodes
-            );
-        }
-
-        private final Graph[] graphs;
-
-        TraversalToEdgeMSBFSStrategy(Graph[] graphs, BfsConsumer perNodeAction) {
-            super(perNodeAction);
-            this.graphs = graphs;
-        }
-
-        @Override
-        protected boolean stopTraversal(boolean hasNext, int depth) {
-            return !hasNext || depth >= graphs.length;
-        }
-
-        @Override
-        protected void prepareNextVisit(
-            RelationshipIterator relationships,
-            long nodeVisit,
-            long nodeId,
-            HugeLongArray nextSet,
-            int depth
-        ) {
-            graphs[depth].forEachRelationship(
-                nodeId,
-                (src, tgt) -> {
-                    nextSet.or(tgt, nodeVisit);
-                    return true;
-                }
-            );
-        }
-    }
-
-    private static class TraversalConsumer implements BfsConsumer {
-        final int targetDepth;
-        final RelationshipsBuilder relImporter;
-
-        private TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
-            this.relImporter = relImporter;
-            this.targetDepth = targetDepth;
-        }
-
-        @Override
-        public void accept(long targetNode, int depth, BfsSources sourceNode) {
-            if (depth == targetDepth) {
-                while (sourceNode.hasNext()) {
-                    relImporter.addFromInternal(sourceNode.nextLong(), targetNode);
-                }
-            }
-        }
-    }
-
-    private static final class NoLoopTraversalConsumer extends TraversalConsumer {
-
-        private NoLoopTraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
-            super(relImporter, targetDepth);
-        }
-
-        @Override
-        public void accept(long targetNode, int depth, BfsSources sourceNode) {
-            if (depth == targetDepth) {
-                while (sourceNode.hasNext()) {
-                    var sourceNodeId = sourceNode.nextLong();
-                    if (sourceNodeId != targetNode) {
-                        relImporter.addFromInternal(sourceNodeId, targetNode);
-                    }
-                }
-            }
-        }
     }
 }

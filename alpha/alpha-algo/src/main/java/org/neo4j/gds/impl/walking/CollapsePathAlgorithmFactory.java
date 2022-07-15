@@ -41,6 +41,11 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
     ) {
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);
 
+        /*
+         * here we build a graph-per-relationship type. you can think of them as layers.
+         * the algorithm will take a step in a layer, then a next step in another layer.
+         * that obviously stops of a node in a layer is not connected to anything.
+         */
         Graph[] graphs = config.relationshipTypes()
             .stream()
             .map(relType -> graphStore.getGraph(nodeLabels, Set.of(RelationshipType.of(relType)), Optional.empty()))

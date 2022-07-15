@@ -19,19 +19,7 @@
  */
 package org.neo4j.gds.msbfs;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-
-public interface ExecutionStrategy {
-
-    void run(
-        RelationshipIterator relationships,
-        long totalNodeCount,
-        SourceNodes sourceNodes,
-        HugeLongArray visitSet,
-        HugeLongArray visitNextSet,
-        HugeLongArray seenSet,
-        @Nullable HugeLongArray seenNextSet
-    );
+public class MSBFSConstants {
+    // the number of sources that can be traversed simultaneously by a single thread
+    public static final int OMEGA = 64;
 }

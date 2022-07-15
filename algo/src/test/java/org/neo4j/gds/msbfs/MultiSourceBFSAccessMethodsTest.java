@@ -286,7 +286,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
     void testSize() {
         int maxNodes = 100;
         // [ last i, expected source from, expected source to ]
-        int[] state = {-1, 0, MultiSourceBFSConstants.OMEGA};
+        int[] state = {-1, 0, MSBFSConstants.OMEGA};
         withGrid(
                 gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
                 graph -> {
@@ -299,7 +299,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
                                     // we complete a source chunk and start again for the next one
                                     state[1] = state[2];
                                     state[2] = Math.min(
-                                        state[2] + MultiSourceBFSConstants.OMEGA,
+                                        state[2] + MSBFSConstants.OMEGA,
                                             maxNodes);
                                 }
                                 state[0] = (int) i;

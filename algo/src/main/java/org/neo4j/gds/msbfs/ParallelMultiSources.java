@@ -52,7 +52,7 @@ abstract class ParallelMultiSources extends AbstractCollection<MultiSourceBFSRun
 
     @Override
     public MultiSourceBFSRunnable next() {
-        int len = (int) Math.min(MultiSourceBFSConstants.OMEGA, sourceLength - start);
+        int len = (int) Math.min(MSBFSConstants.OMEGA, sourceLength - start);
         var bfs = next(start, len);
         start += len;
         i++;

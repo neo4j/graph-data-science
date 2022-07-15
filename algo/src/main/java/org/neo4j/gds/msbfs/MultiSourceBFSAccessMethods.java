@@ -298,7 +298,7 @@ public final class MultiSourceBFSAccessMethods {
 
     private int numberOfThreads() {
         long sourceLength = sourceLength();
-        long threads = ParallelUtil.threadCount(MultiSourceBFSConstants.OMEGA, sourceLength);
+        long threads = ParallelUtil.threadCount(MSBFSConstants.OMEGA, sourceLength);
         if ((int) threads != threads) {
             throw new IllegalArgumentException("Unable run MS-BFS on " + sourceLength + " sources.");
         }

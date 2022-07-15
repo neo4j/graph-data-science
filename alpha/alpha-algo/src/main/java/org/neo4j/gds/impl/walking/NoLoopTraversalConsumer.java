@@ -17,21 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.msbfs;
+package org.neo4j.gds.impl.walking;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.msbfs.BfsSources;
 
-public interface ExecutionStrategy {
+final class NoLoopTraversalConsumer extends TraversalConsumer {
 
-    void run(
-        RelationshipIterator relationships,
-        long totalNodeCount,
-        SourceNodes sourceNodes,
-        HugeLongArray visitSet,
-        HugeLongArray visitNextSet,
-        HugeLongArray seenSet,
-        @Nullable HugeLongArray seenNextSet
-    );
+    NoLoopTraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
+        super(relImporter, targetDepth);
+    }
+
+    @Override
+    public void accept(long targetNode, int depth, BfsSources sourceNode) {
+        if (depth == targetDepth) {
+            while (sourceNode.hasNext()) {
+                var sourceNodeId = sourceNode.nextLong();
+                if (sourceNodeId != targetNode) {
+                    relImporter.addFromInternal(sourceNodeId, targetNode);
+                }
+            }
+        }
+    }
 }

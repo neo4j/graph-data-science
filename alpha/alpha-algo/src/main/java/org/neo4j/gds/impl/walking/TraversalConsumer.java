@@ -17,9 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.msbfs;
+package org.neo4j.gds.impl.walking;
 
-public class MultiSourceBFSConstants {
-    // the number of sources that can be traversed simultaneously by a single thread
-    static final int OMEGA = 64;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.msbfs.BfsConsumer;
+import org.neo4j.gds.msbfs.BfsSources;
+
+class TraversalConsumer implements BfsConsumer {
+    final int targetDepth;
+    final RelationshipsBuilder relImporter;
+
+    TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
+        this.relImporter = relImporter;
+        this.targetDepth = targetDepth;
+    }
+
+    @Override
+    public void accept(long targetNode, int depth, BfsSources sourceNode) {
+        if (depth == targetDepth) {
+            while (sourceNode.hasNext()) {
+                relImporter.addFromInternal(sourceNode.nextLong(), targetNode);
+            }
+        }
+    }
 }
