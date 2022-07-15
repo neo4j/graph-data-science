@@ -83,9 +83,9 @@ class RandowWalkWithRestartsTest {
     }
 
     @Test
-    void shouldSampleAndFilterSchema() {
+    void shouldSample() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("a"))
+            .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .randomSeed(42L)
@@ -114,9 +114,9 @@ class RandowWalkWithRestartsTest {
     }
 
     @Test
-    void shouldFilterGraph() {
+    void shouldSampleWithFiltering() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("e"))
+            .startNodes(List.of(idFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
@@ -143,7 +143,7 @@ class RandowWalkWithRestartsTest {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .nodeLabels(List.of("Z"))
             .relationshipTypes(List.of("R1"))
-            .startNode(idFunction.of("x"))
+            .startNodes(List.of(idFunction.of("x")))
             .samplingRatio(0.999999999)
             .restartProbability(0.0000000001)
             .randomSeed(42L)
@@ -159,7 +159,7 @@ class RandowWalkWithRestartsTest {
     void shouldBeDeterministic() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .samplingRatio(0.5)
-            .startNode(idFunction.of("a"))
+            .startNodes(List.of(idFunction.of("a")))
             .restartProbability(0.1)
             .randomSeed(42L)
             .build();
@@ -173,5 +173,55 @@ class RandowWalkWithRestartsTest {
         for (int i = 0; i < nodes1.nodeCount(); i++) {
             assertThat(nodes1.toOriginalNodeId(i)).isEqualTo(nodes2.toOriginalNodeId(i));
         }
+    }
+
+    @Test
+    void shouldNotExploreNewStartNode() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x")))
+            .samplingRatio(4.0 / graphStore.nodeCount() + 0.001)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(4);
+
+        assertThat(nodes.contains(idFunction.of("x"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x1"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x2"))).isTrue();
+        assertThat(nodes.contains(idFunction.of("x3"))).isTrue();
+    }
+
+    @Test
+    void shouldExploreNewStartNode() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x")))
+            .samplingRatio(5.0 / graphStore.nodeCount() + 0.001)
+            .restartProbability(0.1)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(5);
+    }
+
+    @Test
+    void shouldUseMultipleStartNodes() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x"), idFunction.of("a"), idFunction.of("h"), idFunction.of("j")))
+            .samplingRatio(1)
+            .restartProbability(0.05)
+            .randomSeed(42L)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(graphStore, config);
+        var nodes = rwr.sampleNodes(getGraph(config));
+
+        assertThat(nodes.nodeCount()).isEqualTo(14);
     }
 }

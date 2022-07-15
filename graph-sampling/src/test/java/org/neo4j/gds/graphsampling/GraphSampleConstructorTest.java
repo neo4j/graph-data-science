@@ -142,7 +142,7 @@ class GraphSampleConstructorTest {
     @Test
     void shouldSampleAndFilterSchema() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("a"))
+            .startNodes(List.of(idFunction.of("a")))
             .samplingRatio(0.5)
             .restartProbability(0.1)
             .randomSeed(42L)
@@ -196,7 +196,7 @@ class GraphSampleConstructorTest {
     @Test
     void shouldFilterGraph() {
         var config = RandomWalkWithRestartsConfigImpl.builder()
-            .startNode(idFunction.of("e"))
+            .startNodes(List.of(idFunction.of("e")))
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
