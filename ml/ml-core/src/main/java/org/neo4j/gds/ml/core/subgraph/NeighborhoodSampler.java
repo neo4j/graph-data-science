@@ -25,7 +25,6 @@ import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.gds.ml.core.samplers.UniformSampler;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 
-import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
@@ -69,9 +68,5 @@ public class NeighborhoodSampler {
 
     public void changeRandomState() {
         this.randomSeed++;
-    }
-
-    public OptionalLong sampleOne(Graph graph, long nodeId) {
-        return sample(graph, nodeId, 1).findFirst();
     }
 }

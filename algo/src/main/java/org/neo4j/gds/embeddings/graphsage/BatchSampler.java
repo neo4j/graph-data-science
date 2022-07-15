@@ -20,18 +20,16 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
-import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.OptionalLong;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 
 public final class BatchSampler {
@@ -58,7 +56,7 @@ public final class BatchSampler {
      * For each node in the batch we sample one neighbor node and one negative node from the graph.
      */
     long[] sampleNeighborAndNegativeNodePerBatchNode(Partition batch, int searchDepth, long randomSeed) {
-        var neighbours = neighborBatch(batch, randomSeed, searchDepth).toArray();
+        var neighbours = neighborBatch(batch, randomSeed, searchDepth);
 
         LongStream negativeSamples = negativeBatch(Math.toIntExact(batch.nodeCount()), neighbours, randomSeed);
 
@@ -72,30 +70,37 @@ public final class BatchSampler {
         ).toArray();
     }
 
-    LongStream neighborBatch(Partition batch, long batchLocalSeed, int searchDepth) {
-        var neighborBatchBuilder = LongStream.builder();
-        var localRandom = new Random(batchLocalSeed);
+    long[] neighborBatch(Partition batch, long batchLocalSeed, int searchDepth) {
+        int iBatchSize = Math.toIntExact(batch.nodeCount());
+        var neighbors = new long[iBatchSize];
+        var localRandom = new SplittableRandom(batchLocalSeed);
 
         // sample a neighbor for each batchNode
-        batch.consume(nodeId -> {
+        var batchOffset = batch.startNode();
+
+        for (int idx = 0; idx < iBatchSize; idx++) {
+            var nodeId = batchOffset + idx;
+
             // randomWalk with at most maxSearchDepth steps and only save last node
             int actualSearchDepth = localRandom.nextInt(searchDepth) + 1;
-            AtomicLong currentNode = new AtomicLong(nodeId);
+            var currentNode = new MutableLong(nodeId);
             while (actualSearchDepth > 0) {
-                NeighborhoodSampler neighborhoodSampler = new NeighborhoodSampler(currentNode.get() + actualSearchDepth);
-                OptionalLong maybeSample = neighborhoodSampler.sampleOne(graph, nodeId);
-                if (maybeSample.isPresent()) {
-                    currentNode.set(maybeSample.getAsLong());
+                int degree = graph.degree(currentNode.longValue());
+
+                if (degree != 0) {
+                    var sampledIdx = localRandom.nextInt(degree);
+                    long neighbor = graph.getNeighbor(currentNode.longValue(), sampledIdx);
+                    currentNode.setValue(neighbor);
                 } else {
                     // terminate
                     actualSearchDepth = 0;
                 }
                 actualSearchDepth--;
             }
-            neighborBatchBuilder.add(currentNode.get());
-        });
+            neighbors[idx] = currentNode.longValue();
+        }
 
-        return neighborBatchBuilder.build();
+        return neighbors;
     }
 
     // get a negative sample per node in batch

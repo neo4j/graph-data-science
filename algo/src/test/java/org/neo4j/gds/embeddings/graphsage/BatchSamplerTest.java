@@ -95,7 +95,7 @@ class BatchSamplerTest {
             var localSeed = i + seed;
             var neighborBatch = new BatchSampler(graph).neighborBatch(partitions.get(i), localSeed, searchDepth);
             var otherNeighborBatch = new BatchSampler(graph).neighborBatch(partitions.get(i), localSeed, searchDepth);
-            assertThat(neighborBatch).containsExactlyElementsOf(otherNeighborBatch.boxed().collect(Collectors.toList()));
+            assertThat(neighborBatch).containsExactly(otherNeighborBatch);
         }
     }
 }
