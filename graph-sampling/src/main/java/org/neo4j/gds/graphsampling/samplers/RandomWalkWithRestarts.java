@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
+import com.carrotsearch.hppc.LongDoubleHashMap;
+import com.carrotsearch.hppc.LongDoubleMap;
+import com.carrotsearch.hppc.cursors.DoubleCursor;
+import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -27,8 +31,6 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
@@ -62,7 +64,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .build();
 
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        var walkQualityPerStartNode = initializeQualityMap(inputGraph);
+        LongDoubleMap walkQualityPerStartNode = initializeQualityMap(inputGraph);
         long currentNode = select(walkQualityPerStartNode);
         long currentStartNode = currentNode;
         int addedNodes = 0;
@@ -87,10 +89,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
             if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
                 // walk ended, so check if we need to add a new startNode
                 double walkQuality = ((double) addedNodes) / nodesConsidered;
-                walkQualityPerStartNode.compute(currentStartNode, (nodeId, oldQuality) -> ALPHA * oldQuality + (1 - ALPHA) * walkQuality);
-                double sumOfSquaredQualities = walkQualityPerStartNode.values().stream().mapToDouble(d -> d * d).sum();
-                double sumOfQualities = walkQualityPerStartNode.values().stream().mapToDouble(d -> d).sum();
-                double expectedQuality = sumOfSquaredQualities / sumOfQualities;
+                double oldQuality = walkQualityPerStartNode.get(currentStartNode);
+                walkQualityPerStartNode.put(currentStartNode, ALPHA * oldQuality + (1 - ALPHA) * walkQuality);
+
+                double expectedQuality = expectedQuality(walkQualityPerStartNode);
                 if (expectedQuality < QUALITY_THRESHOLD) {
                     long newNode = rng.nextLong(inputGraph.nodeCount());
                     walkQualityPerStartNode.put(newNode, 1.0);
@@ -112,8 +114,17 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return idMapAndProperties.idMap();
     }
 
-    private Map<Long, Double> initializeQualityMap(Graph inputGraph) {
-        var qualityMap = new HashMap<Long, Double>();
+    private double expectedQuality(LongDoubleMap walkQualityPerStartNode) {
+        double sumOfQualities = valueSum(walkQualityPerStartNode);
+        double sumOfSquaredQualities = 0.0;
+        for (DoubleCursor quality : walkQualityPerStartNode.values()) {
+            sumOfSquaredQualities += quality.value * quality.value;
+        }
+        return sumOfSquaredQualities / sumOfQualities;
+    }
+
+    private LongDoubleMap initializeQualityMap(Graph inputGraph) {
+        var qualityMap = new LongDoubleHashMap();
         if (!config.startNodes().isEmpty()) {
             config.startNodes().forEach(nodeId -> {
                 qualityMap.put(inputGraph.toMappedNodeId(nodeId), 1.0);
@@ -124,17 +135,25 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return qualityMap;
     }
 
-    private long select(Map<Long, Double> qualityMap) {
-        double sum = qualityMap.values().stream().mapToDouble(d -> d).sum();
+    private long select(LongDoubleMap qualityMap) {
+        double sum = valueSum(qualityMap);
         double sample = rng.nextDouble(sum);
         double traversedSum = 0.0;
-        for (Map.Entry<Long, Double> entry : qualityMap.entrySet()) {
-            traversedSum += entry.getValue();
+        for (LongDoubleCursor cursor : qualityMap) {
+            traversedSum += cursor.value;
             if (traversedSum >= sample) {
-                return entry.getKey();
+                return cursor.key;
             }
         }
         throw new IllegalStateException("Something went wrong :(");
+    }
+
+    private double valueSum(LongDoubleMap qualityMap) {
+        double sum = 0.0;
+        for (DoubleCursor quality : qualityMap.values()) {
+            sum += quality.value;
+        }
+        return sum;
     }
 
 }
