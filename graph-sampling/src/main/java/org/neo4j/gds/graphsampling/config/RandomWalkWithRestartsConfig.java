@@ -43,7 +43,7 @@ public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig {
     /**
      * The ratio of nodes that we wish to sample.
      */
-    @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false, maxInclusive = false)
+    @Configuration.DoubleRange(min = 0.0, max = 1.0, minInclusive = false)
     default double samplingRatio() {
         return 0.15;
     }
