@@ -79,6 +79,11 @@ public class CypherGraphStore extends GraphStoreAdapter implements NodeLabelUpda
     }
 
     @Override
+    public void removeLabelFromNode(long nodeId, NodeLabel nodeLabel) {
+        this.cypherIdMap.removeLabelFromNode(nodeId, nodeLabel);
+    }
+
+    @Override
     public Set<NodeLabel> nodeLabels() {
         return this.cypherIdMap.availableNodeLabels();
     }

@@ -94,4 +94,19 @@ class CypherIdMapTest {
         this.idMap.forEachNodeLabel(nodeA, nodeLabels::add);
         assertThat(nodeLabels).containsExactlyInAnyOrder(NodeLabel.of("A"), newNodeLabel, existingLabel);
     }
+
+    @Test
+    void shouldRemoveLabelFromNode() {
+        var newNodeLabel = NodeLabel.of("new");
+        this.idMap.addNodeLabel(newNodeLabel);
+        this.idMap.addLabelToNode(idFunction.of("a"), newNodeLabel);
+        this.idMap.addLabelToNode(idFunction.of("b"), newNodeLabel);
+
+        assertThat(this.idMap.hasLabel(idFunction.of("b"), newNodeLabel)).isTrue();
+
+        this.idMap.removeLabelFromNode(idFunction.of("b"), newNodeLabel);
+
+        assertThat(this.idMap.hasLabel(idFunction.of("a"), newNodeLabel)).isTrue();
+        assertThat(this.idMap.hasLabel(idFunction.of("b"), newNodeLabel)).isFalse();
+    }
 }

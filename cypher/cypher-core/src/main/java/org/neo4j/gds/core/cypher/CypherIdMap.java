@@ -31,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
 
     private final Map<NodeLabel, BitSet> additionalNodeLabels;
@@ -49,6 +51,16 @@ public class CypherIdMap extends IdMapAdapter implements NodeLabelUpdater {
     public void addLabelToNode(long nodeId, NodeLabel nodeLabel) {
         additionalNodeLabels.computeIfAbsent(nodeLabel, ignore -> new BitSet(nodeCount()));
         additionalNodeLabels.get(nodeLabel).set(nodeId);
+    }
+
+    @Override
+    public void removeLabelFromNode(long nodeId, NodeLabel nodeLabel) {
+        var nodeLabelBitSet = additionalNodeLabels.get(nodeLabel);
+        if (nodeLabelBitSet != null) {
+            nodeLabelBitSet.clear(nodeId);
+        } else {
+            throw new RuntimeException(formatWithLocale("Could not find updatable label with name `%s`", nodeLabel.name()));
+        }
     }
 
     @Override
