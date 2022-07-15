@@ -26,10 +26,10 @@ import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.SplittableRandom;
 
-final class ICLazyForwardThread implements Runnable {
+final class ICLazyForwardTask implements Runnable {
 
     private final long[] seedSetNodes;
-    private long randomSeedStart;
+    private long initialRandomSeed;
     private int seedNodeCounter;
 
     private final Partition partition;
@@ -44,19 +44,19 @@ final class ICLazyForwardThread implements Runnable {
 
     private final double propagationProbability;
 
-    ICLazyForwardThread(
+    ICLazyForwardTask(
         Partition partition,
         Graph graph,
         long[] seedSetNodes,
         double propagationProbability,
-        long randomSeedStart
+        long initialRandomSeed
     ) {
         this.localGraph = graph;
         this.active = new BitSet(graph.nodeCount());
         this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
         this.propagationProbability = propagationProbability;
         this.seedSetNodes = seedSetNodes;
-        this.randomSeedStart = randomSeedStart;
+        this.initialRandomSeed = initialRandomSeed;
         this.seedNodeCounter = 1;
         this.partition = partition;
     }
@@ -78,13 +78,10 @@ final class ICLazyForwardThread implements Runnable {
         active.clear();
         newActive.push(candidateNodeId);
         active.set(candidateNodeId);
-        System.out.print("[");
         for (int i = 0; i < seedNodeCounter; ++i) {
-            System.out.print(seedSetNodes[i] + " ");
             newActive.push(seedSetNodes[i]);
             active.set(seedSetNodes[i]);
         }
-        System.out.println("]");
     }
 
     public void run() {
@@ -95,20 +92,18 @@ final class ICLazyForwardThread implements Runnable {
 
         for (long seed = startingSeed; seed < endingSeed; seed++) {
             initDataStructures();
-            System.out.println(seed + " " + startingSeed + " " + endingSeed);
             localSpread += newActive.size();
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected
                 long nodeId = newActive.pop();
-                SplittableRandom rand = new SplittableRandom(seed + randomSeedStart);
+                var rand = new SplittableRandom(initialRandomSeed + seed);
                 long finalSeed = seed;
                 localGraph.forEachRelationship(nodeId, (source, target) ->
                 {
                     double prob = rand.nextDouble();
                     if (prob < propagationProbability) {
                         if (!active.get(target)) {
-                            System.out.println("[trial: " + finalSeed + "] " + nodeId + " enables " + target + " by getting " + prob);
                             //Add newly activated nodes to the set of activated nodes
                             localSpread++;
                             newActive.push(target);

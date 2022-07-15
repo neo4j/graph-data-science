@@ -34,7 +34,7 @@ final class ICLazyForwardMC {
 
     private final int concurrency;
 
-    private final List<ICLazyForwardThread> tasks;
+    private final List<ICLazyForwardTask> tasks;
 
     private final ExecutorService executorService;
 
@@ -45,19 +45,19 @@ final class ICLazyForwardMC {
         long[] seedSetNodes,
         int concurrency,
         ExecutorService executorService,
-        long randomSeedStart
+        long initialRandomSeed
     ) {
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             monteCarloSimulations,
             // should we copy the array when we initialise the threads?
-            partition -> new ICLazyForwardThread(
+            partition -> new ICLazyForwardTask(
                 partition,
                 graph.concurrentCopy(),
                 seedSetNodes.clone(),
                 propagationProbability,
-                randomSeedStart
+                initialRandomSeed
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
@@ -66,7 +66,7 @@ final class ICLazyForwardMC {
 
     ICLazyForwardMC(
         int monteCarloSimulations,
-        List<ICLazyForwardThread> tasks,
+        List<ICLazyForwardTask> tasks,
         int concurrency,
         ExecutorService executorService
     ) {

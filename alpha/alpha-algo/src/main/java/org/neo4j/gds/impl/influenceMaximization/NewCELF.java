@@ -43,7 +43,7 @@ public class NewCELF extends Algorithm<NewCELF> {
     private final int concurrency;
 
     private final Graph graph;
-    private long randomSeedStart;
+    private final long initialRandomSeed;
     private final LongDoubleScatterMap seedSetNodes;
 
     private final long[] seedSetNodesArray;
@@ -64,11 +64,11 @@ public class NewCELF extends Algorithm<NewCELF> {
         int monteCarloSimulations,
         ExecutorService executorService,
         int concurrency,
-        long randomSeedStart
+        long initialRandomSeed
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
-        this.randomSeedStart = randomSeedStart;
+        this.initialRandomSeed = initialRandomSeed;
         long nodeCount = graph.nodeCount();
 
         this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
@@ -95,9 +95,7 @@ public class NewCELF extends Algorithm<NewCELF> {
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
-        for (var value : seedSetNodesArray) {
-            System.out.println(value + " ");
-        }
+       
         return this;
     }
 
@@ -107,15 +105,15 @@ public class NewCELF extends Algorithm<NewCELF> {
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
-            partition -> new ICInitThread(
+            partition -> new ICInitTask(
                 partition,
                 graph,
                 propagationProbability,
                 monteCarloSimulations,
                 singleSpreadArray,
-                randomSeedStart
+                initialRandomSeed
             ),
-            Optional.of((int) graph.nodeCount() / concurrency)
+            Optional.of(Math.toIntExact(graph.nodeCount()) / concurrency)
         );
 
         RunWithConcurrency.builder()
@@ -136,9 +134,6 @@ public class NewCELF extends Algorithm<NewCELF> {
     }
 
     private void lazyForwardPart() {
-        double highestScore;
-        long highestNode;
-
 
         var independentCascade = ICLazyForwardMC.create(
             graph,
@@ -147,13 +142,13 @@ public class NewCELF extends Algorithm<NewCELF> {
             seedSetNodesArray.clone(),
             concurrency,
             executorService,
-            randomSeedStart
+            initialRandomSeed
         );
-        HugeIntArray lastUpdate = HugeIntArray.newArray(graph.nodeCount());
+
+        var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         for (int i = 1; i < seedSetCount; i++) {
             do {
-
-                highestNode = spreads.top();
+                var highestNode = spreads.top();
 
                 //Recalculate the spread of the top node
                 double spread = independentCascade.runForCandidate(highestNode);
@@ -164,19 +159,13 @@ public class NewCELF extends Algorithm<NewCELF> {
             } while (i != lastUpdate.get(spreads.top()));
 
             //Add the node with the highest spread to the seed set
-            highestScore = spreads.cost(spreads.top());
-            highestNode = spreads.pop();
+            var highestScore = spreads.cost(spreads.top());
+            var highestNode = spreads.pop();
 
             seedSetNodes.put(highestNode, highestScore);
             seedSetNodesArray[i] = highestNode;
             gain += highestScore;
             independentCascade.incrementSeedNode(highestNode);
-            System.out.print("===========================");
-            for (int q = 0; q <= i; ++q) {
-                System.out.print(seedSetNodesArray[q] + " ");
-            }
-            System.out.println();
-
         }
     }
 

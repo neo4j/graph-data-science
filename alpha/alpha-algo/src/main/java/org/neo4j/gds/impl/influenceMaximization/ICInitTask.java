@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 
 import java.util.SplittableRandom;
 
-final class ICInitThread implements Runnable {
+final class ICInitTask implements Runnable {
 
     private final Graph localGraph;
     private final double propagationProbability;
@@ -37,18 +37,18 @@ final class ICInitThread implements Runnable {
 
     private final Partition partition;
 
-    private BitSet active;
+    private final BitSet active;
 
-    private HugeLongArrayStack newActive;
-    private long randomSeedStart;
+    private final HugeLongArrayStack newActive;
+    private final long initialRandomSeed;
 
-    ICInitThread(
+    ICInitTask(
         Partition partition,
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
         HugeDoubleArray singleSpreadArray,
-        long randomSeedStart
+        long initialRandomSeed
     ) {
 
         this.partition = partition;
@@ -60,7 +60,7 @@ final class ICInitThread implements Runnable {
         active = new BitSet(graph.nodeCount());
         newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
-        this.randomSeedStart = randomSeedStart;
+        this.initialRandomSeed = initialRandomSeed;
     }
 
     private void initDataStructures(long candidateNodeId) {
@@ -85,7 +85,7 @@ final class ICInitThread implements Runnable {
                 while (!newActive.isEmpty()) {
                     //Determine neighbors that become infected
                     long nextExaminedNode = newActive.pop();
-                    var rand = new SplittableRandom(randomSeedStart + simulation);
+                    var rand = new SplittableRandom(initialRandomSeed + simulation);
 
                     localGraph.forEachRelationship(nextExaminedNode, (source, target) ->
                     {
@@ -107,6 +107,3 @@ final class ICInitThread implements Runnable {
         }
 
     }
-
-
-
