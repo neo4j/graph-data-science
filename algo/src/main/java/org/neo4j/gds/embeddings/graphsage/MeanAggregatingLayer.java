@@ -20,12 +20,10 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 public class MeanAggregatingLayer implements Layer {
 
-    private final NeighborhoodSampler sampler;
     private final int sampleSize;
     private final Weights<Matrix> weights;
     private final ActivationFunction activationFunction;
@@ -33,23 +31,16 @@ public class MeanAggregatingLayer implements Layer {
     public MeanAggregatingLayer(
         Weights<Matrix> weights,
         int sampleSize,
-        ActivationFunction activationFunction,
-        long randomSeed
+        ActivationFunction activationFunction
     ) {
         this.sampleSize = sampleSize;
         this.weights = weights;
         this.activationFunction = activationFunction;
-        this.sampler = new NeighborhoodSampler(randomSeed);
     }
 
     @Override
     public Aggregator aggregator() {
         return new MeanAggregator(weights, activationFunction);
-    }
-
-    @Override
-    public NeighborhoodSampler sampler() {
-        return sampler;
     }
 
     @Override

@@ -37,6 +37,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
 import org.neo4j.gds.ml.core.features.HugeObjectArrayFeatureConsumer;
 import org.neo4j.gds.ml.core.functions.NormalizeRows;
+import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
@@ -46,6 +47,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -80,13 +82,21 @@ public final class GraphSageHelper {
         return new NormalizeRows(previousLayerRepresentations);
     }
 
-    static List<SubGraph> subGraphsPerLayer(Graph graph, long[] nodeIds, Layer[] layers) {
-        List<NeighborhoodFunction> neighborhoodFunctions = Arrays
+    // expecting a thread-local graph here
+    static List<SubGraph> subGraphsPerLayer(Graph graph, long[] nodeIds, Layer[] layers, long randomSeed) {
+        var random = new Random(randomSeed);
+
+        List<NeighborhoodFunction> samplers = Arrays
             .stream(layers)
-            .map(layer -> (NeighborhoodFunction) layer::neighborhoodFunction)
+            .map(layer -> {
+                var neighborhoodSampler = new NeighborhoodSampler(random.nextLong());
+                return (NeighborhoodFunction) (nodeId) -> neighborhoodSampler.sample(graph, nodeId, layer.sampleSize());
+            })
             .collect(Collectors.toList());
-        Collections.reverse(neighborhoodFunctions);
-        return SubGraph.buildSubGraphs(nodeIds, neighborhoodFunctions, graph);
+
+        Collections.reverse(samplers);
+
+        return SubGraph.buildSubGraphs(nodeIds, samplers, SubGraph.relationshipWeightFunction(graph));
     }
 
     public static MemoryEstimation embeddingsEstimation(

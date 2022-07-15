@@ -48,7 +48,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -120,7 +120,7 @@ public class GraphSageModelTrainer {
         List<long[]> extendedBatches = batchSampler
             .extendedBatches(config.batchSize(), config.searchDepth(), randomSeed);
 
-        var random = new Random(randomSeed);
+        var random = new SplittableRandom(randomSeed);
 
         progressTracker.endSubTask("Prepare batches");
 
@@ -136,17 +136,13 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-
-            if (epoch > 1) {
-                // allow sampling new neighbors
-                Arrays.stream(layers).forEach(Layer::modifyRandomState);
-            }
+            int finalEpoch = epoch;
 
             Supplier<List<BatchTask>> batchTaskSampler;
             if (createBatchTasksEagerly) {
                 List<BatchTask> tasksForEpoch = extendedBatches
                     .stream()
-                    .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights))
+                    .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights, finalEpoch))
                     .collect(Collectors.toList());
 
                 batchTaskSampler = () -> IntStream
@@ -154,9 +150,11 @@ public class GraphSageModelTrainer {
                     .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
                     .collect(Collectors.toList());
             } else {
+
                 batchTaskSampler = () -> IntStream
                     .range(0, config.batchesPerIteration(graph.nodeCount()))
-                    .mapToObj(__ -> createBatchTask(extendedBatches.get(random.nextInt(extendedBatches.size())), graph, features, layers, weights))
+                    .mapToObj(__ -> createBatchTask(extendedBatches.get(random.nextInt(extendedBatches.size())), graph, features, layers, weights, finalEpoch
+                    ))
                     .collect(Collectors.toList());
             }
 
@@ -181,11 +179,13 @@ public class GraphSageModelTrainer {
         Graph graph,
         HugeObjectArray<double[]> features,
         Layer[] layers,
-        ArrayList<Weights<? extends Tensor<?>>> weights
+        ArrayList<Weights<? extends Tensor<?>>> weights,
+        int epoch
     ) {
+        // as we pass a reference for the relationshipWeights, we need a local copy
         var localGraph = graph.concurrentCopy();
 
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers, randomSeed + epoch);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,

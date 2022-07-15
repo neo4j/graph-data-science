@@ -20,13 +20,11 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.core.tensor.Vector;
 
 public class MaxPoolAggregatingLayer implements Layer {
 
-    private final NeighborhoodSampler sampler;
     private final int sampleSize;
     private final Weights<Matrix> poolWeights;
     private final Weights<Matrix> selfWeights;
@@ -40,17 +38,13 @@ public class MaxPoolAggregatingLayer implements Layer {
         Weights<Matrix> selfWeights,
         Weights<Matrix> neighborsWeights,
         Weights<Vector> bias,
-        ActivationFunction activationFunction,
-        long randomState
+        ActivationFunction activationFunction
     ) {
         this.poolWeights = poolWeights;
         this.selfWeights = selfWeights;
         this.neighborsWeights = neighborsWeights;
         this.bias = bias;
-
         this.sampleSize = sampleSize;
-        this.sampler = new NeighborhoodSampler(randomState);
-
         this.activationFunction = activationFunction;
     }
 
@@ -68,10 +62,5 @@ public class MaxPoolAggregatingLayer implements Layer {
             this.bias,
             activationFunction
         );
-    }
-
-    @Override
-    public NeighborhoodSampler sampler() {
-        return sampler;
     }
 }

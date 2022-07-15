@@ -237,16 +237,16 @@ class GraphSageModelTrainerTest {
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                16.78,
-                15.70,
-                15.21,
-                16.09,
-                15.78,
-                16.67,
-                14.88,
-                16.25,
-                14.62,
-                14.86
+                18.25,
+                16.31,
+                16.41,
+                16.21,
+                14.96,
+                14.97,
+                14.31,
+                16.17,
+                14.90,
+                15.58
                 }, Offset.offset(0.05)
             );
     }
@@ -281,16 +281,16 @@ class GraphSageModelTrainerTest {
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                20.35,
-                17.86,
-                17.19,
-                20.98,
-                17.79,
-                19.68,
-                21.60,
-                19.67,
-                18.41,
-                18.40
+                23.41,
+                19.94,
+                19.70,
+                21.62,
+                19.06,
+                24.11,
+                19.72,
+                16.47,
+                19.74,
+                20.97
                 }, Offset.offset(0.05)
             );
     }

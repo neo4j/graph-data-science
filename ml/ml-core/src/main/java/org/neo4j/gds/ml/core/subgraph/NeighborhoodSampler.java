@@ -29,7 +29,7 @@ import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
     // Influence of the weight for the probability
-    private long randomSeed;
+    private final long randomSeed;
 
     public NeighborhoodSampler(long randomSeed) {
         this.randomSeed = randomSeed;
@@ -62,11 +62,4 @@ public class NeighborhoodSampler {
         }
     }
 
-    public long randomState() {
-        return this.randomSeed;
-    }
-
-    public void changeRandomState() {
-        this.randomSeed++;
-    }
 }

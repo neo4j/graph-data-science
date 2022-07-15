@@ -51,8 +51,7 @@ public final class LayerFactory {
                 return new MeanAggregatingLayer(
                     weights,
                     layerConfig.sampleSize(),
-                    activationFunction,
-                    randomSeed
+                    activationFunction
                 );
             case POOL:
                 Weights<Matrix> poolWeights = weights;
@@ -79,8 +78,7 @@ public final class LayerFactory {
                     selfWeights,
                     neighborsWeights,
                     bias,
-                    activationFunction,
-                    randomSeed
+                    activationFunction
                 );
             default:
                 throw new IllegalArgumentException(formatWithLocale(

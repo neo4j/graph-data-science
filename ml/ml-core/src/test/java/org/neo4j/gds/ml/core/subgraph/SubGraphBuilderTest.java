@@ -32,6 +32,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
+import org.neo4j.gds.ml.core.RelationshipWeights;
 
 import java.util.Arrays;
 import java.util.List;
@@ -59,10 +60,6 @@ class SubGraphBuilderTest {
         "(e)-[]->(h)," +
         "(e)-[]->(i)";
 
-    private static final NeighborhoodFunction ALL_NEIGBHORS = (graph, nodeId) -> graph
-        .streamRelationships(nodeId, -1D)
-        .mapToLong(RelationshipCursor::targetId);
-
     @Inject
     private IdFunction idFunction;
 
@@ -73,12 +70,12 @@ class SubGraphBuilderTest {
 
     @BeforeEach
     void setup() {
-        neighborhoodFunction = (graph, nodeId) -> new NeighborhoodSampler(0L).sample(graph, nodeId, 100);
+        neighborhoodFunction = (nodeId) -> new NeighborhoodSampler(0L).sample(graph, nodeId, 100);
     }
 
     @Test
     void shouldBuildSubGraphSingleNode() {
-        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L}, neighborhoodFunction, RelationshipWeights.UNWEIGHTED);
 
         int[] expectedAdj = new int[] {1, 2, 3};
         long[] expectedNeighbors = new long[] {
@@ -95,7 +92,7 @@ class SubGraphBuilderTest {
 
     @Test
     void shouldBuildSubGraphAnotherNode() {
-        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{1L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{1L}, neighborhoodFunction, RelationshipWeights.UNWEIGHTED);
 
         int[] expectedAdj = new int[] {1, 2, 3};
         long[] expectedNeighbors = new long[] {
@@ -112,7 +109,7 @@ class SubGraphBuilderTest {
 
     @Test
     void shouldBuildSubGraphMultipleNodes() {
-        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, graph);
+        SubGraph subGraph = SubGraph.buildSubGraph(new long[]{0L, 1L, 2L}, neighborhoodFunction, RelationshipWeights.UNWEIGHTED);
 
         assertThat(subGraph.batchIds()).containsExactly(0, 1, 2);
 
@@ -143,7 +140,7 @@ class SubGraphBuilderTest {
         List<SubGraph> subGraphs = SubGraph.buildSubGraphs(
             new long[]{0L, 1L, 2L},
             List.of(neighborhoodFunction, neighborhoodFunction),
-            graph
+            RelationshipWeights.UNWEIGHTED
         );
 
         int[] expectedAdjA = new int[] {1, 3, 4};
@@ -205,7 +202,7 @@ class SubGraphBuilderTest {
                 idFunction.of("a")
             },
             neighborhoodFunction,
-            graph
+            RelationshipWeights.UNWEIGHTED
         );
 
         assertEquals(6, subGraph.neighbors.length);
@@ -222,7 +219,11 @@ class SubGraphBuilderTest {
             filteredGraph.toMappedNodeId(idFunction.of("b")),
             filteredGraph.toMappedNodeId(idFunction.of("d"))
         };
-        var subgraph = SubGraph.buildSubGraph(batch, ALL_NEIGBHORS, filteredGraph);
+        var subgraph = SubGraph.buildSubGraph(
+            batch,
+            (nodeId) -> filteredGraph.streamRelationships(nodeId, -1D).mapToLong(RelationshipCursor::targetId),
+            RelationshipWeights.UNWEIGHTED
+        );
 
         // b, c, d
         assertThat(subgraph.nodeCount()).isEqualTo(filteredGraph.nodeCount());

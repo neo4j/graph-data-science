@@ -19,34 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.ml.core.functions.Weights;
-import org.neo4j.gds.ml.core.subgraph.NeighborhoodSampler;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 
 import java.util.List;
-import java.util.stream.LongStream;
 
 public interface Layer {
     int sampleSize();
 
     Aggregator aggregator();
 
-    default long randomState() {
-        return sampler().randomState();
-    }
-
-    default void modifyRandomState() {
-        sampler().changeRandomState();
-    }
-
-    NeighborhoodSampler sampler();
-
     default List<Weights<? extends Tensor<?>>> weights() {
         return aggregator().weights();
     }
 
-    default LongStream neighborhoodFunction(Graph graph, long nodeId) {
-        return sampler().sample(graph, nodeId, sampleSize());
-    }
 }
