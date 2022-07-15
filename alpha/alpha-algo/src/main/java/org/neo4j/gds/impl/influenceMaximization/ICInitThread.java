@@ -49,11 +49,11 @@ final class ICInitThread implements Runnable {
         HugeDoubleArray singleSpreadArray
     ) {
 
-        this.partition=partition;
+        this.partition = partition;
         this.localGraph = graph.concurrentCopy();
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
-        this.singleSpreadArray=singleSpreadArray;
+        this.singleSpreadArray = singleSpreadArray;
 
         active = new BitSet(graph.nodeCount());
         newActive = HugeLongArrayStack.newStack(graph.nodeCount());
@@ -78,7 +78,7 @@ final class ICInitThread implements Runnable {
         }
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
 
-            double nodeSpread = 0;
+            double nodeSpread = 0d;
             for (int simulation = 0; simulation < monteCarloSimulations; ++simulation) {
                 initDataStructures(nodeId);
                 var rand = splittableRandom[simulation];

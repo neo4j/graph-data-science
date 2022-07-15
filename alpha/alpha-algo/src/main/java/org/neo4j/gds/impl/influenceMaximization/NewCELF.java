@@ -134,7 +134,7 @@ public class NewCELF extends Algorithm<NewCELF> {
         long highestNode;
 
 
-        var independentCascade = new ICLazyForwardMC(
+        var independentCascade = ICLazyForwardMC.create(
             graph,
             propagationProbability,
             monteCarloSimulations,

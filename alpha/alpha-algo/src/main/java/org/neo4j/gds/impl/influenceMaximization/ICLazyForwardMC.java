@@ -38,8 +38,7 @@ final class ICLazyForwardMC {
 
     private final ExecutorService executorService;
 
-
-    ICLazyForwardMC(
+    static ICLazyForwardMC create(
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
@@ -47,10 +46,8 @@ final class ICLazyForwardMC {
         int concurrency,
         ExecutorService executorService
     ) {
-//
-        this.monteCarloSimulations = monteCarloSimulations;
 
-        this.tasks = PartitionUtils.rangePartition(
+        var tasks = PartitionUtils.rangePartition(
             concurrency,
             monteCarloSimulations,
             // should we copy the array when we initialise the threads?
@@ -62,6 +59,20 @@ final class ICLazyForwardMC {
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
+        return new ICLazyForwardMC(monteCarloSimulations, tasks, concurrency, executorService);
+    }
+
+    ICLazyForwardMC(
+        int monteCarloSimulations,
+        List<ICLazyForwardThread> tasks,
+        int concurrency,
+        ExecutorService executorService
+    ) {
+//
+        this.monteCarloSimulations = monteCarloSimulations;
+
+        this.tasks = tasks;
+
         this.concurrency = concurrency;
         this.executorService = executorService;
     }
