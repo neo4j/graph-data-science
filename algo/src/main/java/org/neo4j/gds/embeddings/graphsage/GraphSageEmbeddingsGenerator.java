@@ -76,7 +76,7 @@ public class GraphSageEmbeddingsGenerator {
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            partition -> createEmbeddings(graph, partition, features, result)
+            partition -> createEmbeddings(graph.concurrentCopy(), partition, features, result)
         );
 
         RunWithConcurrency.builder()
