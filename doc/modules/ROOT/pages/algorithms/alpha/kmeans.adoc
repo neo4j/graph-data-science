@@ -41,6 +41,9 @@ That is, the probability a node is chosen as the next centroid is proportional t
 Nodes with larger distance hence have higher chance to be picked as a centroid.
 This sampling strategy tries to spread the initial clusters more evenly so as to obtain a better final clustering. This option can be enabled by choosing `kmeans++` as the  initial sampler in the configuration.
 
+
+It is also possible to explicitly give the list of initial centroids to the algorithm. In this case, the value of the `initialSampler` parameter is ignored, even if changed in the configuration.
+
 [[algorithm-k-means-considerations]]
 == Considerations
 
