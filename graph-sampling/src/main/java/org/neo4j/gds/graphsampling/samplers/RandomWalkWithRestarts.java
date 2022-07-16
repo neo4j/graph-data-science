@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import com.carrotsearch.hppc.LongArrayList;
-import com.carrotsearch.hppc.LongCollection;
 import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongDoubleMap;
-import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.cursors.LongDoubleCursor;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -32,11 +29,10 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 import java.util.SplittableRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
-    private static final double QUALITY_THRESHOLD = 0.05;
+    private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private final RandomWalkWithRestartsConfig config;
     private final SplittableRandom rng;
 
@@ -49,17 +45,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var walkQualitiesMap = initializeQualityMap(inputGraph);
-        var startNodes = new ConcurrentIndexedLongList(walkQualitiesMap.keys());
-        var numberOfStartNodes = new AtomicInteger(startNodes.size());
         var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
             {
                 var threadRng = this.rng.split();
                 return new Walker(
-                    startNodes,
-                    numberOfStartNodes,
                     seenNodes,
                     expectedNodes,
+                    QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
                     new WalkQualities(new LongDoubleHashMap(walkQualitiesMap), threadRng),
                     threadRng,
                     inputGraph.concurrentCopy(),
@@ -89,29 +82,26 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     static class Walker implements Runnable {
 
-        private final ConcurrentIndexedLongList startNodes;
-        private final AtomicInteger numberOfStartNodes;
         private final HugeAtomicBitSet seenNodes;
         private final long expectedNodes;
+        private final double qualityThreshold;
         private final WalkQualities walkQualities;
         private final SplittableRandom rng;
         private final Graph inputGraph;
         private final RandomWalkWithRestartsConfig config;
 
         Walker(
-            ConcurrentIndexedLongList startNodes,
-            AtomicInteger numberOfStartNodes,
             HugeAtomicBitSet seenNodes,
             long expectedNodes,
+            double qualityThreshold,
             WalkQualities walkQualities,
             SplittableRandom rng,
             Graph inputGraph,
             RandomWalkWithRestartsConfig config
         ) {
-            this.startNodes = startNodes;
-            this.numberOfStartNodes = numberOfStartNodes;
             this.seenNodes = seenNodes;
             this.expectedNodes = expectedNodes;
+            this.qualityThreshold = qualityThreshold;
             this.walkQualities = walkQualities;
             this.rng = rng;
             this.inputGraph = inputGraph;
@@ -137,17 +127,11 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     double walkQuality = ((double) addedNodes) / nodesConsidered;
                     walkQualities.updateNodeQuality(currentStartNode, walkQuality);
 
-                    updateLocalStartNodes();
-
-                    if (walkQualities.expectedQuality() < QUALITY_THRESHOLD) {
-                        // If another thread added a new start node, then quality has probably increased enough for now.
-                        int localNumberOfStartNodes = walkQualities.size();
-                        if (numberOfStartNodes.compareAndSet(localNumberOfStartNodes, localNumberOfStartNodes + 1)) {
-                            long newNode;
-                            do {
-                                newNode = rng.nextLong(inputGraph.nodeCount());
-                            } while (!startNodes.add(newNode));
-                        }
+                    if (walkQualities.expectedQuality() < qualityThreshold) {
+                        long newNode;
+                        do {
+                            newNode = rng.nextLong(inputGraph.nodeCount());
+                        } while (!walkQualities.addNode(newNode));
                     }
 
                     currentStartNode = walkQualities.nextStartNode();
@@ -159,16 +143,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
                     nodesConsidered++;
                 }
-            }
-        }
-
-        // Make sure using all possible start nodes added by all threads.
-        private void updateLocalStartNodes() {
-            if (walkQualities.size() >= startNodes.size()) {
-                return;
-            }
-            for (int i = walkQualities.size(); i < startNodes.size(); i++) {
-                walkQualities.addNode(startNodes.get(i));
             }
         }
     }
@@ -186,10 +160,16 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.sumOfSquares = qualities.size();
         }
 
-        void addNode(long nodeId) {
+        boolean addNode(long nodeId) {
+            if (qualities.containsKey(nodeId)) {
+                return false;
+            }
+
             qualities.put(nodeId, 1.0);
             sum += 1.0;
             sumOfSquares += 1.0;
+
+            return true;
         }
 
         void updateNodeQuality(long nodeId, double walkQuality) {
@@ -216,37 +196,6 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 }
             }
             throw new IllegalStateException("Something went wrong :(");
-        }
-
-        int size() {
-            return qualities.size();
-        }
-    }
-
-    static class ConcurrentIndexedLongList {
-        private final LongArrayList list;
-        private final LongHashSet set;
-
-
-        ConcurrentIndexedLongList(LongCollection longCollection) {
-            this.set = new LongHashSet(longCollection);
-            this.list = new LongArrayList(longCollection);
-        }
-
-        synchronized boolean add(long x) {
-            if (!set.add(x)) {
-                return false;
-            }
-            list.add(x);
-            return true;
-        }
-
-        synchronized int size() {
-            return list.size();
-        }
-
-        synchronized long get(int i) {
-            return list.get(i);
         }
     }
 }
