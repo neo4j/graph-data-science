@@ -31,8 +31,10 @@ public final class AdjacencyPacking {
 
     private AdjacencyPacking() {}
 
+    public static final int BLOCK_SIZE = 64;
+
     public static int advanceValueOffset(int valuesStart) {
-        return valuesStart + 64;
+        return valuesStart + BLOCK_SIZE;
     }
 
     public static long pack(int bits, long[] values, int valuesStart, long packedPtr) {
@@ -194,14 +196,14 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 0-bit values into 0 bytes, touching 0 words.
      */
-    public static long pack0(long[] values, int valuesStart, long packedPtr) {
+    private static long pack0(long[] values, int valuesStart, long packedPtr) {
         return packedPtr;
     }
 
     /**
      * Packs 64 1-bit values into 8 bytes, touching 1 word.
      */
-    public static long pack1(long[] values, int valuesStart, long packedPtr) {
+    private static long pack1(long[] values, int valuesStart, long packedPtr) {
         // Touching 1 word
         long w0;
         w0 = values[valuesStart];
@@ -276,7 +278,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 2-bit values into 16 bytes, touching 2 words.
      */
-    public static long pack2(long[] values, int valuesStart, long packedPtr) {
+    private static long pack2(long[] values, int valuesStart, long packedPtr) {
         // Touching 2 words
         long w0;
         long w1;
@@ -353,7 +355,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 3-bit values into 24 bytes, touching 3 words.
      */
-    public static long pack3(long[] values, int valuesStart, long packedPtr) {
+    private static long pack3(long[] values, int valuesStart, long packedPtr) {
         // Touching 3 words
         long w0;
         long w1;
@@ -434,7 +436,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 4-bit values into 32 bytes, touching 4 words.
      */
-    public static long pack4(long[] values, int valuesStart, long packedPtr) {
+    private static long pack4(long[] values, int valuesStart, long packedPtr) {
         // Touching 4 words
         long w0;
         long w1;
@@ -515,7 +517,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 5-bit values into 40 bytes, touching 5 words.
      */
-    public static long pack5(long[] values, int valuesStart, long packedPtr) {
+    private static long pack5(long[] values, int valuesStart, long packedPtr) {
         // Touching 5 words
         long w0;
         long w1;
@@ -602,7 +604,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 6-bit values into 48 bytes, touching 6 words.
      */
-    public static long pack6(long[] values, int valuesStart, long packedPtr) {
+    private static long pack6(long[] values, int valuesStart, long packedPtr) {
         // Touching 6 words
         long w0;
         long w1;
@@ -691,7 +693,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 7-bit values into 56 bytes, touching 7 words.
      */
-    public static long pack7(long[] values, int valuesStart, long packedPtr) {
+    private static long pack7(long[] values, int valuesStart, long packedPtr) {
         // Touching 7 words
         long w0;
         long w1;
@@ -784,7 +786,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 8-bit values into 64 bytes, touching 8 words.
      */
-    public static long pack8(long[] values, int valuesStart, long packedPtr) {
+    private static long pack8(long[] values, int valuesStart, long packedPtr) {
         // Touching 8 words
         long w0;
         long w1;
@@ -873,7 +875,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 9-bit values into 72 bytes, touching 9 words.
      */
-    public static long pack9(long[] values, int valuesStart, long packedPtr) {
+    private static long pack9(long[] values, int valuesStart, long packedPtr) {
         // Touching 9 words
         long w0;
         long w1;
@@ -972,7 +974,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 10-bit values into 80 bytes, touching 10 words.
      */
-    public static long pack10(long[] values, int valuesStart, long packedPtr) {
+    private static long pack10(long[] values, int valuesStart, long packedPtr) {
         // Touching 10 words
         long w0;
         long w1;
@@ -1073,7 +1075,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 11-bit values into 88 bytes, touching 11 words.
      */
-    public static long pack11(long[] values, int valuesStart, long packedPtr) {
+    private static long pack11(long[] values, int valuesStart, long packedPtr) {
         // Touching 11 words
         long w0;
         long w1;
@@ -1178,7 +1180,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 12-bit values into 96 bytes, touching 12 words.
      */
-    public static long pack12(long[] values, int valuesStart, long packedPtr) {
+    private static long pack12(long[] values, int valuesStart, long packedPtr) {
         // Touching 12 words
         long w0;
         long w1;
@@ -1283,7 +1285,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 13-bit values into 104 bytes, touching 13 words.
      */
-    public static long pack13(long[] values, int valuesStart, long packedPtr) {
+    private static long pack13(long[] values, int valuesStart, long packedPtr) {
         // Touching 13 words
         long w0;
         long w1;
@@ -1394,7 +1396,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 14-bit values into 112 bytes, touching 14 words.
      */
-    public static long pack14(long[] values, int valuesStart, long packedPtr) {
+    private static long pack14(long[] values, int valuesStart, long packedPtr) {
         // Touching 14 words
         long w0;
         long w1;
@@ -1507,7 +1509,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 15-bit values into 120 bytes, touching 15 words.
      */
-    public static long pack15(long[] values, int valuesStart, long packedPtr) {
+    private static long pack15(long[] values, int valuesStart, long packedPtr) {
         // Touching 15 words
         long w0;
         long w1;
@@ -1624,7 +1626,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 16-bit values into 128 bytes, touching 16 words.
      */
-    public static long pack16(long[] values, int valuesStart, long packedPtr) {
+    private static long pack16(long[] values, int valuesStart, long packedPtr) {
         // Touching 16 words
         long w0;
         long w1;
@@ -1729,7 +1731,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 17-bit values into 136 bytes, touching 17 words.
      */
-    public static long pack17(long[] values, int valuesStart, long packedPtr) {
+    private static long pack17(long[] values, int valuesStart, long packedPtr) {
         // Touching 17 words
         long w0;
         long w1;
@@ -1852,7 +1854,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 18-bit values into 144 bytes, touching 18 words.
      */
-    public static long pack18(long[] values, int valuesStart, long packedPtr) {
+    private static long pack18(long[] values, int valuesStart, long packedPtr) {
         // Touching 18 words
         long w0;
         long w1;
@@ -1977,7 +1979,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 19-bit values into 152 bytes, touching 19 words.
      */
-    public static long pack19(long[] values, int valuesStart, long packedPtr) {
+    private static long pack19(long[] values, int valuesStart, long packedPtr) {
         // Touching 19 words
         long w0;
         long w1;
@@ -2106,7 +2108,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 20-bit values into 160 bytes, touching 20 words.
      */
-    public static long pack20(long[] values, int valuesStart, long packedPtr) {
+    private static long pack20(long[] values, int valuesStart, long packedPtr) {
         // Touching 20 words
         long w0;
         long w1;
@@ -2235,7 +2237,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 21-bit values into 168 bytes, touching 21 words.
      */
-    public static long pack21(long[] values, int valuesStart, long packedPtr) {
+    private static long pack21(long[] values, int valuesStart, long packedPtr) {
         // Touching 21 words
         long w0;
         long w1;
@@ -2370,7 +2372,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 22-bit values into 176 bytes, touching 22 words.
      */
-    public static long pack22(long[] values, int valuesStart, long packedPtr) {
+    private static long pack22(long[] values, int valuesStart, long packedPtr) {
         // Touching 22 words
         long w0;
         long w1;
@@ -2507,7 +2509,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 23-bit values into 184 bytes, touching 23 words.
      */
-    public static long pack23(long[] values, int valuesStart, long packedPtr) {
+    private static long pack23(long[] values, int valuesStart, long packedPtr) {
         // Touching 23 words
         long w0;
         long w1;
@@ -2648,7 +2650,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 24-bit values into 192 bytes, touching 24 words.
      */
-    public static long pack24(long[] values, int valuesStart, long packedPtr) {
+    private static long pack24(long[] values, int valuesStart, long packedPtr) {
         // Touching 24 words
         long w0;
         long w1;
@@ -2785,7 +2787,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 25-bit values into 200 bytes, touching 25 words.
      */
-    public static long pack25(long[] values, int valuesStart, long packedPtr) {
+    private static long pack25(long[] values, int valuesStart, long packedPtr) {
         // Touching 25 words
         long w0;
         long w1;
@@ -2932,7 +2934,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 26-bit values into 208 bytes, touching 26 words.
      */
-    public static long pack26(long[] values, int valuesStart, long packedPtr) {
+    private static long pack26(long[] values, int valuesStart, long packedPtr) {
         // Touching 26 words
         long w0;
         long w1;
@@ -3081,7 +3083,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 27-bit values into 216 bytes, touching 27 words.
      */
-    public static long pack27(long[] values, int valuesStart, long packedPtr) {
+    private static long pack27(long[] values, int valuesStart, long packedPtr) {
         // Touching 27 words
         long w0;
         long w1;
@@ -3234,7 +3236,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 28-bit values into 224 bytes, touching 28 words.
      */
-    public static long pack28(long[] values, int valuesStart, long packedPtr) {
+    private static long pack28(long[] values, int valuesStart, long packedPtr) {
         // Touching 28 words
         long w0;
         long w1;
@@ -3387,7 +3389,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 29-bit values into 232 bytes, touching 29 words.
      */
-    public static long pack29(long[] values, int valuesStart, long packedPtr) {
+    private static long pack29(long[] values, int valuesStart, long packedPtr) {
         // Touching 29 words
         long w0;
         long w1;
@@ -3546,7 +3548,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 30-bit values into 240 bytes, touching 30 words.
      */
-    public static long pack30(long[] values, int valuesStart, long packedPtr) {
+    private static long pack30(long[] values, int valuesStart, long packedPtr) {
         // Touching 30 words
         long w0;
         long w1;
@@ -3707,7 +3709,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 31-bit values into 248 bytes, touching 31 words.
      */
-    public static long pack31(long[] values, int valuesStart, long packedPtr) {
+    private static long pack31(long[] values, int valuesStart, long packedPtr) {
         // Touching 31 words
         long w0;
         long w1;
@@ -3872,7 +3874,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 32-bit values into 256 bytes, touching 32 words.
      */
-    public static long pack32(long[] values, int valuesStart, long packedPtr) {
+    private static long pack32(long[] values, int valuesStart, long packedPtr) {
         // Touching 32 words
         long w0;
         long w1;
@@ -4009,7 +4011,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 33-bit values into 264 bytes, touching 33 words.
      */
-    public static long pack33(long[] values, int valuesStart, long packedPtr) {
+    private static long pack33(long[] values, int valuesStart, long packedPtr) {
         // Touching 33 words
         long w0;
         long w1;
@@ -4180,7 +4182,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 34-bit values into 272 bytes, touching 34 words.
      */
-    public static long pack34(long[] values, int valuesStart, long packedPtr) {
+    private static long pack34(long[] values, int valuesStart, long packedPtr) {
         // Touching 34 words
         long w0;
         long w1;
@@ -4353,7 +4355,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 35-bit values into 280 bytes, touching 35 words.
      */
-    public static long pack35(long[] values, int valuesStart, long packedPtr) {
+    private static long pack35(long[] values, int valuesStart, long packedPtr) {
         // Touching 35 words
         long w0;
         long w1;
@@ -4530,7 +4532,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 36-bit values into 288 bytes, touching 36 words.
      */
-    public static long pack36(long[] values, int valuesStart, long packedPtr) {
+    private static long pack36(long[] values, int valuesStart, long packedPtr) {
         // Touching 36 words
         long w0;
         long w1;
@@ -4707,7 +4709,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 37-bit values into 296 bytes, touching 37 words.
      */
-    public static long pack37(long[] values, int valuesStart, long packedPtr) {
+    private static long pack37(long[] values, int valuesStart, long packedPtr) {
         // Touching 37 words
         long w0;
         long w1;
@@ -4890,7 +4892,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 38-bit values into 304 bytes, touching 38 words.
      */
-    public static long pack38(long[] values, int valuesStart, long packedPtr) {
+    private static long pack38(long[] values, int valuesStart, long packedPtr) {
         // Touching 38 words
         long w0;
         long w1;
@@ -5075,7 +5077,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 39-bit values into 312 bytes, touching 39 words.
      */
-    public static long pack39(long[] values, int valuesStart, long packedPtr) {
+    private static long pack39(long[] values, int valuesStart, long packedPtr) {
         // Touching 39 words
         long w0;
         long w1;
@@ -5264,7 +5266,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 40-bit values into 320 bytes, touching 40 words.
      */
-    public static long pack40(long[] values, int valuesStart, long packedPtr) {
+    private static long pack40(long[] values, int valuesStart, long packedPtr) {
         // Touching 40 words
         long w0;
         long w1;
@@ -5449,7 +5451,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 41-bit values into 328 bytes, touching 41 words.
      */
-    public static long pack41(long[] values, int valuesStart, long packedPtr) {
+    private static long pack41(long[] values, int valuesStart, long packedPtr) {
         // Touching 41 words
         long w0;
         long w1;
@@ -5644,7 +5646,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 42-bit values into 336 bytes, touching 42 words.
      */
-    public static long pack42(long[] values, int valuesStart, long packedPtr) {
+    private static long pack42(long[] values, int valuesStart, long packedPtr) {
         // Touching 42 words
         long w0;
         long w1;
@@ -5841,7 +5843,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 43-bit values into 344 bytes, touching 43 words.
      */
-    public static long pack43(long[] values, int valuesStart, long packedPtr) {
+    private static long pack43(long[] values, int valuesStart, long packedPtr) {
         // Touching 43 words
         long w0;
         long w1;
@@ -6042,7 +6044,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 44-bit values into 352 bytes, touching 44 words.
      */
-    public static long pack44(long[] values, int valuesStart, long packedPtr) {
+    private static long pack44(long[] values, int valuesStart, long packedPtr) {
         // Touching 44 words
         long w0;
         long w1;
@@ -6243,7 +6245,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 45-bit values into 360 bytes, touching 45 words.
      */
-    public static long pack45(long[] values, int valuesStart, long packedPtr) {
+    private static long pack45(long[] values, int valuesStart, long packedPtr) {
         // Touching 45 words
         long w0;
         long w1;
@@ -6450,7 +6452,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 46-bit values into 368 bytes, touching 46 words.
      */
-    public static long pack46(long[] values, int valuesStart, long packedPtr) {
+    private static long pack46(long[] values, int valuesStart, long packedPtr) {
         // Touching 46 words
         long w0;
         long w1;
@@ -6659,7 +6661,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 47-bit values into 376 bytes, touching 47 words.
      */
-    public static long pack47(long[] values, int valuesStart, long packedPtr) {
+    private static long pack47(long[] values, int valuesStart, long packedPtr) {
         // Touching 47 words
         long w0;
         long w1;
@@ -6872,7 +6874,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 48-bit values into 384 bytes, touching 48 words.
      */
-    public static long pack48(long[] values, int valuesStart, long packedPtr) {
+    private static long pack48(long[] values, int valuesStart, long packedPtr) {
         // Touching 48 words
         long w0;
         long w1;
@@ -7073,7 +7075,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 49-bit values into 392 bytes, touching 49 words.
      */
-    public static long pack49(long[] values, int valuesStart, long packedPtr) {
+    private static long pack49(long[] values, int valuesStart, long packedPtr) {
         // Touching 49 words
         long w0;
         long w1;
@@ -7292,7 +7294,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 50-bit values into 400 bytes, touching 50 words.
      */
-    public static long pack50(long[] values, int valuesStart, long packedPtr) {
+    private static long pack50(long[] values, int valuesStart, long packedPtr) {
         // Touching 50 words
         long w0;
         long w1;
@@ -7513,7 +7515,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 51-bit values into 408 bytes, touching 51 words.
      */
-    public static long pack51(long[] values, int valuesStart, long packedPtr) {
+    private static long pack51(long[] values, int valuesStart, long packedPtr) {
         // Touching 51 words
         long w0;
         long w1;
@@ -7738,7 +7740,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 52-bit values into 416 bytes, touching 52 words.
      */
-    public static long pack52(long[] values, int valuesStart, long packedPtr) {
+    private static long pack52(long[] values, int valuesStart, long packedPtr) {
         // Touching 52 words
         long w0;
         long w1;
@@ -7963,7 +7965,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 53-bit values into 424 bytes, touching 53 words.
      */
-    public static long pack53(long[] values, int valuesStart, long packedPtr) {
+    private static long pack53(long[] values, int valuesStart, long packedPtr) {
         // Touching 53 words
         long w0;
         long w1;
@@ -8194,7 +8196,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 54-bit values into 432 bytes, touching 54 words.
      */
-    public static long pack54(long[] values, int valuesStart, long packedPtr) {
+    private static long pack54(long[] values, int valuesStart, long packedPtr) {
         // Touching 54 words
         long w0;
         long w1;
@@ -8427,7 +8429,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 55-bit values into 440 bytes, touching 55 words.
      */
-    public static long pack55(long[] values, int valuesStart, long packedPtr) {
+    private static long pack55(long[] values, int valuesStart, long packedPtr) {
         // Touching 55 words
         long w0;
         long w1;
@@ -8664,7 +8666,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 56-bit values into 448 bytes, touching 56 words.
      */
-    public static long pack56(long[] values, int valuesStart, long packedPtr) {
+    private static long pack56(long[] values, int valuesStart, long packedPtr) {
         // Touching 56 words
         long w0;
         long w1;
@@ -8897,7 +8899,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 57-bit values into 456 bytes, touching 57 words.
      */
-    public static long pack57(long[] values, int valuesStart, long packedPtr) {
+    private static long pack57(long[] values, int valuesStart, long packedPtr) {
         // Touching 57 words
         long w0;
         long w1;
@@ -9140,7 +9142,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 58-bit values into 464 bytes, touching 58 words.
      */
-    public static long pack58(long[] values, int valuesStart, long packedPtr) {
+    private static long pack58(long[] values, int valuesStart, long packedPtr) {
         // Touching 58 words
         long w0;
         long w1;
@@ -9385,7 +9387,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 59-bit values into 472 bytes, touching 59 words.
      */
-    public static long pack59(long[] values, int valuesStart, long packedPtr) {
+    private static long pack59(long[] values, int valuesStart, long packedPtr) {
         // Touching 59 words
         long w0;
         long w1;
@@ -9634,7 +9636,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 60-bit values into 480 bytes, touching 60 words.
      */
-    public static long pack60(long[] values, int valuesStart, long packedPtr) {
+    private static long pack60(long[] values, int valuesStart, long packedPtr) {
         // Touching 60 words
         long w0;
         long w1;
@@ -9883,7 +9885,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 61-bit values into 488 bytes, touching 61 words.
      */
-    public static long pack61(long[] values, int valuesStart, long packedPtr) {
+    private static long pack61(long[] values, int valuesStart, long packedPtr) {
         // Touching 61 words
         long w0;
         long w1;
@@ -10138,7 +10140,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 62-bit values into 496 bytes, touching 62 words.
      */
-    public static long pack62(long[] values, int valuesStart, long packedPtr) {
+    private static long pack62(long[] values, int valuesStart, long packedPtr) {
         // Touching 62 words
         long w0;
         long w1;
@@ -10395,7 +10397,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 63-bit values into 504 bytes, touching 63 words.
      */
-    public static long pack63(long[] values, int valuesStart, long packedPtr) {
+    private static long pack63(long[] values, int valuesStart, long packedPtr) {
         // Touching 63 words
         long w0;
         long w1;
@@ -10656,7 +10658,7 @@ public final class AdjacencyPacking {
     /**
      * Packs 64 64-bit values into 512 bytes, touching 64 words.
      */
-    public static long pack64(long[] values, int valuesStart, long packedPtr) {
+    private static long pack64(long[] values, int valuesStart, long packedPtr) {
         // Touching 64 words
         long w0;
         long w1;
@@ -10857,7 +10859,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 0-bit values using 0 bytes, touching 0 words.
      */
-    public static long unpack0(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack0(long[] values, int valuesStart, long packedPtr) {
         java.util.Arrays.fill(values, valuesStart, valuesStart + 64, 0x0L);
         return packedPtr;
     }
@@ -10865,7 +10867,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 1-bit values using 8 bytes, touching 1 word.
      */
-    public static long unpack1(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack1(long[] values, int valuesStart, long packedPtr) {
         // Access 1 word
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -10939,7 +10941,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 2-bit values using 16 bytes, touching 2 words.
      */
-    public static long unpack2(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack2(long[] values, int valuesStart, long packedPtr) {
         // Access 2 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11015,7 +11017,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 3-bit values using 24 bytes, touching 3 words.
      */
-    public static long unpack3(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack3(long[] values, int valuesStart, long packedPtr) {
         // Access 3 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11093,7 +11095,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 4-bit values using 32 bytes, touching 4 words.
      */
-    public static long unpack4(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack4(long[] values, int valuesStart, long packedPtr) {
         // Access 4 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11173,7 +11175,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 5-bit values using 40 bytes, touching 5 words.
      */
-    public static long unpack5(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack5(long[] values, int valuesStart, long packedPtr) {
         // Access 5 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11255,7 +11257,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 6-bit values using 48 bytes, touching 6 words.
      */
-    public static long unpack6(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack6(long[] values, int valuesStart, long packedPtr) {
         // Access 6 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11339,7 +11341,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 7-bit values using 56 bytes, touching 7 words.
      */
-    public static long unpack7(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack7(long[] values, int valuesStart, long packedPtr) {
         // Access 7 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11425,7 +11427,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 8-bit values using 64 bytes, touching 8 words.
      */
-    public static long unpack8(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack8(long[] values, int valuesStart, long packedPtr) {
         // Access 8 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11513,7 +11515,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 9-bit values using 72 bytes, touching 9 words.
      */
-    public static long unpack9(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack9(long[] values, int valuesStart, long packedPtr) {
         // Access 9 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11603,7 +11605,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 10-bit values using 80 bytes, touching 10 words.
      */
-    public static long unpack10(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack10(long[] values, int valuesStart, long packedPtr) {
         // Access 10 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11695,7 +11697,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 11-bit values using 88 bytes, touching 11 words.
      */
-    public static long unpack11(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack11(long[] values, int valuesStart, long packedPtr) {
         // Access 11 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11789,7 +11791,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 12-bit values using 96 bytes, touching 12 words.
      */
-    public static long unpack12(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack12(long[] values, int valuesStart, long packedPtr) {
         // Access 12 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11885,7 +11887,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 13-bit values using 104 bytes, touching 13 words.
      */
-    public static long unpack13(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack13(long[] values, int valuesStart, long packedPtr) {
         // Access 13 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -11983,7 +11985,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 14-bit values using 112 bytes, touching 14 words.
      */
-    public static long unpack14(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack14(long[] values, int valuesStart, long packedPtr) {
         // Access 14 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12083,7 +12085,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 15-bit values using 120 bytes, touching 15 words.
      */
-    public static long unpack15(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack15(long[] values, int valuesStart, long packedPtr) {
         // Access 15 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12185,7 +12187,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 16-bit values using 128 bytes, touching 16 words.
      */
-    public static long unpack16(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack16(long[] values, int valuesStart, long packedPtr) {
         // Access 16 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12289,7 +12291,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 17-bit values using 136 bytes, touching 17 words.
      */
-    public static long unpack17(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack17(long[] values, int valuesStart, long packedPtr) {
         // Access 17 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12395,7 +12397,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 18-bit values using 144 bytes, touching 18 words.
      */
-    public static long unpack18(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack18(long[] values, int valuesStart, long packedPtr) {
         // Access 18 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12503,7 +12505,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 19-bit values using 152 bytes, touching 19 words.
      */
-    public static long unpack19(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack19(long[] values, int valuesStart, long packedPtr) {
         // Access 19 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12613,7 +12615,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 20-bit values using 160 bytes, touching 20 words.
      */
-    public static long unpack20(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack20(long[] values, int valuesStart, long packedPtr) {
         // Access 20 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12725,7 +12727,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 21-bit values using 168 bytes, touching 21 words.
      */
-    public static long unpack21(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack21(long[] values, int valuesStart, long packedPtr) {
         // Access 21 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12839,7 +12841,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 22-bit values using 176 bytes, touching 22 words.
      */
-    public static long unpack22(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack22(long[] values, int valuesStart, long packedPtr) {
         // Access 22 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -12955,7 +12957,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 23-bit values using 184 bytes, touching 23 words.
      */
-    public static long unpack23(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack23(long[] values, int valuesStart, long packedPtr) {
         // Access 23 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13073,7 +13075,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 24-bit values using 192 bytes, touching 24 words.
      */
-    public static long unpack24(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack24(long[] values, int valuesStart, long packedPtr) {
         // Access 24 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13193,7 +13195,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 25-bit values using 200 bytes, touching 25 words.
      */
-    public static long unpack25(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack25(long[] values, int valuesStart, long packedPtr) {
         // Access 25 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13315,7 +13317,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 26-bit values using 208 bytes, touching 26 words.
      */
-    public static long unpack26(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack26(long[] values, int valuesStart, long packedPtr) {
         // Access 26 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13439,7 +13441,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 27-bit values using 216 bytes, touching 27 words.
      */
-    public static long unpack27(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack27(long[] values, int valuesStart, long packedPtr) {
         // Access 27 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13565,7 +13567,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 28-bit values using 224 bytes, touching 28 words.
      */
-    public static long unpack28(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack28(long[] values, int valuesStart, long packedPtr) {
         // Access 28 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13693,7 +13695,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 29-bit values using 232 bytes, touching 29 words.
      */
-    public static long unpack29(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack29(long[] values, int valuesStart, long packedPtr) {
         // Access 29 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13823,7 +13825,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 30-bit values using 240 bytes, touching 30 words.
      */
-    public static long unpack30(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack30(long[] values, int valuesStart, long packedPtr) {
         // Access 30 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -13955,7 +13957,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 31-bit values using 248 bytes, touching 31 words.
      */
-    public static long unpack31(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack31(long[] values, int valuesStart, long packedPtr) {
         // Access 31 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14089,7 +14091,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 32-bit values using 256 bytes, touching 32 words.
      */
-    public static long unpack32(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack32(long[] values, int valuesStart, long packedPtr) {
         // Access 32 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14225,7 +14227,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 33-bit values using 264 bytes, touching 33 words.
      */
-    public static long unpack33(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack33(long[] values, int valuesStart, long packedPtr) {
         // Access 33 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14363,7 +14365,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 34-bit values using 272 bytes, touching 34 words.
      */
-    public static long unpack34(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack34(long[] values, int valuesStart, long packedPtr) {
         // Access 34 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14503,7 +14505,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 35-bit values using 280 bytes, touching 35 words.
      */
-    public static long unpack35(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack35(long[] values, int valuesStart, long packedPtr) {
         // Access 35 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14645,7 +14647,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 36-bit values using 288 bytes, touching 36 words.
      */
-    public static long unpack36(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack36(long[] values, int valuesStart, long packedPtr) {
         // Access 36 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14789,7 +14791,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 37-bit values using 296 bytes, touching 37 words.
      */
-    public static long unpack37(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack37(long[] values, int valuesStart, long packedPtr) {
         // Access 37 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -14935,7 +14937,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 38-bit values using 304 bytes, touching 38 words.
      */
-    public static long unpack38(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack38(long[] values, int valuesStart, long packedPtr) {
         // Access 38 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15083,7 +15085,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 39-bit values using 312 bytes, touching 39 words.
      */
-    public static long unpack39(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack39(long[] values, int valuesStart, long packedPtr) {
         // Access 39 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15233,7 +15235,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 40-bit values using 320 bytes, touching 40 words.
      */
-    public static long unpack40(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack40(long[] values, int valuesStart, long packedPtr) {
         // Access 40 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15385,7 +15387,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 41-bit values using 328 bytes, touching 41 words.
      */
-    public static long unpack41(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack41(long[] values, int valuesStart, long packedPtr) {
         // Access 41 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15539,7 +15541,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 42-bit values using 336 bytes, touching 42 words.
      */
-    public static long unpack42(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack42(long[] values, int valuesStart, long packedPtr) {
         // Access 42 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15695,7 +15697,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 43-bit values using 344 bytes, touching 43 words.
      */
-    public static long unpack43(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack43(long[] values, int valuesStart, long packedPtr) {
         // Access 43 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -15853,7 +15855,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 44-bit values using 352 bytes, touching 44 words.
      */
-    public static long unpack44(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack44(long[] values, int valuesStart, long packedPtr) {
         // Access 44 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16013,7 +16015,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 45-bit values using 360 bytes, touching 45 words.
      */
-    public static long unpack45(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack45(long[] values, int valuesStart, long packedPtr) {
         // Access 45 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16175,7 +16177,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 46-bit values using 368 bytes, touching 46 words.
      */
-    public static long unpack46(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack46(long[] values, int valuesStart, long packedPtr) {
         // Access 46 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16339,7 +16341,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 47-bit values using 376 bytes, touching 47 words.
      */
-    public static long unpack47(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack47(long[] values, int valuesStart, long packedPtr) {
         // Access 47 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16505,7 +16507,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 48-bit values using 384 bytes, touching 48 words.
      */
-    public static long unpack48(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack48(long[] values, int valuesStart, long packedPtr) {
         // Access 48 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16673,7 +16675,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 49-bit values using 392 bytes, touching 49 words.
      */
-    public static long unpack49(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack49(long[] values, int valuesStart, long packedPtr) {
         // Access 49 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -16843,7 +16845,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 50-bit values using 400 bytes, touching 50 words.
      */
-    public static long unpack50(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack50(long[] values, int valuesStart, long packedPtr) {
         // Access 50 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17015,7 +17017,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 51-bit values using 408 bytes, touching 51 words.
      */
-    public static long unpack51(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack51(long[] values, int valuesStart, long packedPtr) {
         // Access 51 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17189,7 +17191,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 52-bit values using 416 bytes, touching 52 words.
      */
-    public static long unpack52(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack52(long[] values, int valuesStart, long packedPtr) {
         // Access 52 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17365,7 +17367,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 53-bit values using 424 bytes, touching 53 words.
      */
-    public static long unpack53(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack53(long[] values, int valuesStart, long packedPtr) {
         // Access 53 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17543,7 +17545,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 54-bit values using 432 bytes, touching 54 words.
      */
-    public static long unpack54(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack54(long[] values, int valuesStart, long packedPtr) {
         // Access 54 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17723,7 +17725,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 55-bit values using 440 bytes, touching 55 words.
      */
-    public static long unpack55(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack55(long[] values, int valuesStart, long packedPtr) {
         // Access 55 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -17905,7 +17907,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 56-bit values using 448 bytes, touching 56 words.
      */
-    public static long unpack56(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack56(long[] values, int valuesStart, long packedPtr) {
         // Access 56 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -18089,7 +18091,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 57-bit values using 456 bytes, touching 57 words.
      */
-    public static long unpack57(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack57(long[] values, int valuesStart, long packedPtr) {
         // Access 57 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -18275,7 +18277,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 58-bit values using 464 bytes, touching 58 words.
      */
-    public static long unpack58(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack58(long[] values, int valuesStart, long packedPtr) {
         // Access 58 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -18463,7 +18465,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 59-bit values using 472 bytes, touching 59 words.
      */
-    public static long unpack59(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack59(long[] values, int valuesStart, long packedPtr) {
         // Access 59 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -18653,7 +18655,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 60-bit values using 480 bytes, touching 60 words.
      */
-    public static long unpack60(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack60(long[] values, int valuesStart, long packedPtr) {
         // Access 60 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -18845,7 +18847,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 61-bit values using 488 bytes, touching 61 words.
      */
-    public static long unpack61(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack61(long[] values, int valuesStart, long packedPtr) {
         // Access 61 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -19039,7 +19041,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 62-bit values using 496 bytes, touching 62 words.
      */
-    public static long unpack62(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack62(long[] values, int valuesStart, long packedPtr) {
         // Access 62 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -19235,7 +19237,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 63-bit values using 504 bytes, touching 63 words.
      */
-    public static long unpack63(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack63(long[] values, int valuesStart, long packedPtr) {
         // Access 63 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);
@@ -19433,7 +19435,7 @@ public final class AdjacencyPacking {
     /**
      * Unpacks 64 64-bit values using 512 bytes, touching 64 words.
      */
-    public static long unpack64(long[] values, int valuesStart, long packedPtr) {
+    private static long unpack64(long[] values, int valuesStart, long packedPtr) {
         // Access 64 words
         long w0;
         w0 = UnsafeUtil.getLong(packedPtr);

@@ -55,7 +55,7 @@ public final class AdjacencyCompression {
 
     public static int applyDeltaEncoding(long[] data, int length, Aggregation aggregation) {
         Arrays.sort(data, 0, length);
-        return applyDelta(data, length, aggregation);
+        return deltaEncodeSortedValues(data, 0, length, aggregation);
     }
 
     // TODO: requires lots of additional memory ... inline indirect sort to make reuse of - to be created - buffers
@@ -110,10 +110,11 @@ public final class AdjacencyCompression {
         return encodeVLongs(data, length, out, 0);
     }
 
-    private static int applyDelta(long[] values, int length, Aggregation aggregation) {
-        long value = values[0], delta;
-        int in = 1, out = 1;
-        for (; in < length; ++in) {
+    public static int deltaEncodeSortedValues(long[] values, int offset, int length, Aggregation aggregation) {
+        long value = values[offset], delta;
+        int end = offset + length;
+        int in = offset + 1, out = in;
+        for (; in < end; ++in) {
             delta = values[in] - value;
             value = values[in];
             if (delta > 0L || aggregation == Aggregation.NONE) {
@@ -121,6 +122,14 @@ public final class AdjacencyCompression {
             }
         }
         return out;
+    }
+
+    public static void prefixSumDeltaEncodedValues(long[] values, int length) {
+        length = Math.min(values.length, length);
+        long value = values[0];
+        for (int idx = 1; idx < length; ++idx) {
+            value = values[idx] += value;
+        }
     }
 
     /**

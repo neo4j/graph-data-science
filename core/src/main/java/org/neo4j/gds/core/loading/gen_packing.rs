@@ -4,6 +4,7 @@
 // java sizes
 const LONG: u32 = std::mem::size_of::<u64>() as _;
 const LONG_BITS: u32 = u64::BITS;
+const BYTE_BITS: u32 = u8::BITS;
 
 const fn number_of_x_per_bits(block_size: u32, bits: u32, x: u32) -> u32 {
     (block_size * bits + x - 1) / x
@@ -14,7 +15,7 @@ const fn number_of_words_for_bits(block_size: u32, bits: u32) -> u32 {
 }
 
 const fn number_of_bytes_for_bits(block_size: u32, bits: u32) -> u32 {
-    number_of_x_per_bits(block_size, bits, LONG)
+    number_of_x_per_bits(block_size, bits, BYTE_BITS)
 }
 
 const fn plural(n: u32) -> &'static str {
@@ -355,7 +356,7 @@ mod java {
         }
         println!("{INDENT:>4} */");
         println!(
-            "{INDENT:>4}public static long {}{}(long[] {PIN}, int {OFF}, long {PW}) {{",
+            "{INDENT:>4}private static long {}{}(long[] {PIN}, int {OFF}, long {PW}) {{",
             method.prefix, method.bits
         );
 
@@ -492,8 +493,14 @@ mod java {
         println!("{INDENT:>4}private {}() {{}}", class.name);
         println!();
 
+        println!(
+            "{INDENT:>4}public static final int BLOCK_SIZE = {};",
+            class.block_size
+        );
+        println!();
+
         println!("{INDENT:>4}public static int advanceValueOffset(int {OFF}) {{");
-        println!("{INDENT:>4}{INDENT:>4}return {OFF} + {};", class.block_size);
+        println!("{INDENT:>4}{INDENT:>4}return {OFF} + BLOCK_SIZE;");
         println!("{INDENT:>4}{CLOSE}");
         println!();
 
