@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.core.Aggregation;
 
 import java.util.Arrays;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AdjacencyPackerTest {
 
+    @SuppressForbidden(reason = "Just wanna test some stuff")
     @Test
     void name() {
         var random = new Random();
