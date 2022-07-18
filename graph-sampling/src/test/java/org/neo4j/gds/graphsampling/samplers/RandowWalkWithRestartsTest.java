@@ -111,7 +111,6 @@ class RandowWalkWithRestartsTest {
             .nodeLabels(List.of("M", "X"))
             .relationshipTypes(List.of("R1"))
             .samplingRatio(0.5)
-            .concurrency(1)
             .restartProbability(0.1)
             .build();
 
@@ -194,7 +193,7 @@ class RandowWalkWithRestartsTest {
         var rwr = new RandomWalkWithRestarts(config);
         var nodes = rwr.sampleNodes(getGraph(config));
 
-        assertThat(nodes.cardinality()).isEqualTo(5);
+        assertThat(nodes.cardinality()).isGreaterThan(4);
     }
 
     @Test

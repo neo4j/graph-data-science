@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import com.carrotsearch.hppc.LongDoubleHashMap;
-import com.carrotsearch.hppc.LongDoubleMap;
-import com.carrotsearch.hppc.cursors.LongDoubleCursor;
+import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.DoubleCollection;
+import com.carrotsearch.hppc.LongArrayList;
+import com.carrotsearch.hppc.LongCollection;
+import com.carrotsearch.hppc.LongHashSet;
+import com.carrotsearch.hppc.LongSet;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -33,32 +37,29 @@ import java.util.SplittableRandom;
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
+    private static final int MAX_WALKS_PER_START = 100;
     private final RandomWalkWithRestartsConfig config;
-    private final SplittableRandom rng;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
-        this.rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
     }
 
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+        var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
-        var walkQualitiesMap = initializeQualityMap(inputGraph);
+        var initialStartQualities = initializeQualities(inputGraph, rng);
         var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            {
-                var threadRng = this.rng.split();
-                return new Walker(
-                    seenNodes,
-                    expectedNodes,
-                    QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
-                    new WalkQualities(new LongDoubleHashMap(walkQualitiesMap), threadRng),
-                    threadRng,
-                    inputGraph.concurrentCopy(),
-                    config
-                );
-            }
+            new Walker(
+                seenNodes,
+                expectedNodes,
+                QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
+                new WalkQualities(initialStartQualities),
+                rng.split(),
+                inputGraph.concurrentCopy(),
+                config
+            )
         );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
@@ -68,16 +69,27 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return seenNodes;
     }
 
-    private LongDoubleMap initializeQualityMap(Graph inputGraph) {
-        var qualityMap = new LongDoubleHashMap();
+    @ValueClass
+    interface InitialStartQualities {
+        LongCollection nodeIds();
+
+        DoubleCollection qualities();
+    }
+
+    private InitialStartQualities initializeQualities(Graph inputGraph, SplittableRandom rng) {
+        var nodeIds = new LongArrayList();
+        var qualities = new DoubleArrayList();
         if (!config.startNodes().isEmpty()) {
             config.startNodes().forEach(nodeId -> {
-                qualityMap.put(inputGraph.toMappedNodeId(nodeId), 1.0);
+                nodeIds.add(inputGraph.toMappedNodeId(nodeId));
+                qualities.add(1.0);
             });
         } else {
-            qualityMap.put(rng.nextLong(inputGraph.nodeCount()), 1.0);
+            nodeIds.add(rng.nextLong(inputGraph.nodeCount()));
+            qualities.add(1.0);
         }
-        return qualityMap;
+
+        return ImmutableInitialStartQualities.of(nodeIds, qualities);
     }
 
     static class Walker implements Runnable {
@@ -110,10 +122,11 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         @Override
         public void run() {
-            long currentNode = walkQualities.nextStartNode();
-            long currentStartNode = currentNode;
+            int currentStartNodePosition = rng.nextInt(walkQualities.size());
+            long currentNode = walkQualities.nodeId(currentStartNodePosition);
             int addedNodes = 0;
             int nodesConsidered = 1;
+            int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
 
             while (seenNodes.cardinality() < expectedNodes) {
                 if (!seenNodes.getAndSet(currentNode)) {
@@ -123,9 +136,19 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 // walk a step
                 int degree = inputGraph.degree(currentNode);
                 if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
-                    // walk ended, so check if we need to add a new startNode
                     double walkQuality = ((double) addedNodes) / nodesConsidered;
-                    walkQualities.updateNodeQuality(currentStartNode, walkQuality);
+                    walkQualities.updateNodeQuality(currentStartNodePosition, walkQuality);
+                    addedNodes = 0;
+                    nodesConsidered = 1;
+
+                    if (walksLeft-- > 0 && walkQualities.nodeQuality(currentStartNodePosition) > qualityThreshold) {
+                        currentNode = walkQualities.nodeId(currentStartNodePosition);
+                        continue;
+                    }
+
+                    if (walkQualities.nodeQuality(currentStartNodePosition) < 1.0 / MAX_WALKS_PER_START) {
+                        walkQualities.removeNode(currentStartNodePosition);
+                    }
 
                     if (walkQualities.expectedQuality() < qualityThreshold) {
                         long newNode;
@@ -134,10 +157,9 @@ public class RandomWalkWithRestarts implements NodesSampler {
                         } while (!walkQualities.addNode(newNode));
                     }
 
-                    currentStartNode = walkQualities.nextStartNode();
-                    currentNode = currentStartNode;
-                    addedNodes = 0;
-                    nodesConsidered = 1;
+                    currentStartNodePosition = rng.nextInt(walkQualities.size());
+                    currentNode = walkQualities.nodeId(currentStartNodePosition);
+                    walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
                     int targetOffset = rng.nextInt(degree);
                     currentNode = inputGraph.getNeighbor(currentNode, targetOffset);
@@ -148,54 +170,80 @@ public class RandomWalkWithRestarts implements NodesSampler {
     }
 
     static class WalkQualities {
-        private final LongDoubleMap qualities;
-        private final SplittableRandom rng;
+        private final LongSet nodeIdIndex;
+        private final LongArrayList nodeIds;
+        private final DoubleArrayList qualities;
+        private int size;
         private double sum;
         private double sumOfSquares;
 
-        WalkQualities(LongDoubleMap qualities, SplittableRandom rng) {
-            this.qualities = qualities;
-            this.rng = rng;
+        WalkQualities(InitialStartQualities initialStartQualities) {
+            this.nodeIdIndex = new LongHashSet(initialStartQualities.nodeIds());
+            this.nodeIds = new LongArrayList(initialStartQualities.nodeIds());
+            this.qualities = new DoubleArrayList(initialStartQualities.qualities());
             this.sum = qualities.size();
             this.sumOfSquares = qualities.size();
+            this.size = qualities.size();
         }
 
         boolean addNode(long nodeId) {
-            if (qualities.containsKey(nodeId)) {
+            if (nodeIdIndex.contains(nodeId)) {
                 return false;
             }
 
-            qualities.put(nodeId, 1.0);
+            if (size >= nodeIds.size()) {
+                nodeIds.add(nodeId);
+                qualities.add(1.0);
+            } else {
+                nodeIds.set(size, nodeId);
+                qualities.set(size, 1.0);
+            }
+            nodeIdIndex.add(nodeId);
+            size++;
+
             sum += 1.0;
             sumOfSquares += 1.0;
 
             return true;
         }
 
-        void updateNodeQuality(long nodeId, double walkQuality) {
-            double previousQuality = qualities.get(nodeId);
+        void removeNode(int position) {
+            double quality = qualities.get(position);
+            sum -= quality;
+            sumOfSquares -= quality * quality;
+
+            nodeIds.set(position, nodeIds.get(size - 1));
+            qualities.set(position, qualities.get(size - 1));
+            size--;
+        }
+
+        long nodeId(int position) {
+            return nodeIds.get(position);
+        }
+
+        double nodeQuality(int position) {
+            return qualities.get(position);
+        }
+
+        void updateNodeQuality(int position, double walkQuality) {
+            double previousQuality = qualities.get(position);
             double updatedQuality = QUALITY_MOMENTUM * previousQuality + (1 - QUALITY_MOMENTUM) * walkQuality;
 
             sum += updatedQuality - previousQuality;
             sumOfSquares += updatedQuality * updatedQuality - previousQuality * previousQuality;
 
-            qualities.put(nodeId, updatedQuality);
+            qualities.set(position, updatedQuality);
         }
 
         double expectedQuality() {
+            if (size <= 0) {
+                return 0;
+            }
             return sumOfSquares / sum;
         }
 
-        long nextStartNode() {
-            double sample = rng.nextDouble(sum);
-            double traversedSum = 0.0;
-            for (LongDoubleCursor cursor : qualities) {
-                traversedSum += cursor.value;
-                if (traversedSum >= sample) {
-                    return cursor.key;
-                }
-            }
-            throw new IllegalStateException("Something went wrong :(");
+        int size() {
+            return size;
         }
     }
 }
