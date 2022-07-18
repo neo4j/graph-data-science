@@ -83,4 +83,12 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     default List<String> nonNegativeRelationshipTypes() {
         return List.of();
     }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default List<RelationshipType> superRelationshipTypes() {
+        return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
+            .map(RelationshipType::of)
+            .collect(Collectors.toList());
+    }
 }

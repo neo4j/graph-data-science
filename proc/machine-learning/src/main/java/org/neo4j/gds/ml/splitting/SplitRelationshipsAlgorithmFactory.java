@@ -54,7 +54,7 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
         if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
             masterGraph = graphStore.getGraph(
                 configuration.nodeLabelIdentifiers(graphStore),
-                configuration.superGraphTypes(),
+                configuration.superRelationshipTypes(),
                 Optional.empty()
             );
         }
