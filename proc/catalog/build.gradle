@@ -17,6 +17,7 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':algo-common')
     implementation project(':cypher-aggregation')
     implementation project(':csv')
     implementation project(':executor')
@@ -27,6 +28,7 @@ dependencies {
     implementation project(':neo4j-adapter')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
+    implementation project(':graph-sampling')
     implementation project(':transaction')
 
     implementation group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'
