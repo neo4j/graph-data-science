@@ -180,16 +180,14 @@ gds.graph.drop(G)  # same as G.drop()
 
 ==== Streaming properties
 
-The calls xref:graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[`gds.graph.streamNodeProperties`] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[`gds.graph.streamRelationshipProperties`] have additional functionality in the client.
+The client methods
 
+* xref:graph-catalog-node-ops.adoc[`gds.graph.streamNodeProperty`]
+* xref:graph-catalog-node-ops.adoc[`gds.graph.streamNodeProperties`]
+* xref:graph-catalog-relationship-ops.adoc[`gds.graph.streamRelationshipProperty`]
+* xref:graph-catalog-relationship-ops.adoc[`gds.graph.streamRelationshipProperties`]
 
-===== Separate columns
+are greatly sped up if xref::installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS is enabled.
 
-Setting the client only optional keyword parameter `separate_property_columns=True` (it defaults to `False`) for `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` returns a pandas `DataFrame` in which each property requested has its own column.
+Additionally, setting the client only optional keyword parameter `separate_property_columns=True` (it defaults to `False`) for `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` returns a pandas `DataFrame` in which each property requested has its own column.
 Note that this is different from the default behavior for which there would only be one column called `propertyValue` that contains all properties requested interleaved for each node or relationship.
-
-
-[.enterprise-edition]
-===== Arrow flight server support
-
-If the xref::installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS is enabled, the client `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` calls are greatly sped up.
