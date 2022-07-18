@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.graphsampling;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -31,7 +30,6 @@ import org.neo4j.gds.beta.filter.RelationshipsFilter;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -39,6 +37,8 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.NodesBuilder;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.samplers.NodesSampler;
 
@@ -59,7 +59,7 @@ public class GraphSampleConstructor {
     }
 
     public GraphStore construct() {
-        var idMap = buildIdMap();
+        var idMap = computeIdMap();
 
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
@@ -109,7 +109,7 @@ public class GraphSampleConstructor {
             .build();
     }
 
-    private IdMap buildIdMap() {
+    private IdMap computeIdMap() {
         var inputGraph = inputGraphStore.getGraph(
             config.nodeLabelIdentifiers(inputGraphStore),
             config.internalRelationshipTypes(inputGraphStore),
@@ -125,21 +125,17 @@ public class GraphSampleConstructor {
             .hasLabelInformation(hasLabelInformation)
             .deduplicateIds(false)
             .build();
-        var sliceStartIdx = new MutableLong();
-        long sliceSize = (inputGraph.nodeCount() + config.concurrency() - 1) / config.concurrency();
-
-        var tasks = ParallelUtil.tasks(config.concurrency(), () -> {
-            var runnable = new IdMapAccumulator(
+        var tasks = PartitionUtils.rangePartition(config.concurrency(),
+            inputGraph.nodeCount(),
+            partition -> new IdMapSampleTask(
                 nodesBuilder,
                 sampledNodesBitSet,
                 inputGraph,
                 hasLabelInformation,
-                sliceStartIdx.getValue(),
-                Math.min(sliceSize, inputGraph.nodeCount() - sliceStartIdx.getValue())
-            );
-            sliceStartIdx.add(sliceSize);
-            return runnable;
-        });
+                partition
+            ),
+            Optional.empty()
+        );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
@@ -148,33 +144,30 @@ public class GraphSampleConstructor {
         return nodesBuilder.build().idMap();
     }
 
-    static class IdMapAccumulator implements Runnable {
+    static class IdMapSampleTask implements Runnable {
         private final NodesBuilder nodesBuilder;
         private final HugeAtomicBitSet nodesBitSet;
         private final Graph inputGraph;
         private final boolean hasLabelInformation;
-        private final long sliceStartIdx;
-        private final long sliceSize;
+        private final Partition partition;
 
-        IdMapAccumulator(
+        IdMapSampleTask(
             NodesBuilder nodesBuilder,
             HugeAtomicBitSet nodesBitSet,
             Graph inputGraph,
             boolean hasLabelInformation,
-            long sliceStartIdx,
-            long sliceSize
+            Partition partition
         ) {
             this.nodesBuilder = nodesBuilder;
             this.nodesBitSet = nodesBitSet;
             this.inputGraph = inputGraph;
             this.hasLabelInformation = hasLabelInformation;
-            this.sliceStartIdx = sliceStartIdx;
-            this.sliceSize = sliceSize;
+            this.partition = partition;
         }
 
         @Override
         public void run() {
-            for (long mappedId = sliceStartIdx; mappedId < sliceStartIdx + sliceSize; mappedId++) {
+            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition.nodeCount(); mappedId++) {
                 if (!nodesBitSet.get(mappedId)) {
                     continue;
                 }
