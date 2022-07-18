@@ -35,7 +35,7 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -57,7 +57,7 @@ public final class GraphLoaderBuilders {
     @Builder.Factory
     static GraphLoader storeLoader(
         // GraphLoader parameters
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
@@ -99,7 +99,7 @@ public final class GraphLoaderBuilders {
         );
 
         return createGraphLoader(
-            api,
+            databaseService,
             transactionContext,
             executorService,
             terminationFlag,
@@ -112,7 +112,7 @@ public final class GraphLoaderBuilders {
     @Builder.Factory
     static GraphLoader storeLoaderWithConfig(
         // GraphLoader parameters
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
@@ -121,7 +121,7 @@ public final class GraphLoaderBuilders {
         GraphProjectFromStoreConfig graphProjectConfig
     ) {
         return createGraphLoader(
-            api,
+            databaseService,
             transactionContext,
             executorService,
             terminationFlag,
@@ -139,7 +139,7 @@ public final class GraphLoaderBuilders {
     @Builder.Factory
     static GraphLoader cypherLoader(
         // GraphLoader parameters
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         Optional<TransactionContext> transactionContext,
         Optional<TerminationFlag> terminationFlag,
         Optional<Log> log,
@@ -165,7 +165,7 @@ public final class GraphLoaderBuilders {
         );
 
         return createGraphLoader(
-            api,
+            databaseService,
             transactionContext,
             Optional.empty(),
             terminationFlag,
@@ -177,7 +177,7 @@ public final class GraphLoaderBuilders {
 
     @NotNull
     public static GraphLoader createGraphLoader(
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         Optional<TransactionContext> transactionContext,
         Optional<ExecutorService> executorService,
         Optional<TerminationFlag> terminationFlag,
@@ -187,8 +187,8 @@ public final class GraphLoaderBuilders {
     ) {
         return ImmutableGraphLoader.builder()
             .context(ImmutableGraphLoaderContext.builder()
-                .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(api)))
-                .graphDatabaseService(api)
+                .transactionContext(transactionContext.orElseGet(() -> TestSupport.fullAccessTransaction(databaseService)))
+                .graphDatabaseService(databaseService)
                 .executor(executorService.orElse(Pools.DEFAULT))
                 .terminationFlag(terminationFlag.orElse(TerminationFlag.RUNNING_TRUE))
                 .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

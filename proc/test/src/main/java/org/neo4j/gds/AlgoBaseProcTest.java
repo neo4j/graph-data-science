@@ -46,6 +46,7 @@ import org.neo4j.gds.core.write.NativeRelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
@@ -426,7 +427,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     @NotNull
     default GraphLoader graphLoader(
-        GraphDatabaseAPI db,
+        GraphDatabaseService db,
         GraphProjectConfig graphProjectConfig
     ) {
         return ImmutableGraphLoader
