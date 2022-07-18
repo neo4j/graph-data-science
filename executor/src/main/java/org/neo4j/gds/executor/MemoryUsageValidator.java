@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 
 import java.util.StringJoiner;
@@ -45,9 +45,9 @@ public class MemoryUsageValidator {
     }
 
     private final Log log;
-    private final GraphDatabaseAPI api;
+    private final GraphDatabaseService api;
 
-    public MemoryUsageValidator(Log log, GraphDatabaseAPI api) {
+    public MemoryUsageValidator(Log log, GraphDatabaseService api) {
         this.log = log;
         this.api = api;
     }
