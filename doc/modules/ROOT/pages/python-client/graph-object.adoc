@@ -158,7 +158,7 @@ The primary use case for a graph object is to pass it to algorithms, but it's al
 
 === Input to algorithms
 
-The Python client syntax for using a `Graph` as input to an algorithm follows the standard Cypher API, where the graph is the first parameter passed to the algorithm.
+The Python client syntax for using a `Graph` as input to an algorithm follows the GDS Cypher procedure API, where the graph is the first parameter passed to the algorithm.
 
 include::partial$/pythonclient/python-client-syntax.adoc[]
 
