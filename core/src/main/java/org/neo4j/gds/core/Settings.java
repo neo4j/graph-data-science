@@ -26,14 +26,12 @@ import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.SettingsUtil;
 import org.neo4j.graphdb.config.Setting;
 
-import java.lang.invoke.MethodHandles;
 import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class Settings {
 
@@ -96,8 +94,8 @@ public final class Settings {
         return GraphDatabaseSettings.store_internal_log_path;
     }
 
-    public static <T> T disableOnlineBackup(T builder, SetConfig<T, Boolean> setConfig) {
-        return tryConfigure(
+    public static <T> T disableOnlineBackup(T builder, SettingsUtil.SetConfig<T, Boolean> setConfig) {
+        return SettingsUtil.tryConfigure(
             builder,
             setConfig,
             "com.neo4j.configuration.OnlineBackupSettings",
@@ -106,15 +104,15 @@ public final class Settings {
         );
     }
 
-    public static <T> T disableReplication(T builder, SetConfig<T, Boolean> setConfig) {
-        builder = tryConfigure(
+    public static <T> T disableReplication(T builder, SettingsUtil.SetConfig<T, Boolean> setConfig) {
+        builder = SettingsUtil.tryConfigure(
             builder,
             setConfig,
             "com.neo4j.configuration.EnterpriseEditionInternalSettings",
             "enable_replication",
             Boolean.FALSE
         );
-        builder = tryConfigure(
+        builder = SettingsUtil.tryConfigure(
             builder,
             setConfig,
             "com.neo4j.configuration.EnterpriseEditionInternalSettings",
@@ -122,33 +120,6 @@ public final class Settings {
             Boolean.FALSE
         );
         return builder;
-    }
-
-    public static <T, U> T tryConfigure(
-        T builder,
-        SetConfig<T, U> setConfig,
-        String className,
-        String settingName,
-        U settingValue
-    ) {
-        var lookup = MethodHandles.lookup();
-        try {
-            var settingsClass = Class.forName(className);
-            var settingHandle = lookup.findStaticGetter(settingsClass, settingName, Setting.class);
-            //noinspection unchecked
-            var setting = (Setting<U>) settingHandle.invoke();
-            return setConfig.set(builder, setting, settingValue);
-        } catch (ClassNotFoundException | NoSuchFieldException e) {
-            // Setting is not available on this version
-            return builder;
-        } catch (Throwable e) {
-            // Actually applying the setting failed
-            throw new IllegalStateException(formatWithLocale(
-                "The %s setting could not be configured: %s",
-                settingName,
-                e.getMessage()
-            ), e);
-        }
     }
 
     public static Setting<List<String>> procedureUnrestricted() {
@@ -173,9 +144,5 @@ public final class Settings {
 
     private Settings() {
         throw new UnsupportedOperationException();
-    }
-
-    public interface SetConfig<T, S> {
-        T set(T config, Setting<S> setting, S value);
     }
 }

@@ -20,14 +20,27 @@
 package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.configuration.Config;
 import org.neo4j.configuration.SettingValueParser;
 
 public final class SettingProxy {
 
     private static final SettingProxyApi IMPL = ProxyUtil.findProxy(SettingProxyFactory.class);
 
-    public static <T> Setting.Builder<T> newBuilder(String name, SettingValueParser<T> parser, @Nullable T defaultValue) {
+    public static <T> Setting.Builder<T> newBuilder(
+        String name,
+        SettingValueParser<T> parser,
+        @Nullable T defaultValue
+    ) {
         return ImmutableSetting.builder(name, parser, defaultValue).convert(IMPL::setting);
+    }
+
+    public static DatabaseMode databaseMode(Config config) {
+        return IMPL.databaseMode(config);
+    }
+
+    public static void setDatabaseMode(Config config, DatabaseMode databaseMode) {
+        IMPL.setDatabaseMode(config, databaseMode);
     }
 
     private SettingProxy() {}
