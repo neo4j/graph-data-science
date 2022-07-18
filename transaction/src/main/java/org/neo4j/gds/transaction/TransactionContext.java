@@ -21,13 +21,13 @@ package org.neo4j.gds.transaction;
 
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 /**
  * Manage transactions by making sure that the correct {@link SecurityContext} is applied.
@@ -57,35 +57,35 @@ public final class TransactionContext {
     /**
      * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link Transaction}.
      */
-    public static TransactionContext of(GraphDatabaseAPI api, Transaction top) {
+    public static TransactionContext of(GraphDatabaseService databaseService, Transaction top) {
         var internalTransaction = (InternalTransaction) top;
-        return of(api, internalTransaction);
+        return of(databaseService, internalTransaction);
     }
 
     /**
      * Creates a new {@code TransactionContext} with the same {@link SecurityContext} as the provided {@link InternalTransaction}.
      */
-    public static TransactionContext of(GraphDatabaseAPI api, InternalTransaction top) {
-        return of(api, top.securityContext());
+    public static TransactionContext of(GraphDatabaseService databaseService, InternalTransaction top) {
+        return of(databaseService, top.securityContext());
     }
 
     /**
      * Creates a new {@code TransactionContext} with the provided {@link SecurityContext}.
      */
-    public static TransactionContext of(GraphDatabaseAPI api, SecurityContext securityContext) {
-        var securityContextService = GraphDatabaseApiProxy.resolveDependency(api, SecurityContextWrapper.class);
+    public static TransactionContext of(GraphDatabaseService databaseService, SecurityContext securityContext) {
+        var securityContextService = GraphDatabaseApiProxy.resolveDependency(databaseService, SecurityContextWrapper.class);
         securityContext = securityContextService.wrap(securityContext);
-        return new TransactionContext(api, securityContext);
+        return new TransactionContext(databaseService, securityContext);
     }
 
-    private final GraphDatabaseAPI api;
+    private final GraphDatabaseService databaseService;
     private final SecurityContext securityContext;
 
     private TransactionContext(
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         SecurityContext securityContext
     ) {
-        this.api = api;
+        this.databaseService = databaseService;
         this.securityContext = securityContext;
     }
 
@@ -102,7 +102,7 @@ public final class TransactionContext {
      * will throw a {@link org.neo4j.graphdb.NotInTransactionException} upon access.
      */
     public <T, E extends Exception> T apply(TxFunction<T, E> block) throws E {
-        Transaction tx = api.beginTx();
+        Transaction tx = databaseService.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         ktx.overrideWith(securityContext);
         try (tx) {
@@ -117,7 +117,7 @@ public final class TransactionContext {
      * The new transaction is closed afterwards.
      */
     public <E extends Exception> void accept(TxConsumer<E> block) throws E {
-        Transaction tx = api.beginTx();
+        Transaction tx = databaseService.beginTx();
         KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
         ktx.overrideWith(securityContext);
         try (tx) {
@@ -138,7 +138,7 @@ public final class TransactionContext {
     public TransactionContext withRestrictedAccess(AccessMode.Static accessMode) {
         var restrictedMode = new RestrictedAccessMode(securityContext.mode(), accessMode);
         var newContext = securityContext.withMode(restrictedMode);
-        return new TransactionContext(api, newContext);
+        return new TransactionContext(databaseService, newContext);
     }
 
     /**
@@ -152,7 +152,7 @@ public final class TransactionContext {
      * use {@link SecureTransaction#kernelTransaction()} to get the underlying transaction.
      */
     public SecureTransaction fork() {
-        InternalTransaction tx = (InternalTransaction) api.beginTx();
+        InternalTransaction tx = (InternalTransaction) databaseService.beginTx();
         tx.kernelTransaction().overrideWith(securityContext);
         return new SecureTransaction(tx);
     }

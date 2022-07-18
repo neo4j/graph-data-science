@@ -49,7 +49,6 @@ import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.database.NamedDatabaseId;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -441,8 +440,8 @@ public final class TestSupport {
         return formatWithLocale(cypherAggregation, property);
     }
 
-    public static TransactionContext fullAccessTransaction(GraphDatabaseAPI api) {
-        return TransactionContext.of(api, SecurityContext.AUTH_DISABLED);
+    public static TransactionContext fullAccessTransaction(GraphDatabaseService databaseService) {
+        return TransactionContext.of(databaseService, SecurityContext.AUTH_DISABLED);
     }
 
     public static IdMap idMap(long nodeCount) {
