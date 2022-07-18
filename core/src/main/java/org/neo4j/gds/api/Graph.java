@@ -99,6 +99,13 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      * @return the target at the {@code offset} or {@link IdMap#NOT_FOUND -1} if there is no such target.
      */
     default long nthTarget(long sourceNodeId, int offset) {
+        return Graph.nthTarget(this, sourceNodeId, offset);
+    }
+
+    /**
+     * @see {@link #nthTarget(long, int)}
+     */
+    static long nthTarget(Graph graph, long sourceNodeId, int offset) {
         class FindNth implements RelationshipConsumer {
             private int remaining = offset;
             private long target = NOT_FOUND;
@@ -113,14 +120,14 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
             }
         }
 
-        if (offset >= degree(sourceNodeId)) {
+        if (offset >= graph.degree(sourceNodeId)) {
             return NOT_FOUND;
         }
 
         assert offset >= 0 : "offset must be positive, got " + offset;
 
         var findN = new FindNth();
-        forEachRelationship(sourceNodeId, findN);
+        graph.forEachRelationship(sourceNodeId, findN);
         return findN.target;
     }
 }
