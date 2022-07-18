@@ -36,7 +36,7 @@ public abstract class StreamOfRelationshipsWriter<ALGO extends Algorithm<ALGO_RE
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .api(api)
+            .databaseService(api)
             .log(log)
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)

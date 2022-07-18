@@ -106,7 +106,7 @@ public final class TestNativeGraphLoader implements TestGraphLoader {
     }
 
     private GraphLoader storeLoader() {
-        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().api(db);
+        StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder().databaseService(db);
         nodeLabels.forEach(storeLoaderBuilder::addNodeLabel);
 
         if (relTypes.isEmpty()) {

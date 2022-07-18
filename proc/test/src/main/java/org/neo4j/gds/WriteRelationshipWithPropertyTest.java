@@ -57,7 +57,7 @@ public interface WriteRelationshipWithPropertyTest<ALGORITHM extends Algorithm<R
 
         var graphName = "myGraph";
         var storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(graphDb())
+            .databaseService(graphDb())
             .graphName(graphName)
             .addNodeLabels("A", "B");
 

@@ -83,7 +83,7 @@ class NativeRelationshipExporterTest extends BaseTest {
     @Test
     void doesNotExportWhenNotAllowed() {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("foo")
             .build()
             .graph();
@@ -107,7 +107,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
-        GraphStore graphStore = new StoreLoaderBuilder().api(db)
+        GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "NEW_REL",
                 RelationshipProjection.of("BARFOO", Orientation.NATURAL)
@@ -237,7 +237,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipType("BARFOO");
         if (includeProperties) {
             storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_MISSING));
@@ -282,7 +282,7 @@ class NativeRelationshipExporterTest extends BaseTest {
 
     private Graph loadWrittenGraph(boolean loadRelProperty) {
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipType("FOOBAR");
         if (loadRelProperty) {
             loader.addRelationshipProperty(PropertyMapping.of("weight", PROPERTY_VALUE_IF_NOT_WRITTEN));

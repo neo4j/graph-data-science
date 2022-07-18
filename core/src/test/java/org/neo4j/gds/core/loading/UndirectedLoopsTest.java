@@ -58,7 +58,7 @@ final class UndirectedLoopsTest extends BaseTest {
     @Test
     void undirectedWithMultipleLoopsShouldSucceed() {
         Graph graph = new StoreLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .addRelationshipProperty(PropertyMapping.of("cost", Double.MAX_VALUE))
                 .build()
                 .graph();

@@ -35,12 +35,12 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -51,7 +51,7 @@ import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 public interface ExecutionContext {
 
     @Nullable
-    GraphDatabaseAPI api();
+    GraphDatabaseService databaseService();
 
     @Nullable
     ModelCatalog modelCatalog();
@@ -92,7 +92,7 @@ public interface ExecutionContext {
 
     @Value.Lazy
     default NamedDatabaseId databaseId() {
-        return api().databaseId();
+        return GraphDatabaseApiProxy.databaseId(databaseService());
     }
 
     @Value.Lazy
@@ -108,13 +108,13 @@ public interface ExecutionContext {
             return false;
         }
         return GraphDatabaseApiProxy
-            .resolveDependency(api(), SecurityContextWrapper.class)
+            .resolveDependency(databaseService(), SecurityContextWrapper.class)
             .isAdmin(transaction().securityContext());
     }
 
     ExecutionContext EMPTY = new ExecutionContext() {
         @Override
-        public @Nullable GraphDatabaseAPI api() {
+        public @Nullable GraphDatabaseService databaseService() {
             return null;
         }
 

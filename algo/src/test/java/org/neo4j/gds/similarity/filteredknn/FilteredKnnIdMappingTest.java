@@ -51,7 +51,7 @@ public class FilteredKnnIdMappingTest extends BaseTest {
         var lowestNeoId = runQuery("MATCH (n) RETURN id(n) AS id ORDER BY id ASC LIMIT 1", (r) -> (Long) r.next().get("id"));
 
         var graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .nodeProperties(List.of(PropertyMapping.of("knn")))
             .build()
             .graphStore()

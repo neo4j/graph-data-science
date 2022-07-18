@@ -61,7 +61,7 @@ public interface MutateRelationshipWithPropertyTest<ALGORITHM extends Algorithm<
         String graphName = "myGraph";
 
         StoreLoaderBuilder storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(graphDb())
+            .databaseService(graphDb())
             .graphName(graphName)
             .addNodeLabels("A", "B");
 

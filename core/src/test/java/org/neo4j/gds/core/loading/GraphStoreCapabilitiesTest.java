@@ -43,7 +43,7 @@ class GraphStoreCapabilitiesTest extends BaseProcTest {
     void neo4jGraphIsBackedByDatabase() {
         runQuery("CREATE (a)-[:T]->(b);");
         var graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .build()
             .graphStore();
 

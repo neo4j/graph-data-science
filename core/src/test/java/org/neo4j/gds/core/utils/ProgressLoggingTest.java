@@ -59,7 +59,7 @@ class ProgressLoggingTest extends BaseTest {
         final StringWriter buffer = new StringWriter();
 
         new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .log(testLogger(buffer))
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)

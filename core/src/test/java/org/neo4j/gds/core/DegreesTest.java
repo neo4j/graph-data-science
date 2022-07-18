@@ -189,7 +189,7 @@ class DegreesTest extends BaseTest {
     private void setup(String cypher, Orientation orientation) {
         runQuery(cypher);
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_OUT",
                 RelationshipProjection.of("TYPE", Orientation.NATURAL)

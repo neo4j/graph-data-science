@@ -102,7 +102,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var executionContext = ImmutableExecutionContext
                 .builder()
-                .api(db)
+                .databaseService(db)
                 .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))
                 .username("")
                 .log(Neo4jProxy.testLog())

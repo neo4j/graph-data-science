@@ -60,7 +60,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
     @MethodSource(value = "nodePropertyMappingsAndExpectedResults")
     void computesCorrectNodeSchema(PropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeProjection(
                 NodeProjection.of(
                     "Node",
@@ -77,7 +77,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
     @MethodSource(value = "relationshipPropertyMappingsAndExpectedResults")
     void computesCorrectRelationshipSchema(RelationshipPropertySchema expectedSchema, PropertyMapping propertyMapping) {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipProjection(
                 RelationshipProjection.builder()
                     .type("REL")

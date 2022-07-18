@@ -229,7 +229,7 @@ class FilteredKnnWriteProcTest extends FilteredKnnProcTest<FilteredKnnWriteConfi
         runQuery(algoQuery);
 
         Graph knnGraph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Person")
             .addNodeLabel("Foo")
             .addRelationshipType(relationshipType)

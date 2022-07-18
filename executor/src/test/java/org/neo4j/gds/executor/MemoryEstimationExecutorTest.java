@@ -62,7 +62,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
 
         executionContext = ImmutableExecutionContext
             .builder()
-            .api(db)
+            .databaseService(db)
             .callContext(new ProcedureCallContext(42, new String[0], false, "neo4j", false))
             .log(Neo4jProxy.testLog())
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)

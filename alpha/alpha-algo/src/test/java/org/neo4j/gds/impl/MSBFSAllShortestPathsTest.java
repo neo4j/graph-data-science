@@ -73,7 +73,7 @@ class MSBFSAllShortestPathsTest extends BaseTest {
     @Test
     void testResults() {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .build()

@@ -93,7 +93,7 @@ class GraphStoreTest extends BaseTest {
        boolean expectedIsPresent
     ) {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("myGraph")
             .addNodeProjection(NodeProjection.of("A"))
             .addNodeProjection(NodeProjection.of("B"))
@@ -115,7 +115,7 @@ class GraphStoreTest extends BaseTest {
         String expectedGraph
     ) {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("myGraph")
             .addNodeProjection(NodeProjection.of("A"))
             .addNodeProjection(NodeProjection.of("B"))
@@ -142,7 +142,7 @@ class GraphStoreTest extends BaseTest {
     @MethodSource("validNodeFilterParameters")
     void testFilteringGraphsByNodeLabels(String desc, List<NodeLabel> labels, String expectedGraph) {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("myGraph")
             .nodeProjections(nodeProjections())
             .addRelationshipProjection(RelationshipProjection.of("T1", Orientation.NATURAL))
@@ -160,7 +160,7 @@ class GraphStoreTest extends BaseTest {
     @Test
     void testModificationDate() throws InterruptedException {
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .build()
             .graphStore();
 
@@ -192,7 +192,7 @@ class GraphStoreTest extends BaseTest {
         runQuery("CREATE (a {nodeProp: 42})-[:REL]->(b {nodeProp: 23})");
 
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeProperty(PropertyMapping.of("nodeProp", 0D))
             .build()
             .graphStore();
@@ -207,7 +207,7 @@ class GraphStoreTest extends BaseTest {
         runQuery("CREATE ()-[:REL {p: 2}]->(), ()-[:LER {p: 1}]->(), ()-[:LER {p: 2}]->(), ()-[:LER {q: 2}]->()");
 
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL)
                 .withProperties(
                     PropertyMappings.of(PropertyMapping.of("p", 3.14))
@@ -240,7 +240,7 @@ class GraphStoreTest extends BaseTest {
     @Test
     void unionGraphPrecedesNodeFilteredGraph() {
         var graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabels("A", "B")
             .addRelationshipTypes("T1", "T3")
             .build()
@@ -258,7 +258,7 @@ class GraphStoreTest extends BaseTest {
     @Test
     void nodeOnlyGraph() {
         var graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabels("A", "B")
             .addNodeProperty(PropertyMapping.of("nodeProperty"))
             .addRelationshipTypes("T1", "T3")

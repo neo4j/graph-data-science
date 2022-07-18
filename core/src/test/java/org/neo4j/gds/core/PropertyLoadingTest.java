@@ -42,7 +42,7 @@ public class PropertyLoadingTest extends BaseTest {
     void setup() {
         db.executeTransactionally(DB_CYPHER);
         graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeProperty(PropertyMapping.of("longProp", 24L))
             .addNodeProperty(PropertyMapping.of("doubleProp", 73.31D))
             .addNodeProperty(PropertyMapping.of("longListProp", new long[]{ 0L }))

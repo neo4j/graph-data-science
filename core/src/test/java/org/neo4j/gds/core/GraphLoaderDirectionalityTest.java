@@ -249,13 +249,13 @@ class GraphLoaderDirectionalityTest extends BaseTest {
         if (factoryType == CYPHER) {
 
             graphLoader = new CypherLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .nodeQuery(GraphProjectFromCypherConfig.ALL_NODES_QUERY)
                 .relationshipQuery(relationshipQuery)
                 .build();
         } else {
             graphLoader = new StoreLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .globalOrientation(orientation)
                 .globalAggregation(aggregation)
                 .build();

@@ -91,7 +91,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(LabelPropagationWriteProc.class);
         var testGraphName = "lpaGraph";
-        var initialGraphStore = new StoreLoaderBuilder().api(db)
+        var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
             .build()
             .graphStore();
 
@@ -116,7 +116,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
 
         runQuery(writeQuery);
 
-        var updatedGraph = new StoreLoaderBuilder().api(db)
+        var updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();

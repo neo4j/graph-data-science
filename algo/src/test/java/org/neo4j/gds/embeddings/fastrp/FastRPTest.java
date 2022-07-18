@@ -102,7 +102,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldSwapInitialRandomVectors() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
@@ -133,7 +133,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldAverageNeighbors() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -178,7 +178,7 @@ class FastRPTest extends BaseTest {
             .build();
 
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -237,7 +237,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldInitialisePropertyEmbeddingsCorrectly() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -292,7 +292,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldBeDetermintisticInParallel() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -337,7 +337,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldAverageNeighborsWeighted() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -380,7 +380,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldDistributeValuesCorrectly() {
         var graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
@@ -434,7 +434,7 @@ class FastRPTest extends BaseTest {
     @Test
     void shouldYieldEmptyEmbeddingForIsolatedNodes() {
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Isolated")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))
             .build();
@@ -498,7 +498,7 @@ class FastRPTest extends BaseTest {
             .build();
 
         GraphLoader graphLoader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Node1")
             .addNodeLabel("Node2")
             .nodeProperties(List.of(PropertyMapping.of("f1"), PropertyMapping.of("f2")))

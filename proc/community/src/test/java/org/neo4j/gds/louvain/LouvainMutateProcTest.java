@@ -139,7 +139,7 @@ public class LouvainMutateProcTest extends LouvainProcTest<LouvainMutateConfig> 
 
         runQuery(writeQuery);
 
-        var updatedGraph = new StoreLoaderBuilder().api(db)
+        var updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .addNodeLabel("Node")
             .addRelationshipType("TYPE")
             .globalOrientation(Orientation.UNDIRECTED)

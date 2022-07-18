@@ -121,7 +121,7 @@ class LargeIntersectingTriangleCountTest extends BaseTest {
 
     private void loadGraph() {
         graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .globalOrientation(Orientation.UNDIRECTED)

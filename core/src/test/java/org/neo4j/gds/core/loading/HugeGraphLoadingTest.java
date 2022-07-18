@@ -97,7 +97,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(label.name())
             .addNodeProperty(PropertyMapping.of("bar", -1.0))
             .build()
@@ -139,7 +139,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         final Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .build()
             .graph();
 
@@ -168,7 +168,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         final Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipProperty(PropertyMapping.of("weight", 1.0))
             .build()
             .graph();
@@ -184,7 +184,7 @@ final class HugeGraphLoadingTest extends BaseTest {
                  ", (a)-[:TYPE]->(b)");
 
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NATURAL",
                 RelationshipProjection.of("TYPE", Orientation.NATURAL)
@@ -225,7 +225,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         runQuery("CREATE (a)-[:TYPE {t: 1}]->(b), (a)-[:TYPE {t: 2}]->(b), (a)-[:TYPE2]->(b)");
 
         GraphStore graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "TYPE_NONE",
                 RelationshipProjection.of("TYPE", Aggregation.NONE)
@@ -304,7 +304,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
             .concurrency(concurrency)
-            .api(db)
+            .databaseService(db)
             .build()
             .graphStore();
 
@@ -359,7 +359,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         });
 
         var graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipProperty(PropertyMapping.of("p1", "weight", 1.0))
             .addRelationshipProperty(PropertyMapping.of("p2", "weight", 1.0))
             .concurrency(4)

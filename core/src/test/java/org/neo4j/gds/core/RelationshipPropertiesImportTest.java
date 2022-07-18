@@ -96,7 +96,7 @@ class RelationshipPropertiesImportTest extends BaseTest {
         runQuery(cypher);
 
         graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .globalOrientation(orientation)
             .addRelationshipProperty(PropertyMapping.of("w", 0.0))
             .build()

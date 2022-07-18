@@ -113,7 +113,7 @@ class GraphLoaderTest extends BaseTest {
     void shouldLogProgressWithNativeLoading() {
         var log = Neo4jProxy.testLog();
         new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))
@@ -131,7 +131,7 @@ class GraphLoaderTest extends BaseTest {
         TestLog log = Neo4jProxy.testLog();
 
         new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))
@@ -206,7 +206,7 @@ class GraphLoaderTest extends BaseTest {
     void shouldLogProgressWithCypherLoading() {
         var log = Neo4jProxy.testLog();
         new CypherLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("graph")
             .nodeQuery("MATCH (n) RETURN id(n) AS id, coalesce(n.prop1, 42) AS prop1")
             .relationshipQuery("MATCH (n)-[:REL1|REL2]->(m) RETURN id(n) AS source, id(m) AS target")
@@ -389,7 +389,7 @@ class GraphLoaderTest extends BaseTest {
         TerminationFlag terminationFlag = () -> false;
         assertTransactionTermination(
             () -> new StoreLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .terminationFlag(terminationFlag)
                 .build()
                 .graph()
@@ -459,7 +459,7 @@ class GraphLoaderTest extends BaseTest {
     @Test
     void shouldLoadSingleNodeLabelViaNativeLoader() {
         var graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("graph")
             .nodeProjectionsWithIdentifier(Map.of("AllNodes", NodeProjection.all()))
             .relationshipProjectionsWithIdentifier(Map.of("AllRels", RelationshipProjection.all()))

@@ -92,7 +92,7 @@ class TriangleStreamTest extends BaseTest {
 
     private Graph loadGraph() {
         return new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .globalOrientation(Orientation.UNDIRECTED)

@@ -94,7 +94,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     void testMutateAndWriteWithSeeding() throws Exception {
         registerProcedures(WccWriteProc.class);
         var testGraphName = "wccGraph";
-        var initialGraphStore = new StoreLoaderBuilder().api(db)
+        var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
             .build()
             .graphStore();
 
@@ -119,7 +119,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
 
         runQuery(writeQuery);
 
-        var updatedGraph = new StoreLoaderBuilder().api(db)
+        var updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty(mutateProperty(), mutateProperty(), DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
@@ -130,7 +130,7 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     @Test
     void testMutateYields() {
         var testGraphName = "wccGraph";
-        var initialGraphStore = new StoreLoaderBuilder().api(db)
+        var initialGraphStore = new StoreLoaderBuilder().databaseService(db)
             .build()
             .graphStore();
 
@@ -208,5 +208,3 @@ class WccMutateProcTest extends WccProcTest<WccMutateConfig> implements
     @Override
     public void testExceptionLogging() {}
 }
-
-

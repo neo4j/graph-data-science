@@ -58,7 +58,7 @@ final class LoadingTest extends BaseTest {
     @Test
     void testBasicLoading() {
         Graph graph = new StoreLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .executorService(Pools.DEFAULT)
                 .addNodeLabel("Node")
                 .addRelationshipType("TYPE")

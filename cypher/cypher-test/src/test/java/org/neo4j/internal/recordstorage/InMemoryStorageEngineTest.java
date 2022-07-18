@@ -49,7 +49,7 @@ class InMemoryStorageEngineTest extends CypherTest {
     @Override
     protected GraphStore graphStore() {
         return new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeProjection(NodeProjection.of("A", PropertyMappings.of(PropertyMapping.of("prop1"))))
             .addNodeProjection(NodeProjection.of("B", PropertyMappings.of(PropertyMapping.of("prop2"))))
             .addRelationshipProjection(RelationshipProjection.of("REL", Orientation.NATURAL))
@@ -73,4 +73,3 @@ class InMemoryStorageEngineTest extends CypherTest {
     }
 
 }
-

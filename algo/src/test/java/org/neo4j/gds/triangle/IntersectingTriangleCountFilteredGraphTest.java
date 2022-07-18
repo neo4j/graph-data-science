@@ -62,7 +62,7 @@ class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
     @BeforeEach
     void setup() {
         this.graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addAllNodeLabels(List.of("A", "B"))
             .addRelationshipProjection(RelationshipProjection.of("R1", Orientation.UNDIRECTED, Aggregation.NONE))
             .addRelationshipProjection(RelationshipProjection.of("R2", Orientation.UNDIRECTED, Aggregation.NONE))

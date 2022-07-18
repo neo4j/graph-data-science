@@ -107,7 +107,7 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
     }
 
     private GraphLoader cypherLoader() {
-        CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().api(db);
+        CypherLoaderBuilder cypherLoaderBuilder = new CypherLoaderBuilder().databaseService(db);
 
         String nodeQueryTemplate = "MATCH (n) %s RETURN id(n) AS id%s%s";
 

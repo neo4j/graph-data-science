@@ -108,7 +108,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                     PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 1.0D)).build()
                 )
             ).graphName("myGraph")
-            .api(db)
+            .databaseService(db)
             .build()
             .graphStore();
 
@@ -148,7 +148,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
                     PropertyMappings.builder().addMapping(PropertyMapping.of("prop2", 8.0D)).build()
                 )
             ).graphName("myGraph")
-            .api(db)
+            .databaseService(db)
             .build()
             .graphStore();
 
@@ -321,7 +321,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         String prop2 = "prop2";
 
         var graphStore = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipProjections(
                 RelationshipProjection
                     .builder()

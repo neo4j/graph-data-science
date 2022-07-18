@@ -106,7 +106,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         ThrowingThreadPool pool = new ThrowingThreadPool(3, message);
         try {
             new StoreLoaderBuilder()
-                .api(db)
+                .databaseService(db)
                 .executorService(pool)
                 .build()
                 .graph();
@@ -196,7 +196,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     private GraphStore load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {
         ExecutorService pool = Executors.newFixedThreadPool(3);
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .executorService(pool);
         block.accept(loader);
         try {

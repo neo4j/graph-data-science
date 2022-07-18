@@ -70,7 +70,7 @@ final class HugeIntersectionTest extends BaseTest {
         });
 
         var graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph();

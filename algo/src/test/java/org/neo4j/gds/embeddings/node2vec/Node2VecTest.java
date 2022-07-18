@@ -92,7 +92,7 @@ class Node2VecTest extends BaseTest {
     @MethodSource("graphs")
     void embeddingsShouldHaveTheConfiguredDimension(String msg, Iterable<String> nodeLabels) {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .nodeLabels(nodeLabels)
             .build()
             .graph();
@@ -118,7 +118,7 @@ class Node2VecTest extends BaseTest {
     })
     void shouldLogProgress(boolean relationshipWeights, int expectedProgresses) {
         var storeLoaderBuilder = new StoreLoaderBuilder()
-            .api(db);
+            .databaseService(db);
         if (relationshipWeights) {
             storeLoaderBuilder.addRelationshipProperty(PropertyMapping.of("prop"));
         }
@@ -209,7 +209,7 @@ class Node2VecTest extends BaseTest {
     @Disabled("The order of the randomWalks + its usage in the training is not deterministic yet.")
     @Test
     void randomSeed(SoftAssertions softly) {
-        Graph graph = new StoreLoaderBuilder().api(db).build().graph();
+        Graph graph = new StoreLoaderBuilder().databaseService(db).build().graph();
 
         int embeddingDimension = 2;
 

@@ -67,7 +67,7 @@ class RelationshipPredicateTest extends BaseTest {
     @Test
     void testOutgoing() {
         final Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .build()
             .graph();
 
@@ -203,6 +203,6 @@ class RelationshipPredicateTest extends BaseTest {
     }
 
     private StoreLoaderBuilder loader() {
-        return new StoreLoaderBuilder().api(db);
+        return new StoreLoaderBuilder().databaseService(db);
     }
 }

@@ -83,7 +83,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
         train(16, "mean", ActivationFunction.SIGMOID);
 
         var graphStore = new StoreLoaderWithConfigBuilder()
-            .api(db)
+            .databaseService(db)
             .graphProjectConfig(config)
             .build()
             .graphStore();

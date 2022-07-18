@@ -384,7 +384,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
     private void withGraph(String cypher, Consumer<? super Graph> block) {
         runQuery(cypher);
         block.accept(new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .globalOrientation(Orientation.UNDIRECTED)
             .build()
             .graph());
@@ -397,7 +397,7 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
         build.accept(graphBuilder);
         graphBuilder.close();
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .build()
             .graph();
         block.accept(graph);

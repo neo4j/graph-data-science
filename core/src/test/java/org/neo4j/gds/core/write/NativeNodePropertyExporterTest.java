@@ -69,7 +69,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void exportSingleNodeProperty() {
-        Graph graph = new StoreLoaderBuilder().api(db)
+        Graph graph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
             .graph();
@@ -81,7 +81,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         int[] intData = {23, 42, 84};
         exporter.write("newProp1",  new LongTestPropertyValues(nodeId -> intData[(int) nodeId]));
 
-        Graph updatedGraph = new StoreLoaderBuilder().api(db)
+        Graph updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
             .build()
@@ -102,7 +102,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
     @Test
     void exportMultipleNodeProperties() {
-        Graph graph = new StoreLoaderBuilder().api(db)
+        Graph graph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty("newProp1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp2", "prop2", DefaultValue.of(42.0), Aggregation.NONE)
             .build()
@@ -122,7 +122,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
         exporter.write(nodeProperties);
 
-        Graph updatedGraph = new StoreLoaderBuilder().api(db)
+        Graph updatedGraph = new StoreLoaderBuilder().databaseService(db)
             .addNodeProperty("prop1", "prop1", DefaultValue.of(42.0), Aggregation.NONE)
             .addNodeProperty("newProp1", "newProp1", DefaultValue.of(42), Aggregation.NONE)
             .addNodeProperty("newProp2", "newProp2", DefaultValue.of(42.0), Aggregation.NONE)
@@ -157,7 +157,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
     void progressLogging(boolean parallel) {
         // given a graph of 20 nodes
         runQuery("UNWIND range(1, 20) AS i CREATE (:A)");
-        Graph graph = new StoreLoaderBuilder().api(db).addNodeLabel("A").build().graph();
+        Graph graph = new StoreLoaderBuilder().databaseService(db).addNodeLabel("A").build().graph();
 
         // with a node exporter
         var log = Neo4jProxy.testLog();

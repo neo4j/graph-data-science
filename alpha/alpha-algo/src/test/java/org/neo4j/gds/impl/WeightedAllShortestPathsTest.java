@@ -76,7 +76,7 @@ class WeightedAllShortestPathsTest extends BaseTest {
             .close();
 
         graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
@@ -109,7 +109,7 @@ class WeightedAllShortestPathsTest extends BaseTest {
     @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
         Graph graph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel(LABEL)
             .addRelationshipType(RELATIONSHIP)
             .build()

@@ -67,7 +67,7 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
     @Override
     protected GraphStore graphStore() {
         return new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("A")
             .addNodeLabel("B")
             .addNodeProperty(PropertyMapping.of("nodeProp", ValueType.LONG.fallbackValue()))

@@ -64,7 +64,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
     @Override
     protected GraphStore graphStore() {
         return new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .graphName("test")
             .addAllRelationshipTypes(List.of("REL1", "REL2", "REL3"))
             .addRelationshipProperty(PropertyMapping.of("relProp"))

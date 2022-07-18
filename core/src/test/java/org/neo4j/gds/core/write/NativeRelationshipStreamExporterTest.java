@@ -63,7 +63,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
     @BeforeEach
     void setup() {
-        graph = new StoreLoaderBuilder().api(db).build().graphStore().getUnion();
+        graph = new StoreLoaderBuilder().databaseService(db).build().graphStore().getUnion();
     }
 
     @Test
@@ -109,7 +109,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         assertEquals(exportRelationships.size(), relationshipsWritten);
 
-        var exportedGraph = new StoreLoaderBuilder().api(db)
+        var exportedGraph = new StoreLoaderBuilder().databaseService(db)
             .addRelationshipType(relationshipType)
             .addRelationshipProperty(longKey, longKey, DefaultValue.forLong(), Aggregation.NONE)
             .addRelationshipProperty(doubleKey, doubleKey, DefaultValue.forDouble(), Aggregation.NONE)

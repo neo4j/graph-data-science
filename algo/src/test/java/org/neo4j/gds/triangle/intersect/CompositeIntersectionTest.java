@@ -73,7 +73,7 @@ final class CompositeIntersectionTest extends BaseTest {
         });
 
         GRAPH = ((UnionGraph) new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addRelationshipType(TYPE_1.name())
             .addRelationshipType(TYPE_2.name())
             .globalOrientation(Orientation.UNDIRECTED)

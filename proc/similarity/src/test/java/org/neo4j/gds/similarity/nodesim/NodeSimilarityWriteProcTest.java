@@ -260,7 +260,7 @@ public class NodeSimilarityWriteProcTest
         runQuery(algoQuery);
 
         Graph knnGraph = new StoreLoaderBuilder()
-            .api(db)
+            .databaseService(db)
             .addNodeLabel("Person")
             .addNodeLabel("Foo")
             .addRelationshipType(relationshipType)

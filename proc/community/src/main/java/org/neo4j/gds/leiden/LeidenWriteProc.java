@@ -56,7 +56,7 @@ public class LeidenWriteProc extends BaseProc {
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .api(api)
+            .databaseService(api)
             .modelCatalog(internalModelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)

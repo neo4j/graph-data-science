@@ -79,17 +79,17 @@ public class MemoryEstimationExecutor<
 
         if (graphNameOrConfiguration instanceof Map) {
             // if the api is null, we are probably using EstimationCli
-            var graphLoaderContext = (executionContext.api() == null)
+            var graphLoaderContext = (executionContext.databaseService() == null)
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
-                    .graphDatabaseService(executionContext.api())
+                    .graphDatabaseService(executionContext.databaseService())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
                     .terminationFlag(TerminationFlag.wrap(executionContext.transaction()))
                     .transactionContext(TransactionContext.of(
-                        executionContext.api(),
+                        executionContext.databaseService(),
                         executionContext.procedureTransaction()
                     )).build();
 
