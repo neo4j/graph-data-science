@@ -103,7 +103,7 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
     }
 
     /**
-     * @see {@link #nthTarget(long, int)}
+     * see {@link #nthTarget(long, int)}
      */
     static long nthTarget(Graph graph, long sourceNodeId, int offset) {
         class FindNth implements RelationshipConsumer {
