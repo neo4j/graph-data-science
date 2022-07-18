@@ -20,6 +20,7 @@
 package org.neo4j.gds.graphsampling;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.beta.filter.GraphStoreFilter;
@@ -30,7 +31,14 @@ import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
+import org.neo4j.gds.core.loading.construction.NodesBuilder;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.graphsampling.samplers.NodesSampler;
 
@@ -51,16 +59,11 @@ public class GraphSampleConstructor {
     }
 
     public GraphStore construct() {
-        var inputGraph = inputGraphStore.getGraph(
-            config.nodeLabelIdentifiers(inputGraphStore),
-            config.internalRelationshipTypes(inputGraphStore),
-            Optional.empty()
-        );
-        IdMap sampledNodes = nodesSampler.sampleNodes(inputGraph);
+        var idMap = computeIdMap();
 
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
-            sampledNodes,
+            idMap,
             config.concurrency(),
             ProgressTracker.NULL_TRACKER
         );
@@ -81,7 +84,7 @@ public class GraphSampleConstructor {
             inputGraphStore,
             relTypeFilterExpression,
             inputGraphStore.nodes(),
-            sampledNodes,
+            idMap,
             config.concurrency(),
             Map.of(),
             Pools.DEFAULT,
@@ -90,7 +93,7 @@ public class GraphSampleConstructor {
 
         var filteredSchema = GraphStoreFilter.filterSchema(
             inputGraphStore.schema(),
-            ImmutableFilteredNodes.of(sampledNodes, nodePropertyStore),
+            ImmutableFilteredNodes.of(idMap, nodePropertyStore),
             filteredRelationships
         );
 
@@ -98,7 +101,7 @@ public class GraphSampleConstructor {
             .databaseId(inputGraphStore.databaseId())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
-            .nodes(sampledNodes)
+            .nodes(idMap)
             .nodePropertyStore(nodePropertyStore)
             .relationships(filteredRelationships.topology())
             .relationshipPropertyStores(filteredRelationships.propertyStores())
@@ -106,4 +109,77 @@ public class GraphSampleConstructor {
             .build();
     }
 
+    private IdMap computeIdMap() {
+        var inputGraph = inputGraphStore.getGraph(
+            config.nodeLabelIdentifiers(inputGraphStore),
+            config.internalRelationshipTypes(inputGraphStore),
+            Optional.empty()
+        );
+        var sampledNodesBitSet = nodesSampler.sampleNodes(inputGraph);
+
+        boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .concurrency(config.concurrency())
+            .maxOriginalId(inputGraph.highestNeoId())
+            .hasProperties(false)
+            .hasLabelInformation(hasLabelInformation)
+            .deduplicateIds(false)
+            .build();
+        var tasks = PartitionUtils.rangePartition(config.concurrency(),
+            inputGraph.nodeCount(),
+            partition -> new IdMapSampleTask(
+                nodesBuilder,
+                sampledNodesBitSet,
+                inputGraph,
+                hasLabelInformation,
+                partition
+            ),
+            Optional.empty()
+        );
+        RunWithConcurrency.builder()
+            .concurrency(config.concurrency())
+            .tasks(tasks)
+            .run();
+
+        return nodesBuilder.build().idMap();
+    }
+
+    static class IdMapSampleTask implements Runnable {
+        private final NodesBuilder nodesBuilder;
+        private final HugeAtomicBitSet nodesBitSet;
+        private final Graph inputGraph;
+        private final boolean hasLabelInformation;
+        private final Partition partition;
+
+        IdMapSampleTask(
+            NodesBuilder nodesBuilder,
+            HugeAtomicBitSet nodesBitSet,
+            Graph inputGraph,
+            boolean hasLabelInformation,
+            Partition partition
+        ) {
+            this.nodesBuilder = nodesBuilder;
+            this.nodesBitSet = nodesBitSet;
+            this.inputGraph = inputGraph;
+            this.hasLabelInformation = hasLabelInformation;
+            this.partition = partition;
+        }
+
+        @Override
+        public void run() {
+            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition.nodeCount(); mappedId++) {
+                if (!nodesBitSet.get(mappedId)) {
+                    continue;
+                }
+
+                long originalId = inputGraph.toOriginalNodeId(mappedId);
+                if (hasLabelInformation) {
+                    var nodeLabelToken = NodeLabelTokens.of(inputGraph.nodeLabels(mappedId));
+                    nodesBuilder.addNode(originalId, nodeLabelToken);
+                } else {
+                    nodesBuilder.addNode(originalId);
+                }
+            }
+        }
+    }
 }
