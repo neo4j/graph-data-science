@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.NodeLabel;
@@ -65,8 +64,6 @@ public abstract class EdgeSplitter {
         this.targetLabels = targetLabels;
         this.concurrency = concurrency;
     }
-
-    abstract long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair);
 
     public abstract SplitResult split(
         Graph graph,

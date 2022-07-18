@@ -57,8 +57,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
-    @Override
-    long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
+    private long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
         var validRelationshipCountAdder = new LongAdder();
 
         var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency,

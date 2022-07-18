@@ -29,6 +29,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
 import java.util.Collection;
@@ -47,8 +48,11 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
-    @Override
-    long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
+    private long validPositiveRelationshipCandidateCount(
+        Graph graph,
+        LongLongPredicate isValidNodePair,
+        HugeLongArray degreeResult
+    ) {
         LongAdder validRelationshipCountAdder = new LongAdder();
         var countValidRelationshipTasks = PartitionUtils.rangePartition(
             concurrency,
@@ -56,11 +60,13 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             partition -> (Runnable) () -> {
                 var concurrentGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
-                    if (isValidNodePair.apply(s, t)) {
-                        validRelationshipCountAdder.add(1);
-                    }
-                    return true;
-                }));
+                        if (isValidNodePair.apply(s, t)) {
+                            validRelationshipCountAdder.add(1);
+                            degreeResult.addTo(nodeId, 1);
+                        }
+                        return true;
+                    })
+                );
             }, Optional.empty()
         );
 
@@ -107,7 +113,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             };
         }
 
-        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
+        var validDegrees = HugeLongArray.newArray(graph.nodeCount());
+        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair, validDegrees);
 
         int positiveSamples = (int) (validRelationshipCount * holdoutFraction);
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
@@ -117,6 +124,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         graph.forEachNode(nodeId -> {
             positiveSampling(
                 graph,
+                validDegrees,
                 selectedRelsBuilder,
                 remainingRelsConsumer,
                 positiveSamplesRemaining,
@@ -144,6 +152,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
     private void positiveSampling(
         Graph graph,
+        HugeLongArray validDegrees,
         RelationshipsBuilder selectedRelsBuilder,
         RelationshipWithPropertyConsumer remainingRelsConsumer,
         MutableLong positiveSamplesRemaining,
@@ -157,14 +166,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             return;
         }
 
-        MutableLong validDegree = new MutableLong();
-
-        graph.forEachRelationship(nodeId, (source, target) -> {
-            if (isValidTargetNode.apply(target)) {
-                validDegree.increment();
-            }
-            return true;
-        });
+        MutableLong validDegree = new MutableLong(validDegrees.get(nodeId));
 
         var relsToSelectFromThisNode = samplesPerNode(
             validDegree.longValue(),
