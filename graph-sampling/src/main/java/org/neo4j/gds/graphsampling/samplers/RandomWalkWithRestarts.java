@@ -163,8 +163,9 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
                     int targetOffset = rng.nextInt(degree);
-                    currentNode = inputGraph.nthTarget(currentNode, targetOffset);
-                    assert currentNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "'is bound by the degree but no target could be found";
+                    var nextNode = inputGraph.nthTarget(currentNode, targetOffset);
+                    assert nextNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
+                    currentNode = nextNode;
                     nodesConsidered++;
                 }
             }
