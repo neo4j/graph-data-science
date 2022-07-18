@@ -83,7 +83,22 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      */
     Optional<NodeFilteredGraph> asNodeFilteredGraph();
 
-    default long nthTarget(long nodeId, int offset) {
+    /**
+     * Get the n-th target node id for a given {@code sourceNodeId}.
+     *
+     * The order of the targets is not defined and depends on the implementation of the graph,
+     * but it is consistent across separate calls to this method on the same graph.
+     *
+     * The {@code sourceNodeId} must be a node id existing in the graph.
+     * The {@code offset} parameter is 0-indexed and must be positive.
+     * If {@code offset} is greater than the number of targets for {@code sourceNodeId}, {@link IdMap#NOT_FOUND -1} is returned.
+     *
+     * It is undefined behavior if the {@code sourceNodeId} does not exist in the graph or the {@code offset} is negative.
+     *
+     * @param offset the {@code n}-th target to return. Must be positive.
+     * @return the target at the {@code offset} or {@link IdMap#NOT_FOUND -1} if there is no such target.
+     */
+    default long nthTarget(long sourceNodeId, int offset) {
         class FindNth implements RelationshipConsumer {
             private int remaining = offset;
             private long target = NOT_FOUND;
@@ -98,12 +113,14 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
             }
         }
 
-        if (offset >= degree(nodeId)) {
+        if (offset >= degree(sourceNodeId)) {
             return NOT_FOUND;
         }
 
+        assert offset >= 0 : "offset must be positive, got " + offset;
+
         var findN = new FindNth();
-        forEachRelationship(nodeId, findN);
+        forEachRelationship(sourceNodeId, findN);
         return findN.target;
     }
 }
