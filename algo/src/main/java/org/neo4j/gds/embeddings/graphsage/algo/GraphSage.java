@@ -68,6 +68,7 @@ public class GraphSage extends Algorithm<GraphSage.GraphSageResult> {
             config.batchSize(),
             config.concurrency(),
             model.data().featureFunction(),
+            model.trainConfig().randomSeed(),
             executor,
             progressTracker
         );

@@ -81,6 +81,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.batchSize(),
             config.concurrency(),
             new SingleLabelFeatureFunction(),
+            config.randomSeed(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -119,6 +120,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.batchSize(),
             config.concurrency(),
             model.data().featureFunction(),
+            model.trainConfig().randomSeed(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );
@@ -171,6 +173,7 @@ class GraphSageEmbeddingsGeneratorTest {
             config.batchSize(),
             config.concurrency(),
             model.data().featureFunction(),
+            model.trainConfig().randomSeed(),
             Pools.DEFAULT,
             ProgressTracker.NULL_TRACKER
         );

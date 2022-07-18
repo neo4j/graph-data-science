@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.ml.core;
 
-import org.neo4j.gds.api.Graph;
-
 import java.util.stream.LongStream;
 
 @FunctionalInterface
 public interface NeighborhoodFunction {
-    LongStream apply(Graph graph, long nodeId);
+    LongStream sample(long nodeId);
 }

@@ -31,13 +31,16 @@ import org.neo4j.gds.ml.core.subgraph.SubGraph;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final int batchSize;
     private final int concurrency;
     private final FeatureFunction featureFunction;
+    private final long randomSeed;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
 
@@ -46,6 +49,7 @@ public class GraphSageEmbeddingsGenerator {
         int batchSize,
         int concurrency,
         FeatureFunction featureFunction,
+        Optional<Long> randomSeed,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
@@ -53,6 +57,7 @@ public class GraphSageEmbeddingsGenerator {
         this.batchSize = batchSize;
         this.concurrency = concurrency;
         this.featureFunction = featureFunction;
+        this.randomSeed = randomSeed.orElseGet(() -> ThreadLocalRandom.current().nextLong());
         this.executor = executor;
         this.progressTracker = progressTracker;
     }
@@ -71,7 +76,7 @@ public class GraphSageEmbeddingsGenerator {
         var tasks = PartitionUtils.rangePartitionWithBatchSize(
             graph.nodeCount(),
             batchSize,
-            partition -> createEmbeddings(graph, partition, features, result)
+            partition -> createEmbeddings(graph.concurrentCopy(), partition, features, result)
         );
 
         RunWithConcurrency.builder()
@@ -95,7 +100,8 @@ public class GraphSageEmbeddingsGenerator {
             List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(
                 graph,
                 partition.stream().toArray(),
-                layers
+                layers,
+                randomSeed
             );
 
             Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(

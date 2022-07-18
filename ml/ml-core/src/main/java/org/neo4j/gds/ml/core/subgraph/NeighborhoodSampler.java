@@ -25,12 +25,11 @@ import org.neo4j.gds.ml.core.RelationshipWeights;
 import org.neo4j.gds.ml.core.samplers.UniformSampler;
 import org.neo4j.gds.ml.core.samplers.WeightedUniformSampler;
 
-import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
 public class NeighborhoodSampler {
     // Influence of the weight for the probability
-    private long randomSeed;
+    private final long randomSeed;
 
     public NeighborhoodSampler(long randomSeed) {
         this.randomSeed = randomSeed;
@@ -48,14 +47,14 @@ public class NeighborhoodSampler {
         }
 
         if (graph.hasRelationshipProperty()) {
-            return new WeightedUniformSampler(randomSeed)
+            return new WeightedUniformSampler(randomSeed + nodeId)
                 .sample(
                     concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                     degree,
                     numberOfSamples
                 );
         } else {
-            return new UniformSampler(randomSeed).sample(
+            return new UniformSampler(randomSeed + nodeId).sample(
                 concurrentCopyGraph.streamRelationships(nodeId, RelationshipWeights.DEFAULT_VALUE),
                 degree,
                 numberOfSamples
@@ -63,15 +62,4 @@ public class NeighborhoodSampler {
         }
     }
 
-    public long randomState() {
-        return this.randomSeed;
-    }
-
-    public void changeRandomState() {
-        this.randomSeed++;
-    }
-
-    public OptionalLong sampleOne(Graph graph, long nodeId) {
-        return sample(graph, nodeId, 1).findFirst();
-    }
 }

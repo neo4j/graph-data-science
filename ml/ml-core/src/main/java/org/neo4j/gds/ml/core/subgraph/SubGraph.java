@@ -54,13 +54,13 @@ public final class SubGraph implements BatchNeighbors {
     public static List<SubGraph> buildSubGraphs(
         long[] batchNodeIds,
         List<NeighborhoodFunction> neighborhoodFunctions,
-        Graph graph
+        RelationshipWeights weightFunction
     ) {
         List<SubGraph> result = new ArrayList<>();
         long[] previousNodes = batchNodeIds;
 
         for (NeighborhoodFunction neighborhoodFunction : neighborhoodFunctions) {
-            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, graph);
+            SubGraph lastGraph = buildSubGraph(previousNodes, neighborhoodFunction, weightFunction);
             result.add(lastGraph);
             // the next Subgraph needs to consider all nodes included in the last subgraph
             previousNodes = lastGraph.originalNodeIds;
@@ -68,7 +68,7 @@ public final class SubGraph implements BatchNeighbors {
         return result;
     }
 
-    public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, Graph graph) {
+    public static SubGraph buildSubGraph(long[] batchNodeIds, NeighborhoodFunction neighborhoodFunction, RelationshipWeights weightFunction) {
         int[][] adjacency = new int[batchNodeIds.length][];
         int[] batchedNodeIds = new int[batchNodeIds.length];
 
@@ -86,7 +86,7 @@ public final class SubGraph implements BatchNeighbors {
 
             batchedNodeIds[nodeOffset] = idmap.toMapped(nodeId);
 
-            var nodeNeighbors = neighborhoodFunction.apply(graph, nodeId);
+            var nodeNeighbors = neighborhoodFunction.sample(nodeId);
 
             // map sampled neighbors into local id space
             // this also expands the id mapping as the neighbours could be not in the nodeIds[]
@@ -97,7 +97,7 @@ public final class SubGraph implements BatchNeighbors {
             adjacency[nodeOffset] = neighborInternalIds;
         }
 
-        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), relationshipWeightFunction(graph));
+        return new SubGraph(adjacency, batchedNodeIds, idmap.originalIds(), weightFunction);
     }
 
     @Override

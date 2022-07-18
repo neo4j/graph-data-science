@@ -237,16 +237,17 @@ class GraphSageModelTrainerTest {
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                17.33,
-                17.41,
-                16.55,
-                16.88,
-                17.54,
-                15.21,
-                15.14,
-                17.24,
-                15.71,
-                15.08
+                // these are often affected by changes. The idea is to check if the general direction is correct
+                16.80,
+                17.22,
+                17.12,
+                15.99,
+                15.75,
+                15.52,
+                16.77,
+                15.12,
+                15.04,
+                14.23
                 }, Offset.offset(0.05)
             );
     }
@@ -281,16 +282,17 @@ class GraphSageModelTrainerTest {
 
         assertThat(metrics.epochLosses().stream().mapToDouble(Double::doubleValue).toArray())
             .contains(new double[]{
-                19.50,
-                18.53,
-                16.60,
-                22.28,
-                17.35,
-                19.72,
-                21.07,
-                19.76,
-                17.86,
-                17.85
+                // these are often affected by changes. The idea is to check if the general direction is correct
+                22.90,
+                17.45,
+                21.65,
+                18.46,
+                17.87,
+                19.10,
+                16.49,
+                19.69,
+                19.67,
+                21.59
                 }, Offset.offset(0.05)
             );
     }

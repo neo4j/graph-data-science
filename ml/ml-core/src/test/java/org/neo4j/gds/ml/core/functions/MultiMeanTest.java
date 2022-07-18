@@ -136,10 +136,8 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
             graph.toMappedNodeId("d3"),
             graph.toMappedNodeId("d4"),
         };
-        NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
-            .streamRelationships(nodeId, 0.0D)
-            .mapToLong(RelationshipCursor::targetId);
-        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
+        NeighborhoodFunction neighborhoodFunction = (nodeId) -> graph.streamRelationships(nodeId, 0.0D).mapToLong(RelationshipCursor::targetId);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph::relationshipProperty);
 
         var userEmbeddings = Constant.matrix(new double[] {
             1, 1, 1, // u1
@@ -172,10 +170,8 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
             graph.toMappedNodeId("d3"),
             graph.toMappedNodeId("d4"),
         };
-        NeighborhoodFunction neighborhoodFunction = (graph, nodeId) -> graph
-            .streamRelationships(nodeId, 0.0D)
-            .mapToLong(RelationshipCursor::targetId);
-        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph);
+        NeighborhoodFunction neighborhoodFunction = (nodeId) -> graph.streamRelationships(nodeId, 0.0D).mapToLong(RelationshipCursor::targetId);
+        var subGraph = SubGraph.buildSubGraph(ids, neighborhoodFunction, graph::relationshipProperty);
 
         var weights = new Weights<>(new Matrix(new double[] {
             1, 1, 1, // u1
