@@ -58,7 +58,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     private final CloseableThreadLocal<Graph> threadLocalGraph;
 
     public NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap) {
-        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap),-1);
+        this(originalGraph, filteredIdMap, emptyDegreeCache(filteredIdMap), -1);
     }
 
     private NodeFilteredGraph(CSRGraph originalGraph, IdMap filteredIdMap, HugeIntArray degreeCache, long relationshipCount) {
@@ -223,13 +223,25 @@ public class NodeFilteredGraph extends CSRGraphAdapter {
     }
 
     @Override
+    public long nthTarget(long nodeId, int offset) {
+        return Graph.nthTarget(this, nodeId, offset);
+    }
+
+    @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
-        return super.relationshipProperty(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId), fallbackValue);
+        return super.relationshipProperty(
+            filteredIdMap.toOriginalNodeId(sourceNodeId),
+            filteredIdMap.toOriginalNodeId(targetNodeId),
+            fallbackValue
+        );
     }
 
     @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId) {
-        return super.relationshipProperty(filteredIdMap.toOriginalNodeId(sourceNodeId), filteredIdMap.toOriginalNodeId(targetNodeId));
+        return super.relationshipProperty(
+            filteredIdMap.toOriginalNodeId(sourceNodeId),
+            filteredIdMap.toOriginalNodeId(targetNodeId)
+        );
     }
 
     @Override
