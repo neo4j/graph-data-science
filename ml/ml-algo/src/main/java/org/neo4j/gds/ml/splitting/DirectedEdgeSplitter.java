@@ -37,7 +37,13 @@ import java.util.concurrent.atomic.LongAdder;
 
 public class DirectedEdgeSplitter extends EdgeSplitter {
 
-    public DirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, int concurrency) {
+    public DirectedEdgeSplitter(
+        Optional<Long> maybeSeed,
+        double negativeSamplingRatio,
+        Collection<NodeLabel> sourceLabels,
+        Collection<NodeLabel> targetLabels,
+        int concurrency
+    ) {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
@@ -55,18 +61,19 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
-        var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
-        MutableLong positiveSourceNodeCount = new MutableLong(sourceNodesWithRequiredNodeLabels.nodeCount());
+        var sourceNodes = sourceNodes(graph);
+        MutableLong positiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
         MutableLong negativeSourceNodeCount = new MutableLong(positiveSourceNodeCount.longValue());
-        var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
+        var targetNodes = targetNodes(graph);
 
-        LongPredicate isValidSourceNode = node -> sourceNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
+        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toRootNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toRootNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
             ? newRelationshipsBuilderWithProp(graph, Orientation.NATURAL)
             : newRelationshipsBuilder(graph, Orientation.NATURAL);
+
         RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
             ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
@@ -132,7 +139,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         LongPredicate isValidTargetNode
     ) {
         if (!isValidSourceNode.apply(nodeId)) {
-            graph.forEachRelationship(nodeId, Double.NaN, remainingRelsConsumer::accept);
+            graph.forEachRelationship(nodeId, Double.NaN, remainingRelsConsumer);
             return;
         }
 

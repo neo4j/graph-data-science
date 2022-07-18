@@ -26,6 +26,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -46,7 +47,13 @@ import java.util.concurrent.atomic.LongAdder;
  */
 public class UndirectedEdgeSplitter extends EdgeSplitter {
 
-    public UndirectedEdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, int concurrency) {
+    public UndirectedEdgeSplitter(
+        Optional<Long> maybeSeed,
+        double negativeSamplingRatio,
+        Collection<NodeLabel> sourceLabels,
+        Collection<NodeLabel> targetLabels,
+        int concurrency
+    ) {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
@@ -69,13 +76,12 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             throw new IllegalArgumentException("EdgeSplitter requires master graph to be UNDIRECTED");
         }
 
-        var sourceNodesWithRequiredNodeLabels = graph.withFilteredLabels(sourceLabels, concurrency);
-        MutableLong sourceNodeCount = new MutableLong(sourceNodesWithRequiredNodeLabels.nodeCount());
-        var targetNodesWithRequiredNodeLabels = graph.withFilteredLabels(targetLabels, concurrency);
+        IdMap sourceNodes = sourceNodes(graph);
+        MutableLong sourceNodeCount = new MutableLong(sourceNodes.nodeCount());
+        IdMap targetNodes = targetNodes(graph);
 
-        //TODO Pass in graphStore to avoid mapping to rootNodeIds
-        LongPredicate isValidSourceNode = node -> sourceNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodesWithRequiredNodeLabels.contains(graph.toRootNodeId(node));
+        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toRootNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toRootNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);

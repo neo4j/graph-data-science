@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -46,11 +47,11 @@ public abstract class EdgeSplitter {
     private static final int MAX_RETRIES = 20;
 
     private final Random rng;
+    private final Collection<NodeLabel> sourceLabels;
+
+    private final Collection<NodeLabel> targetLabels;
+
     final double negativeSamplingRatio;
-
-    protected final Collection<NodeLabel> sourceLabels;
-
-    protected final Collection<NodeLabel> targetLabels;
 
     protected int concurrency;
 
@@ -69,6 +70,14 @@ public abstract class EdgeSplitter {
         Graph masterGraph,
         double holdoutFraction
     );
+
+    protected IdMap sourceNodes(Graph graph) {
+        return graph.withFilteredLabels(sourceLabels, concurrency);
+    }
+
+    protected IdMap targetNodes(Graph graph) {
+        return graph.withFilteredLabels(targetLabels, concurrency);
+    }
 
     protected boolean sample(double probability) {
         return rng.nextDouble() < probability;
