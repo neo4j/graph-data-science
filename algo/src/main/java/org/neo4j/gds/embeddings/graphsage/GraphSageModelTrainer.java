@@ -136,13 +136,20 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-            int finalEpoch = epoch;
+            long epochLocalSeed = random.nextLong();
 
             Supplier<List<BatchTask>> batchTaskSampler;
             if (createBatchTasksEagerly) {
                 List<BatchTask> tasksForEpoch = extendedBatches
                     .stream()
-                    .map(extendedBatch -> createBatchTask(extendedBatch, graph, features, layers, weights, finalEpoch))
+                    .map(extendedBatch -> createBatchTask(
+                        extendedBatch,
+                        graph,
+                        features,
+                        layers,
+                        weights,
+                        epochLocalSeed
+                    ))
                     .collect(Collectors.toList());
 
                 batchTaskSampler = () -> IntStream
@@ -150,10 +157,15 @@ public class GraphSageModelTrainer {
                     .mapToObj(__ -> tasksForEpoch.get(random.nextInt(tasksForEpoch.size())))
                     .collect(Collectors.toList());
             } else {
-
                 batchTaskSampler = () -> IntStream
                     .range(0, config.batchesPerIteration(graph.nodeCount()))
-                    .mapToObj(__ -> createBatchTask(extendedBatches.get(random.nextInt(extendedBatches.size())), graph, features, layers, weights, finalEpoch
+                    .mapToObj(__ -> createBatchTask(
+                        extendedBatches.get(random.nextInt(extendedBatches.size())),
+                        graph,
+                        features,
+                        layers,
+                        weights,
+                        epochLocalSeed
                     ))
                     .collect(Collectors.toList());
             }
@@ -180,12 +192,12 @@ public class GraphSageModelTrainer {
         HugeObjectArray<double[]> features,
         Layer[] layers,
         ArrayList<Weights<? extends Tensor<?>>> weights,
-        int epoch
+        long randomSeed
     ) {
         // as we pass a reference for the relationshipWeights, we need a local copy
         var localGraph = graph.concurrentCopy();
 
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers, randomSeed + epoch);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers, randomSeed);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,

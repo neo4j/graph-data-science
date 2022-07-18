@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
+import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -87,21 +88,21 @@ class GraphSageStreamProcTest extends GraphSageBaseProcTest {
             .yields();
 
         assertCypherResult(streamQuery, List.of(
-            Map.of("nodeId", 0L, "embedding", List.of(-0.9999999992039947)),
-            Map.of("nodeId", 1L, "embedding", List.of(-0.9999999999000064)),
-            Map.of("nodeId", 2L, "embedding", List.of(-0.9999999995051105)),
-            Map.of("nodeId", 3L, "embedding", List.of(-0.9999999985728191)),
-            Map.of("nodeId", 4L, "embedding", List.of(-0.9999999999324936)),
-            Map.of("nodeId", 5L, "embedding", List.of(-0.9999999974310742)),
-            Map.of("nodeId", 6L, "embedding", List.of(-0.9999999982663691)),
-            Map.of("nodeId", 7L, "embedding", List.of(-0.9999999976052386)),
-            Map.of("nodeId", 8L, "embedding", List.of(-0.9999999843010093)),
-            Map.of("nodeId", 9L, "embedding", List.of(0.99999999984301)),
-            Map.of("nodeId", 10L, "embedding", List.of(-0.9999999978753245)),
-            Map.of("nodeId", 11L, "embedding", List.of(0.9999999999917132)),
-            Map.of("nodeId", 12L, "embedding", List.of(-0.9999999985728191)),
-            Map.of("nodeId", 13L, "embedding", List.of(-0.9999999985728191)),
-            Map.of("nodeId", 14L, "embedding", List.of(-0.9999999985728191))
+            Map.of("nodeId", 0L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 1L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 2L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 3L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 4L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 5L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 6L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 7L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 8L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 9L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 10L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 11L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 12L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 13L, "embedding", Matchers.iterableWithSize(1)),
+            Map.of("nodeId", 14L, "embedding", Matchers.iterableWithSize(1))
         ));
     }
 
