@@ -43,7 +43,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.NEGATIVE;
-import static org.neo4j.gds.ml.splitting.DirectedEdgeSplitter.POSITIVE;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -58,13 +57,45 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multiLabel")
     static String gdlMultiLabel = "(n1 :A)-[:T {foo: 5} ]->(n2 :C)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :D)";
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multi")
+    static String gdlMultiGraph = "(n1 :A), (n2: A), (n1)-->(n2), (n1)-->(n2), (n1)-->(n2), (n1)-->(n2)";
+
     @Inject
     TestGraph multiLabelGraph;
+
+    @Inject
+    TestGraph multiGraph;
+
+    @Test
+    void splitMultiGraph() {
+        double negativeSamplingRatio = 0.0;
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(-1L),
+            negativeSamplingRatio,
+            multiGraph.availableNodeLabels(),
+            multiGraph.availableNodeLabels(),
+            4
+        );
+
+        EdgeSplitter.SplitResult result = splitter.split(graph, 0.5);
+
+        assertThat(result.selectedRels().topology())
+            // we always aggregate the result at the moment
+            .matches(topology -> !topology.isMultiGraph())
+            .matches(topology -> topology.elementCount() == 2);
+    }
 
 
     @Test
     void split() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        double negativeSamplingRatio = 1.0;
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(-1L),
+            negativeSamplingRatio,
+            graph.availableNodeLabels(),
+            graph.availableNodeLabels(),
+            4
+        );
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -76,30 +107,24 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
+        assertRelInGraph(remainingRels, graph);
 
         var selectedRels = result.selectedRels();
-        assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 4,0 and 5,4 (neg) and 0,1 and 2,3 (pos) relationships
-            assertEquals(4L, topology.elementCount());
-            assertRelExists(topology, 4, 0);
-            assertRelExists(topology, 5, 4);
-            assertRelExists(topology, 0, 1);
-            assertRelExists(topology, 2, 3);
-            assertEquals(Orientation.NATURAL, topology.orientation());
-            assertFalse(topology.isMultiGraph());
-        });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(4L, p.elementCount());
-            assertRelProperties(p, 4, NEGATIVE);
-            assertRelProperties(p, 5, NEGATIVE);
-            assertRelProperties(p, 0, POSITIVE);
-            assertRelProperties(p, 2, POSITIVE);
-        });
+
+        assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+        assertFalse(selectedRels.topology().isMultiGraph());
     }
 
     @Test
     void splitWithNegativeRatio() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(-1L), 2.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        double negativeSamplingRatio = 2.0;
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(-1L),
+            negativeSamplingRatio,
+            graph.availableNodeLabels(),
+            graph.availableNodeLabels(),
+            4
+        );
 
         // select 40%, which is 2 rels in this graph
         var result = splitter.split(graph, .4);
@@ -111,27 +136,11 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
+        assertRelInGraph(remainingRels, graph);
 
         var selectedRels = result.selectedRels();
-        assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 0,5; 3,0; 4,2; 5,3 (neg) and 0,1 and 1,2 (pos) relationships
-            assertEquals(6L, topology.elementCount());
-            assertRelExists(topology, 0, 1, 5);
-            assertRelExists(topology, 3, 0);
-            assertRelExists(topology, 4, 2);
-            assertRelExists(topology, 5, 3);
-            assertRelExists(topology, 1, 2);
-            assertEquals(Orientation.NATURAL, topology.orientation());
-            assertFalse(topology.isMultiGraph());
-        });
-        assertThat(selectedRels.properties()).isPresent().get().satisfies(p -> {
-            assertEquals(6L, p.elementCount());
-            assertRelProperties(p, 0, POSITIVE, NEGATIVE);
-            assertRelProperties(p, 3, NEGATIVE);
-            assertRelProperties(p, 4, NEGATIVE);
-            assertRelProperties(p, 5, NEGATIVE);
-            assertRelProperties(p, 1, POSITIVE);
-        });
+        assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+        assertFalse(selectedRels.topology().isMultiGraph());
     }
 
     @Test

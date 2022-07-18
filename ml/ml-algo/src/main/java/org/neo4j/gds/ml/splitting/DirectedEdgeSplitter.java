@@ -158,6 +158,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         }
 
         MutableLong validDegree = new MutableLong();
+
         graph.forEachRelationship(nodeId, (source, target) -> {
             if (isValidTargetNode.apply(target)) {
                 validDegree.increment();

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
@@ -48,11 +49,11 @@ abstract class EdgeSplitterBaseTest {
         }
     }
 
-    void assertRelSamplingProperties(Relationships relationships, Graph inputGraph, double negativeSamplingRatio) {
+    void assertRelSamplingProperties(Relationships selectedRels, Graph inputGraph, double negativeSamplingRatio) {
         MutableInt positiveCount = new MutableInt();
         inputGraph.forEachNode(source -> {
-            var targetNodeCursor = relationships.topology().adjacencyList().adjacencyCursor(source);
-            var propertyCursor = relationships.properties().get().propertiesList().propertyCursor(source);
+            var targetNodeCursor = selectedRels.topology().adjacencyList().adjacencyCursor(source);
+            var propertyCursor = selectedRels.properties().get().propertiesList().propertyCursor(source);
             while (targetNodeCursor.hasNextVLong()) {
                 boolean edgeIsPositive = Double.longBitsToDouble(propertyCursor.nextLong()) == EdgeSplitter.POSITIVE;
                 if (edgeIsPositive) positiveCount.increment();
@@ -62,7 +63,9 @@ abstract class EdgeSplitterBaseTest {
             assertThat(propertyCursor.hasNextLong()).isFalse();
             return true;
         });
-        assertThat(relationships.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
+
+        assertThat(selectedRels.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
+        assertThat(selectedRels.topology().orientation() == Orientation.UNDIRECTED).isEqualTo(inputGraph.isUndirected());
     }
 
     void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
