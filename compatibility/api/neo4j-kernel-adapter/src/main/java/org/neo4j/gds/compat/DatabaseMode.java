@@ -19,13 +19,8 @@
  */
 package org.neo4j.gds.compat;
 
-import org.neo4j.configuration.Config;
-
-public interface SettingProxyApi {
-    // public, otherwise checkstyle complains that "'<' is preceded with whitespace."
-    public <T> org.neo4j.graphdb.config.Setting<T> setting(Setting<T> setting);
-
-    DatabaseMode databaseMode(Config config);
-
-    void setDatabaseMode(Config config, DatabaseMode databaseMode);
+public enum DatabaseMode {
+    SINGLE,
+    CORE,
+    READ_REPLICA
 }
