@@ -83,9 +83,11 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
 
     @Configuration.Ignore
     default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
-        return contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : contextRelationshipTypes().stream().map(RelationshipType::new).collect(Collectors.toList());
+        var relTypes =  contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.relationshipTypes().stream()
+            : contextRelationshipTypes().stream().map(RelationshipType::new);
+
+        return relTypes .filter(type -> !type.equals(internalTargetRelationshipType())).collect(Collectors.toList());
     }
 
     @Override
