@@ -47,6 +47,28 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
+    @Override
+    long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
+        LongAdder validRelationshipCountAdder = new LongAdder();
+        var countValidRelationshipTasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> (Runnable) () -> {
+                var concurrentGraph = graph.concurrentCopy();
+                partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
+                    if (isValidNodePair.apply(s, t)) {
+                        validRelationshipCountAdder.add(1);
+                    }
+                    return true;
+                }));
+            }, Optional.empty()
+        );
+
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
+
+        return validRelationshipCountAdder.longValue();
+    }
+
     @TestOnly
     public SplitResult split(Graph graph, double holdoutFraction) {
         return split(graph, graph, holdoutFraction);
@@ -78,22 +100,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
-        LongAdder validRelationshipCountAdder = new LongAdder();
-        var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partition -> (Runnable)()->{
-            var concurrentGraph = graph.concurrentCopy();
-            partition.consume(nodeId -> {
-                concurrentGraph.forEachRelationship(nodeId, (s, t) ->{
-                    if (isValidNodePair.apply(s,t)) {
-                            validRelationshipCountAdder.add(1);
-                    }
-                    return true;
-                });
-            });
-        }, Optional.empty());
-
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
-
-        var validRelationshipCount = validRelationshipCountAdder.longValue();
+        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
 
         int positiveSamples = (int) (validRelationshipCount * holdoutFraction);
         var positiveSamplesRemaining = new MutableLong(positiveSamples);

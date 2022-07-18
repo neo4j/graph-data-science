@@ -57,6 +57,33 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
     }
 
+    @Override
+    long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair) {
+        var validRelationshipCountAdder = new LongAdder();
+
+        var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency,
+            graph.nodeCount(),
+            partition -> (Runnable) () -> {
+                var concurrentGraph = graph.concurrentCopy();
+                partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
+                    if (s < t) {
+                        //If one directed edge has valid labels, then increment count by 2 for undirected graph to get correct total positiveSamples count.
+                        //because we only do directed positiveSampling, which is choosing one of the positive undirected relationship.
+                        //Otherwise, if sourceNodeLabels != targetNodeLabels, positiveSamples will be too small.
+                        if (isValidNodePair.apply(s, t) || isValidNodePair.apply(t, s)) {
+                            validRelationshipCountAdder.add(2);
+                        }
+                    }
+                    return true;
+                }));
+            }, Optional.empty()
+        );
+
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
+
+        return validRelationshipCountAdder.longValue();
+    }
+
     @TestOnly
     public SplitResult split(Graph graph, double holdoutFraction) {
         return split(graph, graph, holdoutFraction);
@@ -93,27 +120,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
             ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
             : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
 
-        LongAdder validRelationshipCountAdder = new LongAdder();
-        var countValidRelationshipTasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(), partition -> (Runnable)()->{
-            var concurrentGraph = graph.concurrentCopy();
-            partition.consume(nodeId -> {
-                    concurrentGraph.forEachRelationship(nodeId, (s, t) ->{
-                        if (s < t) {
-                            //If one directed edge has valid labels, then increment count by 2 for undirected graph to get correct total positiveSamples count.
-                            //because we only do directed positiveSampling, which is choosing one of the positive undirected relationship.
-                            //Otherwise, if sourceNodeLabels != targetNodeLabels, positiveSamples will be too small.
-                            if (isValidNodePair.apply(s,t) || isValidNodePair.apply(t,s)) {
-                                validRelationshipCountAdder.add(2);
-                            }
-                        }
-                        return true;
-                    });
-            });
-        }, Optional.empty());
-
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
-
-        var validRelationshipCount = validRelationshipCountAdder.longValue();
+        var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
 
         var positiveSamples = (long) (validRelationshipCount * holdoutFraction) / 2;
         var positiveSamplesRemaining = new MutableLong(positiveSamples);
