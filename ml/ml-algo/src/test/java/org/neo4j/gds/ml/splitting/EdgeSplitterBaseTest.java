@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.splitting;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.Relationships;
@@ -65,7 +64,6 @@ abstract class EdgeSplitterBaseTest {
         });
 
         assertThat(selectedRels.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
-        assertThat(selectedRels.topology().orientation() == Orientation.UNDIRECTED).isEqualTo(inputGraph.isUndirected());
     }
 
     void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
