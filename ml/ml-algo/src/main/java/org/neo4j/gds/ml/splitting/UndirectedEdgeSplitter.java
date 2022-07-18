@@ -113,12 +113,21 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
-        RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
-            ? newRelationshipsBuilderWithProp(graph, Orientation.UNDIRECTED)
-            : newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
-        RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
-            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
-            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
+        RelationshipsBuilder remainingRelsBuilder;
+        RelationshipWithPropertyConsumer remainingRelsConsumer;
+        if (graph.hasRelationshipProperty()) {
+            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.UNDIRECTED);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
+                return true;
+            };
+        } else {
+            remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.UNDIRECTED);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
+                return true;
+            };
+        }
 
         var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
 

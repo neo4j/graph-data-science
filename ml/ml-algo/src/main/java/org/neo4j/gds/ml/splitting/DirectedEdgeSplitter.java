@@ -80,9 +80,6 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         Graph masterGraph,
         double holdoutFraction
     ) {
-
-        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
-
         var sourceNodes = sourceNodes(graph);
         MutableLong positiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
         MutableLong negativeSourceNodeCount = new MutableLong(positiveSourceNodeCount.longValue());
@@ -92,13 +89,23 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toRootNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
-        RelationshipsBuilder remainingRelsBuilder = graph.hasRelationshipProperty()
-            ? newRelationshipsBuilderWithProp(graph, Orientation.NATURAL)
-            : newRelationshipsBuilder(graph, Orientation.NATURAL);
+        RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
 
-        RelationshipWithPropertyConsumer remainingRelsConsumer = graph.hasRelationshipProperty()
-            ? (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w); return true; }
-            : (s, t, w) -> { remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t)); return true; };
+        RelationshipsBuilder remainingRelsBuilder;
+        RelationshipWithPropertyConsumer remainingRelsConsumer;
+        if (graph.hasRelationshipProperty()) {
+            remainingRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t), w);
+                return true;
+            };
+        } else {
+            remainingRelsBuilder = newRelationshipsBuilder(graph, Orientation.NATURAL);
+            remainingRelsConsumer = (s, t, w) -> {
+                remainingRelsBuilder.addFromInternal(graph.toRootNodeId(s), graph.toRootNodeId(t));
+                return true;
+            };
+        }
 
         var validRelationshipCount = validPositiveRelationshipCandidateCount(graph, isValidNodePair);
 
