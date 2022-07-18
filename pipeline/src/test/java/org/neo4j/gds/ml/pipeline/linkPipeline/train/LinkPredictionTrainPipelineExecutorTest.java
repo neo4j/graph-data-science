@@ -520,7 +520,10 @@ class LinkPredictionTrainPipelineExecutorTest extends BaseProcTest {
             pipeline.addNodePropertyStep(propertyStep);
         }
 
-        GraphDimensions graphDimensions = pipeline.splitConfig().expectedGraphDimensions(1000, 500);
+        GraphDimensions graphDimensions = pipeline.splitConfig().expectedGraphDimensions(
+            GraphDimensions.of(1_000, 500),
+            config.targetRelationshipType()
+        );
 
         var actualRange = LinkPredictionTrainPipelineExecutor
             .estimate(new OpenModelCatalog(), pipeline, config)

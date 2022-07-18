@@ -221,17 +221,21 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Value.Derived
     @Configuration.Ignore
-    default GraphDimensions expectedGraphDimensions(long nodeCount, long relationshipCount) {
-        var expectedSetSizes = expectedSetSizes(relationshipCount);
+    default GraphDimensions expectedGraphDimensions(GraphDimensions baseDim, String targetRelType) {
+        var expectedSetSizes = expectedSetSizes(baseDim
+            .relationshipCounts()
+            .getOrDefault(RelationshipType.of(targetRelType), baseDim.relCountUpperBound())
+        );
 
         return GraphDimensions.builder()
-            .nodeCount(nodeCount)
+            .nodeCount(baseDim.nodeCount())
             // matches the relCount of the original GraphStore and thus lower than the sum of all relationshipCounts
-            .relCountUpperBound(relationshipCount)
+            .relCountUpperBound(baseDim.relCountUpperBound())
             .putRelationshipCount(testRelationshipType(), expectedSetSizes.testSize())
             .putRelationshipCount(testComplementRelationshipType(), expectedSetSizes.testComplementSize())
             .putRelationshipCount(trainRelationshipType(), expectedSetSizes.trainSize())
             .putRelationshipCount(featureInputRelationshipType(), expectedSetSizes.featureInputSize())
+            .putAllRelationshipCounts(baseDim.relationshipCounts())
             .build();
     }
 }

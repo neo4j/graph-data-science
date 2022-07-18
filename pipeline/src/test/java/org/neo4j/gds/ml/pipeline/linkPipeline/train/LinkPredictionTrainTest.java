@@ -363,7 +363,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
@@ -389,7 +389,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
@@ -419,7 +419,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
@@ -449,7 +449,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
@@ -906,7 +906,11 @@ class LinkPredictionTrainTest {
         return linkPredictionTrain.compute();
     }
 
-    private GraphDimensions graphDimensionsWithSplits(GraphDimensions inputDimensions, LinkPredictionSplitConfig splitConfig) {
-        return splitConfig.expectedGraphDimensions(inputDimensions.nodeCount(), inputDimensions.relCountUpperBound());
+    private GraphDimensions graphDimensionsWithSplits(
+        GraphDimensions inputDimensions,
+        LinkPredictionSplitConfig splitConfig,
+        LinkPredictionTrainConfig trainConfig
+    ) {
+        return splitConfig.expectedGraphDimensions(inputDimensions, trainConfig.targetRelationshipType());
     }
 }

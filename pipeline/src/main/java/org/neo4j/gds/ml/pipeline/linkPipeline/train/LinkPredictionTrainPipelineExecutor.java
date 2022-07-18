@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
@@ -103,13 +104,24 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     ) {
         pipeline.validateTrainingParameterSpace();
 
-        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.targetRelationshipType(), pipeline.relationshipWeightProperty(), configuration.sourceNodeLabel(), configuration.targetNodeLabel());
+        var splitEstimations = splitEstimation(
+            pipeline.splitConfig(),
+            configuration.targetRelationshipType(),
+            pipeline.relationshipWeightProperty(),
+            configuration.sourceNodeLabel(),
+            configuration.targetNodeLabel()
+        );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            List.of(pipeline.splitConfig().featureInputRelationshipType().name)
+            Stream.concat(
+                    configuration.contextRelationshipTypes().stream(),
+                    Stream.of(pipeline.splitConfig().featureInputRelationshipType().name)
+                )
+                .distinct()
+                .collect(Collectors.toList())
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
