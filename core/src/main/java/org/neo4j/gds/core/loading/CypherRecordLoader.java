@@ -72,8 +72,8 @@ abstract class CypherRecordLoader<R> {
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
         this.loadingContext = loadingContext;
-        this.executionEngine =  GraphDatabaseApiProxy.executionEngine(loadingContext.api());
-        this.contextFactory = GraphDatabaseApiProxy.contextFactory(loadingContext.api());
+        this.executionEngine =  GraphDatabaseApiProxy.executionEngine(loadingContext.graphDatabaseService());
+        this.contextFactory = GraphDatabaseApiProxy.contextFactory(loadingContext.graphDatabaseService());
     }
 
     final R load(InternalTransaction transaction) {

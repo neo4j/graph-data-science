@@ -20,6 +20,7 @@
 package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -47,7 +48,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         RelationshipsAndProperties relationshipsAndProperties
     ) {
         return new GraphStoreBuilder()
-            .databaseId(loadingContext.api().databaseId())
+            .databaseId(GraphDatabaseApiProxy.databaseId(loadingContext.graphDatabaseService()))
             .capabilities(capabilities)
             .schema(computeGraphSchema(idMapAndProperties, relationshipsAndProperties))
             .nodes(idMapAndProperties.idMap())

@@ -67,7 +67,7 @@ public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromSt
             new GraphDimensionsStoreReader(
                 loadingContext.transactionContext(),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.api(), IdGeneratorFactory.class)
+                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
             ).call()
         );
     }

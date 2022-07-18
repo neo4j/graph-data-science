@@ -74,7 +74,7 @@ public class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherCo
             new GraphDimensionsCypherReader(
                 loadingContext.transactionContext().withRestrictedAccess(READ),
                 graphProjectConfig,
-                GraphDatabaseApiProxy.resolveDependency(loadingContext.api(), IdGeneratorFactory.class)
+                GraphDatabaseApiProxy.resolveDependency(loadingContext.graphDatabaseService(), IdGeneratorFactory.class)
             ).call()
         );
     }

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -39,7 +39,7 @@ public interface GraphLoaderContext {
 
     TransactionContext transactionContext();
 
-    GraphDatabaseAPI api();
+    GraphDatabaseService graphDatabaseService();
 
     Log log();
 
@@ -65,7 +65,7 @@ public interface GraphLoaderContext {
         }
 
         @Override
-        public GraphDatabaseAPI api() {
+        public GraphDatabaseService graphDatabaseService() {
             return null;
         }
 

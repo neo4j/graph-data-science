@@ -83,7 +83,7 @@ public class MemoryEstimationExecutor<
                 ? GraphLoaderContext.NULL_CONTEXT
                 : ImmutableGraphLoaderContext
                     .builder()
-                    .api(executionContext.api())
+                    .graphDatabaseService(executionContext.api())
                     .log(executionContext.log())
                     .taskRegistryFactory(executionContext.taskRegistryFactory())
                     .userLogRegistryFactory(executionContext.userLogRegistryFactory())
