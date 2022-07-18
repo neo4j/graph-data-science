@@ -177,7 +177,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('myGraph', {
   modelName: 'lp-pipeline-model',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 })
 YIELD requiredMemory
 ----
@@ -201,25 +201,25 @@ YIELD requiredMemory
 CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 })
  YIELD node1, node2, probability
  RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
  ORDER BY probability DESC, person1
 ----
 
-We specified `threshold` to filter out predictions with probability less than 45%, and `topN` to further limit output to the top 5 relationships.
+We specified `threshold` to filter out predictions with probability less than 50%, and `topN` to further limit output to the top 5 relationships.
 As the default samplingRate is `1`, we use the xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-exhaustive-search[exhaustive-search].
 
 .Results
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Alice"   | "Mark"    | 0.6
-| "Karin"   | "Will"    | 0.6
-| "Karin"   | "Greg"    | 0.6
-| "Michael" | "Veselin" | 0.6
-| "Will"    | "Greg"    | 0.6
+| "Chris"   | "Mark"    | 0.6
+| "Alice"   | "Will"    | 0.5
+| "Alice"   | "Veselin" | 0.5
+| "Alice"   | "Mark"    | 0.5
+| "Alice"   | "Chris"   | 0.5
 |===
 
 We can see, that our model predicts the most likely links are the five above.
@@ -241,7 +241,7 @@ CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
   topN: 5,
-  threshold: 0.45
+  threshold: 0.5
 }) YIELD relationshipsWritten, samplingStats
 ----
 
@@ -300,7 +300,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header",cols="3,7"]
 |===
 | relationshipsWritten | samplingStats
-| 16                   | {linksConsidered=44, didConverge=true, strategy=approximate, ranIterations=2}
+| 16                   | {linksConsidered=31, didConverge=true, strategy=approximate, ranIterations=1}
 |===
 --
 

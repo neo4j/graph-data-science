@@ -256,16 +256,16 @@ The splitting configuration of a pipeline can be inspected by using `gds.beta.mo
 
 The splitting of relationships proceeds internally in the following steps:
 
-1. The graph is filtered according to specified `nodeLabels` and `relationshipTypes`, which are configured at train time.
+1. The graph is filtered according to specified `sourceNodeLabel`, `targetNodeLabel` and `targetRelationshipType`, which are configured at train time.
 2. The relationships remaining after filtering we call _positive_, and they are split into a `test` set and remaining relationships which we refer to as `test-complement` set.[[def-test-complement]]
 * The `test` set contains a `testFraction` fraction of the positive relationships.
-* Random negative relationships are added to the `test` set.
+* Random negative relationships, which confirm to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `test` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships.
 3. The relationships in the `test-complement` set are split into a `train` set and a `feature-input` set.
 * The `train` set contains a `trainFraction` fraction of the `test-complement` set.
 * The `feature-input` set contains `(1-trainFraction)` fraction of the `test-complement` set.
-* Random negative relationships are added to the `train` set.
+* Random negative relationships, which confirm to the `sourceNodeLabel` and `tagetNodeLabel` filter, are added to the `train` set.
 The number of negative relationships is the number of positive ones multiplied by the `negativeSamplingRatio`.
 * The negative relationships do not coincide with positive relationships, nor with test relationships.
 
