@@ -23,8 +23,6 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
@@ -59,22 +57,5 @@ public final class TestProcedureRunner {
             Username.EMPTY_USERNAME,
             func
         ));
-    }
-
-    public static <P extends BaseProc> P instantiateProcedure(
-        GraphDatabaseAPI graphDb,
-        Class<P> procClass,
-        Transaction tx
-    ) {
-        return ProcedureRunner.instantiateProcedure(
-            graphDb,
-            procClass,
-            ProcedureCallContext.EMPTY,
-            Neo4jProxy.testLog(),
-            EmptyTaskRegistryFactory.INSTANCE,
-            EmptyUserLogRegistryFactory.INSTANCE,
-            tx,
-            Username.EMPTY_USERNAME
-        );
     }
 }
