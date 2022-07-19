@@ -26,7 +26,7 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -83,7 +83,7 @@ final class HugeGraphNoPropertiesTest extends BaseTest {
         });
     }
 
-    private Graph loadGraph(final GraphDatabaseAPI db, Orientation orientation) {
+    private Graph loadGraph(final GraphDatabaseService db, Orientation orientation) {
         return new StoreLoaderBuilder()
             .databaseService(db)
             .globalOrientation(orientation)

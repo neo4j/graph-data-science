@@ -29,11 +29,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.graphdb.Direction;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodType;
@@ -193,7 +193,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         return load(db, l -> { }).getUnion();
     }
 
-    private GraphStore load(GraphDatabaseAPI db, Consumer<StoreLoaderBuilder> block) {
+    private GraphStore load(GraphDatabaseService db, Consumer<StoreLoaderBuilder> block) {
         ExecutorService pool = Executors.newFixedThreadPool(3);
         StoreLoaderBuilder loader = new StoreLoaderBuilder()
             .databaseService(db)

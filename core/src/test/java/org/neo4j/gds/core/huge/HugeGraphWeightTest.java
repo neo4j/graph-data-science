@@ -27,9 +27,9 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.concurrent.TimeUnit;
 
@@ -99,7 +99,7 @@ final class HugeGraphWeightTest extends BaseTest {
         });
     }
 
-    private Graph loadGraph(final GraphDatabaseAPI db) {
+    private Graph loadGraph(final GraphDatabaseService db) {
         return new StoreLoaderBuilder()
             .databaseService(db)
             .addRelationshipProperty(PropertyMapping.of("weight", 0))
