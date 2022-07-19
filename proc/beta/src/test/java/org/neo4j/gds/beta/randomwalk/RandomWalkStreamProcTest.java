@@ -83,6 +83,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
 
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
+            .withNodeLabels("Node1", "Node2")
             .loadEverything(Orientation.UNDIRECTED)
             .yields();
         runQuery(createQuery);
