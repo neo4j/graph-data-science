@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.core.io.db;
 
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.CompatInput;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
@@ -38,7 +39,6 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.impl.scheduler.JobSchedulerFactory;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifeSupport;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
@@ -60,29 +60,26 @@ public final class GdsParallelBatchImporter {
     private final Log log;
     private final ExecutionMonitor executionMonitor;
 
-    private final DependencyResolver dependencyResolver;
     private final FileSystemAbstraction fs;
     private final LogService logService;
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
 
     static GdsParallelBatchImporter fromDb(
-        GraphDatabaseAPI db,
+        GraphDatabaseService db,
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ExecutionMonitor executionMonitor
     ) {
-        var dependencyResolver = db.getDependencyResolver();
-        var dbms = dependencyResolver.resolveDependency(DatabaseManagementService.class);
-        var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
-        var logService = dependencyResolver.resolveDependency(LogService.class);
-        var databaseConfig = dependencyResolver.resolveDependency(Config.class);
+        var dbms = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManagementService.class);
+        var fs = GraphDatabaseApiProxy.resolveDependency(db, FileSystemAbstraction.class);
+        var logService = GraphDatabaseApiProxy.resolveDependency(db, LogService.class);
+        var databaseConfig = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
             dbms,
-            dependencyResolver,
             fs,
             logService,
             databaseConfig
@@ -95,17 +92,15 @@ public final class GdsParallelBatchImporter {
         Log log,
         ExecutionMonitor executionMonitor
     ) {
-        var db = (GraphDatabaseAPI) dbms.database(SYSTEM_DATABASE_NAME);
-        var dependencyResolver = db.getDependencyResolver();
-        var fs = dependencyResolver.resolveDependency(FileSystemAbstraction.class);
-        var logService = dependencyResolver.resolveDependency(LogService.class);
-        var databaseConfig = dependencyResolver.resolveDependency(Config.class);
+        var db = dbms.database(SYSTEM_DATABASE_NAME);
+        var fs = GraphDatabaseApiProxy.resolveDependency(db, FileSystemAbstraction.class);
+        var logService = GraphDatabaseApiProxy.resolveDependency(db, LogService.class);
+        var databaseConfig = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
         return new GdsParallelBatchImporter(
             config,
             log,
             executionMonitor,
             dbms,
-            dependencyResolver,
             fs,
             logService,
             databaseConfig
@@ -117,7 +112,6 @@ public final class GdsParallelBatchImporter {
         Log log,
         ExecutionMonitor executionMonitor,
         DatabaseManagementService dbms,
-        DependencyResolver dependencyResolver,
         FileSystemAbstraction fs,
         LogService logService,
         Config databaseConfig
@@ -126,7 +120,6 @@ public final class GdsParallelBatchImporter {
         this.log = log;
         this.executionMonitor = executionMonitor;
         this.dbms = dbms;
-        this.dependencyResolver = dependencyResolver;
         this.fs = fs;
         this.logService = logService;
 
