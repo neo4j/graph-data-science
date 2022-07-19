@@ -40,7 +40,7 @@ class WriteConfigTest {
     @ValueSource(booleans = {true, false})
     void validateGraphStoreCapabilities(boolean isBackedByDatabase) {
         var config = CypherMapWrapper.empty();
-        var testConfig = new TestConfigImpl(config);
+        var testConfig = new TestWriteConfigImpl(config);
 
         var testGraphStore = new GraphStoreBuilder()
             .databaseId(DatabaseIdFactory.from("neo4j", UUID.randomUUID()))
@@ -66,6 +66,6 @@ class WriteConfigTest {
     }
 
     @Configuration
-    interface TestConfig extends WriteConfig {
+    interface TestWriteConfig extends WriteConfig {
     }
 }
