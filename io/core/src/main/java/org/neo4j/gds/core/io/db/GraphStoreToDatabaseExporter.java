@@ -25,7 +25,7 @@ import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.ClockService;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -37,28 +37,28 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return of(graphStore, api, config, Optional.empty(), log, progressTracker);
+        return of(graphStore, databaseService, config, Optional.empty(), log, progressTracker);
     }
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, api, config, neoNodeProperties, log, progressTracker);
+        return new GraphStoreToDatabaseExporter(graphStore, databaseService, config, neoNodeProperties, log, progressTracker);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
-        GraphDatabaseAPI api,
+        GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
@@ -71,7 +71,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             config.executionMonitorCheckMillis(),
             TimeUnit.MILLISECONDS
         );
-        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(api, config, log, executionMonitor);
+        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, config, log, executionMonitor);
     }
 
     @Override
