@@ -20,10 +20,16 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
 
 public interface SourceNodesConfig {
 
@@ -31,6 +37,15 @@ public interface SourceNodesConfig {
     @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
     default List<Long> sourceNodes() {
         return Collections.emptyList();
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceLabels(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        validateNodes(graphStore, sourceNodes(), selectedLabels, "Source");
     }
 
 }

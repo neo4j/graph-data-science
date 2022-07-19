@@ -20,10 +20,16 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
 
 public interface TargetNodesConfig {
 
@@ -37,5 +43,14 @@ public interface TargetNodesConfig {
     @Value.Derived
     default boolean hasTargetNodes() {
         return !targetNodes().isEmpty();
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodes(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        validateNodes(graphStore, targetNodes(), selectedLabels, "Target");
     }
 }

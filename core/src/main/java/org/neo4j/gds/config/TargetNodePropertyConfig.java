@@ -20,10 +20,16 @@
 package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+
+import java.util.Collection;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface TargetNodePropertyConfig {
 
@@ -32,5 +38,21 @@ public interface TargetNodePropertyConfig {
 
     static @Nullable String validateProperty(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "targetProperty");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetProperty(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var targetProperty = targetProperty();
+        if (targetProperty != null && !graphStore.hasNodeProperty(selectedLabels, targetProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Target property `%s` not found in graph with node properties: %s",
+                targetProperty,
+                graphStore.nodePropertyKeys()
+            ));
+        }
     }
 }

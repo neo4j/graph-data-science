@@ -19,7 +19,16 @@
  */
 package org.neo4j.gds.config;
 
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+
+import java.util.Collection;
+
+import static org.neo4j.gds.config.ConfigNodesValidations.labelFilteredGraphContainsNode;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodeLabelFilterDescription;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface SourceNodeConfig extends NodeConfig {
 
@@ -30,5 +39,22 @@ public interface SourceNodeConfig extends NodeConfig {
 
     static long parseSourceNodeId(Object input) {
         return NodeConfig.parseNodeId(input, SOURCE_NODE_KEY);
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceNode(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var sourceNodeId = sourceNode();
+
+        if (labelFilteredGraphContainsNode(selectedLabels, graphStore.nodes(), sourceNodeId)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Source node does not exist in the in-memory graph%s: `%d`",
+                nodeLabelFilterDescription(selectedLabels, graphStore),
+                sourceNodeId
+            ));
+        }
     }
 }
