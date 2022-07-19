@@ -102,7 +102,7 @@ class DfsMutateProcTest extends BaseProcTest {
         )));
 
         var actual = GraphStoreCatalog
-            .get(Username.EMPTY_USERNAME.username(), db.databaseId(), DEFAULT_GRAPH_NAME)
+            .get(Username.EMPTY_USERNAME.username(), db.databaseName(), DEFAULT_GRAPH_NAME)
             .graphStore()
             .getGraph(RelationshipType.of("DFS"));
 
@@ -144,7 +144,7 @@ class DfsMutateProcTest extends BaseProcTest {
         )));
 
         var actual = GraphStoreCatalog
-            .get(Username.EMPTY_USERNAME.username(), db.databaseId(), DEFAULT_GRAPH_NAME)
+            .get(Username.EMPTY_USERNAME.username(), db.databaseName(), DEFAULT_GRAPH_NAME)
             .graphStore()
             .getGraph(RelationshipType.of("DFS"));
 

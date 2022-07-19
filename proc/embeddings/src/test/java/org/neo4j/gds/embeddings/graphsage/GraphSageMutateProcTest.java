@@ -52,7 +52,7 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseName(), graphName).graphStore();
 
         runQueryWithRowConsumer(query, row -> {
             assertThat(row.get("nodeCount")).isEqualTo(graphStore.nodeCount());

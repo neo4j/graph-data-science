@@ -186,7 +186,7 @@ public class PregelProcTest extends BaseProcTest {
 
         runQuery(query);
 
-        var graph = GraphStoreCatalog.get(getUsername(), db.databaseId(), DEFAULT_GRAPH_NAME).graphStore().getUnion();
+        var graph = GraphStoreCatalog.get(getUsername(), db.databaseName(), DEFAULT_GRAPH_NAME).graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

@@ -68,7 +68,7 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
         )));
 
         var actual = GraphStoreCatalog
-            .get(Username.EMPTY_USERNAME.username(), db.databaseId(), "graph")
+            .get(Username.EMPTY_USERNAME.username(), db.databaseName(), "graph")
             .graphStore()
             .getUnion();
         var expected = TestSupport.fromGdl(
@@ -105,7 +105,7 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
         )));
 
         var actual = GraphStoreCatalog
-            .get(Username.EMPTY_USERNAME.username(), db.databaseId(), "graph")
+            .get(Username.EMPTY_USERNAME.username(), db.databaseName(), "graph")
             .graphStore()
             .getUnion();
         var expected = TestSupport.fromGdl(
