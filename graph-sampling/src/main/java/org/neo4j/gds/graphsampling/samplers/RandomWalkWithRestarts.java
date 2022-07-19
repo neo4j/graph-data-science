@@ -169,6 +169,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
         }
     }
 
+    /**
+     *  In order be able to sample start nodes uniformly at random (for performance reasons) we have a special data
+     *  structure which is optimized for exactly this. In particular, we need to be able to do random access by index
+     *  of the set of start nodes we are currently interested in. A simple hashmap for example does not work for this
+     *  reason.
+     */
     static class WalkQualities {
         private final LongSet nodeIdIndex;
         private final LongArrayList nodeIds;
