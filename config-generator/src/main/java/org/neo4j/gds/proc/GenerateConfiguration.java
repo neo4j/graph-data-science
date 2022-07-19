@@ -227,7 +227,7 @@ final class GenerateConfiguration {
         ));
 
         if (!implMembers.isEmpty()) {
-            combineCollectedErrors(names, constructorMethodBuilder, errorsVarName);
+            ErrorPropagator.combineCollectedErrors(names, constructorMethodBuilder, errorsVarName);
         }
 
         if (requiredMapParameter) {
@@ -238,59 +238,6 @@ final class GenerateConfiguration {
         }
 
         return constructorMethodBuilder.build();
-    }
-
-    private void combineCollectedErrors(
-        NameAllocator names,
-        MethodSpec.Builder configMapConstructor,
-        String errorsVarName
-    ) {
-        String combinedErrorMsgVarName = names.newName("combinedErrorMsg");
-        String combinedErrorVarName = names.newName("combinedError");
-        configMapConstructor.beginControlFlow("if(!$N.isEmpty())", errorsVarName)
-            .beginControlFlow("if($N.size() == $L)", errorsVarName, 1)
-            .addStatement("throw $N.get($L)", errorsVarName, 0)
-            .nextControlFlow("else")
-            .addStatement(
-                "$1T $2N = $3N.stream().map($4T::getMessage)" +
-                ".collect($5T.joining(System.lineSeparator() + $6S, $7S + System.lineSeparator() + $6S, $8S))",
-                String.class,
-                combinedErrorMsgVarName,
-                errorsVarName,
-                IllegalArgumentException.class,
-                Collectors.class,
-                "\t\t\t\t",
-                "Multiple errors in configuration arguments:", //prefix
-                "" // suffix
-            )
-            .addStatement(
-                "$1T $2N = new $1T($3N)",
-                IllegalArgumentException.class,
-                combinedErrorVarName,
-                combinedErrorMsgVarName
-            )
-            .addStatement(
-                "$1N.forEach($2N -> $3N.addSuppressed($2N))",
-                errorsVarName,
-                names.newName("error"),
-                combinedErrorVarName
-            )
-            .addStatement("throw $N", combinedErrorVarName)
-            .endControlFlow()
-            .endControlFlow();
-    }
-
-    private void catchAndPropagateIllegalArgumentError(
-        MethodSpec.Builder builder,
-        String errorVarName,
-        UnaryOperator<MethodSpec.Builder> statementFunc
-    ) {
-        builder.beginControlFlow("try");
-        statementFunc.apply(builder);
-        builder
-            .nextControlFlow("catch ($T e)", IllegalArgumentException.class)
-            .addStatement("$N.add(e)", errorVarName)
-            .endControlFlow();
     }
 
     private void catchValidationError(
@@ -384,7 +331,7 @@ final class GenerateConfiguration {
 
         addValidationCode(definition, fieldCodeBuilder);
 
-        catchAndPropagateIllegalArgumentError(
+        ErrorPropagator.catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
             builder -> builder.addCode(fieldCodeBuilder.build())
@@ -490,7 +437,7 @@ final class GenerateConfiguration {
 
         CodeBlock finalValueProducer = valueProducer;
         constructor.addParameter(paramType, definition.fieldName());
-        catchAndPropagateIllegalArgumentError(
+        ErrorPropagator.catchAndPropagateIllegalArgumentError(
             constructor,
             errorsVarName,
             builder -> builder.addStatement("this.$N = $L", definition.fieldName(), finalValueProducer)

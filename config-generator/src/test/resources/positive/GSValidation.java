@@ -36,6 +36,15 @@ public interface GSValidation {
         assert true;
     }
 
+    @Configuration.GraphStoreValidationCheck
+    default void anotherCheck(
+        List<String> graphStore,
+        Collection<String> selectedLabels,
+        Collection<String> selectedRelationshipTypes
+    ) {
+        assert 1 == 1;
+    }
+
     @Configuration.GraphStoreValidation
     default void graphStoreValidation(
         List<String> graphStore,

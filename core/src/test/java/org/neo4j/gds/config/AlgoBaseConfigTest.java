@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
@@ -70,12 +69,11 @@ class AlgoBaseConfigTest {
             );
     }
 
-    @Disabled("Not collecting multiple errors yet")
     @Test
     void validateGraphFilter() {
         TestConfig config = TestConfigImpl.builder()
             .nodeLabels(List.of("A", "B", "X", "Y"))
-            .relationshipTypes(List.of("REL", "INVALID_REL", "OTHER_INVALID_REL"))
+            .relationshipTypes(List.of("REL", "I_REL", "I_REL_2"))
             .build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(

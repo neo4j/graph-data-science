@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -35,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.google.auto.common.MoreTypes.isTypeOf;
 
@@ -65,7 +65,7 @@ final class GenerateConfigurationMethods {
         } else if (member.toMap()) {
             GenerateConfigurationMethods.injectToMapCode(config, builder);
         } else if (member.graphStoreValidation()) {
-            GenerateConfigurationMethods.graphStoreValidationCode(member, config).forEach(builder::addStatement);
+            GenerateConfigurationMethods.graphStoreValidationCode(member, config, names, builder);
         } else if (member.isConfigValue()) {
             builder.addStatement("return this.$N", names.get(member));
         } else {
@@ -164,19 +164,42 @@ final class GenerateConfigurationMethods {
         }
     }
 
-    private static Stream<CodeBlock> graphStoreValidationCode(
+    private static void graphStoreValidationCode(
         ConfigParser.Member validationMethod,
-        ConfigParser.Spec config
+        ConfigParser.Spec config,
+        NameAllocator names,
+        MethodSpec.Builder builder
     ) {
-        var parameters = validationMethod.method().getParameters();
-        return config.members().stream()
+        var graphStoreValidationMethods = config.members().stream()
             .filter(ConfigParser.Member::graphStoreValidationCheck)
-            .map(check -> CodeBlock.of(
-                "$N($N, $N, $N)",
-                check.methodName(),
-                parameters.get(0).getSimpleName(),
-                parameters.get(1).getSimpleName(),
-                parameters.get(2).getSimpleName()
-            ));
+            .collect(Collectors.toList());
+        var parameters = validationMethod.method().getParameters();
+
+        String errorsVarName = names.newName("errors");
+        if (!graphStoreValidationMethods.isEmpty()) {
+            builder.addStatement(
+                "$1T<$2T> $3N = new $1T<>()",
+                ArrayList.class,
+                IllegalArgumentException.class,
+                errorsVarName
+            );
+        }
+
+        for (ConfigParser.Member check : graphStoreValidationMethods) {
+            ErrorPropagator.catchAndPropagateIllegalArgumentError(
+                builder,
+                errorsVarName,
+                methodBuilder -> methodBuilder.addStatement(CodeBlock.of(
+                    "$N($N, $N, $N)",
+                    check.methodName(),
+                    parameters.get(0).getSimpleName(),
+                    parameters.get(1).getSimpleName(),
+                    parameters.get(2).getSimpleName()
+                ))
+            );
+        }
+
+        ErrorPropagator.combineCollectedErrors(names, builder, errorsVarName);
     }
+
 }

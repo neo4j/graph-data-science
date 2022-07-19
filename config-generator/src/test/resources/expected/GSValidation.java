@@ -19,10 +19,12 @@
  */
 package positive;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.annotation.processing.Generated;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -38,7 +40,33 @@ public final class GSValidationConfig implements GSValidation {
         Collection<String> selectedLabels,
         Collection<String> selectedRelationshipTypes
     ) {
-        classSpecificName(graphStore, selectedLabels, selectedRelationshipTypes);
+        ArrayList<IllegalArgumentException> errors_ = new ArrayList<>();
+        try {
+            classSpecificName(graphStore, selectedLabels, selectedRelationshipTypes);
+        } catch (IllegalArgumentException e) {
+            errors_.add(e);
+        }
+        try {
+            anotherCheck(graphStore, selectedLabels, selectedRelationshipTypes);
+        } catch (IllegalArgumentException e) {
+            errors_.add(e);
+        }
+        if (!errors_.isEmpty()) {
+            if (errors_.size() == 1) {
+                throw errors_.get(0);
+            } else {
+                String combinedErrorMsg = errors_
+                    .stream()
+                    .map(IllegalArgumentException::getMessage)
+                    .collect(Collectors.joining(System.lineSeparator() + "\t\t\t\t",
+                        "Multiple errors in configuration arguments:" + System.lineSeparator() + "\t\t\t\t",
+                        ""
+                    ));
+                IllegalArgumentException combinedError = new IllegalArgumentException(combinedErrorMsg);
+                errors_.forEach(error -> combinedError.addSuppressed(error));
+                throw combinedError;
+            }
+        }
     }
 
     public static GSValidationConfig.Builder builder() {
