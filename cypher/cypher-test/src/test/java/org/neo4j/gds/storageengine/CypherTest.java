@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -43,7 +44,7 @@ public abstract class CypherTest extends BaseTest {
     void setup() throws Exception {
         this.graphStore = new CypherGraphStore(graphStore());
 
-        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", db.databaseLayout().getDatabaseName()), graphStore);
+        GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName("", GraphDatabaseApiProxy.databaseLayout(db).getDatabaseName()), graphStore);
 
         this.tokenHolders = new TokenHolders(
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
@@ -51,7 +52,7 @@ public abstract class CypherTest extends BaseTest {
             new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
         );
 
-        this.storageEngine = InMemoryStorageEngineCompanion.create(db.databaseLayout(), tokenHolders);
+        this.storageEngine = InMemoryStorageEngineCompanion.create(GraphDatabaseApiProxy.databaseLayout(db), tokenHolders);
         this.storageEngine.schemaAndTokensLifecycle().init();
         onSetup();
     }
