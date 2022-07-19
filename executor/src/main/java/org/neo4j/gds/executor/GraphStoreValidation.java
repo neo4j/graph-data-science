@@ -28,7 +28,6 @@ import org.neo4j.gds.config.ConfigurableSeedConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
-import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.TargetNodeConfig;
@@ -47,9 +46,6 @@ public final class GraphStoreValidation {
 
     public static void validate(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
-        if (config instanceof SeedConfig) {
-            validateSeedProperty(graphStore, (SeedConfig) config, filterLabels);
-        }
         if (config instanceof ConfigurableSeedConfig) {
             validateConfigurableSeedProperty(graphStore, (ConfigurableSeedConfig) config, filterLabels);
         }
@@ -76,17 +72,6 @@ public final class GraphStoreValidation {
         }
         if (config instanceof TargetNodePropertyConfig) {
             validateTargetNodeProperty(graphStore, (TargetNodePropertyConfig) config, filterLabels);
-        }
-    }
-
-    private static void validateSeedProperty(GraphStore graphStore, SeedConfig config, Collection<NodeLabel> filterLabels) {
-        String seedProperty = config.seedProperty();
-        if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Seed property `%s` not found in graph with node properties: %s",
-                seedProperty,
-                graphStore.nodePropertyKeys().stream().sorted().collect(Collectors.toList())
-            ));
         }
     }
 

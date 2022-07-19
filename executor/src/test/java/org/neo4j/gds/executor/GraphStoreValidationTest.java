@@ -24,29 +24,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GraphStoreValidationTest {
-
-    @SuppressWarnings("JUnit5MalformedNestedClass")
-    @Nested
-    static class SeedConfigTests {
-        @Test
-        void shouldFailWithInvalidSeedProperty() {
-            var graphStore = GdlFactory.of("(a {bar: 42})").build();
-            var config = ImmutableTestSeedConfig.builder().seedProperty("foo").build();
-
-
-            assertThatThrownBy(() -> GraphStoreValidation.validate(graphStore, config))
-                .hasMessageContaining("Seed property `foo` not found in graph with node properties: [bar]");
-        }
-
-        @ValueClass
-        interface TestSeedConfig extends AlgoBaseConfig, SeedConfig {}
-    }
 
     @SuppressWarnings("JUnit5MalformedNestedClass")
     @Nested
