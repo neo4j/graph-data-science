@@ -44,12 +44,12 @@ public class RelationshipSplitter {
     private final GraphStore graphStore;
     private final TerminationFlag terminationFlag;
 
-    RelationshipSplitter(
-        GraphStore graphStore,
-        LinkPredictionSplitConfig splitConfig,
-        ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
-    ) {
+     public RelationshipSplitter(
+         GraphStore graphStore,
+         LinkPredictionSplitConfig splitConfig,
+         ProgressTracker progressTracker,
+         TerminationFlag terminationFlag
+     ) {
         this.graphStore = graphStore;
         this.splitConfig = splitConfig;
         this.progressTracker = progressTracker;
