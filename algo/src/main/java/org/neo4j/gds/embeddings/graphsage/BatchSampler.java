@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.graphsage;
 import com.carrotsearch.hppc.LongHashSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableRelationshipCursor;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -89,8 +90,9 @@ public final class BatchSampler {
 
                 if (degree != 0) {
                     var sampledIdx = localRandom.nextInt(degree);
-                    long neighbor = graph.getNeighbor(currentNode.longValue(), sampledIdx);
-                    currentNode.setValue(neighbor);
+                    var nextNode = graph.nthTarget(currentNode.longValue(), sampledIdx);
+                    assert nextNode != IdMap.NOT_FOUND : "The offset '" + sampledIdx + "' is bound by the degree but no target could be found for nodeId " + currentNode.longValue();
+                    currentNode.setValue(nextNode);
                 } else {
                     // terminate
                     actualSearchDepth = 0;
