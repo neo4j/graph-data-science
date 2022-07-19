@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.api;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -27,6 +28,7 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import java.util.Optional;
 import java.util.Set;
 
+@SuppressFBWarnings("UCF_USELESS_CONTROL_FLOW")
 public interface Graph extends IdMap, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
 
     GraphSchema schema();
