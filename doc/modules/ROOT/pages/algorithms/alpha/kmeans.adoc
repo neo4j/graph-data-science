@@ -415,3 +415,41 @@ YIELD nodePropertiesWritten
 
 In `write` mode, only a single row is returned by the procedure.
 The result is written to the Neo4j database instead of the GDS in-memory graph.
+
+[[algorithms-leiden-examples-centroids]]
+=== Seeding initial centroids
+
+We now see the effect that seeding centroids has on K-Means.
+We run K-Means with initial seeds the coordinates of New York, Amsterdam, and Rome.
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.stream('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  seedCentroids: [[40.712776,-74.005974], [52.370216,4.895168],[41.902782,12.496365]]
+})
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY communityId, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name                  | communityId
+|"Kingston upon Thames" | 1
+|"Liverpool"            | 1
+|"Malmö"                | 1
+|"Solna"                | 1
+|"Surbiton"             | 1
+|"Örkelljunga"          | 1
+|"Sliven"               | 2
+|"Xánthi"               | 2
+
+|===
+--
+Notice that in this case the cities have been geographically clustered into two clusters: one contains cities in Northern Europe whereas the other contains in Southern Europe.
+On the other hand, the cluster with New York as the initial centroid was not the closest to any city at the first phase.
