@@ -24,8 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConfigurableSeedConfig;
-import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
@@ -35,9 +33,7 @@ import org.neo4j.gds.config.TargetNodePropertyConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -46,12 +42,7 @@ public final class GraphStoreValidation {
 
     public static void validate(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
-        if (config instanceof ConfigurableSeedConfig) {
-            validateConfigurableSeedProperty(graphStore, (ConfigurableSeedConfig) config, filterLabels);
-        }
-        if (config instanceof FeaturePropertiesConfig) {
-            validateFeaturesProperties(graphStore, (FeaturePropertiesConfig) config, filterLabels);
-        }
+
         if (config instanceof MutatePropertyConfig) {
             validateMutateProperty(graphStore, filterLabels, (MutatePropertyConfig) config);
         }
@@ -72,18 +63,6 @@ public final class GraphStoreValidation {
         }
         if (config instanceof TargetNodePropertyConfig) {
             validateTargetNodeProperty(graphStore, (TargetNodePropertyConfig) config, filterLabels);
-        }
-    }
-
-    private static void validateConfigurableSeedProperty(GraphStore graphStore, ConfigurableSeedConfig config, Collection<NodeLabel> filterLabels) {
-        String seedProperty = config.seedProperty();
-        if (seedProperty != null && !graphStore.hasNodeProperty(filterLabels, seedProperty)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "`%s`: `%s` not found in graph with node properties: %s",
-                config.propertyNameOverride(),
-                seedProperty,
-                graphStore.nodePropertyKeys().stream().sorted().collect(Collectors.toList())
-            ));
         }
     }
 
@@ -112,30 +91,6 @@ public final class GraphStoreValidation {
             throw new IllegalArgumentException(formatWithLocale(
                 "Relationship type `%s` already exists in the in-memory graph.",
                 mutateRelationshipType
-            ));
-        }
-    }
-
-    private static void validateFeaturesProperties(GraphStore graphStore, FeaturePropertiesConfig config, Collection<NodeLabel> filterLabels) {
-        List<String> weightProperties = config.featureProperties();
-        List<String> missingProperties;
-        if (config.propertiesMustExistForEachNodeLabel()) {
-            missingProperties = weightProperties
-                .stream()
-                .filter(weightProperty -> !graphStore.hasNodeProperty(filterLabels, weightProperty))
-                .collect(Collectors.toList());
-        } else {
-            var availableProperties = filterLabels
-                .stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
-            missingProperties = new ArrayList<>(weightProperties);
-            missingProperties.removeAll(availableProperties);
-        }
-        if (!missingProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
-                StringJoining.join(missingProperties),
-                StringJoining.join(filterLabels.stream().map(NodeLabel::name)),
-                StringJoining.join(graphStore.nodePropertyKeys(filterLabels))
             ));
         }
     }
