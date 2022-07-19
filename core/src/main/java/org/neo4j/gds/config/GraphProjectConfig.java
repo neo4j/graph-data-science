@@ -134,6 +134,8 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         R graph(GraphProjectFromGraphConfig graphConfig);
 
         R random(RandomGraphGeneratorConfig randomGraphConfig);
+
+        R sample(GraphSampleProcConfig graphSampleProcConfig);
     }
 
     interface Visitor extends Cases<Void> {
@@ -162,6 +164,12 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             return null;
         }
 
+        @Override
+        default Void sample(GraphSampleProcConfig sampleProcConfig) {
+            visit(sampleProcConfig);
+            return null;
+        }
+
         default void visit(GraphProjectFromStoreConfig storeConfig) {}
 
         default void visit(GraphProjectFromCypherConfig cypherConfig) {}
@@ -169,5 +177,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         default void visit(GraphProjectFromGraphConfig graphConfig) {}
 
         default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
+
+        default void visit(GraphSampleProcConfig sampleProcConfig) {}
     }
 }

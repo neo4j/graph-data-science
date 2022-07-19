@@ -29,7 +29,7 @@ import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.RelationshipsFilter;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -48,11 +48,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GraphSampleConstructor {
-    private final AlgoBaseConfig config;
+    private final GraphSampleAlgoConfig config;
     private final GraphStore inputGraphStore;
     private final NodesSampler nodesSampler;
 
-    public GraphSampleConstructor(AlgoBaseConfig config, GraphStore inputGraphStore, NodesSampler nodesSampler) {
+    public GraphSampleConstructor(GraphSampleAlgoConfig config, GraphStore inputGraphStore, NodesSampler nodesSampler) {
         this.config = config;
         this.inputGraphStore = inputGraphStore;
         this.nodesSampler = nodesSampler;

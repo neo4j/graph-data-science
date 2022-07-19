@@ -19,28 +19,31 @@
  */
 package org.neo4j.gds.config;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+import org.neo4j.gds.api.GraphStoreFactory;
 
 @Configuration
-public interface RandomWalkWithRestartsProcConfig extends GraphSampleProcConfig {
-    static RandomWalkWithRestartsProcConfig of(
-        String userName,
-        String graphName,
-        String fromGraphName,
-        GraphProjectConfig originalConfig,
-        CypherMapWrapper procedureConfig
-    ) {
-        var rwrConfig = RandomWalkWithRestartsConfig.of(procedureConfig);
-        return new RandomWalkWithRestartsProcConfigImpl(
-            originalConfig,
-            fromGraphName,
-            rwrConfig,
-            userName,
-            graphName,
-            procedureConfig
-        );
+public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConfig {
+    @Configuration.Parameter
+    GraphProjectConfig originalConfig();
+
+    @Configuration.Parameter
+    String fromGraphName();
+
+    @Configuration.Parameter
+    GraphSampleAlgoConfig sampleAlgoConfig();
+
+    @Value.Default
+    @Configuration.Ignore
+    @Override
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        return originalConfig().graphStoreFactory();
     }
 
+    @Override
+    @Configuration.Ignore
+    default <R> R accept(Cases<R> visitor) {
+        return visitor.sample(this);
+    }
 }

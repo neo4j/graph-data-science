@@ -24,6 +24,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
+import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.projection.CypherAggregation;
@@ -157,6 +158,17 @@ public class GraphInfo {
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
             configuration = cleansed(randomGraphConfig.toMap(), randomGraphConfig.outputFieldDenylist());
+        }
+
+        @Override
+        public void visit(GraphSampleProcConfig sampleProcConfig) {
+            sampleProcConfig.originalConfig().accept(this);
+
+            var cleansedSampleAlgoConfig = cleansed(
+                sampleProcConfig.sampleAlgoConfig().toMap(),
+                sampleProcConfig.sampleAlgoConfig().outputFieldDenylist()
+            );
+            configuration.putAll(cleansedSampleAlgoConfig);
         }
 
         private Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {

@@ -19,28 +19,17 @@
  */
 package org.neo4j.gds.config;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+
+import java.util.Set;
 
 @Configuration
-public interface RandomWalkWithRestartsProcConfig extends GraphSampleProcConfig {
-    static RandomWalkWithRestartsProcConfig of(
-        String userName,
-        String graphName,
-        String fromGraphName,
-        GraphProjectConfig originalConfig,
-        CypherMapWrapper procedureConfig
-    ) {
-        var rwrConfig = RandomWalkWithRestartsConfig.of(procedureConfig);
-        return new RandomWalkWithRestartsProcConfigImpl(
-            originalConfig,
-            fromGraphName,
-            rwrConfig,
-            userName,
-            graphName,
-            procedureConfig
-        );
+@SuppressWarnings("immutables:subtype")
+public interface GraphSampleAlgoConfig extends AlgoBaseConfig {
+    @Value.Derived
+    @Configuration.Ignore
+    default Set<String> outputFieldDenylist() {
+        return Set.of("jobId", "concurrency", "sudo");
     }
-
 }

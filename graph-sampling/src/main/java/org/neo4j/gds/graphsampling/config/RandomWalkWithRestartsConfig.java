@@ -20,7 +20,7 @@
 package org.neo4j.gds.graphsampling.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.GraphSampleAlgoConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -28,7 +28,7 @@ import java.util.List;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface RandomWalkWithRestartsConfig extends AlgoBaseConfig, SingleThreadedRandomSeedConfig {
+public interface RandomWalkWithRestartsConfig extends GraphSampleAlgoConfig, SingleThreadedRandomSeedConfig {
 
     default List<Long> startNodes() {
         return List.of();

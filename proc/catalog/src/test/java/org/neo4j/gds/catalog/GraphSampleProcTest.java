@@ -28,6 +28,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class GraphSampleProcTest extends BaseProcTest {
 
     private static final String DB_CYPHER =
@@ -61,7 +63,7 @@ class GraphSampleProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphProjectProc.class, GraphSampleProc.class);
+        registerProcedures(GraphProjectProc.class, GraphSampleProc.class, GraphListProc.class);
         runQuery(DB_CYPHER);
     }
 
@@ -73,7 +75,6 @@ class GraphSampleProcTest extends BaseProcTest {
     @Test
     void shouldSample() {
         runQuery("CALL gds.graph.project('g', '*', '*')");
-
         var query =
             "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 1.0}) YIELD nodeCount";
 
@@ -85,12 +86,21 @@ class GraphSampleProcTest extends BaseProcTest {
     @Test
     void shouldSampleHalf() {
         runQuery("CALL gds.graph.project('g', '*', '*')");
-
         var query =
             "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5, concurrency: 1, randomSeed: 42}) YIELD nodeCount";
 
         assertCypherResult(query, List.of(
             Map.of("nodeCount", 7L)
         ));
+    }
+
+    @Test
+    void shouldListCorrectGraphProjectionConfig() {
+        runQuery("CALL gds.graph.project('g', ['Z', 'N'], ['R1'])");
+        runQuery("CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 0.5})");
+        runQueryWithRowConsumer("CALL gds.graph.list('sample') YIELD configuration", resultRow -> {
+            var config = (Map<String, Object>) resultRow.get("configuration");
+            assertThat(config.get("samplingRatio")).isEqualTo(0.5);
+        });
     }
 }
