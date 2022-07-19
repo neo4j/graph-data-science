@@ -134,6 +134,11 @@ public final class GraphStoreCatalog {
         return get(CatalogRequest.of(username, databaseId), graphName);
     }
 
+    @TestOnly
+    public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
+        return get(CatalogRequest.of(username, databaseName), graphName);
+    }
+
     public static void set(GraphProjectConfig config, GraphStore graphStore) {
         set(config, graphStore, false);
     }
@@ -156,6 +161,10 @@ public final class GraphStoreCatalog {
             );
             return userCatalog;
         });
+    }
+
+    public static boolean exists(String username, String databaseName, String graphName) {
+        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseName, graphName));
     }
 
     public static boolean exists(String username, NamedDatabaseId databaseId, String graphName) {

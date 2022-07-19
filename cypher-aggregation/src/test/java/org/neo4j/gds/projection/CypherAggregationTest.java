@@ -107,8 +107,8 @@ class CypherAggregationTest extends BaseProcTest {
             )
         );
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
         assertThat(graph)
             .returns(8L, Graph::nodeCount)
             .returns(4L, Graph::relationshipCount);
@@ -118,8 +118,8 @@ class CypherAggregationTest extends BaseProcTest {
     void testMatch() {
         runQuery("MATCH (s:A)-[:REL]->(t:A) RETURN gds.alpha.graph.project('g', s, t)");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
         assertThat(graph)
             // only connected :A nodes
             .returns(6L, Graph::nodeCount)
@@ -137,8 +137,8 @@ class CypherAggregationTest extends BaseProcTest {
             List.of(Map.of("nodes", (37L - 13L + 1L) * 2L, "rels", 37L - 13L + 1L))
         );
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
         for (long source = 13L; source < 37; source++) {
             long sourceNodeId = graph.toMappedNodeId(source);
@@ -198,8 +198,8 @@ class CypherAggregationTest extends BaseProcTest {
                 "OPTIONAL MATCH (s)-[r:TYPE]->(t:Label) " +
                 "RETURN gds.alpha.graph.project('g', s, t)"
             );
-            assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-            var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+            assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(10000);
         }
     }
@@ -239,8 +239,8 @@ class CypherAggregationTest extends BaseProcTest {
                 "RETURN gds.alpha.graph.project('g', s, t)"
             );
 
-            assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-            var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+            assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
             assertThat(graph.relationshipCount()).isEqualTo(relCount);
         }
@@ -257,8 +257,8 @@ class CypherAggregationTest extends BaseProcTest {
                 ")"
             );
 
-            assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-            var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+            assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+            var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
             assertThat(graph.nodeCount()).isEqualTo(nodeCount);
             assertThat(graph.relationshipCount()).isEqualTo(relCount);
         }
@@ -270,8 +270,8 @@ class CypherAggregationTest extends BaseProcTest {
             "MATCH (s:B)-[:REL]->(t:B) RETURN " +
             "gds.alpha.graph.project('g', s, t)");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             for (char nodeVariable = 'a'; nodeVariable <= 'f'; nodeVariable++) {
@@ -290,7 +290,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s) WHERE s:A or s:B " +
                  "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + labels + " })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
     }
 
@@ -299,7 +299,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s)" +
                  "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: labels(s) })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(16);
         assertThat(graphStore.nodeLabels())
             .extracting(NodeLabel::name)
@@ -311,7 +311,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s)" +
                  "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: true })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels())
             .extracting(NodeLabel::name)
             .containsExactly("A", "B", "__ALL__", "DifferentLabel");
@@ -327,7 +327,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s)" +
                  "RETURN gds.alpha.graph.project('g', s, null" + nodeConfig + ")");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("__ALL__");
     }
 
@@ -337,7 +337,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s:A)" +
                  "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeLabels: " + label + " })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A");
     }
 
@@ -346,7 +346,7 @@ class CypherAggregationTest extends BaseProcTest {
         runQuery("MATCH (s)" +
                  "RETURN gds.alpha.graph.project('g', s, null, { sourceNodeProperties: s { .foo } })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         var graph = graphStore.getUnion();
         var nodeProperties = graph.nodeProperties("foo");
 
@@ -364,7 +364,7 @@ class CypherAggregationTest extends BaseProcTest {
                  "WITH idAndLabels[0] AS id, idAndLabels[1] AS labels " +
                  "RETURN gds.alpha.graph.project('g', id, null, { sourceNodeLabels: labels })");
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
         var graph = graphStore.getGraph(NodeLabel.of("Label"));
 
         assertThat(graph.nodeCount()).isEqualTo(1);
@@ -379,8 +379,8 @@ class CypherAggregationTest extends BaseProcTest {
             "   targetNodeProperties: t {.prop1, another_prop: coalesce(t.prop2, 84.0), doubles: coalesce(t.prop3, [13.37, 42.0]), longs: coalesce(t.prop4, [42]) }" +
             "})");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
         assertThat(graph.availableNodeProperties()).containsExactlyInAnyOrder(
             "prop1",
@@ -428,8 +428,8 @@ class CypherAggregationTest extends BaseProcTest {
             "   { relationshipType: " + type + " }" +
             ")");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore()
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore()
             .getGraph(org.neo4j.gds.RelationshipType.of("REL"));
 
         assertThat(graph)
@@ -456,8 +456,8 @@ class CypherAggregationTest extends BaseProcTest {
             "   { properties: r {.prop} }" +
             ")");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
         assertThat(graph.hasRelationshipProperty()).isTrue();
 
@@ -493,8 +493,8 @@ class CypherAggregationTest extends BaseProcTest {
             "   { properties: r {.prop, prop_by_another_name: r.prop} }" +
             ")");
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
 
         GraphDatabaseApiProxy.runInTransaction(db, tx -> {
             for (var prop : List.of("prop", "prop_by_another_name")) {
@@ -540,8 +540,8 @@ class CypherAggregationTest extends BaseProcTest {
             ")"
         );
 
-        assertThat(GraphStoreCatalog.exists("", db.databaseId(), "g")).isTrue();
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore();
+        assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
+        var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
 
         assertThat(graphStore)
             .returns(2L, GraphStore::nodeCount)
