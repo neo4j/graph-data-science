@@ -70,7 +70,7 @@ ext {
         'RoaringBitmap'        : '0.9.16',
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
-        'spotbugsToolVersion'  : '4.7.0',
+        'spotbugsToolVersion'  : '4.7.1',
         'protobuf'             : '3.19.2',
         'kryo'                 : '5.0.4',
     ]
