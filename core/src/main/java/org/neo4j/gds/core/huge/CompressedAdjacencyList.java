@@ -250,8 +250,9 @@ public final class CompressedAdjacencyList implements AdjacencyList {
                 return AdjacencyCursor.NOT_FOUND;
             }
 
-            this.currentPosition += n;
-            return decompress.advanceBy(n);
+            var value = decompress.advanceBy(n, targetsLeftToBeDecoded, this);
+            this.currentPosition += this.value;
+            return value;
         }
 
         @Override
