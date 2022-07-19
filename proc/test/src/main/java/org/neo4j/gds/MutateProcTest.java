@@ -33,7 +33,6 @@ import org.neo4j.gds.executor.ComputationResult;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -82,12 +81,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
             getProcedureMethods(procedure)
                 .filter(procedureMethod -> getProcedureMethodName(procedureMethod).endsWith(".mutate"))
                 .forEach(mutateMethod -> {
-                    CypherMapWrapper filterConfig = CypherMapWrapper.empty().withEntry(
-                        "nodeLabels",
-                        Collections.singletonList("A")
-                    );
-
-                    Map<String, Object> config = createMinimalConfig(filterConfig).toMap();
+                    Map<String, Object> config = createMinimalConfig(CypherMapWrapper.empty()).toMap();
                     config.remove("nodeWeightProperty");
                     try {
                         // write first time
