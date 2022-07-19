@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.SettingValueParser;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -40,8 +41,9 @@ public final class SettingProxy {
         return IMPL.databaseMode(config, databaseService);
     }
 
-    public static void setDatabaseMode(Config config, DatabaseMode databaseMode) {
-        IMPL.setDatabaseMode(config, databaseMode);
+    @TestOnly
+    public static void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService) {
+        IMPL.setDatabaseMode(config, databaseMode, databaseService);
     }
 
     private SettingProxy() {}
