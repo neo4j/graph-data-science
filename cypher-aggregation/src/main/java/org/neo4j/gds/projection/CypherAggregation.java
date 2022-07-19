@@ -40,6 +40,7 @@ import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -93,7 +94,7 @@ public final class CypherAggregation extends BaseProc {
         var progressTimer = ProgressTimer.start();
         return new GraphAggregator(
             progressTimer,
-            this.api.databaseId(),
+            GraphDatabaseApiProxy.databaseId(this.api),
             username()
         );
     }
