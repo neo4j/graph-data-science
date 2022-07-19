@@ -21,6 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +30,7 @@ import java.util.Map;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
+
 
 public abstract class KmeansSampler {
 
@@ -104,17 +106,18 @@ public abstract class KmeansSampler {
 
         private static final Map<String, String> VALUES = Arrays
             .stream(SamplerType.values())
-            .collect(Collectors.toMap(sampler -> sampler.getSamplerName(), sampler -> sampler.getSamplerType()));
+            .collect(Collectors.toMap(SamplerType::getSamplerName, SamplerType::getSamplerType));
 
         public static SamplerType parse(Object input) {
             if (input instanceof String) {
-                var inputString = ((String) input).toUpperCase(Locale.ENGLISH);
+                var inputString = StringFormatting.toUpperCaseWithLocale((String) input);
+                
                 if (VALUES.containsKey(inputString)) {
                     return SamplerType.valueOf(VALUES.get(inputString));
                 }
 
                 throw new IllegalArgumentException(String.format(
-                    Locale.ENGLISH,
+                    Locale.getDefault(),
                     "Sampler `%s` is not supported. Must be one of: %s.",
                     inputString,
                     VALUES
@@ -123,8 +126,7 @@ public abstract class KmeansSampler {
                 return (SamplerType) input;
             }
 
-            throw new IllegalArgumentException(String.format(
-                Locale.ENGLISH,
+            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                 "Expected Sampler or String. Got %s.",
                 input.getClass().getSimpleName()
             ));
