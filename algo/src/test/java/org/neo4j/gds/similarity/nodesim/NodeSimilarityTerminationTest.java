@@ -30,11 +30,11 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
@@ -75,7 +75,7 @@ class NodeSimilarityTerminationTest extends BaseTest {
      * A second thread will terminate the transaction during the sleep interval.
      */
     static void assertAlgorithmTermination(
-        GraphDatabaseAPI db,
+        GraphDatabaseService db,
         Algorithm<?> algorithm,
         Consumer<Algorithm<?>> algoConsumer,
         long sleepMillis
