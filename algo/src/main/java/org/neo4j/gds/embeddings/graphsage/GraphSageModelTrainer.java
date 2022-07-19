@@ -136,7 +136,8 @@ public class GraphSageModelTrainer {
 
         for (int epoch = 1; epoch <= epochs && !converged; epoch++) {
             progressTracker.beginSubTask("Epoch");
-            long epochLocalSeed = random.nextLong();
+            // also tried using random.nextLong() but this somehow had a worse quality
+            long epochLocalSeed = epoch + randomSeed;
 
             Supplier<List<BatchTask>> batchTaskSampler;
             if (createBatchTasksEagerly) {
@@ -192,12 +193,12 @@ public class GraphSageModelTrainer {
         HugeObjectArray<double[]> features,
         Layer[] layers,
         ArrayList<Weights<? extends Tensor<?>>> weights,
-        long randomSeed
+        long localSeed
     ) {
         // as we pass a reference for the relationshipWeights, we need a local copy
         var localGraph = graph.concurrentCopy();
 
-        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers, randomSeed);
+        List<SubGraph> subGraphs = GraphSageHelper.subGraphsPerLayer(localGraph, extendedBatch, layers, localSeed);
 
         Variable<Matrix> batchedFeaturesExtractor = featureFunction.apply(
             localGraph,
