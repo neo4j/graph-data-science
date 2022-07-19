@@ -23,7 +23,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +39,8 @@ import java.util.Random;
  */
 public class GridBuilder extends GraphBuilder<GridBuilder> {
 
-    GridBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
-        super(api, tx, label, relationship, random);
+    GridBuilder(Transaction tx, Label label, RelationshipType relationship, Random random) {
+        super(tx, label, relationship, random);
     }
 
     public GridBuilder createGrid(int width, int height) {

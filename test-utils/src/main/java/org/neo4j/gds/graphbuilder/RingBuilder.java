@@ -23,7 +23,6 @@ import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Random;
 
@@ -34,8 +33,8 @@ import java.util.Random;
  */
 public class RingBuilder extends GraphBuilder<RingBuilder> {
 
-    RingBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
-        super(api, tx, label, relationship, random);
+    RingBuilder(Transaction tx, Label label, RelationshipType relationship, Random random) {
+        super(tx, label, relationship, random);
     }
 
     /**

@@ -22,7 +22,6 @@ package org.neo4j.gds.graphbuilder;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Random;
 
@@ -33,13 +32,12 @@ import java.util.Random;
 public class DefaultBuilder extends GraphBuilder<DefaultBuilder> {
 
     protected DefaultBuilder(
-        GraphDatabaseAPI api,
         Transaction tx,
         Label label,
         RelationshipType relationship,
         Random random
     ) {
-        super(api, tx, label, relationship, random);
+        super(tx, label, relationship, random);
     }
 
     @Override

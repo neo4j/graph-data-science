@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.graphbuilder;
 
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -41,15 +41,13 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
     protected final HashSet<Node> nodes;
     protected final HashSet<Relationship> relationships;
 
-    private final GraphDatabaseAPI api;
     private final Transaction tx;
     private final Random random;
 
     protected Label label;
     protected RelationshipType relationship;
 
-    protected GraphBuilder(GraphDatabaseAPI api, Transaction tx, Label label, RelationshipType relationship, Random random) {
-        this.api = api;
+    protected GraphBuilder(Transaction tx, Label label, RelationshipType relationship, Random random) {
         this.tx = tx;
         this.label = label;
         this.relationship = relationship;
@@ -140,7 +138,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return a new default builder
      */
     public DefaultBuilder newDefaultBuilder() {
-        return new DefaultBuilder(api, tx, label, relationship, random);
+        return new DefaultBuilder(tx, label, relationship, random);
     }
 
     /**
@@ -150,7 +148,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return a new ring builder
      */
     public RingBuilder newRingBuilder() {
-        return new RingBuilder(api, tx, label, relationship, random);
+        return new RingBuilder(tx, label, relationship, random);
     }
 
     /**
@@ -160,7 +158,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return the GridBuilder
      */
     public GridBuilder newGridBuilder() {
-        return new GridBuilder(api, tx, label, relationship, random);
+        return new GridBuilder(tx, label, relationship, random);
     }
 
     /**
@@ -170,7 +168,7 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
      * @return the CompleteGraphBuilder
      */
     public CompleteGraphBuilder newCompleteGraphBuilder() {
-        return new CompleteGraphBuilder(api, tx, label, relationship, random);
+        return new CompleteGraphBuilder(tx, label, relationship, random);
     }
 
     protected double randomDouble() {
@@ -187,11 +185,11 @@ public abstract class GraphBuilder<ME extends GraphBuilder<ME>> implements AutoC
     /**
      * create a new default builder
      *
-     * @param api the neo4j api
+     * @param databaseService the neo4j database service
      * @return a new default builder
      */
-    public static DefaultBuilder create(GraphDatabaseAPI api) {
-        return new DefaultBuilder(api, api.beginTx(), null, null, RNGHolder.rng);
+    public static DefaultBuilder create(GraphDatabaseService databaseService) {
+        return new DefaultBuilder(databaseService.beginTx(), null, null, RNGHolder.rng);
     }
 
     @Override
