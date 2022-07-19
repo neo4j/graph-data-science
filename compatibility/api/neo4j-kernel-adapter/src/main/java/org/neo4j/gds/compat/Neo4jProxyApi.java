@@ -24,6 +24,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.exceptions.KernelException;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -65,7 +66,6 @@ import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
@@ -81,7 +81,7 @@ public interface Neo4jProxyApi {
 
     String validateExternalDatabaseName(String databaseName);
 
-    void cacheDatabaseId(GraphDatabaseAPI databaseIdRepository);
+    void cacheDatabaseId(GraphDatabaseService databaseIdRepository);
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
 

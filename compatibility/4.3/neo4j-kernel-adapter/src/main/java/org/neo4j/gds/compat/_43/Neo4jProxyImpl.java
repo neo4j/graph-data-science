@@ -45,6 +45,7 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
@@ -101,7 +102,6 @@ import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.memory.EmptyMemoryTracker;
@@ -136,10 +136,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public void cacheDatabaseId(GraphDatabaseAPI db) {
+    public void cacheDatabaseId(GraphDatabaseService db) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(db, DatabaseManager.class);
         var databaseIdRepository = databaseManager.databaseIdRepository();
-        databaseIdRepository.cache(db.databaseId());
+        databaseIdRepository.cache(GraphDatabaseApiProxy.databaseId(db));
     }
 
     @Override
