@@ -10,14 +10,13 @@ include::partial$/operations-reference/alpha-note.adoc[]
 == Introduction
 
 The Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal.
-In other words, the path between the start node and the end node is collapsed into a single relationship (a direct path).
+In other words, the path between a start node and an end node is collapsed into a single relationship (a direct path).
 The algorithm is intended to support the creation of monopartite graphs required by many graph algorithms.
 
-The main input for the algorithm is a list of relationship types.
-Starting from every node in the specified graph, these relationship types are traversed one after the other using the order specified in the configuration.
-Only nodes reached after traversing every relationship type specified are used as end nodes.
+The main input for the algorithm is a list of path templates.
+Starting from every node in the specified graph, the relationships of each template are traversed one after the other using the order specified in the configuration.
+Only nodes reached after traversing entire paths are used as end nodes.
 Exactly one directed relationship is created for every pair of nodes for which at least one path from start to end node exists.
-
 
 [[algorithms-collapse-path-syntax]]
 == Syntax
@@ -120,7 +119,7 @@ CALL gds.graph.project(
 })
 ----
 
-Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in the `relationshipTypes` option.
+Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in the `pathTemplates` option.
 
 [role=query-example]
 --
@@ -129,7 +128,7 @@ Now we can run the algorithm by specifying the traversal `PLAYS, PLAYED_BY` in t
 CALL gds.alpha.collapsePath.mutate(
   'persons',
   {
-    relationshipTypes: ['PLAYS', 'PLAYED_BY'],
+    pathTemplates: [['PLAYS', 'PLAYED_BY']],
     allowSelfLoops: false,
     mutateRelationshipType: 'PLAYS_SAME_INSTRUMENT'
   }

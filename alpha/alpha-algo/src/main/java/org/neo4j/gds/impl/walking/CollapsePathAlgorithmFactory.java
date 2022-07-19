@@ -28,11 +28,12 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<CollapsePath, CollapsePathConfig> {
-
     @Override
     public CollapsePath build(
         GraphStore graphStore,
@@ -46,12 +47,26 @@ public class CollapsePathAlgorithmFactory extends GraphStoreAlgorithmFactory<Col
          * the algorithm will take a step in a layer, then a next step in another layer.
          * that obviously stops of a node in a layer is not connected to anything.
          */
-        Graph[] graphs = config.relationshipTypes()
-            .stream()
-            .map(relType -> graphStore.getGraph(nodeLabels, Set.of(RelationshipType.of(relType)), Optional.empty()))
-            .toArray(Graph[]::new);
+        List<Graph[]> pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs = config.pathTemplates().stream()
+            .map(
+                path -> path.stream()
+                    .map(
+                        relationshipTypeAsString -> graphStore.getGraph(
+                            nodeLabels,
+                            Set.of(RelationshipType.of(relationshipTypeAsString)),
+                            Optional.empty()
+                        )
+                    )
+                    .toArray(Graph[]::new)
+            )
+            .collect(Collectors.toList());
 
-        return new CollapsePath(graphs, config.allowSelfLoops(), config.concurrency(), Pools.DEFAULT);
+        return new CollapsePath(
+            pathTemplatesEncodedAsListsOfSingleRelationshipTypeGraphs,
+            config.allowSelfLoops(),
+            config.concurrency(),
+            Pools.DEFAULT
+        );
     }
 
     @Override

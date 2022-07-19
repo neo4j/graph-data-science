@@ -33,7 +33,7 @@ import java.util.List;
 @SuppressWarnings("immutables:subtype")
 public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipConfig {
 
-    List<String> relationshipTypes();
+    List<List<String>> pathTemplates();
 
     @Value.Default
     default boolean allowSelfLoops() {

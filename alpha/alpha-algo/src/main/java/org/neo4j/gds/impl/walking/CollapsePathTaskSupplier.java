@@ -23,48 +23,65 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.MSBFSConstants;
 import org.neo4j.gds.msbfs.MultiSourceBFSRunnable;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
-    private final AtomicLong globalSharedBatchOffset = new AtomicLong(0);
+    // path template index - which stack of graphs are we working on?
+    private final AtomicInteger globalSharedPathTemplateIndex = new AtomicInteger(0);
 
-    private final RelationshipIterator[] relationshipIterators;
+    // node index
+    private final List<AtomicLong> globalSharedBatchOffsets;
+
+    private final List<Graph[]> pathTemplates;
     private final long nodeCount;
-    private final BfsConsumer bfsConsumer;
+    private final List<TraversalConsumer> bfsConsumers;
     private final boolean allowSelfLoops;
 
     static Supplier<Runnable> create(
         RelationshipsBuilder relationshipsBuilder,
         boolean allowSelfLoops,
-        Graph[] graphs,
+        List<Graph[]> pathTemplates,
         long nodeCount
     ) {
-        var traversalConsumer = allowSelfLoops
-            ? new TraversalConsumer(relationshipsBuilder, graphs.length)
-            : new NoLoopTraversalConsumer(relationshipsBuilder, graphs.length);
+        List<TraversalConsumer> traversalConsumers = pathTemplates.stream()
+            .map(
+                pathTemplate -> allowSelfLoops
+                    ? new TraversalConsumer(relationshipsBuilder, pathTemplate.length)
+                    : new NoLoopTraversalConsumer(relationshipsBuilder, pathTemplate.length)
+            )
+            .collect(Collectors.toList());
+
+        List<AtomicLong> globalSharedBatchOffsets = pathTemplates.stream()
+            .map(pathTemplate -> new AtomicLong(0))
+            .collect(Collectors.toList());
 
         return new CollapsePathTaskSupplier(
-            graphs,
+            globalSharedBatchOffsets,
+            pathTemplates,
             nodeCount,
-            traversalConsumer,
+            traversalConsumers,
             allowSelfLoops
         );
     }
 
     private CollapsePathTaskSupplier(
-        RelationshipIterator[] relationshipIterators,
+        List<AtomicLong> globalSharedBatchOffsets,
+        List<Graph[]> pathTemplates,
         long nodeCount,
-        BfsConsumer bfsConsumer,
+        List<TraversalConsumer> bfsConsumers,
         boolean allowSelfLoops
     ) {
-        this.relationshipIterators = relationshipIterators;
+        this.globalSharedBatchOffsets = globalSharedBatchOffsets;
+        this.pathTemplates = pathTemplates;
         this.nodeCount = nodeCount;
-        this.bfsConsumer = bfsConsumer;
+        this.bfsConsumers = bfsConsumers;
         this.allowSelfLoops = allowSelfLoops;
     }
 
@@ -74,26 +91,38 @@ public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
     @Override
     public Runnable get() {
         return () -> {
-            RelationshipIterator[] localRelationshipIterators = getRelationshipIterators();
+            while (true) {
+                // record which path template we are working on
+                int pathTemplateIndex = globalSharedPathTemplateIndex.get();
 
-            var offset = -1L;
-            var startNodes = new long[MSBFSConstants.OMEGA];
+                if (pathTemplateIndex >= pathTemplates.size()) return; // we have exhausted all!
 
-            // remember that this loop happens on many thread concurrently, hence the shared offset counter
-            while ((offset = globalSharedBatchOffset.getAndAdd(MSBFSConstants.OMEGA)) < nodeCount) {
-                // at the end of the array we might not have a whole omega-sized chunk left, so we resize
-                if (offset + MSBFSConstants.OMEGA >= nodeCount) {
-                    var numberOfNodesRemaining = (int) (nodeCount - offset);
-                    startNodes = new long[numberOfNodesRemaining];
+                // path template == list of relationship types, but encoded as list of single relationship type graphs
+                RelationshipIterator[] localPathTemplate = getPathTemplate(pathTemplateIndex);
+
+                var offset = -1L;
+                var startNodes = new long[MSBFSConstants.OMEGA];
+                AtomicLong offsetHolder = globalSharedBatchOffsets.get(pathTemplateIndex);
+
+                // remember that this loop happens on many thread concurrently, hence the shared offset counter
+                while ((offset = offsetHolder.getAndAdd(MSBFSConstants.OMEGA)) < nodeCount) {
+                    // at the end of the array we might not have a whole omega-sized chunk left, so we resize
+                    if (offset + MSBFSConstants.OMEGA >= nodeCount) {
+                        var numberOfNodesRemaining = (int) (nodeCount - offset);
+                        startNodes = new long[numberOfNodesRemaining];
+                    }
+
+                    for (int i = 0; i < startNodes.length; i++) {
+                        startNodes[i] = offset + i;
+                    }
+
+                    var msbfsTask = createMSBFSTask(localPathTemplate, startNodes, pathTemplateIndex);
+
+                    msbfsTask.run();
                 }
 
-                for (int i = 0; i < startNodes.length; i++) {
-                    startNodes[i] = offset + i;
-                }
-
-                var msbfsTask = createMSBFSTask(localRelationshipIterators, startNodes);
-
-                msbfsTask.run();
+                // once we exhaust one stack of layers, we move to next one
+                globalSharedPathTemplateIndex.compareAndSet(pathTemplateIndex, pathTemplateIndex + 1);
             }
         };
     }
@@ -102,18 +131,27 @@ public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
      * Make concurrent copies of the stack of graphs/ layers so that we may run stuff concurrently
      */
     @NotNull
-    private RelationshipIterator[] getRelationshipIterators() {
-        var localRelationshipIterators = new RelationshipIterator[relationshipIterators.length];
+    private RelationshipIterator[] getPathTemplate(int pathTemplateIndex) {
+        var pathTemplate = pathTemplates.get(pathTemplateIndex);
 
-        for (int i = 0; i < relationshipIterators.length; i++) {
-            localRelationshipIterators[i] = relationshipIterators[i].concurrentCopy();
+        var localPathTemplate = new RelationshipIterator[pathTemplate.length];
+
+        for (int i = 0; i < pathTemplate.length; i++) {
+            localPathTemplate[i] = pathTemplate[i].concurrentCopy();
         }
 
-        return localRelationshipIterators;
+        return localPathTemplate;
     }
 
-    private MultiSourceBFSRunnable createMSBFSTask(RelationshipIterator[] localRelationshipIterators, long[] startNodes) {
-        var executionStrategy = new TraversalToEdgeMSBFSStrategy(localRelationshipIterators, bfsConsumer);
+    private MultiSourceBFSRunnable createMSBFSTask(
+        RelationshipIterator[] localPathTemplate,
+        long[] startNodes,
+        int pathTemplateIndex
+    ) {
+        var executionStrategy = new TraversalToEdgeMSBFSStrategy(
+            localPathTemplate,
+            bfsConsumers.get(pathTemplateIndex)
+        );
 
         return MultiSourceBFSRunnable.createWithoutSeensNext(
             nodeCount,

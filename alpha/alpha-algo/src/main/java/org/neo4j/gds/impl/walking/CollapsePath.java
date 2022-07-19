@@ -30,25 +30,31 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
+/**
+ * A path template is a list of relationship types.
+ *
+ * In this implementation, the list of relationship types is encoded as a list of graphs with each one having only a single relationship type.
+ */
 public class CollapsePath extends Algorithm<Relationships> {
-    private final Graph[] graphs;
+    private final List<Graph[]> pathTemplates;
     private final long nodeCount;
     private final boolean allowSelfLoops;
     private final int concurrency;
     private final ExecutorService executorService;
 
     public CollapsePath(
-        Graph[] graphs,
+        List<Graph[]> pathTemplates,
         boolean allowSelfLoops,
         int concurrency,
         ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
-        this.graphs = graphs;
-        this.nodeCount = graphs[0].nodeCount();
+        this.pathTemplates = pathTemplates;
+        this.nodeCount = pathTemplates.get(0)[0].nodeCount();
         this.allowSelfLoops = allowSelfLoops;
         this.concurrency = concurrency;
         this.executorService = executorService;
@@ -57,7 +63,7 @@ public class CollapsePath extends Algorithm<Relationships> {
     @Override
     public Relationships compute() {
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
-            .nodes(graphs[0])
+            .nodes(pathTemplates.get(0)[0]) // just need any arbitrary graph
             .orientation(Orientation.NATURAL)
             .aggregation(Aggregation.NONE)
             .concurrency(concurrency)
@@ -67,7 +73,7 @@ public class CollapsePath extends Algorithm<Relationships> {
         Supplier<Runnable> collapsePathTaskSupplier = CollapsePathTaskSupplier.create(
             relImporter,
             allowSelfLoops,
-            graphs,
+            pathTemplates,
             nodeCount
         );
 

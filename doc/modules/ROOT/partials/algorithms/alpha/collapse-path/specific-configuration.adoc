@@ -1,8 +1,8 @@
 .Algorithm specific configuration
 [opts="header",cols="1,1,1m,1,4"]
 |===
-| Name                          | Type          | Default         | Optional  | Description
-| relationshipTypes             | List of String      | n/a             | no        | Ordered list of relationship types used for the traversal. The same relationship type can be added multiple times, in order to traverse them as indicated.
-| mutateRelationshipType        | String        | n/a             | no        | Relationship type of the newly created relationships.
-| allowSelfLoops                | Boolean       | false           | yes       | Indicates whether it is possible to create self referencing relationships, i.e. relationships where the start and end node are identical.
+| Name                          | Type                   | Default         | Optional  | Description
+| pathTemplates                 | List of List of String | n/a             | no        | A path template is an ordered list of relationship types used for the traversal. The same relationship type can be added multiple times, in order to traverse them as indicated. And, you may specify several path templates to process in one go.
+| mutateRelationshipType        | String                 | n/a             | no        | Relationship type of the newly created relationships.
+| allowSelfLoops                | Boolean                | false           | yes       | Indicates whether it is possible to create self referencing relationships, i.e. relationships where the start and end node are identical.
 |===

@@ -33,6 +33,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -116,7 +118,7 @@ class CollapsePathTest {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
         Relationships relationships = new CollapsePath(
-            new Graph[]{tookRel, tookRel},
+            Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             2,
             Pools.DEFAULT
@@ -131,7 +133,7 @@ class CollapsePathTest {
         var tookRel = graphStore.getGraph(RelationshipType.of("TOOK"));
 
         Relationships relationships = new CollapsePath(
-            new Graph[]{tookRel, tookRel},
+            Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             2,
             Pools.DEFAULT
@@ -144,7 +146,7 @@ class CollapsePathTest {
     @Test
     void runWithDifferentRelationshipTypes() {
         Relationships relationships = new CollapsePath(
-            new Graph[]{tookGraph, takenByGraph},
+            Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             2,
             Pools.DEFAULT
@@ -191,7 +193,7 @@ class CollapsePathTest {
             // when no `nodeLabels` specified
             var config = ImmutableCollapsePathConfig.builder()
                 .mutateRelationshipType(mutateRelType.name)
-                .addRelationshipTypes(relType, relType)
+                .addPathTemplate(List.of(relType, relType))
                 .allowSelfLoops(false)
                 .build();
 
@@ -216,7 +218,7 @@ class CollapsePathTest {
             var config = ImmutableCollapsePathConfig.builder()
                 .addNodeLabel("Person")
                 .mutateRelationshipType(mutateRelType.name)
-                .addRelationshipTypes(relType, relType)
+                .addPathTemplate(List.of(relType, relType))
                 .allowSelfLoops(false)
                 .build();
 
