@@ -56,7 +56,7 @@ public class SettingProxyImpl implements SettingProxyApi {
     }
 
     @Override
-    public void setDatabaseMode(Config config, DatabaseMode databaseMode) {
+    public void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService) {
         GraphDatabaseSettings.Mode mode;
         switch (databaseMode) {
             case SINGLE:

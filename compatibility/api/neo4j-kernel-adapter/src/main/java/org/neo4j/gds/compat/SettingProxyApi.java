@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.compat;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -28,5 +29,6 @@ public interface SettingProxyApi {
 
     DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService);
 
-    void setDatabaseMode(Config config, DatabaseMode databaseMode);
+    @TestOnly
+    void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService);
 }
