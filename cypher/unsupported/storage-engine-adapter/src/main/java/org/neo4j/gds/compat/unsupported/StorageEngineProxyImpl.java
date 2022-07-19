@@ -45,8 +45,9 @@ import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
 import org.neo4j.token.TokenHolders;
 
 public class StorageEngineProxyImpl implements StorageEngineProxyApi {
+
     @Override
-    public <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+    public InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders
     ) {

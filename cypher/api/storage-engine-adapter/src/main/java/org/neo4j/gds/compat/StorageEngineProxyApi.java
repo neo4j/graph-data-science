@@ -38,7 +38,7 @@ import org.neo4j.token.TokenHolders;
 
 public interface StorageEngineProxyApi {
 
-    <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+    InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders
     );

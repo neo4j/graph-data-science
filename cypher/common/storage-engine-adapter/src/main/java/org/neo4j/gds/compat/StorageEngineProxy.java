@@ -43,7 +43,7 @@ public final class StorageEngineProxy {
 
     private StorageEngineProxy() {}
 
-    public static <ENGINE extends AbstractInMemoryStorageEngine, BUILDER extends InMemoryStorageEngineBuilder<ENGINE>> BUILDER inMemoryStorageEngineBuilder(
+    public static InMemoryStorageEngineBuilder<? extends AbstractInMemoryStorageEngine> inMemoryStorageEngineBuilder(
         DatabaseLayout databaseLayout,
         TokenHolders tokenHolders
     ) {
