@@ -24,8 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
@@ -41,7 +41,7 @@ import static org.neo4j.gds.utils.StringJoining.join;
 
 public final class TestCypherGraphLoader implements TestGraphLoader {
 
-    private final GraphDatabaseAPI db;
+    private final GraphDatabaseService db;
 
     private final Set<String> nodeLabels;
     private final Set<String> relTypes;
@@ -52,7 +52,7 @@ public final class TestCypherGraphLoader implements TestGraphLoader {
     private Optional<Aggregation> maybeAggregation = Optional.empty();
     private Optional<Log> maybeLog = Optional.empty();
 
-    TestCypherGraphLoader(GraphDatabaseAPI db) {
+    TestCypherGraphLoader(GraphDatabaseService db) {
         this.db = db;
         this.nodeLabels = new HashSet<>();
         this.relTypes = new HashSet<>();
