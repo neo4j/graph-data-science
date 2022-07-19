@@ -20,12 +20,9 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutatePropertyConfig;
-import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.config.TargetNodeConfig;
@@ -43,12 +40,6 @@ public final class GraphStoreValidation {
     public static void validate(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> filterLabels = config.nodeLabelIdentifiers(graphStore);
 
-        if (config instanceof MutatePropertyConfig) {
-            validateMutateProperty(graphStore, filterLabels, (MutatePropertyConfig) config);
-        }
-        if (config instanceof MutateRelationshipConfig) {
-            validateMutateRelationships(graphStore, (MutateRelationshipConfig) config);
-        }
         if (config instanceof SourceNodesConfig) {
             validateSourceNodes(graphStore, (SourceNodesConfig) config, filterLabels);
         }
@@ -63,35 +54,6 @@ public final class GraphStoreValidation {
         }
         if (config instanceof TargetNodePropertyConfig) {
             validateTargetNodeProperty(graphStore, (TargetNodePropertyConfig) config, filterLabels);
-        }
-    }
-
-    private static void validateMutateProperty(GraphStore graphStore, Collection<NodeLabel> filterLabels, MutatePropertyConfig mutateConfig) {
-        String mutateProperty = mutateConfig.mutateProperty();
-
-        validateNodePropertyDoesNotExist(graphStore, filterLabels, mutateProperty);
-    }
-
-    private static void validateNodePropertyDoesNotExist(
-        GraphStore graphStore,
-        Collection<NodeLabel> filterLabels,
-        String nodeProperty
-    ) {
-        if (nodeProperty != null && graphStore.hasNodeProperty(filterLabels, nodeProperty)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Node property `%s` already exists in the in-memory graph.",
-                nodeProperty
-            ));
-        }
-    }
-
-    private static void validateMutateRelationships(GraphStore graphStore, MutateRelationshipConfig config) {
-        String mutateRelationshipType = config.mutateRelationshipType();
-        if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Relationship type `%s` already exists in the in-memory graph.",
-                mutateRelationshipType
-            ));
         }
     }
 

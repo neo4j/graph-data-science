@@ -20,10 +20,16 @@
 package org.neo4j.gds.config;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+
+import java.util.Collection;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface MutateRelationshipConfig extends MutateConfig {
 
@@ -34,5 +40,20 @@ public interface MutateRelationshipConfig extends MutateConfig {
 
     static @Nullable String validateTypeIdentifier(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "mutateRelationshipType");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateMutateRelationships(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        String mutateRelationshipType = mutateRelationshipType();
+        if (mutateRelationshipType != null && graphStore.hasRelationshipType(RelationshipType.of(mutateRelationshipType))) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship type `%s` already exists in the in-memory graph.",
+                mutateRelationshipType
+            ));
+        }
     }
 }

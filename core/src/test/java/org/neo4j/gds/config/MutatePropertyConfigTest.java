@@ -17,32 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.config;
 
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.MutatePropertyConfig;
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.gdl.GdlFactory;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class GraphStoreValidationTest {
+class MutatePropertyConfigTest {
 
-    @SuppressWarnings("JUnit5MalformedNestedClass")
-    @Nested
-    static class MutatePropertyConfigTests {
-        @Test
-        void testMutateFailsOnExistingToken() {
-            var graphStore = GdlFactory.of("(a {foo: 42})").build();
-            var config = ImmutableTestMutatePropertyConfig.builder().mutateProperty("foo").build();
+    @Test
+    void testMutateFailsOnExistingToken() {
+        var graphStore = GdlFactory.of("(a {foo: 42})").build();
+        MutatePropertyConfig config = TestMutatePropertyConfigImpl.builder().mutateProperty("foo").build();
 
-            assertThatThrownBy(() -> GraphStoreValidation.validate(graphStore, config))
-                .hasMessageContaining("Node property `foo` already exists in the in-memory graph.");
-        }
+        assertThatThrownBy(() -> config.validateMutateProperty(graphStore, config.nodeLabelIdentifiers(graphStore), List.of()))
+            .hasMessageContaining("Node property `foo` already exists in the in-memory graph.");
+    }
 
-        @ValueClass
-        interface TestMutatePropertyConfig extends AlgoBaseConfig, MutatePropertyConfig {}
+    @Configuration
+    interface TestMutatePropertyConfig extends AlgoBaseConfig, MutatePropertyConfig {
     }
 }
+
