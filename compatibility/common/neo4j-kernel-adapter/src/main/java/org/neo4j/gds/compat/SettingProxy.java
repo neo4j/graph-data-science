@@ -22,6 +22,7 @@ package org.neo4j.gds.compat;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.SettingValueParser;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class SettingProxy {
 
@@ -35,8 +36,8 @@ public final class SettingProxy {
         return ImmutableSetting.builder(name, parser, defaultValue).convert(IMPL::setting);
     }
 
-    public static DatabaseMode databaseMode(Config config) {
-        return IMPL.databaseMode(config);
+    public static DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService) {
+        return IMPL.databaseMode(config, databaseService);
     }
 
     public static void setDatabaseMode(Config config, DatabaseMode databaseMode) {
