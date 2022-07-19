@@ -237,8 +237,7 @@ public final class GdsParallelBatchImporter {
                 config.dbName(),
                 databaseConfig,
                 fs,
-                logService,
-                dependencyResolver
+                logService
             ),
             jobScheduler,
             collector

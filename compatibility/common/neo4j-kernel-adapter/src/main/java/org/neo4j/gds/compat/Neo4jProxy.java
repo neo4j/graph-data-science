@@ -21,7 +21,6 @@ package org.neo4j.gds.compat;
 
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
@@ -386,10 +385,9 @@ public final class Neo4jProxy {
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogService logService,
-        DependencyResolver dependencyResolver
+        LogService logService
     ) {
-        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, dependencyResolver);
+        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService);
     }
 
     public static NamedDatabaseId randomDatabaseId() {
