@@ -20,8 +20,9 @@
 package org.neo4j.gds.preconditions;
 
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class ClusterRestrictions {
@@ -29,8 +30,9 @@ public final class ClusterRestrictions {
     private ClusterRestrictions() {}
 
     public static void disallowRunningOnCluster(GraphDatabaseService databaseService, String detail) throws IllegalStateException {
-        var neo4jMode = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class).get(GraphDatabaseSettings.mode);
-        if (neo4jMode != GraphDatabaseSettings.Mode.SINGLE) {
+        var config = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
+        var neo4jMode = SettingProxy.databaseMode(config);
+        if (neo4jMode != DatabaseMode.SINGLE) {
             throw new IllegalStateException(
                 "The requested operation (" + detail +
                 ") is not available while running Neo4j Graph Data Science library on a Neo4j Causal Cluster.");
