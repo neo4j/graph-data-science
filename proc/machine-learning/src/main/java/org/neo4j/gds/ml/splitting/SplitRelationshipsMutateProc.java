@@ -22,16 +22,11 @@ package org.neo4j.gds.ml.splitting;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.AfterLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.SplitRelationshipGraphStoreMutator;
 import org.neo4j.gds.ml.splitting.EdgeSplitter.SplitResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
@@ -39,12 +34,10 @@ import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.ml.splitRelationships.mutate", description = "Splits a graph into holdout and remaining relationship types and adds them to the graph.", executionMode = MUTATE_RELATIONSHIP)
@@ -102,16 +95,6 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
         };
     }
 
-    @Override
-    public ValidationConfiguration<SplitRelationshipsMutateConfig> validationConfig() {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<AfterLoadValidation<SplitRelationshipsMutateConfig>> afterLoadValidations() {
-                return List.of(new Validation());
-            }
-        };
-    }
-
     @SuppressWarnings("unused")
     public static class MutateResult {
         public final long preProcessingMillis;
@@ -149,42 +132,4 @@ public class SplitRelationshipsMutateProc extends MutateProc<SplitRelationships,
             }
         }
     }
-
-    static class Validation implements AfterLoadValidation<SplitRelationshipsMutateConfig> {
-        @Override
-        public void validateConfigsAfterLoad(
-            GraphStore graphStore, GraphProjectConfig graphProjectConfig, SplitRelationshipsMutateConfig config
-        ) {
-            validateTypeDoesNotExist(graphStore, config.holdoutRelationshipType());
-            validateTypeDoesNotExist(graphStore, config.remainingRelationshipType());
-            validateNonNegativeRelationshipTypesExist(graphStore, config);
-        }
-
-        private void validateNonNegativeRelationshipTypesExist(
-            GraphStore graphStore,
-            SplitRelationshipsMutateConfig config
-        ) {
-            config.nonNegativeRelationshipTypes().forEach(relationshipType -> {
-                if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Relationship type `%s` does not exist in the in-memory graph.",
-                        relationshipType
-                    ));
-                }
-            });
-        }
-
-        private void validateTypeDoesNotExist(
-            GraphStore graphStore,
-            RelationshipType holdoutRelationshipType
-        ) {
-            if (graphStore.hasRelationshipType(holdoutRelationshipType)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship type `%s` already exists in the in-memory graph.",
-                    holdoutRelationshipType.name()
-                ));
-            }
-        }
-    }
-
 }

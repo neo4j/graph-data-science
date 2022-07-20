@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @Configuration
 public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeedConfig, RelationshipWeightConfig {
 
@@ -90,5 +92,53 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
             .map(RelationshipType::of)
             .collect(Collectors.toList());
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateRemainingRelType(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        validateTypeDoesNotExist(graphStore, remainingRelationshipType());
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateNonNegativeRelTypesExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        nonNegativeRelationshipTypes().forEach(relationshipType -> {
+            if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Relationship type `%s` does not exist in the in-memory graph.",
+                    relationshipType
+                ));
+            }
+        });
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateHoldOutRelType(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        validateTypeDoesNotExist(graphStore, holdoutRelationshipType());
+    }
+
+
+    @Configuration.Ignore
+    default void validateTypeDoesNotExist(GraphStore graphStore, RelationshipType holdoutRelationshipType) {
+        if (graphStore.hasRelationshipType(holdoutRelationshipType)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Relationship type `%s` already exists in the in-memory graph.",
+                holdoutRelationshipType.name()
+            ));
+        }
     }
 }
