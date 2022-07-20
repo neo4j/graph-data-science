@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.metrics;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
@@ -45,14 +43,6 @@ public abstract class SignedProbabilities {
 
     private long positiveCount;
     private long negativeCount;
-
-    public static long estimateMemory(GraphDimensions dimensions, RelationshipType relationshipType, double relationshipFraction) {
-        var relationshipCount = dimensions.relationshipCounts().containsKey(relationshipType)
-            ? (dimensions.relationshipCounts().get(relationshipType) * relationshipFraction)
-            : (dimensions.relCountUpperBound() * relationshipFraction);
-
-        return estimateMemory((long) relationshipCount);
-    }
 
     public static long estimateMemory(long relationshipSetSize) {
         return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
