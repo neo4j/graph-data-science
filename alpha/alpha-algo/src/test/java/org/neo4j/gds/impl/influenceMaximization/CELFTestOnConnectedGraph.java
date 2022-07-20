@@ -32,7 +32,7 @@ import org.neo4j.gds.extension.Inject;
 
 
 @GdlExtension
-final class NewCELFTest {
+class CELFTestOnConnectedGraph {
     @GdlGraph(orientation = Orientation.NATURAL)
     private static final String DB_CYPHER =
         "CREATE " +
@@ -92,7 +92,7 @@ final class NewCELFTest {
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
 
 
-        NewCELF celf = new NewCELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0);
+        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0);
         celf.compute();
         var softAssertions = new SoftAssertions();
 

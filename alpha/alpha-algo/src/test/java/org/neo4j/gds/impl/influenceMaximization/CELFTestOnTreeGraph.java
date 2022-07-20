@@ -30,11 +30,9 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.SplittableRandom;
-
 
 @GdlExtension
-final class ANewCELFTest {
+class CELFTestOnTreeGraph {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
@@ -64,12 +62,7 @@ final class ANewCELFTest {
 
     @Test
     void testSpreadWithSeed1() {
-        SplittableRandom random0 = new SplittableRandom(10);
-        SplittableRandom random1 = new SplittableRandom(11);
-        SplittableRandom random2 = new SplittableRandom(12);
-        System.out.println(random0.nextDouble() + " " + random0.nextDouble() + " " + random0.nextDouble() + " " + random0.nextDouble());
-        System.out.println(random1.nextDouble() + " " + random1.nextDouble() + " " + random1.nextDouble() + " " + random1.nextDouble());
-        System.out.println(random2.nextDouble() + " " + random2.nextDouble() + " " + random2.nextDouble() + " " + random2.nextDouble());
+
         //a1 : a2 a3
         //a2: a1 a3 a4 a5
         //a3: a1 a2 a5
@@ -134,7 +127,7 @@ final class ANewCELFTest {
         //then  a4 is picked with 1/3 (independntant)
 
         //finally a5 has a gain of 0
-        NewCELF celf = new NewCELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10);
+        CELF celf = new CELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10);
         celf.compute();
         var softAssertions = new SoftAssertions();
 

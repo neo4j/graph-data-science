@@ -23,13 +23,15 @@ import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
+import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.results.InfluenceMaximizationResult;
 
-import java.util.ArrayList;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -41,8 +43,10 @@ public class CELF extends Algorithm<CELF> {
     private final int concurrency;
 
     private final Graph graph;
-    private final ArrayList<Runnable> tasks;
+    private final long initialRandomSeed;
     private final LongDoubleScatterMap seedSetNodes;
+
+    private final long[] seedSetNodesArray;
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
 
@@ -59,10 +63,12 @@ public class CELF extends Algorithm<CELF> {
         double propagationProbability,
         int monteCarloSimulations,
         ExecutorService executorService,
-        int concurrency
+        int concurrency,
+        long initialRandomSeed
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
+        this.initialRandomSeed = initialRandomSeed;
         long nodeCount = graph.nodeCount();
 
         this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
@@ -71,9 +77,10 @@ public class CELF extends Algorithm<CELF> {
 
         this.executorService = executorService;
         this.concurrency = concurrency;
-        this.tasks = new ArrayList<>();
 
         seedSetNodes = new LongDoubleScatterMap(seedSetCount);
+
+        this.seedSetNodesArray = new long[seedSetCount];
         spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
@@ -88,62 +95,77 @@ public class CELF extends Algorithm<CELF> {
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
+
         return this;
     }
 
     private void greedyPart() {
-        double highestScore;
-        long highestNode;
+        HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
 
-        var globalNodeProgress = new AtomicLong(0);
-        for (int i = 0; i < concurrency; i++) {
-            var runner = new IndependentCascadeRunner(graph, spreads, globalNodeProgress,
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            graph.nodeCount(),
+            partition -> new ICInitTask(
+                partition,
+                graph,
                 propagationProbability,
-                monteCarloSimulations
-            );
-            runner.setSeedSetNodes(new long[0]);
-            tasks.add(runner);
-        }
+                monteCarloSimulations,
+                singleSpreadArray,
+                initialRandomSeed
+            ),
+            Optional.of(Math.toIntExact(graph.nodeCount()) / concurrency)
+        );
+
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
 
-        //Add the node with the highest spread to the seed set
-        highestScore = spreads.cost(spreads.top());
-        highestNode = spreads.pop();
-        seedSetNodes.put(highestNode, highestScore);
-        gain = highestScore;
+        graph.forEachNode(nodeId -> {
+            spreads.add(nodeId, singleSpreadArray.get(nodeId));
+            return true;
+        });
+        long highestNode = spreads.top();
+        gain = spreads.cost(highestNode);
+        spreads.pop();
+        seedSetNodes.put(highestNode, gain);
+        seedSetNodesArray[0] = highestNode;
     }
 
     private void lazyForwardPart() {
-        double highestScore;
-        long highestNode;
 
-        var independentCascade = new IndependentCascade(
+        var independentCascade = ICLazyForwardMC.create(
             graph,
             propagationProbability,
             monteCarloSimulations,
-            spreads
+            seedSetNodesArray.clone(),
+            concurrency,
+            executorService,
+            initialRandomSeed
         );
 
-        for (long i = 0; i < seedSetCount - 1; i++) {
+        var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
+        for (int i = 1; i < seedSetCount; i++) {
             do {
+                var highestNode = spreads.top();
 
-                highestNode = spreads.pop();
                 //Recalculate the spread of the top node
-                independentCascade.run(highestNode, seedSetNodes.keys().toArray());
-                spreads.set(highestNode, spreads.cost(highestNode) - gain);
+                double spread = independentCascade.runForCandidate(highestNode);
+                spreads.set(highestNode, spread - gain);
+                lastUpdate.set(highestNode, i);
 
                 //Check if previous top node stayed on top after the sort
-            } while (highestNode != spreads.top());
+            } while (i != lastUpdate.get(spreads.top()));
 
             //Add the node with the highest spread to the seed set
-            highestScore = spreads.cost(spreads.top());
-            highestNode = spreads.pop();
-            seedSetNodes.put(highestNode, highestScore + gain);
+            var highestScore = spreads.cost(spreads.top());
+            var highestNode = spreads.pop();
+
+            seedSetNodes.put(highestNode, highestScore);
+            seedSetNodesArray[i] = highestNode;
             gain += highestScore;
+            independentCascade.incrementSeedNode(highestNode);
         }
     }
 
