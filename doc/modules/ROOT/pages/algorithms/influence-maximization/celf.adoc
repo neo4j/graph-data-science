@@ -181,8 +181,8 @@ ORDER BY spread ASC
 [opts="header"]
 |===
 | Name      | spread
-| "Michael" | 1.093
-| "Ceri"    | 1.107
-| "Alice"   | 1.578
+| "Michael" | 1.08
+| "Ceri"    | 1.08
+| "Alice"   | 1.6
 |===
 --

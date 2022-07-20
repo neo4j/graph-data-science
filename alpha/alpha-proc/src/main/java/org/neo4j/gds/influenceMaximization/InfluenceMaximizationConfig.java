@@ -41,6 +41,6 @@ public interface InfluenceMaximizationConfig extends AlgoBaseConfig, RandomSeedC
     @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int monteCarloSimulations() {
-        return 1000;
+        return 100;
     }
 }
