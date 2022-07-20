@@ -88,6 +88,7 @@ public class Greedy extends Algorithm<Greedy> {
         double highestScore;
         long highestNode;
 
+        double gain = 0;
         //Find k nodes with largest marginal gain
         for (long i = 0; i < seedSetCount; i++) {
             globalNodeProgress.set(0);
@@ -102,7 +103,9 @@ public class Greedy extends Algorithm<Greedy> {
 
             highestScore = spreads.cost(spreads.top());
             highestNode = spreads.pop();
-            seedSetNodes.put(highestNode, highestScore);
+            var nodeGain = highestScore - gain;
+            seedSetNodes.put(highestNode, nodeGain);
+            gain += nodeGain;
         }
 
         return this;

@@ -24,7 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
-import java.util.Random;
+import java.util.SplittableRandom;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -37,7 +37,6 @@ final class IndependentCascade {
     private final HugeLongPriorityQueue spreads;
     private final LongScatterSet active;
     private final HugeLongArrayStack newActive;
-    private final Random rand;
     private double spread;
 
     IndependentCascade(
@@ -54,7 +53,6 @@ final class IndependentCascade {
         this.active = new LongScatterSet();
         this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
-        this.rand = new Random();
     }
 
     public void run(long candidateNode, long[] seedSetNodes) {
@@ -66,14 +64,14 @@ final class IndependentCascade {
             //For each newly active node, find its neighbors that become activated
             while (!newActive.isEmpty()) {
                 //Determine neighbors that become infected
-                rand.setSeed(i);
+                SplittableRandom rand = new SplittableRandom(i);
                 long node = newActive.pop();
                 graph.forEachRelationship(node, (source, target) ->
                 {
                     if (rand.nextDouble() < propagationProbability) {
-                        spread++;
                         if (!active.contains(target)) {
                             //Add newly activated nodes to the set of activated nodes
+                            spread++;
                             newActive.push(target);
                             active.add(target);
                         }

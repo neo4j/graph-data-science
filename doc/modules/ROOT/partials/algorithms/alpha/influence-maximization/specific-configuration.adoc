@@ -1,3 +1,4 @@
 | seedSetSize               | Integer | n/a     | no       | The number of nodes that maximize the expected spread in the network.
-| monteCarloSimulations     | Integer | 1000    | yes      | The number of Monte-Carlo simulations.
+| monteCarloSimulations     | Integer | 100    | yes      | The number of Monte-Carlo simulations.
 | propagationProbability    | Float   | 0.1     | yes      | The probability of a node being activated by an active neighbour node.
+| randomSeed                | integer | n/a       | yes       | The seed value to control the randomness of the algorithm.

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.impl.influenceMaximization;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
@@ -27,8 +28,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  *     (c)-----|
@@ -90,18 +89,20 @@ final class GreedyTest {
 
     @Test
     void testSpread() {
-        Greedy greedy = new Greedy(graph, 10, 0.2, 10, Pools.DEFAULT, 2);
+        var greedy = new Greedy(graph, 10, 0.2, 10, Pools.DEFAULT, 2);
         greedy.compute();
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("a"))).isEqualTo(2.6);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("b"))).isEqualTo(1.0);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("c"))).isEqualTo(0.9000000000000004);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("d"))).isEqualTo(0.9999999999999996);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("e"))).isEqualTo(0.7999999999999998);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("f"))).isEqualTo(0.6999999999999993);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("g"))).isEqualTo(0.5999999999999996);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("h"))).isEqualTo(0.7999999999999998);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("i"))).isEqualTo(0.7000000000000011);
+        softAssertions.assertThat(greedy.getNodeSpread(idFunction.of("j"))).isEqualTo(0.9000000000000004);
 
-        assertThat(greedy.getNodeSpread(idFunction.of("a"))).isEqualTo(2.2);
-        assertThat(greedy.getNodeSpread(idFunction.of("b"))).isEqualTo(4.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("c"))).isEqualTo(5.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("d"))).isEqualTo(6.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("e"))).isEqualTo(7.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("f"))).isEqualTo(8.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("g"))).isEqualTo(9.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("h"))).isEqualTo(10.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("i"))).isEqualTo(11.4);
-        assertThat(greedy.getNodeSpread(idFunction.of("j"))).isEqualTo(12.4);
+        softAssertions.assertAll();
     }
 }
