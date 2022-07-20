@@ -153,13 +153,11 @@ public class CELF extends Algorithm<CELF> {
                     break;
                 }
                 long k = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
-                int ik = (int) k;
-                for (int j = 0; j < k; ++j)
-                    firstK[j] = spreads.getIth(j);
                 int jj = 0;
-                for (int j = 0; j < (ik); ++j) {
-                    if (lastUpdate.get(firstK[j]) != i) {
-                        firstK[jj++] = firstK[j];
+                for (int j = 0; j < k; ++j) {
+                    var nextNodeId = spreads.getIth(j);
+                    if (lastUpdate.get(nextNodeId) != i) {
+                        firstK[jj++] = nextNodeId;
                     }
                 }
                 independentCascade.runForCandidate(firstK, jj);
