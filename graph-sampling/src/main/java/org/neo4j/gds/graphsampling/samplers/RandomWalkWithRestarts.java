@@ -25,21 +25,28 @@ import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongCollection;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
+import java.util.Optional;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private static final int MAX_WALKS_PER_START = 100;
+    private static final double TOTAL_WEIGHT_MISSING = -1.0;
+
     private final RandomWalkWithRestartsConfig config;
+
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -51,10 +58,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
         var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
+
+        Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
+
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
             new Walker(
                 seenNodes,
                 expectedNodes,
+                totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
                 new WalkQualities(initialStartQualities),
                 rng.split(),
@@ -68,6 +79,15 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
 
         return seenNodes;
+    }
+
+    private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
+        if (config.hasRelationshipWeightProperty()) {
+            var totalWeights = HugeAtomicDoubleArray.newArray(nodeCount);
+            totalWeights.setAll(TOTAL_WEIGHT_MISSING);
+            return Optional.of(totalWeights);
+        }
+        return Optional.empty();
     }
 
     @ValueClass
@@ -97,6 +117,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
         private final HugeAtomicBitSet seenNodes;
         private final long expectedNodes;
+        private final Optional<HugeAtomicDoubleArray> totalWeights;
         private final double qualityThreshold;
         private final WalkQualities walkQualities;
         private final SplittableRandom rng;
@@ -106,6 +127,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         Walker(
             HugeAtomicBitSet seenNodes,
             long expectedNodes,
+            Optional<HugeAtomicDoubleArray> totalWeights,
             double qualityThreshold,
             WalkQualities walkQualities,
             SplittableRandom rng,
@@ -114,6 +136,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         ) {
             this.seenNodes = seenNodes;
             this.expectedNodes = expectedNodes;
+            this.totalWeights = totalWeights;
             this.qualityThreshold = qualityThreshold;
             this.walkQualities = walkQualities;
             this.rng = rng;
@@ -135,8 +158,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 }
 
                 // walk a step
-                int degree = inputGraph.degree(currentNode);
-                if (degree == 0 || rng.nextDouble() < config.restartProbability()) {
+                double degree = computeDegree(currentNode);
+                if (degree == 0.0 || rng.nextDouble() < config.restartProbability()) {
                     double walkQuality = ((double) addedNodes) / nodesConsidered;
                     walkQualities.updateNodeQuality(currentStartNodePosition, walkQuality);
                     addedNodes = 0;
@@ -162,13 +185,50 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     currentNode = walkQualities.nodeId(currentStartNodePosition);
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
-                    int targetOffset = rng.nextInt(degree);
-                    var nextNode = inputGraph.nthTarget(currentNode, targetOffset);
-                    assert nextNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
+                    long nextNode;
+                    if (inputGraph.hasRelationshipProperty()) {
+                        nextNode = weightedWalkOffset(currentNode);
+                    } else {
+                        int targetOffset = rng.nextInt(inputGraph.degree(currentNode));
+                        nextNode = inputGraph.nthTarget(currentNode, targetOffset);
+                        assert nextNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
+                    }
                     currentNode = nextNode;
                     nodesConsidered++;
                 }
             }
+        }
+
+        private double computeDegree(long currentNode) {
+            if (!inputGraph.hasRelationshipProperty()) {
+                return inputGraph.degree(currentNode);
+            }
+
+            var presentTotalWeights = totalWeights.get();
+            if (presentTotalWeights.get(currentNode) == TOTAL_WEIGHT_MISSING) {
+                var degree = new MutableDouble(0.0);
+                inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
+                    degree.add(weight);
+                    return true;
+                });
+                presentTotalWeights.set(currentNode, degree.doubleValue());
+            }
+            return presentTotalWeights.get(currentNode);
+        }
+
+        private long weightedWalkOffset(long currentNode) {
+            final var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
+            var target = new MutableLong(-1);
+            inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
+                if (remainingMass.doubleValue() < weight) {
+                    target.setValue(trg);
+                    return false;
+                }
+                remainingMass.subtract(weight);
+                return true;
+            });
+            assert target.getValue() != -1;
+            return target.getValue();
         }
     }
 

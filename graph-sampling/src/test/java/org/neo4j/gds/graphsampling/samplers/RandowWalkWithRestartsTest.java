@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -54,11 +55,11 @@ class RandowWalkWithRestartsTest {
         ", (h:M {prop: 53})" +
         ", (i:X {prop: 54})" +
         ", (j:M {prop: 55})" +
-        ", (x)-[:R1]->(x1)" +
-        ", (x)-[:R1]->(x2)" +
-        ", (x)-[:R1]->(x3)" +
-        ", (e)-[:R1]->(d)" +
-        ", (i)-[:R1]->(g)" +
+        ", (x)-[:R1 {distance: 0.0} ]->(x1)" +
+        ", (x)-[:R1 {distance: 2.0} ]->(x2)" +
+        ", (x)-[:R1 {distance: 30000.0} ]->(x3)" +
+        ", (e)-[:R1 {distance: 1.0} ]->(d)" +
+        ", (i)-[:R1 {distance: 1.0} ]->(g)" +
         ", (a)-[:R1 {cost: 10.0, distance: 5.8}]->(b)" +
         ", (a)-[:R1 {cost: 10.0, distance: 4.8}]->(c)" +
         ", (c)-[:R1 {cost: 10.0, distance: 5.8}]->(d)" +
@@ -102,6 +103,25 @@ class RandowWalkWithRestartsTest {
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("e")))).isTrue();
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("f")))).isTrue();
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("g")))).isTrue();
+    }
+
+    @RepeatedTest(1000)
+    void shouldSampleWeighted() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("x")))
+            .relationshipWeightProperty("distance")
+            .samplingRatio(0.22)
+            .restartProbability(0.01)
+            .build();
+
+        var rwr = new RandomWalkWithRestarts(config);
+        var graph = getGraph(config);
+        var nodes = rwr.sampleNodes(graph);
+
+        assertThat(nodes.cardinality()).isBetween(3L, 4L);
+
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x")))).isTrue();
+        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x3")))).isTrue();
     }
 
     @Test

@@ -113,7 +113,7 @@ public class GraphSampleConstructor {
         var inputGraph = inputGraphStore.getGraph(
             config.nodeLabelIdentifiers(inputGraphStore),
             config.internalRelationshipTypes(inputGraphStore),
-            Optional.empty()
+            config.hasRelationshipWeightProperty() ? Optional.of(config.relationshipWeightProperty()) : Optional.empty()
         );
         var sampledNodesBitSet = nodesSampler.sampleNodes(inputGraph);
 
