@@ -67,6 +67,8 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     private long[] nodesInCluster;
 
+    private final List<List<Double>> seededCentroids;
+
 
     public static Kmeans createKmeans(Graph graph, KmeansBaseConfig config, KmeansContext context) {
         String nodeWeightProperty = config.nodeProperty();
@@ -83,6 +85,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
             nodeProperties,
             config.computeSilhouette(),
             config.initialSampler(),
+            config.seedCentroids(),
             getSplittableRandom(config.randomSeed())
         );
     }
@@ -100,6 +103,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         NodePropertyValues nodePropertyValues,
         boolean computeSilhouette,
         KmeansSampler.SamplerType initialSampler,
+        List<List<Double>> seededCentroids,
         SplittableRandom random
     ) {
         super(progressTracker);
@@ -120,6 +124,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
         this.distanceFromCentroid = HugeDoubleArray.newArray(graph.nodeCount());
         this.computeSilhouette = computeSilhouette;
         this.samplerType = initialSampler;
+        this.seededCentroids = seededCentroids;
         this.nodesInCluster = new long[k];
     }
 
@@ -193,15 +198,19 @@ public class Kmeans extends Algorithm<KmeansResult> {
             assert numberOfTasks <= concurrency;
 
             //Initialization do initial centroid computation and assignment
-
-            sampler.performInitialSampling();
-
+            if (seededCentroids.size() > 0) {
+                clusterManager.assignSeededCentroids(seededCentroids);
+            } else {
+                sampler.performInitialSampling();
+            }
             //
             int iteration = 0;
             while (true) {
                 long numberOfSwaps = 0;
                 //assign each node to a centroid
-                if (samplerType != KmeansSampler.SamplerType.KMEANSPP || iteration > 0) {
+                boolean shouldComputeDistance = (iteration > 0)
+                                                || (samplerType == KmeansSampler.SamplerType.UNIFORM);
+                if (shouldComputeDistance) {
                     RunWithConcurrency.builder()
                         .concurrency(concurrency)
                         .tasks(tasks)
@@ -264,6 +273,21 @@ public class Kmeans extends Algorithm<KmeansResult> {
     }
 
     private void checkInputValidity() {
+        if (seededCentroids.size() > 0) {
+            for (List<Double> centroid : seededCentroids) {
+                if (centroid.size() != dimensions) {
+                    throw new IllegalStateException(
+                        "All property arrays for K-Means should have the same number of dimensions");
+                } else {
+                    for (double value : centroid) {
+                        if (Double.isNaN(value)) {
+                            throw new IllegalArgumentException("Input for K-Means should not contain any NaN values");
+                        }
+                    }
+                }
+
+            }
+        }
         ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, nodeId -> {
             if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
                 var value = nodePropertyValues.floatArrayValue(nodeId);
@@ -290,10 +314,10 @@ public class Kmeans extends Algorithm<KmeansResult> {
                         }
                     }
                 }
-
             }
         });
     }
+
 
     private void calculateSilhouette() {
         var nodeCount = graph.nodeCount();

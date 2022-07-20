@@ -114,4 +114,5 @@ class KmeansStreamConfigTest {
         var userInput = CypherMapWrapper.create(Map.of("nodeProperty", "foo", "initialSampler", "kmEanS++"));
         assertThatNoException().isThrownBy(() -> KmeansStreamConfig.of(userInput));
     }
+    
 }

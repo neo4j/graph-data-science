@@ -29,6 +29,8 @@ import java.util.List;
 abstract class ClusterManager {
 
     final long[] nodesInCluster;
+
+    final boolean[] shouldReset;
     final NodePropertyValues nodePropertyValues;
     final int dimensions;
     final int k;
@@ -41,15 +43,22 @@ abstract class ClusterManager {
         this.nodePropertyValues = values;
         this.nodesInCluster = new long[k];
         this.currentlyAssigned = 0;
+        this.shouldReset = new boolean[k];
     }
 
-    public int getCurrentlyAssigned() {
+    int getCurrentlyAssigned() {
         return currentlyAssigned;
     }
 
     abstract void initialAssignCluster(long id);
 
-    abstract void reset();
+    void reset() {
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            nodesInCluster[centroidId] = 0;
+            shouldReset[centroidId] = true;
+        }
+    }
+
 
     abstract void normalizeClusters();
 
@@ -89,6 +98,8 @@ abstract class ClusterManager {
         }
         return community;
     }
+
+    public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);
 }
 
 class FloatClusterManager extends ClusterManager {
@@ -101,18 +112,13 @@ class FloatClusterManager extends ClusterManager {
 
 
     @Override
-    public void reset() {
-        for (int centroidId = 0; centroidId < k; ++centroidId) {
-            nodesInCluster[centroidId] = 0;
-            Arrays.fill(centroids[centroidId], 0.0f);
-        }
-    }
-
-    @Override
     public void normalizeClusters() {
-        for (int centreId = 0; centreId < k; ++centreId) {
-            for (int dimension = 0; dimension < dimensions; ++dimension)
-                centroids[centreId][dimension] /= (float) nodesInCluster[centreId];
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                if (nodesInCluster[centroidId] > 0) {
+                    centroids[centroidId][dimension] /= (float) nodesInCluster[centroidId];
+                }
+            }
         }
     }
 
@@ -126,10 +132,17 @@ class FloatClusterManager extends ClusterManager {
     public void updateFromTask(KmeansTask task) {
         var floatKmeansTask = (FloatKmeansTask) task;
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            nodesInCluster[centroidId] += task.getNumAssignedAtCluster(centroidId);
-            var taskContributionToCluster = floatKmeansTask.getCentroidContribution(centroidId);
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+            var contribution = task.getNumAssignedAtCluster(centroidId);
+            if (contribution > 0) {
+                if (shouldReset[centroidId]) {
+                    Arrays.fill(centroids[centroidId], 0.0f);
+                    shouldReset[centroidId] = false;
+                }
+                nodesInCluster[centroidId] += contribution;
+                var taskContributionToCluster = floatKmeansTask.getCentroidContribution(centroidId);
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
+                    centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+                }
             }
         }
     }
@@ -152,6 +165,19 @@ class FloatClusterManager extends ClusterManager {
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new float[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = (float) value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
+    }
+
 
 }
 
@@ -163,19 +189,15 @@ class DoubleClusterManager extends ClusterManager {
         this.centroids = new double[k][dimensions];
     }
 
-    @Override
-    public void reset() {
-        for (int centroidId = 0; centroidId < k; ++centroidId) {
-            nodesInCluster[centroidId] = 0;
-            Arrays.fill(centroids[centroidId], 0.0d);
-        }
-    }
 
     @Override
     public void normalizeClusters() {
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            for (int dimension = 0; dimension < dimensions; ++dimension)
-                centroids[centroidId][dimension] /= (double) nodesInCluster[centroidId];
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                if (nodesInCluster[centroidId] > 0) {
+                    centroids[centroidId][dimension] /= (double) nodesInCluster[centroidId];
+                }
+            }
         }
     }
 
@@ -183,10 +205,17 @@ class DoubleClusterManager extends ClusterManager {
     public void updateFromTask(KmeansTask task) {
         var doubleKmeansTask = (DoubleKmeansTask) task;
         for (int centroidId = 0; centroidId < k; ++centroidId) {
-            nodesInCluster[centroidId] += task.getNumAssignedAtCluster(centroidId);
-            var taskContributionToCluster = doubleKmeansTask.getCentroidContribution(centroidId);
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+            var contribution = task.getNumAssignedAtCluster(centroidId);
+            if (contribution > 0) {
+                if (shouldReset[centroidId]) {
+                    Arrays.fill(centroids[centroidId], 0.0d);
+                    shouldReset[centroidId] = false;
+                }
+                nodesInCluster[centroidId] += contribution;
+                var taskContributionToCluster = doubleKmeansTask.getCentroidContribution(centroidId);
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
+                    centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+                }
             }
         }
     }
@@ -208,6 +237,19 @@ class DoubleClusterManager extends ClusterManager {
     @Override
     public double[][] getCentroids() {
         return centroids;
+    }
+
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new double[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
     }
 
 }
