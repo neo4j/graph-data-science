@@ -102,9 +102,9 @@ final class AdjacencyDecompressingReader {
         // skip blocks until we have either not enough available to decode or have advanced far enough
         while (available > CHUNK_SIZE - pos && block[CHUNK_SIZE - 1] <= target) {
             int skippedInThisBlock = CHUNK_SIZE - pos;
-            int needToDecode = Math.min(CHUNK_SIZE, available - skippedInThisBlock);
-            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
             available -= skippedInThisBlock;
+            int needToDecode = Math.min(CHUNK_SIZE, available);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
             pos = 0;
         }
 
@@ -129,9 +129,9 @@ final class AdjacencyDecompressingReader {
         // skip blocks until we have either not enough available to decode or have advanced far enough
         while (available > CHUNK_SIZE - pos && block[CHUNK_SIZE - 1] < target) {
             int skippedInThisBlock = CHUNK_SIZE - pos;
-            int needToDecode = Math.min(CHUNK_SIZE, available - skippedInThisBlock);
-            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
             available -= skippedInThisBlock;
+            int needToDecode = Math.min(CHUNK_SIZE, available);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
             pos = 0;
         }
 
@@ -141,6 +141,37 @@ final class AdjacencyDecompressingReader {
         available -= (1 + targetPos - pos);
         consumed.value = remaining - available;
         this.pos = 1 + targetPos;
+        return block[targetPos];
+    }
+
+    long advanceBy(int skip, int remaining, MutableIntValue consumed) {
+        assert skip < remaining : "skip must be less than remaining but got skip=" + skip + " remaining=" + remaining;
+
+        int availableBeyondSkip = remaining - skip;
+        int initialSkip = skip;
+        int pos = this.pos;
+        long[] block = this.block;
+
+        // skip blocks until we have either not enough available to decode or have advanced far enough
+        while (skip >= CHUNK_SIZE - pos) {
+            int skippedInThisBlock = CHUNK_SIZE - pos;
+            skip -= skippedInThisBlock;
+            // we need to decode the full block of the adjacency list, even if we would only
+            // skip it partially. We would get wrong data after the skip position otherwise.
+            int needToDecode = Math.min(CHUNK_SIZE, skip + availableBeyondSkip);
+            offset = decodeDeltaVLongs(block[CHUNK_SIZE - 1], array, offset, needToDecode, block);
+            pos = 0;
+        }
+
+        // last block
+        int targetPos = pos + skip;
+        // we need to consume including targetPos, not to it, therefore +1
+        skip -= (1 + targetPos - pos);
+        this.pos = 1 + targetPos;
+        // this should be the initialSkip + 1
+        consumed.value = remaining - availableBeyondSkip - skip;
+        assert consumed.value == initialSkip + 1 : "Meant to skip " + initialSkip + " targets but only " + consumed.value + " were skipped";
+
         return block[targetPos];
     }
 

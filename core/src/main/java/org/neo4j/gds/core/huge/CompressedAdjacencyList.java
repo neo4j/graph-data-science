@@ -233,10 +233,24 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         @Override
         public long advance(long target) {
             int targetsLeftToBeDecoded = remaining();
-            if(targetsLeftToBeDecoded <= 0) {
+            if (targetsLeftToBeDecoded <= 0) {
                 return AdjacencyCursor.NOT_FOUND;
             }
             long value = decompress.advance(target, targetsLeftToBeDecoded, this);
+            this.currentPosition += this.value;
+            return value;
+        }
+
+        @Override
+        public long advanceBy(int n) {
+            assert n >= 0;
+
+            int targetsLeftToBeDecoded = remaining();
+            if (targetsLeftToBeDecoded <= n) {
+                return AdjacencyCursor.NOT_FOUND;
+            }
+
+            var value = decompress.advanceBy(n, targetsLeftToBeDecoded, this);
             this.currentPosition += this.value;
             return value;
         }

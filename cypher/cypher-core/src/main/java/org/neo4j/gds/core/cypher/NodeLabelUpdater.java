@@ -26,4 +26,6 @@ public interface NodeLabelUpdater {
     void addNodeLabel(NodeLabel nodeLabel);
 
     void addLabelToNode(long nodeId, NodeLabel nodeLabel);
+
+    void removeLabelFromNode(long nodeId, NodeLabel nodeLabel);
 }

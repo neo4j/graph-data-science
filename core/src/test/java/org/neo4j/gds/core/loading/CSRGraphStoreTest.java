@@ -20,8 +20,12 @@
 package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
@@ -33,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -120,23 +125,15 @@ class CSRGraphStoreTest {
         });
 
         assertThat(graphStore.graphProperty("longProp")).isNotNull();
-        assertThat(graphStore.schema().graphProperties()).containsEntry("longProp", PropertySchema.of("longProp", ValueType.LONG));
+        assertThat(graphStore.schema().graphProperties()).containsEntry(
+            "longProp",
+            PropertySchema.of("longProp", ValueType.LONG)
+        );
     }
 
-    @Test
-    void getNeighborIsConsistentWithRelationshipIteration() {
-        var factory = GdlFactory.of(
-            " (a)-[:T]->(b)" +
-            ", (b)-[:T]->(a)" +
-            ", (b)-[:T]->(c)" +
-            ", (a)-[:T]->(b)" +
-            ", (b)-[:T]->(a)" +
-            ", (b)-[:T]->(b)" +
-            ", (b)-[:T]->(c)"
-        );
-        var graphStore = factory.build();
-        var graph = graphStore.getUnion();
-
+    @ParameterizedTest
+    @MethodSource("nthTestGraphs")
+    void nthTargetIsConsistentWithRelationshipIteration(Graph graph) {
         var expected = new HashMap<Long, List<Long>>();
         var actual = new HashMap<Long, List<Long>>();
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
@@ -150,19 +147,42 @@ class CSRGraphStoreTest {
             var actualNeighbors = new ArrayList<Long>();
             actual.put(nodeId, actualNeighbors);
             for (int offset = 0; offset < graph.degree(nodeId); offset++) {
-                actualNeighbors.add(graph.getNeighbor(nodeId, offset));
+                actualNeighbors.add(graph.nthTarget(nodeId, offset));
             }
         }
         assertThat(actual).isEqualTo(expected);
     }
 
+    static Stream<Graph> nthTestGraphs() {
+        return Stream.of(
+            GdlFactory.of(
+                " (a)-[:T]->(b)" +
+                ", (b)-[:T]->(a)" +
+                ", (b)-[:T]->(c)" +
+                ", (a)-[:T]->(b)" +
+                ", (b)-[:T]->(a)" +
+                ", (b)-[:T]->(b)" +
+                ", (b)-[:T]->(c)"
+            ).build().getUnion(),
+            GdlFactory.of(
+                " (a)-[:T]->(b)" +
+                ", (b)-[:A]->(a)" +
+                ", (b)-[:B]->(c)" +
+                ", (a)-[:A]->(b)" +
+                ", (b)-[:A]->(a)" +
+                ", (b)-[:B]->(b)" +
+                ", (b)-[:T]->(c)"
+            ).build().getUnion()
+        );
+    }
+
     @Test
-    void outOfBoundNeighborShouldThrow() {
+    void outOfBoundNthTargetShouldReturnNotFound() {
         var factory = GdlFactory.of(" (a)-[:T]->(b)");
         var graphStore = factory.build();
         var graph = graphStore.getUnion();
 
-        assertThatThrownBy(() -> graph.getNeighbor(0, 1)).hasMessageContaining("Offset 1 is out of bounds for node 0 with degree 1.");
-        assertThatThrownBy(() -> graph.getNeighbor(1, 0)).hasMessageContaining("Offset 0 is out of bounds for node 1 with degree 0.");
+        assertThat(graph.nthTarget(0, 1)).isEqualTo(IdMap.NOT_FOUND);
+        assertThat(graph.nthTarget(1, 0)).isEqualTo(IdMap.NOT_FOUND);
     }
 }

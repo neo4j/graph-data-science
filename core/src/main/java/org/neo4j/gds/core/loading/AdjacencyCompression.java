@@ -106,7 +106,7 @@ public final class AdjacencyCompression {
         return compress(data.buffer, out, data.length);
     }
 
-    private static int compress(long[] data, byte[] out, int length) {
+    public static int compress(long[] data, byte[] out, int length) {
         return encodeVLongs(data, length, out, 0);
     }
 

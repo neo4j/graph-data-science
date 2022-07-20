@@ -153,6 +153,11 @@ class HugeGraphCursorReuseTest {
         }
 
         @Override
+        public long advanceBy(int n) {
+            return NOT_FOUND;
+        }
+
+        @Override
         public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
             return new TestAdjacencyCursor();
         }

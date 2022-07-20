@@ -208,6 +208,11 @@ public abstract class GraphAdapter implements Graph {
     }
 
     @Override
+    public long nthTarget(long nodeId, int offset) {
+        return graph.nthTarget(nodeId, offset);
+    }
+
+    @Override
     public double relationshipProperty(long sourceNodeId, long targetNodeId, double fallbackValue) {
         return graph.relationshipProperty(sourceNodeId, targetNodeId, fallbackValue);
     }

@@ -113,6 +113,19 @@ public class NodeFilteredAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
+    public long advanceBy(int n) {
+        assert n >= 0;
+
+        while (hasNextVLong()) {
+            nextVLong();
+            if (n-- == 0) {
+                return nextLongValue;
+            }
+        }
+        return NOT_FOUND;
+    }
+
+    @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
         return new NodeFilteredAdjacencyCursor(innerCursor.shallowCopy(destination), idMap);
     }

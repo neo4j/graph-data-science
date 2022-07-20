@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.List;
+
 public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> extends GraphAlgorithmFactory<Kmeans, CONFIG> {
 
     public KmeansAlgorithmFactory() {
@@ -43,6 +45,13 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
+        var seedCentroids = (List) configuration.seedCentroids();
+        if (configuration.numberOfRestarts() > 1 && seedCentroids.size() > 0) {
+            throw new IllegalArgumentException("K-Means cannot be run multiple time when seeded");
+        }
+        if (seedCentroids.size() > 0 && seedCentroids.size() != configuration.k()) {
+            throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
+        }
         return Kmeans.createKmeans(graph, configuration, ImmutableKmeansContext
             .builder()
             .progressTracker(progressTracker)

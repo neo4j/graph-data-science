@@ -20,6 +20,30 @@ For more information on this algorithm, see:
 
 * https://en.wikipedia.org/wiki/K-means_clustering
 
+[[algorithms-kmeans-introduction-sampling]]
+== Initial Centroid Sampling
+
+The algorithm starts by picking `k` centroids by  randomly sampling from the set of available nodes.
+There are two different sampling strategies.
+
+Uniform::
+
+With uniform sampling, each node has the same probability to be picked as one of the `k`  initial centroids.
+This is the default sampler for K-Means.
+
+K-Means++::
+
+This sampling strategy adapts the well-known
+http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf[K-means++]  initialization algorithm for K-Means.
+The sampling begins by choosing the  first centroid uniformly at random.
+Then, the remaining `k-1`  centroids are picked one-by-one based on weighted random sampling.
+That is, the probability a node is chosen as the next centroid is proportional to its minimum distance from the already picked centroids.
+Nodes with larger distance hence have higher chance to be picked as a centroid.
+This sampling strategy tries to spread the initial clusters more evenly so as to obtain a better final clustering. This option can be enabled by choosing `kmeans++` as the  initial sampler in the configuration.
+
+
+It is also possible to explicitly give the list of initial centroids to the algorithm. In this case, the value of the `initialSampler` parameter is ignored, even if changed in the configuration.
+
 [[algorithm-k-means-considerations]]
 == Considerations
 
@@ -391,3 +415,41 @@ YIELD nodePropertiesWritten
 
 In `write` mode, only a single row is returned by the procedure.
 The result is written to the Neo4j database instead of the GDS in-memory graph.
+
+[[algorithms-leiden-examples-centroids]]
+=== Seeding initial centroids
+
+We now see the effect that seeding centroids has on K-Means.
+We run K-Means with initial seeds the coordinates of New York, Amsterdam, and Rome.
+[role=query-example]
+--
+.The following will run the algorithm and stream results:
+[source,cypher,role=noplay]
+----
+CALL gds.alpha.kmeans.stream('cities', {
+  nodeProperty: 'coordinates',
+  k: 3,
+  seedCentroids: [[40.712776,-74.005974], [52.370216,4.895168],[41.902782,12.496365]]
+})
+YIELD nodeId, communityId
+RETURN gds.util.asNode(nodeId).name AS name, communityId
+ORDER BY communityId, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name                  | communityId
+|"Kingston upon Thames" | 1
+|"Liverpool"            | 1
+|"Malmö"                | 1
+|"Solna"                | 1
+|"Surbiton"             | 1
+|"Örkelljunga"          | 1
+|"Sliven"               | 2
+|"Xánthi"               | 2
+
+|===
+--
+Notice that in this case the cities have been geographically clustered into two clusters: one contains cities in Northern Europe whereas the other contains in Southern Europe.
+On the other hand, the cluster with New York as the initial centroid was not the closest to any city at the first phase.

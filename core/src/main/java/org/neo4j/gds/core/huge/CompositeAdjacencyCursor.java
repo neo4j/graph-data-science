@@ -132,6 +132,19 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
     }
 
     @Override
+    public long advanceBy(int n) {
+        assert n >= 0;
+
+        while (hasNextVLong()) {
+            long target = nextVLong();
+            if (n-- == 0) {
+                return target;
+            }
+        }
+        return NOT_FOUND;
+    }
+
+    @Override
     public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
         var destCursors = destination instanceof CompositeAdjacencyCursor
             ? ((CompositeAdjacencyCursor) destination).cursors

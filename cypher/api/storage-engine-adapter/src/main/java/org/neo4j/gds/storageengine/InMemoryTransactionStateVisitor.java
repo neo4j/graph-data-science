@@ -22,6 +22,8 @@ package org.neo4j.gds.storageengine;
 import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.eclipse.collections.api.IntIterable;
+import org.eclipse.collections.api.set.primitive.LongSet;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.cypher.UpdatableNodeProperty;
 import org.neo4j.gds.core.cypher.nodeproperties.UpdatableDoubleArrayNodeProperty;
@@ -34,6 +36,7 @@ import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
 
 import java.util.Iterator;
@@ -81,6 +84,34 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
         if (!usedByOtherLabels) {
             this.nodePropertiesCache.remove(propertyToken);
         }
+    }
+
+    @Override
+    public void visitNodeLabelChanges(
+        long id, LongSet added, LongSet removed
+    ) {
+        added.forEach(addedLabelToken -> {
+            try {
+                var labelName = tokenHolders.labelTokens().getTokenById((int) addedLabelToken).name();
+                graphStore.addLabelToNode(id, NodeLabel.of(labelName));
+            } catch (TokenNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        removed.forEach(removedLabelToken -> {
+            try {
+                var labelName = tokenHolders.labelTokens().getTokenById((int) removedLabelToken).name();
+                graphStore.removeLabelFromNode(id, NodeLabel.of(labelName));
+            } catch (TokenNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Override
+    public void visitCreatedLabelToken(long id, String name, boolean internal) {
+        graphStore.addNodeLabel(NodeLabel.of(name));
     }
 
     private void visitAddedOrChangedNodeProperties(long nodeId, Iterator<StorageProperty> added, Iterator<StorageProperty> changed) {

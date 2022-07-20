@@ -1,6 +1,6 @@
 ext {
     releasedNeos = [
-        '4.3'           : properties.getOrDefault('neo4jVersion43', '4.3.14'),
+        '4.3'           : properties.getOrDefault('neo4jVersion43', '4.3.15'),
         '4.4'           : properties.getOrDefault('neo4jVersion44', '4.4.8')
     ]
 
@@ -8,7 +8,7 @@ ext {
     [
         // This separation is required for the Cypher compatibility layer
         '4.3.3'         : properties.getOrDefault('neo4jVersion433', '4.3.3'),
-        '4.3.4plus'     : properties.getOrDefault('neo4jVersion434', '4.3.14'),
+        '4.3.4plus'     : properties.getOrDefault('neo4jVersion434', '4.3.15'),
     ]
 
     neo4jDefault = neos.'4.4'
@@ -70,7 +70,7 @@ ext {
         'RoaringBitmap'        : '0.9.16',
         'sb-contrib'           : '7.4.7',
         'scala'                : scalas[neo4j_minor],
-        'spotbugsToolVersion'  : '4.7.0',
+        'spotbugsToolVersion'  : '4.7.1',
         'protobuf'             : '3.19.2',
         'kryo'                 : '5.0.4',
     ]

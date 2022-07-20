@@ -29,33 +29,49 @@ import java.util.List;
 abstract class ClusterManager {
 
     final long[] nodesInCluster;
+
+    final boolean[] shouldReset;
     final NodePropertyValues nodePropertyValues;
     final int dimensions;
     final int k;
+
+    int currentlyAssigned;
 
     ClusterManager(NodePropertyValues values, int dimensions, int k) {
         this.dimensions = dimensions;
         this.k = k;
         this.nodePropertyValues = values;
         this.nodesInCluster = new long[k];
+        this.currentlyAssigned = 0;
+        this.shouldReset = new boolean[k];
     }
 
-    abstract void initialAssignCluster(int i, long id);
+    int getCurrentlyAssigned() {
+        return currentlyAssigned;
+    }
 
-    abstract void reset();
+    abstract void initialAssignCluster(long id);
+
+    void reset() {
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            nodesInCluster[centroidId] = 0;
+            shouldReset[centroidId] = true;
+        }
+    }
+
 
     abstract void normalizeClusters();
 
     abstract void updateFromTask(KmeansTask task);
 
-    void initializeCenters(List<Long> initialCenterIds) {
-        int clusterUpdateId = 0;
-        for (Long currentId : initialCenterIds) {
-            initialAssignCluster(clusterUpdateId++, currentId);
+    void initializeCentroids(List<Long> initialCentroidIds) {
+        currentlyAssigned = 0;
+        for (Long currentId : initialCentroidIds) {
+            initialAssignCluster(currentId);
         }
     }
-
-    abstract double[][] getCenters();
+    
+    abstract double[][] getCentroids();
 
     public long[] getNodesInCluster() {
         return nodesInCluster;
@@ -68,142 +84,172 @@ abstract class ClusterManager {
         return new DoubleClusterManager(values, dimensions, k);
     }
 
-    public abstract double euclidean(long nodeId, int centerId);
+    public abstract double euclidean(long nodeId, int centroidId);
 
-    public int findClosestCenter(long nodeId) {
+    public int findClosestCentroid(long nodeId) {
         int community = 0;
         double smallestDistance = Double.MAX_VALUE;
-        for (int centerId = 0; centerId < k; ++centerId) {
-            double distance = euclidean(nodeId, centerId);
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            double distance = euclidean(nodeId, centroidId);
             if (Double.compare(distance, smallestDistance) < 0) {
                 smallestDistance = distance;
-                community = centerId;
+                community = centroidId;
             }
         }
         return community;
     }
+
+    public abstract void assignSeededCentroids(List<List<Double>> seededCentroids);
 }
 
 class FloatClusterManager extends ClusterManager {
-    private final float[][] clusterCenters;
+    private final float[][] centroids;
 
     FloatClusterManager(NodePropertyValues values, int dimensions, int k) {
         super(values, dimensions, k);
-        this.clusterCenters = new float[k][dimensions];
+        this.centroids = new float[k][dimensions];
     }
 
-
-    @Override
-    public void reset() {
-        for (int centerId = 0; centerId < k; ++centerId) {
-            nodesInCluster[centerId] = 0;
-            Arrays.fill(clusterCenters[centerId], 0.0f);
-        }
-    }
 
     @Override
     public void normalizeClusters() {
-        for (int centreId = 0; centreId < k; ++centreId) {
-            for (int dimension = 0; dimension < dimensions; ++dimension)
-                clusterCenters[centreId][dimension] /= (float) nodesInCluster[centreId];
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                if (nodesInCluster[centroidId] > 0) {
+                    centroids[centroidId][dimension] /= (float) nodesInCluster[centroidId];
+                }
+            }
         }
     }
 
     @Override
-    public void initialAssignCluster(int i, long id) {
+    public void initialAssignCluster(long id) {
         float[] cluster = nodePropertyValues.floatArrayValue(id);
-        System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
+        System.arraycopy(cluster, 0, centroids[currentlyAssigned++], 0, cluster.length);
     }
 
     @Override
     public void updateFromTask(KmeansTask task) {
         var floatKmeansTask = (FloatKmeansTask) task;
-        for (int centerId = 0; centerId < k; ++centerId) {
-            nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
-            var taskContributionToCluster = floatKmeansTask.getCenterContribution(centerId);
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                clusterCenters[centerId][dimension] += taskContributionToCluster[dimension];
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            var contribution = task.getNumAssignedAtCluster(centroidId);
+            if (contribution > 0) {
+                if (shouldReset[centroidId]) {
+                    Arrays.fill(centroids[centroidId], 0.0f);
+                    shouldReset[centroidId] = false;
+                }
+                nodesInCluster[centroidId] += contribution;
+                var taskContributionToCluster = floatKmeansTask.getCentroidContribution(centroidId);
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
+                    centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+                }
             }
         }
     }
 
     @Override
-    double[][] getCenters() {
-        double[][] doubleClusterCenters = new double[k][dimensions];
+    double[][] getCentroids() {
+        double[][] doubleCentroids = new double[k][dimensions];
         for (int i = 0; i < k; ++i) {
             for (int j = 0; j < dimensions; ++j) {
-                doubleClusterCenters[i][j] = clusterCenters[i][j];
+                doubleCentroids[i][j] = centroids[i][j];
             }
         }
-        return doubleClusterCenters;
+        return doubleCentroids;
     }
 
     @Override
-    public double euclidean(long nodeId, int centerId) {
+    public double euclidean(long nodeId, int centroidId) {
         float[] left = nodePropertyValues.floatArrayValue(nodeId);
-        float[] right = clusterCenters[centerId];
+        float[] right = centroids[centroidId];
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
     }
 
-    private float floatEuclidean(float[] left, float[] right) {
-        return (float) Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new float[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = (float) value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
     }
+
 
 }
 
 class DoubleClusterManager extends ClusterManager {
-    private final double[][] clusterCenters;
+    private final double[][] centroids;
 
     DoubleClusterManager(NodePropertyValues values, int dimensions, int k) {
         super(values, dimensions, k);
-        this.clusterCenters = new double[k][dimensions];
+        this.centroids = new double[k][dimensions];
     }
 
-    @Override
-    public void reset() {
-        for (int centerId = 0; centerId < k; ++centerId) {
-            nodesInCluster[centerId] = 0;
-            Arrays.fill(clusterCenters[centerId], 0.0d);
-        }
-    }
 
     @Override
     public void normalizeClusters() {
-        for (int centreId = 0; centreId < k; ++centreId) {
-            for (int dimension = 0; dimension < dimensions; ++dimension)
-                clusterCenters[centreId][dimension] /= (double) nodesInCluster[centreId];
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            for (int dimension = 0; dimension < dimensions; ++dimension) {
+                if (nodesInCluster[centroidId] > 0) {
+                    centroids[centroidId][dimension] /= (double) nodesInCluster[centroidId];
+                }
+            }
         }
     }
 
     @Override
     public void updateFromTask(KmeansTask task) {
         var doubleKmeansTask = (DoubleKmeansTask) task;
-        for (int centerId = 0; centerId < k; ++centerId) {
-            nodesInCluster[centerId] += task.getNumAssignedAtCenter(centerId);
-            var taskContributionToCluster = doubleKmeansTask.getCenterContribution(centerId);
-            for (int dimension = 0; dimension < dimensions; ++dimension) {
-                clusterCenters[centerId][dimension] += taskContributionToCluster[dimension];
+        for (int centroidId = 0; centroidId < k; ++centroidId) {
+            var contribution = task.getNumAssignedAtCluster(centroidId);
+            if (contribution > 0) {
+                if (shouldReset[centroidId]) {
+                    Arrays.fill(centroids[centroidId], 0.0d);
+                    shouldReset[centroidId] = false;
+                }
+                nodesInCluster[centroidId] += contribution;
+                var taskContributionToCluster = doubleKmeansTask.getCentroidContribution(centroidId);
+                for (int dimension = 0; dimension < dimensions; ++dimension) {
+                    centroids[centroidId][dimension] += taskContributionToCluster[dimension];
+                }
             }
         }
     }
 
     @Override
-    public double euclidean(long nodeId, int centerId) {
+    public double euclidean(long nodeId, int centroidId) {
         double[] left = nodePropertyValues.doubleArrayValue(nodeId);
-        double[] right = clusterCenters[centerId];
+        double[] right = centroids[centroidId];
         return Math.sqrt(Intersections.sumSquareDelta(left, right, right.length));
 
     }
 
     @Override
-    public void initialAssignCluster(int i, long id) {
+    public void initialAssignCluster(long id) {
         double[] cluster = nodePropertyValues.doubleArrayValue(id);
-        System.arraycopy(cluster, 0, clusterCenters[i], 0, cluster.length);
+        System.arraycopy(cluster, 0, centroids[currentlyAssigned++], 0, cluster.length);
     }
 
     @Override
-    public double[][] getCenters() {
-        return clusterCenters;
+    public double[][] getCentroids() {
+        return centroids;
+    }
+
+    @Override
+    public void assignSeededCentroids(List<List<Double>> seededCentroids) {
+
+        for (List<Double> centroid : seededCentroids) {
+            var centroidArray = new double[dimensions];
+            int index = 0;
+            for (double value : centroid) {
+                centroidArray[index++] = value;
+            }
+            System.arraycopy(centroidArray, 0, centroids[currentlyAssigned++], 0, centroidArray.length);
+        }
     }
 
 }

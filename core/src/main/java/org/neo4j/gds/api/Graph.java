@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.api;
 
-import org.apache.commons.lang3.mutable.MutableInt;
-import org.apache.commons.lang3.mutable.MutableLong;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyContainer;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -29,8 +28,7 @@ import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
+@SuppressFBWarnings("UCF_USELESS_CONTROL_FLOW")
 public interface Graph extends IdMap, NodePropertyContainer, Degrees, RelationshipIterator, RelationshipProperties {
 
     GraphSchema schema();
@@ -87,24 +85,51 @@ public interface Graph extends IdMap, NodePropertyContainer, Degrees, Relationsh
      */
     Optional<NodeFilteredGraph> asNodeFilteredGraph();
 
-    default long getNeighbor(long nodeId, int offset) {
-        if (offset >= degree(nodeId)) {
-            throw new IllegalStateException(formatWithLocale(
-                "Offset %d is out of bounds for node %d with degree %d.",
-                offset,
-                toOriginalNodeId(nodeId),
-                degree(nodeId)
-            ));
-        }
-        var targetsRemaining = new MutableInt(offset);
-        var target = new MutableLong();
-        forEachRelationship(nodeId, (src, trg) -> {
-            if (targetsRemaining.getAndDecrement() == 0) {
-                target.setValue(trg);
-                return false;
+    /**
+     * Get the n-th target node id for a given {@code sourceNodeId}.
+     *
+     * The order of the targets is not defined and depends on the implementation of the graph,
+     * but it is consistent across separate calls to this method on the same graph.
+     *
+     * The {@code sourceNodeId} must be a node id existing in the graph.
+     * The {@code offset} parameter is 0-indexed and must be positive.
+     * If {@code offset} is greater than the number of targets for {@code sourceNodeId}, {@link IdMap#NOT_FOUND -1} is returned.
+     *
+     * It is undefined behavior if the {@code sourceNodeId} does not exist in the graph or the {@code offset} is negative.
+     *
+     * @param offset the {@code n}-th target to return. Must be positive.
+     * @return the target at the {@code offset} or {@link IdMap#NOT_FOUND -1} if there is no such target.
+     */
+    default long nthTarget(long sourceNodeId, int offset) {
+        return Graph.nthTarget(this, sourceNodeId, offset);
+    }
+
+    /**
+     * see {@link #nthTarget(long, int)}
+     */
+    static long nthTarget(Graph graph, long sourceNodeId, int offset) {
+        class FindNth implements RelationshipConsumer {
+            private int remaining = offset;
+            private long target = NOT_FOUND;
+
+            @Override
+            public boolean accept(long sourceNodeId, long targetNodeId) {
+                if (remaining-- == 0) {
+                    target = targetNodeId;
+                    return false;
+                }
+                return true;
             }
-            return true;
-        });
-        return target.getValue();
+        }
+
+        if (offset >= graph.degree(sourceNodeId)) {
+            return NOT_FOUND;
+        }
+
+        assert offset >= 0 : "offset must be positive, got " + offset;
+
+        var findN = new FindNth();
+        graph.forEachRelationship(sourceNodeId, findN);
+        return findN.target;
     }
 }
