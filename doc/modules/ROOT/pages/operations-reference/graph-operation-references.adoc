@@ -68,7 +68,8 @@
 [role=procedure-listing]
 [opts=header,cols="1, 1"]
 |===
-|Description                                        | Operation
-|Drop a graph property from a named graph           | `gds.alpha.graph.graphProperty.drop`
-|Stream a graph property to the procedure caller    | `gds.alpha.graph.graphProperty.stream`
+|Description                                       | Operation
+|Drop a graph property from a named graph          | `gds.alpha.graph.graphProperty.drop`
+|Stream a graph property to the procedure caller   | `gds.alpha.graph.graphProperty.stream`
+|Sample a subgraph using random walk with restarts | `gds.alpha.graph.sample.rwr`
 |===
