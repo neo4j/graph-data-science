@@ -30,7 +30,6 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.pipeline.node.PredictMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -75,11 +74,6 @@ public class NodeClassificationPipelineMutateProc
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ValidationConfiguration<NodeClassificationPredictPipelineMutateConfig> validationConfig() {
-        return NodeClassificationPipelineCompanion.getValidationConfig();
     }
 
     @Override

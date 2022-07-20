@@ -20,11 +20,17 @@
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutatePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.Optional;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -42,5 +48,38 @@ public interface NodeClassificationPredictPipelineMutateConfig
 
     static NodeClassificationPredictPipelineMutateConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPredictPipelineMutateConfigImpl(username, config);
+    }
+
+    @Value.Check
+    default void validatePredictedProbabilityDifferentToMutateProperty() {
+        predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
+            if (mutateProperty().equals(predictedProbabilityProperty)) {
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
+                        "mutateProperty",
+                        "predictedProbabilityProperty",
+                        predictedProbabilityProperty
+                    )
+                );
+            }
+        });
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validatePredictedProbabilityPropertyDoesNotExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
+            if (graphStore.hasNodeProperty(selectedLabels, predictedProbabilityProperty)) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Node property `%s` already exists in the in-memory graph.",
+                    predictedProbabilityProperty
+                ));
+            }
+        });
     }
 }

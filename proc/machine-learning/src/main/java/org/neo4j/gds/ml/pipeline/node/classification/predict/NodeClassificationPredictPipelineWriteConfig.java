@@ -26,6 +26,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineWriteConfig
@@ -39,6 +41,23 @@ public interface NodeClassificationPredictPipelineWriteConfig
     }
 
     Optional<String> predictedProbabilityProperty();
+
+    @Value.Check
+    default void validatePredictedProbabilityPropertyDoesNotExist() {
+        predictedProbabilityProperty()
+            .ifPresent(predictedProbabilityProperty -> {
+                if (writeProperty().equals(predictedProbabilityProperty)) {
+                    throw new IllegalArgumentException(
+                        formatWithLocale(
+                            "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
+                            "writeProperty",
+                            "predictedProbabilityProperty",
+                            predictedProbabilityProperty
+                        )
+                    );
+                }
+            });
+    }
 
     static NodeClassificationPredictPipelineWriteConfig of(String username, CypherMapWrapper config) {
         return new NodeClassificationPredictPipelineWriteConfigImpl(username, config);
