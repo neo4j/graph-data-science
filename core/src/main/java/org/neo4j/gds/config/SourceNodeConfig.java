@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.labelFilteredGraphContainsNode;
+import static org.neo4j.gds.config.ConfigNodesValidations.labelFilteredGraphNotContainsNode;
 import static org.neo4j.gds.config.ConfigNodesValidations.nodeLabelFilterDescription;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -49,7 +49,7 @@ public interface SourceNodeConfig extends NodeConfig {
     ) {
         var sourceNodeId = sourceNode();
 
-        if (labelFilteredGraphContainsNode(selectedLabels, graphStore.nodes(), sourceNodeId)) {
+        if (labelFilteredGraphNotContainsNode(selectedLabels, graphStore.nodes(), sourceNodeId)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Source node does not exist in the in-memory graph%s: `%d`",
                 nodeLabelFilterDescription(selectedLabels, graphStore),

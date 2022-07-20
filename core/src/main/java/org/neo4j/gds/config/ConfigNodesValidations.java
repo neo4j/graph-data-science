@@ -35,14 +35,14 @@ final class ConfigNodesValidations {
 
     static void validateNodes(
         GraphStore graphStore,
-        Collection<Long> nodesToValidate,
+        Collection<Long> neoNodesToValidate,
         Collection<NodeLabel> filteredNodeLabels,
         String nodeDescription
     ) {
-        if (!nodesToValidate.isEmpty()) {
-            var missingNodes = nodesToValidate
+        if (!neoNodesToValidate.isEmpty()) {
+            var missingNodes = neoNodesToValidate
                 .stream()
-                .filter(targetNode -> labelFilteredGraphContainsNode(
+                .filter(targetNode -> labelFilteredGraphNotContainsNode(
                     filteredNodeLabels,
                     graphStore.nodes(),
                     targetNode
@@ -61,7 +61,7 @@ final class ConfigNodesValidations {
         }
     }
 
-    static boolean labelFilteredGraphContainsNode(
+    static boolean labelFilteredGraphNotContainsNode(
         Collection<NodeLabel> filteredNodeLabels,
         IdMap idMap,
         long neoNodeId
