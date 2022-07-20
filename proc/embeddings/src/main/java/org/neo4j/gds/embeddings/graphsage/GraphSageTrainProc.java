@@ -29,15 +29,12 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.AfterLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -93,23 +90,6 @@ public class GraphSageTrainProc extends TrainProc<GraphSageTrain, Model<ModelDat
     @Override
     protected Model<?, ?, ?> extractModel(Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model) {
         return model;
-    }
-
-    @Override
-    public ValidationConfiguration<GraphSageTrainConfig> validationConfig() {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<AfterLoadValidation<GraphSageTrainConfig>> afterLoadValidations() {
-                return List.of(
-                    new GraphSageTrainingConfigValidation(),
-                    (graphStore, graphProjectConfig, config) -> {
-                        if (graphStore.relationshipCount() == 0) {
-                            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
-                        }
-                    }
-                );
-            }
-        };
     }
 }
 

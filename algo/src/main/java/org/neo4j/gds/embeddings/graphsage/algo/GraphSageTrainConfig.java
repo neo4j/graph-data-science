@@ -21,8 +21,11 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
@@ -38,10 +41,13 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
@@ -201,6 +207,60 @@ public interface GraphSageTrainConfig extends
             throw new IllegalArgumentException(
                 "GraphSage requires at least one property."
             );
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateNonEmptyGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (selectedRelationshipTypes.stream().mapToLong(graphStore::relationshipCount).sum() == 0) {
+            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validatePropertiesAtLeastOncePerLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var nodePropertyNames = featureProperties();
+
+        if (isMultiLabel()) {
+            // each property exists on at least one label
+            var allProperties =
+                graphStore
+                    .schema()
+                    .nodeSchema()
+                    .allProperties();
+            var missingProperties = nodePropertyNames
+                .stream()
+                .filter(key -> !allProperties.contains(key))
+                .collect(Collectors.toSet());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
+                    missingProperties
+                ));
+            }
+        } else {
+            // all properties exist on all labels
+            List<String> missingProperties = nodePropertyNames
+                .stream()
+                .filter(weightProperty -> !graphStore.hasNodeProperty(selectedLabels, weightProperty))
+                .collect(Collectors.toList());
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The following node properties are not present for each label in the graph: %s. Properties that exist for each label are %s",
+                    missingProperties,
+                    graphStore.nodePropertyKeys(selectedLabels)
+                ));
+            }
         }
     }
 
