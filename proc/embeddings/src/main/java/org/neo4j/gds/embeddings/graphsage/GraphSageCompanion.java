@@ -29,7 +29,6 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.GraphStoreValidation;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.utils.StringFormatting;
@@ -79,7 +78,12 @@ public final class GraphSageCompanion {
                             username,
                             graphSageConfig.modelName()
                         );
-                        GraphStoreValidation.validate(graphStore, model.trainConfig());
+                        GraphSageTrainConfig trainConfig = model.trainConfig();
+                        trainConfig.graphStoreValidation(
+                            graphStore,
+                            trainConfig.nodeLabelIdentifiers(graphStore),
+                            trainConfig.internalRelationshipTypes(graphStore)
+                        );
                     }
                 );
             }

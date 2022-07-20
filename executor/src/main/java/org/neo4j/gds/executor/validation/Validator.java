@@ -22,7 +22,6 @@ package org.neo4j.gds.executor.validation;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.executor.GraphStoreValidation;
 
 public class Validator<CONFIG extends AlgoBaseConfig> {
 
@@ -48,7 +47,6 @@ public class Validator<CONFIG extends AlgoBaseConfig> {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         );
-        GraphStoreValidation.validate(graphStore, config);
 
         validationConfiguration
             .afterLoadValidations()

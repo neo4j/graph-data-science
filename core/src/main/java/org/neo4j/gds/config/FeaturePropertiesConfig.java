@@ -20,9 +20,18 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface FeaturePropertiesConfig {
 
@@ -37,5 +46,45 @@ public interface FeaturePropertiesConfig {
     @Configuration.Ignore
     default boolean propertiesMustExistForEachNodeLabel() {
         return true;
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateFeatureProperties(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        List<String> missingProperties;
+
+        if (propertiesMustExistForEachNodeLabel()) {
+            missingProperties = featureProperties()
+                .stream()
+                .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))
+                .collect(Collectors.toList());
+
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The feature properties %s are not present for all requested labels. " +
+                    "Requested labels: %s. Properties available on all requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+                ));
+            }
+        } else {
+            var availableProperties = selectedLabels
+                .stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
+            missingProperties = new ArrayList<>(featureProperties());
+            missingProperties.removeAll(availableProperties);
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The feature properties %s are not present for any of the requested labels. " +
+                    "Requested labels: %s. Properties available on the requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(availableProperties)
+                ));
+            }
+        }
     }
 }

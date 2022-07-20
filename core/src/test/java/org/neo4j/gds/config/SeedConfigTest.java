@@ -22,6 +22,9 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.gdl.GdlFactory;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -49,6 +52,15 @@ class SeedConfigTest {
         assertThatThrownBy(() -> new TestSeedConfigImpl(mapWrapper))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("not end or begin with whitespace characters");
+    }
+
+    @Test
+    void shouldFailWithInvalidSeedProperty() {
+        var graphStore = GdlFactory.of("(a {bar: 42})").build();
+        var config = TestSeedConfigImpl.builder().seedProperty("foo").build();
+
+        assertThatThrownBy(() -> config.validateSeedProperty(graphStore, config.nodeLabelIdentifiers(graphStore), List.of()))
+            .hasMessageContaining("Seed property `foo` not found in graph with node properties: [bar]");
     }
 
     @Configuration

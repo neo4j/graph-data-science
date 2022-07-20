@@ -49,7 +49,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
 
 class GraphSageTrainProcTest extends GraphSageBaseProcTest {
 
@@ -164,10 +163,12 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .addParameter("modelName", modelName)
             .yields();
 
-        String expectedFail = "The feature properties ['missing_1', 'missing_2'] are not present for all requested labels. Requested labels: ['King']. Properties available on all requested labels: ['age', 'birth_year', 'death_year']";
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
-        assertEquals(expectedFail, throwable.getMessage());
+        assertThatThrownBy(() -> runQuery(query))
+            .isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The feature properties ['missing_1', 'missing_2'] are not present for any of the requested labels.")
+            .hasMessageContaining("Requested labels: ['King']")
+            .hasMessageContaining("Properties available on the requested labels: ['age', 'birth_year', 'death_year']");
     }
 
     @Test
@@ -257,11 +258,13 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         );
         modelCatalog.set(model);
 
-        TestProcedureRunner.applyOnProcedure(db, GraphSageTrainProc.class, proc -> {
-            assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
+        TestProcedureRunner.applyOnProcedure(
+            db,
+            GraphSageTrainProc.class,
+            proc -> assertThatThrownBy(() -> proc.train(GraphSageBaseProcTest.graphName, trainConfigParams))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName);
-        });
+                .hasMessage("Model with name `%s` already exists.", GraphSageBaseProcTest.modelName)
+        );
     }
 
     @ParameterizedTest

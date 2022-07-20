@@ -19,33 +19,27 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.gdl.GdlFactory;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public interface SourceNodesConfig {
+class MutatePropertyConfigTest {
 
-    @Value.Default
-    @Configuration.ConvertWith("org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
-    default List<Long> sourceNodes() {
-        return Collections.emptyList();
+    @Test
+    void testMutateFailsOnExistingToken() {
+        var graphStore = GdlFactory.of("(a {foo: 42})").build();
+        MutatePropertyConfig config = TestMutatePropertyConfigImpl.builder().mutateProperty("foo").build();
+
+        assertThatThrownBy(() -> config.validateMutateProperty(graphStore, config.nodeLabelIdentifiers(graphStore), List.of()))
+            .hasMessageContaining("Node property `foo` already exists in the in-memory graph.");
     }
 
-    @Configuration.GraphStoreValidationCheck
-    default void validateSourceLabels(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        validateNodes(graphStore, sourceNodes(), selectedLabels, "Source");
+    @Configuration
+    interface TestMutatePropertyConfig extends AlgoBaseConfig, MutatePropertyConfig {
     }
-
 }
+

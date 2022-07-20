@@ -21,10 +21,17 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface ConfigurableSeedConfig {
 
@@ -41,5 +48,22 @@ public interface ConfigurableSeedConfig {
 
     static @Nullable String validateProperty(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "seedProperty");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateConfigurableSeedConfig(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        String seedProperty = seedProperty();
+        if (seedProperty != null && !graphStore.hasNodeProperty(selectedLabels, seedProperty)) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "`%s`: `%s` not found in graph with node properties: %s",
+                propertyNameOverride(),
+                seedProperty,
+                graphStore.nodePropertyKeys().stream().sorted().collect(Collectors.toList())
+            ));
+        }
     }
 }
