@@ -51,6 +51,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
     private static final String NODES =
         "CREATE " +
+        "(ignored:Ignored), " +
         "(a:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
         "(b:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
         "(c:N {noise: 42, z: 0, array: [1.0,2.0,3.0,4.0,5.0]}), " +
@@ -88,6 +89,8 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(m)-[:REL]->(o), " +
         "(n)-[:REL]->(o), " +
         "(a)-[:REL]->(p), " +
+
+        "(a)-[:IGNORED]->(e), " +
 
         "(a)-[:REL]->(e), " +
         "(m)-[:REL]->(a), " +

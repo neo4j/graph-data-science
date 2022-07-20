@@ -116,6 +116,9 @@ public abstract class EdgeSplitter {
             .build();
     }
 
+    // Negative sampling does not guarantee negativeSamplesRemaining number of negative edges are sampled.
+    // because 1. for dense graphs there aren't enough possible negative edges
+    // and 2. If the last few nodes are dense, since we calculate negative samples needed per node, there won't be enough negative samples added.
     void negativeSampling(
         Graph graph,
         Graph masterGraph,

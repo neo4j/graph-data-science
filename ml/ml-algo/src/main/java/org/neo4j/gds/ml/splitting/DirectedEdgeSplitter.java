@@ -87,8 +87,6 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         double holdoutFraction
     ) {
         var sourceNodes = sourceNodes(graph);
-        MutableLong positiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
-        MutableLong negativeSourceNodeCount = new MutableLong(positiveSourceNodeCount.longValue());
         var targetNodes = targetNodes(graph);
 
         LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toRootNodeId(node));
@@ -121,6 +119,9 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         var negativeSamples = (long) (negativeSamplingRatio * validRelationshipCount * holdoutFraction);
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
 
+        var validPositiveSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
+        var validNegativeSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
+
         graph.forEachNode(nodeId -> {
             positiveSampling(
                 graph,
@@ -129,7 +130,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 remainingRelsConsumer,
                 positiveSamplesRemaining,
                 nodeId,
-                positiveSourceNodeCount,
+                validPositiveSourceNodeCount,
                 isValidSourceNode,
                 isValidTargetNode
             );
@@ -142,7 +143,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                 nodeId,
                 isValidSourceNode,
                 isValidTargetNode,
-                negativeSourceNodeCount
+                validNegativeSourceNodeCount
             );
             return true;
         });

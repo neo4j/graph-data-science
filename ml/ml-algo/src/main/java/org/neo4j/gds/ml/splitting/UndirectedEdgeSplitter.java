@@ -103,7 +103,6 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         }
 
         IdMap sourceNodes = sourceNodes(graph);
-        MutableLong sourceNodeCount = new MutableLong(sourceNodes.nodeCount());
         IdMap targetNodes = targetNodes(graph);
 
         LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toRootNodeId(node));
@@ -136,6 +135,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         var negativeSamplesRemaining = new MutableLong(negativeSamples);
         var candidateEdgesRemaining = new MutableLong(validRelationshipCount);
 
+        var validSourceNodeCount = new MutableLong(sourceNodes.nodeCount());
+
         graph.forEachNode(nodeId -> {
             positiveSampling(
                 graph,
@@ -155,7 +156,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                 nodeId,
                 isValidSourceNode,
                 isValidTargetNode,
-                sourceNodeCount
+                validSourceNodeCount
             );
             return true;
         });
@@ -173,7 +174,6 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
         LongLongPredicate isValidNodePair
     ) {
         graph.forEachRelationship(nodeId, Double.NaN, (source, target, weight) -> {
-            assert source != target;
             if (source < target) {
                 // we handle also reverse edge here
                 // the effect of self-loops are disregarded

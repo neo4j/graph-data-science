@@ -57,7 +57,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multiLabel")
     static String gdlMultiLabel = "(n1 :A)-[:T {foo: 5} ]->(n2 :C)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :D)";
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multi")
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multi")
     static String gdlMultiGraph = "(n1 :A), (n2: A), (n1)-->(n2), (n1)-->(n2), (n1)-->(n2), (n1)-->(n2)";
 
     @Inject
@@ -77,12 +77,12 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             4
         );
 
-        EdgeSplitter.SplitResult result = splitter.split(graph, 0.5);
+        EdgeSplitter.SplitResult result = splitter.split(multiGraph, 0.5);
 
         assertThat(result.selectedRels().topology())
             // we always aggregate the result at the moment
             .matches(topology -> !topology.isMultiGraph())
-            .matches(topology -> topology.elementCount() == 2);
+            .matches(topology -> topology.elementCount() == 1);
     }
 
 
@@ -112,6 +112,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
 
         assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+        assertThat(selectedRels.topology().elementCount()).isEqualTo(4);
         assertFalse(selectedRels.topology().isMultiGraph());
     }
 
@@ -140,6 +141,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+        assertThat(selectedRels.topology().elementCount()).isEqualTo(6);
         assertFalse(selectedRels.topology().isMultiGraph());
     }
 
@@ -213,6 +215,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, multiLabelGraph, negativeSamplingRatio);
+            assertThat(topology.elementCount()).isEqualTo(3);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });

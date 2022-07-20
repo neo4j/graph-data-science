@@ -63,14 +63,15 @@ abstract class EdgeSplitterBaseTest {
             return true;
         });
 
+        //For dense graph the assertion may fail since negativeSampling does not guarantee its count. Modify assertion if needed.
         assertThat(selectedRels.topology().elementCount()).isEqualTo((long) Math.floor(positiveCount.intValue() * (1 + negativeSamplingRatio)));
     }
 
     void assertNodeLabelFilter(Relationships.Topology topology, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, IdMap idmap) {
         idmap.forEachNode(sourceNode -> {
             var targetNodeCursor = topology.adjacencyList().adjacencyCursor(sourceNode);
+            if (targetNodeCursor.hasNextVLong()) { assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty(); }
             while (targetNodeCursor.hasNextVLong()) {
-                assertThat(idmap.nodeLabels(sourceNode).stream().filter(sourceLabels::contains)).isNotEmpty();
                 assertThat(idmap.nodeLabels(targetNodeCursor.nextVLong()).stream().filter(targetLabels::contains)).isNotEmpty();
             }
             return true;

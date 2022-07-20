@@ -63,6 +63,12 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Inject
     TestGraph multiLabelGraph;
 
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multi")
+    static String gdlMultiGraph = "(n1 :A), (n2: A), (n1)-->(n2), (n2)-->(n1), (n1)-->(n2), (n1)-->(n2)";
+
+    @Inject
+    TestGraph multiGraph;
+
     @Test
     void split() {
         double negativeSamplingRatio = 1.0;
@@ -80,11 +86,30 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
-            // it selected 2,5 (neg) and 3,2 (pos) relationships
             assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+            assertThat(topology.elementCount()).isEqualTo(2);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
+    }
+
+    @Test
+    void splitMultiGraph() {
+        double negativeSamplingRatio = 0.0;
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(-1L),
+            negativeSamplingRatio,
+            multiGraph.availableNodeLabels(),
+            multiGraph.availableNodeLabels(),
+            4
+        );
+
+        EdgeSplitter.SplitResult result = splitter.split(multiGraph, 0.5);
+
+        assertThat(result.selectedRels().topology())
+            // we always aggregate the result at the moment
+            .matches(topology -> !topology.isMultiGraph())
+            .matches(topology -> topology.elementCount() == 2);
     }
 
 
@@ -106,6 +131,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+            assertThat(topology.elementCount()).isEqualTo(3);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
@@ -240,6 +266,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, graph, negativeSamplingRatio);
+            assertThat(topology.elementCount()).isEqualTo(3);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
@@ -269,6 +296,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var selectedRels = result.selectedRels();
         assertThat(selectedRels.topology()).satisfies(topology -> {
             assertRelSamplingProperties(selectedRels, multiLabelGraph, negativeSamplingRatio);
+            assertThat(topology.elementCount()).isEqualTo(6);
             assertEquals(Orientation.NATURAL, topology.orientation());
             assertFalse(topology.isMultiGraph());
         });
@@ -308,6 +336,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var result = splitter.split(graph, .2);
 
         assertRelSamplingProperties(result.selectedRels(), graph, 0.0);
+        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(1);
     }
 
     private boolean relationshipsAreEqual(IdMap mapping, Relationships r1, Relationships r2) {
