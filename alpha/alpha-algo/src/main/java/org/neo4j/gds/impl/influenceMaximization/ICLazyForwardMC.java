@@ -38,6 +38,8 @@ final class ICLazyForwardMC {
 
     public static int DEFAULT_BATCH_SIZE = 10;
 
+    private double spread[];
+
     static ICLazyForwardMC create(
         Graph graph,
         double propagationProbability,
@@ -47,6 +49,7 @@ final class ICLazyForwardMC {
         ExecutorService executorService,
         long initialRandomSeed
     ) {
+        double[] spread = new double[seedSetNodes.length];
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -61,38 +64,44 @@ final class ICLazyForwardMC {
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
-        return new ICLazyForwardMC(tasks, concurrency, executorService);
+        return new ICLazyForwardMC(tasks, concurrency, executorService, spread);
     }
 
     ICLazyForwardMC(
         List<ICLazyForwardTask> tasks,
         int concurrency,
-        ExecutorService executorService
+        ExecutorService executorService,
+        double[] spread
     ) {
 //
         this.tasks = tasks;
-
+        this.spread = spread;
         this.concurrency = concurrency;
         this.executorService = executorService;
     }
 
-    public double[] runForCandidate(long[] candidateIdNodes, int candidateSize) {
+    public void runForCandidate(long[] candidateIdNodes, int candidateSize) {
         for (var task : tasks) {
             task.setCandidateNodeId(candidateIdNodes, candidateSize);
+        }
+        for (int j = 0; j < candidateSize; ++j) {
+            spread[j] = 0;
         }
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
-        double[] spread = new double[candidateSize];
         for (var task : tasks) {
-            double[] taskSpread = task.getSpread();
             for (int j = 0; j < candidateSize; ++j) {
-                spread[j] += taskSpread[j];
+                spread[j] += task.getSpread(j);
             }
         }
-        return spread;
+        return;
+    }
+
+    public double getSpread(int j) {
+        return spread[j];
     }
 
     void incrementSeedNode(long newSetNode) {

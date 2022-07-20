@@ -82,8 +82,8 @@ final class ICLazyForwardTask implements Runnable {
         this.candidateSetSizes = candidateSetSize;
     }
 
-    public double[] getSpread() {
-        return localSpread;
+    public double getSpread(int j) {
+        return localSpread[j];
     }
 
     private void initCandidate(long candidateId) {

@@ -146,21 +146,23 @@ public class CELF extends Algorithm<CELF> {
         );
 
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
+        long[] firstK = new long[ICLazyForwardMC.DEFAULT_BATCH_SIZE];
         for (int i = 1; i < seedSetCount; i++) {
             do {
                 long k = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
                 int ik = (int) k;
-                long[] firstK = spreads.getFirstK(ik);
+                for (int j = 0; j < k; ++j)
+                    firstK[j] = spreads.getIth(j);
                 int jj = 0;
                 for (int j = 0; j < (ik); ++j) {
                     if (lastUpdate.get(firstK[j]) != i) {
                         firstK[jj++] = firstK[j];
                     }
                 }
-                double[] vals = independentCascade.runForCandidate(firstK, jj);
+                independentCascade.runForCandidate(firstK, jj);
                 for (int j = 0; j < jj; ++j) {
                     long nodeId = firstK[j];
-                    double value = vals[j] / monteCarloSimulations;
+                    double value = independentCascade.getSpread(j) / monteCarloSimulations;
                     spreads.set(nodeId, value - gain);
                     lastUpdate.set(nodeId, i);
                 }
