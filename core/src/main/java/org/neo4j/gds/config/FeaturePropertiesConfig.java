@@ -61,22 +61,30 @@ public interface FeaturePropertiesConfig {
                 .stream()
                 .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))
                 .collect(Collectors.toList());
+
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The feature properties %s are not present for all requested labels. " +
+                    "Requested labels: %s. Properties available on all requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
+                ));
+            }
         } else {
             var availableProperties = selectedLabels
                 .stream().flatMap(label -> graphStore.nodePropertyKeys(label).stream()).collect(Collectors.toSet());
             missingProperties = new ArrayList<>(featureProperties());
             missingProperties.removeAll(availableProperties);
-        }
-        if (!missingProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The feature properties %s are not present for %s requested labels. " +
-                "Requested labels: %s. Properties available on %s requested labels: %s",
-                StringJoining.join(missingProperties),
-                propertiesMustExistForEachNodeLabel() ? "all" : "any of the",
-                StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
-                propertiesMustExistForEachNodeLabel() ? "all" : "the",
-                StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
-            ));
+            if (!missingProperties.isEmpty()) {
+                throw new IllegalArgumentException(formatWithLocale(
+                    "The feature properties %s are not present for any of the requested labels. " +
+                    "Requested labels: %s. Properties available on the requested labels: %s",
+                    StringJoining.join(missingProperties),
+                    StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                    StringJoining.join(availableProperties)
+                ));
+            }
         }
     }
 }

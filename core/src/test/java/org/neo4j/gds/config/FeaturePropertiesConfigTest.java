@@ -55,7 +55,7 @@ class FeaturePropertiesConfigTest {
 
         Assertions.assertThatThrownBy(() -> config.validateFeatureProperties(graphStore, List.of(NodeLabel.of("A"), NodeLabel.of("AB")), List.of()))
             .hasMessage("The feature properties ['c'] are not present for any of the requested labels. " +
-                        "Requested labels: ['A', 'AB']. Properties available on the requested labels: ['a']");
+                        "Requested labels: ['A', 'AB']. Properties available on the requested labels: ['a', 'b']");
     }
 
     @Configuration

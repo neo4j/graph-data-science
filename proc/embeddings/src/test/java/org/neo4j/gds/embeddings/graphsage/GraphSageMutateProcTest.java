@@ -34,10 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.utils.ExceptionUtil.rootCause;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GraphSageMutateProcTest extends GraphSageBaseProcTest {
 
@@ -97,16 +95,12 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
             .addParameter("mutateProperty", modelName)
             .yields();
 
-        String expectedFail = formatWithLocale(
-            "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
-            StringJoining.join(nodeProperties),
-            StringJoining.join(label),
-            StringJoining.join(graphProperties)
-        );
-
-        Throwable throwable = rootCause(assertThrows(QueryExecutionException.class, () -> runQuery(query)));
-        assertEquals(IllegalArgumentException.class, throwable.getClass());
-        assertEquals(expectedFail, throwable.getMessage());
+        assertThatThrownBy(() -> runQuery(query))
+            .isInstanceOf(QueryExecutionException.class)
+            .hasRootCauseInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The feature properties %s are not present for any of the requested labels.", StringJoining.join(nodeProperties))
+            .hasMessageContaining("Requested labels: %s", StringJoining.join(label))
+            .hasMessageContaining("Properties available on the requested labels: %s", StringJoining.join(graphProperties));
     }
 
 }
