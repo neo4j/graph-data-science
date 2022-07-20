@@ -33,7 +33,6 @@ import java.util.function.LongUnaryOperator;
 public interface LabelInformation {
     static Builder single(NodeLabel singleLabel) {
         return new SingleLabelInformation.Builder(singleLabel);
-
     }
 
     static Builder builder(long expectedCapacity) {
