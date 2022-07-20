@@ -55,10 +55,11 @@ public interface FeaturePropertiesConfig {
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         List<String> missingProperties;
+
         if (propertiesMustExistForEachNodeLabel()) {
             missingProperties = featureProperties()
                 .stream()
-                .filter(weightProperty -> !graphStore.hasNodeProperty(selectedLabels, weightProperty))
+                .filter(featureProperty -> !graphStore.hasNodeProperty(selectedLabels, featureProperty))
                 .collect(Collectors.toList());
         } else {
             var availableProperties = selectedLabels
@@ -68,9 +69,12 @@ public interface FeaturePropertiesConfig {
         }
         if (!missingProperties.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "The feature properties %s are not present for all requested labels. Requested labels: %s. Properties available on all requested labels: %s",
+                "The feature properties %s are not present for %s requested labels. " +
+                "Requested labels: %s. Properties available on %s requested labels: %s",
                 StringJoining.join(missingProperties),
+                propertiesMustExistForEachNodeLabel() ? "all" : "any of the",
                 StringJoining.join(selectedLabels.stream().map(NodeLabel::name)),
+                propertiesMustExistForEachNodeLabel() ? "all" : "the",
                 StringJoining.join(graphStore.nodePropertyKeys(selectedLabels))
             ));
         }
