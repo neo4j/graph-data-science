@@ -87,10 +87,11 @@ final class ICLazyForwardTask implements Runnable {
     }
 
     private void initCandidate(long candidateId) {
-        candidateActive.clear();
-
-        candidateActive.set(candidateId);
-        newActive.push(candidateId);
+        if (!seedActive.get(candidateId)) {
+            candidateActive.clear();
+            candidateActive.set(candidateId);
+            newActive.push(candidateId);
+        }
     }
 
     private void initDataStructures() {
@@ -102,13 +103,13 @@ final class ICLazyForwardTask implements Runnable {
         }
     }
 
-    public void seedTraverse(long  seed) {
+    private void seedTraverse(long seed) {
         while (!newActive.isEmpty()) {
             //Determine neighbors that become infected
             long nodeId = newActive.pop();
+            SplittableRandom rand = new SplittableRandom(initialRandomSeed + seed);
             localGraph.forEachRelationship(nodeId, (source, target) ->
             {
-                SplittableRandom rand=new SplittableRandom(seed);
                 if (rand.nextDouble() < propagationProbability) {
                     if (!seedActive.get(target)) {
                         //Add newly activated nodes to the set of activated nodes
@@ -126,9 +127,9 @@ final class ICLazyForwardTask implements Runnable {
         while (!newActive.isEmpty()) {
             //Determine neighbors that become infected
             long nodeId = newActive.pop();
+            SplittableRandom rand = new SplittableRandom(initialRandomSeed + seed);
             localGraph.forEachRelationship(nodeId, (source, target) ->
             {
-                SplittableRandom rand=new SplittableRandom(seed);
                 if (rand.nextDouble() < propagationProbability) {
                     if (!seedActive.get(target) && !candidateActive.get(target)) {
                         //Add newly activated nodes to the set of activated nodes
@@ -154,8 +155,11 @@ final class ICLazyForwardTask implements Runnable {
             seedTraverse(seed);
             for (int j = 0; j < candidateSetSizes; ++j) {
                 initCandidate(candidateNodeIds[j]);
-                candidateTraverse(seed);
-                localSpread[j] += seedActive.cardinality() + candidateActive.cardinality();
+                localSpread[j] += seedActive.cardinality();
+                if (!newActive.isEmpty()) {
+                    candidateTraverse(seed);
+                    localSpread[j] += candidateActive.cardinality();
+                }
             }
 
         }

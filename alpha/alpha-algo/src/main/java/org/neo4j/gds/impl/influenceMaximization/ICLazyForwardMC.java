@@ -30,13 +30,12 @@ import java.util.concurrent.ExecutorService;
 final class ICLazyForwardMC {
 
 
-    private final int monteCarloSimulations;
-
     private final int concurrency;
 
     private final List<ICLazyForwardTask> tasks;
 
     private final ExecutorService executorService;
+
     public static int DEFAULT_BATCH_SIZE = 10;
 
     static ICLazyForwardMC create(
@@ -62,18 +61,15 @@ final class ICLazyForwardMC {
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
-        return new ICLazyForwardMC(monteCarloSimulations, tasks, concurrency, executorService);
+        return new ICLazyForwardMC(tasks, concurrency, executorService);
     }
 
     ICLazyForwardMC(
-        int monteCarloSimulations,
         List<ICLazyForwardTask> tasks,
         int concurrency,
         ExecutorService executorService
     ) {
 //
-        this.monteCarloSimulations = monteCarloSimulations;
-
         this.tasks = tasks;
 
         this.concurrency = concurrency;
