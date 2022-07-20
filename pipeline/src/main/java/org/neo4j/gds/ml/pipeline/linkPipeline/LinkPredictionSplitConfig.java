@@ -33,6 +33,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -112,34 +113,41 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig testSplit(
-        Collection<RelationshipType> relationshipTypes,
+        RelationshipType targetRelationshipType,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
+            .sourceNodeLabels(List.of(sourceNodeLabel))
+            .targetNodeLabels(List.of(targetNodeLabel))
             .holdoutRelationshipType(testRelationshipType().name)
             .remainingRelationshipType(testComplementRelationshipType().name)
             .holdoutFraction(testFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .relationshipTypes(List.of(targetRelationshipType.name))
             .randomSeed(randomSeed)
             .build();
     }
 
     @Configuration.Ignore
     default SplitRelationshipsBaseConfig trainSplit(
-        Collection<RelationshipType> relationshipTypes,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         Optional<Long> randomSeed,
         Optional<String> relationshipWeightProperty
     ) {
         return SplitRelationshipsBaseConfigImpl.builder()
+            .sourceNodeLabels(List.of(sourceNodeLabel))
+            .targetNodeLabels(List.of(targetNodeLabel))
             .holdoutRelationshipType(trainRelationshipType().name)
             .remainingRelationshipType(featureInputRelationshipType().name)
             .holdoutFraction(trainFraction())
             .negativeSamplingRatio(negativeSamplingRatio())
             .relationshipWeightProperty(relationshipWeightProperty.orElse(null))
-            .relationshipTypes(relationshipTypes.stream().map(RelationshipType::name).collect(Collectors.toList()))
+            .relationshipTypes(List.of(testComplementRelationshipType().name))
             .randomSeed(randomSeed)
             .build();
     }
@@ -213,17 +221,21 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
 
     @Value.Derived
     @Configuration.Ignore
-    default GraphDimensions expectedGraphDimensions(long nodeCount, long relationshipCount) {
-        var expectedSetSizes = expectedSetSizes(relationshipCount);
+    default GraphDimensions expectedGraphDimensions(GraphDimensions baseDim, String targetRelType) {
+        var expectedSetSizes = expectedSetSizes(baseDim
+            .relationshipCounts()
+            .getOrDefault(RelationshipType.of(targetRelType), baseDim.relCountUpperBound())
+        );
 
         return GraphDimensions.builder()
-            .nodeCount(nodeCount)
+            .nodeCount(baseDim.nodeCount())
             // matches the relCount of the original GraphStore and thus lower than the sum of all relationshipCounts
-            .relCountUpperBound(relationshipCount)
+            .relCountUpperBound(baseDim.relCountUpperBound())
             .putRelationshipCount(testRelationshipType(), expectedSetSizes.testSize())
             .putRelationshipCount(testComplementRelationshipType(), expectedSetSizes.testComplementSize())
             .putRelationshipCount(trainRelationshipType(), expectedSetSizes.trainSize())
             .putRelationshipCount(featureInputRelationshipType(), expectedSetSizes.featureInputSize())
+            .putAllRelationshipCounts(baseDim.relationshipCounts())
             .build();
     }
 }

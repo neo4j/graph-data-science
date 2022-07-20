@@ -166,17 +166,18 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var nodeId3 = 3 + labelIdOffset;
         var nodeId4 = 4 + labelIdOffset;
         var nodeId5 = 5 + labelIdOffset;
-        var expectedTest = formatWithLocale("CREATE" +
+        var expectedTest = formatWithLocale(
                               " (a:" + nodeLabel + " {id: %d})" +
                               ",(b:" + nodeLabel + " {id: %d})" +
                               ",(c:" + nodeLabel + " {id: %d})" +
                               ",(d:" + nodeLabel + " {id: %d})" +
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
-                              ",(c)-[:test {w: 0.0}]->(f)" +
+                              ",(d)-[:test {w: 0.0}]->(b)" +
                               ",(e)-[:test {w: 0.0}]->(c)" +
-                              ",(d)-[:test {w: 1.0}]->(c)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
-        var expectedTrain = formatWithLocale("CREATE" +
+                              ",(c)-[:test {w: 1.0}]->(d)",
+            nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
+        var expectedTrain = formatWithLocale(
                                " (a:" + nodeLabel + " {id: %d})" +
                                ",(b:" + nodeLabel + " {id: %d})" +
                                ",(c:" + nodeLabel + " {id: %d})" +
@@ -194,7 +195,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var query = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
-            .addParameter("nodeLabels", List.of(nodeLabel))
+            .addParameter("sourceNodeLabels", List.of(nodeLabel))
+            .addParameter("targetNodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
@@ -231,7 +233,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
                               ",(e:" + nodeLabel + " {id: %d})" +
                               ",(f:" + nodeLabel + " {id: %d})" +
                               ",(c)-[:innerTest {w: 0.0}]->(e)" +
-                              ",(e)-[:innerTest {w: 0.0}]->(c)" +
+                              ",(d)-[:innerTest {w: 0.0}]->(b)" +
                               ",(d)-[:innerTest {w: 1.0}]->(e)", nodeId0, nodeId1, nodeId2, nodeId3, nodeId4, nodeId5);
         var expectedTrain = formatWithLocale("CREATE" +
                                " (a:" + nodeLabel + "{id: %d})" +
@@ -249,7 +251,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var outerSplitQuery = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
-            .addParameter("nodeLabels", List.of(nodeLabel))
+            .addParameter("sourceNodeLabels", List.of(nodeLabel))
+            .addParameter("targetNodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "test")
             .addParameter("remainingRelationshipType", "train")
             .addParameter("holdoutFraction", 0.2)
@@ -261,7 +264,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var innerSplitQuery = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
-            .addParameter("nodeLabels", List.of(nodeLabel))
+            .addParameter("sourceNodeLabels", List.of(nodeLabel))
+            .addParameter("targetNodeLabels", List.of(nodeLabel))
             .addParameter("relationshipTypes", List.of("train"))
             .addParameter("nonNegativeRelationshipTypes", List.of("T"))
             .addParameter("holdoutRelationshipType", "innerTest")
@@ -289,7 +293,8 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         var query = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
-            .addParameter("nodeLabels", List.of(nodeLabel))
+            .addParameter("sourceNodeLabels", List.of(nodeLabel))
+            .addParameter("targetNodeLabels", List.of(nodeLabel))
             .addParameter("holdoutRelationshipType", "baz")
             .addParameter("remainingRelationshipType", "remaining")
             .addParameter("relationshipWeightProperty", "foo")

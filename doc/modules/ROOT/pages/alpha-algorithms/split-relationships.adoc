@@ -54,11 +54,19 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-| holdoutFraction               | Float          | n/a             | no        | The fraction of all relationships being used as holdout set.
+| sourceNodeLabels           | List of String    | ['*']                  | yes      | Filter the selected relationships where the sourceNode has at least one of the sourceNodeLabels.
+
+| targetNodeLabels           | List of String    | ['*']                  | yes      | Filter the selected relationships where the targetNode has at least one of the targetNodeLabels.
+
+| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+
+| xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.
+
+| holdoutFraction               | Float          | n/a             | no        | The fraction of valid relationships being used as holdout set. The remaining `1 - holdoutFraction` of the valid relationships are added to the remaining set.
 | negativeSamplingRatio         | Float          | n/a             | no        | The desired ratio of negative to positive samples in holdout set.
 | holdoutRelationshipType       | String         | n/a             | no        | Relationship type used for the holdout set. Each relationship has a property `label` indicating whether it is a positive or negative sample.
-| remainingRelationshipType     | String         | n/a             | no        | Relationship type used for the remaining set.
+| remainingRelationshipType     | String         | n/a             | no        | Relationships where one node has none of the source or target labels will be omitted. All invalid relationship are added to the remaining set.
 | nonNegativeRelationshipTypes  | List of String | n/a             | yes       | Additional relationship types that are used for negative sampling.
 | xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty]
                                 | String         | null            | yes       | Name of the relationship property that is inherited by the `remainingRelationshipType`.

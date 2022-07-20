@@ -352,6 +352,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -360,7 +363,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(nodeCount, relationshipCount);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
@@ -374,6 +377,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -383,7 +389,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
@@ -397,6 +403,9 @@ class LinkPredictionTrainTest {
             .modelName("DUMMY")
             .graphName("DUMMY")
             .pipeline("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -410,7 +419,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedRange.min, expectedRange.max);
@@ -427,6 +436,9 @@ class LinkPredictionTrainTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .concurrency(concurrency)
             .build();
@@ -437,7 +449,7 @@ class LinkPredictionTrainTest {
         var graphDim = GraphDimensions.of(100, 1_000);
         MemoryTree actualEstimation = LinkPredictionTrain
             .estimate(pipeline, trainConfig)
-            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig()), trainConfig.concurrency());
+            .estimate(graphDimensionsWithSplits(graphDim, pipeline.splitConfig(), trainConfig), trainConfig.concurrency());
 
         MemoryRange actualRange = actualEstimation.memoryUsage();
         assertMemoryRange(actualRange, expectedMinEstimation, expectedMaxEstimation);
@@ -481,6 +493,9 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .randomSeed(42L)
                 .concurrency(4)
                 .build(),
@@ -575,6 +590,9 @@ class LinkPredictionTrainTest {
                 .username("DUMMY")
                 .modelName("DUMMY")
                 .graphName("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .pipeline("DUMMY")
                 .concurrency(4)
                 .build(),
@@ -641,6 +659,9 @@ class LinkPredictionTrainTest {
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
+                .targetRelationshipType("REL")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
                 .concurrency(4)
                 .build(),
             progressTracker,
@@ -860,6 +881,9 @@ class LinkPredictionTrainTest {
             .username("DUMMY")
             .modelName(modelName)
             .graphName("g")
+            .targetRelationshipType("REL")
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .pipeline("DUMMY")
             .metrics(metrics.stream().map(Metric::name).collect(Collectors.toList()))
             .negativeClassWeight(1)
@@ -882,7 +906,11 @@ class LinkPredictionTrainTest {
         return linkPredictionTrain.compute();
     }
 
-    private GraphDimensions graphDimensionsWithSplits(GraphDimensions inputDimensions, LinkPredictionSplitConfig splitConfig) {
-        return splitConfig.expectedGraphDimensions(inputDimensions.nodeCount(), inputDimensions.relCountUpperBound());
+    private GraphDimensions graphDimensionsWithSplits(
+        GraphDimensions inputDimensions,
+        LinkPredictionSplitConfig splitConfig,
+        LinkPredictionTrainConfig trainConfig
+    ) {
+        return splitConfig.expectedGraphDimensions(inputDimensions, trainConfig.targetRelationshipType());
     }
 }

@@ -20,15 +20,19 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
-import java.util.Collections;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeedConfig, RelationshipWeightConfig {
@@ -38,6 +42,34 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
 
     @Configuration.DoubleRange(min = 0.0)
     double negativeSamplingRatio();
+
+    default List<String> sourceNodeLabels() {
+        return List.of(ElementProjection.PROJECT_ALL);
+    };
+
+    default List<String> targetNodeLabels() {
+        return List.of(ElementProjection.PROJECT_ALL);
+    };
+
+    @Configuration.Ignore
+    @Override
+    default List<String> nodeLabels() {
+        return Stream.of(sourceNodeLabels(), targetNodeLabels()).flatMap(List::stream).distinct().collect(Collectors.toList());
+    }
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> internalSourceLabels(GraphStore graphStore) {
+        return sourceNodeLabels().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.nodeLabels()
+            : sourceNodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+    }
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> internalTargetLabels(GraphStore graphStore) {
+        return targetNodeLabels().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.nodeLabels()
+            : targetNodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+    }
 
     @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
@@ -52,10 +84,11 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         return List.of();
     }
 
-    @Configuration.ToMap
-    @Value.Auxiliary
+    @Configuration.Ignore
     @Value.Derived
-    default Map<String, Object> toSplitMap() {
-        return Collections.emptyMap();
+    default List<RelationshipType> superRelationshipTypes() {
+        return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
+            .map(RelationshipType::of)
+            .collect(Collectors.toList());
     }
 }

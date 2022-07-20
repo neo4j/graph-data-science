@@ -21,11 +21,14 @@ package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
@@ -38,6 +41,35 @@ class LinkPredictionSplitConfigTest {
 
     @Inject
     GraphStore graphStore;
+
+    @Test
+    void expectedSetSize() {
+        var config = LinkPredictionSplitConfigImpl.builder()
+            .testFraction(0.2)
+            .trainFraction(0.2)
+            .build();
+
+        GraphDimensions inputDim = GraphDimensions
+            .builder()
+            .nodeCount(100)
+            .putRelationshipCount(RelationshipType.of("TARGET"), 100)
+            .putRelationshipCount(RelationshipType.of("CONTEXT"), 1000)
+            .relCountUpperBound(1100)
+            .build();
+
+        GraphDimensions expectedDim = GraphDimensions.builder()
+            .nodeCount(100)
+            .putRelationshipCount(RelationshipType.of("TARGET"), 100)
+            .putRelationshipCount(RelationshipType.of("CONTEXT"), 1000)
+            .putRelationshipCount(config.testRelationshipType(), 20)
+            .putRelationshipCount(config.testComplementRelationshipType(), 80)
+            .putRelationshipCount(config.trainRelationshipType(), 16)
+            .putRelationshipCount(config.featureInputRelationshipType(), 64)
+            .relCountUpperBound(1100)
+            .build();
+
+        assertThat(config.expectedGraphDimensions(inputDim, "TARGET")).isEqualTo(expectedDim);
+    }
 
     @Test
     void shouldThrowOnEmptyTestComplementSet() {

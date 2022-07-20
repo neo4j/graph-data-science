@@ -7,10 +7,10 @@ The model can be xref::machine-learning/linkprediction-pipelines/predict.adoc[ap
 
 More precisely, the procedure will in order:
 
-. Apply `nodeLabels` and `relationshipType` filters to the graph. All subsequent graphs have the same node set.
+. Apply `sourceNodeLabel`, `targetNodeLabel`, and `targetRelationshipType` filters to the graph. All subsequent graphs have the same node set.
 . Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
 These graphs are internally managed and exist only for the duration of the training.
-. Apply the node property steps, added according to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties], on the `feature-input` graph.
+. Apply the node property steps, added according to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties], on the graph of the `featureInput` and `contextRelationshipTypes`.
 . Apply the feature steps, added according to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
@@ -52,11 +52,13 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | Name                                                          | Type              | Default              | Optional | Description
 | modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
+| targetRelationshipType                                        | String            | n/a                  | no       | The name of the relationship type to train the model on.
+| sourceNodeLabel                                               | String            | n/a                  | no       | The name of the node label relationships in the training and test sets should start from footnote:label-filter[This helps to train the model to predict links with a certain label combination.].
+| targetNodeLabel                                              | String            | n/a                  | no       | The name of the node label relationships in the training and test sets should end at footnote:label-filter[].
+| contextRelationshipType                                       | String            | []                   | yes      | The names of context relationship types to use to the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] on. This is in addition to the `feature input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
 | negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
 | metrics                                                       | List of String    | [`AUCPR`]            | no       | xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
-| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
 | xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
@@ -217,7 +219,10 @@ For more details on `estimate` in general, see xref::common-usage/memory-estimat
 ----
 CALL gds.beta.pipeline.linkPrediction.train.estimate('myGraph', {
   pipeline: 'pipe',
-  modelName: 'lp-pipeline-model'
+  modelName: 'lp-pipeline-model',
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS'
 })
 YIELD requiredMemory
 ----
@@ -243,7 +248,10 @@ CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
   metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
-  randomSeed: 42
+  sourceNodeLabel: 'Person',
+  targetNodeLabel: 'Person',
+  targetRelationshipType: 'KNOWS',
+  randomSeed: 73
 }) YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
@@ -257,7 +265,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.779365079365079 |  0.788888888888889 | 0.766666666666667 | [0.3333333333333333, 0.6388888888888888, 0.3333333333333333, 0.3333333333333333, 0.3333333333333333]
+| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.631481481481481 |  0.725 | 0.666666666666667 | [0.5833333333333334, 0.6944444444444443, 0.5833333333333334, 0.5833333333333334, 0.5833333333333334]
 |===
 
 We can see the RandomForest model configuration with `numberOfDecisionTrees = 10` (and defaults filled for remaining parameters) was selected, and has a score of `0.77` on the test set.

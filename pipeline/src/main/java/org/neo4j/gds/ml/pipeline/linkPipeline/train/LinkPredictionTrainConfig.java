@@ -20,7 +20,10 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
@@ -29,8 +32,10 @@ import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -43,6 +48,53 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     }
 
     String pipeline();
+
+    String targetRelationshipType();
+
+    String sourceNodeLabel();
+
+    String targetNodeLabel();
+
+    default List<String> contextRelationshipTypes() {
+        return List.of();
+    }
+
+    @Override
+    @Configuration.Ignore
+    default List<String> relationshipTypes() {
+        return Stream.concat(
+                contextRelationshipTypes().stream(),
+                Stream.of(targetRelationshipType())
+            )
+            .collect(Collectors.toList());
+    }
+
+    @Value.Check
+    default void validate() {
+        if (targetRelationshipType().equals(ElementProjection.PROJECT_ALL)) {
+            throw new IllegalArgumentException("'*' is not allowed as targetRelationshipType.");
+        }
+    }
+
+    @Configuration.Ignore
+    default RelationshipType internalTargetRelationshipType() {
+        return RelationshipType.of(targetRelationshipType());
+    }
+
+    @Configuration.Ignore
+    default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
+        var relTypes =  contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.relationshipTypes().stream()
+            : contextRelationshipTypes().stream().map(RelationshipType::new);
+
+        return relTypes .filter(type -> !type.equals(internalTargetRelationshipType())).collect(Collectors.toList());
+    }
+
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return Stream.of(sourceNodeLabel(), targetNodeLabel()).distinct().collect(Collectors.toList());
+    }
 
     @Configuration.ConvertWith("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#namesToMetrics")
     @Configuration.ToMapValue("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig#metricsToNames")

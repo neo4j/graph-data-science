@@ -19,28 +19,14 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface SplitRelationshipsMutateConfig extends MutateConfig, SplitRelationshipsBaseConfig {
-
-    @Configuration.Ignore
-    @Value.Derived
-    default List<RelationshipType> superGraphTypes() {
-        return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
-            .map(RelationshipType::of)
-            .collect(Collectors.toList());
-    }
+public interface SplitRelationshipsMutateConfig extends SplitRelationshipsBaseConfig, MutateConfig {
 
     static SplitRelationshipsMutateConfig of(CypherMapWrapper userInput) {
         return new SplitRelationshipsMutateConfigImpl(userInput);

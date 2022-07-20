@@ -102,6 +102,6 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             .getTyped(config.username(), config.pipeline(), LinkPredictionTrainingPipeline.class)
             .splitConfig();
 
-        return splitConfig.expectedGraphDimensions(graphDimensions.nodeCount(), graphDimensions.relCountUpperBound());
+        return splitConfig.expectedGraphDimensions(graphDimensions, config.targetRelationshipType());
     }
 }

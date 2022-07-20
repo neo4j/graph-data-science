@@ -111,6 +111,9 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
                 .username(getUsername())
                 .modelName("model")
                 .pipeline("DUMMY")
+                .sourceNodeLabel("N")
+                .targetNodeLabel("N")
+                .targetRelationshipType("T")
                 .graphName("g")
                 .negativeClassWeight(1.0)
                 .build(),

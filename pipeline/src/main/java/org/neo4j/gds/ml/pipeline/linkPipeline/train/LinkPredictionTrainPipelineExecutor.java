@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutor.LinkPredictionTrainPipelineResult;
@@ -103,13 +104,24 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     ) {
         pipeline.validateTrainingParameterSpace();
 
-        var splitEstimations = splitEstimation(pipeline.splitConfig(), configuration.relationshipTypes(), pipeline.relationshipWeightProperty());
+        var splitEstimations = splitEstimation(
+            pipeline.splitConfig(),
+            configuration.targetRelationshipType(),
+            pipeline.relationshipWeightProperty(),
+            configuration.sourceNodeLabel(),
+            configuration.targetNodeLabel()
+        );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
             modelCatalog,
             pipeline.nodePropertySteps(),
             configuration.nodeLabels(),
-            List.of(pipeline.splitConfig().featureInputRelationshipType().name)
+            Stream.concat(
+                    configuration.contextRelationshipTypes().stream(),
+                    Stream.of(pipeline.splitConfig().featureInputRelationshipType().name)
+                )
+                .distinct()
+                .collect(Collectors.toList())
         );
 
         MemoryEstimation trainingEstimation = MemoryEstimations
@@ -125,8 +137,9 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     @Override
     public Map<DatasetSplits, PipelineExecutor.GraphFilter> splitDataset() {
         this.relationshipSplitter.splitRelationships(
-            config.internalRelationshipTypes(graphStore),
-            config.nodeLabelIdentifiers(graphStore),
+            config.internalTargetRelationshipType(),
+            config.sourceNodeLabel(),
+            config.targetNodeLabel(),
             config.randomSeed(),
             pipeline.relationshipWeightProperty()
         );
@@ -136,9 +149,13 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
 
         return Map.of(
-            DatasetSplits.TRAIN, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.trainRelationshipType())),
-            DatasetSplits.TEST, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.testRelationshipType())),
-            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.of(nodeLabels, List.of(splitConfig.featureInputRelationshipType()))
+            DatasetSplits.TRAIN, ImmutableGraphFilter.builder().nodeLabels(nodeLabels).intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType())).build(),
+            DatasetSplits.TEST, ImmutableGraphFilter.builder().nodeLabels(nodeLabels).intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType())).build(),
+            DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.builder()
+                .nodeLabels(nodeLabels)
+                .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
+                .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
+                .build()
         );
     }
 
@@ -198,7 +215,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
     private void removeDataSplitRelationships(Map<DatasetSplits, GraphFilter> datasets) {
         datasets.values()
             .stream()
-            .flatMap(graphFilter -> graphFilter.relationshipTypes().stream())
+            .flatMap(graphFilter -> graphFilter.intermediateRelationshipTypes().stream())
             .distinct()
             .collect(Collectors.toList())
             .forEach(graphStore::deleteRelationships);
