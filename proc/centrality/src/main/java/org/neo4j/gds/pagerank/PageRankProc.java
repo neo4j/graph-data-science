@@ -21,13 +21,8 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.executor.ComputationResult;
-import org.neo4j.gds.executor.validation.BeforeLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.logging.Log;
-
-import java.util.List;
 
 final class PageRankProc {
 
@@ -59,19 +54,6 @@ final class PageRankProc {
 
     static <CONFIG extends PageRankConfig> NodePropertyValues nodeProperties(ComputationResult<PageRankAlgorithm, PageRankResult, CONFIG> computeResult) {
         return computeResult.result().scores().asNodeProperties();
-    }
-
-    static <CONFIG extends PageRankConfig> ValidationConfiguration<CONFIG> getValidationConfig(Log log) {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<BeforeLoadValidation<CONFIG>> beforeLoadValidations() {
-                return List.of(
-                    (graphProjectConfig, config) -> {
-
-                    }
-                );
-            }
-        };
     }
 
     abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {

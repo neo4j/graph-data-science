@@ -27,7 +27,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -90,11 +89,6 @@ public class PageRankMutateProc extends MutatePropertyProc<PageRankAlgorithm, Pa
             new MutateResult.Builder(executionContext.callContext(), computeResult.config().concurrency()),
             computeResult
         );
-    }
-
-    @Override
-    public ValidationConfiguration<PageRankMutateConfig> validationConfig() {
-        return PageRankProc.getValidationConfig(log);
     }
 
     @SuppressWarnings("unused")
