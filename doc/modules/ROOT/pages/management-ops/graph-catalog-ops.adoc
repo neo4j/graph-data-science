@@ -42,6 +42,7 @@ This chapter explains the available graph catalog operations.
 | xref::graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]               | Writes relationships stored in a named graph to Neo4j.
 | xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
 | xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
+| xref::algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                       | Creates a new graph projection by sampling using random walk with restarts.
 |===
 
 [NOTE]

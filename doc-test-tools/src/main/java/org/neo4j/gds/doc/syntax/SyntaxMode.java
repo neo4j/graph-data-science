@@ -37,6 +37,7 @@ public enum SyntaxMode {
     GRAPH_EXISTS("graph-exists-syntax"),
     MODEL_EXISTS("model-exists-syntax"),
     GRAPH_EXPORT("graph-export-syntax"),
+    PROJECT_SAMPLE("project-sample-syntax"),
     PROJECT_SUBGRAPH("project-subgraph-syntax"),
     REMOVE("include-with-remove"),
     DELETE_RELATIONSHIPS("include-with-delete-relationships"),
