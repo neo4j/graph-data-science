@@ -159,7 +159,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
 
-
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
 
 
