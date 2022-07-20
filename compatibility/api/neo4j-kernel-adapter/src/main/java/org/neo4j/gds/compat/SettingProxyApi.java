@@ -19,13 +19,16 @@
  */
 package org.neo4j.gds.compat;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.configuration.Config;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public interface SettingProxyApi {
     // public, otherwise checkstyle complains that "'<' is preceded with whitespace."
     public <T> org.neo4j.graphdb.config.Setting<T> setting(Setting<T> setting);
 
-    DatabaseMode databaseMode(Config config);
+    DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService);
 
-    void setDatabaseMode(Config config, DatabaseMode databaseMode);
+    @TestOnly
+    void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService);
 }

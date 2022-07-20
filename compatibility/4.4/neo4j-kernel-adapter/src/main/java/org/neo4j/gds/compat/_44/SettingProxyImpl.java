@@ -25,6 +25,7 @@ import org.neo4j.configuration.SettingImpl;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.SettingProxyApi;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Setting;
 
 public class SettingProxyImpl implements SettingProxyApi {
@@ -40,7 +41,7 @@ public class SettingProxyImpl implements SettingProxyApi {
     }
 
     @Override
-    public DatabaseMode databaseMode(Config config) {
+    public DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService) {
         var mode = config.get(GraphDatabaseSettings.mode);
         switch (mode) {
             case SINGLE:
@@ -55,7 +56,7 @@ public class SettingProxyImpl implements SettingProxyApi {
     }
 
     @Override
-    public void setDatabaseMode(Config config, DatabaseMode databaseMode) {
+    public void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService) {
         GraphDatabaseSettings.Mode mode;
         switch (databaseMode) {
             case SINGLE:

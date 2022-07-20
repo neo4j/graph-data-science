@@ -31,7 +31,7 @@ public final class ClusterRestrictions {
 
     public static void disallowRunningOnCluster(GraphDatabaseService databaseService, String detail) throws IllegalStateException {
         var config = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
-        var neo4jMode = SettingProxy.databaseMode(config);
+        var neo4jMode = SettingProxy.databaseMode(config, databaseService);
         if (neo4jMode != DatabaseMode.SINGLE) {
             throw new IllegalStateException(
                 "The requested operation (" + detail +
