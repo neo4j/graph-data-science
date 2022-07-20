@@ -23,11 +23,12 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RandomSeedConfig;
 
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface InfluenceMaximizationConfig extends AlgoBaseConfig { //BaseConfig
+public interface InfluenceMaximizationConfig extends AlgoBaseConfig, RandomSeedConfig { //BaseConfig
     @Configuration.IntegerRange(min = 1)
     int seedSetSize();
 
