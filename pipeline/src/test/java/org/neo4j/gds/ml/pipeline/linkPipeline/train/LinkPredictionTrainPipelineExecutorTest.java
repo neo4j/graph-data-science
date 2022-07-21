@@ -109,7 +109,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
     }
 
     @Nested
-    private final class MonoPartiteTest extends BaseProcTest {
+    final class MonoPartiteTest extends BaseProcTest {
 
         @Neo4jGraph
         private static final String GRAPH =
@@ -346,7 +346,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
         }
 
         @ParameterizedTest
-        @MethodSource("invalidSplits")
+        @MethodSource("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutorTest#invalidSplits")
         void failOnEmptySplitGraph(LinkPredictionSplitConfig splitConfig, String expectedError) {
             var pipeline = new LinkPredictionTrainingPipeline();
             pipeline.setSplitConfig(splitConfig);
@@ -547,7 +547,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
         }
 
         @ParameterizedTest(name = "{0}")
-        @MethodSource("estimationsForDiffNodeSteps")
+        @MethodSource("org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainPipelineExecutorTest#estimationsForDiffNodeSteps")
         void estimateWithDifferentNodePropertySteps(
             String desc,
             List<ExecutableNodePropertyStep> nodePropertySteps,
