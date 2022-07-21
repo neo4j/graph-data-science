@@ -21,9 +21,9 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.api.DatabaseNotFoundException;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.graphdb.event.DatabaseEventContext;
 import org.neo4j.graphdb.event.DatabaseEventListener;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
@@ -32,7 +32,7 @@ import java.util.Map;
 
 class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
     private final DatabaseManagementService dbms;
-    private final Map<String, NamedDatabaseId> databaseIdMapping;
+    private final Map<String, DatabaseId> databaseIdMapping;
 
     InMemoryGraphTrackerLifecycleAdapter(DatabaseManagementService dbms) {
         this.dbms = dbms;
@@ -63,7 +63,7 @@ class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements D
     public void databaseCreate(DatabaseEventContext eventContext) {
         var databaseName = eventContext.getDatabaseName();
         var db = (GraphDatabaseAPI) dbms.database(databaseName);
-        databaseIdMapping.put(databaseName, db.databaseId());
+        databaseIdMapping.put(databaseName, DatabaseId.of(db));
     }
 
     // The @override is missing for compatibility reasons

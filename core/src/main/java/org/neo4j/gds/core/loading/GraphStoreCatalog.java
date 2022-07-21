@@ -26,7 +26,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -216,8 +215,8 @@ public final class GraphStoreCatalog {
         userCatalogs.clear();
     }
 
-    public static void removeAllLoadedGraphs(NamedDatabaseId databaseId) {
-        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.name()));
+    public static void removeAllLoadedGraphs(DatabaseId databaseId) {
+        userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.databaseName()));
     }
 
     public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username) {
