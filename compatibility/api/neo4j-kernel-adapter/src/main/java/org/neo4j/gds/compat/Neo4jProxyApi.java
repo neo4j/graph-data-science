@@ -254,7 +254,8 @@ public interface Neo4jProxyApi {
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogService logService
+        LogService logService,
+        GraphDatabaseService databaseService
     );
 
     NamedDatabaseId randomDatabaseId();

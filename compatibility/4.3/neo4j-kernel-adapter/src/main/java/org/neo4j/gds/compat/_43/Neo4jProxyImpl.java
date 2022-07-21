@@ -563,7 +563,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogService logService
+        LogService logService,
+        GraphDatabaseService databaseService
     ) {
         return RecordFormatSelector.selectForConfig(databaseConfig, logService.getInternalLogProvider());
     }

@@ -385,9 +385,10 @@ public final class Neo4jProxy {
         String databaseName,
         Config databaseConfig,
         FileSystemAbstraction fs,
-        LogService logService
+        LogService logService,
+        GraphDatabaseService databaseService
     ) {
-        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService);
+        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, databaseService);
     }
 
     public static NamedDatabaseId randomDatabaseId() {
