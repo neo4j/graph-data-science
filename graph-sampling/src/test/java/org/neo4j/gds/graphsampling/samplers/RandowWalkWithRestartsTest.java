@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.samplers;
 
-import org.junit.jupiter.api.RepeatedTest;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -57,7 +57,7 @@ class RandowWalkWithRestartsTest {
         ", (j:M {prop: 55})" +
         ", (x)-[:R1 {distance: 0.0} ]->(x1)" +
         ", (x)-[:R1 {distance: 2.0} ]->(x2)" +
-        ", (x)-[:R1 {distance: 30000.0} ]->(x3)" +
+        ", (x)-[:R1 {distance: 200.0} ]->(x3)" +
         ", (e)-[:R1 {distance: 1.0} ]->(d)" +
         ", (i)-[:R1 {distance: 1.0} ]->(g)" +
         ", (a)-[:R1 {cost: 10.0, distance: 5.8}]->(b)" +
@@ -75,7 +75,7 @@ class RandowWalkWithRestartsTest {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
-            Optional.empty()
+            config.hasRelationshipWeightProperty() ? Optional.of(config.relationshipWeightProperty()) : Optional.empty()
         );
     }
 
@@ -105,23 +105,83 @@ class RandowWalkWithRestartsTest {
         assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("g")))).isTrue();
     }
 
-    @RepeatedTest(1000)
+    @Test
     void shouldSampleWeighted() {
+        double casesPassed = 0;
+        var validCases = 0;
+        for (long seed = 0; seed < 250; seed++) {
+            var config = RandomWalkWithRestartsConfigImpl.builder()
+                .startNodes(List.of(idFunction.of("x")))
+                .relationshipWeightProperty("distance")
+                .samplingRatio(0.22)
+                .restartProbability(0.01)
+                .randomSeed(seed)
+                .concurrency(1)
+                .build();
+
+            var graph = getGraph(config);
+            var rwr = new RandomWalkWithRestarts(config);
+            var nodes = rwr.sampleNodes(graph);
+            if (rwr.usedStartNodes().contains(idFunction.of("x1")) || rwr.usedStartNodes().contains(idFunction.of("x2"))) {
+                continue;
+            }
+            validCases++;
+
+            assertThat(nodes.cardinality()).isEqualTo(3L);
+            assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isFalse();
+
+            if (nodes.get(graph.toMappedNodeId(idFunction.of("x"))) &&
+                !nodes.get(graph.toMappedNodeId(idFunction.of("x2"))) &&
+                nodes.get(graph.toMappedNodeId(idFunction.of("x3")))
+            ) {
+                casesPassed++;
+            }
+        }
+        // the probability that we walk from x to x3 everytime until a new startnode is picked
+        // is P(x->x3) ^ <number of walks until new startnode given that x3 is picked every time>
+        // the number of these walks is 30, because first walk keeps quality at 1 and for remaining
+        // walks we have quality *= 0.9 and 0.9 ^ 29 is the first that is lower than the threshold 0.05.
+        // therefore the probability of a case passing is (200 / 202) ^ 30.
+        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 30), Offset.offset(0.015));
+    }
+
+    @Test
+    void shouldSampleWeightedConcurrently() {
+
+        double casesPassed = 0;
+        var validCases = 0;
         var config = RandomWalkWithRestartsConfigImpl.builder()
             .startNodes(List.of(idFunction.of("x")))
             .relationshipWeightProperty("distance")
+            .concurrency(4)
             .samplingRatio(0.22)
-            .restartProbability(0.01)
-            .build();
-
-        var rwr = new RandomWalkWithRestarts(config);
+            .restartProbability(0.01).build();
         var graph = getGraph(config);
-        var nodes = rwr.sampleNodes(graph);
 
-        assertThat(nodes.cardinality()).isBetween(3L, 4L);
+        for (int i = 0; i < 250; i++) {
+            var rwr = new RandomWalkWithRestarts(config);
+            var nodes = rwr.sampleNodes(graph);
+            if (rwr.usedStartNodes().contains(idFunction.of("x1")) || rwr.usedStartNodes().contains(idFunction.of("x2"))) {
+                continue;
+            }
+            validCases++;
 
-        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x")))).isTrue();
-        assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x3")))).isTrue();
+            assertThat(nodes.cardinality()).isBetween(3L, 4L);
+            assertThat(nodes.get(graph.toMappedNodeId(idFunction.of("x1")))).isFalse();
+
+            if (nodes.get(graph.toMappedNodeId(idFunction.of("x"))) &&
+                !nodes.get(graph.toMappedNodeId(idFunction.of("x2"))) &&
+                nodes.get(graph.toMappedNodeId(idFunction.of("x3")))
+            ) {
+                casesPassed++;
+            }
+        }
+        // the analysis from single threaded case can be partially repeated. it takes 51 walks to get below 0.05/(4 ^ 2),
+        // so the expectation would be (200 / 202) ** (51 * 4) , however the result is closer to (200 / 202) ** (51 * 2),
+        // and its unclear exactly why.
+        // this may be due to the fastest thread picking a new startnode before the other threads finish and therefore the
+        // other threads have less time to find the improbable node x2
+        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2), Offset.offset(0.33));
     }
 
     @Test

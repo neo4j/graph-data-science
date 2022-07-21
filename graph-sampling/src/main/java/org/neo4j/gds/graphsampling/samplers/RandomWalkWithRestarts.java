@@ -36,7 +36,9 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
@@ -46,7 +48,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     private static final double TOTAL_WEIGHT_MISSING = -1.0;
 
     private final RandomWalkWithRestartsConfig config;
-
+    private Set<Long> usedStartNodes;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -54,6 +56,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+        usedStartNodes = new HashSet<>();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
@@ -77,6 +80,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .concurrency(config.concurrency())
             .tasks(tasks)
             .run();
+        tasks.forEach(task -> usedStartNodes.addAll(((Walker) task).usedStartNodes()));
 
         return seenNodes;
     }
@@ -113,6 +117,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return ImmutableInitialStartQualities.of(nodeIds, qualities);
     }
 
+    Set<Long> usedStartNodes() {
+        return usedStartNodes;
+    }
+
     static class Walker implements Runnable {
 
         private final HugeAtomicBitSet seenNodes;
@@ -123,6 +131,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final SplittableRandom rng;
         private final Graph inputGraph;
         private final RandomWalkWithRestartsConfig config;
+
+        private Set<Long> usedStartNodes;
 
         Walker(
             HugeAtomicBitSet seenNodes,
@@ -142,12 +152,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.rng = rng;
             this.inputGraph = inputGraph;
             this.config = config;
+            this.usedStartNodes = new HashSet<>();
         }
 
         @Override
         public void run() {
             int currentStartNodePosition = rng.nextInt(walkQualities.size());
             long currentNode = walkQualities.nodeId(currentStartNodePosition);
+            usedStartNodes.add(inputGraph.toOriginalNodeId(currentNode));
             int addedNodes = 0;
             int nodesConsidered = 1;
             int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
@@ -183,17 +195,16 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
                     currentStartNodePosition = rng.nextInt(walkQualities.size());
                     currentNode = walkQualities.nodeId(currentStartNodePosition);
+                    usedStartNodes.add(inputGraph.toOriginalNodeId(currentNode));
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
-                    long nextNode;
                     if (inputGraph.hasRelationshipProperty()) {
-                        nextNode = weightedWalkOffset(currentNode);
+                        currentNode = weightedNextNode(currentNode);
                     } else {
                         int targetOffset = rng.nextInt(inputGraph.degree(currentNode));
-                        nextNode = inputGraph.nthTarget(currentNode, targetOffset);
-                        assert nextNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
+                        currentNode = inputGraph.nthTarget(currentNode, targetOffset);
+                        assert currentNode != IdMap.NOT_FOUND : "The offset '" + targetOffset + "' is bound by the degree but no target could be found for nodeId " + currentNode;
                     }
-                    currentNode = nextNode;
                     nodesConsidered++;
                 }
             }
@@ -216,7 +227,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return presentTotalWeights.get(currentNode);
         }
 
-        private long weightedWalkOffset(long currentNode) {
+        private long weightedNextNode(long currentNode) {
             final var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
             var target = new MutableLong(-1);
             inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
@@ -229,6 +240,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
             });
             assert target.getValue() != -1;
             return target.getValue();
+        }
+
+        public Set<Long> usedStartNodes() {
+            return usedStartNodes;
         }
     }
 
