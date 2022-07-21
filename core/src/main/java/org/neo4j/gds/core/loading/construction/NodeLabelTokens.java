@@ -110,6 +110,10 @@ public final class NodeLabelTokens {
         return new Array<>(nodeLabels, Function.identity());
     }
 
+    public static @NotNull NodeLabelToken ofStrings(String... nodeLabelStrings) {
+        return new Array<>(nodeLabelStrings, NodeLabelTokens::labelOf);
+    }
+
     static @NotNull NodeLabelToken ofNodeLabel(NodeLabel nodeLabel) {
         return new Singleton<>(nodeLabel, Function.identity());
     }
