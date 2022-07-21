@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.extension.GdlExtension;
@@ -28,7 +29,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.kernel.database.DatabaseIdFactory;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -390,30 +390,30 @@ class GraphStoreCatalogTest {
         GraphProjectFromStoreConfig config0 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph0");
         GraphProjectFromStoreConfig config1 = GraphProjectFromStoreConfig.emptyWithName(USER_NAME, "graph1");
 
-        NamedDatabaseId namedDatabaseId0 = DatabaseIdFactory.from("DB_0", UUID.fromString("0-0-0-0-0"));
-        NamedDatabaseId namedDatabaseId1 = DatabaseIdFactory.from("DB_1", UUID.fromString("0-0-0-0-1"));
+        DatabaseId databaseId0 = DatabaseId.from("DB_0");
+        DatabaseId databaseId1 = DatabaseId.from("DB_1");
 
         GraphStore graphStore0 = GdlFactory
             .builder()
             .gdlGraph("()-->()")
-            .namedDatabaseId(namedDatabaseId0)
+            .databaseId(databaseId0)
             .build()
             .build();
         GraphStore graphStore1 = GdlFactory
             .builder()
             .gdlGraph("()-->()-->()")
-            .namedDatabaseId(namedDatabaseId1)
+            .databaseId(databaseId1)
             .build()
             .build();
 
         GraphStoreCatalog.set(config0, graphStore0);
         GraphStoreCatalog.set(config1, graphStore1);
 
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId0, "graph0"));
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId0, "graph1"));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, databaseId0, "graph0"));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, databaseId0, "graph1"));
 
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId1, "graph1"));
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, namedDatabaseId1, "graph0"));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, databaseId1, "graph1"));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, databaseId1, "graph0"));
     }
 
     @Test

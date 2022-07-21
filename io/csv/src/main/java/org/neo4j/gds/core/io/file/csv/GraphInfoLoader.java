@@ -29,9 +29,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
-import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -39,7 +39,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.UUID;
 
 public class GraphInfoLoader {
     private final Path graphInfoPath;
@@ -58,9 +57,9 @@ public class GraphInfoLoader {
             var mappingIterator = objectReader.<GraphInfoLine>readValues(fileReader);
 
             var line = mappingIterator.next();
-            var databaseId = DatabaseIdFactory.from(line.databaseName, line.databaseId);
+            var databaseId = DatabaseId.from(line.databaseName);
             return ImmutableGraphInfo.builder()
-                .namedDatabaseId(databaseId)
+                .databaseId(databaseId)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
                 .relationshipTypeCounts(line.relTypeCounts)
@@ -72,9 +71,6 @@ public class GraphInfoLoader {
     }
 
     public static class GraphInfoLine {
-        @JsonProperty
-        UUID databaseId;
-
         @JsonProperty
         String databaseName;
 

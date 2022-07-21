@@ -20,8 +20,8 @@
 package org.neo4j.gds.beta.generator;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -95,7 +95,7 @@ public final class GraphGenerateProc extends BaseProc {
                 .map(PropertyProducer::getPropertyName);
 
             GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
-                GraphDatabaseApiProxy.databaseId(api),
+                DatabaseId.of(api),
                 graph,
                 config.relationshipType().name,
                 relationshipProperty,

@@ -23,8 +23,8 @@ import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStoreFactory;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 
@@ -49,7 +49,7 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
         return loaderContext -> GdlFactory
             .builder()
             .graphProjectConfig(this)
-            .namedDatabaseId(GraphDatabaseApiProxy.databaseId(loaderContext.graphDatabaseService()))
+            .databaseId(DatabaseId.of(loaderContext.graphDatabaseService()))
             .build();
     }
 

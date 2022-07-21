@@ -29,7 +29,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -46,7 +45,7 @@ import static java.util.Collections.singletonList;
 
 public interface GraphStore {
 
-    NamedDatabaseId databaseId();
+    DatabaseId databaseId();
 
     GraphSchema schema();
 

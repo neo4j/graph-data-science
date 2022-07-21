@@ -444,15 +444,13 @@ public class GraphStoreToCsvExporterTest extends CsvTest {
             GRAPH_INFO_FILE_NAME,
             List.of(
                 List.of(
-                    CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
                     CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
                     CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                     CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
                     CsvGraphInfoVisitor.REL_TYPE_COUNTS_COLUMN_NAME
                 ),
                 List.of(
-                    graphStore.databaseId().databaseId().uuid().toString(),
-                    graphStore.databaseId().name(),
+                    graphStore.databaseId().databaseName(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(3L),
                     CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 3L, RelationshipType.of("REL1"), 3L))

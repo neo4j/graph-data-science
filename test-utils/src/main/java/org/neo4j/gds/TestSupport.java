@@ -29,6 +29,7 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.provider.Arguments;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -48,7 +49,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -144,7 +144,7 @@ public final class TestSupport {
         Optional<Orientation> orientation,
         Optional<Aggregation> aggregation,
         Optional<LongSupplier> idSupplier,
-        Optional<NamedDatabaseId> namedDatabaseId
+        Optional<DatabaseId> databaseId
     ) {
         Objects.requireNonNull(gdl);
 
@@ -161,7 +161,7 @@ public final class TestSupport {
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .namedDatabaseId(namedDatabaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
+            .databaseId(databaseId.orElse(GdlSupportPerMethodExtension.NEW_DATABASE_ID))
             .build();
 
         return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);

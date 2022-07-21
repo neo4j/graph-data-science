@@ -23,11 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -55,7 +54,7 @@ class CSRGraphStoreUtilTest {
         assertThat(graph.hasRelationshipProperty()).isTrue();
 
         var convertedGraphStore = CSRGraphStoreUtil.createFromGraph(
-            DatabaseIdFactory.from("dummy", UUID.fromString("42-42-42-42-42")),
+            DatabaseId.from("dummy"),
             (HugeGraph) graph,
             "REL1",
             Optional.of("prop1"),
@@ -71,7 +70,7 @@ class CSRGraphStoreUtilTest {
 
         assertThatThrownBy(() -> {
             CSRGraphStoreUtil.createFromGraph(
-                DatabaseIdFactory.from("dummy", UUID.fromString("42-42-42-42-42")),
+                DatabaseId.from("dummy"),
                 (HugeGraph) graph.innerGraph(),
                 "REL",
                 Optional.of("prop1"),

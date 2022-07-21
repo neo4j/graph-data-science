@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -38,7 +39,6 @@ import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.Collection;
@@ -54,7 +54,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class CSRGraphStoreUtil {
 
     public static CSRGraphStore createFromGraph(
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         HugeGraph graph,
         String relationshipTypeString,
         Optional<String> relationshipPropertyKey,

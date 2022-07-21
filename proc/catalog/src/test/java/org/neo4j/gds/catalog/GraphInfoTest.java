@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
@@ -32,10 +33,8 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
-import org.neo4j.kernel.database.DatabaseIdFactory;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
@@ -101,7 +100,7 @@ final class GraphInfoTest {
             .relationshipProjections(RelationshipProjections.ALL)
             .build();
         var graphStore = CSRGraphStoreUtil.createFromGraph(
-            DatabaseIdFactory.from("test", UUID.randomUUID()),
+            DatabaseId.from("test"),
             graph,
             "TY",
             Optional.empty(),

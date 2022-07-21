@@ -26,6 +26,7 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
@@ -58,7 +59,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlSupportPerMethodExtension;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 import org.neo4j.values.storable.Values;
 import org.s1ck.gdl.GDLHandler;
@@ -82,7 +82,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlConfig> {
 
     private final GDLHandler gdlHandler;
-    private final NamedDatabaseId databaseId;
+    private final DatabaseId databaseId;
 
     public static GdlFactory of(String gdlGraph) {
         return builder().gdlGraph(gdlGraph).build();
@@ -95,7 +95,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
     @Builder.Factory
     static GdlFactory gdlFactory(
         Optional<String> gdlGraph,
-        Optional<NamedDatabaseId> namedDatabaseId,
+        Optional<DatabaseId> databaseId,
         Optional<String> userName,
         Optional<String> graphName,
         Optional<GraphProjectFromGdlConfig> graphProjectConfig,
@@ -109,8 +109,6 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .gdlGraph(gdlGraph.orElse(""))
             .build()
             : graphProjectConfig.get();
-
-        var databaseId = namedDatabaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID);
 
         var nextVertexId = nodeIdFunction
             .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())
@@ -127,14 +125,14 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(true));
 
-        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId, capabilities);
+        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId.orElse(GdlSupportPerMethodExtension.NEW_DATABASE_ID), capabilities);
     }
 
     private GdlFactory(
         GDLHandler gdlHandler,
         GraphProjectFromGdlConfig graphProjectConfig,
         GraphDimensions graphDimensions,
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         Capabilities capabilities
     ) {
         super(

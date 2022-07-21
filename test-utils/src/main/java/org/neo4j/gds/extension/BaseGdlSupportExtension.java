@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraph;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
@@ -53,6 +54,7 @@ import static org.neo4j.gds.extension.ExtensionUtil.setField;
 abstract class BaseGdlSupportExtension {
 
     public static final NamedDatabaseId DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
+    public static final DatabaseId NEW_DATABASE_ID = DatabaseId.from("GDL");
 
     void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
@@ -133,7 +135,7 @@ abstract class BaseGdlSupportExtension {
             .builder()
             .nodeIdFunction(nodeIdFunction)
             .graphProjectConfig(graphProjectConfig)
-            .namedDatabaseId(DATABASE_ID)
+            .databaseId(NEW_DATABASE_ID)
             .build();
 
         CSRGraphStore graphStore = gdlFactory.build();

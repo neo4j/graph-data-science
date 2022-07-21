@@ -21,9 +21,8 @@ package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.List;
 import java.util.Map;
@@ -34,10 +33,10 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
 
     @Test
     void shouldExportGraphInfo() {
-        NamedDatabaseId namedDatabaseId = Neo4jProxy.randomDatabaseId();
+        DatabaseId databaseId = DatabaseId.random();
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
-        graphInfoVisitor.export(ImmutableGraphInfo.of(namedDatabaseId, 1337L, 19L, relationshipTypeCounts));
+        graphInfoVisitor.export(ImmutableGraphInfo.of(databaseId, 1337L, 19L, relationshipTypeCounts));
         graphInfoVisitor.close();
 
         assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
@@ -46,8 +45,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
             List.of(
                 defaultHeaderColumns(),
                 List.of(
-                    namedDatabaseId.databaseId().uuid().toString(),
-                    namedDatabaseId.name(),
+                    databaseId.databaseName(),
                     Long.toString(1337L),
                     Long.toString(19L),
                     CsvMapUtil.relationshipCountsToString(relationshipTypeCounts)
@@ -59,7 +57,6 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
     @Override
     protected List<String> defaultHeaderColumns() {
         return List.of(
-            CsvGraphInfoVisitor.DATABASE_ID_COLUMN_NAME,
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
             CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,

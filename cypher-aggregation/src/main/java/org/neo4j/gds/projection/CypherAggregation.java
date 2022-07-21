@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ReturnType;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.IdMap;
@@ -40,7 +41,6 @@ import org.neo4j.gds.api.schema.ImmutableGraphSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -62,7 +62,6 @@ import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.Relationship;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserAggregationFunction;
@@ -94,7 +93,7 @@ public final class CypherAggregation extends BaseProc {
         var progressTimer = ProgressTimer.start();
         return new GraphAggregator(
             progressTimer,
-            GraphDatabaseApiProxy.databaseId(this.api),
+            DatabaseId.of(this.api),
             username()
         );
     }
@@ -104,7 +103,7 @@ public final class CypherAggregation extends BaseProc {
     public static class GraphAggregator {
 
         private final ProgressTimer progressTimer;
-        private final NamedDatabaseId databaseId;
+        private final DatabaseId databaseId;
         private final ImmutableGraphSchema.Builder graphSchemaBuilder;
         private final String username;
 
@@ -118,7 +117,7 @@ public final class CypherAggregation extends BaseProc {
 
         GraphAggregator(
             ProgressTimer progressTimer,
-            NamedDatabaseId databaseId,
+            DatabaseId databaseId,
             String username
         ) {
             this.progressTimer = progressTimer;

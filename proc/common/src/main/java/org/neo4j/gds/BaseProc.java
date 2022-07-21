@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -85,6 +86,10 @@ public abstract class BaseProc {
 
     protected String username() {
         return username.username();
+    }
+
+    protected DatabaseId newDatabaseId() {
+        return DatabaseId.of(api);
     }
 
     protected NamedDatabaseId databaseId() {

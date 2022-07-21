@@ -21,10 +21,10 @@ package org.neo4j.gds.core.io.file;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
@@ -133,7 +133,7 @@ class GraphStoreRelationshipVisitorTest {
             .relationshipPropertyStores(propertyStores)
             .relationships(actualRelationships.topologies())
             .nodes(expectedGraph)
-            .databaseId(Neo4jProxy.randomDatabaseId())
+            .databaseId(DatabaseId.random())
             .concurrency(1)
             .build()
             .getUnion();

@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -57,7 +58,6 @@ import org.neo4j.gds.core.huge.UnionGraph;
 import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.values.storable.NumberType;
 
 import java.time.ZonedDateTime;
@@ -83,7 +83,7 @@ public class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
-    private final NamedDatabaseId databaseId;
+    private final DatabaseId databaseId;
 
     private final Capabilities capabilities;
 
@@ -105,7 +105,7 @@ public class CSRGraphStore implements GraphStore {
 
     @Builder.Factory
     public static CSRGraphStore of(
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
         IdMap nodes,
@@ -129,7 +129,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     protected CSRGraphStore(
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         Capabilities capabilities,
         GraphSchema schema,
         IdMap nodes,
@@ -158,7 +158,7 @@ public class CSRGraphStore implements GraphStore {
     }
 
     @Override
-    public NamedDatabaseId databaseId() {
+    public DatabaseId databaseId() {
         return databaseId;
     }
 

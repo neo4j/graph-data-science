@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.AlgoBaseProcTest.InvocationCountingTaskStore;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -81,7 +82,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var graphStore = GdlFactory
                 .builder()
-                .namedDatabaseId(db.databaseId())
+                .databaseId(DatabaseId.of(db))
                 .graphProjectConfig(ImmutableGraphProjectFromGdlConfig
                     .builder()
                     .graphName("foo")

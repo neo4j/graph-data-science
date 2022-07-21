@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -113,7 +114,7 @@ class GraphSageTest {
         long nodeCount = graph.nodeCount();
 
         graphStore = CSRGraphStoreUtil.createFromGraph(
-            Neo4jProxy.randomDatabaseId(),
+            DatabaseId.random(),
             randomGraph,
             "REL",
             Optional.of("weight"),

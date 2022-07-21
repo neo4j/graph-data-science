@@ -27,6 +27,7 @@ import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -183,7 +184,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             )
         );
 
-        var graphStore = GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build();
+        var graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db)).build().build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,
@@ -206,7 +207,7 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 )
             )
         );
-        CSRGraphStore graphStore = GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build();
+        CSRGraphStore graphStore = GdlFactory.builder().databaseId(DatabaseId.of(db)).build().build();
 
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,

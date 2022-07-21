@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.StringJoining;
@@ -135,6 +136,11 @@ public final class GraphStoreCatalog {
     }
 
     @TestOnly
+    public static GraphStoreWithConfig get(String username, DatabaseId databaseId, String graphName) {
+        return get(CatalogRequest.of(username, databaseId), graphName);
+    }
+
+    @TestOnly
     public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
         return get(CatalogRequest.of(username, databaseName), graphName);
     }
@@ -171,6 +177,10 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
+    public static boolean exists(String username, DatabaseId databaseId, String graphName) {
+        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
+    }
+
     public static int graphStoresCount() {
         return userCatalogs
             .values()
@@ -193,6 +203,14 @@ public final class GraphStoreCatalog {
 
     public static Optional<Map<String, Object>> getDegreeDistribution(
         String username,
+        DatabaseId databaseId,
+        String graphName
+    ) {
+        return getUserCatalog(username).getDegreeDistribution(UserCatalog.UserCatalogKey.of(databaseId, graphName));
+    }
+
+    public static Optional<Map<String, Object>> getDegreeDistribution(
+        String username,
         NamedDatabaseId databaseId,
         String graphName
     ) {
@@ -201,7 +219,7 @@ public final class GraphStoreCatalog {
 
     public static void setDegreeDistribution(
         String username,
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         String graphName,
         Map<String, Object> degreeDistribution
     ) {
@@ -259,6 +277,10 @@ public final class GraphStoreCatalog {
 
             static UserCatalogKey of(NamedDatabaseId databaseId, String graphName) {
                 return of(databaseId.name(), graphName);
+            }
+
+            static UserCatalogKey of(DatabaseId databaseId, String graphName) {
+                return of(databaseId.databaseName(), graphName);
             }
 
             static UserCatalogKey of(String databaseName, String graphName) {
