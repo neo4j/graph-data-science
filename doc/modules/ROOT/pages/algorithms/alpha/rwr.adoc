@@ -54,6 +54,7 @@ YIELD
   fromGraphName,
   nodeCount,
   relationshipCount,
+  startNodeCount,
   projectMillis
 ----
 
@@ -86,6 +87,7 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 | fromGraphName          | String   | The name of the original graph in the graph catalog.
 | nodeCount              | Integer  | Number of nodes in the subgraph.
 | relationshipCount      | Integer  | Number of relationships in the subgraph.
+| startNodeCount         | Integer  | Number of start nodes actually used by the algorithm.
 | projectMillis          | Integer  | Milliseconds for projecting the subgraph.
 |===
 --
