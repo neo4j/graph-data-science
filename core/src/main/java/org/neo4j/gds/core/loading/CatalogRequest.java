@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Optional;
 
@@ -60,10 +59,6 @@ public abstract class CatalogRequest {
         return ImmutableCatalogRequest.of(databaseName, username, Optional.empty(), false);
     }
 
-    public static CatalogRequest of(String username, NamedDatabaseId databaseId) {
-        return of(username, databaseId.name());
-    }
-
     public static CatalogRequest of(String username, DatabaseId databaseId) {
         return of(username, databaseId.databaseName());
     }
@@ -76,11 +71,11 @@ public abstract class CatalogRequest {
         return ImmutableCatalogRequest.of(databaseName, username, usernameOverride, true);
     }
 
-    public static CatalogRequest ofAdmin(String username, NamedDatabaseId databaseId) {
-        return ofAdmin(username, databaseId.name());
+    public static CatalogRequest ofAdmin(String username, DatabaseId databaseId) {
+        return ofAdmin(username, databaseId.databaseName());
     }
 
-    public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, NamedDatabaseId databaseId) {
-        return ofAdmin(username, usernameOverride, databaseId.name());
+    public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, DatabaseId databaseId) {
+        return ofAdmin(username, usernameOverride, databaseId.databaseName());
     }
 }

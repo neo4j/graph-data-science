@@ -20,6 +20,7 @@
 package org.neo4j.gds.functions;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Username;
@@ -60,7 +61,7 @@ public class NodePropertyFunc {
         Objects.requireNonNull(propertyKey);
         Objects.requireNonNull(nodeLabel);
 
-        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username.username(), api.databaseId()), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username.username(), DatabaseId.of(api)), graphName).graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
         var nodeLabelType = projectAll ? NodeLabel.ALL_NODES : NodeLabel.of(nodeLabel);
 

@@ -161,7 +161,7 @@ public final class TestSupport {
             .builder()
             .nodeIdFunction(idSupplier.orElse(new OffsetIdSupplier(0L)))
             .graphProjectConfig(config)
-            .databaseId(databaseId.orElse(GdlSupportPerMethodExtension.NEW_DATABASE_ID))
+            .databaseId(databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID))
             .build();
 
         return new TestGraph(gdlFactory.build().getUnion(), gdlFactory::nodeId, graphName);

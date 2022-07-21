@@ -34,8 +34,6 @@ import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
-import org.neo4j.kernel.database.DatabaseIdFactory;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.lang.reflect.Field;
 import java.util.Arrays;
@@ -43,7 +41,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.stream;
@@ -53,8 +50,7 @@ import static org.neo4j.gds.extension.ExtensionUtil.setField;
 
 abstract class BaseGdlSupportExtension {
 
-    public static final NamedDatabaseId DATABASE_ID = DatabaseIdFactory.from("GDL", UUID.fromString("42-42-42-42-42"));
-    public static final DatabaseId NEW_DATABASE_ID = DatabaseId.from("GDL");
+    public static final DatabaseId DATABASE_ID = DatabaseId.from("GDL");
 
     void beforeAction(ExtensionContext context) {
         Class<?> requiredTestClass = context.getRequiredTestClass();
@@ -135,7 +131,7 @@ abstract class BaseGdlSupportExtension {
             .builder()
             .nodeIdFunction(nodeIdFunction)
             .graphProjectConfig(graphProjectConfig)
-            .databaseId(NEW_DATABASE_ID)
+            .databaseId(DATABASE_ID)
             .build();
 
         CSRGraphStore graphStore = gdlFactory.build();

@@ -55,7 +55,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
                 validateNeo4jEnterpriseEdition();
                 MutableLong createMillis = new MutableLong(0);
                 try (ProgressTimer ignored = ProgressTimer.start(createMillis::setValue)) {
-                    InMemoryDatabaseCreator.createDatabase(api, username(), databaseId(), graphName, dbName);
+                    InMemoryDatabaseCreator.createDatabase(api, username(), newDatabaseId(), graphName, dbName);
                 }
 
                 return new CreateCypherDbResult(dbName, graphName, createMillis.getValue());

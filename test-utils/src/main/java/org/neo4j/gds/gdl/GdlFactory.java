@@ -125,7 +125,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         // NOTE: We don't really have a database, but GDL is for testing to work as if we had a database
         var capabilities = graphCapabilities.orElseGet(() -> ImmutableStaticCapabilities.of(true));
 
-        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId.orElse(GdlSupportPerMethodExtension.NEW_DATABASE_ID), capabilities);
+        return new GdlFactory(gdlHandler, config, graphDimensions, databaseId.orElse(GdlSupportPerMethodExtension.DATABASE_ID), capabilities);
     }
 
     private GdlFactory(
