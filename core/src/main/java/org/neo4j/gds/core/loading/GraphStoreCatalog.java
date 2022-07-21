@@ -173,10 +173,6 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseName, graphName));
     }
 
-    public static boolean exists(String username, NamedDatabaseId databaseId, String graphName) {
-        return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
-    }
-
     public static boolean exists(String username, DatabaseId databaseId, String graphName) {
         return getUserCatalog(username).exists(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }

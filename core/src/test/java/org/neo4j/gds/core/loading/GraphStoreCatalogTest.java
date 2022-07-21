@@ -44,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.neo4j.gds.extension.GdlSupportPerMethodExtension.DATABASE_ID;
+import static org.neo4j.gds.extension.GdlSupportPerMethodExtension.NEW_DATABASE_ID;
 
 @GdlExtension
 class GraphStoreCatalogTest {
@@ -66,9 +67,9 @@ class GraphStoreCatalogTest {
 
     @Test
     void set() {
-        Assertions.assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        Assertions.assertFalse(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -188,14 +189,14 @@ class GraphStoreCatalogTest {
     @Test
     void remove() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> {},
             true
         );
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -209,7 +210,7 @@ class GraphStoreCatalogTest {
             },
             true
         );
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -226,8 +227,8 @@ class GraphStoreCatalogTest {
             },
             true
         );
-        assertFalse(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
-        assertTrue(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists("admin", NEW_DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -279,8 +280,8 @@ class GraphStoreCatalogTest {
             },
             true
         );
-        assertFalse(GraphStoreCatalog.exists("alice", DATABASE_ID, GRAPH_NAME));
-        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists("alice", NEW_DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("bob", NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -293,7 +294,7 @@ class GraphStoreCatalogTest {
             graphStoreWithConfig -> fail("Should not have removed the graph"),
             false
         );
-        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("bob", NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -310,8 +311,8 @@ class GraphStoreCatalogTest {
             },
             true
         );
-        assertFalse(GraphStoreCatalog.exists(USER_NAME, DATABASE_ID, GRAPH_NAME));
-        assertTrue(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
+        assertFalse(GraphStoreCatalog.exists(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("admin", NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -326,7 +327,7 @@ class GraphStoreCatalogTest {
         ))
             .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
 
-        assertTrue(GraphStoreCatalog.exists("admin", DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("admin", NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test
@@ -342,7 +343,7 @@ class GraphStoreCatalogTest {
         ))
             .hasMessage("Graph with name `%s` does not exist on database `%s`. It might exist on another database.", GRAPH_NAME, DATABASE_ID.name());
 
-        assertTrue(GraphStoreCatalog.exists("bob", DATABASE_ID, GRAPH_NAME));
+        assertTrue(GraphStoreCatalog.exists("bob", NEW_DATABASE_ID, GRAPH_NAME));
     }
 
     @Test

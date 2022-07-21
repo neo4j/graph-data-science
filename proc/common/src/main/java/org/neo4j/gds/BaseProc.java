@@ -138,7 +138,7 @@ public abstract class BaseProc {
 
     protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphStoreCatalog.exists(username, databaseId(), graphName)) {
+        if (GraphStoreCatalog.exists(username, newDatabaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
                 graphName
