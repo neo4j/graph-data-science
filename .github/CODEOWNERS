@@ -1,0 +1,2 @@
+# Require GDS signoff for changes to Github specific changes, e.g. workflows
+/.github/    @neo4j/team-graph-data-science
