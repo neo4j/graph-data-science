@@ -14,15 +14,15 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 == Introduction
 
 Sometimes it may be useful to have a smaller but structurally representative sample of a given graph.
-For instance, such a sample could be used to train an inductive embedding algorithm (eg. a graph neural network, like xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]) faster than when training on the entire graph, and then the trained model could be used to predict embeddings on the entire graph.
+For instance, such a sample could be used to train an inductive embedding algorithm (such as a graph neural network, like xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]). The training would then be faster than when training on the entire graph, and then the trained model could still be used to predict embeddings on the entire graph.
 
-Random walk with restarts (RWR) samples the graph by taking random walks from a set of start nodes (see the `startNodes` parameter below).
-On each step of each random walk, there is some probability (see the `restartProbability` parameter below) that the walk stops, and a new walk from one of the start nodes starts instead (i.e. the walk restarts).
+Random walk with restarts (RWR) samples the graph by taking random walks from a set of start nodes (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`startNodes`] parameter below).
+On each step of a random walk, there is some probability (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`restartProbability`] parameter below) that the walk stops, and a new walk from one of the start nodes starts instead (i.e. the walk restarts).
 Each node visited on these walks will be part of the sampled subgraph.
-The algorithm stops walking when the requested number of nodes have been visited (see the `samplingRatio` parameter below).
+The algorithm stops walking when the requested number of nodes have been visited (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`samplingRatio`] parameter below).
 The relationships of the sampled subgraph are those induced by the sampled nodes (i.e. the relationships of the original graph that connect nodes that have been sampled).
 
-If the algorithm has a very hard time finding new nodes to visit by random walking, it will lazily expand the pool of start nodes one at a time by picking nodes uniformly at random from the original graph.
+If at some point it's very unlikely to visit new nodes by random walking from the current set of start nodes (possibly due to the original graph being disconnected), the algorithm will lazily expand the pool of start nodes one at a time by picking nodes uniformly at random from the original graph.
 
 It was shown by Leskovec et al. in the paper _"Sampling from Large Graphs"_ that RWR is a very good sampling algorithm for preserving structural features of the original graph that was sampled from. Additionally, RWR has been successfully used throughout the literature to sample batches for graph neural network (GNN) training.
 
@@ -62,6 +62,7 @@ YIELD
 | configuration       | Map     | Additional parameters to configure the subgraph sampling.
 |===
 
+[[alpha-algorithms-rwr-syntax-configuration]]
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -137,6 +138,7 @@ CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
 
 We can now go on to sample a subgraph from "myGraph" using RWR.
 Using the "Alice" `User` node as our set of start nodes, we will venture to visit four nodes in the graph for our sample.
+Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as our sampling ratio.
 
 [role=query-example]
 --
@@ -144,7 +146,7 @@ Using the "Alice" `User` node as our set of start nodes, we will venture to visi
 [source, cypher, role=noplay]
 ----
 MATCH (start:User {name: 'Alice'})
-CALL gds.alpha.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.67, startNodes: [id(start)] })
+CALL gds.alpha.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
 YIELD nodeCount, relationshipCount
 RETURN nodeCount, relationshipCount
 ----
