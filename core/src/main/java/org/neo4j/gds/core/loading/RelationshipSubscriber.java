@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.eclipse.collections.api.map.primitive.ObjectDoubleMap;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.QueryStatistics;
 import org.neo4j.kernel.impl.query.QuerySubscriber;
@@ -62,6 +63,8 @@ class RelationshipSubscriber implements QuerySubscriber {
     private RelationshipType relationshipType = ALL_RELATIONSHIPS;
     private int propertyIndex = 0;
 
+    private RelationshipsBuilder allRelationshipsBuilder;
+
     RelationshipSubscriber(
         IdMap idMap,
         CypherRelationshipLoader.Context loaderContext,
@@ -97,7 +100,7 @@ class RelationshipSubscriber implements QuerySubscriber {
             propertyCount--;
         } else {
             //means that this is a AnyRelTypeQuery
-            loaderContext.getOrCreateRelationshipsBuilder(RelationshipType.ALL_RELATIONSHIPS);
+            allRelationshipsBuilder = loaderContext.getOrCreateRelationshipsBuilder(RelationshipType.ALL_RELATIONSHIPS);
         }
         this.propertyValueBuffer = new double[propertyCount];
     }
@@ -166,8 +169,8 @@ class RelationshipSubscriber implements QuerySubscriber {
             return;
         }
 
-        var relationshipsBuilder = loaderContext.getOrCreateRelationshipsBuilder(relationshipType);
-
+        var relationshipsBuilder =
+            allRelationshipsBuilder != null ? allRelationshipsBuilder : loaderContext.getOrCreateRelationshipsBuilder(relationshipType);
         if (propertyValueBuffer.length == 0) {
             relationshipsBuilder.addFromInternal(sourceId, targetId);
         } else if (propertyValueBuffer.length == 1) {
