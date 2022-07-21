@@ -42,7 +42,7 @@ public class GraphSampleProc extends CatalogProc {
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<GraphSampleResult> sampleRandomWalkWithRestarts(
+    public Stream<RandomWalkWithRestartsSampleResult> sampleRandomWalkWithRestarts(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -75,29 +75,33 @@ public class GraphSampleProc extends CatalogProc {
             GraphStoreCatalog.set(rwrProcConfig, sampledGraphStore);
 
             var projectMillis = progressTimer.stop().getDuration();
-            return Stream.of(new GraphSampleResult(
+            return Stream.of(new RandomWalkWithRestartsSampleResult(
                 graphName,
                 fromGraphName,
                 sampledGraphStore.nodeCount(),
                 sampledGraphStore.relationshipCount(),
+                randomWalkWithRestarts.startNodesUsed().size(),
                 projectMillis
             ));
         }
     }
 
 
-    public static class GraphSampleResult extends GraphProjectProc.GraphProjectResult {
+    public static class RandomWalkWithRestartsSampleResult extends GraphProjectProc.GraphProjectResult {
         public final String fromGraphName;
+        public final long startNodeCount;
 
-        GraphSampleResult(
+        RandomWalkWithRestartsSampleResult(
             String graphName,
             String fromGraphName,
             long nodeCount,
             long relationshipCount,
+            long startNodeCount,
             long projectMillis
         ) {
             super(graphName, nodeCount, relationshipCount, projectMillis);
             this.fromGraphName = fromGraphName;
+            this.startNodeCount = startNodeCount;
         }
     }
 }

@@ -122,7 +122,7 @@ class RandowWalkWithRestartsTest {
             var graph = getGraph(config);
             var rwr = new RandomWalkWithRestarts(config);
             var nodes = rwr.sampleNodes(graph);
-            if (rwr.usedStartNodes().contains(idFunction.of("x1")) || rwr.usedStartNodes().contains(idFunction.of("x2"))) {
+            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -161,7 +161,7 @@ class RandowWalkWithRestartsTest {
         for (int i = 0; i < 250; i++) {
             var rwr = new RandomWalkWithRestarts(config);
             var nodes = rwr.sampleNodes(graph);
-            if (rwr.usedStartNodes().contains(idFunction.of("x1")) || rwr.usedStartNodes().contains(idFunction.of("x2"))) {
+            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr.startNodesUsed().contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;

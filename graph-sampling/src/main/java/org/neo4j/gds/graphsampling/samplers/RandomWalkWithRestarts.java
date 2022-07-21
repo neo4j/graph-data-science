@@ -36,9 +36,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
@@ -48,7 +46,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     private static final double TOTAL_WEIGHT_MISSING = -1.0;
 
     private final RandomWalkWithRestartsConfig config;
-    private LongSet usedStartNodes;
+    private LongHashSet startNodesUsed;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -56,7 +54,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
-        usedStartNodes = new LongHashSet();
+        startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
@@ -80,7 +78,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .concurrency(config.concurrency())
             .tasks(tasks)
             .run();
-        tasks.forEach(task -> ((Walker) task).usedStartNodes().forEach(usedStartNodes::add));
+        tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
         return seenNodes;
     }
@@ -117,8 +115,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return ImmutableInitialStartQualities.of(nodeIds, qualities);
     }
 
-    LongSet usedStartNodes() {
-        return usedStartNodes;
+    public LongSet startNodesUsed() {
+        return startNodesUsed;
     }
 
     static class Walker implements Runnable {
@@ -132,7 +130,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final Graph inputGraph;
         private final RandomWalkWithRestartsConfig config;
 
-        private Set<Long> usedStartNodes;
+        private LongSet startNodesUsed;
 
         Walker(
             HugeAtomicBitSet seenNodes,
@@ -152,14 +150,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.rng = rng;
             this.inputGraph = inputGraph;
             this.config = config;
-            this.usedStartNodes = new HashSet<>();
+            this.startNodesUsed = new LongHashSet();
         }
 
         @Override
         public void run() {
             int currentStartNodePosition = rng.nextInt(walkQualities.size());
             long currentNode = walkQualities.nodeId(currentStartNodePosition);
-            usedStartNodes.add(inputGraph.toOriginalNodeId(currentNode));
+            startNodesUsed.add(inputGraph.toOriginalNodeId(currentNode));
             int addedNodes = 0;
             int nodesConsidered = 1;
             int walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
@@ -195,7 +193,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
                     currentStartNodePosition = rng.nextInt(walkQualities.size());
                     currentNode = walkQualities.nodeId(currentStartNodePosition);
-                    usedStartNodes.add(inputGraph.toOriginalNodeId(currentNode));
+                    startNodesUsed.add(inputGraph.toOriginalNodeId(currentNode));
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
                     if (inputGraph.hasRelationshipProperty()) {
@@ -242,8 +240,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
             return target.getValue();
         }
 
-        public Set<Long> usedStartNodes() {
-            return usedStartNodes;
+        public LongSet startNodesUsed() {
+            return startNodesUsed;
         }
     }
 
