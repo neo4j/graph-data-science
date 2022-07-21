@@ -48,7 +48,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     private static final double TOTAL_WEIGHT_MISSING = -1.0;
 
     private final RandomWalkWithRestartsConfig config;
-    private Set<Long> usedStartNodes;
+    private LongSet usedStartNodes;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
@@ -56,7 +56,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
-        usedStartNodes = new HashSet<>();
+        usedStartNodes = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
@@ -80,7 +80,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .concurrency(config.concurrency())
             .tasks(tasks)
             .run();
-        tasks.forEach(task -> usedStartNodes.addAll(((Walker) task).usedStartNodes()));
+        tasks.forEach(task -> ((Walker) task).usedStartNodes().forEach(usedStartNodes::add));
 
         return seenNodes;
     }
@@ -117,7 +117,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         return ImmutableInitialStartQualities.of(nodeIds, qualities);
     }
 
-    Set<Long> usedStartNodes() {
+    LongSet usedStartNodes() {
         return usedStartNodes;
     }
 
