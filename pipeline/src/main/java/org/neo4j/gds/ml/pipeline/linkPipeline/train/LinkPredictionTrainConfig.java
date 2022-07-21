@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
@@ -36,6 +37,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -115,6 +118,20 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
             .filter(metric -> !metric.isModelSpecific())
             .map(metric -> (LinkMetric) metric)
             .collect(Collectors.toList());
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (!graphStore.isUndirected(internalTargetRelationshipType())) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "TargetRelationshipType '%s' must be undirected, but was directed.",
+                targetRelationshipType()
+            ));
+        }
     }
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {

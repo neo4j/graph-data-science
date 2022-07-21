@@ -21,19 +21,33 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+@GdlExtension
 class LinkPredictionTrainConfigTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "directed")
+    static final String GDL_GRAPH = "()-[:REL]->()-[:CONTEXT]->()";
+
+    @Inject
+    GraphStore graphStore;
+
+    @Inject
+    GraphStore directedGraphStore;
 
     @Test
     void contextDoesNotIncludeTargetRelType() {
-        var graphStore = GdlFactory.of("()-[:REL]->()-[:CONTEXT]->()").build();
-
         var config = LinkPredictionTrainConfigImpl.builder()
             .pipeline("DUMMY")
             .graphName("DUMMY")
@@ -46,6 +60,26 @@ class LinkPredictionTrainConfigTest {
             .build();
 
         assertThat(config.internalContextRelationshipType(graphStore)).containsExactly(RelationshipType.of("CONTEXT"));
+    }
+
+    @Test
+    void targetRelMustBeUndirected() {
+        var config = LinkPredictionTrainConfigImpl.builder()
+            .pipeline("DUMMY")
+            .graphName("DUMMY")
+            .modelName("DUMMY")
+            .username("DUMMY")
+            .sourceNodeLabel(ElementProjection.PROJECT_ALL)
+            .targetNodeLabel(ElementProjection.PROJECT_ALL)
+            .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
+            .targetRelationshipType("REL")
+            .build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            directedGraphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        )).hasMessage("TargetRelationshipType 'REL' must be undirected, but was directed.");
     }
 
 }
