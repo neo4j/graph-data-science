@@ -185,7 +185,7 @@ public final class GraphStoreCatalog {
             .sum();
     }
 
-    public static int graphStoresCount(NamedDatabaseId databaseId) {
+    public static int graphStoresCount(DatabaseId databaseId) {
         return userCatalogs
             .values()
             .stream()
@@ -237,7 +237,7 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).getGraphStores();
     }
 
-    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username, NamedDatabaseId databaseId) {
+    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username, DatabaseId databaseId) {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
@@ -403,9 +403,9 @@ public final class GraphStoreCatalog {
                 );
         }
 
-        private Map<GraphProjectConfig, GraphStore> getGraphStores(NamedDatabaseId databaseId) {
+        private Map<GraphProjectConfig, GraphStore> getGraphStores(DatabaseId databaseId) {
             return graphsByName.entrySet().stream()
-                .filter(entry -> entry.getKey().databaseName().equals(databaseId.name()))
+                .filter(entry -> entry.getKey().databaseName().equals(databaseId.databaseName()))
                 .collect(Collectors.toMap(
                     entry -> entry.getValue().config(),
                     entry -> entry.getValue().graphStore()

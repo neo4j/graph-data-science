@@ -348,16 +348,16 @@ class GraphStoreCatalogTest {
 
     @Test
     void graphStoresCount() {
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(NEW_DATABASE_ID));
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(1, GraphStoreCatalog.graphStoresCount(NEW_DATABASE_ID));
         GraphStoreCatalog.remove(
             CatalogRequest.of(USER_NAME, DATABASE_ID),
             GRAPH_NAME,
             graphStoreWithConfig -> {},
             true
         );
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(NEW_DATABASE_ID));
     }
 
     @Test
@@ -381,9 +381,9 @@ class GraphStoreCatalogTest {
     @Test
     void removeAllLoadedGraphs() {
         GraphStoreCatalog.set(CONFIG, graphStore);
-        assertEquals(1, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(1, GraphStoreCatalog.graphStoresCount(NEW_DATABASE_ID));
         GraphStoreCatalog.removeAllLoadedGraphs();
-        assertEquals(0, GraphStoreCatalog.graphStoresCount(DATABASE_ID));
+        assertEquals(0, GraphStoreCatalog.graphStoresCount(NEW_DATABASE_ID));
     }
 
     @Test

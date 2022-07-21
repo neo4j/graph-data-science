@@ -24,6 +24,7 @@ import org.hamcrest.Matcher;
 import org.intellij.lang.annotations.Language;
 import org.intellij.lang.annotations.RegExp;
 import org.junit.jupiter.api.AfterEach;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.ExceptionMessageMatcher;
@@ -173,7 +174,7 @@ public class BaseProcTest extends BaseTest {
 
     protected Graph findLoadedGraph(String graphName) {
         return GraphStoreCatalog
-            .getGraphStores("", db.databaseId())
+            .getGraphStores("", DatabaseId.of(db))
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))
@@ -184,7 +185,7 @@ public class BaseProcTest extends BaseTest {
 
     private Set<Graph> getLoadedGraphs(String graphName) {
         return GraphStoreCatalog
-            .getGraphStores("", db.databaseId())
+            .getGraphStores("", DatabaseId.of(db))
             .entrySet()
             .stream()
             .filter(e -> e.getKey().graphName().equals(graphName))
