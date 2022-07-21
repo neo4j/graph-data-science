@@ -24,6 +24,7 @@ import org.immutables.value.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
@@ -356,6 +357,11 @@ public class CSRGraphStore implements GraphStore {
     @Override
     public boolean hasRelationshipType(RelationshipType relationshipType) {
         return relationships.containsKey(relationshipType);
+    }
+
+    @Override
+    public boolean isUndirected(RelationshipType relationshipType) {
+        return relationships.get(relationshipType).orientation() == Orientation.UNDIRECTED;
     }
 
     @Override
