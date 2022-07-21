@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphSampleProc extends GraphProjectProc {
+public class GraphSampleProc extends CatalogProc {
 
     private static final String DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
 
@@ -86,7 +86,7 @@ public class GraphSampleProc extends GraphProjectProc {
     }
 
 
-    public static class GraphSampleResult extends GraphProjectResult {
+    public static class GraphSampleResult extends GraphProjectProc.GraphProjectResult {
         public final String fromGraphName;
 
         GraphSampleResult(
