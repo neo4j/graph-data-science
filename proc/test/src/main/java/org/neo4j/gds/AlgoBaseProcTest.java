@@ -48,7 +48,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
 
@@ -103,10 +102,6 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
     }
 
     GraphDatabaseAPI graphDb();
-
-    default NamedDatabaseId namedDatabaseId() {
-        return graphDb().databaseId();
-    }
 
     default DatabaseId databaseId() {
         return DatabaseId.of(graphDb());

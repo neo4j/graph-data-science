@@ -34,7 +34,7 @@ public class GraphExistsFunc extends CatalogProc {
     public boolean existsFunction(@Name(value = "graphName") String graphName) {
         ProcPreconditions.check();
         validateGraphName(graphName);
-        return GraphStoreCatalog.exists(username(), newDatabaseId(), graphName);
+        return GraphStoreCatalog.exists(username(), databaseId(), graphName);
     }
 
 }

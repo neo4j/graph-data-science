@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -39,7 +40,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -91,8 +91,8 @@ public interface ExecutionContext {
     NodePropertyExporterBuilder<? extends NodePropertyExporter> nodePropertyExporterBuilder();
 
     @Value.Lazy
-    default NamedDatabaseId databaseId() {
-        return GraphDatabaseApiProxy.databaseId(databaseService());
+    default DatabaseId databaseId() {
+        return DatabaseId.of(databaseService());
     }
 
     @Value.Lazy

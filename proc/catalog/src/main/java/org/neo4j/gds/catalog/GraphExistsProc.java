@@ -40,7 +40,7 @@ public class GraphExistsProc extends CatalogProc {
         validateGraphName(graphName);
         return Stream.of(new GraphExistsResult(graphName, GraphStoreCatalog.exists(
             username(),
-            newDatabaseId(),
+            databaseId(),
             graphName
         )));
     }

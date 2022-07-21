@@ -41,7 +41,6 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
@@ -88,12 +87,8 @@ public abstract class BaseProc {
         return username.username();
     }
 
-    protected DatabaseId newDatabaseId() {
+    protected DatabaseId databaseId() {
         return DatabaseId.of(api);
-    }
-
-    protected NamedDatabaseId databaseId() {
-        return api.databaseId();
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
@@ -138,7 +133,7 @@ public abstract class BaseProc {
 
     protected final void validateGraphName(String username, String graphName) {
         CypherMapWrapper.failOnBlank("graphName", graphName);
-        if (GraphStoreCatalog.exists(username, newDatabaseId(), graphName)) {
+        if (GraphStoreCatalog.exists(username, databaseId(), graphName)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "A graph with name '%s' already exists.",
                 graphName

@@ -20,6 +20,7 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
-import org.neo4j.kernel.database.NamedDatabaseId;
 
 import java.util.Map;
 import java.util.Optional;
@@ -49,7 +49,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         String graphName,
         AlgoBaseConfig config,
         String username,
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         boolean isGdsAdmin
     ) {
         this.config = config;
@@ -89,11 +89,11 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         String graphName,
         BaseConfig config,
         String username,
-        NamedDatabaseId databaseId,
+        DatabaseId databaseId,
         boolean isGdsAdmin
     ) {
         var request = ImmutableCatalogRequest.of(
-            databaseId.name(),
+            databaseId.databaseName(),
             username,
             Optional.ofNullable(config.usernameOverride()),
             isGdsAdmin
