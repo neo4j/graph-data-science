@@ -24,19 +24,71 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
+@GdlExtension
 class SplitRelationshipsTest {
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 42)
+    final static String GRAPH_WITH_OFFSET =
+        "        CREATE" +
+        "        (a: Node)," +
+        "        (b: Node)," +
+        "        (c: Node)," +
+        "        (d: Node)," +
+        "        (e: Node)," +
+        "        (f: Node)," +
+        "        (g: Node)," +
+        "        (a)-[:REL]->(b)," +
+        "        (a)-[:REL]->(c)," +
+        "        (a)-[:REL]->(d)," +
+        "        (a)-[:REL]->(e)," +
+        "        (a)-[:REL]->(f)," +
+        "        (a)-[:REL]->(g)," +
+        "        (b)-[:REL]->(c)," +
+        "        (b)-[:REL]->(a)," +
+        "        (b)-[:REL]->(d)," +
+        "        (b)-[:REL]->(e)," +
+        "        (b)-[:REL]->(f)," +
+        "        (b)-[:REL]->(g)," +
+        "        (c)-[:REL]->(a)," +
+        "        (c)-[:REL]->(b)," +
+        "        (c)-[:REL]->(d)";
+
+    @Inject
+    GraphStore graphStore;
+
+    @Test
+    void computeWithOffset() {
+        var config = SplitRelationshipsBaseConfigImpl.builder()
+            .holdoutFraction(0.2)
+            .negativeSamplingRatio(1.0)
+            .holdoutRelationshipType("TEST")
+            .remainingRelationshipType("REST")
+            .build();
+
+        SplitRelationships splitter = SplitRelationships.of(graphStore, config);
+
+        EdgeSplitter.SplitResult result = splitter.compute();
+
+        assertThat(result.selectedRels().topology().elementCount()).isEqualTo(6);
+    }
 
     @Test
     void estimate() {
