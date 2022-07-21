@@ -247,7 +247,7 @@ include::partial$/algorithms/alpha/leiden/specific-configuration.adoc[]
 
 :algorithm-name: Leiden community detection
 :graph-description: social network
-:image-file: louvain.svg
+:image-file: two-user-communities.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:

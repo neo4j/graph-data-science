@@ -94,7 +94,7 @@ In this section we will demonstrate the usage of the RWR sampling algorithm on a
 
 :algorithm-name: Random walk with restarts sampling
 :graph-description: social network
-:image-file: louvain.svg
+:image-file: two-user-communities.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
