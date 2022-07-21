@@ -100,9 +100,7 @@ public class RelationshipSplitter {
         // the split config is generated internally and the input should be fully validated already
         splitConfig.graphStoreValidation(graphStore, splitConfig.nodeLabelIdentifiers(graphStore), splitConfig.internalRelationshipTypes(graphStore));
 
-        var graph = graphStore.getGraph(splitConfig.nodeLabelIdentifiers(graphStore), splitConfig.internalRelationshipTypes(graphStore), Optional.ofNullable(splitConfig.relationshipWeightProperty()));
-
-        var splitAlgo = new SplitRelationships(graph, graph, splitConfig, splitConfig.internalSourceLabels(graphStore), splitConfig.internalTargetLabels(graphStore));
+        var splitAlgo = SplitRelationships.of(graphStore, splitConfig);
         splitAlgo.setTerminationFlag(terminationFlag);
 
         EdgeSplitter.SplitResult result = splitAlgo.compute();

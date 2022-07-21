@@ -20,32 +20,49 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-import java.util.Collection;
+import java.util.Optional;
 
-public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
+public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
 
     private final Graph graph;
     private final Graph masterGraph;
     private final SplitRelationshipsBaseConfig config;
 
-    private final Collection<NodeLabel> sourceLabels;
+    private final IdMap sourceNodes;
 
-    private final Collection<NodeLabel> targetLabels;
+    private final IdMap targetNodes;
 
-    public SplitRelationships(Graph graph, Graph masterGraph, SplitRelationshipsBaseConfig config, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels) {
+    private SplitRelationships(Graph graph, Graph masterGraph, IdMap sourceNodes, IdMap targetNodes, SplitRelationshipsBaseConfig config) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.masterGraph = masterGraph;
         this.config = config;
-        this.sourceLabels = sourceLabels;
-        this.targetLabels = targetLabels;
+        this.sourceNodes = sourceNodes;
+        this.targetNodes = targetNodes;
+    }
+
+    public static SplitRelationships of(GraphStore graphStore, SplitRelationshipsBaseConfig config) {
+        var nodeLabels = config.nodeLabelIdentifiers(graphStore);
+        var sourceLabels = config.internalSourceLabels(graphStore);
+        var targetLabels = config.internalTargetLabels(graphStore);
+        var relationshipTypes = config.internalRelationshipTypes(graphStore);
+        var superRelationshipTypes = config.superRelationshipTypes(graphStore);
+
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, config.maybeRelationshipWeightProperty());
+        var masterGraph = graphStore.getGraph(nodeLabels, superRelationshipTypes, Optional.empty());
+
+        IdMap sourceNodes = graphStore.getGraph(sourceLabels);
+        IdMap targetNodes = graphStore.getGraph(targetLabels);
+
+        return new SplitRelationships(graph, masterGraph, sourceNodes, targetNodes, config);
     }
 
     public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
@@ -74,8 +91,21 @@ public class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult> {
     @Override
     public EdgeSplitter.SplitResult compute() {
         var splitter = graph.isUndirected()
-            ? new UndirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio(), sourceLabels, targetLabels, config.concurrency())
-            : new DirectedEdgeSplitter(config.randomSeed(), config.negativeSamplingRatio(), sourceLabels, targetLabels, config.concurrency());
+            ? new UndirectedEdgeSplitter(
+            config.randomSeed(),
+            config.negativeSamplingRatio(),
+            sourceNodes,
+            targetNodes,
+            config.concurrency()
+        )
+            : new DirectedEdgeSplitter(
+                config.randomSeed(),
+                config.negativeSamplingRatio(),
+                sourceNodes,
+                targetNodes,
+                config.concurrency()
+            );
+
         return splitter.split(graph, masterGraph, config.holdoutFraction());
     }
 

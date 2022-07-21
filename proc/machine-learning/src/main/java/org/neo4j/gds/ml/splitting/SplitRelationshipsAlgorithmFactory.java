@@ -20,14 +20,9 @@
 package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.Collection;
-import java.util.Optional;
 
 public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> {
 
@@ -42,23 +37,7 @@ public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFacto
         SplitRelationshipsMutateConfig configuration,
         ProgressTracker progressTracker
     ) {
-        Optional<String> weightProperty = configuration != null
-            ? Optional.ofNullable(configuration.relationshipWeightProperty())
-            : Optional.empty();
-
-        Collection<NodeLabel> nodeLabels = configuration.nodeLabelIdentifiers(graphStore);
-        Collection<RelationshipType> relationshipTypes = configuration.internalRelationshipTypes(graphStore);
-
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, weightProperty);
-        var masterGraph = graph;
-        if (!configuration.nonNegativeRelationshipTypes().isEmpty()) {
-            masterGraph = graphStore.getGraph(
-                configuration.nodeLabelIdentifiers(graphStore),
-                configuration.superRelationshipTypes(),
-                Optional.empty()
-            );
-        }
-        return new SplitRelationships(graph, masterGraph, configuration, configuration.internalSourceLabels(graphStore), configuration.internalTargetLabels(graphStore));
+        return SplitRelationships.of(graphStore, configuration);
     }
 
     @Override

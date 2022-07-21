@@ -23,16 +23,15 @@ import com.carrotsearch.hppc.predicates.LongLongPredicate;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.jetbrains.annotations.TestOnly;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.atomic.LongAdder;
 
@@ -41,8 +40,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
     public DirectedEdgeSplitter(
         Optional<Long> maybeSeed,
         double negativeSamplingRatio,
-        Collection<NodeLabel> sourceLabels,
-        Collection<NodeLabel> targetLabels,
+        IdMap sourceLabels,
+        IdMap targetLabels,
         int concurrency
     ) {
         super(maybeSeed, negativeSamplingRatio, sourceLabels, targetLabels, concurrency);
@@ -86,11 +85,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         Graph masterGraph,
         double holdoutFraction
     ) {
-        var sourceNodes = sourceNodes(graph);
-        var targetNodes = targetNodes(graph);
-
-        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toRootNodeId(node));
-        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toRootNodeId(node));
+        LongPredicate isValidSourceNode = node -> sourceNodes.contains(graph.toOriginalNodeId(node));
+        LongPredicate isValidTargetNode = node -> targetNodes.contains(graph.toOriginalNodeId(node));
         LongLongPredicate isValidNodePair = (s, t) -> isValidSourceNode.apply(s) && isValidTargetNode.apply(t);
 
         RelationshipsBuilder selectedRelsBuilder = newRelationshipsBuilderWithProp(graph, Orientation.NATURAL);

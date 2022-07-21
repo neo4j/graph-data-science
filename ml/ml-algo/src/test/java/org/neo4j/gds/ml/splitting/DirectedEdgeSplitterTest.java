@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -52,6 +53,9 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     static String gdl = "(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)-[:T {foo: 5} ]->(:A)";
 
     @Inject
+    GraphStore graphStore;
+
+    @Inject
     TestGraph graph;
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multiLabel")
@@ -64,7 +68,13 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     TestGraph multiLabelGraph;
 
     @Inject
+    GraphStore multiLabelGraphStore;
+
+    @Inject
     TestGraph multiGraph;
+
+    @Inject
+    GraphStore multiGraphStore;
 
     @Test
     void splitMultiGraph() {
@@ -72,8 +82,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
             negativeSamplingRatio,
-            multiGraph.availableNodeLabels(),
-            multiGraph.availableNodeLabels(),
+            multiGraphStore.nodes(),
+            multiGraphStore.nodes(),
             4
         );
 
@@ -92,8 +102,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
             negativeSamplingRatio,
-            graph.availableNodeLabels(),
-            graph.availableNodeLabels(),
+            graphStore.nodes(),
+            graphStore.nodes(),
             4
         );
 
@@ -122,8 +132,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
             negativeSamplingRatio,
-            graph.availableNodeLabels(),
-            graph.availableNodeLabels(),
+            graphStore.nodes(),
+            graphStore.nodes(),
             4
         );
 
@@ -158,7 +168,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, huuuuugeDenseGraph.availableNodeLabels(), huuuuugeDenseGraph.availableNodeLabels(), 4);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, huuuuugeDenseGraph, huuuuugeDenseGraph, 4);
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -183,7 +193,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graphStore.nodes(), graphStore.nodes(), 4);
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -199,7 +209,13 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         Collection<NodeLabel> sourceNodeLabels = List.of(NodeLabel.of("A"), NodeLabel.of("B"));
         Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("C"), NodeLabel.of("D"));
         double negativeSamplingRatio = 2.0;
-        var splitter = new DirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, sourceNodeLabels, targetNodeLabels, 4);
+        var splitter = new DirectedEdgeSplitter(
+            Optional.of(1337L),
+            negativeSamplingRatio,
+            multiLabelGraphStore.getGraph(sourceNodeLabels),
+            multiLabelGraphStore.getGraph(targetNodeLabels),
+            4
+        );
 
         // select 60%, which is 2*0.6 rounded down to 1 rel in this graph. 3 were invalid.
         var result = splitter.split(multiLabelGraph, .6);
@@ -226,7 +242,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graphStore.nodes(), graphStore.nodes(), 4);
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
@@ -234,7 +250,7 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void shouldPreserveRelationshipWeights() {
-        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new DirectedEdgeSplitter(Optional.of(42L), 1.0, graphStore.nodes(), graphStore.nodes(), 4);
         EdgeSplitter.SplitResult split = splitter.split(graph, 0.01);
         var maybeProp = split.remainingRels().properties();
         assertThat(maybeProp).isPresent();
