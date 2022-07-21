@@ -81,7 +81,7 @@ Nodes with a negative community ID will only take part in the computation to the
 
 :algorithm-name: Conductance
 :graph-description: social network
-:image-file: louvain.svg
+:image-file: two-user-communities.svg
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:

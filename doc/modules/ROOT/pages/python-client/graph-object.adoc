@@ -41,11 +41,12 @@ To get a graph object that represents a graph that has already been projected in
 G = gds.graph.get("my-graph")
 ----
 
-In addition to those aforementioned there are three more methods that create graph objects:
+In addition to those aforementioned there are four more methods that create graph objects:
 
 * `gds.graph.project.cypher`
 * `gds.beta.graph.subgraph`
 * `gds.beta.graph.generate`
+* `gds.alpha.graph.sample.rwr`
 
 Their Cypher signatures map to Python in much the same way as `gds.graph.project` above.
 

@@ -21,15 +21,29 @@ For more information on this algorithm see:
 * https://arxiv.org/pdf/1706.02216.pdf[William L. Hamilton, Rex Ying, and Jure Leskovec. "Inductive Representation Learning on Large Graphs." 2018.^]
 * https://arxiv.org/pdf/1911.10232.pdf[Amit Pande, Kai Ni and Venkataramani Kini. "SWAG: Item Recommendations using Convolutions on Weighted Graphs." 2019.^]
 
+
 [[algorithms-embeddings-graph-sage-considerations]]
 == Considerations
+
+
+=== Isolated nodes
 
 If you are embedding a graph that has an isolated node, the aggregation step in GraphSAGE can only draw information from the node itself.
 When all the properties of that node are `0.0`, and the activation function is ReLU, this leads to an all-zero vector for that node.
 However, since GraphSAGE normalizes node embeddings using the L2-norm, and a zero vector cannot be normalized, we assign all-zero embeddings to such nodes under these special circumstances.
 In scenarios where you generate all-zero embeddings for orphan nodes, that may have impacts on downstream tasks such as nearest neighbor or other similarity algorithms. It may be more appropriate to filter out these disconnected nodes prior to running GraphSAGE.
 
+
+=== Memory estimation
+
 When doing memory estimation of the training, the feature dimension is computed as if each feature property is scalar.
+
+
+=== Graph pre-sampling to reduce time and memory
+
+Since training GraphSAGE may take a lot of time and memory to train on large graphs, it can be helpful to sample a smaller subgraph prior to training, and then training on that subgraph.
+The trained model can still be applied to predict embeddings on the full graph (or other graphs) since GraphSAGE is inductive.
+To sample a structurally representative subgraph, see xref::algorithms/alpha/rwr.adoc[Random walk with restarts sampling].
 
 
 == Tuning parameters

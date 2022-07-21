@@ -1,0 +1,164 @@
+[[alpha-algorithms-rwr]]
+[.alpha]
+= Random walk with restarts sampling
+:description: This section describes the Random walk with restarts sampling algorithm in the Neo4j Graph Data Science library.
+
+include::partial$/operations-reference/alpha-note.adoc[]
+
+:directed:
+:undirected:
+:homogeneous:
+include::partial$/algorithms/shared/algorithm-traits.adoc[]
+
+
+== Introduction
+
+Sometimes it may be useful to have a smaller but structurally representative sample of a given graph.
+For instance, such a sample could be used to train an inductive embedding algorithm (such as a graph neural network, like xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]). The training would then be faster than when training on the entire graph, and then the trained model could still be used to predict embeddings on the entire graph.
+
+Random walk with restarts (RWR) samples the graph by taking random walks from a set of start nodes (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`startNodes`] parameter below).
+On each step of a random walk, there is some probability (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`restartProbability`] parameter below) that the walk stops, and a new walk from one of the start nodes starts instead (i.e. the walk restarts).
+Each node visited on these walks will be part of the sampled subgraph.
+The algorithm stops walking when the requested number of nodes have been visited (see the xref::algorithms/alpha/rwr.adoc#alpha-algorithms-rwr-syntax-configuration[`samplingRatio`] parameter below).
+The relationships of the sampled subgraph are those induced by the sampled nodes (i.e. the relationships of the original graph that connect nodes that have been sampled).
+
+If at some point it's very unlikely to visit new nodes by random walking from the current set of start nodes (possibly due to the original graph being disconnected), the algorithm will lazily expand the pool of start nodes one at a time by picking nodes uniformly at random from the original graph.
+
+It was shown by Leskovec et al. in the paper _"Sampling from Large Graphs"_ that RWR is a very good sampling algorithm for preserving structural features of the original graph that was sampled from. Additionally, RWR has been successfully used throughout the literature to sample batches for graph neural network (GNN) training.
+
+
+[Note]
+====
+Random walk with restarts is sometimes also referred to as _rooted_ or _personalized_ random walk.
+====
+
+
+== Syntax
+
+[.project-sample-syntax]
+--
+.The following describes the API for running the algorithm
+[source, cypher, role=noplay]
+----
+CALL gds.alpha.graph.sample.rwr(
+  graphName: String,
+  fromGraphName: String,
+  configuration: Map
+)
+YIELD
+  graphName,
+  fromGraphName,
+  nodeCount,
+  relationshipCount,
+  projectMillis
+----
+
+.Parameters
+[opts="header",cols="1,1,4"]
+|===
+| Name                | Type    | Description
+| graphName           | String  | The name of the new graph that is stored in the graph catalog.
+| fromGraphName       | String  | The name of the original graph in the graph catalog.
+| configuration       | Map     | Additional parameters to configure the subgraph sampling.
+|===
+
+[[alpha-algorithms-rwr-syntax-configuration]]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name               | Type            | Default                           | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+| samplingRatio      | Float           | 0.15                              | yes      | The fraction of nodes in the original graph to be sampled.
+| restartProbability | Float           | 0.1                               | yes      | The probability that a sampling random walk restarts from one of the start nodes.
+| startNodes         | List of Integer | A node chosen uniformly at random | yes      | IDs of the initial set of nodes of the original graph from which the sampling random walks will start.
+|===
+
+.Results
+[opts="header",cols="1,1,4"]
+|===
+| Name                   | Type     | Description
+| graphName              | String   | The name of the new graph that is stored in the graph catalog.
+| fromGraphName          | String   | The name of the original graph in the graph catalog.
+| nodeCount              | Integer  | Number of nodes in the subgraph.
+| relationshipCount      | Integer  | Number of relationships in the subgraph.
+| projectMillis          | Integer  | Milliseconds for projecting the subgraph.
+|===
+--
+
+
+== Examples
+
+In this section we will demonstrate the usage of the RWR sampling algorithm on a small toy graph.
+
+
+=== Setting up
+
+:algorithm-name: Random walk with restarts sampling
+:graph-description: social network
+:image-file: two-user-communities.svg
+include::partial$/algorithms/shared/examples-intro.adoc[]
+
+.The following Cypher statement will create the example graph in the Neo4j database:
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  (nAlice:User {name: 'Alice'}),
+  (nBridget:User {name: 'Bridget'}),
+  (nCharles:User {name: 'Charles'}),
+  (nDoug:User {name: 'Doug'}),
+  (nMark:User {name: 'Mark'}),
+  (nMichael:User {name: 'Michael'}),
+
+  (nAlice)-[:LINK]->(nBridget),
+  (nAlice)-[:LINK]->(nCharles),
+  (nCharles)-[:LINK]->(nBridget),
+
+  (nAlice)-[:LINK]->(nDoug),
+
+  (nMark)-[:LINK]->(nDoug),
+  (nMark)-[:LINK]->(nMichael),
+  (nMichael)-[:LINK]->(nMark);
+----
+
+This graph has two clusters of _Users_, that are closely connected.
+Between those clusters there is one single relationship.
+
+We can now project the graph and store it in the graph catalog.
+
+include::partial$/algorithms/shared/examples-named-native-note.adoc[]
+
+.The following statement will project the graph and store it in the graph catalog.
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
+----
+
+
+=== Sampling
+
+We can now go on to sample a subgraph from "myGraph" using RWR.
+Using the "Alice" `User` node as our set of start nodes, we will venture to visit four nodes in the graph for our sample.
+Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as our sampling ratio.
+
+[role=query-example]
+--
+.The following will run the Random walk with restarts sampling algorithm:
+[source, cypher, role=noplay]
+----
+MATCH (start:User {name: 'Alice'})
+CALL gds.alpha.graph.sample.rwr('mySample', 'myGraph', { samplingRatio: 0.66, startNodes: [id(start)] })
+YIELD nodeCount, relationshipCount
+RETURN nodeCount, relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount
+| 4         | 4
+|===
+--
+
+As we can see we did indeed visit four nodes.
+Looking at the topology of our original graph, "myGraph", we can conclude that the nodes must be those corresponding to the `User` nodes with the name properties "Alice", "Bridget", "Charles" and "Doug".
+And the relationships sampled are those connecting these nodes.
