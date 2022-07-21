@@ -28,12 +28,12 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface RelationshipWeightConfig {
     String RELATIONSHIP_WEIGHT_PROPERTY = "relationshipWeightProperty";
@@ -42,6 +42,12 @@ public interface RelationshipWeightConfig {
     @Configuration.ConvertWith("validatePropertyName")
     default @Nullable String relationshipWeightProperty() {
         return null;
+    }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default Optional<String> maybeRelationshipWeightProperty() {
+        return Optional.ofNullable(relationshipWeightProperty());
     }
 
     @Value.Derived
