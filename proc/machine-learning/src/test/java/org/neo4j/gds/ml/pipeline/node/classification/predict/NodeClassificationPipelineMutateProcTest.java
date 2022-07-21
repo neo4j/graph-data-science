@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -102,7 +103,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class"));
         assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
     }
@@ -129,7 +130,7 @@ class NodeClassificationPipelineMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, db.databaseId(), GRAPH_NAME).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
         assertThat(mutatedGraph.availableNodeProperties()).isEqualTo(Set.of("a", "b", "class", "probabilities"));
         assertThat(mutatedGraph.nodeProperties("class").size()).isEqualTo(5);
         assertThat(mutatedGraph.nodeProperties("probabilities").size()).isEqualTo(5);

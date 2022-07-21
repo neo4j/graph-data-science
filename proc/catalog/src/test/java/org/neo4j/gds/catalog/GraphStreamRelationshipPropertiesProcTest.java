@@ -30,6 +30,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
@@ -176,7 +177,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedRelationshipProperties() {
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())
@@ -256,7 +257,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
 
     @Test
     void streamMutatedNodeProperty() {
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH_SAME_PROPERTIES).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH_SAME_PROPERTIES).graphStore();
 
         RelationshipsBuilder relImporter = GraphFactory.initRelationshipsBuilder()
             .nodes(graphStore.nodes())

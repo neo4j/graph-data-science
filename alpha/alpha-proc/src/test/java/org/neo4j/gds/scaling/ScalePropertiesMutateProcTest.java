@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -84,7 +85,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
             )
         ));
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore().getUnion();
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

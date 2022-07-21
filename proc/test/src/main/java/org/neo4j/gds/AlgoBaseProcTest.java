@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -105,6 +106,10 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
 
     default NamedDatabaseId namedDatabaseId() {
         return graphDb().databaseId();
+    }
+
+    default DatabaseId databaseId() {
+        return DatabaseId.of(graphDb());
     }
 
     default GraphDatabaseAPI emptyDb() {

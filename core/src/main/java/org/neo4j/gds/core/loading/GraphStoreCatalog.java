@@ -131,11 +131,6 @@ public final class GraphStoreCatalog {
     }
 
     @TestOnly
-    public static GraphStoreWithConfig get(String username, NamedDatabaseId databaseId, String graphName) {
-        return get(CatalogRequest.of(username, databaseId), graphName);
-    }
-
-    @TestOnly
     public static GraphStoreWithConfig get(String username, DatabaseId databaseId, String graphName) {
         return get(CatalogRequest.of(username, databaseId), graphName);
     }
@@ -205,14 +200,6 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).getDegreeDistribution(UserCatalog.UserCatalogKey.of(databaseId, graphName));
     }
 
-    public static Optional<Map<String, Object>> getDegreeDistribution(
-        String username,
-        NamedDatabaseId databaseId,
-        String graphName
-    ) {
-        return getUserCatalog(username).getDegreeDistribution(UserCatalog.UserCatalogKey.of(databaseId, graphName));
-    }
-
     public static void setDegreeDistribution(
         String username,
         DatabaseId databaseId,
@@ -270,10 +257,6 @@ public final class GraphStoreCatalog {
             String graphName();
 
             String databaseName();
-
-            static UserCatalogKey of(NamedDatabaseId databaseId, String graphName) {
-                return of(databaseId.name(), graphName);
-            }
 
             static UserCatalogKey of(DatabaseId databaseId, String graphName) {
                 return of(databaseId.databaseName(), graphName);

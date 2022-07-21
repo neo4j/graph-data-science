@@ -96,7 +96,7 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
@@ -138,6 +138,6 @@ public interface MutateProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG exte
                 })
         );
 
-        return GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
+        return GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore();
     }
 }

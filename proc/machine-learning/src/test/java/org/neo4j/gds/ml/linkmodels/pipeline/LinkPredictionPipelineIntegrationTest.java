@@ -26,6 +26,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -122,7 +123,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog
-            .get(getUsername(), db.databaseId(), "g")
+            .get(getUsername(), DatabaseId.of(db), "g")
             .graphStore();
     }
 

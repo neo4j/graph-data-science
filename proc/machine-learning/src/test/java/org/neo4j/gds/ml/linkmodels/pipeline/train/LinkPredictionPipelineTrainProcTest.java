@@ -27,6 +27,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -186,7 +187,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                 ))
         );
 
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
 
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");
@@ -257,7 +258,7 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
                     "configuration", aMapWithSize(15)
                 ))
         );
-        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+        GraphStore graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
 
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("N"))).doesNotContain("pr");
         assertThat(graphStore.nodePropertyKeys(NodeLabel.of("Ignore"))).doesNotContain("pr");

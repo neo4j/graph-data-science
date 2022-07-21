@@ -44,11 +44,11 @@ class GdlSupportPerClassExtensionTest {
 
     @Test
     void testHasGraph() {
-        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
+        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.NEW_DATABASE_ID, "graph")).isNotNull();
     }
 
     @Test
     void testStillHasGraph() {
-        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.DATABASE_ID, "graph")).isNotNull();
+        assertThat(GraphStoreCatalog.get("", BaseGdlSupportExtension.NEW_DATABASE_ID, "graph")).isNotNull();
     }
 }

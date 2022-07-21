@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -167,7 +168,7 @@ class GraphGenerateProcTest extends BaseProcTest {
         String query = "CALL gds.beta.graph.generate('g', 4, 2, {relationshipDistribution: 'RANDOM'})";
         runQuery(query);
 
-        var graph = GraphStoreCatalog.get(this.getUsername(), this.db.databaseId(), "g").graphStore();
+        var graph = GraphStoreCatalog.get(this.getUsername(), DatabaseId.of(this.db), "g").graphStore();
 
         assertThat(graph.schema().relationshipSchema().hasProperties()).isFalse();
         assertThat(graph.schema().relationshipSchema().properties().get(RelationshipType.of("REL"))).isEmpty();

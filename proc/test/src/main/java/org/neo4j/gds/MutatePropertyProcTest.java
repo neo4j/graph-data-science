@@ -104,7 +104,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
 
         runMutation(graphName, filterConfig);
 
-        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
+        GraphStore mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore();
         Assertions.assertEquals(
             Collections.singleton(mutateProperty()),
             mutatedGraph.nodePropertyKeys(NodeLabel.of("A"))
@@ -139,7 +139,7 @@ public interface MutatePropertyProcTest<ALGORITHM extends Algorithm<RESULT>, CON
                 })
         );
 
-        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 

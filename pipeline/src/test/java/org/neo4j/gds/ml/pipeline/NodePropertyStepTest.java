@@ -28,6 +28,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
@@ -93,7 +94,7 @@ class NodePropertyStepTest extends BaseProcTest {
             )
         );
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), GRAPH_NAME).graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), GRAPH_NAME).graphStore();
 
         graphStore
             .nodeLabels()

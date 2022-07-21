@@ -220,7 +220,7 @@ public class LabelPropagationMutateProcTest extends LabelPropagationProcTest<Lab
             expectedValueList.add(Long.MIN_VALUE);
             RESULT.forEach(component -> expectedValueList.add(component + deletedNodes + 1));
 
-            Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, namedDatabaseId(), graphName).graphStore().getUnion();
+            Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, databaseId(), graphName).graphStore().getUnion();
             mutatedGraph.forEachNode(nodeId -> {
                     assertEquals(
                         expectedValueList.get(Math.toIntExact(nodeId)),

@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.graph.DoubleGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
@@ -59,7 +60,7 @@ class GraphStreamGraphPropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
-        graphStore = GraphStoreCatalog.get("", db.databaseId(), DEFAULT_GRAPH_NAME).graphStore();
+        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), DEFAULT_GRAPH_NAME).graphStore();
     }
 
     @AfterEach

@@ -25,6 +25,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -61,13 +62,13 @@ class MultiGraphProjectTest extends BaseProcTest {
         runQuery(create2);
 
         Graph graph1 = GraphStoreCatalog
-            .get("", db.databaseId(), "graph1")
+            .get("", DatabaseId.of(db), "graph1")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE1"), Optional.empty());
         assertGraph(graph1);
 
         Graph graph2 = GraphStoreCatalog
-            .get("", db.databaseId(), "graph2")
+            .get("", DatabaseId.of(db), "graph2")
             .graphStore()
             .getGraph(RelationshipType.of("TYPE2"), Optional.empty());
         assertGraph(graph2);

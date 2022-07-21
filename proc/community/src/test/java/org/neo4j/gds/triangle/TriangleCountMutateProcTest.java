@@ -115,7 +115,7 @@ class TriangleCountMutateProcTest
             "nodePropertiesWritten", 4L
         )));
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "testGraph").graphStore().getUnion();
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), databaseId(), "testGraph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

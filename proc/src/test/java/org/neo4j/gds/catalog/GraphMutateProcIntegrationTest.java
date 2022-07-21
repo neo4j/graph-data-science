@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -182,7 +183,7 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
         runQuery(louvainQuery);
         runQuery(nodeSimilarityQuery);
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH).graphStore().getUnion());
 
         int embeddingDimension = 64;
         String graphSageModel = "graphSageModel";
@@ -252,6 +253,6 @@ class GraphMutateProcIntegrationTest extends BaseProcTest {
             .yields()
         );
 
-        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), db.databaseId(), TEST_GRAPH).graphStore().getUnion());
+        assertGraphEquals(EXPECTED_GRAPH, GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), TEST_GRAPH).graphStore().getUnion());
     }
 }

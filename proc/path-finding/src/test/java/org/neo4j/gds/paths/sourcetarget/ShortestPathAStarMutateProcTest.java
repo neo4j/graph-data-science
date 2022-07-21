@@ -168,7 +168,7 @@ class ShortestPathAStarMutateProcTest extends ShortestPathAStarProcTest<Shortest
             "configuration", isA(Map.class)
         )));
 
-        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
+        var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (nA)-[:PATH {w: 2979.0D}]->(nX)");
 
         assertGraphEquals(expected, actual);

@@ -166,7 +166,7 @@ public class NodeSimilarityWriteProcTest
                         0.0
                     )
                 ),
-            GraphStoreCatalog.get(getUsername(), namedDatabaseId(), resultGraphName).graphStore().getUnion()
+            GraphStoreCatalog.get(getUsername(), databaseId(), resultGraphName).graphStore().getUnion()
         );
     }
 

@@ -75,10 +75,10 @@ class GraphStoreCatalogTest {
     @Test
     void overwrite() {
         GraphStoreCatalog.set(GraphProjectFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), graphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(graphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(graphStore);
         GraphStoreCatalog.overwrite(GraphProjectFromStoreConfig.emptyWithName(USER_NAME, GRAPH_NAME), otherGraphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(otherGraphStore);
-        assertThat(GraphStoreCatalog.get(USER_NAME, DATABASE_ID, GRAPH_NAME).graphStore()).isNotEqualTo(graphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME).graphStore()).isEqualTo(otherGraphStore);
+        assertThat(GraphStoreCatalog.get(USER_NAME, NEW_DATABASE_ID, GRAPH_NAME).graphStore()).isNotEqualTo(graphStore);
     }
 
     @Test

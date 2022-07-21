@@ -28,6 +28,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -105,7 +106,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore();
+        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
     }
 
     @AfterEach

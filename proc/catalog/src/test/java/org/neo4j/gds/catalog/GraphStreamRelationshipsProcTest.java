@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipsProc.TopologyResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -140,7 +141,7 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
         ));
 
         var expectedRelationships = new ArrayList<TopologyResult>();
-        var generatedGraph = GraphStoreCatalog.get("", db.databaseId(), "generatedGraph").graphStore().getUnion();
+        var generatedGraph = GraphStoreCatalog.get("", DatabaseId.of(db), "generatedGraph").graphStore().getUnion();
         generatedGraph.forEachNode(nodeId -> {
             generatedGraph.forEachRelationship(nodeId, (source, target) -> expectedRelationships.add(
                 relationship(source, target, "REL")

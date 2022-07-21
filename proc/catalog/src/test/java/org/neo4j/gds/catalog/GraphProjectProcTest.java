@@ -38,6 +38,7 @@ import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.MapUtil;
@@ -480,7 +481,7 @@ class GraphProjectProcTest extends BaseProcTest {
             ))
         );
 
-        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[:B {w:55}]->()"), graph);
     }
 
@@ -504,7 +505,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("()-[{w: 55}]->()"), graph);
     }
 
@@ -611,7 +612,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        Graph graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
         assertGraphEquals(fromGdl(formatWithLocale("()-[:B {w: %d}]->()", expectedValue)), graph);
     }
 
@@ -760,7 +761,7 @@ class GraphProjectProcTest extends BaseProcTest {
         );
 
         assertGraphExists(name);
-        var graph = GraphStoreCatalog.get("", db.databaseId(), name).graphStore().getUnion();
+        var graph = GraphStoreCatalog.get("", DatabaseId.of(db), name).graphStore().getUnion();
         assertGraphEquals(fromGdl("({ratings: [1.0, 2.0]}), ({ratings: [5.0]})"), graph);
     }
 
@@ -903,7 +904,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
         runQuery(query, map());
 
-        Graph graph = GraphStoreCatalog.get("", db.databaseId(), "g").graphStore().getUnion();
+        Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db), "g").graphStore().getUnion();
         Graph expected = fromGdl("(:Node { fooProp: 42, barProp: 13.37D })" +
                                  "(:Node { fooProp: 43, barProp: 13.38D })" +
                                  "(:Node { fooProp: 44, barProp: 13.39D })" +
@@ -955,7 +956,7 @@ class GraphProjectProcTest extends BaseProcTest {
             assertEquals("MAX", maxCostParams.get("aggregation").toString());
         });
 
-        Graph actual = GraphStoreCatalog.get("", db.databaseId(), "aggGraph").graphStore().getUnion();
+        Graph actual = GraphStoreCatalog.get("", DatabaseId.of(db), "aggGraph").graphStore().getUnion();
         Graph expected = fromGdl("(a:Node)-[:TYPE_1 {w:85.3D}]->(b:Node),(a)-[:TYPE_1 {w:42.1D}]->(b),(a)-[:TYPE_1 {w:2.0D}]->(b)");
         assertGraphEquals(expected, actual);
     }
@@ -1557,7 +1558,7 @@ class GraphProjectProcTest extends BaseProcTest {
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
         return GraphStoreCatalog
-            .get(getUsername(), db.databaseId(), graphName)
+            .get(getUsername(), DatabaseId.of(db), graphName)
             .graphStore()
             .getGraph(relationshipType, Optional.of(property));
     }

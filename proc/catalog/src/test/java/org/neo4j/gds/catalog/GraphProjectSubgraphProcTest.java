@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.beta.filter.expression.SemanticErrors;
 import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -87,7 +88,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
         // are added.
 
         var originalGraphProjectConfig = (GraphProjectFromStoreConfig) GraphStoreCatalog
-            .get(getUsername(), db.databaseId(), "graph")
+            .get(getUsername(), DatabaseId.of(db), "graph")
             .config();
         var expectedNodeProjection = originalGraphProjectConfig.nodeProjections().toObject();
         var expectedRelationshipProjection = originalGraphProjectConfig.relationshipProjections().toObject();
@@ -114,7 +115,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
         var subgraphStore = GraphStoreCatalog.get(
             getUsername(),
-            db.databaseId(),
+            DatabaseId.of(db),
             "subgraph"
         ).graphStore();
 
@@ -183,7 +184,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
         runQuery(subGraphQuery, Map.of("weight", 42));
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), "subgraph").graphStore();
         assertThat(graphStore.relationshipCount()).isEqualTo(expectedRelationships);
     }
 
@@ -200,7 +201,7 @@ class GraphProjectSubgraphProcTest extends BaseProcTest {
 
         runQuery(subGraphQuery);
 
-        var graphStore = GraphStoreCatalog.get("", db.databaseId(), "subgraph").graphStore();
+        var graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), "subgraph").graphStore();
         assertThat(graphStore.nodeCount()).isEqualTo(expectedNodes);
     }
 }

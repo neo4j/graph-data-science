@@ -33,6 +33,7 @@ import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -169,7 +170,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .withNodeProperties(List.of("scalar", "array"), DefaultValue.DEFAULT)
                 .yields());
 
-            graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), GRAPH_NAME).graphStore();
+            graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), GRAPH_NAME).graphStore();
         }
 
         @Test
@@ -395,7 +396,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             runQuery(createQuery);
 
-            var invalidGraphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), graphName).graphStore();
+            var invalidGraphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), graphName).graphStore();
 
             var pipeline = new LinkPredictionTrainingPipeline();
             pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder().build());

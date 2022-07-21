@@ -27,6 +27,7 @@ import org.neo4j.gds.ImmutablePropertyMapping;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -233,7 +234,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(
@@ -276,7 +277,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
 
         assertEquals(6, mutatedGraph.relationshipCount());
 
@@ -317,7 +318,7 @@ class KnnMutateProcTest extends KnnProcTest<KnnMutateConfig>
             .addParameter("mutateProperty", relationshipProperty).yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

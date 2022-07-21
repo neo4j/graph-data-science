@@ -151,7 +151,7 @@ class ShortestPathYensMutateProcTest extends ShortestPathYensProcTest<ShortestPa
             "configuration", isA(Map.class)
         )));
 
-        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
+        var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(
             EXISTING_GRAPH +
             // new relationship as a result from mutate

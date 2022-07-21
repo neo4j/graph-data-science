@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -50,7 +51,7 @@ class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 
-        graphStore = GraphStoreCatalog.get("", db.databaseId(), DEFAULT_GRAPH_NAME).graphStore();
+        graphStore = GraphStoreCatalog.get("", DatabaseId.of(db), DEFAULT_GRAPH_NAME).graphStore();
     }
 
     @AfterEach

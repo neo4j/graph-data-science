@@ -105,7 +105,7 @@ class Node2VecMutateProcTest
                 })
         );
 
-        GraphStore mutatedGraphStore = GraphStoreCatalog.get(AlgoBaseProcTest.TEST_USERNAME, namedDatabaseId(), graphName).graphStore();
+        GraphStore mutatedGraphStore = GraphStoreCatalog.get(AlgoBaseProcTest.TEST_USERNAME, databaseId(), graphName).graphStore();
         assertMutatedGraph(mutatedGraphStore);
     }
 

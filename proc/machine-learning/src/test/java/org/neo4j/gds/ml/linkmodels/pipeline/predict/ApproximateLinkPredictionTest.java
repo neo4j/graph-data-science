@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -86,7 +87,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        var graphStore = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore();
+        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
         graph = graphStore.getUnion();
     }
 

@@ -144,7 +144,7 @@ class ShortestPathDijkstraMutateProcTest extends ShortestPathDijkstraProcTest<Sh
             "configuration", isA(Map.class)
         )));
 
-        var actual = GraphStoreCatalog.get(getUsername(), namedDatabaseId(), "graph").graphStore().getUnion();
+        var actual = GraphStoreCatalog.get(getUsername(), databaseId(), "graph").graphStore().getUnion();
         var expected = TestSupport.fromGdl(EXISTING_GRAPH + ", (a)-[:PATH {w: 20.0D}]->(f)");
 
         assertGraphEquals(expected, actual);

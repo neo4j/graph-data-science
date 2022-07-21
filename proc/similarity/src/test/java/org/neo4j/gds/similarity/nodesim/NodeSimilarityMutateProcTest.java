@@ -27,6 +27,7 @@ import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.MutateRelationshipWithPropertyTest;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -235,7 +236,7 @@ class NodeSimilarityMutateProcTest
             .yields();
         runQuery(algoQuery);
 
-        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "graph").graphStore().getUnion();
+        Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "graph").graphStore().getUnion();
 
         assertGraphEquals(
             fromGdl(

@@ -28,6 +28,7 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -69,7 +70,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             Map.of("topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
         );
 
-        Graph actualGraph = GraphStoreCatalog.get(getUsername(), db.databaseId(), "g").graphStore().getGraph(
+        Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore().getGraph(
             NodeLabel.of(nodeLabel), RelationshipType.of("PREDICTED"), Optional.of("probability"));
 
         var relationshipRowsGdl = List.of(
@@ -104,7 +105,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     @Test
     void checkYieldsAndMutatedTypeAndProperty() {
         var graphStore = GraphStoreCatalog
-            .get(getUsername(), db.databaseId(), "g")
+            .get(getUsername(), DatabaseId.of(db), "g")
             .graphStore();
 
         var query = GdsCypher
