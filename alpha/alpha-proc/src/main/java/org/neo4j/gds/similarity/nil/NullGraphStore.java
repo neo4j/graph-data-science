@@ -164,6 +164,11 @@ public class NullGraphStore implements GraphStore {
     }
 
     @Override
+    public boolean isUndirected(RelationshipType relationshipType) {
+        return false;
+    }
+
+    @Override
     public boolean hasRelationshipProperty(RelationshipType relType, String propertyKey) {
         return false;
     }
