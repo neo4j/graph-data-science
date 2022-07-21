@@ -214,6 +214,9 @@ project(':string-formatting').projectDir = file('string-formatting')
 include('subgraph-filtering')
 project(':subgraph-filtering').projectDir = file('subgraph-filtering')
 
+include('graph-sampling')
+project(':graph-sampling').projectDir = file('graph-sampling')
+
 include('test-graph-loaders')
 project(':test-graph-loaders').projectDir = file('test-graph-loaders')
 
