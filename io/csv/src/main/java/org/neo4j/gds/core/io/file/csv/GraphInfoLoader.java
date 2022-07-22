@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -39,6 +40,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.UUID;
 
 public class GraphInfoLoader {
     private final Path graphInfoPath;
@@ -71,6 +73,11 @@ public class GraphInfoLoader {
     }
 
     public static class GraphInfoLine {
+        // Can parse a databaseId if present, for backwards compatibility. The property is never used.
+        @JsonIgnore
+        @JsonProperty
+        UUID databaseId;
+
         @JsonProperty
         String databaseName;
 

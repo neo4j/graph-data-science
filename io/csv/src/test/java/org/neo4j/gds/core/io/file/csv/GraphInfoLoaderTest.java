@@ -64,6 +64,34 @@ class GraphInfoLoaderTest {
     }
 
     /**
+     * Test for backwards compatibility by including `databaseId`
+     */
+    @Test
+    void shouldLoadGraphInfoWithDatabaseId(@TempDir Path exportDir) throws IOException {
+        var databaseId = DatabaseId.from("my-database");
+        var graphInfoFile = exportDir.resolve(GRAPH_INFO_FILE_NAME).toFile();
+        var lines = List.of(
+            String.join(", ", "databaseId", "databaseName", "nodeCount", "maxOriginalId", "relTypeCounts"),
+            String.join(", ", "26ca2600-2f7a-4e99-acc1-9d976603698c", "my-database", "19", "1337", "REL;42")
+        );
+        FileUtils.writeLines(graphInfoFile, lines);
+
+        var graphInfoLoader = new GraphInfoLoader(exportDir, CSV_MAPPER);
+        var graphInfo = graphInfoLoader.load();
+
+        assertThat(graphInfo).isNotNull();
+        assertThat(graphInfo.databaseId()).isEqualTo(databaseId);
+        assertThat(graphInfo.databaseId().databaseName()).isEqualTo("my-database");
+
+        assertThat(graphInfo.nodeCount()).isEqualTo(19L);
+        assertThat(graphInfo.maxOriginalId()).isEqualTo(1337L);
+
+        assertThat(graphInfo.relationshipTypeCounts()).containsExactlyEntriesOf(
+            Map.of(RelationshipType.of("REL"), 42L)
+        );
+    }
+
+    /**
      * Test for backwards compatibility by leaving out `relTypeCounts`
      */
     @Test
