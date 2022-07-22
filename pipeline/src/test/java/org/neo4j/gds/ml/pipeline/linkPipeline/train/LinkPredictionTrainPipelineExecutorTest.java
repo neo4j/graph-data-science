@@ -75,6 +75,9 @@ import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.TestNodePropertyStepWithFixedEstimation;
+import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.FEATURE_INPUT;
+import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.TEST;
+import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.TRAIN;
 
 final class LinkPredictionTrainPipelineExecutorTest {
 
@@ -625,6 +628,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(q4:Q {height: 12})," +
             "(q5:Q {height: 50})," +
 
+            "(x1:X {height: 50})," +
+            "(x2:X {height: 50})," +
+
             "(p1)-[:REL2]->(q1)," +
             "(p1)-[:REL2]->(q3)," +
             "(p1)-[:REL2]->(q5)," +
@@ -633,6 +639,9 @@ final class LinkPredictionTrainPipelineExecutorTest {
             "(p2)-[:REL2]->(q5)," +
             "(p4)-[:REL2]->(q5)," +
             "(p3)-[:REL2]->(q4)," +
+
+            "(p1)-[:CONTEXT]->(x1)," +
+            "(p3)-[:CONTEXT]->(x2)," +
 
             "(p1)-[:CONTEXT]->(p3)," +
             "(q1)-[:CONTEXT]->(q1)," +
@@ -685,7 +694,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .randomSeed(1337L)
                 .build();
 
-
             var result = new LinkPredictionTrainPipelineExecutor(
                 pipeline,
                 config,
@@ -700,6 +708,52 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 0.666,
                 Offset.offset(1e-3)
             );
+        }
+
+        @Test
+        void nodePropertyStepsIncludeContextNodes() {
+            var pipeline = new LinkPredictionTrainingPipeline();
+
+            pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
+                .validationFolds(2)
+                .negativeSamplingRatio(1)
+                .trainFraction(0.5)
+                .testFraction(0.5)
+                .build());
+            pipeline.addTrainerConfig(RandomForestClassifierTrainerConfig.DEFAULT);
+            pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
+
+            var config = LinkPredictionTrainConfigImpl.builder()
+                .username(username)
+                .modelName("model")
+                .graphName(G_BI)
+                .targetRelationshipType("REL2")
+                .sourceNodeLabel("P")
+                .targetNodeLabel("Q")
+                .contextRelationshipTypes(List.of("CONTEXT"))
+                .contextNodeLabels(List.of("X"))
+                .metrics(List.of(LinkMetric.AUCPR.name()))
+                .pipeline("DUMMY")
+                .negativeClassWeight(1)
+                .randomSeed(1337L)
+                .build();
+
+            var splits = new LinkPredictionTrainPipelineExecutor(
+                pipeline,
+                config,
+                ExecutionContext.EMPTY,
+                graphStore,
+                G_BI,
+                ProgressTracker.NULL_TRACKER
+            ).splitDataset();
+
+            assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
+                NodeLabel.of("P"),
+                NodeLabel.of("Q"),
+                NodeLabel.of("X")
+            );
+            assertThat(splits.get(TEST).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
+            assertThat(splits.get(TRAIN).nodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("P"), NodeLabel.of("Q"));
         }
     }
 }

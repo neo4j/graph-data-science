@@ -146,13 +146,17 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
 
         var splitConfig = pipeline.splitConfig();
 
-        var nodeLabels = config.nodeLabelIdentifiers(graphStore);
-
         return Map.of(
-            DatasetSplits.TRAIN, ImmutableGraphFilter.builder().nodeLabels(nodeLabels).intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType())).build(),
-            DatasetSplits.TEST, ImmutableGraphFilter.builder().nodeLabels(nodeLabels).intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType())).build(),
+            DatasetSplits.TRAIN, ImmutableGraphFilter.builder()
+                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+                .intermediateRelationshipTypes(List.of(splitConfig.trainRelationshipType()))
+                .build(),
+            DatasetSplits.TEST, ImmutableGraphFilter.builder()
+                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+                .intermediateRelationshipTypes(List.of(splitConfig.testRelationshipType()))
+                .build(),
             DatasetSplits.FEATURE_INPUT, ImmutableGraphFilter.builder()
-                .nodeLabels(nodeLabels)
+                .nodeLabels(config.featureInputLabels(graphStore))
                 .intermediateRelationshipTypes(List.of(splitConfig.featureInputRelationshipType()))
                 .contextRelationshipTypes(config.internalContextRelationshipType(graphStore))
                 .build()
