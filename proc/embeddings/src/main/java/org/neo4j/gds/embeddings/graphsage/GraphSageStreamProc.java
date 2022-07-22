@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.StreamProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -46,8 +46,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualConfig;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPHSAGE_DESCRIPTION, executionMode = STREAM)
@@ -59,8 +57,6 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog(), username.username());
-
         return stream(compute(graphName, configuration));
     }
 
@@ -70,8 +66,6 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog(), username.username());
-
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
@@ -112,7 +106,7 @@ public class GraphSageStreamProc extends StreamProc<GraphSage, GraphSage.GraphSa
     }
 
     @Override
-    public GraphAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<GraphSage, GraphSageStreamConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 

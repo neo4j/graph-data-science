@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -32,13 +31,8 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.GraphStoreValidation;
 import org.neo4j.gds.executor.validation.AfterLoadValidation;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.List;
-import java.util.Map;
-
-import static org.neo4j.gds.config.RelationshipWeightConfig.RELATIONSHIP_WEIGHT_PROPERTY;
-import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 
 public final class GraphSageCompanion {
 
@@ -81,31 +75,6 @@ public final class GraphSageCompanion {
                 );
             }
         };
-    }
-
-    static Map<String, Object> getActualConfig(Object graphNameOrConfig, Map<String, Object> maybeConfig) {
-        return graphNameOrConfig instanceof Map
-            ? (Map<String, Object>) graphNameOrConfig
-            : maybeConfig;
-    }
-
-    // FIXME:
-    //  For AlgoBaseProc to provide the correct graph, this needs to match with the `trainConfig.relationshipWeightProperty`.
-    //  Ideally we would resolve the graph from the GraphStore after the model was resolved. But as GraphSage also supports anonymous loading, this is not possible with the current AlgoBaseProc.
-    //  For now we resolve the model at proc level and set the corresponding relationshipWeightProperty (thus no default)
-    public static void injectRelationshipWeightPropertyFromModel(Map<String, Object> configuration, ModelCatalog modelCatalog, String username) {
-        if (configuration.containsKey(RELATIONSHIP_WEIGHT_PROPERTY)) {
-            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
-                "The parameter `%s` cannot be overwritten during embedding computation. Instead, specify this parameter in the configuration of the model training.",
-                RELATIONSHIP_WEIGHT_PROPERTY
-            ));
-        }
-
-        String modelName = CypherMapWrapper.create(configuration).requireString(MODEL_NAME_KEY);
-
-        var trainProperty = GraphSageModelResolver
-            .resolveModel(modelCatalog, username, modelName).trainConfig().relationshipWeightProperty();
-        configuration.put(RELATIONSHIP_WEIGHT_PROPERTY, trainProperty);
     }
 
 }
