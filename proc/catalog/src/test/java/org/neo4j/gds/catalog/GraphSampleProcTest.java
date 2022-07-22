@@ -96,13 +96,13 @@ class GraphSampleProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"0.28,1", "0.36,2"})
+    @CsvSource(value = {"0.28,1", "0.35,2"})
     void shouldUseSingleStartNode(double samplingRatio, long expectedStartNodeCount) {
         runQuery("CALL gds.graph.project('g', '*', '*')");
 
         var query =
             "MATCH (z:Z {prop: 42})" +
-            " CALL gds.alpha.graph.sample.rwr('sample', 'g', {concurrency: 1, samplingRatio: $samplingRatio, startNodes: [id(z)]})" +
+            " CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: $samplingRatio, startNodes: [id(z)], concurrency: 1, randomSeed: 42} )" +
             " YIELD startNodeCount RETURN startNodeCount";
         assertCypherResult(query, Map.of("samplingRatio", samplingRatio), List.of(
             Map.of("startNodeCount", expectedStartNodeCount)
