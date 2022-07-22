@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PropertyCursor;
 import org.neo4j.gds.api.Relationships;
@@ -57,11 +58,17 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Inject
     TestGraph graph;
 
+    @Inject
+    GraphStore graphStore;
+
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multiLabel")
     static String gdlMultiLabel = "(n1 :A)-[:T {foo: 5} ]->(n2 :C)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :D)";
 
     @Inject
     TestGraph multiLabelGraph;
+
+    @Inject
+    GraphStore multiLabelGraphStore;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multi")
     static String gdlMultiGraph = "(n1 :A), (n2: A), (n1)-->(n2), (n2)-->(n1), (n1)-->(n2), (n1)-->(n2)";
@@ -69,10 +76,19 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Inject
     TestGraph multiGraph;
 
+    @Inject
+    GraphStore multiGraphStore;
+
     @Test
     void split() {
         double negativeSamplingRatio = 1.0;
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            negativeSamplingRatio,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -99,8 +115,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var splitter = new DirectedEdgeSplitter(
             Optional.of(-1L),
             negativeSamplingRatio,
-            multiGraph.availableNodeLabels(),
-            multiGraph.availableNodeLabels(),
+            multiGraphStore.nodes(),
+            multiGraphStore.nodes(),
             4
         );
 
@@ -116,7 +132,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     @Test
     void splitWithNegativeRatio() {
         double negativeSamplingRatio = 2.0;
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            negativeSamplingRatio,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -150,7 +172,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1, huuuuugeDenseGraph.availableNodeLabels(), huuuuugeDenseGraph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(42L),
+            1,
+            huuuuugeDenseGraph,
+            huuuuugeDenseGraph,
+            4
+        );
         var splitResult = splitter.split(huuuuugeDenseGraph, 0.9);
         var graph = GraphFactory.create(
             huuuuugeDenseGraph.idMap(),
@@ -168,7 +196,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
                     );
                 }
                 return true;
-            } );
+            });
             return true;
         });
     }
@@ -186,8 +214,20 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(Optional.of(12L), 1, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(Optional.of(12L), 1, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(
+            Optional.of(12L),
+            1,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        ).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(
+            Optional.of(12L),
+            1,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        ).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -216,8 +256,20 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .build()
             .generate();
 
-        var splitResult1 = new UndirectedEdgeSplitter(Optional.empty(), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
-        var splitResult2 = new UndirectedEdgeSplitter(Optional.empty(), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4).split(graph, 0.5);
+        var splitResult1 = new UndirectedEdgeSplitter(
+            Optional.empty(),
+            1.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        ).split(graph, 0.5);
+        var splitResult2 = new UndirectedEdgeSplitter(
+            Optional.empty(),
+            1.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        ).split(graph, 0.5);
         var remainingAreEqual = relationshipsAreEqual(
             graph,
             splitResult1.remainingRels(),
@@ -235,7 +287,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void negativeEdgeSampling() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(42L),
+            1.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
 
         var sum = 0;
         for (int i = 0; i < 100; i++) {
@@ -248,10 +306,16 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void splitWithFilteringWithSameSourceTargetLabels() {
-        Collection<NodeLabel> sourceNodeLabels = List.of(NodeLabel.of("A"));
-        Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("A"));
+        var sourceNodeLabels = List.of(NodeLabel.of("A"));
+        var targetNodeLabels = List.of(NodeLabel.of("A"));
         double negativeSamplingRatio = 2.0;
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, sourceNodeLabels, targetNodeLabels, 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            negativeSamplingRatio,
+            graphStore.getGraph(NodeLabel.of("A")),
+            graphStore.getGraph(NodeLabel.of("A")),
+            4
+        );
 
         // select 40%, which is 1.2 rounded down to 1 (undirected) rels in this graph
         var result = splitter.split(graph, .4);
@@ -280,7 +344,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         Collection<NodeLabel> sourceNodeLabels = List.of(NodeLabel.of("A"), NodeLabel.of("B"));
         Collection<NodeLabel> targetNodeLabels = List.of(NodeLabel.of("C"), NodeLabel.of("D"));
         double negativeSamplingRatio = 2.0;
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), negativeSamplingRatio, sourceNodeLabels, targetNodeLabels, 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            negativeSamplingRatio,
+            multiLabelGraphStore.getGraph(sourceNodeLabels),
+            multiLabelGraphStore.getGraph(targetNodeLabels),
+            4
+        );
 
         // select 70%, which is 6*0.7/2 rounded down to 2 (undirected) rels in this graph. 4 were invalid.
         var result = splitter.split(multiLabelGraph, .7);
@@ -307,7 +377,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void samplesWithinBounds() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(42L),
+            1.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
         assertEquals(1, splitter.samplesPerNode(100, 1, 1));
@@ -315,7 +391,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void shouldPreserveRelationshipWeights() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(42L), 1.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(42L),
+            1.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
         EdgeSplitter.SplitResult split = splitter.split(graph, 0.01);
         var maybeProp = split.remainingRels().properties();
         assertThat(maybeProp).isPresent();
@@ -330,7 +412,13 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
 
     @Test
     void zeroNegativeSamples() {
-        var splitter = new UndirectedEdgeSplitter(Optional.of(1337L), 0.0, graph.availableNodeLabels(), graph.availableNodeLabels(), 4);
+        var splitter = new UndirectedEdgeSplitter(
+            Optional.of(1337L),
+            0.0,
+            graphStore.nodes(),
+            graphStore.nodes(),
+            4
+        );
 
         // select 20%, which is 1 (undirected) rels in this graph
         var result = splitter.split(graph, .2);
@@ -350,7 +438,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         g1.forEachNode(nodeId -> {
             g1.forEachRelationship(nodeId, fallbackValue, (source, target, val) -> {
                 var g2Property = g2.relationshipProperty(source, target, fallbackValue);
-                if ((!g2.exists(source, target)) || (Double.compare(g2Property, val) != 0))  {
+                if ((!g2.exists(source, target)) || (Double.compare(g2Property, val) != 0)) {
                     equalSoFar.set(false);
                 }
                 return equalSoFar.get();

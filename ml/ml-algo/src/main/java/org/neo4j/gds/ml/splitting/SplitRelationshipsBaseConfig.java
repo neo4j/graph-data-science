@@ -29,6 +29,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,11 +48,11 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
 
     default List<String> sourceNodeLabels() {
         return List.of(ElementProjection.PROJECT_ALL);
-    };
+    }
 
     default List<String> targetNodeLabels() {
         return List.of(ElementProjection.PROJECT_ALL);
-    };
+    }
 
     @Configuration.Ignore
     @Override
@@ -88,10 +89,14 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
 
     @Configuration.Ignore
     @Value.Derived
-    default List<RelationshipType> superRelationshipTypes() {
-        return Stream.concat(nonNegativeRelationshipTypes().stream(), relationshipTypes().stream())
-            .map(RelationshipType::of)
-            .collect(Collectors.toList());
+    default List<RelationshipType> superRelationshipTypes(GraphStore graphStore) {
+        return relationshipTypes().contains(ElementProjection.PROJECT_ALL) || nonNegativeRelationshipTypes().contains(
+            ElementProjection.PROJECT_ALL)
+            ? new ArrayList<>(graphStore.relationshipTypes())
+            : Stream.of(relationshipTypes(), nonNegativeRelationshipTypes())
+                .flatMap(List::stream)
+                .map(RelationshipType::of)
+                .collect(Collectors.toList());
     }
 
     @Configuration.GraphStoreValidationCheck

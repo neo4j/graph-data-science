@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.splitting;
 
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
@@ -33,7 +32,6 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -45,23 +43,20 @@ public abstract class EdgeSplitter {
     public static final double POSITIVE = 1D;
     public static final String RELATIONSHIP_PROPERTY = "label";
     private static final int MAX_RETRIES = 20;
-
     private final Random rng;
-    private final Collection<NodeLabel> sourceLabels;
 
-    private final Collection<NodeLabel> targetLabels;
-
-    final double negativeSamplingRatio;
-
+    protected final IdMap sourceNodes;
+    protected final IdMap targetNodes;
     protected int concurrency;
+    protected final double negativeSamplingRatio;
 
-    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, Collection<NodeLabel> sourceLabels, Collection<NodeLabel> targetLabels, int concurrency) {
+    EdgeSplitter(Optional<Long> maybeSeed, double negativeSamplingRatio, IdMap sourceNodes, IdMap targetNodes, int concurrency) {
         this.rng = new Random();
         maybeSeed.ifPresent(rng::setSeed);
 
         this.negativeSamplingRatio = negativeSamplingRatio;
-        this.sourceLabels = sourceLabels;
-        this.targetLabels = targetLabels;
+        this.sourceNodes = sourceNodes;
+        this.targetNodes = targetNodes;
         this.concurrency = concurrency;
     }
 
@@ -70,14 +65,6 @@ public abstract class EdgeSplitter {
         Graph masterGraph,
         double holdoutFraction
     );
-
-    protected IdMap sourceNodes(Graph graph) {
-        return graph.withFilteredLabels(sourceLabels, concurrency);
-    }
-
-    protected IdMap targetNodes(Graph graph) {
-        return graph.withFilteredLabels(targetLabels, concurrency);
-    }
 
     protected boolean sample(double probability) {
         return rng.nextDouble() < probability;
