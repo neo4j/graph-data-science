@@ -5,7 +5,7 @@ site:
 
 content:
   sources:
-  - url: https://github.com/neo-technology/graph-analytics.git
+  - url: ../../
     start_path: public/doc
     branches: ['1.8', '2.0', '2.1', 'master']
     include: public/doc/
