@@ -44,6 +44,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private static final int MAX_WALKS_PER_START = 100;
     private static final double TOTAL_WEIGHT_MISSING = -1.0;
+    private static final long INVALID_NODE_ID = -1;
 
     private final RandomWalkWithRestartsConfig config;
     private LongHashSet startNodesUsed;
@@ -54,12 +55,13 @@ public class RandomWalkWithRestarts implements NodesSampler {
 
     @Override
     public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+        assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
+
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         long expectedNodes = Math.round(inputGraph.nodeCount() * config.samplingRatio());
         var initialStartQualities = initializeQualities(inputGraph, rng);
         var seenNodes = HugeAtomicBitSet.create(inputGraph.nodeCount());
-
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
@@ -102,6 +104,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
     private InitialStartQualities initializeQualities(Graph inputGraph, SplittableRandom rng) {
         var nodeIds = new LongArrayList();
         var qualities = new DoubleArrayList();
+
         if (!config.startNodes().isEmpty()) {
             config.startNodes().forEach(nodeId -> {
                 nodeIds.add(inputGraph.toMappedNodeId(nodeId));
@@ -196,7 +199,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
                     startNodesUsed.add(inputGraph.toOriginalNodeId(currentNode));
                     walksLeft = (int) Math.round(walkQualities.nodeQuality(currentStartNodePosition) * MAX_WALKS_PER_START);
                 } else {
-                    if (inputGraph.hasRelationshipProperty()) {
+                    if (totalWeights.isPresent()) {
                         currentNode = weightedNextNode(currentNode);
                     } else {
                         int targetOffset = rng.nextInt(inputGraph.degree(currentNode));
@@ -209,7 +212,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         }
 
         private double computeDegree(long currentNode) {
-            if (!inputGraph.hasRelationshipProperty()) {
+            if (totalWeights.isEmpty()) {
                 return inputGraph.degree(currentNode);
             }
 
@@ -222,12 +225,14 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 });
                 presentTotalWeights.set(currentNode, degree.doubleValue());
             }
+
             return presentTotalWeights.get(currentNode);
         }
 
         private long weightedNextNode(long currentNode) {
-            final var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
-            var target = new MutableLong(-1);
+            var remainingMass = new MutableDouble(rng.nextDouble(0, computeDegree(currentNode)));
+            var target = new MutableLong(INVALID_NODE_ID);
+
             inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
                 if (remainingMass.doubleValue() < weight) {
                     target.setValue(trg);
@@ -236,7 +241,9 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 remainingMass.subtract(weight);
                 return true;
             });
+
             assert target.getValue() != -1;
+
             return target.getValue();
         }
 
@@ -246,10 +253,10 @@ public class RandomWalkWithRestarts implements NodesSampler {
     }
 
     /**
-     *  In order be able to sample start nodes uniformly at random (for performance reasons) we have a special data
-     *  structure which is optimized for exactly this. In particular, we need to be able to do random access by index
-     *  of the set of start nodes we are currently interested in. A simple hashmap for example does not work for this
-     *  reason.
+     * In order be able to sample start nodes uniformly at random (for performance reasons) we have a special data
+     * structure which is optimized for exactly this. In particular, we need to be able to do random access by index
+     * of the set of start nodes we are currently interested in. A simple hashmap for example does not work for this
+     * reason.
      */
     static class WalkQualities {
         private final LongSet nodeIdIndex;

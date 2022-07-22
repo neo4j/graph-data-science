@@ -75,7 +75,7 @@ class RandowWalkWithRestartsTest {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
-            config.hasRelationshipWeightProperty() ? Optional.of(config.relationshipWeightProperty()) : Optional.empty()
+            Optional.ofNullable(config.relationshipWeightProperty())
         );
     }
 
@@ -122,7 +122,9 @@ class RandowWalkWithRestartsTest {
             var graph = getGraph(config);
             var rwr = new RandomWalkWithRestarts(config);
             var nodes = rwr.sampleNodes(graph);
-            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr.startNodesUsed().contains(idFunction.of("x2"))) {
+            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
+                .startNodesUsed()
+                .contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -161,7 +163,9 @@ class RandowWalkWithRestartsTest {
         for (int i = 0; i < 250; i++) {
             var rwr = new RandomWalkWithRestarts(config);
             var nodes = rwr.sampleNodes(graph);
-            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr.startNodesUsed().contains(idFunction.of("x2"))) {
+            if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
+                .startNodesUsed()
+                .contains(idFunction.of("x2"))) {
                 continue;
             }
             validCases++;
@@ -181,7 +185,10 @@ class RandowWalkWithRestartsTest {
         // and its unclear exactly why.
         // this may be due to the fastest thread picking a new startnode before the other threads finish and therefore the
         // other threads have less time to find the improbable node x2
-        assertThat(casesPassed / validCases).isCloseTo(Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2), Offset.offset(0.33));
+        assertThat(casesPassed / validCases).isCloseTo(
+            Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2),
+            Offset.offset(0.33)
+        );
     }
 
     @Test
