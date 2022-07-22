@@ -28,8 +28,8 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.config.GraphProjectFromStoreConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -41,11 +41,9 @@ import org.neo4j.graphdb.QueryExecutionException;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
@@ -166,14 +164,14 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
         assertThatThrownBy(() -> runQuery(query))
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("The feature properties ['missing_1', 'missing_2'] are not present for any of the requested labels.")
+            .hasMessageContaining(
+                "The feature properties ['missing_1', 'missing_2'] are not present for all requested labels")
             .hasMessageContaining("Requested labels: ['King']")
-            .hasMessageContaining("Properties available on the requested labels: ['age', 'birth_year', 'death_year']");
+            .hasMessageContaining("Properties available on all requested labels: ['age', 'birth_year', 'death_year']");
     }
 
     @Test
     void shouldValidateLabelsAndPropertiesWithFeatureDimension() {
-        var proc = new GraphSageTrainProc();
         var config = GraphSageTrainConfig.of(
             getUsername(),
             CypherMapWrapper.create(
@@ -184,29 +182,21 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 )
             )
         );
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                var validationConfig = proc.validationConfig();
-                validationConfig
-                    .afterLoadValidations()
-                    .forEach(validation ->
-                        validation.validateConfigsAfterLoad(
-                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build(),
-                            GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
-                            config
-                        )
-                    );
-            }
-        );
-        assertThat(exception).hasMessage(
-            "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
+
+        var graphStore = GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        )).hasMessageContaining(
+            "The feature properties ['foo'] are not present for any of the requested labels. " +
+            "Requested labels: ['__ALL__']. Properties available on the requested labels: []"
         );
     }
 
     @Test
     void shouldValidateLabelsAndPropertiesWithoutFeatureDimension() {
-        var proc = new GraphSageTrainProc();
         var config = GraphSageTrainConfig.of(
             getUsername(),
             CypherMapWrapper.create(
@@ -216,24 +206,16 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 )
             )
         );
-        var exception = assertThrows(
-            IllegalArgumentException.class,
-            () -> {
-                var validationConfig = proc.validationConfig();
-                validationConfig
-                    .afterLoadValidations()
-                    .forEach(validation ->
-                        validation.validateConfigsAfterLoad(
-                            GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build(),
-                            GraphProjectFromStoreConfig.emptyWithName(getUsername(), graphName),
-                            config
-                        )
-                    );
-            }
-        );
-        assertThat(exception).hasMessage(
-            "The following node properties are not present for each label in the graph: [foo]. Properties that exist for each label are []"
-        );
+        CSRGraphStore graphStore = GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build();
+
+        assertThatThrownBy(() -> config.graphStoreValidation(
+            graphStore,
+            config.nodeLabelIdentifiers(graphStore),
+            config.internalRelationshipTypes(graphStore)
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("The feature properties ['foo'] are not present for all requested labels. " +
+                                  "Requested labels: ['__ALL__']. Properties available on all requested labels: []");
     }
 
     @Test

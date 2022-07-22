@@ -21,8 +21,11 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
@@ -38,6 +41,7 @@ import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 import org.neo4j.gds.model.ModelConfig;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -153,7 +157,7 @@ public interface GraphSageTrainConfig extends
     @Override
     @Configuration.Ignore
     default boolean propertiesMustExistForEachNodeLabel() {
-        return false;
+        return !isMultiLabel();
     }
 
     @Configuration.Ignore
@@ -201,6 +205,18 @@ public interface GraphSageTrainConfig extends
             throw new IllegalArgumentException(
                 "GraphSage requires at least one property."
             );
+        }
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateNonEmptyGraph(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        if (selectedRelationshipTypes.stream().mapToLong(graphStore::relationshipCount).sum() == 0) {
+            throw new IllegalArgumentException("There should be at least one relationship in the graph.");
         }
     }
 

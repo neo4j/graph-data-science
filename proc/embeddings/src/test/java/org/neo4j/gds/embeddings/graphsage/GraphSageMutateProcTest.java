@@ -98,9 +98,9 @@ class GraphSageMutateProcTest extends GraphSageBaseProcTest {
         assertThatThrownBy(() -> runQuery(query))
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("The feature properties %s are not present for any of the requested labels.", StringJoining.join(nodeProperties))
+            .hasMessageContaining("The feature properties %s are not present for all requested labels.", StringJoining.join(nodeProperties))
             .hasMessageContaining("Requested labels: %s", StringJoining.join(label))
-            .hasMessageContaining("Properties available on the requested labels: %s", StringJoining.join(graphProperties));
+            .hasMessageContaining("Properties available on all requested labels: %s", StringJoining.join(graphProperties));
     }
 
 }

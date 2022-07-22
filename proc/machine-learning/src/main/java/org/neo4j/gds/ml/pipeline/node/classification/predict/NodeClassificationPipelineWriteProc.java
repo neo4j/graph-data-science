@@ -30,8 +30,6 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.AfterLoadValidation;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteResult;
@@ -49,7 +47,6 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.pipeline.node.classification.NodeClassificationPipelineCompanion.PREDICT_DESCRIPTION;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdsCallable(name = "gds.beta.pipeline.nodeClassification.predict.write", description = PREDICT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class NodeClassificationPipelineWriteProc
@@ -78,30 +75,6 @@ public class NodeClassificationPipelineWriteProc
     ) {
         preparePipelineConfig(graphNameOrConfiguration, algoConfiguration);
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ValidationConfiguration<NodeClassificationPredictPipelineWriteConfig> validationConfig() {
-        return new ValidationConfiguration<>() {
-            @Override
-            public List<AfterLoadValidation<NodeClassificationPredictPipelineWriteConfig>> afterLoadValidations() {
-                return List.of(
-                    (graphStore, graphProjectConfig, config) -> config.predictedProbabilityProperty()
-                        .ifPresent(predictedProbabilityProperty -> {
-                            if (config.writeProperty().equals(predictedProbabilityProperty)) {
-                                throw new IllegalArgumentException(
-                                    formatWithLocale(
-                                        "Configuration parameters `%s` and `%s` must be different (both were `%s`)",
-                                        "writeProperty",
-                                        "predictedProbabilityProperty",
-                                        predictedProbabilityProperty
-                                    )
-                                );
-                            }
-                        })
-                );
-            }
-        };
     }
 
     @Override
