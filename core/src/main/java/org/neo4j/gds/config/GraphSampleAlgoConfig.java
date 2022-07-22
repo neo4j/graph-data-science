@@ -26,7 +26,7 @@ import java.util.Set;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphSampleAlgoConfig extends AlgoBaseConfig {
+public interface GraphSampleAlgoConfig extends AlgoBaseConfig, RelationshipWeightConfig {
     @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {

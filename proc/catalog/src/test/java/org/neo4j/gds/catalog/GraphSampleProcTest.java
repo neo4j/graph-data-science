@@ -23,6 +23,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
@@ -89,6 +91,21 @@ class GraphSampleProcTest extends BaseProcTest {
             "CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: 1.0}) YIELD nodeCount";
         assertCypherResult(query, List.of(
             Map.of("nodeCount", 14L)
+        ));
+        assertGraphExists("sample");
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {"0.28,1", "0.35,2"})
+    void shouldUseSingleStartNode(double samplingRatio, long expectedStartNodeCount) {
+        runQuery("CALL gds.graph.project('g', '*', '*')");
+
+        var query =
+            "MATCH (z:Z {prop: 42})" +
+            " CALL gds.alpha.graph.sample.rwr('sample', 'g', {samplingRatio: $samplingRatio, startNodes: [id(z)], concurrency: 1, randomSeed: 42} )" +
+            " YIELD startNodeCount RETURN startNodeCount";
+        assertCypherResult(query, Map.of("samplingRatio", samplingRatio), List.of(
+            Map.of("startNodeCount", expectedStartNodeCount)
         ));
         assertGraphExists("sample");
     }
