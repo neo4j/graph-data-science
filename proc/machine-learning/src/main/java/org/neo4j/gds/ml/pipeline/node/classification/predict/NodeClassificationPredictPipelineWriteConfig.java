@@ -43,7 +43,7 @@ public interface NodeClassificationPredictPipelineWriteConfig
     Optional<String> predictedProbabilityProperty();
 
     @Value.Check
-    default void validatePredictedProbabilityPropertyDoesNotExist() {
+    default void validateWritePropertiesDiffer() {
         predictedProbabilityProperty()
             .ifPresent(predictedProbabilityProperty -> {
                 if (writeProperty().equals(predictedProbabilityProperty)) {

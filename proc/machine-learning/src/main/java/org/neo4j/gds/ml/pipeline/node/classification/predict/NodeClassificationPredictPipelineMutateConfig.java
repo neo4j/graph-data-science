@@ -51,7 +51,7 @@ public interface NodeClassificationPredictPipelineMutateConfig
     }
 
     @Value.Check
-    default void validatePredictedProbabilityDifferentToMutateProperty() {
+    default void validateMutatePropertiesDiffer() {
         predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (mutateProperty().equals(predictedProbabilityProperty)) {
                 throw new IllegalArgumentException(
