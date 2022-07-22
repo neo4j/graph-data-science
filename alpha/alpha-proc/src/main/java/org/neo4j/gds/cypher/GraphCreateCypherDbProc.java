@@ -55,7 +55,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
                 validateNeo4jEnterpriseEdition();
                 MutableLong createMillis = new MutableLong(0);
                 try (ProgressTimer ignored = ProgressTimer.start(createMillis::setValue)) {
-                    InMemoryDatabaseCreator.createDatabase(api, username(), databaseId(), graphName, dbName);
+                    InMemoryDatabaseCreator.createDatabase(databaseService, username(), databaseId(), graphName, dbName);
                 }
 
                 return new CreateCypherDbResult(dbName, graphName, createMillis.getValue());
@@ -79,7 +79,7 @@ public class GraphCreateCypherDbProc extends CatalogProc {
     }
 
     private void validateNeo4jEnterpriseEdition() {
-        var edition = StorageEngineProxy.dbmsEdition(api);
+        var edition = StorageEngineProxy.dbmsEdition(databaseService);
         if (!(edition == Edition.ENTERPRISE)) {
             throw new DatabaseManagementException(formatWithLocale(
                 "Requires Neo4j %s version, but found %s",

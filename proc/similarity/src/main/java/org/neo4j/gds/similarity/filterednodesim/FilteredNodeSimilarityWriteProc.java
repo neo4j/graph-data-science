@@ -73,7 +73,7 @@ public class FilteredNodeSimilarityWriteProc extends BaseProc {
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .databaseService(api)
+            .databaseService(databaseService)
             .log(log)
             .procedureTransaction(procedureTransaction)
             .transaction(transaction)

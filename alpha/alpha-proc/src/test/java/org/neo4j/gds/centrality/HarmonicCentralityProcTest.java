@@ -117,7 +117,7 @@ class HarmonicCentralityProcTest extends BaseProcTest {
 
             proc.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(new TaskRegistry(getUsername(), taskStore, jobId));
             proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
-                TransactionContext.of(proc.api, proc.procedureTransaction)
+                TransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
             proc.write(

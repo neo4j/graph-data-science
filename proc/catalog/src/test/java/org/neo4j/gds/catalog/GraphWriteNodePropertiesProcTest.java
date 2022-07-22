@@ -278,7 +278,7 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             GraphWriteNodePropertiesProc.class,
             log,
             proc -> {
-                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(TransactionContext.of(proc.api, proc.procedureTransaction));
+                proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(TransactionContext.of(proc.databaseService, proc.procedureTransaction));
                 proc.run(TEST_GRAPH_SAME_PROPERTIES, List.of("newNodeProp1", "newNodeProp2"), List.of("*"), Map.of());
             }
         );

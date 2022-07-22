@@ -93,7 +93,7 @@ public final class CypherAggregation extends BaseProc {
         var progressTimer = ProgressTimer.start();
         return new GraphAggregator(
             progressTimer,
-            DatabaseId.of(this.api),
+            DatabaseId.of(this.databaseService),
             username()
         );
     }

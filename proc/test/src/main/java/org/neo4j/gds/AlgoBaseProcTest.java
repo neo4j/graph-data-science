@@ -133,7 +133,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 if (proc instanceof NodePropertiesWriter) {
                     ((NodePropertiesWriter<?, ?, ?, ?>) proc).nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                         TransactionContext.of(
-                            proc.api,
+                            proc.databaseService,
                             proc.procedureTransaction
                         ));
                 }
@@ -141,7 +141,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 if (proc instanceof WriteRelationshipsProc) {
                     ((WriteRelationshipsProc<?, ?, ?, ?>) proc).relationshipExporterBuilder = new NativeRelationshipExporterBuilder(
                         TransactionContext.of(
-                            proc.api,
+                            proc.databaseService,
                             proc.procedureTransaction
                         ));
                 }
@@ -149,7 +149,7 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
                 if (proc instanceof StreamOfRelationshipsWriter) {
                     ((StreamOfRelationshipsWriter<?, ?, ?, ?>) proc).relationshipStreamExporterBuilder = new NativeRelationshipStreamExporterBuilder(
                         TransactionContext.of(
-                            proc.api,
+                            proc.databaseService,
                             proc.procedureTransaction
                         ));
                 }

@@ -95,7 +95,7 @@ public final class GraphGenerateProc extends BaseProc {
                 .map(PropertyProducer::getPropertyName);
 
             GraphStore graphStore = CSRGraphStoreUtil.createFromGraph(
-                DatabaseId.of(api),
+                DatabaseId.of(databaseService),
                 graph,
                 config.relationshipType().name,
                 relationshipProperty,

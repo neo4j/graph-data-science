@@ -38,10 +38,10 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.executor.MemoryUsageValidator;
 import org.neo4j.gds.transaction.SecurityContextWrapper;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
@@ -55,7 +55,7 @@ public abstract class BaseProc {
     protected static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
 
     @Context
-    public GraphDatabaseAPI api;
+    public GraphDatabaseService databaseService;
 
     @Context
     public Log log;
@@ -88,7 +88,7 @@ public abstract class BaseProc {
     }
 
     protected DatabaseId databaseId() {
-        return DatabaseId.of(api);
+        return DatabaseId.of(databaseService);
     }
 
     protected GraphStoreWithConfig graphStoreFromCatalog(String graphName, BaseConfig config) {
@@ -101,7 +101,7 @@ public abstract class BaseProc {
             return false;
         }
         return GraphDatabaseApiProxy
-            .resolveDependency(api, SecurityContextWrapper.class)
+            .resolveDependency(databaseService, SecurityContextWrapper.class)
             .isAdmin(transaction.securityContext());
     }
 
@@ -143,8 +143,8 @@ public abstract class BaseProc {
 
     protected GraphLoaderContext graphLoaderContext() {
         return ImmutableGraphLoaderContext.builder()
-            .transactionContext(TransactionContext.of(api, procedureTransaction))
-            .graphDatabaseService(api)
+            .transactionContext(TransactionContext.of(databaseService, procedureTransaction))
+            .graphDatabaseService(databaseService)
             .log(log)
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
@@ -153,13 +153,13 @@ public abstract class BaseProc {
     }
 
     public MemoryUsageValidator memoryUsageValidator() {
-        return new MemoryUsageValidator(log, api);
+        return new MemoryUsageValidator(log, databaseService);
     }
 
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .databaseService(api)
+            .databaseService(databaseService)
             .modelCatalog(internalModelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)

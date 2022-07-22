@@ -62,7 +62,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(api, "Export a graph to Neo4j database");
+        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Export a graph to Neo4j database");
 
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToDatabaseExporterConfig.of(cypherConfig);
@@ -88,7 +88,7 @@ public class GraphStoreExportProc extends BaseProc {
 
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
-                    api,
+                    databaseService,
                     exportConfig,
                     neoNodeProperties(exportConfig, graphStore),
                     log,
@@ -121,7 +121,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(api, "Export a graph to CSV");
+        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Export a graph to CSV");
 
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToFileExporterConfig.of(username(), cypherConfig);
@@ -130,7 +130,7 @@ public class GraphStoreExportProc extends BaseProc {
         var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
         validateAdditionalNodeProperties(graphStore, exportConfig.additionalNodeProperties());
 
-        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(api, Config.class);
+        var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
         var result = GraphStoreExporterUtil.export(
             graphStore,
@@ -159,7 +159,7 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ClusterRestrictions.disallowRunningOnCluster(api, "Estimation for exporting a graph to CSV");
+        ClusterRestrictions.disallowRunningOnCluster(databaseService, "Estimation for exporting a graph to CSV");
 
         var cypherConfig = CypherMapWrapper.create(configuration);
         var exportConfig = GraphStoreToCsvEstimationConfig.of(username(), cypherConfig);
@@ -187,7 +187,7 @@ public class GraphStoreExportProc extends BaseProc {
     ) {
         return NeoNodeProperties.of(
             graphStore,
-            TransactionContext.of(api, procedureTransaction),
+            TransactionContext.of(databaseService, procedureTransaction),
             exportConfig.additionalNodeProperties(),
             log
         );

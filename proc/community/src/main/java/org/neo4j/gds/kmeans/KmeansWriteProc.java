@@ -59,7 +59,7 @@ public class KmeansWriteProc extends BaseProc {
     public ExecutionContext executionContext() {
         return ImmutableExecutionContext
             .builder()
-            .databaseService(api)
+            .databaseService(databaseService)
             .modelCatalog(internalModelCatalog)
             .log(log)
             .procedureTransaction(procedureTransaction)

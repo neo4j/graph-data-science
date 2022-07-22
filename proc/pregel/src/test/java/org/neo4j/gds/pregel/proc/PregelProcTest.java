@@ -203,7 +203,7 @@ public class PregelProcTest extends BaseProcTest {
             var proc = new StreamProc();
             proc.taskRegistryFactory = taskRegistryFactory;
             proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
-            proc.api = db;
+            proc.databaseService = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
@@ -227,7 +227,7 @@ public class PregelProcTest extends BaseProcTest {
             var proc = new WriteProc();
             proc.taskRegistryFactory = taskRegistryFactory;
             proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
-            proc.api = db;
+            proc.databaseService = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
 
@@ -251,7 +251,7 @@ public class PregelProcTest extends BaseProcTest {
             var proc = new MutateProc();
             proc.taskRegistryFactory = taskRegistryFactory;
             proc.userLogRegistryFactory = EmptyUserLogRegistryFactory.INSTANCE;
-            proc.api = db;
+            proc.databaseService = db;
             proc.transaction = transactions.ktx();
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();

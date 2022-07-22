@@ -195,7 +195,7 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
             GraphWriteRelationshipProc.class,
             log,
             proc -> {
-                proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(TransactionContext.of(proc.api, proc.procedureTransaction));
+                proc.relationshipExporterBuilder = new NativeRelationshipExporterBuilder(TransactionContext.of(proc.databaseService, proc.procedureTransaction));
                 proc.run(TEST_GRAPH_NAME, "NEW_REL1", "newRelProp1", Map.of());
             }
         );
