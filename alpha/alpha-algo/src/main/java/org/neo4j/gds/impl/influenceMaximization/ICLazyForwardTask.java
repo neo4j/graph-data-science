@@ -29,11 +29,11 @@ import java.util.SplittableRandom;
 final class ICLazyForwardTask implements Runnable {
 
     private final long[] seedSetNodes;
-    private long initialRandomSeed;
+    private final long initialRandomSeed;
     private int seedNodeCounter;
 
-    private Partition partition;
-    private long[] candidateNodeIds;
+    private final Partition partition;
+    private final long[] candidateNodeIds;
 
     private int candidateSetSizes;
 
@@ -43,7 +43,6 @@ final class ICLazyForwardTask implements Runnable {
     private final BitSet candidateActive;
 
     private final BitSet seedActive;
-
 
     private final HugeLongArrayStack newActive;
 
@@ -59,8 +58,8 @@ final class ICLazyForwardTask implements Runnable {
     ) {
         this.localGraph = graph;
         this.newActive = HugeLongArrayStack.newStack(graph.nodeCount());
-        seedActive = new BitSet(graph.nodeCount());
-        candidateActive = new BitSet(graph.nodeCount());
+        this.seedActive = new BitSet(graph.nodeCount());
+        this.candidateActive = new BitSet(graph.nodeCount());
         this.propagationProbability = propagationProbability;
         this.seedSetNodes = seedSetNodes;
         this.initialRandomSeed = initialRandomSeed;
@@ -74,15 +73,14 @@ final class ICLazyForwardTask implements Runnable {
         seedSetNodes[this.seedNodeCounter++] = newSetNode;
     }
 
-
-    public void setCandidateNodeId(long[] candidateNodeIds, int candidateSetSize) {
-        for (int i = 0; i < candidateSetSize; ++i) {
-            this.candidateNodeIds[i] = candidateNodeIds[i];
+    void setCandidateNodeId(long[] candidateNodeIds, int candidateSetSize) {
+        if (candidateSetSize >= 0) {
+            System.arraycopy(candidateNodeIds, 0, this.candidateNodeIds, 0, candidateSetSize);
         }
         this.candidateSetSizes = candidateSetSize;
     }
 
-    public double getSpread(int j) {
+    double getSpread(int j) {
         return localSpread[j];
     }
 
@@ -123,7 +121,7 @@ final class ICLazyForwardTask implements Runnable {
     }
 
 
-    public void candidateTraverse(long  seed) {
+    private void candidateTraverse(long seed) {
         while (!newActive.isEmpty()) {
             //Determine neighbors that become infected
             long nodeId = newActive.pop();
@@ -147,8 +145,8 @@ final class ICLazyForwardTask implements Runnable {
         for (int j = 0; j < candidateSetSizes; ++j) {
             localSpread[j] = 0;
         }
-        int startingSeed = (int) partition.startNode();
-        int endingSeed = (int) partition.nodeCount() + startingSeed;
+        long startingSeed = partition.startNode();
+        long endingSeed = partition.nodeCount() + startingSeed;
 
         for (long seed = startingSeed; seed < endingSeed; seed++) {
             initDataStructures();
@@ -164,7 +162,5 @@ final class ICLazyForwardTask implements Runnable {
 
         }
     }
-
-
 
 }

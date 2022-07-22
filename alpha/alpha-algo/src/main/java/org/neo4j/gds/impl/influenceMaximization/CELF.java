@@ -78,13 +78,15 @@ public class CELF extends Algorithm<CELF> {
         this.executorService = executorService;
         this.concurrency = concurrency;
 
-        seedSetNodes = new LongDoubleScatterMap(seedSetCount);
+        this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
 
         this.seedSetNodesArray = new long[seedSetCount];
-        spreads = new HugeLongPriorityQueue(nodeCount) {
+        this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
-                return costValues.get(a) != costValues.get(b) ? costValues.get(a) > costValues.get(b) : a < b;
+                return (Double.compare(costValues.get(a), costValues.get(b)) == 0) // when equal costs
+                    ? a < b                                                        // the smaller node ID is less
+                    : costValues.get(a) > costValues.get(b);                       // otherwise compare the costs
             }
         };
     }
@@ -148,20 +150,17 @@ public class CELF extends Algorithm<CELF> {
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         long[] firstK = new long[ICLazyForwardMC.DEFAULT_BATCH_SIZE];
         for (int i = 1; i < seedSetCount; i++) {
-            while (true) {
-                if (lastUpdate.get(spreads.top()) == i) {
-                    break;
-                }
-                long k = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
-                int jj = 0;
-                for (int j = 0; j < k; ++j) {
+            while (lastUpdate.get(spreads.top()) != i) {
+                long batchUpperBound = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
+                int actualBatchSize = 0;
+                for (int j = 0; j < batchUpperBound; ++j) {
                     var nextNodeId = spreads.getIth(j);
                     if (lastUpdate.get(nextNodeId) != i) {
-                        firstK[jj++] = nextNodeId;
+                        firstK[actualBatchSize++] = nextNodeId;
                     }
                 }
-                independentCascade.runForCandidate(firstK, jj);
-                for (int j = 0; j < jj; ++j) {
+                independentCascade.runForCandidate(firstK, actualBatchSize);
+                for (int j = 0; j < actualBatchSize; ++j) {
                     long nodeId = firstK[j];
                     double value = independentCascade.getSpread(j) / monteCarloSimulations;
                     spreads.set(nodeId, value - gain);

@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutorService;
 
 final class ICLazyForwardMC {
 
+    static final int DEFAULT_BATCH_SIZE = 10;
 
     private final int concurrency;
 
@@ -36,9 +37,8 @@ final class ICLazyForwardMC {
 
     private final ExecutorService executorService;
 
-    public static int DEFAULT_BATCH_SIZE = 10;
 
-    private double spread[];
+    private final double[] spread;
 
     static ICLazyForwardMC create(
         Graph graph,
@@ -49,7 +49,7 @@ final class ICLazyForwardMC {
         ExecutorService executorService,
         long initialRandomSeed
     ) {
-        double[] spread = new double[seedSetNodes.length];
+        double[] spread = new double[DEFAULT_BATCH_SIZE];
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -67,40 +67,41 @@ final class ICLazyForwardMC {
         return new ICLazyForwardMC(tasks, concurrency, executorService, spread);
     }
 
-    ICLazyForwardMC(
+    private ICLazyForwardMC(
         List<ICLazyForwardTask> tasks,
         int concurrency,
         ExecutorService executorService,
         double[] spread
     ) {
-//
         this.tasks = tasks;
         this.spread = spread;
         this.concurrency = concurrency;
         this.executorService = executorService;
     }
 
-    public void runForCandidate(long[] candidateIdNodes, int candidateSize) {
+    void runForCandidate(long[] candidateIdNodes, int candidateSize) {
         for (var task : tasks) {
             task.setCandidateNodeId(candidateIdNodes, candidateSize);
         }
+
         for (int j = 0; j < candidateSize; ++j) {
             spread[j] = 0;
         }
+
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
+
         for (var task : tasks) {
             for (int j = 0; j < candidateSize; ++j) {
                 spread[j] += task.getSpread(j);
             }
         }
-        return;
     }
 
-    public double getSpread(int j) {
+    double getSpread(int j) {
         return spread[j];
     }
 
