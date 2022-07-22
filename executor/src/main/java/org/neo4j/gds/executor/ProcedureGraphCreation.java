@@ -61,7 +61,7 @@ public class ProcedureGraphCreation<
     @Override
     public Graph createGraph(GraphStore graphStore) {
         Optional<String> weightProperty = config instanceof RelationshipWeightConfig
-            ? Optional.ofNullable(((RelationshipWeightConfig) config).relationshipWeightProperty())
+            ? ((RelationshipWeightConfig) config).relationshipWeightProperty()
             : Optional.empty();
 
         Collection<NodeLabel> nodeLabels = config.nodeLabelIdentifiers(graphStore);

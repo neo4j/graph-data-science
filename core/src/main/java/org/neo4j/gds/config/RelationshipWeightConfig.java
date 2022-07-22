@@ -20,7 +20,6 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -38,26 +37,20 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public interface RelationshipWeightConfig {
     String RELATIONSHIP_WEIGHT_PROPERTY = "relationshipWeightProperty";
 
-    @Value.Default
-    @Configuration.ConvertWith("validatePropertyName")
-    default @Nullable String relationshipWeightProperty() {
-        return null;
-    }
-
-    @Value.Derived
-    @Configuration.Ignore
-    default Optional<String> maybeRelationshipWeightProperty() {
-        return Optional.ofNullable(relationshipWeightProperty());
-    }
+    Optional<String> relationshipWeightProperty();
 
     @Value.Derived
     @Configuration.Ignore
     default boolean hasRelationshipWeightProperty() {
-        return relationshipWeightProperty() != null;
+        return relationshipWeightProperty().isPresent();
     }
 
-    static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), RELATIONSHIP_WEIGHT_PROPERTY);
+    @Value.Check
+    default void validateRelationshipWeightProperty() {
+        relationshipWeightProperty().ifPresent(input -> validateNoWhiteCharacter(
+            emptyToNull(input),
+            RELATIONSHIP_WEIGHT_PROPERTY
+        ));
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -67,8 +60,7 @@ public interface RelationshipWeightConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        String weightProperty = relationshipWeightProperty();
-        if (weightProperty != null) {
+        relationshipWeightProperty().ifPresent(weightProperty -> {
             var relTypesWithoutProperty = selectedRelationshipTypes.stream()
                 .filter(relType -> !graphStore.hasRelationshipProperty(relType, weightProperty))
                 .collect(Collectors.toSet());
@@ -80,6 +72,6 @@ public interface RelationshipWeightConfig {
                     StringJoining.join(graphStore.relationshipPropertyKeys(selectedRelationshipTypes))
                 ));
             }
-        }
+        });
     }
 }

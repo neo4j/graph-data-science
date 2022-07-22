@@ -60,7 +60,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     private final int concurrency;
     private final float normalizationStrength;
     private final List<FeatureExtractor> featureExtractors;
-    private final String relationshipWeightProperty;
+    private final Optional<String> relationshipWeightProperty;
     private final double relationshipWeightFallback;
     private final int inputDimension;
     private final float[][] propertyVectors;
@@ -110,7 +110,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         this.graph = graph;
         this.featureExtractors = featureExtractors;
         this.relationshipWeightProperty = config.relationshipWeightProperty();
-        this.relationshipWeightFallback = this.relationshipWeightProperty == null ? 1.0 : Double.NaN;
+        this.relationshipWeightFallback = this.relationshipWeightProperty.map(s -> Double.NaN).orElse(1.0);
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
         this.minBatchSize = config.minBatchSize();
@@ -447,7 +447,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
                     if (firstIteration && Double.isNaN(weight)) {
                         throw new IllegalArgumentException(formatWithLocale(
                             "Missing relationship property `%s` on relationship between nodes with ids `%d` and `%d`.",
-                            relationshipWeightProperty,
+                            relationshipWeightProperty.orElse(""),
                             graph.toOriginalNodeId(source), graph.toOriginalNodeId(target)
                         ));
                     }

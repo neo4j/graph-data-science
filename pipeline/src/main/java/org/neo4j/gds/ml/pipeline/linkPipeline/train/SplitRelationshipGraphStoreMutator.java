@@ -33,7 +33,7 @@ public final class SplitRelationshipGraphStoreMutator {
     public static void mutate(GraphStore graphStore, EdgeSplitter.SplitResult splitResult, SplitRelationshipsBaseConfig config) {
         graphStore.addRelationshipType(
             config.remainingRelationshipType(),
-            Optional.ofNullable(config.relationshipWeightProperty()),
+            config.relationshipWeightProperty(),
             Optional.of(NumberType.FLOATING_POINT),
             splitResult.remainingRels()
         );

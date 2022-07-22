@@ -56,7 +56,7 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
         var superRelationshipTypes = config.superRelationshipTypes(graphStore);
 
-        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, config.maybeRelationshipWeightProperty());
+        var graph = graphStore.getGraph(nodeLabels, relationshipTypes, config.relationshipWeightProperty());
         var masterGraph = graphStore.getGraph(nodeLabels, superRelationshipTypes, Optional.empty());
 
         IdMap sourceNodes = graphStore.getGraph(sourceLabels);
