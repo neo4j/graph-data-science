@@ -187,7 +187,9 @@ class LinkPredictionPipelineTrainProcTest extends BaseProcTest {
         runQuery("CALL gds.alpha.ml.pipeline.linkPrediction.addFeature('pipe3', 'L2', {nodeProperties: ['pr']})");
 
         assertError("CALL gds.alpha.ml.pipeline.linkPrediction.train(" +
-                    "   { nodeProjection: '*', relationshipProjection: '*', pipeline: 'pipe3', modelName: 'trainedModel3', negativeClassWeight: 1.0, randomSeed: 1337 }" +
+                    "   { nodeProjection: '*', " +
+                    "   relationshipProjection: {REL: {orientation: 'UNDIRECTED'}}, " +
+                    "   pipeline: 'pipe3', modelName: 'trainedModel3', negativeClassWeight: 1.0, randomSeed: 1337 }" +
                     ")",
             "Link Prediction Pipeline cannot be used with anonymous graphs. Please load the graph before"
         );
