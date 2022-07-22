@@ -5,7 +5,7 @@ site:
 
 content:
   sources:
-  - url: ../../
+  - url: https://github.com/neo-technology/graph-analytics.git
     start_path: public/doc
     branches: ['1.8', '2.0', '2.1', 'master']
     include: public/doc/
@@ -21,6 +21,13 @@ ui:
 
 urls:
   html_extension_style: indexify
+
+antora:
+  extensions:
+  - require: "@neo4j-antora/antora-modify-sitemaps"
+    sitemap_version: '2.1'
+    sitemap_loc_version: current
+    move_sitemaps_to_components: 'true'
 
 asciidoc:
   extensions:
