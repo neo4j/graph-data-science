@@ -20,16 +20,23 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 @SuppressWarnings("immutables:subtype")
@@ -64,6 +71,25 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, ModelConfig, 
             .filter(metric -> !metric.isModelSpecific())
             .map(metric -> (LinkMetric) metric)
             .collect(Collectors.toList());
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetRelIsUndirected(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        var invalidTypes = selectedRelationshipTypes.stream()
+            .filter(type -> !graphStore.isUndirected(type))
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
+
+        if (!invalidTypes.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "RelationshipTypes must be undirected, but found %s which are directed.",
+                StringJoining.join(invalidTypes)
+            ));
+        }
     }
 
     static LinkPredictionTrainConfig of(String username, CypherMapWrapper config) {
