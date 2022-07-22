@@ -47,8 +47,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 @ValueClass
 @Configuration("GraphSageTrainConfigImpl")
 @SuppressWarnings("immutables:subtype")
@@ -159,7 +157,7 @@ public interface GraphSageTrainConfig extends
     @Override
     @Configuration.Ignore
     default boolean propertiesMustExistForEachNodeLabel() {
-        return false;
+        return !isMultiLabel();
     }
 
     @Configuration.Ignore
@@ -219,48 +217,6 @@ public interface GraphSageTrainConfig extends
     ) {
         if (selectedRelationshipTypes.stream().mapToLong(graphStore::relationshipCount).sum() == 0) {
             throw new IllegalArgumentException("There should be at least one relationship in the graph.");
-        }
-    }
-
-    @Configuration.GraphStoreValidationCheck
-    @Value.Default
-    default void validatePropertiesAtLeastOncePerLabel(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        var nodePropertyNames = featureProperties();
-
-        if (isMultiLabel()) {
-            // each property exists on at least one label
-            var allProperties =
-                graphStore
-                    .schema()
-                    .nodeSchema()
-                    .allProperties();
-            var missingProperties = nodePropertyNames
-                .stream()
-                .filter(key -> !allProperties.contains(key))
-                .collect(Collectors.toSet());
-            if (!missingProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Each property set in `featureProperties` must exist for at least one label. Missing properties: %s",
-                    missingProperties
-                ));
-            }
-        } else {
-            // all properties exist on all labels
-            List<String> missingProperties = nodePropertyNames
-                .stream()
-                .filter(weightProperty -> !graphStore.hasNodeProperty(selectedLabels, weightProperty))
-                .collect(Collectors.toList());
-            if (!missingProperties.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "The following node properties are not present for each label in the graph: %s. Properties that exist for each label are %s",
-                    missingProperties,
-                    graphStore.nodePropertyKeys(selectedLabels)
-                ));
-            }
         }
     }
 

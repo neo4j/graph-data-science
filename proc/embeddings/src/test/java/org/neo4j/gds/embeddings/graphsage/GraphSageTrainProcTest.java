@@ -165,9 +165,9 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             .isInstanceOf(QueryExecutionException.class)
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining(
-                "The feature properties ['missing_1', 'missing_2'] are not present for any of the requested labels.")
+                "The feature properties ['missing_1', 'missing_2'] are not present for all requested labels")
             .hasMessageContaining("Requested labels: ['King']")
-            .hasMessageContaining("Properties available on the requested labels: ['age', 'birth_year', 'death_year']");
+            .hasMessageContaining("Properties available on all requested labels: ['age', 'birth_year', 'death_year']");
     }
 
     @Test
@@ -190,7 +190,8 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         )).hasMessageContaining(
-            "Each property set in `featureProperties` must exist for at least one label. Missing properties: [foo]"
+            "The feature properties ['foo'] are not present for any of the requested labels. " +
+            "Requested labels: ['__ALL__']. Properties available on the requested labels: []"
         );
     }
 
@@ -205,16 +206,16 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
                 )
             )
         );
-
         CSRGraphStore graphStore = GdlFactory.builder().namedDatabaseId(db.databaseId()).build().build();
+
         assertThatThrownBy(() -> config.graphStoreValidation(
             graphStore,
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         ))
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("The following node properties are not present for each label in the graph: [foo]. " +
-                        "Properties that exist for each label are []");
+            .hasMessageContaining("The feature properties ['foo'] are not present for all requested labels. " +
+                                  "Requested labels: ['__ALL__']. Properties available on all requested labels: []");
     }
 
     @Test
