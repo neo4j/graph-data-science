@@ -46,7 +46,7 @@ import static org.neo4j.gds.TestSupport.assertMemoryRange;
 class SplitRelationshipsTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 42)
-    final static String GRAPH_WITH_OFFSET =
+    static final String GRAPH_WITH_OFFSET =
         "        CREATE" +
         "        (a: Node)," +
         "        (b: Node)," +
@@ -81,6 +81,7 @@ class SplitRelationshipsTest {
             .negativeSamplingRatio(1.0)
             .holdoutRelationshipType("TEST")
             .remainingRelationshipType("REST")
+            .randomSeed(1337L)
             .build();
 
         SplitRelationships splitter = SplitRelationships.of(graphStore, config);
