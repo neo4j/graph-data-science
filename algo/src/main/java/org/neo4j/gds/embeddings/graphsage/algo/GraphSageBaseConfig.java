@@ -21,9 +21,8 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BatchSizeConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.model.ModelConfig;
 
-public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig, RelationshipWeightConfig {
+public interface GraphSageBaseConfig extends AlgoBaseConfig, BatchSizeConfig, ModelConfig {
     long serialVersionUID = 0x42L;
 }

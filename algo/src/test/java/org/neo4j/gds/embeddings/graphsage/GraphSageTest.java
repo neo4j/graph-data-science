@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -33,6 +34,8 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.huge.HugeGraph;
+import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -52,12 +55,14 @@ import org.neo4j.gds.extension.Inject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.kernel.database.NamedDatabaseId.NAMED_SYSTEM_DATABASE_ID;
 
 @GdlExtension
 @ModelCatalogExtension
@@ -73,6 +78,9 @@ class GraphSageTest {
     @Inject
     private Graph orphanGraph;
 
+    @Inject
+    private GraphStore orphanGraphStore;
+
     @InjectModelCatalog
     private ModelCatalog modelCatalog;
 
@@ -82,12 +90,13 @@ class GraphSageTest {
     private static final String MODEL_NAME = "graphSageModel";
 
     private Graph graph;
+    private GraphStore graphStore;
     private HugeObjectArray<double[]> features;
     private ImmutableGraphSageTrainConfig.Builder configBuilder;
 
     @BeforeEach
     void setUp() {
-        graph = RandomGraphGenerator.builder()
+        HugeGraph randomGraph = RandomGraphGenerator.builder()
             .nodeCount(NODE_COUNT)
             .averageDegree(3)
             .nodeLabelProducer(nodeId -> NodeLabelTokens.of("P"))
@@ -100,7 +109,18 @@ class GraphSageTest {
             .allowSelfLoops(RandomGraphGeneratorConfig.AllowSelfLoops.NO)
             .build().generate();
 
+        graph = randomGraph;
+
         long nodeCount = graph.nodeCount();
+
+        graphStore = CSRGraphStoreUtil.createFromGraph(
+            NAMED_SYSTEM_DATABASE_ID,
+            randomGraph,
+            "REL",
+            Optional.of("weight"),
+            4
+        );
+
         features = HugeObjectArray.newArray(double[].class, nodeCount);
 
         Random random = new Random();
@@ -137,7 +157,7 @@ class GraphSageTest {
             .build();
 
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            orphanGraph,
+            orphanGraphStore,
             streamConfig,
             ProgressTracker.NULL_TRACKER
         );
@@ -209,7 +229,7 @@ class GraphSageTest {
 
         var log = Neo4jProxy.testLog();
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            graph,
+            graphStore,
             streamConfig,
             log,
             EmptyTaskRegistryFactory.INSTANCE

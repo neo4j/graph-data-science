@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.WriteProc;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -44,9 +44,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPHSAGE_DESCRIPTION;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getActualConfig;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.getNodeProperties;
-import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.injectRelationshipWeightPropertyFromModel;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPHSAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
@@ -58,8 +56,6 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphName, configuration), modelCatalog(), username.username());
-
         return write(compute(graphName, configuration));
     }
 
@@ -69,8 +65,6 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        injectRelationshipWeightPropertyFromModel(getActualConfig(graphNameOrConfiguration, algoConfiguration), modelCatalog(), username.username());
-
         return computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
@@ -93,7 +87,7 @@ public class GraphSageWriteProc extends WriteProc<GraphSage, GraphSage.GraphSage
     }
 
     @Override
-    public GraphAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
+    public GraphStoreAlgorithmFactory<GraphSage, GraphSageWriteConfig> algorithmFactory() {
         return new GraphSageAlgorithmFactory<>(modelCatalog());
     }
 

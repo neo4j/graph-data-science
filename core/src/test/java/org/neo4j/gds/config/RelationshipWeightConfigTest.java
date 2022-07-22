@@ -24,6 +24,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -34,13 +36,13 @@ class RelationshipWeightConfigTest {
     void assertRelationshipWeightPropertyCanBeConfigured() {
         var relationshipWeightConfig = CypherMapWrapper.empty().withString("relationshipWeightProperty", "foo");
         var algoConfig = TestRelationshipWeightConfig.of(relationshipWeightConfig);
-        assertThat(algoConfig.relationshipWeightProperty()).isEqualTo("foo");
+        assertThat(algoConfig.relationshipWeightProperty()).isEqualTo(Optional.of("foo"));
     }
 
     @Test
-    void assertDefaultRelationshipWeightPropertyIsNull() {
+    void assertDefaultRelationshipWeightPropertyIsNotPresent() {
         var algoConfig = TestRelationshipWeightConfig.of(CypherMapWrapper.empty());
-        assertThat(algoConfig.relationshipWeightProperty()).isNull();
+        assertThat(algoConfig.relationshipWeightProperty()).isNotPresent();
     }
 
     @Test
@@ -56,7 +58,7 @@ class RelationshipWeightConfigTest {
         configAsMap.put("relationshipWeightProperty", null);
         var relationshipWeightConfig = CypherMapWrapper.create(configAsMap);
         var algoConfig = TestRelationshipWeightConfig.of(relationshipWeightConfig);
-        assertThat(algoConfig.relationshipWeightProperty()).isNull();
+        assertThat(algoConfig.relationshipWeightProperty()).isNotPresent();
     }
 
 
