@@ -35,8 +35,13 @@ public final class VarLongEncoding {
     }
 
     public static int encodedVLongsSize(long[] values, int limit) {
+        return encodedVLongsSize(values, 0, limit);
+    }
+
+    public static int encodedVLongsSize(long[] values, int offset, int limit) {
         int size = 0;
-        for (int i = 0; i < limit; ++i) {
+        int end = offset + limit;
+        for (int i = offset; i < end; ++i) {
             if (values[i] == Long.MIN_VALUE) {
                 continue;
             }

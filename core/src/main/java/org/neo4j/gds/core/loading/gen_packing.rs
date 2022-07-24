@@ -1,5 +1,11 @@
 #!/usr/bin/env rust-script
-// cargo-deps: clap="3"
+//! ```cargo
+//! [dependencies]
+//! clap="3"
+//! gen_java = { git = "https://github.com/knutwalker/gen_java" }
+//! ```
+
+use std::num::NonZeroU32;
 
 // java sizes
 const LONG: u32 = std::mem::size_of::<u64>() as _;
@@ -25,10 +31,6 @@ const fn plural(n: u32) -> &'static str {
         "s"
     }
 }
-
-const PIN: &str = "values";
-const OFF: &str = "valuesStart";
-const PW: &str = "packedPtr";
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     fn parse_block_size(s: &str) -> Result<u32, String> {
@@ -96,51 +98,69 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let file = File { package, class };
 
-    java::gen_file(file);
+    java::write_file(file);
 
     Ok(())
+}
+
+struct Pack {
+    word: u32,
+    offset: u32,
+    shift: u32,
 }
 
 enum Inst {
     Declare {
         word: u32,
     },
+    DeclareAndInit {
+        word: u32,
+        offset: u32,
+    },
     DefineMask {
         constant: u64,
     },
     Pack {
-        word: u32,
-        offset: u32,
-        shift: u32,
+        pack: Pack,
     },
     PackSplit {
-        lower_word: u32,
+        lower: Pack,
         upper_word: u32,
-        offset: u32,
-        lower_shift: u32,
         upper_shift: u32,
+    },
+    _PackDelta {
+        _pack: Pack,
+        _previous: Option<NonZeroU32>,
+    },
+    _PackSplitDelta {
+        _lower: Pack,
+        _upper_word: u32,
+        _upper_shift: u32,
+        _previous: Option<NonZeroU32>,
     },
     Unpack {
-        word: u32,
-        offset: u32,
-        shift: u32,
+        pack: Pack,
     },
     UnpackSplit {
-        lower_word: u32,
+        lower: Pack,
         upper_word: u32,
-        offset: u32,
-        lower_shift: u32,
         upper_shift: u32,
+    },
+    _UnpackDelta {
+        _pack: Pack,
+        _previous: Option<NonZeroU32>,
+    },
+    _UnpackSplitDelta {
+        _lower: Pack,
+        _upper_word: u32,
+        _upper_shift: u32,
+        _previous: Option<NonZeroU32>,
     },
     Memset {
         size: u32,
         constant: u64,
     },
     Write {
-        word: u32,
-        offset: u32,
-    },
-    Read {
         word: u32,
         offset: u32,
     },
@@ -229,14 +249,9 @@ fn unpack(block_size: u32, bits: u32) -> Method {
     code.push(CodeBlock {
         comment: Some(format!("Access {words} word{}", plural(words))),
         code: (0..words)
-            .flat_map(|word| {
-                [
-                    Inst::Declare { word },
-                    Inst::Read {
-                        word,
-                        offset: word * LONG,
-                    },
-                ]
+            .map(|word| Inst::DeclareAndInit {
+                word,
+                offset: word * LONG,
             })
             .collect(),
     });
@@ -256,27 +271,33 @@ fn unpack(block_size: u32, bits: u32) -> Method {
                 .map(|i| {
                     let pack = single_pack(bits, i);
                     match pack {
-                        Inst::Pack {
-                            word,
-                            offset,
-                            shift,
-                        } => Inst::Unpack {
-                            word,
-                            offset,
-                            shift,
-                        },
+                        Inst::Pack { pack } => Inst::Unpack { pack },
                         Inst::PackSplit {
-                            lower_word,
+                            lower,
                             upper_word,
-                            offset,
-                            lower_shift,
                             upper_shift,
                         } => Inst::UnpackSplit {
-                            lower_word,
+                            lower,
                             upper_word,
-                            offset,
-                            lower_shift,
                             upper_shift,
+                        },
+                        Inst::_PackDelta {
+                            _pack: pack,
+                            _previous: previous,
+                        } => Inst::_UnpackDelta {
+                            _pack: pack,
+                            _previous: previous,
+                        },
+                        Inst::_PackSplitDelta {
+                            _lower: lower,
+                            _upper_word: upper_word,
+                            _upper_shift: upper_shift,
+                            _previous: previous,
+                        } => Inst::_UnpackSplitDelta {
+                            _lower: lower,
+                            _upper_word: upper_word,
+                            _upper_shift: upper_shift,
+                            _previous: previous,
                         },
                         _ => unreachable!(),
                     }
@@ -320,20 +341,20 @@ fn single_pack(bits: u32, offset: u32) -> Inst {
     // the word for the upper bits of the current value
     let upper_word = (offset * bits + bits - 1) / LONG_BITS;
 
+    let pack = Pack {
+        word: lower_word,
+        offset,
+        shift,
+    };
+
     if lower_word == upper_word {
         // value fits within one word
-        Inst::Pack {
-            word: lower_word,
-            offset,
-            shift,
-        }
+        Inst::Pack { pack }
     } else {
         // need to split the value across multiple words
         Inst::PackSplit {
-            lower_word,
+            lower: pack,
             upper_word,
-            offset,
-            lower_shift: shift,
             upper_shift: LONG_BITS - shift,
         }
     }
@@ -341,264 +362,516 @@ fn single_pack(bits: u32, offset: u32) -> Inst {
 
 mod java {
     use super::*;
+    use gen_java::*;
 
-    const INDENT: &str = " ";
-    const CLOSE: &str = "}";
+    const PIN: &str = "values";
+    const OFF: &str = "valuesStart";
+    const PW: &str = "packedPtr";
+    const BITS: &str = "bits";
 
-    fn gen_method(method: Method) {
-        println!("{INDENT:>4}/**");
-        for doc in method.documentation {
-            if doc.is_empty() {
-                println!("{INDENT:>4} *");
-            } else {
-                println!("{INDENT:>4} * {doc}");
-            }
+    const BS: &str = "BLOCK_SIZE";
+    const PACKERS: &str = "PACKERS";
+    const UNPACKERS: &str = "UNPACKERS";
+
+    const PIN_PARAM: Param = Param {
+        typ: "long[]",
+        ident: PIN,
+    };
+    const OFF_PARAM: Param = Param {
+        typ: "int",
+        ident: OFF,
+    };
+    const PW_PARAM: Param = Param {
+        typ: "long",
+        ident: PW,
+    };
+
+    const PARAMS: [Param; 3] = [PIN_PARAM, OFF_PARAM, PW_PARAM];
+
+    const FULL_PARAMS: [Param; 4] = [
+        Param {
+            typ: "int",
+            ident: BITS,
+        },
+        PIN_PARAM,
+        OFF_PARAM,
+        PW_PARAM,
+    ];
+
+    fn gen_method(method: Method) -> MethodDef {
+        fn value(offset: u32) -> Expr {
+            Expr::bin(
+                Expr::Ident(PIN),
+                BinOp::Index,
+                Expr::bin(Expr::Literal(offset), BinOp::Add, Expr::Ident(OFF)),
+            )
         }
-        println!("{INDENT:>4} */");
-        println!(
-            "{INDENT:>4}private static long {}{}(long[] {PIN}, int {OFF}, long {PW}) {{",
-            method.prefix, method.bits
-        );
 
-        let mut mask = String::new();
+        let ident = |word: u32| -> String { format!("w{word}") };
+        let mut mask = u64::MAX;
+        let mut statements = Vec::new();
 
         for code in method.code {
-            if !code.code.is_empty() {
-                if let Some(comment) = code.comment {
-                    println!("{INDENT:>8}// {}", comment);
-                }
+            if code.code.is_empty() {
+                continue;
+            }
 
-                for inst in code.code {
-                    match inst {
-                        Inst::Declare { word } => {
-                            println!("{INDENT:>8}long w{word};");
-                        }
-                        Inst::DefineMask { constant } => {
-                            mask = format!(" & 0x{:X}L", constant);
-                        }
-                        Inst::Pack {
-                            word,
-                            offset,
-                            shift,
-                        } => {
-                            let value = if offset == 0 {
-                                format!("{PIN}[{OFF}]")
-                            } else {
-                                format!("{PIN}[{offset} + {OFF}]")
-                            };
+            if let Some(comment) = code.comment {
+                statements.push(Stmt::Comment(comment));
+            }
 
-                            if shift == 0 {
-                                println!("{INDENT:>8}w{word} = {value};");
-                            } else {
-                                println!("{INDENT:>8}w{word} |= {value} << {shift};");
-                            }
+            for inst in code.code {
+                match inst {
+                    Inst::Declare { word } => {
+                        statements.push(Stmt::Def(Def {
+                            typ: "long",
+                            ident: ident(word),
+                            value: None,
+                        }));
+                    }
+                    Inst::DeclareAndInit { word, offset } => {
+                        statements.push(Stmt::Def(Def {
+                            typ: "long",
+                            ident: ident(word),
+                            value: Some(Expr::Call(Call::new(
+                                Expr::Ident("UnsafeUtil"),
+                                "getLong",
+                                vec![Arg::new(Expr::bin(
+                                    Expr::Literal(offset),
+                                    BinOp::Add,
+                                    Expr::Ident(PW),
+                                ))],
+                            ))),
+                        }));
+                    }
+                    Inst::DefineMask { constant } => {
+                        mask = constant;
+                    }
+                    Inst::Pack {
+                        pack:
+                            Pack {
+                                word,
+                                offset,
+                                shift,
+                            },
+                    } => {
+                        let value = Expr::bin(value(offset), BinOp::Shl, Expr::Literal(shift));
+                        if shift == 0 {
+                            statements.push(Stmt::Assign {
+                                lhs: Expr::Var(ident(word)),
+                                rhs: value,
+                            });
+                        } else {
+                            statements.push(Stmt::Expr(Expr::bin(
+                                Expr::Var(ident(word)),
+                                BinOp::OrAssign,
+                                value,
+                            )));
                         }
-                        Inst::PackSplit {
-                            lower_word,
-                            upper_word,
-                            offset,
-                            lower_shift,
-                            upper_shift,
-                        } => {
-                            println!(
-                                "{INDENT:>8}w{lower_word} |= {PIN}[{offset} + {OFF}] << {lower_shift};"
-                            );
-                            println!(
-                                "{INDENT:>8}w{upper_word} = {PIN}[{offset} + {OFF}] >>> {upper_shift};"
-                            );
-                        }
-                        Inst::Unpack {
-                            word,
-                            offset,
-                            shift,
-                        } => {
-                            let value = if offset == 0 {
-                                format!("{PIN}[{OFF}]")
-                            } else {
-                                format!("{PIN}[{offset} + {OFF}]")
-                            };
+                    }
+                    Inst::PackSplit {
+                        lower:
+                            Pack {
+                                word: lower_word,
+                                offset,
+                                shift: lower_shift,
+                            },
+                        upper_word,
+                        upper_shift,
+                    } => {
+                        statements.push(Stmt::Expr(Expr::bin(
+                            Expr::Var(ident(lower_word)),
+                            BinOp::OrAssign,
+                            Expr::bin(value(offset), BinOp::Shl, Expr::Literal(lower_shift)),
+                        )));
 
-                            if shift == 0 {
-                                if method.bits == LONG_BITS {
-                                    println!("{INDENT:>8}{value} = w{word};");
-                                } else {
-                                    println!("{INDENT:>8}{value} = w{word}{mask};");
-                                }
-                            } else {
-                                if shift + method.bits == LONG_BITS {
-                                    println!("{INDENT:>8}{value} = w{word} >>> {shift};");
-                                } else {
-                                    println!("{INDENT:>8}{value} = (w{word} >>> {shift}){mask};");
-                                }
-                            }
-                        }
-                        Inst::UnpackSplit {
-                            lower_word,
-                            upper_word,
-                            offset,
-                            lower_shift,
-                            upper_shift,
-                        } => {
-                            println!(
-                                "{INDENT:>8}{PIN}[{offset} + {OFF}] = ((w{lower_word} >>> {lower_shift}) | (w{upper_word} << {upper_shift})){mask};"
-                            );
-                        }
-                        Inst::Memset { size, constant } => {
-                            println!("{INDENT:>8}java.util.Arrays.fill({PIN}, {OFF}, {OFF} + {size}, 0x{constant:X}L);");
-                        }
-                        Inst::Write { word, offset } => {
-                            let ptr = if offset == 0 {
-                                format!("{PW}")
-                            } else {
-                                format!("{offset} + {PW}")
-                            };
+                        statements.push(Stmt::Assign {
+                            lhs: Expr::Var(ident(upper_word)),
+                            rhs: Expr::bin(value(offset), BinOp::Shr, Expr::Literal(upper_shift)),
+                        });
+                    }
+                    Inst::_PackDelta {
+                        _pack:
+                            Pack {
+                                word: _,
+                                offset: _,
+                                shift: _,
+                            },
+                        _previous,
+                    } => {
+                        todo!()
+                    }
+                    Inst::_PackSplitDelta {
+                        _lower:
+                            Pack {
+                                word: _lower_word,
+                                offset: _,
+                                shift: _lower_shift,
+                            },
+                        _upper_word,
+                        _upper_shift,
+                        _previous,
+                    } => {
+                        todo!()
+                    }
+                    Inst::Unpack {
+                        pack:
+                            Pack {
+                                word,
+                                offset,
+                                shift,
+                            },
+                    } => {
+                        let shift_expr =
+                            Expr::bin(Expr::Var(ident(word)), BinOp::Shr, Expr::Literal(shift));
 
-                            println!("{INDENT:>8}UnsafeUtil.putLong({ptr}, w{word});");
-                        }
-                        Inst::Read { word, offset } => {
-                            let ptr = if offset == 0 {
-                                format!("{PW}")
-                            } else {
-                                format!("{offset} + {PW}")
-                            };
-                            println!("{INDENT:>8}w{word} = UnsafeUtil.getLong({ptr});");
-                        }
-                        Inst::Return { offset } => {
-                            if offset == 0 {
-                                println!("{INDENT:>8}return {PW};");
-                            } else {
-                                println!("{INDENT:>8}return {offset} + {PW};");
-                            }
-                        }
+                        let mask = if shift + method.bits == LONG_BITS {
+                            shift_expr
+                        } else {
+                            Expr::bin(shift_expr, BinOp::And, Expr::HexLiteral(mask))
+                        };
+
+                        statements.push(Stmt::Assign {
+                            lhs: value(offset),
+                            rhs: mask,
+                        });
+                    }
+                    Inst::UnpackSplit {
+                        lower:
+                            Pack {
+                                word: lower_word,
+                                offset,
+                                shift: lower_shift,
+                            },
+                        upper_word,
+                        upper_shift,
+                    } => {
+                        statements.push(Stmt::Assign {
+                            lhs: value(offset),
+                            rhs: Expr::bin(
+                                Expr::bin(
+                                    Expr::bin(
+                                        Expr::Var(ident(lower_word)),
+                                        BinOp::Shr,
+                                        Expr::Literal(lower_shift),
+                                    ),
+                                    BinOp::Or,
+                                    Expr::bin(
+                                        Expr::Var(ident(upper_word)),
+                                        BinOp::Shl,
+                                        Expr::Literal(upper_shift),
+                                    ),
+                                ),
+                                BinOp::And,
+                                Expr::HexLiteral(mask),
+                            ),
+                        });
+                    }
+                    Inst::_UnpackDelta {
+                        _pack:
+                            Pack {
+                                word: _,
+                                offset: _,
+                                shift: _,
+                            },
+                        _previous,
+                    } => {
+                        todo!()
+                    }
+                    Inst::_UnpackSplitDelta {
+                        _lower:
+                            Pack {
+                                word: _lower_word,
+                                offset: _,
+                                shift: _lower_shift,
+                            },
+                        _upper_word,
+                        _upper_shift,
+                        _previous,
+                    } => {
+                        todo!()
+                    }
+                    Inst::Memset { size, constant } => {
+                        statements.push(Stmt::Expr(Expr::Call(Call::new(
+                            Expr::Ident("java.util.Arrays"),
+                            "fill",
+                            vec![
+                                Arg::new(Expr::Ident(PIN)),
+                                Arg::new(Expr::Ident(OFF)),
+                                Arg::new(Expr::bin(
+                                    Expr::Ident(OFF),
+                                    BinOp::Add,
+                                    Expr::Literal(size),
+                                )),
+                                Arg::new(Expr::HexLiteral(constant)),
+                            ],
+                        ))));
+                    }
+                    Inst::Write { word, offset } => {
+                        statements.push(Stmt::Expr(Expr::Call(Call::new(
+                            Expr::Ident("UnsafeUtil"),
+                            "putLong",
+                            vec![
+                                Arg::new(Expr::bin(
+                                    Expr::Literal(offset),
+                                    BinOp::Add,
+                                    Expr::Ident(PW),
+                                )),
+                                Arg::new(Expr::Var(ident(word))),
+                            ],
+                        ))));
+                    }
+                    Inst::Return { offset } => {
+                        statements.push(Stmt::Return {
+                            value: Expr::bin(Expr::Literal(offset), BinOp::Add, Expr::Ident(PW)),
+                        });
                     }
                 }
             }
         }
 
-        println!("{:>4}{}", INDENT, CLOSE);
+        let doc = method.documentation.join("\n");
+        let ident = format!("{prefix}{bits}", prefix = method.prefix, bits = method.bits);
+
+        MethodDef {
+            documentation: Some(doc),
+            modifiers: "private static",
+            typ: "long",
+            ident,
+            params: &PARAMS,
+            code: Some(statements),
+        }
     }
 
-    fn gen_class(class: Class) {
-        println!("/**");
-        for doc in class.documentation {
-            if doc.is_empty() {
-                println!(" *");
-            } else {
-                println!(" * {doc}");
-            }
+    fn gen_class(class: Class) -> ClassDef {
+        let mut members = Vec::new();
+
+        members.push(Member::Method(MethodDef {
+            documentation: None,
+            modifiers: "private",
+            typ: "",
+            ident: class.name.clone(),
+            params: &[],
+            code: Some(vec![]),
+        }));
+
+        members.push(Member::Def(Def {
+            typ: "public static final int",
+            ident: BS.into(),
+            value: Some(Expr::Literal(class.block_size)),
+        }));
+
+        members.push(Member::Method(MethodDef {
+            documentation: None,
+            modifiers: "public static",
+            typ: "int",
+            ident: "advanceValueOffset".into(),
+            params: &[Param {
+                typ: "int",
+                ident: OFF,
+            }],
+            code: Some(vec![Stmt::Return {
+                value: Expr::bin(Expr::Ident(OFF), BinOp::Add, Expr::Ident(BS)),
+            }]),
+        }));
+
+        members.push(Member::Method(MethodDef {
+            documentation: None,
+            modifiers: "public static",
+            typ: "long",
+            ident: "pack".into(),
+            params: &FULL_PARAMS,
+            code: Some(vec![
+                Stmt::Assert {
+                    assertion: Expr::bin(
+                        Expr::Ident(BITS),
+                        BinOp::Lte,
+                        Expr::Literal(class.block_size),
+                    ),
+                    message: Some(Expr::bin(
+                        Expr::StringLit(format!(
+                            "Bits must be at most {bs} but was ",
+                            bs = class.block_size
+                        )),
+                        BinOp::Add,
+                        Expr::Ident(BITS),
+                    )),
+                },
+                Stmt::Return {
+                    value: Expr::Call(Call::new(
+                        Expr::bin(Expr::Ident(PACKERS), BinOp::Index, Expr::Ident(BITS)),
+                        "pack",
+                        vec![
+                            Arg::new(Expr::Ident(PIN)),
+                            Arg::new(Expr::Ident(OFF)),
+                            Arg::new(Expr::Ident(PW)),
+                        ],
+                    )),
+                },
+            ]),
+        }));
+
+        members.push(Member::Method(MethodDef {
+            documentation: None,
+            modifiers: "public static",
+            typ: "long",
+            ident: "unpack".into(),
+            params: &FULL_PARAMS,
+            code: Some(vec![
+                Stmt::Assert {
+                    assertion: Expr::bin(
+                        Expr::Ident(BITS),
+                        BinOp::Lte,
+                        Expr::Literal(class.block_size),
+                    ),
+                    message: Some(Expr::bin(
+                        Expr::StringLit(format!(
+                            "Bits must be at most {bs} but was ",
+                            bs = class.block_size
+                        )),
+                        BinOp::Add,
+                        Expr::Ident(BITS),
+                    )),
+                },
+                Stmt::Return {
+                    value: Expr::Call(Call::new(
+                        Expr::bin(Expr::Ident(UNPACKERS), BinOp::Index, Expr::Ident(BITS)),
+                        "unpack",
+                        vec![
+                            Arg::new(Expr::Ident(PIN)),
+                            Arg::new(Expr::Ident(OFF)),
+                            Arg::new(Expr::Ident(PW)),
+                        ],
+                    )),
+                },
+            ]),
+        }));
+
+        members.push(Member::Class(ClassDef {
+            documentation: None,
+            annotations: vec![Call::new(Expr::NoOp, "FunctionalInterface", Vec::new())],
+            modifiers: "private",
+            typ: "interface",
+            name: "Packer".into(),
+            members: vec![Member::Method(MethodDef {
+                documentation: None,
+                modifiers: "",
+                typ: "long",
+                ident: "pack".into(),
+                params: &PARAMS,
+                code: None,
+            })],
+        }));
+
+        members.push(Member::Class(ClassDef {
+            documentation: None,
+            annotations: vec![Call::new(Expr::NoOp, "FunctionalInterface", Vec::new())],
+            modifiers: "private",
+            typ: "interface",
+            name: "Unpacker".into(),
+            members: vec![Member::Method(MethodDef {
+                documentation: None,
+                modifiers: "",
+                typ: "long",
+                ident: "unpack".into(),
+                params: &PARAMS,
+                code: None,
+            })],
+        }));
+
+        members.push(Member::Def(Def {
+            typ: "private static final Packer[]",
+            ident: PACKERS.into(),
+            value: Some(Expr::ArrayInit(
+                class
+                    .packers
+                    .iter()
+                    .map(|p| {
+                        Expr::MethodRef(Call::new(
+                            Expr::Var(class.name.clone()),
+                            format!("{}{}", p.prefix, p.bits),
+                            Vec::new(),
+                        ))
+                    })
+                    .collect(),
+            )),
+        }));
+
+        members.push(Member::Def(Def {
+            typ: "private static final Unpacker[]",
+            ident: UNPACKERS.into(),
+            value: Some(Expr::ArrayInit(
+                class
+                    .unpackers
+                    .iter()
+                    .map(|p| {
+                        Expr::MethodRef(Call::new(
+                            Expr::Var(class.name.clone()),
+                            format!("{}{}", p.prefix, p.bits),
+                            Vec::new(),
+                        ))
+                    })
+                    .collect(),
+            )),
+        }));
+
+        members.extend(
+            class
+                .packers
+                .into_iter()
+                .chain(class.unpackers)
+                .map(gen_method)
+                .map(Member::Method),
+        );
+
+        let doc = class.documentation.join("\n");
+
+        ClassDef {
+            documentation: Some(doc),
+            annotations: Vec::new(),
+            modifiers: "public final",
+            typ: "class",
+            name: class.name,
+            members,
         }
-        println!(" */");
-        println!("public final class {} {{", class.name);
-        println!();
-        println!("{INDENT:>4}private {}() {{}}", class.name);
-        println!();
-
-        println!(
-            "{INDENT:>4}public static final int BLOCK_SIZE = {};",
-            class.block_size
-        );
-        println!();
-
-        println!("{INDENT:>4}public static int advanceValueOffset(int {OFF}) {{");
-        println!("{INDENT:>4}{INDENT:>4}return {OFF} + BLOCK_SIZE;");
-        println!("{INDENT:>4}{CLOSE}");
-        println!();
-
-        println!(
-            "{INDENT:>4}public static long pack(int bits, long[] {PIN}, int {OFF}, long {PW}) {{"
-        );
-        println!(
-            r#"{INDENT:>8}assert bits <= {bs} : "Bits must be at most {bs} but was " + bits;"#,
-            bs = class.block_size
-        );
-        println!("{INDENT:>8}return PACKERS[bits].pack({PIN}, {OFF}, {PW});");
-        println!("{INDENT:>4}{CLOSE}");
-        println!();
-
-        println!(
-            "{INDENT:>4}public static long unpack(int bits, long[] {PIN}, int {OFF}, long {PW}) {{"
-        );
-        println!(
-            r#"{INDENT:>8}assert bits <= {bs} : "Bits must be at most {bs} but was " + bits;"#,
-            bs = class.block_size
-        );
-        println!("{INDENT:>8}return UNPACKERS[bits].unpack({PIN}, {OFF}, {PW});");
-        println!("{INDENT:>4}{CLOSE}");
-        println!();
-
-        println!("{INDENT:>4}@FunctionalInterface");
-        println!("{INDENT:>4}private interface Packer {{");
-        println!("{INDENT:>4}{INDENT:>4}long pack(long[] {PIN}, int {OFF}, long {PW});");
-        println!("{INDENT:>4}{CLOSE}");
-        println!();
-
-        println!("{INDENT:>4}@FunctionalInterface");
-        println!("{INDENT:>4}private interface Unpacker {{");
-        println!("{INDENT:>4}{INDENT:>4}long unpack(long[] {PIN}, int {OFF}, long {PW});");
-        println!("{INDENT:>4}{CLOSE}");
-        println!();
-
-        println!("{INDENT:>4}private static final Packer[] PACKERS = {{");
-        let (last, methods) = class.packers.split_last().unwrap();
-        for method in methods {
-            println!(
-                "{INDENT:>8}{}::{}{},",
-                class.name, method.prefix, method.bits
-            );
-        }
-        println!("{INDENT:>8}{}::{}{},", class.name, last.prefix, last.bits);
-        println!("{INDENT:>4}{CLOSE};");
-        println!();
-
-        println!("{INDENT:>4}private static final Unpacker[] UNPACKERS = {{");
-        let (last, methods) = class.unpackers.split_last().unwrap();
-        for method in methods {
-            println!(
-                "{INDENT:>8}{}::{}{},",
-                class.name, method.prefix, method.bits
-            );
-        }
-        println!("{INDENT:>8}{}::{}{},", class.name, last.prefix, last.bits);
-        println!("{INDENT:>4}{CLOSE};");
-        println!();
-
-        for method in class.packers.into_iter().chain(class.unpackers) {
-            gen_method(method);
-            println!();
-        }
-
-        println!("{CLOSE}");
     }
 
-    pub(super) fn gen_file(file: File) {
-        println!(
-            r#"/*
- * Copyright (c) "Neo4j"
- * Neo4j Sweden AB [http://neo4j.com]
- *
- * This file is part of Neo4j.
- *
- * Neo4j is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-package {};
+    fn gen_file(file: File) -> FileDef {
+        let class = gen_class(file.class);
+        let mut file = FileDef::new(
+            r#"
+Copyright (c) "Neo4j"
+Neo4j Sweden AB [http://neo4j.com]
 
-import org.neo4j.internal.unsafe.UnsafeUtil;
+This file is part of Neo4j.
+
+Neo4j is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 "#,
-            file.package
+            file.package,
+            vec!["org.neo4j.internal.unsafe.UnsafeUtil".into()],
+            class,
         );
 
-        println!();
-        gen_class(file.class);
+        file.optimize();
+        file
+    }
+
+    pub(super) fn write_file(file: File) {
+        let file = gen_file(file);
+
+        let mut writer = FileWriter::new(0);
+        file.print(&mut writer);
+        print!("{}", writer.into_inner());
     }
 }

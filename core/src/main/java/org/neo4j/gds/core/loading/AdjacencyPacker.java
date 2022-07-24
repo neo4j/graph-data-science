@@ -45,7 +45,7 @@ public final class AdjacencyPacker {
             return bytes + bits.length;
         }
 
-        private void free() {
+        public void free() {
             UnsafeUtil.free(address, bytes, EmptyMemoryTracker.INSTANCE);
         }
 
@@ -55,6 +55,7 @@ public final class AdjacencyPacker {
         }
     }
 
+    public static final int PASS = 0;
     public static final int SORT = 1 << 22;
     public static final int DELTA = 1 << 23;
 
@@ -104,8 +105,23 @@ public final class AdjacencyPacker {
     }
 
     public static long[] decompressAndPrefixSum(Compressed compressed) {
-        var values = decompress(compressed);
-        AdjacencyCompression.prefixSumDeltaEncodedValues(values, values.length);
+//        var values = decompress(compressed);
+//        AdjacencyCompression.prefixSumDeltaEncodedValues(values, values.length);
+
+        long[] values = new long[compressed.bits.length * AdjacencyPacking.BLOCK_SIZE];
+
+        long value = values[0];
+        int offset = 0;
+        long ptr = compressed.address;
+        for (byte bits : compressed.bits) {
+            ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
+            for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
+                value = values[offset + i] += value;
+            }
+            offset += AdjacencyPacking.BLOCK_SIZE;
+        }
+
+
         return values;
     }
 
@@ -118,8 +134,6 @@ public final class AdjacencyPacker {
             ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
             offset += AdjacencyPacking.BLOCK_SIZE;
         }
-
-        compressed.free();
 
         return values;
     }

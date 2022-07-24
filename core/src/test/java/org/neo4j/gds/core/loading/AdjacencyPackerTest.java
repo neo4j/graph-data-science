@@ -52,12 +52,17 @@ class AdjacencyPackerTest {
         );
 
         var decompressed = AdjacencyPacker.decompressAndPrefixSum(compressed);
+        compressed.free();
         assertThat(decompressed).containsExactly(originalValues);
 
-        values = Arrays.copyOf(originalValues, originalValues.length);
-        AdjacencyCompression.deltaEncodeSortedValues(values, 0, values.length, Aggregation.NONE);
-        var compressedBuffer = new byte[values.length * Long.BYTES];
-        int requiredBytes = AdjacencyCompression.compress(values, compressedBuffer, values.length);
+        var varLongCompressed = AdjacencyCompression.deltaEncodeAndCompress(
+            originalValues.clone(),
+            0,
+            originalValues.length,
+            Aggregation.NONE
+        );
+        int requiredBytes = varLongCompressed.length;
+
         System.out.printf(
             Locale.ENGLISH,
             "dvl compressed = %d ratio = %.2f%n",

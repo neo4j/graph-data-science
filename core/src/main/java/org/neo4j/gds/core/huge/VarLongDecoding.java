@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.huge;
 
-final class VarLongDecoding {
+public final class VarLongDecoding {
 
-    static int decodeDeltaVLongs(
+    public static int decodeDeltaVLongs(
         long startValue,
         byte[] adjacencyPage,
         int offset,

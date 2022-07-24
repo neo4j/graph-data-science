@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.AscendingLongComparator;
 
 import java.util.Arrays;
 
+import static org.neo4j.gds.core.huge.VarLongDecoding.decodeDeltaVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodeVLongs;
 import static org.neo4j.gds.core.loading.VarLongEncoding.encodedVLongsSize;
 import static org.neo4j.gds.core.loading.ZigZagLongDecoding.zigZagUncompress;
@@ -108,6 +109,24 @@ public final class AdjacencyCompression {
 
     public static int compress(long[] data, byte[] out, int length) {
         return encodeVLongs(data, length, out, 0);
+    }
+
+    public static int compress(long[] data, int offset, int length, byte[] out) {
+        return encodeVLongs(data, offset, offset + length, out, 0);
+    }
+
+    public static byte[] deltaEncodeAndCompress(long[] values, int offset, int length, Aggregation aggregation) {
+        length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+        var requiredBytes = VarLongEncoding.encodedVLongsSize(values, offset, length);
+        var compressed = new byte[requiredBytes];
+        compress(values, offset, length, compressed);
+        return compressed;
+    }
+
+    public static long[] decompress(byte[] compressed, int numberOfValues) {
+        long[] out = new long[numberOfValues];
+        decodeDeltaVLongs(0L, compressed, 0, numberOfValues, out);
+        return out;
     }
 
     public static int deltaEncodeSortedValues(long[] values, int offset, int length, Aggregation aggregation) {
