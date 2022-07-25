@@ -21,33 +21,53 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.gds.annotation.SuppressForbidden;
 
+import java.util.Locale;
 import java.util.ServiceLoader;
+import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class ProxyUtil {
 
+    private static final AtomicBoolean LOG_ENVIRONMENT = new AtomicBoolean(true);
+
     @SuppressForbidden(reason = "This is the best we can do at the moment")
     public static <PROXY, FACTORY extends ProxyFactory<PROXY>> PROXY findProxy(Class<FACTORY> factoryClass) {
-        var log = new OutputStreamLogBuilder(System.out).build();
-        log.info("Java vendor: %s", System.getProperty("java.vendor"));
-        log.info("Java version: %s", System.getProperty("java.version"));
-        log.info("Java home: %s", System.getProperty("java.home"));
-        var neo4jVersion = GraphDatabaseApiProxy.neo4jVersion();
-        log.info("Detected Neo4j version: %s", neo4jVersion);
-        FACTORY proxyFactory = ServiceLoader
-            .load(factoryClass)
-            .stream()
-            .map(ServiceLoader.Provider::get)
-            .filter(f -> {
-                var canLoad = f.canLoad(neo4jVersion);
-                log.info("GDS compatibility for %s: %s", f.description(), canLoad ? "available" : "not available");
-                return canLoad;
-            })
-            .findFirst()
-            .orElseThrow(() -> new LinkageError("GDS is not compatible with Neo4j version: " + neo4jVersion));
-        var proxy = proxyFactory.load();
-        log.info("Loaded compatibility proxy layer: %s", proxy);
-
-        return proxy;
+        var neo4jVersion = new AtomicReference<Neo4jVersion>();
+        var availabilityLog = new StringJoiner(", ", "GDS compatibility: ", "");
+        try {
+            neo4jVersion.set(GraphDatabaseApiProxy.neo4jVersion());
+            FACTORY proxyFactory = ServiceLoader
+                .load(factoryClass)
+                .stream()
+                .map(ServiceLoader.Provider::get)
+                .filter(f -> {
+                    var canLoad = f.canLoad(neo4jVersion.get());
+                    availabilityLog.add(String.format(
+                        Locale.ENGLISH,
+                        "for %s -- %s",
+                        f.description(),
+                        canLoad ? "available" : "not available"
+                    ));
+                    return canLoad;
+                })
+                .findFirst()
+                .orElseThrow(() -> new LinkageError("GDS is not compatible with Neo4j version: " + neo4jVersion));
+            availabilityLog.add("selected: " + proxyFactory.description());
+            return proxyFactory.load();
+        } finally {
+            var log = new OutputStreamLogBuilder(System.out).build();
+            if (LOG_ENVIRONMENT.getAndSet(false)) {
+                log.debug(
+                    "Java vendor: [%s] Java version: [%s] Java home: [%s] Detected Neo4j version: [%s]",
+                    System.getProperty("java.vendor"),
+                    System.getProperty("java.version"),
+                    System.getProperty("java.home"),
+                    neo4jVersion
+                );
+            }
+            log.info(availabilityLog.toString());
+        }
     }
 
     private ProxyUtil() {}
