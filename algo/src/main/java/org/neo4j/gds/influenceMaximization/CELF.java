@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CELF extends Algorithm<CELF> {
+public class CELF extends Algorithm<LongDoubleScatterMap> {
 
     private final long seedSetCount;
     private final double propagationProbability;
@@ -94,13 +94,13 @@ public class CELF extends Algorithm<CELF> {
     }
 
     @Override
-    public CELF compute() {
+    public LongDoubleScatterMap compute() {
         //Find the first node with greedy algorithm
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
 
-        return this;
+        return seedSetNodes;
     }
 
     private void greedyPart() {
@@ -187,12 +187,11 @@ public class CELF extends Algorithm<CELF> {
     public void release() {
     }
 
-    public double getNodeSpread(long node) {
-        return seedSetNodes.getOrDefault(node, 0);
-    }
-
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
-            .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
+            .mapToObj(node -> new InfluenceMaximizationResult(
+                graph.toOriginalNodeId(node),
+                seedSetNodes.getOrDefault(node, 0)
+            ));
     }
 }

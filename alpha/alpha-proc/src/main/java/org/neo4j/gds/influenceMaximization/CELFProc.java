@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
+import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -37,7 +38,7 @@ import static org.neo4j.gds.influenceMaximization.CELFProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
-public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConfig, InfluenceMaximizationResult> {
+public class CELFProc extends AlgoBaseProc<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, InfluenceMaximizationResult> {
 
     public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
@@ -62,7 +63,7 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
     }
 
     @Override
-    public ComputationResultConsumer<CELF, CELF, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.graph().isEmpty()) {
                 computationResult.graph().release();
