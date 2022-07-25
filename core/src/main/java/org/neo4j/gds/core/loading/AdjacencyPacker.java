@@ -87,9 +87,6 @@ public final class AdjacencyPacker {
             bytes += bytesNeeded(bits);
             allBits[blockIdx++] = (byte) bits;
         }
-//        for (; i < end; i++) {
-//            bytes += VarLongEncoding.encodedVLongSize(values[i]);
-//        }
 
         bytes = BitUtil.align(bytes, Long.BYTES);
         long mem = UnsafeUtil.allocateMemory(bytes, EmptyMemoryTracker.INSTANCE);
@@ -105,9 +102,6 @@ public final class AdjacencyPacker {
     }
 
     public static long[] decompressAndPrefixSum(Compressed compressed) {
-//        var values = decompress(compressed);
-//        AdjacencyCompression.prefixSumDeltaEncodedValues(values, values.length);
-
         long[] values = new long[compressed.bits.length * AdjacencyPacking.BLOCK_SIZE];
 
         long value = values[0];
@@ -148,6 +142,5 @@ public final class AdjacencyPacker {
 
     private static int bytesNeeded(int bits) {
         return BitUtil.ceilDiv(AdjacencyPacking.BLOCK_SIZE * bits, Byte.SIZE);
-//        return ((long) AdjacencyPacking.BLOCK_SIZE * bits + Byte.SIZE - 1) / Byte.SIZE;
     }
 }
