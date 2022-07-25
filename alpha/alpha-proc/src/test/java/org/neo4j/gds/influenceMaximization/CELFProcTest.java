@@ -88,7 +88,6 @@ class CELFProcTest extends BaseProcTest {
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(CELFProc.class, GraphProjectProc.class);
-        runQuery(DB_CYPHER);
 
         String graphCreateQuery = GdsCypher.call("celfGraph")
             .graphProject()
@@ -116,7 +115,7 @@ class CELFProcTest extends BaseProcTest {
         var cypher = GdsCypher.call("celfGraph")
             .algo("gds.alpha.influenceMaximization.celf")
             .streamMode()
-            .addParameter("seedSetSize", 2)
+            .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .yields("nodeId", "spread");
