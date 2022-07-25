@@ -46,7 +46,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
     private final int batchSize;
     private final LongDoubleScatterMap seedSetNodes;
 
-    private final long[] seedSetNodesArray;
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
 
@@ -82,7 +81,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
 
         this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
 
-        this.seedSetNodesArray = new long[seedSetCount];
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
@@ -134,7 +132,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         gain = spreads.cost(highestNode);
         spreads.pop();
         seedSetNodes.put(highestNode, gain);
-        seedSetNodesArray[0] = highestNode;
     }
 
     private void lazyForwardPart() {
@@ -143,7 +140,8 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             graph,
             propagationProbability,
             monteCarloSimulations,
-            seedSetNodesArray.clone(),
+            seedSetNodes.keys[0],
+            (int) seedSetCount,
             concurrency,
             executorService,
             initialRandomSeed,
@@ -176,7 +174,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             var highestNode = spreads.pop();
 
             seedSetNodes.put(highestNode, highestScore);
-            seedSetNodesArray[i] = highestNode;
             gain += highestScore;
             independentCascade.incrementSeedNode(highestNode);
 

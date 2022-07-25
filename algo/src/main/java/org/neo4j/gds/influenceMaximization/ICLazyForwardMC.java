@@ -42,7 +42,8 @@ final class ICLazyForwardMC {
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
-        long[] seedSetNodes,
+        long firstNodeInSeedSet,
+        int seedSetCount,
         int concurrency,
         ExecutorService executorService,
         long initialRandomSeed,
@@ -56,7 +57,8 @@ final class ICLazyForwardMC {
             partition -> new ICLazyForwardTask(
                 partition,
                 graph.concurrentCopy(),
-                seedSetNodes.clone(),
+                firstNodeInSeedSet,
+                seedSetCount,
                 propagationProbability,
                 initialRandomSeed,
                 batchSize

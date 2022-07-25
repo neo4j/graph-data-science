@@ -51,7 +51,8 @@ final class ICLazyForwardTask implements Runnable {
     ICLazyForwardTask(
         Partition partition,
         Graph graph,
-        long[] seedSetNodes,
+        long firstNodeInSeedSet,
+        int seedSetCount,
         double propagationProbability,
         long initialRandomSeed,
         int batchSize
@@ -61,7 +62,8 @@ final class ICLazyForwardTask implements Runnable {
         this.seedActive = new BitSet(graph.nodeCount());
         this.candidateActive = new BitSet(graph.nodeCount());
         this.propagationProbability = propagationProbability;
-        this.seedSetNodes = seedSetNodes;
+        this.seedSetNodes = new long[seedSetCount];
+        this.seedSetNodes[0] = firstNodeInSeedSet;
         this.initialRandomSeed = initialRandomSeed;
         this.seedNodeCounter = 1;
         this.partition = partition;
