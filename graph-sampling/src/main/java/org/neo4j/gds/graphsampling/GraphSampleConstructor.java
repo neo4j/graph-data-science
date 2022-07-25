@@ -70,7 +70,16 @@ public class GraphSampleConstructor {
     public GraphStore compute() {
         progressTracker.beginSubTask(nodesSampler.progressTaskName());
 
-        var idMap = computeIdMap();
+        var inputGraph = inputGraphStore.getGraph(
+            config.nodeLabelIdentifiers(inputGraphStore),
+            config.internalRelationshipTypes(inputGraphStore),
+            Optional.ofNullable(config.relationshipWeightProperty())
+        );
+        var sampledNodesBitSet = nodesSampler.compute(inputGraph, progressTracker);
+
+        progressTracker.beginSubTask("Construct graph");
+
+        var idMap = computeIdMap(inputGraph, sampledNodesBitSet);
 
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
@@ -120,23 +129,16 @@ public class GraphSampleConstructor {
             .build();
 
         progressTracker.endSubTask("Construct graph");
+
         progressTracker.endSubTask(nodesSampler.progressTaskName());
 
         return outputGraphStore;
     }
 
-    private IdMap computeIdMap() {
-        var inputGraph = inputGraphStore.getGraph(
-            config.nodeLabelIdentifiers(inputGraphStore),
-            config.internalRelationshipTypes(inputGraphStore),
-            Optional.ofNullable(config.relationshipWeightProperty())
-        );
-
-        var sampledNodesBitSet = nodesSampler.compute(inputGraph, progressTracker);
-
-        progressTracker.beginSubTask("Construct graph");
+    private IdMap computeIdMap(Graph inputGraph, HugeAtomicBitSet sampledNodesBitSet) {
         progressTracker.beginSubTask("Construct node id map");
         progressTracker.setSteps(inputGraph.nodeCount());
+
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
