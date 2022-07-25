@@ -24,13 +24,21 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 import org.neo4j.gds.graphsampling.samplers.NodesSampler;
+import org.neo4j.gds.graphsampling.samplers.RandomWalkWithRestarts;
 
 import java.util.List;
 import java.util.Set;
@@ -38,6 +46,7 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
 class GraphSampleConstructorTest {
@@ -87,12 +96,22 @@ class GraphSampleConstructorTest {
         }
 
         @Override
-        public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+        public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker unused) {
             var bitset = HugeAtomicBitSet.create(inputGraph.nodeCount());
             for (long originalId : originalIds) {
                 bitset.set(inputGraph.toMappedNodeId(originalId));
             }
             return bitset;
+        }
+
+        @Override
+        public Task progressTask(GraphStore graphStore) {
+            return Tasks.empty();
+        }
+
+        @Override
+        public String progressTaskName() {
+            return "DUMMY";
         }
     }
 
@@ -117,13 +136,14 @@ class GraphSampleConstructorTest {
             idFunction.of("g")
         );
 
-        var rwrGraphConstructor = new GraphSampleConstructor(
+        var graphConstructor = new GraphSampleConstructor(
             config,
             graphStore,
-            new TestNodesSampler(originalIds)
+            new TestNodesSampler(originalIds),
+            ProgressTracker.NULL_TRACKER
         );
 
-        var subgraph = rwrGraphConstructor.construct();
+        var subgraph = graphConstructor.compute();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(7);
         assertThat(graphStore.schema().nodeSchema().filter(Set.of(NodeLabel.of("N"), NodeLabel.of("M"))))
             .usingRecursiveComparison()
@@ -170,13 +190,14 @@ class GraphSampleConstructorTest {
             idFunction.of("g")
         );
 
-        var rwrGraphConstructor = new GraphSampleConstructor(
+        var graphConstructor = new GraphSampleConstructor(
             config,
             graphStore,
-            new TestNodesSampler(originalIds)
+            new TestNodesSampler(originalIds),
+            ProgressTracker.NULL_TRACKER
         );
 
-        var subgraph = rwrGraphConstructor.construct();
+        var subgraph = graphConstructor.compute();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(3);
         var expectedGraph =
             "  (e:M {prop: 50, attr: 48})" +
@@ -185,5 +206,79 @@ class GraphSampleConstructorTest {
             ", (e)-[:R1 {distance: 5.8}]->(f)" +
             ", (f)-[:R1 {distance: 9.9}]->(g)";
         assertGraphEquals(fromGdl(expectedGraph), subgraph.getGraph("distance"));
+    }
+
+    @Test
+    void shouldLogProgressWithRWR() {
+        var config = RandomWalkWithRestartsConfigImpl.builder()
+            .startNodes(List.of(idFunction.of("a")))
+            .samplingRatio(0.5)
+            .restartProbability(0.1)
+            .concurrency(1)
+            .randomSeed(42L)
+            .build();
+        var rwr = new RandomWalkWithRestarts(config);
+
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TaskProgressTracker(
+            GraphSampleConstructor.progressTask(graphStore, rwr),
+            log,
+            1,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        var rwrGraphConstructor = new GraphSampleConstructor(
+            config,
+            graphStore,
+            rwr,
+            progressTracker
+        );
+        rwrGraphConstructor.compute();
+
+        var messages = log.getMessages(TestLog.INFO);
+
+        assertThat(messages)
+            // avoid asserting on the thread id
+            .extracting(removingThreadId())
+            .contains(
+                "Random walk with restarts sampling :: Start",
+                "Random walk with restarts sampling :: Sample with RWR :: Start",
+                "Random walk with restarts sampling :: Sample with RWR 28%",
+                "Random walk with restarts sampling :: Sample with RWR 100%",
+                "Random walk with restarts sampling :: Sample with RWR :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Construct node id map 100%",
+                "Random walk with restarts sampling :: Construct graph :: Construct node id map :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 7%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 14%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 21%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 28%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 35%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 42%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 50%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 57%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 64%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 71%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 78%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 85%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 92%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties 100%",
+                "Random walk with restarts sampling :: Construct graph :: Filter node properties :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 27%",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 45%",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 54%",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 100%",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 1 of 2 :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Start",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 100%",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Relationship type 2 of 2 :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Filter relationship properties :: Finished",
+                "Random walk with restarts sampling :: Construct graph :: Finished",
+                "Random walk with restarts sampling :: Finished"
+            );
     }
 }

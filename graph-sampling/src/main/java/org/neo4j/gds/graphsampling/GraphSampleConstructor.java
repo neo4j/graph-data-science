@@ -40,6 +40,8 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.samplers.NodesSampler;
 
 import java.util.List;
@@ -51,21 +53,30 @@ public class GraphSampleConstructor {
     private final GraphSampleAlgoConfig config;
     private final GraphStore inputGraphStore;
     private final NodesSampler nodesSampler;
+    private final ProgressTracker progressTracker;
 
-    public GraphSampleConstructor(GraphSampleAlgoConfig config, GraphStore inputGraphStore, NodesSampler nodesSampler) {
+    public GraphSampleConstructor(
+        GraphSampleAlgoConfig config,
+        GraphStore inputGraphStore,
+        NodesSampler nodesSampler,
+        ProgressTracker progressTracker
+    ) {
         this.config = config;
         this.inputGraphStore = inputGraphStore;
         this.nodesSampler = nodesSampler;
+        this.progressTracker = progressTracker;
     }
 
-    public GraphStore construct() {
+    public GraphStore compute() {
+        progressTracker.beginSubTask(nodesSampler.progressTaskName());
+
         var idMap = computeIdMap();
 
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
             idMap,
             config.concurrency(),
-            ProgressTracker.NULL_TRACKER
+            progressTracker
         );
 
         var relTypeFilterExpression = new Expression() {
@@ -88,7 +99,7 @@ public class GraphSampleConstructor {
             config.concurrency(),
             Map.of(),
             Pools.DEFAULT,
-            ProgressTracker.NULL_TRACKER
+            progressTracker
         );
 
         var filteredSchema = GraphStoreFilter.filterSchema(
@@ -97,7 +108,7 @@ public class GraphSampleConstructor {
             filteredRelationships
         );
 
-        return new GraphStoreBuilder()
+        var outputGraphStore = new GraphStoreBuilder()
             .databaseId(inputGraphStore.databaseId())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
@@ -107,6 +118,11 @@ public class GraphSampleConstructor {
             .relationshipPropertyStores(filteredRelationships.propertyStores())
             .concurrency(config.concurrency())
             .build();
+
+        progressTracker.endSubTask("Construct graph");
+        progressTracker.endSubTask(nodesSampler.progressTaskName());
+
+        return outputGraphStore;
     }
 
     private IdMap computeIdMap() {
@@ -115,8 +131,12 @@ public class GraphSampleConstructor {
             config.internalRelationshipTypes(inputGraphStore),
             Optional.ofNullable(config.relationshipWeightProperty())
         );
-        var sampledNodesBitSet = nodesSampler.sampleNodes(inputGraph);
 
+        var sampledNodesBitSet = nodesSampler.compute(inputGraph, progressTracker);
+
+        progressTracker.beginSubTask("Construct graph");
+        progressTracker.beginSubTask("Construct node id map");
+        progressTracker.setSteps(inputGraph.nodeCount());
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .concurrency(config.concurrency())
@@ -125,14 +145,16 @@ public class GraphSampleConstructor {
             .hasLabelInformation(hasLabelInformation)
             .deduplicateIds(false)
             .build();
-        var tasks = PartitionUtils.rangePartition(config.concurrency(),
+        var tasks = PartitionUtils.rangePartition(
+            config.concurrency(),
             inputGraph.nodeCount(),
             partition -> new IdMapSampleTask(
                 nodesBuilder,
                 sampledNodesBitSet,
                 inputGraph,
                 hasLabelInformation,
-                partition
+                partition,
+                progressTracker
             ),
             Optional.empty()
         );
@@ -140,8 +162,10 @@ public class GraphSampleConstructor {
             .concurrency(config.concurrency())
             .tasks(tasks)
             .run();
+        var idMap = nodesBuilder.build().idMap();
+        progressTracker.endSubTask("Construct node id map");
 
-        return nodesBuilder.build().idMap();
+        return idMap;
     }
 
     static class IdMapSampleTask implements Runnable {
@@ -150,19 +174,22 @@ public class GraphSampleConstructor {
         private final Graph inputGraph;
         private final boolean hasLabelInformation;
         private final Partition partition;
+        private final ProgressTracker progressTracker;
 
         IdMapSampleTask(
             NodesBuilder nodesBuilder,
             HugeAtomicBitSet nodesBitSet,
             Graph inputGraph,
             boolean hasLabelInformation,
-            Partition partition
+            Partition partition,
+            ProgressTracker progressTracker
         ) {
             this.nodesBuilder = nodesBuilder;
             this.nodesBitSet = nodesBitSet;
             this.inputGraph = inputGraph;
             this.hasLabelInformation = hasLabelInformation;
             this.partition = partition;
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -180,6 +207,25 @@ public class GraphSampleConstructor {
                     nodesBuilder.addNode(originalId);
                 }
             }
+
+            progressTracker.logSteps(partition.nodeCount());
         }
+    }
+
+    public static Task progressTask(GraphStore graphStore, NodesSampler nodesSampler) {
+        return Tasks.task(
+            nodesSampler.progressTaskName(),
+            nodesSampler.progressTask(graphStore),
+            Tasks.task(
+                "Construct graph",
+                Tasks.leaf("Construct node id map", graphStore.nodeCount()),
+                Tasks.leaf("Filter node properties", graphStore.nodeCount()),
+                Tasks.iterativeFixed(
+                    "Filter relationship properties",
+                    () -> List.of(Tasks.leaf("Relationship type", graphStore.relationshipCount())),
+                    graphStore.relationshipTypes().size()
+                )
+            )
+        );
     }
 }

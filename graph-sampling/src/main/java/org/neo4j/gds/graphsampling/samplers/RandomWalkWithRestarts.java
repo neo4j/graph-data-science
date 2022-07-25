@@ -29,17 +29,22 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
 
 public class RandomWalkWithRestarts implements NodesSampler {
+    private static final String SAMPLING_TASK_NAME = "Sample with RWR";
     private static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     private static final int MAX_WALKS_PER_START = 100;
@@ -54,8 +59,12 @@ public class RandomWalkWithRestarts implements NodesSampler {
     }
 
     @Override
-    public HugeAtomicBitSet sampleNodes(Graph inputGraph) {
+    public HugeAtomicBitSet compute(Graph inputGraph, ProgressTracker progressTracker) {
         assert inputGraph.hasRelationshipProperty() == config.hasRelationshipWeightProperty();
+
+        progressTracker.beginSubTask(SAMPLING_TASK_NAME);
+
+        progressTracker.setSteps((long) Math.ceil(inputGraph.nodeCount() * config.samplingRatio()));
 
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
@@ -73,7 +82,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 new WalkQualities(initialStartQualities),
                 rng.split(),
                 inputGraph.concurrentCopy(),
-                config
+                config,
+                progressTracker
             )
         );
         RunWithConcurrency.builder()
@@ -82,7 +92,19 @@ public class RandomWalkWithRestarts implements NodesSampler {
             .run();
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
+        progressTracker.endSubTask(SAMPLING_TASK_NAME);
+
         return seenNodes;
+    }
+
+    @Override
+    public Task progressTask(GraphStore graphStore) {
+        return Tasks.leaf(SAMPLING_TASK_NAME, 10 * Math.round(graphStore.nodeCount() * config.samplingRatio()));
+    }
+
+    @Override
+    public String progressTaskName() {
+        return "Random walk with restarts sampling";
     }
 
     private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
@@ -132,6 +154,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
         private final SplittableRandom rng;
         private final Graph inputGraph;
         private final RandomWalkWithRestartsConfig config;
+        private final ProgressTracker progressTracker;
 
         private LongSet startNodesUsed;
 
@@ -143,7 +166,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
             WalkQualities walkQualities,
             SplittableRandom rng,
             Graph inputGraph,
-            RandomWalkWithRestartsConfig config
+            RandomWalkWithRestartsConfig config,
+            ProgressTracker progressTracker
         ) {
             this.seenNodes = seenNodes;
             this.expectedNodes = expectedNodes;
@@ -153,6 +177,7 @@ public class RandomWalkWithRestarts implements NodesSampler {
             this.rng = rng;
             this.inputGraph = inputGraph;
             this.config = config;
+            this.progressTracker = progressTracker;
             this.startNodesUsed = new LongHashSet();
         }
 
@@ -173,6 +198,8 @@ public class RandomWalkWithRestarts implements NodesSampler {
                 // walk a step
                 double degree = computeDegree(currentNode);
                 if (degree == 0.0 || rng.nextDouble() < config.restartProbability()) {
+                    progressTracker.logSteps(addedNodes);
+
                     double walkQuality = ((double) addedNodes) / nodesConsidered;
                     walkQualities.updateNodeQuality(currentStartNodePosition, walkQuality);
                     addedNodes = 0;
