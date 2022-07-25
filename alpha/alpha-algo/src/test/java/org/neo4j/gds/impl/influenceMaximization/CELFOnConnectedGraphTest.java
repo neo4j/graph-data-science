@@ -31,6 +31,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.influenceMaximization.CELF;
 
+import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
+
 
 @GdlExtension
 class CELFOnConnectedGraphTest {
@@ -93,7 +95,7 @@ class CELFOnConnectedGraphTest {
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
 
 
-        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0);
+        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE);
         celf.compute();
         var softAssertions = new SoftAssertions();
 

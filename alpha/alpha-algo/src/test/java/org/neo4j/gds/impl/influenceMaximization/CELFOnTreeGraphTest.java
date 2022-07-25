@@ -31,6 +31,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.influenceMaximization.CELF;
 
+import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
+
 
 @GdlExtension
 class CELFOnTreeGraphTest {
@@ -128,7 +130,7 @@ class CELFOnTreeGraphTest {
         //then  a4 is picked with 1/3 (independntant)
 
         //finally a5 has a gain of 0
-        CELF celf = new CELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10);
+        CELF celf = new CELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10, DEFAULT_BATCH_SIZE);
         celf.compute();
         var softAssertions = new SoftAssertions();
 

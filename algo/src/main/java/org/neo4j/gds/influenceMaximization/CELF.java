@@ -43,6 +43,7 @@ public class CELF extends Algorithm<CELF> {
 
     private final Graph graph;
     private final long initialRandomSeed;
+    private final int batchSize;
     private final LongDoubleScatterMap seedSetNodes;
 
     private final long[] seedSetNodesArray;
@@ -63,11 +64,13 @@ public class CELF extends Algorithm<CELF> {
         int monteCarloSimulations,
         ExecutorService executorService,
         int concurrency,
-        long initialRandomSeed
+        long initialRandomSeed,
+        int batchSize
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
         this.initialRandomSeed = initialRandomSeed;
+        this.batchSize = batchSize;
         long nodeCount = graph.nodeCount();
 
         this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
@@ -143,14 +146,15 @@ public class CELF extends Algorithm<CELF> {
             seedSetNodesArray.clone(),
             concurrency,
             executorService,
-            initialRandomSeed
+            initialRandomSeed,
+            batchSize
         );
 
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
-        long[] firstK = new long[ICLazyForwardMC.DEFAULT_BATCH_SIZE];
+        long[] firstK = new long[batchSize];
         for (int i = 1; i < seedSetCount; i++) {
             while (lastUpdate.get(spreads.top()) != i) {
-                long batchUpperBound = Math.min(ICLazyForwardMC.DEFAULT_BATCH_SIZE, spreads.size());
+                long batchUpperBound = Math.min(batchSize, spreads.size());
                 int actualBatchSize = 0;
                 for (int j = 0; j < batchUpperBound; ++j) {
                     var nextNodeId = spreads.getIth(j);

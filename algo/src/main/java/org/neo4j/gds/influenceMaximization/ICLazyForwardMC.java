@@ -29,8 +29,6 @@ import java.util.concurrent.ExecutorService;
 
 final class ICLazyForwardMC {
 
-    static final int DEFAULT_BATCH_SIZE = 10;
-
     private final int concurrency;
 
     private final List<ICLazyForwardTask> tasks;
@@ -47,9 +45,10 @@ final class ICLazyForwardMC {
         long[] seedSetNodes,
         int concurrency,
         ExecutorService executorService,
-        long initialRandomSeed
+        long initialRandomSeed,
+        int batchSize
     ) {
-        double[] spread = new double[DEFAULT_BATCH_SIZE];
+        double[] spread = new double[batchSize];
 
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -60,7 +59,7 @@ final class ICLazyForwardMC {
                 seedSetNodes.clone(),
                 propagationProbability,
                 initialRandomSeed,
-                DEFAULT_BATCH_SIZE
+                batchSize
             ),
             Optional.of(monteCarloSimulations / concurrency)
         );
