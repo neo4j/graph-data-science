@@ -22,11 +22,13 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
 
@@ -80,6 +82,30 @@ class LinkPredictionTrainConfigTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         )).hasMessage("TargetRelationshipType 'REL' must be undirected, but was directed.");
+    }
+
+    @Test
+    void featureInputNodeLabelsIncludeSourceAndTarget() {
+        var config = LinkPredictionTrainConfigImpl.builder()
+            .pipeline("DUMMY")
+            .graphName("DUMMY")
+            .modelName("DUMMY")
+            .username("DUMMY")
+            .sourceNodeLabel("A")
+            .targetNodeLabel("B")
+            .contextNodeLabels(List.of("C"))
+            .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
+            .targetRelationshipType("REL")
+            .build();
+
+        var graphStore = GdlFactory.of("(:A)-[:REL]->(:B)-[:CONTEXT]->(:C)").build();
+
+
+        assertThat(config.featureInputLabels(graphStore)).containsExactly(
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
     }
 
 }
