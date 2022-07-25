@@ -33,7 +33,7 @@ import org.neo4j.gds.influenceMaximization.CELF;
 
 
 @GdlExtension
-class CELFTestOnConnectedGraph {
+class CELFOnConnectedGraphTest {
     @GdlGraph(orientation = Orientation.NATURAL)
     private static final String DB_CYPHER =
         "CREATE " +

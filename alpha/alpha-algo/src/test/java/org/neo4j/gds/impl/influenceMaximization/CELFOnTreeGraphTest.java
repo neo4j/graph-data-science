@@ -33,7 +33,7 @@ import org.neo4j.gds.influenceMaximization.CELF;
 
 
 @GdlExtension
-class CELFTestOnTreeGraph {
+class CELFOnTreeGraphTest {
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER =
         "CREATE " +
