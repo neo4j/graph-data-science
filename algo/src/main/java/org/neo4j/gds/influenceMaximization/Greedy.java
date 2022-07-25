@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.influenceMaximization;
+package org.neo4j.gds.influenceMaximization;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
@@ -25,7 +25,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.results.InfluenceMaximizationResult;
 
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -25,7 +25,7 @@ public class InfluenceMaximizationResult {
     public final long nodeId;
     public final double spread;
 
-    public InfluenceMaximizationResult(long nodeId, double spread) {
+    InfluenceMaximizationResult(long nodeId, double spread) {
         this.nodeId = nodeId;
         this.spread = spread;
     }
