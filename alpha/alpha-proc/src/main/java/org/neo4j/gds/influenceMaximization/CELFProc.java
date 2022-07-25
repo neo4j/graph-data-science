@@ -29,6 +29,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -69,7 +70,9 @@ public class CELFProc extends AlgoBaseProc<CELF, CELF, InfluenceMaximizationConf
             }
 
             computationResult.graph().release();
-            return computationResult.algorithm().resultStream();
+            return Optional.ofNullable(computationResult.algorithm())
+                .map(CELF::resultStream)
+                .orElseGet(Stream::empty);
         };
     }
 
