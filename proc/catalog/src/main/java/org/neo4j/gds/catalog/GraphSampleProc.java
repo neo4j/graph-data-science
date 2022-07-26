@@ -24,6 +24,8 @@ import org.neo4j.gds.config.RandomWalkWithRestartsProcConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.RandomWalkWithRestarts;
@@ -38,10 +40,10 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSampleProc extends CatalogProc {
 
-    private static final String DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
+    private static final String RWR_DESCRIPTION = "Constructs a random subgraph based on random walks with restarts";
 
     @Procedure(name = "gds.alpha.graph.sample.rwr", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(RWR_DESCRIPTION)
     public Stream<RandomWalkWithRestartsSampleResult> sampleRandomWalkWithRestarts(
         @Name(value = "graphName") String graphName,
         @Name(value = "fromGraphName") String fromGraphName,
@@ -57,12 +59,21 @@ public class GraphSampleProc extends CatalogProc {
             var rwrConfig = RandomWalkWithRestartsConfig.of(cypherMap);
 
             var randomWalkWithRestarts = new RandomWalkWithRestarts(rwrConfig);
+            var progressTracker = new TaskProgressTracker(
+                GraphSampleConstructor.progressTask(fromGraphStore.graphStore(), randomWalkWithRestarts),
+                log,
+                rwrConfig.concurrency(),
+                rwrConfig.jobId(),
+                taskRegistryFactory,
+                EmptyUserLogRegistryFactory.INSTANCE
+            );
             var graphSampleConstructor = new GraphSampleConstructor(
                 rwrConfig,
                 fromGraphStore.graphStore(),
-                randomWalkWithRestarts
+                randomWalkWithRestarts,
+                progressTracker
             );
-            var sampledGraphStore = graphSampleConstructor.construct();
+            var sampledGraphStore = graphSampleConstructor.compute();
 
             var rwrProcConfig = RandomWalkWithRestartsProcConfig.of(
                 username(),
@@ -104,4 +115,5 @@ public class GraphSampleProc extends CatalogProc {
             this.startNodeCount = startNodeCount;
         }
     }
+
 }

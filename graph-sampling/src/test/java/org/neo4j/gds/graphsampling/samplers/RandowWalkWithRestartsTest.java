@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -92,7 +93,7 @@ class RandowWalkWithRestartsTest {
 
         var rwr = new RandomWalkWithRestarts(config);
         var graph = getGraph(config);
-        var nodes = rwr.sampleNodes(graph);
+        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(7);
 
@@ -121,7 +122,7 @@ class RandowWalkWithRestartsTest {
 
             var graph = getGraph(config);
             var rwr = new RandomWalkWithRestarts(config);
-            var nodes = rwr.sampleNodes(graph);
+            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
             if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
                 .startNodesUsed()
                 .contains(idFunction.of("x2"))) {
@@ -162,7 +163,7 @@ class RandowWalkWithRestartsTest {
 
         for (int i = 0; i < 250; i++) {
             var rwr = new RandomWalkWithRestarts(config);
-            var nodes = rwr.sampleNodes(graph);
+            var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
             if (rwr.startNodesUsed().contains(idFunction.of("x1")) || rwr
                 .startNodesUsed()
                 .contains(idFunction.of("x2"))) {
@@ -203,7 +204,7 @@ class RandowWalkWithRestartsTest {
 
         var rwr = new RandomWalkWithRestarts(config);
         var graph = getGraph(config);
-        var nodes = rwr.sampleNodes(graph);
+        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(3);
 
@@ -223,7 +224,7 @@ class RandowWalkWithRestartsTest {
             .build();
 
         var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(4);
     }
@@ -240,8 +241,8 @@ class RandowWalkWithRestartsTest {
 
         var rwr = new RandomWalkWithRestarts(config);
 
-        var nodes1 = rwr.sampleNodes(getGraph(config));
-        var nodes2 = rwr.sampleNodes(getGraph(config));
+        var nodes1 = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
+        var nodes2 = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes1.cardinality()).isEqualTo(nodes2.cardinality());
         for (int i = 0; i < nodes1.size(); i++) {
@@ -259,7 +260,7 @@ class RandowWalkWithRestartsTest {
 
         var rwr = new RandomWalkWithRestarts(config);
         var graph = getGraph(config);
-        var nodes = rwr.sampleNodes(graph);
+        var nodes = rwr.compute(graph, ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(4);
 
@@ -278,7 +279,7 @@ class RandowWalkWithRestartsTest {
             .build();
 
         var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isGreaterThan(4);
     }
@@ -292,7 +293,7 @@ class RandowWalkWithRestartsTest {
             .build();
 
         var rwr = new RandomWalkWithRestarts(config);
-        var nodes = rwr.sampleNodes(getGraph(config));
+        var nodes = rwr.compute(getGraph(config), ProgressTracker.NULL_TRACKER);
 
         assertThat(nodes.cardinality()).isEqualTo(14);
     }
