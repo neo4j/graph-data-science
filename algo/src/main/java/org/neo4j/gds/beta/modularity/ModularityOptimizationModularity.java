@@ -21,7 +21,7 @@ package org.neo4j.gds.beta.modularity;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -165,7 +165,11 @@ class ModularityOptimizationDirectedModularity implements ModularityOptimization
                 communities
             ), Optional.empty()
         );
-        ParallelUtil.runWithConcurrency(concurrency, tasks, Pools.DEFAULT);
+
+        RunWithConcurrency.builder()
+            .concurrency(concurrency)
+            .tasks(tasks)
+            .run();
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, graph.nodeCount()),
