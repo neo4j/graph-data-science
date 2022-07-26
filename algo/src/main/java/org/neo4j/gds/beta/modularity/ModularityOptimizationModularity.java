@@ -34,11 +34,9 @@ interface ModularityOptimizationModularity {
     double getModularity();
 
     static ModularityOptimizationModularity createModularity(Graph graph, int concurrency) {
-        if (graph.isUndirected()) {
-            return new ModularityOptimizationUndirectedModularity(graph, concurrency);
-        } else {
+
             return new ModularityOptimizationDirectedModularity(graph, concurrency);
-        }
+        
     }
 
     void setTotalWeight(double totalWeight);
