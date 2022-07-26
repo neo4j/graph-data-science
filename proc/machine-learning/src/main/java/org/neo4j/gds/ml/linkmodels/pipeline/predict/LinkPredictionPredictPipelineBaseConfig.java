@@ -56,6 +56,10 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         return 1;
     }
 
+    String sourceNodeLabel();
+
+    String targetNodeLabel();
+
     //Exhaustive strategy fields
     @Configuration.IntegerRange(min = 1)
     Optional<Integer> topN();

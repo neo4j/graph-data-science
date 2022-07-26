@@ -119,6 +119,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
+                    .withEntry("sourceNodeLabel", "N")
+                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -178,6 +180,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
+                    .withEntry("sourceNodeLabel", "N")
+                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -223,6 +227,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
+                    .withEntry("sourceNodeLabel", "N")
+                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -273,6 +279,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             "",
             CypherMapWrapper.empty()
                 .withEntry("modelName", "model")
+                .withEntry("sourceNodeLabel", "N")
+                .withEntry("targetNodeLabel", "N")
                 .withEntry("topN", 3)
                 .withEntry("graphName", GRAPH_NAME)
         );
@@ -382,6 +390,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
             .concurrency(1)
             .graphName(GRAPH_NAME)
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .topN(10)
             .modelName("model")
             .username("user")
@@ -410,6 +420,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
             .concurrency(1)
             .graphName(GRAPH_NAME)
+            .sourceNodeLabel("N")
+            .targetNodeLabel("N")
             .topN(10)
             .modelName("model")
             .username("user")
@@ -448,6 +460,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 LinkPredictionPredictPipelineBaseConfigImpl.builder()
                     .username("")
                     .modelName("model")
+                    .sourceNodeLabel("N")
+                    .targetNodeLabel("N")
                     .topN(3)
                     .graphName(GRAPH_NAME)
                     .build(),

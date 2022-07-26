@@ -48,6 +48,8 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
             " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " threshold: 0," +
             " topN: $topN," +
             " concurrency: $concurrency" +
@@ -55,7 +57,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
+            Map.of("sourceNodeLabel", nodeLabel, "targetNodeLabel", nodeLabel, "topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
             List.of(
                 Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
                 Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926959),
@@ -73,6 +75,8 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .streamMode()
             .addParameter("modelName", "model")
+            .addParameter("sourceNodeLabel", "dummy")
+            .addParameter("targetNodeLabel", "dummy")
             .addParameter("threshold", 0.5)
             .addParameter("topN", 9)
             .yields();
@@ -85,11 +89,13 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " threshold: 0," +
             " topN: $topN" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("topN", 3),
+            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
             List.of(
                 Map.of("requiredMemory", "548 Bytes")
             )
@@ -106,6 +112,8 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
             " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " sampleRate: 0.5," +
             " randomSeed: 42," +
             " topK: $topK," +
@@ -115,7 +123,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("topK", 1, "concurrency", 1, "nodeLabel", "N"),
+            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N","topK", 1, "concurrency", 1, "nodeLabel", "N"),
             List.of(
                 Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
                 Map.of("node1", 4L, "node2", 0L, "probability", .49750002083312506),

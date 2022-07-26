@@ -61,13 +61,15 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             "CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {" +
             " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +
             " topN: $topN," +
             " concurrency:" +
             " $concurrency" +
             "})",
-            Map.of("topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
+            Map.of("sourceNodeLabel", nodeLabel, "targetNodeLabel", nodeLabel, "topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
         );
 
         Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore().getGraph(
@@ -113,6 +115,8 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
             .addParameter("nodeLabels", List.of("N"))
+            .addParameter("sourceNodeLabel", "N")
+            .addParameter("targetNodeLabel", "N")
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.0)
@@ -162,6 +166,8 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
+            .addParameter("sourceNodeLabel", "N")
+            .addParameter("targetNodeLabel", "N")
             .addParameter("threshold", 0.5)
             .addParameter("topN", 9)
             .yields();
@@ -182,12 +188,14 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.mutate.estimate('g', {" +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " threshold: 0," +
             " mutateRelationshipType: 'PREDICTED'," +
             " topN: $topN" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("topN", 3),
+            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
             List.of(
                 Map.of("requiredMemory", "548 Bytes")
             )

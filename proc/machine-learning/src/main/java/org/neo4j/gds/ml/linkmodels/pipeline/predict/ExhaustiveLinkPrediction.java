@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import com.carrotsearch.hppc.LongHashSet;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -45,6 +46,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         int concurrency,
         int topN,
         double threshold,
@@ -54,6 +57,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             classifier,
             linkFeatureExtractor,
             graph,
+            sourceNodeLabel,
+            targetNodeLabel,
             concurrency,
             progressTracker
         );
@@ -73,6 +78,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     @Override
     ExhaustiveLinkPredictionResult predictLinks(
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
         progressTracker.setSteps(graph.nodeCount());
@@ -84,6 +91,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             graph.nodeCount(),
             partition -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
+                sourceNodeLabel,
+                targetNodeLabel,
                 linkPredictionSimilarityComputer,
                 predictionQueue,
                 partition,
@@ -103,6 +112,11 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
     final class LinkPredictionScoreByIdsConsumer implements Runnable {
         private final Graph graph;
+
+        private final NodeLabel sourceNodeLabel;
+
+        private final NodeLabel targetNodeLabel;
+
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final BoundedLongLongPriorityQueue predictionQueue;
         private final ProgressTracker progressTracker;
@@ -111,12 +125,16 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
+            String sourceNodeLabel,
+            String targetNodeLabel,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
             BoundedLongLongPriorityQueue predictionQueue,
             Partition partition,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
+            this.sourceNodeLabel = NodeLabel.of(sourceNodeLabel);
+            this.targetNodeLabel = NodeLabel.of(targetNodeLabel);
             this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
             this.predictionQueue = predictionQueue;
             this.progressTracker = progressTracker;
@@ -127,30 +145,51 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         @Override
         public void run() {
             partition.consume(sourceId -> {
-                var largerNeighbors = largerNeighbors(sourceId);
-                // since graph is undirected, only process pairs where sourceId < targetId
-                var smallestTarget = sourceId + 1;
-                LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
-                        if (largerNeighbors.contains(targetId)) return;
-                        var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
-                        linksConsidered++;
-                        if (probability < threshold) return;
+                //Computes probability for node pairs with valid node labels
+                if (graph.nodeLabels(sourceId).contains(sourceNodeLabel)) {
+                    var largerNeighbors = largerValidNeighbors(sourceId, targetNodeLabel);
+                    // since graph is undirected, only process pairs where sourceId < targetId
+                    var smallestTarget = sourceId + 1;
+                    LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
+                            if (largerNeighbors.contains(targetId)) return;
+                            if (graph.nodeLabels(targetId).contains(targetNodeLabel)) {
+                                var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
+                                linksConsidered++;
+                                if (probability < threshold) return;
 
-                        synchronized (predictionQueue) {
-                            predictionQueue.offer(sourceId, targetId, probability);
+                                synchronized (predictionQueue) {
+                                    predictionQueue.offer(sourceId, targetId, probability);
+                                }
+                            }
                         }
-                    }
-                );
+                    );
+                } else if (graph.nodeLabels(sourceId).contains(targetNodeLabel)) {
+                    var largerNeighbors = largerValidNeighbors(sourceId, sourceNodeLabel);
+                    var smallestTarget = sourceId + 1;
+                    LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
+                            if (largerNeighbors.contains(targetId)) return;
+                            if (graph.nodeLabels(targetId).contains(sourceNodeLabel)) {
+                                var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
+                                linksConsidered++;
+                                if (probability < threshold) return;
+
+                                synchronized (predictionQueue) {
+                                    predictionQueue.offer(sourceId, targetId, probability);
+                                }
+                            }
+                        }
+                    );
+                }
             });
 
             progressTracker.logSteps(partition.nodeCount());
         }
 
-        private LongHashSet largerNeighbors(long sourceId) {
+        private LongHashSet largerValidNeighbors(long sourceId, NodeLabel targetLabel) {
             var neighbors = new LongHashSet();
             graph.forEachRelationship(
                 sourceId, (src, trg) -> {
-                    if (src < trg) neighbors.add(trg);
+                    if (src < trg && graph.nodeLabels(trg).contains(targetLabel)) neighbors.add(trg);
                     return true;
                 }
             );

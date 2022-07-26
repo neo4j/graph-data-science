@@ -161,10 +161,12 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             " modelName: $modelName," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " topN: $topN," +
             " concurrency: $concurrency" +
             "})",
-            Map.of("graphName", GRAPH_NAME, "modelName", modelName,"topN", topN, "concurrency", 4),
+            Map.of("graphName", GRAPH_NAME, "modelName", modelName,"sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", topN, "concurrency", 4),
             List.of(Map.of(
                 "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),
@@ -211,10 +213,12 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             " modelName: $modelName," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " topN: $topN," +
             " concurrency: $concurrency" +
             "})",
-            Map.of("graphName", GRAPH_NAME, "modelName", modelName,"topN", topN, "concurrency", 4),
+            Map.of("graphName", GRAPH_NAME, "modelName", modelName,"sourceNodeLabel", "N", "targetNodeLabel", "N","topN", topN, "concurrency", 4),
             List.of(Map.of(
                 "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),

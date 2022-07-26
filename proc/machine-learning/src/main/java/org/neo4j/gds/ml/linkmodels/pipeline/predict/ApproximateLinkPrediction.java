@@ -47,6 +47,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
@@ -54,6 +56,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             classifier,
             linkFeatureExtractor,
             graph,
+            sourceNodeLabel,
+            targetNodeLabel,
             knnConfig.concurrency(),
             progressTracker
         );
@@ -72,6 +76,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     @Override
     LinkPredictionResult predictLinks(
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     ) {
         var knnResult = Knn.create(

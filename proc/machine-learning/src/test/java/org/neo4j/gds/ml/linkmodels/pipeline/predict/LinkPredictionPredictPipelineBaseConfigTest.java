@@ -108,6 +108,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
+                    "sourceNodeLabel", "dummy",
+                    "targetNodeLabel", "dummy",
                     "sampleRate", 1,
                     "topN", 42,
                     "graphName", "g"
@@ -126,6 +128,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
+                    "sourceNodeLabel", "dummy",
+                    "targetNodeLabel", "dummy",
                     "sampleRate", 0.4,
                     "maxIterations", 42,
                     "initialSampler", "randomWalk",
@@ -151,6 +155,8 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
+                    "sourceNodeLabel", "dummy",
+                    "targetNodeLabel", "dummy",
                     "sampleRate", 1,
                     "graphName", "g"
                 )
@@ -158,5 +164,23 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("No value specified for the mandatory configuration parameter `topN`");
+    }
+
+    @Test
+    void failOnMissingNodeLabel() {
+        assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "topN", 42,
+                    "sampleRate", 1,
+                    "graphName", "g"
+                )
+            )
+        ))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("Multiple errors in configuration arguments:\n\t\t\t\t" +
+                        "No value specified for the mandatory configuration parameter `sourceNodeLabel`\n\t\t\t\t" +
+                        "No value specified for the mandatory configuration parameter `targetNodeLabel`");
     }
 }

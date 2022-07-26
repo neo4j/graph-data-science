@@ -116,6 +116,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
+            "N",
+            "N",
             concurrency,
             topN,
             0D,
@@ -179,6 +181,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
+            "N",
+            "N",
             4,
             6,
             threshold,
@@ -202,6 +206,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .sourceNodeLabel("DUMMY")
+            .targetNodeLabel("DUMMY")
             .build();
 
         var actualEstimate = ExhaustiveLinkPrediction
@@ -222,6 +228,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .sourceNodeLabel("DUMMY")
+            .targetNodeLabel("DUMMY")
             .build();
 
         var actualEstimate = ExhaustiveLinkPrediction
@@ -230,4 +238,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
         assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }
+
+
+    //TODO Test filtered predictions on multilabel graphs
 }

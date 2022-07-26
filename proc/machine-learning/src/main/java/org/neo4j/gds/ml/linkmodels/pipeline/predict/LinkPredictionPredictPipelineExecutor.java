@@ -176,6 +176,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
+                config.sourceNodeLabel(),
+                config.targetNodeLabel(),
                 config.approximateConfig(),
                 progressTracker
             );
@@ -184,6 +186,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
+                config.sourceNodeLabel(),
+                config.targetNodeLabel(),
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),

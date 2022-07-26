@@ -31,6 +31,11 @@ public abstract class LinkPrediction {
     private final Classifier classifier;
     private final LinkFeatureExtractor linkFeatureExtractor;
     private final Graph graph;
+
+    private final String sourceNodeLabel;
+
+    private final String targetNodeLabel;
+
     protected final int concurrency;
     final ProgressTracker progressTracker;
 
@@ -38,12 +43,16 @@ public abstract class LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.graph = graph;
+        this.sourceNodeLabel = sourceNodeLabel;
+        this.targetNodeLabel = targetNodeLabel;
         this.concurrency = concurrency;
         this.progressTracker = progressTracker;
     }
@@ -64,11 +73,13 @@ public abstract class LinkPrediction {
             classifier
         );
 
-        return predictLinks(graph, linkPredictionSimilarityComputer);
+        return predictLinks(graph, sourceNodeLabel, targetNodeLabel, linkPredictionSimilarityComputer);
     }
 
     abstract LinkPredictionResult predictLinks(
         Graph graph,
+        String sourceNodeLabel,
+        String targetNodeLabel,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     );
 }
