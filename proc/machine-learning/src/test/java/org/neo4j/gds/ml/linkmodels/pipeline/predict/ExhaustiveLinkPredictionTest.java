@@ -35,7 +35,11 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
@@ -53,6 +57,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.ApproximateLinkPredictionTest.compareWithPrecision;
 
+@GdlExtension
 class ExhaustiveLinkPredictionTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
@@ -71,6 +76,22 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
     private static final double[] WEIGHTS = new double[]{2.0, 1.0, -3.0};
 
     private GraphStore graphStore;
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multiLabel")
+    static String gdlMultiLabel = "(n0 :A {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n1: B {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n2: C {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n3: B {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n4: C {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n5: A {a: 1.0, b: 0.8, c: 1.0})" +
+                                  "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T}->(n0), (n5)-[:T]->(n1)";
+
+
+    @Inject
+    TestGraph multiLabelGraph;
+
+    @Inject
+    GraphStore multiLabelGraphStore;
 
     @BeforeEach
     void setup() throws Exception {
@@ -195,6 +216,67 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
     }
 
+    //TODO Test filtered predictions on multilabel graphs
+    @ParameterizedTest
+    @CsvSource(value = {"1", "5"})
+    void shouldOnlyPredictOverValidNodeLabels(int topN) {
+        var featureStep = new L2FeatureStep(List.of("a", "b", "c"));
+
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            new Weights<>(
+                new Matrix(
+                    WEIGHTS,
+                    1,
+                    WEIGHTS.length
+                )),
+            Weights.ofVector(0.0)
+        );
+
+        var graph = multiLabelGraphStore.getGraph(
+            List.of(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C")),
+            List.of(RelationshipType.of("T")),
+            Optional.empty()
+        );
+        var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
+        var linkPrediction = new ExhaustiveLinkPrediction(
+            LogisticRegressionClassifier.from(modelData),
+            linkFeatureExtractor,
+            multiLabelGraph,
+            "A",
+            "B",
+            4,
+            topN,
+            0D,
+            ProgressTracker.NULL_TRACKER
+        );
+
+        var predictionResult = linkPrediction.compute();
+        assertThat(predictionResult.samplingStats()).isEqualTo(
+            Map.of(
+                "strategy", "exhaustive",
+                //Only (n0)--(n3), (n5)--(n3) respect labels
+                "linksConsidered", 2L
+            )
+        );
+
+
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(Math.min(topN, 2));
+
+        var expectedLinks = List.of(
+            PredictedLink.of(0, 3, 0.5),
+            PredictedLink.of(3,5,0.5)
+        );
+
+        var endIndex = Math.min(topN, expectedLinks.size());
+        assertThat(predictedLinks)
+            .usingElementComparator(compareWithPrecision(1e-10))
+            .containsExactlyInAnyOrder(expectedLinks
+                .subList(0, endIndex)
+                .toArray(PredictedLink[]::new));
+    }
+
     @ParameterizedTest
     @CsvSource(value = {
         "1, 3_636",
@@ -239,6 +321,4 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }
 
-
-    //TODO Test filtered predictions on multilabel graphs
 }
