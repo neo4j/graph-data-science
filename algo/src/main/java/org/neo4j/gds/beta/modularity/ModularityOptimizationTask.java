@@ -42,7 +42,7 @@ final class ModularityOptimizationTask implements Runnable {
     private final HugeLongArray currentCommunities;
     private final HugeLongArray nextCommunities;
     private final HugeDoubleArray cumulativeNodeWeights;
-    private final ModularityOptimizationModularity modularityOptimizationModularity;
+    private final ModularityManager modularityManager;
     private final HugeAtomicDoubleArray communityWeightUpdates;
 
     ModularityOptimizationTask(
@@ -55,7 +55,7 @@ final class ModularityOptimizationTask implements Runnable {
         HugeLongArray nextCommunities,
         HugeDoubleArray cumulativeNodeWeights,
         HugeAtomicDoubleArray communityWeightUpdates,
-        ModularityOptimizationModularity modularityOptimizationModularity,
+        ModularityManager modularityManager,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
@@ -63,7 +63,7 @@ final class ModularityOptimizationTask implements Runnable {
         this.localGraph = graph.concurrentCopy();
         this.currentCommunities = currentCommunities;
         this.nextCommunities = nextCommunities;
-        this.modularityOptimizationModularity = modularityOptimizationModularity;
+        this.modularityManager = modularityManager;
         this.communityWeightUpdates = communityWeightUpdates;
         this.totalNodeWeight = totalNodeWeight;
         this.cumulativeNodeWeights = cumulativeNodeWeights;
@@ -109,7 +109,7 @@ final class ModularityOptimizationTask implements Runnable {
             double maxGain = 0.0;
             double eix = communityInfluences.get(currentCommunity) - selfWeight.doubleValue();
             double cumulativeNodeWeight = cumulativeNodeWeights.get(nodeId);
-            double ax = modularityOptimizationModularity.getCommunityWeight(currentCommunity) - cumulativeNodeWeight;
+            double ax = modularityManager.getCommunityWeight(currentCommunity) - cumulativeNodeWeight;
             double eiy;
             double ay;
 
@@ -118,7 +118,7 @@ final class ModularityOptimizationTask implements Runnable {
                 communityCandidate = cursor.key;
 
                 if (currentCommunity != communityCandidate) {
-                    ay = modularityOptimizationModularity.getCommunityWeight(communityCandidate);
+                    ay = modularityManager.getCommunityWeight(communityCandidate);
                     eiy = cursor.value;
                     currentGain =
                         (eiy - eix) / (totalNodeWeight / 2.0)
@@ -138,13 +138,7 @@ final class ModularityOptimizationTask implements Runnable {
             nextCommunities.set(nodeId, nextCommunity);
             communityWeightUpdates.update(currentCommunity, agg -> agg - cumulativeNodeWeight);
             communityWeightUpdates.update(nextCommunity, agg -> agg + cumulativeNodeWeight);
-            modularityOptimizationModularity.processMove(
-                currentCommunity,
-                nextCommunity,
-                communityInfluences.get(currentCommunity),
-                communityInfluences.get(nextCommunity),
-                selfWeight.getValue()
-            );
+
             relationshipsProcessed.add(degree);
         });
 

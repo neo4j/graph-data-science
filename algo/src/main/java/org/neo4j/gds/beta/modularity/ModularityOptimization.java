@@ -69,7 +69,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodePropertyValues seedProperty;
     private final ExecutorService executor;
 
-    private final ModularityOptimizationModularity modularityOptimizationModularity;
+    private final ModularityManager modularityManager;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -102,10 +102,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.executor = executor;
         this.concurrency = concurrency;
         this.minBatchSize = minBatchSize;
-        this.modularityOptimizationModularity = ModularityOptimizationModularity.createModularity(
-            graph,
-            concurrency
-        );
+        this.modularityManager = new ModularityManager(graph, concurrency);
         if (maxIterations < 1) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Need to run at least one iteration, but got %d",
@@ -123,7 +120,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         computeColoring();
         initSeeding();
         init();
-        modularityOptimizationModularity.setTotalWeight(totalNodeWeight);
+        modularityManager.setTotalWeight(totalNodeWeight);
         progressTracker.endSubTask();
 
 
@@ -214,7 +211,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             new InitTask(
                 graph.concurrentCopy(),
                 currentCommunities,
-                modularityOptimizationModularity,
+                modularityManager,
                 cumulativeNodeWeights,
                 seedProperty != null,
                 partition
@@ -235,7 +232,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         private final HugeLongArray currentCommunities;
 
-        ModularityOptimizationModularity modularityOptimizationModularity;
+        ModularityManager modularityManager;
 
         private final HugeDoubleArray cumulativeNodeWeights;
 
@@ -248,14 +245,14 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         private InitTask(
             RelationshipIterator relationshipIterator,
             HugeLongArray currentCommunities,
-            ModularityOptimizationModularity modularityOptimizationModularity,
+            ModularityManager modularityManager,
             HugeDoubleArray cumulativeNodeWeights,
             boolean isSeeded,
             Partition partition
         ) {
             this.relationshipIterator = relationshipIterator;
             this.currentCommunities = currentCommunities;
-            this.modularityOptimizationModularity = modularityOptimizationModularity;
+            this.modularityManager = modularityManager;
             this.cumulativeNodeWeights = cumulativeNodeWeights;
             this.isSeeded = isSeeded;
             this.partition = partition;
@@ -282,11 +279,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                     }
                     return true;
                 });
-                modularityOptimizationModularity.processSeedContribution(
-                    currentCommunity,
-                    insideWeightContribution.doubleValue()
-                );
-                modularityOptimizationModularity.communityWeightUpdate(
+
+                modularityManager.communityWeightUpdate(
                     currentCommunities.get(nodeId),
                     cumulativeWeight.doubleValue()
                 );
@@ -320,7 +314,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             concurrency,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
-                modularityOptimizationModularity.communityWeightUpdate(nodeId, update);
+                modularityManager.communityWeightUpdate(nodeId, update);
             })
         );
 
@@ -342,7 +336,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 nextCommunities,
                 cumulativeNodeWeights,
                 communityWeightUpdates,
-                modularityOptimizationModularity,
+                modularityManager,
                 progressTracker
             ),
             Optional.of((int) minBatchSize)
@@ -357,8 +351,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private double calculateModularity() {
-        modularityOptimizationModularity.registerCommunities(currentCommunities);
-        return modularityOptimizationModularity.getModularity();
+        modularityManager.registerCommunities(currentCommunities);
+        return modularityManager.getModularity();
     }
 
     @Override
