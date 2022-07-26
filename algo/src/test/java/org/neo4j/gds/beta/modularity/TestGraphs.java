@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.leiden;
+package org.neo4j.gds.beta.modularity;
 
-final class TestGraphs {
+public final class TestGraphs {
 
-    static final String KARATE_CLUB_GRAPH =
+    public static final String KARATE_CLUB_GRAPH =
         "CREATE " +
         "(a0: Node)," +
         "(a1: Node)," +
@@ -138,7 +138,7 @@ final class TestGraphs {
         "(a33)-[:R]->(a34)";
 
 
-    static final String FOOTBALL_GRAPH =
+    public static final String FOOTBALL_GRAPH =
         "CREATE " +
         "(a0:Node)," +
         "(a1:Node)," +
