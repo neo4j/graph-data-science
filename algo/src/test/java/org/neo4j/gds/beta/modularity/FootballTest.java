@@ -22,8 +22,7 @@ package org.neo4j.gds.beta.modularity;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.data.Offset;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.RepeatedTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
@@ -794,17 +793,17 @@ class FootballTest {
     private IdFunction idFunction;
 
 
-    @ParameterizedTest
-    @ValueSource(ints = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1})
-    void test(int iteration) {
-        ModularityOptimization pmo = compute(graph, iteration, null, 3, 2);
-        double modularity1=pmo.getModularity();
-        HugeLongArray communities=HugeLongArray.newArray(graph.nodeCount());
-        graph.forEachNode( nodeId -> {
-            communities.set(nodeId,pmo.getCommunityId(nodeId));
-            return true; }
+    @RepeatedTest(25)
+    void test() {
+        ModularityOptimization pmo = compute(graph, 1, null, 3, 2);
+        double modularity1 = pmo.getModularity();
+        HugeLongArray communities = HugeLongArray.newArray(graph.nodeCount());
+        graph.forEachNode(nodeId -> {
+                communities.set(nodeId, pmo.getCommunityId(nodeId));
+                return true;
+            }
         );
-        double modularity2= ModularityComputer.modularity(graph,communities,1.0/graph.relationshipCount());
+        double modularity2 = ModularityComputer.modularity(graph, communities, 1.0 / graph.relationshipCount());
         assertThat(modularity2).isCloseTo(modularity1, Offset.offset(0.0001));
 
     }
