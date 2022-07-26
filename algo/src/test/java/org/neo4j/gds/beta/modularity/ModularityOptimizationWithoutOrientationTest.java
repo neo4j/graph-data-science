@@ -204,9 +204,9 @@ class ModularityOptimizationWithoutOrientationTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5614048, 8413080),
-            arguments(4, 5617336, 14413344),
-            arguments(42, 5658984, 90416688)
+            arguments(1, 5614040, 8413072),
+            arguments(4, 5617328, 14413336),
+            arguments(42, 5658976, 90416680)
         );
     }
 

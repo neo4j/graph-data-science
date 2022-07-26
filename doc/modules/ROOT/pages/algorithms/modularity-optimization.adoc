@@ -257,7 +257,7 @@ YIELD nodes, communityCount, ranIterations, didConverge
 [opts="header"]
 |===
 | nodes | communityCount | ranIterations | didConverge
-| 6     | 2              | 3             | true
+| 6     | 2              | 2             | true
 |===
 --
 
@@ -281,7 +281,7 @@ YIELD nodes, communityCount, ranIterations, didConverge
 [opts="header"]
 |===
 | nodes | communityCount | ranIterations | didConverge
-| 6     | 2              | 3             | true
+| 6     | 2              | 2             | true
 |===
 --
 
