@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -47,8 +48,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
+        IdMap sourceNodeLabelIdMap,
+        IdMap targetNodeLabelIdMap,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
@@ -56,8 +57,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             classifier,
             linkFeatureExtractor,
             graph,
-            sourceNodeLabel,
-            targetNodeLabel,
+            sourceNodeLabelIdMap,
+            targetNodeLabelIdMap,
             knnConfig.concurrency(),
             progressTracker
         );
@@ -74,12 +75,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     }
 
     @Override
-    LinkPredictionResult predictLinks(
-        Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
-        LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
-    ) {
+    LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
         var knnResult = Knn.create(
             graph,
             knnConfig,

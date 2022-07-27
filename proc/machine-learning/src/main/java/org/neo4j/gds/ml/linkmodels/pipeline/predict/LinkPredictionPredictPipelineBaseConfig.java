@@ -20,7 +20,10 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
@@ -32,6 +35,7 @@ import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +63,17 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     String sourceNodeLabel();
 
     String targetNodeLabel();
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> internalSourceLabels(GraphStore graphStore) {
+        return (sourceNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(sourceNodeLabel()));
+    }
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> internalTargetLabels(GraphStore graphStore) {
+        return (targetNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(targetNodeLabel()));
+    }
+
 
     //Exhaustive strategy fields
     @Configuration.IntegerRange(min = 1)

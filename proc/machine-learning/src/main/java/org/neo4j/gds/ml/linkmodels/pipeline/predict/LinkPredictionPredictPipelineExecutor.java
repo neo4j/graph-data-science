@@ -176,8 +176,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                config.sourceNodeLabel(),
-                config.targetNodeLabel(),
+                graphStore.getGraph(config.internalSourceLabels(graphStore)),
+                graphStore.getGraph(config.internalTargetLabels(graphStore)),
                 config.approximateConfig(),
                 progressTracker
             );
@@ -186,8 +186,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                config.sourceNodeLabel(),
-                config.targetNodeLabel(),
+                graphStore.getGraph(config.internalSourceLabels(graphStore)),
+                graphStore.getGraph(config.internalTargetLabels(graphStore)),
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),

@@ -137,8 +137,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
-            "N",
-            "N",
+            graphStore.getGraph(NodeLabel.of("N")),
+            graphStore.getGraph(NodeLabel.of("N")),
             concurrency,
             topN,
             0D,
@@ -202,8 +202,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             graph,
-            "N",
-            "N",
+            graphStore.getGraph(NodeLabel.of("N")),
+            graphStore.getGraph(NodeLabel.of("N")),
             4,
             6,
             threshold,
@@ -216,7 +216,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         assertThat(predictedLinks).allMatch(l -> l.probability() >= threshold);
     }
 
-    //TODO Test filtered predictions on multilabel graphs
     @ParameterizedTest
     @CsvSource(value = {"1", "5"})
     void shouldOnlyPredictOverValidNodeLabels(int topN) {
@@ -243,8 +242,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             linkFeatureExtractor,
             multiLabelGraph,
-            "A",
-            "B",
+            multiLabelGraphStore.getGraph(NodeLabel.of("A")),
+            multiLabelGraphStore.getGraph(NodeLabel.of("B")),
             4,
             topN,
             0D,

@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
@@ -30,11 +31,11 @@ public abstract class LinkPrediction {
     static final int MIN_NODE_BATCH_SIZE = 10;
     private final Classifier classifier;
     private final LinkFeatureExtractor linkFeatureExtractor;
-    private final Graph graph;
+    protected final Graph graph;
 
-    private final String sourceNodeLabel;
+    protected final IdMap sourceNodeLabelIdMap;
 
-    private final String targetNodeLabel;
+    protected final IdMap targetNodeLabelIdMap;
 
     protected final int concurrency;
     final ProgressTracker progressTracker;
@@ -43,16 +44,16 @@ public abstract class LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
+        IdMap sourceNodeLabelIdMap,
+        IdMap targetNodeLabelIdMap,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.graph = graph;
-        this.sourceNodeLabel = sourceNodeLabel;
-        this.targetNodeLabel = targetNodeLabel;
+        this.sourceNodeLabelIdMap = sourceNodeLabelIdMap;
+        this.targetNodeLabelIdMap = targetNodeLabelIdMap;
         this.concurrency = concurrency;
         this.progressTracker = progressTracker;
     }
@@ -73,13 +74,10 @@ public abstract class LinkPrediction {
             classifier
         );
 
-        return predictLinks(graph, sourceNodeLabel, targetNodeLabel, linkPredictionSimilarityComputer);
+        return predictLinks(linkPredictionSimilarityComputer);
     }
 
     abstract LinkPredictionResult predictLinks(
-        Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
         LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
     );
 }

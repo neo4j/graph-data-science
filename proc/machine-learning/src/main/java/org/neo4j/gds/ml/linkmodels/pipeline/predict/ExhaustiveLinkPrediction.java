@@ -20,8 +20,8 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import com.carrotsearch.hppc.LongHashSet;
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -46,8 +46,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
+        IdMap sourceNodeLabelIdMap,
+        IdMap targetNodeLabelIdMap,
         int concurrency,
         int topN,
         double threshold,
@@ -57,8 +57,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             classifier,
             linkFeatureExtractor,
             graph,
-            sourceNodeLabel,
-            targetNodeLabel,
+            sourceNodeLabelIdMap,
+            targetNodeLabelIdMap,
             concurrency,
             progressTracker
         );
@@ -76,12 +76,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     }
 
     @Override
-    ExhaustiveLinkPredictionResult predictLinks(
-        Graph graph,
-        String sourceNodeLabel,
-        String targetNodeLabel,
-        LinkPredictionSimilarityComputer linkPredictionSimilarityComputer
-    ) {
+    ExhaustiveLinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
         progressTracker.setSteps(graph.nodeCount());
 
         var predictionQueue = BoundedLongLongPriorityQueue.max(topN);
@@ -91,8 +86,8 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             graph.nodeCount(),
             partition -> new LinkPredictionScoreByIdsConsumer(
                 graph.concurrentCopy(),
-                sourceNodeLabel,
-                targetNodeLabel,
+                sourceNodeLabelIdMap,
+                targetNodeLabelIdMap,
                 linkPredictionSimilarityComputer,
                 predictionQueue,
                 partition,
@@ -113,9 +108,9 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
     final class LinkPredictionScoreByIdsConsumer implements Runnable {
         private final Graph graph;
 
-        private final NodeLabel sourceNodeLabel;
+        private final IdMap sourceNodeLabelIdMap;
 
-        private final NodeLabel targetNodeLabel;
+        private final IdMap targetNodeLabelIdMap;
 
         private final LinkPredictionSimilarityComputer linkPredictionSimilarityComputer;
         private final BoundedLongLongPriorityQueue predictionQueue;
@@ -125,16 +120,16 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
 
         LinkPredictionScoreByIdsConsumer(
             Graph graph,
-            String sourceNodeLabel,
-            String targetNodeLabel,
+            IdMap sourceNodeLabelIdMap,
+            IdMap targetNodeLabelIdMap,
             LinkPredictionSimilarityComputer linkPredictionSimilarityComputer,
             BoundedLongLongPriorityQueue predictionQueue,
             Partition partition,
             ProgressTracker progressTracker
         ) {
             this.graph = graph;
-            this.sourceNodeLabel = NodeLabel.of(sourceNodeLabel);
-            this.targetNodeLabel = NodeLabel.of(targetNodeLabel);
+            this.sourceNodeLabelIdMap = sourceNodeLabelIdMap;
+            this.targetNodeLabelIdMap = targetNodeLabelIdMap;
             this.linkPredictionSimilarityComputer = linkPredictionSimilarityComputer;
             this.predictionQueue = predictionQueue;
             this.progressTracker = progressTracker;
@@ -146,13 +141,13 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         public void run() {
             partition.consume(sourceId -> {
                 //Computes probability for node pairs with valid node labels
-                if (graph.nodeLabels(sourceId).contains(sourceNodeLabel)) {
-                    var largerNeighbors = largerValidNeighbors(sourceId, targetNodeLabel);
+                if (sourceNodeLabelIdMap.contains(graph.toOriginalNodeId(sourceId))) {
+                    var largerNeighbors = largerValidNeighbors(sourceId, targetNodeLabelIdMap);
                     // since graph is undirected, only process pairs where sourceId < targetId
                     var smallestTarget = sourceId + 1;
                     LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                             if (largerNeighbors.contains(targetId)) return;
-                            if (graph.nodeLabels(targetId).contains(targetNodeLabel)) {
+                            if (targetNodeLabelIdMap.contains(graph.toOriginalNodeId(targetId))) {
                                 var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
                                 linksConsidered++;
                                 if (probability < threshold) return;
@@ -163,12 +158,12 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                             }
                         }
                     );
-                } else if (graph.nodeLabels(sourceId).contains(targetNodeLabel)) {
-                    var largerNeighbors = largerValidNeighbors(sourceId, sourceNodeLabel);
+                } else if (targetNodeLabelIdMap.contains(graph.toOriginalNodeId(sourceId))) {
+                    var largerNeighbors = largerValidNeighbors(sourceId, sourceNodeLabelIdMap);
                     var smallestTarget = sourceId + 1;
                     LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
                             if (largerNeighbors.contains(targetId)) return;
-                            if (graph.nodeLabels(targetId).contains(sourceNodeLabel)) {
+                            if (sourceNodeLabelIdMap.contains(graph.toOriginalNodeId(targetId))) {
                                 var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
                                 linksConsidered++;
                                 if (probability < threshold) return;
@@ -185,11 +180,11 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             progressTracker.logSteps(partition.nodeCount());
         }
 
-        private LongHashSet largerValidNeighbors(long sourceId, NodeLabel targetLabel) {
+        private LongHashSet largerValidNeighbors(long sourceId, IdMap targetLabelIdMap) {
             var neighbors = new LongHashSet();
             graph.forEachRelationship(
                 sourceId, (src, trg) -> {
-                    if (src < trg && graph.nodeLabels(trg).contains(targetLabel)) neighbors.add(trg);
+                    if (src < trg && targetLabelIdMap.contains(graph.toOriginalNodeId(trg))) neighbors.add(trg);
                     return true;
                 }
             );
