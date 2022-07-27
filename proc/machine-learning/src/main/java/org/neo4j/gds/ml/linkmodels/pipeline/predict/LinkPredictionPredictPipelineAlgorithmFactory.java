@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -27,8 +29,15 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.models.ClassifierFactory;
+import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
     private final ExecutionContext executionContext;
@@ -66,9 +75,18 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration.username()
         );
 
+        var trainConfig = model.trainConfig();
+        LPNodeLabelFilter lpNodeLabelFilter = generateNodeLabels(trainConfig, configuration, graphStore);
+
+
+        progressTracker.logInfo(formatWithLocale(
+            "The node labels used for filtering in prediction is: {sourceNodeLabel: %s, targetNodeLabel: %s, nodePropertyStepsLabels: %s}",
+            lpNodeLabelFilter.internalSourceNodeLabels(), lpNodeLabelFilter.internalTargetNodeLabels(), lpNodeLabelFilter.nodePropertyStepsLabels()));
+
         return new LinkPredictionPredictPipelineExecutor(
             model.customInfo().pipeline(),
             ClassifierFactory.create(model.data()),
+            lpNodeLabelFilter,
             configuration,
             executionContext,
             graphStore,
@@ -93,4 +111,37 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             model.data()
         );
     }
+
+    static Collection<NodeLabel> internalNodeLabels(GraphStore graphStore, String nodeLabel) {
+        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(nodeLabel));
+    }
+
+    static Collection<NodeLabel> featureInputLabels(GraphStore graphStore, String sourceNodeLabel, String targetNodeLabel, List<String> contextNodeLabels) {
+
+        return (contextNodeLabels.contains(ElementProjection.PROJECT_ALL)
+                || sourceNodeLabel.equals(ElementProjection.PROJECT_ALL) || targetNodeLabel.equals(ElementProjection.PROJECT_ALL))
+            ? graphStore.nodeLabels()
+            : Stream.concat(contextNodeLabels.stream(), Stream.of(sourceNodeLabel, targetNodeLabel))
+                .map(NodeLabel::of)
+                .collect(Collectors.toSet());
+    }
+
+    static LPNodeLabelFilter generateNodeLabels(LinkPredictionTrainConfig trainConfig, LinkPredictionPredictPipelineBaseConfig predictConfig, GraphStore graphStore) {
+        String sourceNodeLabel = predictConfig.sourceNodeLabel().orElse(trainConfig.sourceNodeLabel());
+        String targetNodeLabel = predictConfig.targetNodeLabel().orElse(trainConfig.targetNodeLabel());
+        List<String> contextNodeLabels;
+        if (!predictConfig.contextNodeLabels().isEmpty()) {
+            contextNodeLabels = predictConfig.contextNodeLabels();
+        } else {
+            contextNodeLabels = trainConfig.contextNodeLabels();
+        }
+
+        return ImmutableLPNodeLabelFilter.of(
+            internalNodeLabels(graphStore, sourceNodeLabel),
+            internalNodeLabels(graphStore, targetNodeLabel),
+            featureInputLabels(graphStore, sourceNodeLabel, targetNodeLabel, contextNodeLabels)
+        );
+
+    }
+
 }

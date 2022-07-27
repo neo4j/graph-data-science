@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -41,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,9 +57,16 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     > {
     private final Classifier classifier;
 
+    private final Collection<NodeLabel> sourceNodeLabels;
+
+    private final Collection<NodeLabel> targetNodeLabels;
+
+    private final Collection<NodeLabel> featureInputLabels;
+
     public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
+        LPNodeLabelFilter lpNodeLabelFilter,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -66,6 +75,9 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.classifier = classifier;
+        this.sourceNodeLabels = lpNodeLabelFilter.internalSourceNodeLabels();
+        this.targetNodeLabels = lpNodeLabelFilter.internalTargetNodeLabels();
+        this.featureInputLabels = lpNodeLabelFilter.nodePropertyStepsLabels();
     }
 
     @Override
@@ -74,7 +86,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.builder()
-                .nodeLabels(config.featureInputLabels(graphStore))
+                .nodeLabels(featureInputLabels)
                 .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
         );
     }
@@ -176,8 +188,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                graphStore.getGraph(config.internalSourceLabels(graphStore)),
-                graphStore.getGraph(config.internalTargetLabels(graphStore)),
+                graphStore.getGraph(sourceNodeLabels),
+                graphStore.getGraph(targetNodeLabels),
                 config.approximateConfig(),
                 progressTracker
             );
@@ -186,8 +198,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                graphStore.getGraph(config.internalSourceLabels(graphStore)),
-                graphStore.getGraph(config.internalTargetLabels(graphStore)),
+                graphStore.getGraph(sourceNodeLabels),
+                graphStore.getGraph(targetNodeLabels),
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),

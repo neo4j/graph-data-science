@@ -41,7 +41,6 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -76,7 +75,6 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.FEATURE_INPUT;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
 @GdlExtension
@@ -179,6 +177,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
+                ImmutableLPNodeLabelFilter.of(
+                    List.of(NodeLabel.of("N")),
+                    List.of(NodeLabel.of("N")),
+                    List.of()),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -227,6 +229,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
                 new RandomForestClassifier(modelData),
+                ImmutableLPNodeLabelFilter.of(
+                    List.of(NodeLabel.of("N")),
+                    List.of(NodeLabel.of("N")),
+                    List.of()),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -280,6 +286,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
+                ImmutableLPNodeLabelFilter.of(
+                    List.of(NodeLabel.of("N")),
+                    List.of(NodeLabel.of("N")),
+                    List.of()),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -368,6 +378,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
+                ImmutableLPNodeLabelFilter.of(
+                    List.of(NodeLabel.of("N")),
+                    List.of(NodeLabel.of("N")),
+                    List.of()),
                 config,
                 caller.executionContext(),
                 graphStore,
@@ -482,6 +496,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
                 ),
                 LogisticRegressionClassifier.from(modelData),
+                ImmutableLPNodeLabelFilter.of(
+                    List.of(NodeLabel.of("N")),
+                    List.of(NodeLabel.of("N")),
+                    List.of()),
                 LinkPredictionPredictPipelineBaseConfigImpl.builder()
                     .username("")
                     .modelName("model")
@@ -502,38 +520,4 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         });
     }
 
-    @Test
-    void nodePropertyStepsIncludeContextNodes() {
-        var pipeline = LinkPredictionPredictPipeline.from(Stream.of(), Stream.of(new L2FeatureStep(List.of("a"))));
-        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .graphName("dummy")
-            .modelName("dummy")
-            .username("dummy")
-            .topN(5)
-            .sourceNodeLabel("A")
-            .targetNodeLabel("B")
-            .contextNodeLabels(List.of("C"))
-            .build();
-
-        var splits = new LinkPredictionPredictPipelineExecutor(
-            pipeline,
-            LogisticRegressionClassifier.from(ImmutableLogisticRegressionData.of(2, new Weights<>(new Matrix(
-                new double[]{0, 0, 0, 0, 0},
-                1,
-                1
-            )), Weights.ofVector(0.0))),
-            config,
-            ExecutionContext.EMPTY,
-            multiLabelGraphStore,
-            "dummy",
-            ProgressTracker.NULL_TRACKER
-        ).splitDataset();
-
-        assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
-            NodeLabel.of("A"),
-            NodeLabel.of("B"),
-            NodeLabel.of("C")
-        );
-
-    }
 }
