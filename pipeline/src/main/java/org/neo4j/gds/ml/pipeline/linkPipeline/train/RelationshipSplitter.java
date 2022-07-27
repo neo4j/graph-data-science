@@ -79,7 +79,7 @@ public class RelationshipSplitter {
 
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
-        relationshipSplit(splitConfig.trainSplit(sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeightProperty));
+        relationshipSplit(splitConfig.trainSplit(targetRelationshipType, sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeightProperty));
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -109,19 +109,33 @@ public class RelationshipSplitter {
     }
 
     static MemoryEstimation splitEstimation(LinkPredictionSplitConfig splitConfig, String targetRelationshipType, Optional<String> relationshipWeight, String sourceNodeLabel, String targetNodeLabel) {
-        var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL) ?RelationshipType.ALL_RELATIONSHIPS : RelationshipType.of(targetRelationshipType);
+        var checkTargetRelType = targetRelationshipType.equals(ElementProjection.PROJECT_ALL)
+            ? RelationshipType.ALL_RELATIONSHIPS
+            : RelationshipType.of(targetRelationshipType);
 
         // randomSeed does not matter for memory estimation
         Optional<Long> randomSeed = Optional.empty();
 
         var firstSplitEstimation = MemoryEstimations
             .builder("Test/Test-complement split")
-            .add(SplitRelationships.estimate(splitConfig.testSplit(checkTargetRelType, sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.testSplit(
+                checkTargetRelType,
+                sourceNodeLabel,
+                targetNodeLabel,
+                randomSeed,
+                relationshipWeight
+            )))
             .build();
 
         var secondSplitEstimation = MemoryEstimations
             .builder("Train/Feature-input split")
-            .add(SplitRelationships.estimate(splitConfig.trainSplit(sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeight)))
+            .add(SplitRelationships.estimate(splitConfig.trainSplit(
+                checkTargetRelType,
+                sourceNodeLabel,
+                targetNodeLabel,
+                randomSeed,
+                relationshipWeight
+            )))
             .build();
 
         return MemoryEstimations.builder("Split relationships")
