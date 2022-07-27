@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LinkPredictionPredictPipelineBaseConfigTest {
 
@@ -183,4 +183,26 @@ class LinkPredictionPredictPipelineBaseConfigTest {
                         "No value specified for the mandatory configuration parameter `sourceNodeLabel`\n\t\t\t\t" +
                         "No value specified for the mandatory configuration parameter `targetNodeLabel`");
     }
+
+    @Test
+    void configIgnoresUserSpecifiedNodeLabels() {
+        var config = new LinkPredictionPredictPipelineBaseConfigImpl(
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "sourceNodeLabel", "N",
+                    "targetNodeLabel", "N",
+                    "nodeLabels", 42,
+                    "topN", 42,
+                    "sampleRate", 1,
+                    "graphName", "g"
+                )
+            )
+        );
+
+        assertThat(config.nodeLabels()).containsExactly("N");
+
+
+    }
+
 }

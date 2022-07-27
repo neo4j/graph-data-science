@@ -46,7 +46,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         var labelOffset = nodeLabel.equals("N") ? 0 : nodeCount;
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " sourceNodeLabel: $sourceNodeLabel," +
             " targetNodeLabel: $targetNodeLabel," +
@@ -75,8 +74,8 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .streamMode()
             .addParameter("modelName", "model")
-            .addParameter("sourceNodeLabel", "dummy")
-            .addParameter("targetNodeLabel", "dummy")
+            .addParameter("sourceNodeLabel", "N")
+            .addParameter("targetNodeLabel", "M")
             .addParameter("threshold", 0.5)
             .addParameter("topN", 9)
             .yields();
@@ -110,7 +109,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         );
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " sourceNodeLabel: $sourceNodeLabel," +
             " targetNodeLabel: $targetNodeLabel," +

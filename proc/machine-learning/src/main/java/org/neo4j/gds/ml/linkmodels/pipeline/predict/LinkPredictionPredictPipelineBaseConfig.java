@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -64,14 +65,32 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     String targetNodeLabel();
 
+    default List<String> contextNodeLabels() {return List.of();}
+
     @Configuration.Ignore
     default Collection<NodeLabel> internalSourceLabels(GraphStore graphStore) {
-        return (sourceNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(sourceNodeLabel()));
+        return (sourceNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(
+            sourceNodeLabel()));
     }
 
     @Configuration.Ignore
     default Collection<NodeLabel> internalTargetLabels(GraphStore graphStore) {
-        return (targetNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(targetNodeLabel()));
+        return (targetNodeLabel().equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(
+            targetNodeLabel()));
+    }
+
+    @Configuration.Ignore
+    default Collection<NodeLabel> featureInputLabels(GraphStore graphStore) {
+        return contextNodeLabels().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.nodeLabels()
+            : Stream.concat(contextNodeLabels().stream().map(NodeLabel::of), nodeLabelIdentifiers(graphStore).stream())
+                .collect(Collectors.toSet());
+    }
+
+    @Override
+    @Configuration.Ignore
+    default List<String> nodeLabels() {
+        return Stream.of(sourceNodeLabel(), targetNodeLabel()).distinct().collect(Collectors.toList());
     }
 
 
@@ -114,14 +133,15 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
             validateStrategySpecificParameters(exhaustiveStrategyParameters, "equal to 1");
         } else {
             Map<String, Boolean> approximateStrategyParameters = Map.of(
-                "topK",topK().isPresent(),
+                "topK", topK().isPresent(),
                 "deltaThreshold", deltaThreshold().isPresent(),
                 "maxIterations", maxIterations().isPresent(),
                 "randomJoins", randomJoins().isPresent(),
-                "initialSampler", derivedInitialSampler().isPresent());
+                "initialSampler", derivedInitialSampler().isPresent()
+            );
             validateStrategySpecificParameters(approximateStrategyParameters, "less than 1");
 
-            topN().orElseThrow(()-> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
+            topN().orElseThrow(() -> MissingParameterExceptions.missingValueFor("topN", Collections.emptyList()));
         }
     }
 

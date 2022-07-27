@@ -74,7 +74,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.builder()
-                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
+                .nodeLabels(config.featureInputLabels(graphStore))
                 .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
         );
     }

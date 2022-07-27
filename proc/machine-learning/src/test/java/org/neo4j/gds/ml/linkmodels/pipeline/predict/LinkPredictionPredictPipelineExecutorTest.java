@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProcedureRunner;
@@ -40,7 +41,12 @@ import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -70,8 +76,10 @@ import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.compat.TestLog.INFO;
+import static org.neo4j.gds.ml.pipeline.PipelineExecutor.DatasetSplits.FEATURE_INPUT;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
+@GdlExtension
 class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
     public static final String GRAPH_NAME = "g";
 
@@ -88,6 +96,23 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n2)-[:T]->(n4)";
 
     private GraphStore graphStore;
+
+
+    @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multiLabel")
+    static String gdlMultiLabel = "(n0 :A {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n1: B {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n2: C {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n3: B {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n4: C {a: 1.0, b: 0.8, c: 1.0}), " +
+                                  "(n5: A {a: 1.0, b: 0.8, c: 1.0})" +
+                                  "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T}->(n0), (n5)-[:T]->(n1)";
+
+
+    @Inject
+    TestGraph multiLabelGraph;
+
+    @Inject
+    GraphStore multiLabelGraphStore;
 
     @BeforeEach
     void setup() throws Exception {
@@ -475,5 +500,40 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 .hasMessageContaining("Model expected link features to have a total dimension of `5`, but got `3`. ")
                 .hasMessageContaining("This indicates the dimension of the node-properties ['a', 'b', 'c'] differ between the input and the original train graph.");
         });
+    }
+
+    @Test
+    void nodePropertyStepsIncludeContextNodes() {
+        var pipeline = LinkPredictionPredictPipeline.from(Stream.of(), Stream.of(new L2FeatureStep(List.of("a"))));
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .graphName("dummy")
+            .modelName("dummy")
+            .username("dummy")
+            .topN(5)
+            .sourceNodeLabel("A")
+            .targetNodeLabel("B")
+            .contextNodeLabels(List.of("C"))
+            .build();
+
+        var splits = new LinkPredictionPredictPipelineExecutor(
+            pipeline,
+            LogisticRegressionClassifier.from(ImmutableLogisticRegressionData.of(2, new Weights<>(new Matrix(
+                new double[]{0, 0, 0, 0, 0},
+                1,
+                1
+            )), Weights.ofVector(0.0))),
+            config,
+            ExecutionContext.EMPTY,
+            multiLabelGraphStore,
+            "dummy",
+            ProgressTracker.NULL_TRACKER
+        ).splitDataset();
+
+        assertThat(splits.get(FEATURE_INPUT).nodeLabels()).containsExactlyInAnyOrder(
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
+
     }
 }

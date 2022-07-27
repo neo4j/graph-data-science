@@ -59,7 +59,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     void shouldPredictWithTopN(int topN, int concurrency, String nodeLabel) {
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " sourceNodeLabel: $sourceNodeLabel," +
             " targetNodeLabel: $targetNodeLabel," +
@@ -114,7 +113,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .call("g")
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
-            .addParameter("nodeLabels", List.of("N"))
             .addParameter("sourceNodeLabel", "N")
             .addParameter("targetNodeLabel", "N")
             .addParameter("mutateRelationshipType", "PREDICTED")
