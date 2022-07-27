@@ -266,10 +266,10 @@ RETURN
 [opts="header", cols="6, 2, 2, 2, 6"]
 |===
 | winningModel                                                                                                                                | avgTrainScore      | outerTrainScore     | testScore | validationScores
-| {maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0} | 0.631481481481481 |  0.725 | 0.666666666666667 | [0.5833333333333334, 0.6944444444444443, 0.5833333333333334, 0.5833333333333334, 0.5833333333333334]
+| {maxEpochs=100, minEpochs=1, penalty=1.0, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001} | 0.799603174603175 |  0.8 | 0.75 | [0.5555555555555555, 0.6805555555555555, 0.75, 0.5555555555555555, 0.5555555555555555]
 |===
 
-We can see the RandomForest model configuration with `numberOfDecisionTrees = 10` (and defaults filled for remaining parameters) was selected, and has a score of `0.77` on the test set.
+We can see the MLP model configuration won, and has a score of `0.8` on the test set.
 The score computed as the xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 --

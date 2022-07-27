@@ -505,7 +505,7 @@ YIELD parameterSpace
 .The following will add a configured multilayer perceptron model:
 --
 CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
-{hiddenLayerSizes: [4, 2], penalty: 1})
+{hiddenLayerSizes: [4, 2], penalty: 1, patience: 2})
 YIELD parameterSpace
 --
 
@@ -523,7 +523,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace | MultilayerPerceptronSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, penalty=1, patience=1, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, penalty=0.0, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, penalty=1, patience=2, methodName=MultilayerPerceptron, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001}]
 |===
 --
 

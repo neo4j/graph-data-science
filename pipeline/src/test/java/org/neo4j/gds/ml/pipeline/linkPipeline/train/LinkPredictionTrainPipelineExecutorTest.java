@@ -263,7 +263,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             pipeline.setSplitConfig(LinkPredictionSplitConfigImpl.builder()
                 .validationFolds(2)
-                .negativeSamplingRatio(1)
+                .negativeSamplingRatio(2)
                 .trainFraction(0.5)
                 .testFraction(0.5)
                 .build());
@@ -282,7 +282,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .metrics(List.of(OutOfBagError.OUT_OF_BAG_ERROR.name()))
                 .pipeline("DUMMY")
                 .negativeClassWeight(1)
-                .randomSeed(1337L)
+                .randomSeed(4242L)
                 .build();
 
             TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
@@ -299,8 +299,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 assertThat(actualModel.customInfo().toMap()).containsEntry(
                     "metrics",
                     Map.of("OUT_OF_BAG_ERROR", Map.of(
-                            "test", 0.875,
-                            "validation", Map.of("avg", 0.875, "max", 1.0, "min", 0.75)
+                            "test", 0.6666666666666666,
+                            "validation", Map.of("avg", 0.75, "max", 0.8333333333333334, "min", 0.6666666666666666)
                         )
                     )
                 );
