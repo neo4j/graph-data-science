@@ -76,6 +76,9 @@ project(':edition-api').projectDir = file('edition-api')
 include('executor')
 project(':executor').projectDir = file('executor')
 
+include 'procedure-collector'
+project(':procedure-collector').projectDir = file('procedure-collector')
+
 include('graph-dimensions')
 project(':graph-dimensions').projectDir = file('graph-dimensions')
 
