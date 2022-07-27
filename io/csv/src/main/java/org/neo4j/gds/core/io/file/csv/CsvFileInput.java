@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -105,16 +106,12 @@ public final class CsvFileInput implements FileInput {
             propertySchemas
         ));
 
-        var headerToObjectReaderMapping = new HashMap<NodeFileHeader, ObjectReader>();
-        headerToDataFilesMapping.keySet().forEach(header -> {
-            var csvSchema = CsvSchemaUtil
-                .fromElementSchema(propertySchemas, header, CsvNodeVisitor.ID_COLUMN_NAME)
-                .withColumnSeparator(COLUMN_SEPARATOR)
-                .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR);
-
-            var objectReader = CSV_MAPPER.readerFor(NodeDTO.class).with(csvSchema);
-            headerToObjectReaderMapping.put(header, objectReader);
-        });
+        HashMap<NodeFileHeader, ObjectReader> headerToObjectReaderMapping = computeHeaderToObjectReaderMapping(
+            headerToDataFilesMapping,
+            propertySchemas,
+            NodeDTO.class,
+            CsvNodeVisitor.ID_COLUMN_NAME
+        );
 
         return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema, headerToObjectReaderMapping);
     }
@@ -134,19 +131,35 @@ public final class CsvFileInput implements FileInput {
             propertySchemas
         ));
 
-        var headerToObjectReaderMapping = new HashMap<RelationshipFileHeader, ObjectReader>();
+        var headerToObjectReaderMapping = computeHeaderToObjectReaderMapping(
+            headerToDataFilesMapping,
+            propertySchemas,
+            RelationshipDTO.class,
+            CsvRelationshipVisitor.START_ID_COLUMN_NAME,
+            CsvRelationshipVisitor.END_ID_COLUMN_NAME
+        );
+
+        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema, headerToObjectReaderMapping);
+    }
+
+    @NotNull
+    private <P extends PropertySchema, HEADER extends FileHeader<?, P>> HashMap<HEADER, ObjectReader> computeHeaderToObjectReaderMapping(
+        Map<HEADER, List<Path>> headerToDataFilesMapping,
+        Map<String, P> propertySchemas,
+        Class<?> deserializationClass,
+        String... elementColumns
+    ) {
+        var headerToObjectReaderMapping = new HashMap<HEADER, ObjectReader>();
         headerToDataFilesMapping.keySet().forEach(header -> {
             var csvSchema = CsvSchemaUtil
-                .fromElementSchema(propertySchemas, header, CsvRelationshipVisitor.START_ID_COLUMN_NAME, CsvRelationshipVisitor.END_ID_COLUMN_NAME)
+                .fromElementSchema(propertySchemas, header, elementColumns)
                 .withColumnSeparator(COLUMN_SEPARATOR)
                 .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR);
 
-            var objectReader = CSV_MAPPER.readerFor(RelationshipDTO.class).with(csvSchema);
-
+            var objectReader = CSV_MAPPER.readerFor(deserializationClass).with(csvSchema);
             headerToObjectReaderMapping.put(header, objectReader);
         });
-
-        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema, headerToObjectReaderMapping);
+        return headerToObjectReaderMapping;
     }
 
     @Override

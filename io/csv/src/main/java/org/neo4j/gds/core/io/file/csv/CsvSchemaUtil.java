@@ -32,9 +32,9 @@ final class CsvSchemaUtil {
 
     private CsvSchemaUtil() {}
 
-    static <P extends PropertySchema> CsvSchema fromElementSchema(
+    static <P extends PropertySchema, HEADER extends FileHeader<?, P>> CsvSchema fromElementSchema(
         Map<String, P> propertySchemas,
-        FileHeader<?, P> header,
+        HEADER header,
         String... elementColumns
     ) {
         var schemaBuilder = CsvSchema.builder();
