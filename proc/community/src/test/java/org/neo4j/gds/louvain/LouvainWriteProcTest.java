@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,7 +40,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -208,18 +208,19 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
 
     static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
-            Arguments.of(Map.of("minCommunitySize", 1), new Long[] {8L, 11L, 13L, 14L}),
-            Arguments.of(Map.of("minCommunitySize", 3), new Long[] {8L, 13L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), new Long[] {0L, 1L, 2L, 3L}),
-            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), new Long[] {2L, 3L}),
-            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), new Long[] {1L, 2L, 42L}),
-            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), new Long[] {2L, 42L})
+            // configuration | expectedCommunityCount | expectedCommunityIds
+            Arguments.of(Map.of("minCommunitySize", 1), 3L, new Long[] {11L, 13L, 14L}),
+            Arguments.of(Map.of("minCommunitySize", 3), 3L, new Long[] {14L, 13L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "consecutiveIds", true), 3L, new Long[] {0L, 1L, 2L}),
+            Arguments.of(Map.of("minCommunitySize", 3, "consecutiveIds", true), 3L, new Long[] {1L, 2L}),
+            Arguments.of(Map.of("minCommunitySize", 1, "seedProperty", SEED_PROPERTY), 3L, new Long[] {1L, 2L, 42L}),
+            Arguments.of(Map.of("minCommunitySize", 3, "seedProperty", SEED_PROPERTY), 3L, new Long[] {2L, 42L})
         );
     }
 
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
-    void testWriteWithMinCommunitySize(Map<String, Object> parameters, Long[] expectedCommunityIds) {
+    void testWriteWithMinCommunitySize(Map<String, Object> parameters, long expectedCommunityCount, Long[] expectedCommunityIds) {
         var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .graphProject()
             .withAnyLabel()
@@ -237,15 +238,16 @@ class LouvainWriteProcTest extends LouvainProcTest<LouvainWriteConfig> {
             .yields("communityCount");
 
         runQueryWithRowConsumer(query, row -> {
-            assertEquals(parameters.containsKey("seedProperty") ? 3L : 4L, row.getNumber("communityCount"));
+            assertEquals(expectedCommunityCount, row.getNumber("communityCount"));
 
         });
 
         runQueryWithRowConsumer(
             "MATCH (n) RETURN collect(DISTINCT n." + WRITE_PROPERTY + ") AS communities ",
             row -> {
-                @SuppressWarnings("unchecked") var actualComponents = (List<Long>) row.get("communities");
-                assertThat(actualComponents, containsInAnyOrder(expectedCommunityIds));
+                Assertions.assertThat(row.get("communities"))
+                    .asList()
+                    .containsExactlyInAnyOrder(expectedCommunityIds);
             }
         );
     }
