@@ -55,22 +55,6 @@ class ValueTypeTest {
         );
     }
 
-    private static Stream<Arguments> formatValuesWithNulls() {
-        return Stream.concat(
-            formatValues(),
-            Stream.of(
-                arguments(ValueType.LONG, null, ""),
-                arguments(ValueType.DOUBLE, null, "")
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("formatValuesWithNulls")
-    void testFormatting(ValueType valueType, Object value, String expected) {
-        assertThat(valueType.csvValue(value)).isEqualTo(expected);
-    }
-
     @ParameterizedTest
     @MethodSource("formatValues")
     void testParsingFromCsv(ValueType valueType, Object expected, String value) throws JsonProcessingException {
