@@ -140,40 +140,10 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         @Override
         public void run() {
             partition.consume(sourceId -> {
-                //Computes probability for node pairs with valid node labels
                 if (sourceNodeLabelIdMap.contains(graph.toOriginalNodeId(sourceId))) {
-                    var largerNeighbors = largerValidNeighbors(sourceId, targetNodeLabelIdMap);
-                    // since graph is undirected, only process pairs where sourceId < targetId
-                    var smallestTarget = sourceId + 1;
-                    LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
-                            if (largerNeighbors.contains(targetId)) return;
-                            if (targetNodeLabelIdMap.contains(graph.toOriginalNodeId(targetId))) {
-                                var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
-                                linksConsidered++;
-                                if (probability < threshold) return;
-
-                                synchronized (predictionQueue) {
-                                    predictionQueue.offer(sourceId, targetId, probability);
-                                }
-                            }
-                        }
-                    );
+                    predictLinksFromNode(sourceId, targetNodeLabelIdMap);
                 } else if (targetNodeLabelIdMap.contains(graph.toOriginalNodeId(sourceId))) {
-                    var largerNeighbors = largerValidNeighbors(sourceId, sourceNodeLabelIdMap);
-                    var smallestTarget = sourceId + 1;
-                    LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
-                            if (largerNeighbors.contains(targetId)) return;
-                            if (sourceNodeLabelIdMap.contains(graph.toOriginalNodeId(targetId))) {
-                                var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
-                                linksConsidered++;
-                                if (probability < threshold) return;
-
-                                synchronized (predictionQueue) {
-                                    predictionQueue.offer(sourceId, targetId, probability);
-                                }
-                            }
-                        }
-                    );
+                    predictLinksFromNode(sourceId, sourceNodeLabelIdMap);
                 }
             });
 
@@ -189,6 +159,25 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
                 }
             );
             return neighbors;
+        }
+
+        private void predictLinksFromNode(long sourceId, IdMap nodeLabelIdMap) {
+            var largerNeighbors = largerValidNeighbors(sourceId, nodeLabelIdMap);
+            // since graph is undirected, only process pairs where sourceId < targetId
+            var smallestTarget = sourceId + 1;
+            LongStream.range(smallestTarget, graph.nodeCount()).forEach(targetId -> {
+                    if (largerNeighbors.contains(targetId)) return;
+                    if (nodeLabelIdMap.contains(graph.toOriginalNodeId(targetId))) {
+                        var probability = linkPredictionSimilarityComputer.similarity(sourceId, targetId);
+                        linksConsidered++;
+                        if (probability < threshold) return;
+
+                        synchronized (predictionQueue) {
+                            predictionQueue.offer(sourceId, targetId, probability);
+                        }
+                    }
+                }
+            );
         }
 
         long linksConsidered() {

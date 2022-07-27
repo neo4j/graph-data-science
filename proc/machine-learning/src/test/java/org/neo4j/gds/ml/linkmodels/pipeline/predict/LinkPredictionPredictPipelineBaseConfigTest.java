@@ -167,24 +167,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
     }
 
     @Test
-    void failOnMissingNodeLabel() {
-        assertThatThrownBy(() -> new LinkPredictionPredictPipelineBaseConfigImpl(
-            "user",
-            CypherMapWrapper.create(Map.of(
-                    "modelName", "testModel",
-                    "topN", 42,
-                    "sampleRate", 1,
-                    "graphName", "g"
-                )
-            )
-        ))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage("Multiple errors in configuration arguments:\n\t\t\t\t" +
-                        "No value specified for the mandatory configuration parameter `sourceNodeLabel`\n\t\t\t\t" +
-                        "No value specified for the mandatory configuration parameter `targetNodeLabel`");
-    }
-
-    @Test
     void configIgnoresUserSpecifiedNodeLabels() {
         var config = new LinkPredictionPredictPipelineBaseConfigImpl(
             "user",
