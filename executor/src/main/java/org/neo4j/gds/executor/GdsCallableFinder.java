@@ -25,22 +25,26 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @SuppressWarnings("unchecked")
 public final class GdsCallableFinder {
-    private static final List<String> PACKAGES_TO_SCAN = List.of(
-        "org.neo4j.gds"
-    );
 
     private static final List<String> DEFAULT_PACKAGE_BLACKLIST = List.of("org.neo4j.gds.pregel");
 
@@ -68,13 +72,10 @@ public final class GdsCallableFinder {
 
     @NotNull
     private static Stream<GdsCallableDefinition> allGdsCallables(Collection<String> blacklist) {
-        return PACKAGES_TO_SCAN.stream()
-            .map(pkg -> new Reflections(pkg, Scanners.TypesAnnotated))
-            .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
+        return ClassesHolder.CALLABLE_CLASSES.stream()
             .filter(clazz -> blacklist
                 .stream()
                 .noneMatch(item -> clazz.getPackageName().startsWith(item)))
-            .peek(clazz -> {assert AlgorithmSpec.class.isAssignableFrom(clazz);})
             .map(clazz -> {
                 GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
                 return ImmutableGdsCallableDefinition
@@ -87,6 +88,53 @@ public final class GdsCallableFinder {
             });
     }
 
+    private static final class ClassesHolder {
+        private static final List<Class<?>> CALLABLE_CLASSES = loadPossibleClasses();
+
+        @NotNull
+        private static List<Class<?>> loadPossibleClasses() {
+            var pathFromJar = "META-INF/services/" + GdsCallable.class.getCanonicalName();
+            var pathFromResourcesFolder = "/" + pathFromJar;
+
+            var classes = new ArrayList<Class<?>>();
+            classes.addAll(loadPossibleClassesFrom(pathFromJar));
+            classes.addAll(loadPossibleClassesFrom(pathFromResourcesFolder));
+
+            return classes;
+        }
+
+        @NotNull
+        private static List<Class<?>> loadPossibleClassesFrom(String path) {
+            var classLoader = Objects.requireNonNullElse(
+                Thread.currentThread().getContextClassLoader(),
+                ClassesHolder.class.getClassLoader()
+            );
+
+            try (var callablesStream = classLoader.getResourceAsStream(path)) {
+                if (callablesStream == null) {
+                    return List.of();
+                }
+                try (var callables = new BufferedReader(new InputStreamReader(
+                    new BufferedInputStream(callablesStream),
+                    StandardCharsets.UTF_8
+                ))) {
+                    return callables.lines()
+                        .map(clazz -> {
+                            try {
+                                return classLoader.loadClass(clazz);
+                            } catch (ClassNotFoundException e) {
+                                throw new RuntimeException(e);
+                            }
+                        })
+                        .peek(clazz -> {assert AlgorithmSpec.class.isAssignableFrom(clazz);})
+                        .collect(Collectors.toList());
+                }
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        }
+    }
+
     @ValueClass
     public interface GdsCallableDefinition {
         Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>> algorithmSpecClass();
@@ -95,7 +143,8 @@ public final class GdsCallableFinder {
         default AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>> algorithmSpec() {
             try {
                 return algorithmSpecClass().getConstructor().newInstance();
-            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException e) {
                 throw new RuntimeException(e);
             }
         }
