@@ -170,28 +170,6 @@ public final class MemoryUsage {
         }
     }
 
-    private static final boolean VM_INFO_AVAILABLE = isVmInfoAvailable();
-
-    /*
-     * Try to initialize JOL without having it print warnings or throw errors because
-     * we run on an unsupported VM
-     */
-    @SuppressForbidden(reason = "we want to use system.out here")
-    private static boolean isVmInfoAvailable() {
-        var sysOut = System.out;
-        try {
-            var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
-            System.setOut(swallowSysOut);
-            VM.current();
-            swallowSysOut.flush();
-            return true;
-        } catch (Exception unavailable) {
-            return false;
-        } finally {
-            System.setOut(sysOut);
-        }
-    }
-
     public static long sizeOfByteArray(final long length) {
         return alignObjectSize((long) BYTES_ARRAY_HEADER + (length << SHIFT_BYTE));
     }
@@ -311,7 +289,7 @@ public final class MemoryUsage {
     }
 
     public static long sizeOf(Object thing) {
-        if (!VM_INFO_AVAILABLE) {
+        if (!VmInfoHolder.VM_INFO_AVAILABLE) {
             return -1L;
         }
         return new GraphWalker().walk(thing).totalSize();
@@ -358,28 +336,54 @@ public final class MemoryUsage {
         throw new UnsupportedOperationException();
     }
 
-    private static final class NullOutputStream extends OutputStream {
+    // nested class so we initialize the VM object lazily when we actually need it
+    private static final class VmInfoHolder {
 
-        static final OutputStream NULL_OUTPUT_STREAM = new NullOutputStream();
+        private static final boolean VM_INFO_AVAILABLE = isVmInfoAvailable();
 
-        private NullOutputStream() {
+        /*
+         * Try to initialize JOL without having it print warnings or throw errors because
+         * we run on an unsupported VM
+         */
+        @SuppressForbidden(reason = "we want to use system.out here")
+        private static boolean isVmInfoAvailable() {
+            var sysOut = System.out;
+            try {
+                var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
+                System.setOut(swallowSysOut);
+                VM.current();
+                swallowSysOut.flush();
+                return true;
+            } catch (Exception unavailable) {
+                return false;
+            } finally {
+                System.setOut(sysOut);
+            }
         }
 
-        @Override
-        public void write(int b) {
-            //nothing
-        }
+        private static final class NullOutputStream extends OutputStream {
 
-        @Override
-        public void write(byte[] b) {
-            // nothing
-        }
+            static final OutputStream NULL_OUTPUT_STREAM = new NullOutputStream();
 
-        @Override
-        public void write(byte[] b, int off, int len) {
-            // nothing
-        }
+            private NullOutputStream() {
+            }
 
+            @Override
+            public void write(int b) {
+                //nothing
+            }
+
+            @Override
+            public void write(byte[] b) {
+                // nothing
+            }
+
+            @Override
+            public void write(byte[] b, int off, int len) {
+                // nothing
+            }
+
+        }
     }
 
     private MemoryUsage() {
