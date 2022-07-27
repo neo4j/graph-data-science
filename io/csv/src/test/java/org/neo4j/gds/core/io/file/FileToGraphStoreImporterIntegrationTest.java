@@ -46,9 +46,10 @@ class FileToGraphStoreImporterIntegrationTest {
     @GdlGraph
     private static final String GDL =
         "CREATE" +
-        "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
+        //                                      This triggers jackson wrapping the values in quotes
+        "  (a:A:B { prop1: 0, prop2: 42, prop3: [0.30000001192092896D, 0.20000000298023224D]})" +
         ", (b:A:B { prop1: 1, prop2: 43})" +
-        ", (c:A:C { prop1: 2, prop2: 44, prop3: [1L, 9L, 8L, 4L] })" +
+        ", (c:A:C { prop1: 2, prop2: 44, prop3: [-0.04D] })" +
         ", (d:B { prop1: 3 })" +
         ", (a)-[:REL1 { prop1: 0, prop2: 42 }]->(a)" +
         ", (a)-[:REL1 { prop1: 1, prop2: 43 }]->(b)" +

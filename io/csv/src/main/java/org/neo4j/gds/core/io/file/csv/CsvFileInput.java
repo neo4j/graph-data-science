@@ -19,7 +19,11 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import com.fasterxml.jackson.databind.InjectableValues;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
@@ -50,6 +54,7 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +63,8 @@ import java.util.stream.Stream;
 
 public final class CsvFileInput implements FileInput {
 
+    private static final char COLUMN_SEPARATOR = ',';
+    private static final String ARRAY_ELEMENT_SEPARATOR = ";";
     private static final CsvMapper CSV_MAPPER = new CsvMapper();
 
     private final Path importPath;
@@ -74,6 +81,15 @@ public final class CsvFileInput implements FileInput {
         this.nodeSchema = new NodeSchemaLoader(importPath).load();
         this.relationshipSchema = new RelationshipSchemaLoader(importPath).load();
         this.capabilities = new GraphCapabilitiesLoader(importPath, CSV_MAPPER).load();
+
+        setupCsvMapper();
+    }
+
+    private static void setupCsvMapper() {
+        var module = new SimpleModule()
+            .addDeserializer(NodeDTO.class, new NodeDeserializer())
+            .addDeserializer(RelationshipDTO.class, new RelationshipDeserializer());
+        CSV_MAPPER.registerModule(module);
     }
 
     @Override
@@ -83,7 +99,25 @@ public final class CsvFileInput implements FileInput {
             entry -> CsvImportUtil.parseNodeHeader(entry.getKey()),
             Map.Entry::getValue
         ));
-        return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema);
+
+        var propertySchemas = nodeSchema.unionProperties();
+        CSV_MAPPER.setInjectableValues(new InjectableValues.Std().addValue(
+            NodeDeserializer.NODE_SCHEMA_INJECTION_NAME,
+            propertySchemas
+        ));
+
+        var headerToObjectReaderMapping = new HashMap<NodeFileHeader, ObjectReader>();
+        headerToDataFilesMapping.keySet().forEach(header -> {
+            var csvSchema = CsvSchemaUtil
+                .fromElementSchema(propertySchemas, header, CsvNodeVisitor.ID_COLUMN_NAME)
+                .withColumnSeparator(COLUMN_SEPARATOR)
+                .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR);
+
+            var objectReader = CSV_MAPPER.readerFor(NodeDTO.class).with(csvSchema);
+            headerToObjectReaderMapping.put(header, objectReader);
+        });
+
+        return () -> new NodeImporter(headerToDataFilesMapping, nodeSchema, headerToObjectReaderMapping);
     }
 
     @Override
@@ -93,7 +127,27 @@ public final class CsvFileInput implements FileInput {
             entry -> CsvImportUtil.parseRelationshipHeader(entry.getKey()),
             Map.Entry::getValue
         ));
-        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema);
+
+        var propertySchemas = relationshipSchema.unionProperties();
+
+        CSV_MAPPER.setInjectableValues(new InjectableValues.Std().addValue(
+            RelationshipDeserializer.RELATIONSHIP_SCHEMA_INJECTION_NAME,
+            propertySchemas
+        ));
+
+        var headerToObjectReaderMapping = new HashMap<RelationshipFileHeader, ObjectReader>();
+        headerToDataFilesMapping.keySet().forEach(header -> {
+            var csvSchema = CsvSchemaUtil
+                .fromElementSchema(propertySchemas, header, CsvRelationshipVisitor.START_ID_COLUMN_NAME, CsvRelationshipVisitor.END_ID_COLUMN_NAME)
+                .withColumnSeparator(COLUMN_SEPARATOR)
+                .withArrayElementSeparator(ARRAY_ELEMENT_SEPARATOR);
+
+            var objectReader = CSV_MAPPER.readerFor(RelationshipDTO.class).with(csvSchema);
+
+            headerToObjectReaderMapping.put(header, objectReader);
+        });
+
+        return () -> new RelationshipImporter(headerToDataFilesMapping, relationshipSchema, headerToObjectReaderMapping);
     }
 
     @Override
@@ -158,11 +212,15 @@ public final class CsvFileInput implements FileInput {
                 Pair<HEADER, Path> entry = entryIterator.next();
 
                 assert chunk instanceof LineChunk;
-                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(entry.getKey(), entry.getValue());
+                var header = entry.getKey();
+                var objectReader = objectReaderForHeader(header);
+                ((LineChunk<HEADER, SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>) chunk).initialize(header, entry.getValue(), objectReader);
                 return true;
             }
             return false;
         }
+
+        abstract ObjectReader objectReaderForHeader(HEADER header);
 
         @Override
         public void close() {
@@ -171,11 +229,20 @@ public final class CsvFileInput implements FileInput {
 
     static class NodeImporter extends FileImporter<NodeFileHeader, NodeSchema, NodeLabel, PropertySchema> {
 
+        private final Map<NodeFileHeader, ObjectReader> headerToObjectReaderMapping;
+
         NodeImporter(
             Map<NodeFileHeader, List<Path>> headerToDataFilesMapping,
-            NodeSchema nodeSchema
+            NodeSchema nodeSchema,
+            Map<NodeFileHeader, ObjectReader> headerToObjectReaderMapping
         ) {
             super(headerToDataFilesMapping, nodeSchema);
+            this.headerToObjectReaderMapping = headerToObjectReaderMapping;
+        }
+
+        @Override
+        ObjectReader objectReaderForHeader(NodeFileHeader header) {
+            return headerToObjectReaderMapping.get(header);
         }
 
         @Override
@@ -186,11 +253,21 @@ public final class CsvFileInput implements FileInput {
 
     static class RelationshipImporter extends FileImporter<RelationshipFileHeader, RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
 
+        private final Map<RelationshipFileHeader, ObjectReader> headerToObjectReaderMapping;
+
         RelationshipImporter(
             Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping,
-            RelationshipSchema relationshipSchema
+
+            RelationshipSchema relationshipSchema,
+            Map<RelationshipFileHeader, ObjectReader> headerToObjectReaderMapping
         ) {
             super(headerToDataFilesMapping, relationshipSchema);
+            this.headerToObjectReaderMapping = headerToObjectReaderMapping;
+        }
+
+        @Override
+        ObjectReader objectReaderForHeader(RelationshipFileHeader header) {
+            return headerToObjectReaderMapping.get(header);
         }
 
         @Override
@@ -211,6 +288,7 @@ public final class CsvFileInput implements FileInput {
         Stream<String> lineStream;
         Iterator<String> lineIterator;
         Map<String, PROPERTY_SCHEMA> propertySchemas;
+        ObjectReader objectReader;
 
         LineChunk(SCHEMA schema) {
             this.schema = schema;
@@ -218,12 +296,14 @@ public final class CsvFileInput implements FileInput {
 
         void initialize(
             HEADER header,
-            Path path
+            Path path,
+            ObjectReader objectReader
         ) throws IOException {
             this.header = header;
             this.propertySchemas = header.schemaForIdentifier(schema);
             this.lineStream = Files.lines(path);
             this.lineIterator = this.lineStream.iterator();
+            this.objectReader = objectReader;
         }
 
         @Override
@@ -255,29 +335,11 @@ public final class CsvFileInput implements FileInput {
 
         @Override
         void visitLine(String line, NodeFileHeader header, InputEntityVisitor visitor) throws IOException {
-
-            var lineValues = line.split(",", -1);
+            NodeDTO node = objectReader.readValue(line);
 
             visitor.labels(header.nodeLabels());
-
-            visitor.id(Long.parseLong(lineValues[0]));
-
-            header
-                .propertyMappings()
-                .forEach(property -> {
-                    var propertyValue = property.position() < lineValues.length
-                        ? lineValues[property.position()]
-                        : "";
-                    visitor.property(
-                        property.propertyKey(),
-                        property
-                            .valueType()
-                            .fromCsvValue(
-                                propertyValue,
-                                propertySchemas.get(property.propertyKey()).defaultValue()
-                            )
-                    );
-                });
+            visitor.id(node.id);
+            node.properties.forEach(visitor::property);
 
             visitor.endOfEntity();
         }
@@ -296,18 +358,13 @@ public final class CsvFileInput implements FileInput {
 
         @Override
         void visitLine(String line, RelationshipFileHeader header, InputEntityVisitor visitor) throws IOException {
-            var lineValues = line.split(",", -1);
+            RelationshipDTO relationship = objectReader.readValue(line);
 
             visitor.type(header.relationshipType());
-            visitor.startId(Long.parseLong(lineValues[0]));
-            visitor.endId(Long.parseLong(lineValues[1]));
+            visitor.startId(relationship.sourceId);
+            visitor.endId(relationship.targetId);
 
-            header
-                .propertyMappings()
-                .forEach(property -> visitor.property(
-                    property.propertyKey(),
-                    property.valueType().fromCsvValue(lineValues[property.position()], propertySchemas.get(property.propertyKey()).defaultValue())
-                ));
+            relationship.properties.forEach(visitor::property);
 
             visitor.endOfEntity();
         }

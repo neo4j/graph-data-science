@@ -20,6 +20,9 @@ dependencies {
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
     )
 
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
+
     testCompileOnly         group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     testCompileOnly         group: 'org.immutables',           name: 'value-annotations',  version: ver.'immutables'
 

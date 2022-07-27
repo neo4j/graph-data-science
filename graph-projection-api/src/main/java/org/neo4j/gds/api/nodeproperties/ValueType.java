@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.api.nodeproperties;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.neo4j.gds.api.DefaultValue;
 
 import java.util.Arrays;
@@ -46,11 +48,11 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
-            if (csvValue.isBlank()) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
+            if (node.textValue().isBlank()) {
                 return fallbackValue.longValue();
             }
-            return Long.parseLong(csvValue);
+            return node.asLong();
         }
 
         @Override
@@ -78,11 +80,11 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
-            if (csvValue.isBlank()) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
+            if (node == null || node.textValue().isBlank()) {
                 return fallbackValue.doubleValue();
             }
-            return Double.parseDouble(csvValue);
+            return node.asDouble();
         }
 
         @Override
@@ -110,7 +112,7 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             throw new UnsupportedOperationException("Unsupported conversion from CSV value to STRING");
         }
 
@@ -140,14 +142,15 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
-            if (csvValue.isBlank()) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
+            if (node.isEmpty()) {
                 return fallbackValue.doubleArrayValue();
             }
-            String[] arrayElements = csvValue.split(";");
-            double[] doubleArray = new double[arrayElements.length];
-            for (int i = 0; i < arrayElements.length; i++) {
-                doubleArray[i] = Double.parseDouble(arrayElements[i]);
+            var arrayNode = (ArrayNode) node;
+            var size = arrayNode.size();
+            var doubleArray = new double[size];
+            for (int i = 0; i < size; i++) {
+                doubleArray[i] = arrayNode.get(i).asDouble();
             }
             return doubleArray;
         }
@@ -182,14 +185,15 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
-            if (csvValue.isBlank()) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
+            if (node.isEmpty()) {
                 return fallbackValue.floatArrayValue();
             }
-            String[] arrayElements = csvValue.split(";");
-            float[] floatArray = new float[arrayElements.length];
-            for (int i = 0; i < arrayElements.length; i++) {
-                floatArray[i] = Float.parseFloat(arrayElements[i]);
+            var arrayNode = (ArrayNode) node;
+            var size = arrayNode.size();
+            var floatArray = new float[size];
+            for (int i = 0; i < size; i++) {
+                floatArray[i] = (float) arrayNode.get(i).asDouble();
             }
             return floatArray;
         }
@@ -220,14 +224,15 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
-            if (csvValue.isBlank()) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
+            if (node.isEmpty()) {
                 return fallbackValue.longArrayValue();
             }
-            String[] arrayElements = csvValue.split(";");
-            long[] longArray = new long[arrayElements.length];
-            for (int i = 0; i < arrayElements.length; i++) {
-                longArray[i] = Long.parseLong(arrayElements[i]);
+            var arrayNode = (ArrayNode) node;
+            var size = arrayNode.size();
+            var longArray = new long[size];
+            for (int i = 0; i < size; i++) {
+                longArray[i] = arrayNode.get(i).asLong();
             }
             return longArray;
         }
@@ -257,7 +262,7 @@ public enum ValueType {
         }
 
         @Override
-        public Object fromCsvValue(String csvValue, DefaultValue fallbackValue) {
+        public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             throw new UnsupportedOperationException("Unsupported conversion from CSV value to UNKNOWN");
         }
 
@@ -273,12 +278,12 @@ public enum ValueType {
 
     public abstract String csvValue(Object value);
 
-    public abstract Object fromCsvValue(String csvValue, DefaultValue fallbackValue);
+    public abstract Object fromCsvValue(DefaultValue fallbackValue, JsonNode node);
 
     public abstract DefaultValue fallbackValue();
 
-    public Object fromCsvValue(String csvValue) {
-        return fromCsvValue(csvValue, fallbackValue());
+    public Object fromCsvValue(JsonNode node) {
+        return fromCsvValue(fallbackValue(), node);
     }
 
     public static ValueType fromCsvName(String csvName) {
