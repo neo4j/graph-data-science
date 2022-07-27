@@ -49,7 +49,7 @@ public enum ValueType {
 
         @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
-            if (node.textValue().isBlank()) {
+            if (node == null || node.textValue().isBlank()) {
                 return fallbackValue.longValue();
             }
             return node.asLong();
@@ -143,7 +143,7 @@ public enum ValueType {
 
         @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
-            if (node.isEmpty()) {
+            if (node == null || node.isEmpty()) {
                 return fallbackValue.doubleArrayValue();
             }
             var arrayNode = (ArrayNode) node;
@@ -186,7 +186,7 @@ public enum ValueType {
 
         @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
-            if (node.isEmpty()) {
+            if (node == null || node.isEmpty()) {
                 return fallbackValue.floatArrayValue();
             }
             var arrayNode = (ArrayNode) node;
@@ -225,7 +225,7 @@ public enum ValueType {
 
         @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
-            if (node.isEmpty()) {
+            if (node == null || node.isEmpty()) {
                 return fallbackValue.longArrayValue();
             }
             var arrayNode = (ArrayNode) node;
