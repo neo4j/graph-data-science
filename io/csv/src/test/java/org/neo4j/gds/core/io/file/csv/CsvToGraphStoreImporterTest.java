@@ -50,11 +50,11 @@ class CsvToGraphStoreImporterTest {
         assertThat(userGraphStore.userName()).isEqualTo("UserA");
 
         var expectedGraph = TestSupport.fromGdl(
-                                            "  (n0:A {prop1: 21})" +
-                                            ", (n1:A {prop1: 42})" +
-                                            ", (n2:A {prop1: 23})" +
-                                            ", (n3:A {prop1: 24})" +
-                                            ", (:A { prop1: 25})" +
+                                            "  (n0:A {prop1: 21, prop2: [0.1, 0.00002]})" +
+                                            ", (n1:A {prop1: 42, prop2: [0.3, -0.4]})" +
+                                            ", (n2:A {prop1: 23, prop2: [0.5]})" +
+                                            ", (n3:A {prop1: 24, prop2: NULL})" +
+                                            ", (:A { prop1: 25, prop2: [0.6, 0.7]})" +
                                             ", (:B)" +
                                             ", (:B)" +
                                             ", (:B)" +
