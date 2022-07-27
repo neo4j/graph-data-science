@@ -17,25 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.walking;
+package org.neo4j.gds.beta.walking;
 
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.msbfs.BfsConsumer;
 import org.neo4j.gds.msbfs.BfsSources;
 
-final class NoLoopTraversalConsumer extends TraversalConsumer {
+class TraversalConsumer implements BfsConsumer {
+    final int targetDepth;
+    final RelationshipsBuilder relImporter;
 
-    NoLoopTraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
-        super(relImporter, targetDepth);
+    TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
+        this.relImporter = relImporter;
+        this.targetDepth = targetDepth;
     }
 
     @Override
     public void accept(long targetNode, int depth, BfsSources sourceNode) {
         if (depth == targetDepth) {
             while (sourceNode.hasNext()) {
-                var sourceNodeId = sourceNode.nextLong();
-                if (sourceNodeId != targetNode) {
-                    relImporter.addFromInternal(sourceNodeId, targetNode);
-                }
+                relImporter.addFromInternal(sourceNode.nextLong(), targetNode);
             }
         }
     }
