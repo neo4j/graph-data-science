@@ -19,26 +19,19 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
@@ -58,10 +51,10 @@ import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.ml.linkmodels.pipeline.predict.ApproximateLinkPredictionTest.compareWithPrecision;
 
 @GdlExtension
-class ExhaustiveLinkPredictionTest extends BaseProcTest {
+class ExhaustiveLinkPredictionTest {
     public static final String GRAPH_NAME = "g";
 
-    @Neo4jGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     static String GDL = "CREATE " +
                         "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
                         ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
@@ -75,6 +68,7 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
     private static final double[] WEIGHTS = new double[]{2.0, 1.0, -3.0};
 
+    @Inject
     private GraphStore graphStore;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multiLabel")
@@ -92,24 +86,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
 
     @Inject
     GraphStore multiLabelGraphStore;
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphProjectProc.class,
-            GraphStreamNodePropertiesProc.class
-        );
-        String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("N")
-            .withRelationshipType("T", Orientation.UNDIRECTED)
-            .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .yields();
-
-        runQuery(createQuery);
-
-        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
-    }
 
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})
@@ -158,17 +134,17 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         assertThat(predictedLinks).hasSize(Math.min(topN, 6));
 
         var expectedLinks = List.of(
-            PredictedLink.of(0, 4, 0.49750002083312506),
-            PredictedLink.of(1, 4, 0.11815697780926955),
-            PredictedLink.of(0, 1, 0.1150667320455498),
-            PredictedLink.of(0, 3, 0.0024726231566347765),
+            PredictedLink.of(0, 4, 0.497),
+            PredictedLink.of(1, 4, 0.118),
+            PredictedLink.of(0, 1, 0.115),
+            PredictedLink.of(0, 3, 0.002),
             PredictedLink.of(0, 2, 2.054710330936739E-4),
-            PredictedLink.of(2, 3, 2.810228605019864E-9)
+            PredictedLink.of(2, 3, 2.8102289384435153E-9)
         );
 
         var endIndex = Math.min(topN, expectedLinks.size());
         assertThat(predictedLinks)
-            .usingElementComparator(compareWithPrecision(1e-10))
+            .usingElementComparator(compareWithPrecision(1e-3))
             .containsExactly(expectedLinks
             .subList(0, endIndex)
             .toArray(PredictedLink[]::new));
