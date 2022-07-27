@@ -44,9 +44,31 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
         runQueryWithRowConsumer(query, row -> {
             assertEquals(true, row.getBoolean("didConverge"));
-//            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
-            // this value changed after adapting to OUTGOING (same value for UNDIRECTED)
+            // this value changed after adapting to OUTGOING
             assertEquals(-0.0408, row.getNumber("modularity").doubleValue(), 0.001);
+            assertEquals(2, row.getNumber("communityCount").longValue());
+            assertTrue(row.getNumber("ranIterations").longValue() <= 3);
+        });
+
+        assertWriteResult(UNWEIGHTED_COMMUNITIES);
+    }
+    @Test
+    void testWritingUndirected() {
+        var createQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .loadEverything(Orientation.UNDIRECTED)
+            .yields();
+        runQuery(createQuery);
+
+        String query = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .algo("gds", "beta", "modularityOptimization")
+            .writeMode()
+            .addParameter("writeProperty", "community")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+            assertEquals(true, row.getBoolean("didConverge"));
+            assertEquals(0.12244, row.getNumber("modularity").doubleValue(), 0.001);
             assertEquals(2, row.getNumber("communityCount").longValue());
             assertTrue(row.getNumber("ranIterations").longValue() <= 3);
         });
@@ -116,7 +138,9 @@ class ModularityOptimizationWriteProcTest extends ModularityOptimizationProcTest
 
         runQueryWithRowConsumer(query, (row) -> {
             assertTrue(row.getBoolean("didConverge"));
-            assertEquals(1, row.getNumber("ranIterations").longValue());
+            // Cannot converge after one iteration,
+            // because it doesn't have anything to compare the computed modularity against.
+            assertEquals(2, row.getNumber("ranIterations").longValue());
         });
     }
 
