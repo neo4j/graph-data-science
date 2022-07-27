@@ -347,6 +347,11 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         double oldModularity = this.modularity;
         this.modularity = calculateModularity();
 
+        // We have nothing to compare against in the first iteration => the modularity was updated.
+        if (iterationCounter == 0) {
+            return true;
+        }
+
         return this.modularity > oldModularity && Math.abs(this.modularity - oldModularity) > tolerance;
     }
 

@@ -98,8 +98,7 @@ final class ModularityOptimizationTask implements Runnable {
                 if (s == t) {
                     selfWeight.add(w);
                 }
-                long targetCommunity = (colors.get(t) < colors.get(s)) ? nextCommunities.get(t) : currentCommunities.get(
-                    t);
+                long targetCommunity = currentCommunities.get(t);
                 communityInfluences.addTo(targetCommunity, w);
                 return true;
             });
