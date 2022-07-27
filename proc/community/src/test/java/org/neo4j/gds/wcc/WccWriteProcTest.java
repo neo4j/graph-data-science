@@ -88,7 +88,6 @@ class WccWriteProcTest extends WccProcTest<WccWriteConfig> {
             row -> {
                 assertUserInput(row, "writeProperty", WRITE_PROPERTY);
                 assertUserInput(row, "seedProperty", null);
-                assertUserInput(row, "relationshipWeightProperty", null);
 
                 assertEquals(10L, row.getNumber("nodePropertiesWritten"));
 

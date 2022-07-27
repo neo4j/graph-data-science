@@ -32,7 +32,6 @@ import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfigImpl;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -76,7 +75,7 @@ class RandowWalkWithRestartsTest {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),
-            Optional.ofNullable(config.relationshipWeightProperty())
+            config.relationshipWeightProperty()
         );
     }
 

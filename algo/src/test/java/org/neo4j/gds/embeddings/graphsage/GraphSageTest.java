@@ -62,7 +62,6 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.kernel.database.NamedDatabaseId.NAMED_SYSTEM_DATABASE_ID;
 
 @GdlExtension
 @ModelCatalogExtension
@@ -114,7 +113,7 @@ class GraphSageTest {
         long nodeCount = graph.nodeCount();
 
         graphStore = CSRGraphStoreUtil.createFromGraph(
-            NAMED_SYSTEM_DATABASE_ID,
+            Neo4jProxy.randomDatabaseId(),
             randomGraph,
             "REL",
             Optional.of("weight"),

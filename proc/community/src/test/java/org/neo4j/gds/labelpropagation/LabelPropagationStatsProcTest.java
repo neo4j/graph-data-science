@@ -80,8 +80,7 @@ class LabelPropagationStatsProcTest extends LabelPropagationProcTest<LabelPropag
                 "consecutiveIds", false,
                 "maxIterations", 10,
                 "seedProperty", null,
-                "nodeWeightProperty", null,
-                "relationshipWeightProperty", null
+                "nodeWeightProperty", null
             ))
         )));
     }

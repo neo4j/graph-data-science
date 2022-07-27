@@ -41,7 +41,7 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
 
     @Value.Check
     default void validate() {
-        if (threshold() > 0 && relationshipWeightProperty() == null) {
+        if (threshold() > 0 && relationshipWeightProperty().isEmpty()) {
             throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");
         }
     }

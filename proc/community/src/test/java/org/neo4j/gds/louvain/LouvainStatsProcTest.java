@@ -85,8 +85,7 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
                 "maxIterations", 10,
                 "maxLevels", 10,
                 "tolerance", 1e-4,
-                "seedProperty", null,
-                "relationshipWeightProperty", null
+                "seedProperty", null
             ))
         )));
     }

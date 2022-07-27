@@ -87,8 +87,7 @@ class WccStatsProcTest extends WccProcTest<WccStatsConfig> {
             "configuration", containsAllEntriesOf(MapUtil.map(
                 "consecutiveIds", false,
                 "threshold", 0D,
-                "seedProperty", null,
-                "relationshipWeightProperty", null
+                "seedProperty", null
             ))
         )));
     }
