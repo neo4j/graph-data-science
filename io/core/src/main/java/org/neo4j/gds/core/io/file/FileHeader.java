@@ -22,8 +22,11 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
+import java.util.Set;
 
 public interface FileHeader<SCHEMA, PROPERTY_SCHEMA extends PropertySchema> {
+
+    Set<HeaderProperty> propertyMappings();
 
     Map<String, PROPERTY_SCHEMA> schemaForIdentifier(SCHEMA schema);
 }

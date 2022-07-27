@@ -19,15 +19,23 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
+import java.util.Set;
 
 @ValueClass
 public interface GraphPropertyFileHeader extends FileHeader<Map<String, PropertySchema>, PropertySchema> {
 
     HeaderProperty propertyMapping();
+
+    @Value.Derived
+    @Override
+    default Set<HeaderProperty> propertyMappings() {
+        return Set.of(propertyMapping());
+    }
 
     @Override
     default Map<String, PropertySchema> schemaForIdentifier(Map<String, PropertySchema> propertySchema) {
