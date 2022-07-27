@@ -23,10 +23,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import org.neo4j.gds.api.DefaultValue;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 public enum ValueType {
     LONG {
         @Override
@@ -37,14 +33,6 @@ public enum ValueType {
         @Override
         public String csvName() {
             return "long";
-        }
-
-        @Override
-        public String csvValue(Object value) {
-            if (value == null || (Long) value == DefaultValue.LONG_DEFAULT_FALLBACK || (Long) value == DefaultValue.INTEGER_DEFAULT_FALLBACK) {
-                return "";
-            }
-            return value.toString();
         }
 
         @Override
@@ -72,14 +60,6 @@ public enum ValueType {
         }
 
         @Override
-        public String csvValue(Object value) {
-            if (value == null || ((Double) value).isNaN()) {
-                return "";
-            }
-            return value.toString();
-        }
-
-        @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             if (node == null || node.textValue().isBlank()) {
                 return fallbackValue.doubleValue();
@@ -104,14 +84,6 @@ public enum ValueType {
         }
 
         @Override
-        public String csvValue(Object value) {
-            if (value == null) {
-                return "";
-            }
-            return value.toString();
-        }
-
-        @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             throw new UnsupportedOperationException("Unsupported conversion from CSV value to STRING");
         }
@@ -130,15 +102,6 @@ public enum ValueType {
         @Override
         public String csvName() {
             return "double[]";
-        }
-
-        @Override
-        public String csvValue(Object value) {
-            if (value == null) {
-                return "";
-            }
-            var doubleArray = (double[]) value;
-            return Arrays.stream(doubleArray).mapToObj(Double::toString).collect(Collectors.joining(";"));
         }
 
         @Override
@@ -172,19 +135,6 @@ public enum ValueType {
         }
 
         @Override
-        public String csvValue(Object value) {
-            if (value == null) {
-                return "";
-            }
-            var floatArray = (float[]) value;
-            return IntStream
-                .range(0, floatArray.length)
-                .mapToDouble(i -> floatArray[i])
-                .mapToObj(Double::toString)
-                .collect(Collectors.joining(";"));
-        }
-
-        @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             if (node == null || node.isEmpty()) {
                 return fallbackValue.floatArrayValue();
@@ -212,15 +162,6 @@ public enum ValueType {
         @Override
         public String csvName() {
             return "long[]";
-        }
-
-        @Override
-        public String csvValue(Object value) {
-            if (value == null) {
-                return "";
-            }
-            var longArray = (long[]) value;
-            return Arrays.stream(longArray).mapToObj(Long::toString).collect(Collectors.joining(";"));
         }
 
         @Override
@@ -254,14 +195,6 @@ public enum ValueType {
         }
 
         @Override
-        public String csvValue(Object value) {
-            if (value == null) {
-                return "";
-            }
-            return value.toString();
-        }
-
-        @Override
         public Object fromCsvValue(DefaultValue fallbackValue, JsonNode node) {
             throw new UnsupportedOperationException("Unsupported conversion from CSV value to UNKNOWN");
         }
@@ -275,8 +208,6 @@ public enum ValueType {
     public abstract String cypherName();
 
     public abstract String csvName();
-
-    public abstract String csvValue(Object value);
 
     public abstract Object fromCsvValue(DefaultValue fallbackValue, JsonNode node);
 
