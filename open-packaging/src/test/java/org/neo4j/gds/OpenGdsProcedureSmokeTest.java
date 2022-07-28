@@ -52,7 +52,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.alpha.allShortestPaths.stream",
 
-        "gds.alpha.collapsePath.mutate",
+        "gds.beta.collapsePath.mutate",
 
         "gds.alpha.conductance.stream",
 

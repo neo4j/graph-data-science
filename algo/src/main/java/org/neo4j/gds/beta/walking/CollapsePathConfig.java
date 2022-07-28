@@ -17,27 +17,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.impl.walking;
+package org.neo4j.gds.beta.walking;
 
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
-import org.neo4j.gds.msbfs.BfsConsumer;
-import org.neo4j.gds.msbfs.BfsSources;
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-class TraversalConsumer implements BfsConsumer {
-    final int targetDepth;
-    final RelationshipsBuilder relImporter;
+import java.util.List;
 
-    TraversalConsumer(RelationshipsBuilder relImporter, int targetDepth) {
-        this.relImporter = relImporter;
-        this.targetDepth = targetDepth;
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface CollapsePathConfig extends AlgoBaseConfig, MutateRelationshipConfig {
+
+    List<List<String>> pathTemplates();
+
+    @Value.Default
+    default boolean allowSelfLoops() {
+        return false;
     }
 
-    @Override
-    public void accept(long targetNode, int depth, BfsSources sourceNode) {
-        if (depth == targetDepth) {
-            while (sourceNode.hasNext()) {
-                relImporter.addFromInternal(sourceNode.nextLong(), targetNode);
-            }
-        }
+    static CollapsePathConfig of(CypherMapWrapper userInput) {
+        return new CollapsePathConfigImpl(userInput);
     }
+
 }
