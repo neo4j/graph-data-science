@@ -185,6 +185,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         }
 
         if (isApproximateStrategy) {
+            // TODO: use filtered knn if needed
             return new ApproximateLinkPrediction(
                 classifier,
                 linkFeatureExtractor,
