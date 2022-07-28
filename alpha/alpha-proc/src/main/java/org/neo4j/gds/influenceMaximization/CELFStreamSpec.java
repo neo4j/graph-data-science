@@ -20,53 +20,40 @@
 package org.neo4j.gds.influenceMaximization;
 
 import com.carrotsearch.hppc.LongDoubleScatterMap;
-import org.neo4j.gds.AlgoBaseProc;
-import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.procedure.Description;
-import org.neo4j.procedure.Name;
-import org.neo4j.procedure.Procedure;
+import org.neo4j.gds.executor.NewConfigFunction;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.influenceMaximization.CELFProc.DESCRIPTION;
-import static org.neo4j.procedure.Mode.READ;
+import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
-public class CELFProc extends AlgoBaseProc<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, InfluenceMaximizationResult> {
+public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>, CELFAlgorithmFactory> {
 
-    public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
-
-    @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<InfluenceMaximizationResult> stream(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        var computationResult = compute(graphName, configuration);
-        return computationResultConsumer().consume(computationResult, executionContext());
+    @Override
+    public String name() {
+        return "CELFStream";
     }
 
     @Override
-    protected InfluenceMaximizationConfig newConfig(String username, CypherMapWrapper config) {
-        return new InfluenceMaximizationConfigImpl(config);
-    }
-
-    @Override
-    public GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> algorithmFactory() {
+    public CELFAlgorithmFactory algorithmFactory() {
         return new CELFAlgorithmFactory();
+    }
+
+    @Override
+    public NewConfigFunction<InfluenceMaximizationConfig> newConfigFunction() {
+        return (__, userInput) -> InfluenceMaximizationConfig.of(userInput);
     }
 
     @Override
     public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            if (computationResult.graph().isEmpty()) {
-                computationResult.graph().release();
+            var celfSeedSetMap = computationResult.result();
+            if (celfSeedSetMap == null) {
                 return Stream.empty();
             }
 
@@ -75,6 +62,6 @@ public class CELFProc extends AlgoBaseProc<CELF, LongDoubleScatterMap, Influence
                 .map(CELF::resultStream)
                 .orElseGet(Stream::empty);
         };
-    }
 
+    }
 }

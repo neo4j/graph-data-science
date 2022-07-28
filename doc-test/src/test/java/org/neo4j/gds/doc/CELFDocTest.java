@@ -21,7 +21,7 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
-import org.neo4j.gds.influenceMaximization.CELFProc;
+import org.neo4j.gds.influenceMaximization.CELFStreamProc;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ class CELFDocTest extends SingleFileDocTestBase {
 
     @Override
     protected List<Class<?>> procedures() {
-        return List.of(CELFProc.class, GraphProjectProc.class);
+        return List.of(CELFStreamProc.class, GraphProjectProc.class);
     }
 
     @Override

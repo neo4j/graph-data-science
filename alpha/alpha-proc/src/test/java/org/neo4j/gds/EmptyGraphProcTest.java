@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.centrality.HarmonicCentralityStreamProc;
 import org.neo4j.gds.centrality.HarmonicCentralityWriteProc;
-import org.neo4j.gds.influenceMaximization.CELFProc;
+import org.neo4j.gds.influenceMaximization.CELFStreamProc;
 import org.neo4j.gds.influenceMaximization.GreedyProc;
 import org.neo4j.gds.scc.SccStreamProc;
 import org.neo4j.gds.scc.SccWriteProc;
@@ -58,7 +58,7 @@ class EmptyGraphProcTest extends BaseProcTest {
             SccWriteProc.class,
             TriangleProc.class,
             GreedyProc.class,
-            CELFProc.class,
+            CELFStreamProc.class,
             GraphProjectProc.class
         );
 
