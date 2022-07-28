@@ -61,6 +61,6 @@ class ValueTypeTest {
         var schema = CsvSchema.builder().addColumn("a", CsvSchemaUtil.csvTypeFromValueType(valueType)).build();
         var tree = new CsvMapper().reader().with(schema).readTree(value);
         var node = tree.get("a");
-        assertThat(valueType.fromCsvValue(node)).isEqualTo(expected);
+        assertThat(CsvImportParsingUtil.getParsingFunction(valueType).fromCsvValue(valueType.fallbackValue(), node)).isEqualTo(expected);
     }
 }

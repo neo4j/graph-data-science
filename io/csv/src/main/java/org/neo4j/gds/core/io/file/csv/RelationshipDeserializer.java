@@ -64,7 +64,9 @@ public class RelationshipDeserializer extends StdDeserializer<RelationshipDTO> {
             }
             var node = tree.get(propertyKey);
             var propertySchema = propertySchemas.get(propertyKey);
-            var parseValue = propertySchema.valueType().fromCsvValue(propertySchema.defaultValue(), (JsonNode) node);
+            var parseValue = CsvImportParsingUtil
+                .getParsingFunction(propertySchema.valueType())
+                .fromCsvValue(propertySchema.defaultValue(), (JsonNode) node);
             relationshipDTO.setProperty(propertyKey, parseValue);
         });
 

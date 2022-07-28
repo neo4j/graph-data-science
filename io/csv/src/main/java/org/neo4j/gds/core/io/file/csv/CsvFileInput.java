@@ -451,7 +451,12 @@ public final class CsvFileInput implements FileInput {
             var propertyMapping = header.propertyMapping();
             var propertyKey = propertyMapping.propertyKey();
             var defaultValue = propertySchemas.get(propertyKey).defaultValue();
-            visitor.property(propertyKey, propertyMapping.valueType().fromCsvValue(defaultValue, node.get(propertyKey)));
+            visitor.property(
+                propertyKey,
+                CsvImportParsingUtil
+                    .getParsingFunction(propertyMapping.valueType())
+                    .fromCsvValue(defaultValue, node.get(propertyKey))
+            );
             visitor.endOfEntity();
         }
     }
