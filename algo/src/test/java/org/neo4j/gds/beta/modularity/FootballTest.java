@@ -103,8 +103,10 @@ class FootballTest {
             .concurrency(concurrency)
             .batchSize(minBatchSize)
             .build();
+
         var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
         var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+
         return new ModularityOptimization(
             graph,
             maxIterations,

@@ -33,19 +33,29 @@ import java.util.stream.LongStream;
 class ModularityManager {
 
     private final Graph graph;
-    private double totalWeight;
+    private final double totalWeight;
     private final HugeAtomicDoubleArray communityWeights;
     private HugeLongArray communities;
     private final int concurrency;
 
 
-    ModularityManager(Graph graph, int concurrency) {
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.communityWeights = HugeAtomicDoubleArray.newArray(graph.nodeCount());
+    static ModularityManager create(Graph graph, int concurrency, double totalWeight) {
+        return new ModularityManager(
+            graph,
+            HugeAtomicDoubleArray.newArray(graph.nodeCount()),
+            concurrency,
+            totalWeight
+        );
     }
 
-    public double getModularity() {
+    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, int concurrency, double totalWeight) {
+        this.graph = graph;
+        this.communityWeights = communityWeights;
+        this.concurrency = concurrency;
+        this.totalWeight = totalWeight;
+    }
+
+    double calculateModularity() {
         HugeAtomicDoubleArray insideRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
             concurrency,
@@ -77,11 +87,6 @@ class ModularityManager {
                     .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
         return modularity * (1.0 / totalWeight);
-    }
-
-    void setTotalWeight(double totalWeight) {
-        this.totalWeight = totalWeight;
-
     }
 
     void communityWeightUpdate(long communityId, double weight) {

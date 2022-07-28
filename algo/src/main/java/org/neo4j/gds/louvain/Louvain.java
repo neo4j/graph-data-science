@@ -337,6 +337,8 @@ public final class Louvain extends Algorithm<Louvain> {
             partition.consume(nodeId -> {
                 long communityId = modularityOptimization.getCommunityId(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (source, target, property) -> {
+                    // In the case of undirected graphs, we need scaling as otherwise we'd have double the value in these edges
+                    // see GraphAggregationPhase.java for the equivalent in Leiden; and the corresponding test
                     if (source == target) {
                         relationshipsBuilder.add(communityId, modularityOptimization.getCommunityId(target), property);
                     } else {

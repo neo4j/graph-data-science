@@ -69,7 +69,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodePropertyValues seedProperty;
     private final ExecutorService executor;
 
-    private final ModularityManager modularityManager;
+    private ModularityManager modularityManager;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -102,7 +102,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.executor = executor;
         this.concurrency = concurrency;
         this.minBatchSize = minBatchSize;
-        this.modularityManager = new ModularityManager(graph, concurrency);
         if (maxIterations < 1) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Need to run at least one iteration, but got %d",
@@ -120,7 +119,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         computeColoring();
         initSeeding();
         init();
-        modularityManager.setTotalWeight(totalNodeWeight);
         progressTracker.endSubTask();
 
 
@@ -220,10 +218,10 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         ParallelUtil.run(initTasks, executor);
 
-        var doubleTotalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
-
-        totalNodeWeight = doubleTotalNodeWeight;
+        totalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
         currentCommunities.copyTo(nextCommunities, nodeCount);
+
+        this.modularityManager = ModularityManager.create(graph, concurrency, totalNodeWeight);
     }
 
     private static final class InitTask implements Runnable {
@@ -357,7 +355,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
     private double calculateModularity() {
         modularityManager.registerCommunities(currentCommunities);
-        return modularityManager.getModularity();
+        return modularityManager.calculateModularity();
     }
 
     @Override
