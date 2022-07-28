@@ -22,7 +22,6 @@ package org.neo4j.gds.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -82,24 +81,4 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
         return MutateResult.builder();
     }
 
-    static class CelfNodeProperties implements DoubleNodePropertyValues {
-
-        private final LongDoubleScatterMap celfSeedSet;
-        private final long size;
-
-        CelfNodeProperties(LongDoubleScatterMap celfSeedSet, long size) {
-            this.celfSeedSet = celfSeedSet;
-            this.size = size;
-        }
-
-        @Override
-        public long size() {
-            return size;
-        }
-
-        @Override
-        public double doubleValue(long nodeId) {
-            return celfSeedSet.getOrDefault(nodeId, 0d);
-        }
-    }
 }
