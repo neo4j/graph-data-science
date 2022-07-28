@@ -79,7 +79,7 @@ public final class ProcedureCollectorProcessor extends BasicAnnotationProcessor 
                     "Failed to generate callables resource: %s",
                     e.getMessage()
                 ),
-                validTypes.iterator().next()
+                validTypes.get(0)
             );
         }
     }
