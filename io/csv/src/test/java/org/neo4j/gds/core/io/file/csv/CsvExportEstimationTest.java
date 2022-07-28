@@ -58,6 +58,6 @@ class CsvExportEstimationTest {
             .memoryUsage();
 
         // The actual value is 40K
-        assertThat(estimation.max).isBetween(100L, 200L);
+        assertThat(estimation.max).isBetween(100L, 300L);
     }
 }
