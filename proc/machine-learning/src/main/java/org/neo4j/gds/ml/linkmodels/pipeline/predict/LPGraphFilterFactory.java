@@ -74,8 +74,14 @@ public final class LPGraphFilterFactory {
             contextNodeLabels = trainConfig.contextNodeLabels();
         }
 
-        Collection<RelationshipType> predictRelTypes = trainConfig.internalContextRelationshipType(graphStore);
-        Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(predictRelTypes, predictConfig.internalRelationshipTypes(graphStore))
+        Collection<RelationshipType> contextRelTypes;
+        if (!predictConfig.contextRelationshipTypes().isEmpty()) {
+            contextRelTypes = predictConfig.internalContextRelationshipTypes(graphStore);
+        } else {
+            contextRelTypes = trainConfig.internalContextRelationshipType(graphStore);
+        }
+
+        Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictConfig.internalRelationshipTypes(graphStore))
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 

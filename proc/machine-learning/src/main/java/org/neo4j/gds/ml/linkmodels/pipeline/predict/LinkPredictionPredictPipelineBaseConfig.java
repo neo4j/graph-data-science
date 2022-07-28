@@ -21,7 +21,9 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
@@ -33,6 +35,7 @@ import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -63,12 +66,27 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     default List<String> contextNodeLabels() {return List.of();}
 
+
+    @Override
+    default List<String> relationshipTypes() {
+        return List.of();
+    }
+
+    default List<String> contextRelationshipTypes() {return List.of();}
+
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
         // The graph is derived manually in the algo factory.
         // This method is only used by GraphStoreFromCatalogLoader.graphDimensions for memory estimation.
         return List.of(ElementProjection.PROJECT_ALL);
+    }
+
+    @Configuration.Ignore
+    default Collection<RelationshipType> internalContextRelationshipTypes(GraphStore graphStore) {
+        return contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.relationshipTypes()
+            : contextRelationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
     }
 
 

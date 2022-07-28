@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -45,8 +46,14 @@ class LPGraphFilterFactoryTest {
                                   "(n2: C {a: 1.0, b: 0.8, c: 1.0}), " +
                                   "(n3: B {a: 1.0, b: 0.8, c: 1.0}), " +
                                   "(n4: C {a: 1.0, b: 0.8, c: 1.0}), " +
-                                  "(n5: A {a: 1.0, b: 0.8, c: 1.0})" +
-                                  "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T}->(n0), (n5)-[:T]->(n1)";
+                                  "(n5: A {a: 1.0, b: 0.8, c: 1.0})," +
+                                  "(n0)-[:T]->(n1), " +
+                                  "(n1)-[:T]->(n2), " +
+                                  "(n2)-[:T]->(n0), " +
+                                  "(n5)-[:T]->(n1)," +
+                                  "(n5)-[:OTHER]->(n1)," +
+                                  "(n5)-[:CONTEXT_NEW]->(n1)," +
+                                  "(n4)-[:CONTEXT]->(n0) ";
 
     @Inject
     GraphStore multiLabelGraphStore;
@@ -60,11 +67,12 @@ class LPGraphFilterFactoryTest {
         .targetRelationshipType("T")
         .sourceNodeLabel("A")
         .targetNodeLabel("B")
-        .contextNodeLabels(List.of("A", "B", "C"))
+        .contextNodeLabels(List.of("C"))
+        .contextRelationshipTypes(List.of("CONTEXT"))
         .build();
 
     @Test
-    void generateNodeLabelsFromTrainConfig() {
+    void generateFromTrainConfig() {
         var predictConfig = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .modelName("dummy")
             .graphName("dummy")
@@ -77,11 +85,11 @@ class LPGraphFilterFactoryTest {
         assertThat(labelFilter.sourceNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(labelFilter.targetNodeLabels()).containsExactly(NodeLabel.of("B"));
         assertThat(labelFilter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
-
+        assertThat(labelFilter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("CONTEXT"));
     }
 
     @Test
-    void generateNodeLabelsFromPredictConfig() {
+    void generateFromPredictConfig() {
         var predictConfig = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .modelName("dummy")
             .graphName("dummy")
@@ -89,14 +97,16 @@ class LPGraphFilterFactoryTest {
             .sourceNodeLabel("B")
             .targetNodeLabel("A")
             .contextNodeLabels(List.of("A"))
+            .contextRelationshipTypes(List.of("CONTEXT_NEW"))
             .topN(42)
             .build();
 
-        var nodeLabelFilterForPrediction = generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
+        var filter = generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
 
-        assertThat(nodeLabelFilterForPrediction.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
-        assertThat(nodeLabelFilterForPrediction.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
-        assertThat(nodeLabelFilterForPrediction.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+        assertThat(filter.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
+        assertThat(filter.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
+        assertThat(filter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
+        assertThat(filter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("CONTEXT_NEW"));
     }
 
     @Test
@@ -150,12 +160,13 @@ class LPGraphFilterFactoryTest {
             .modelName(modelName)
             .graphName("dummy")
             .username(username)
+            .relationshipTypes(List.of("T"))
             .topN(42)
             .build();
 
         assertThatThrownBy(() -> generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER))
             .hasMessage("Based on the predict and the model's training configuration, expected relationship types ['INVALID', 'T'], " +
-                        "but could not find ['INVALID']. Available types are ['T'].");
+                        "but could not find ['INVALID']. Available types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
     }
 
 }
