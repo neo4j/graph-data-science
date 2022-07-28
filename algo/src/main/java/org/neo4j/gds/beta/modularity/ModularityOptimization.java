@@ -69,7 +69,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final NodePropertyValues seedProperty;
     private final ExecutorService executor;
 
-    private ModularityManager modularityManager;
+    private final ModularityManager modularityManager;
 
     private int iterationCounter;
     private boolean didConverge = false;
@@ -108,6 +108,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 maxIterations
             ));
         }
+
+        this.modularityManager = ModularityManager.create(graph, concurrency);
     }
 
     @Override
@@ -220,8 +222,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         totalNodeWeight = initTasks.stream().mapToDouble(InitTask::localSum).sum();
         currentCommunities.copyTo(nextCommunities, nodeCount);
-
-        this.modularityManager = ModularityManager.create(graph, concurrency, totalNodeWeight);
+        modularityManager.totalWeight(totalNodeWeight);
     }
 
     private static final class InitTask implements Runnable {

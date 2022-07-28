@@ -33,26 +33,24 @@ import java.util.stream.LongStream;
 class ModularityManager {
 
     private final Graph graph;
-    private final double totalWeight;
+    private double totalWeight;
     private final HugeAtomicDoubleArray communityWeights;
     private HugeLongArray communities;
     private final int concurrency;
 
 
-    static ModularityManager create(Graph graph, int concurrency, double totalWeight) {
+    static ModularityManager create(Graph graph, int concurrency) {
         return new ModularityManager(
             graph,
             HugeAtomicDoubleArray.newArray(graph.nodeCount()),
-            concurrency,
-            totalWeight
+            concurrency
         );
     }
 
-    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, int concurrency, double totalWeight) {
+    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, int concurrency) {
         this.graph = graph;
         this.communityWeights = communityWeights;
         this.concurrency = concurrency;
-        this.totalWeight = totalWeight;
     }
 
     double calculateModularity() {
@@ -87,6 +85,10 @@ class ModularityManager {
                     .orElseThrow(() -> new RuntimeException("Error while computing modularity"))
         );
         return modularity * (1.0 / totalWeight);
+    }
+
+    void totalWeight(double totalWeight) {
+        this.totalWeight = totalWeight;
     }
 
     void communityWeightUpdate(long communityId, double weight) {
