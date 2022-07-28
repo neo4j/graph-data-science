@@ -81,9 +81,12 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                          | Type              | Default           | Optional | Description
 | modelName                                                     | String            | n/a               | no       | The name of a Link Prediction model in the model catalog.
-| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']             | yes      | Filter the named graph using the given node labels.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']             | yes      | Filter the named graph using the given relationship types.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
+| sourceNodeLabel                                               | String            | from trainConfig             | yes      | The name of the node label predicted links should start from.
+| targetNodeLabel                                               | String            | from trainConfig             | yes      | The name of the node label predicted links should end at.
+| contextNodeLabels                                             | List of String    | from trainConfig           | yes    | The names of context node labels used to execute the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
+| relationshipTypes                                             | List of String    | from trainConfig      | yes      | The names of the existing relationships. As a default we use the `targetRelationshipType` from the training.
+| contextRelationshipTypes                                      | List of String    | from trainConfig             | yes      | The names of the relationships used to execute the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `relationshipTypes`.
+| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency] | Integer           | 4                 | yes      | The number of concurrent threads used for running the algorithm.
 | mutateRelationshipType                                        | String            | n/a               | no       | The relationship type used for the new relationships written to the projected graph.
 | mutateProperty                                                | String            | 'probability'     | yes      | The relationship property in the GDS graph to which the result is written.
 include::partial$/machine-learning/linkprediction-pipeline/specific-predict-configuration.adoc[]
