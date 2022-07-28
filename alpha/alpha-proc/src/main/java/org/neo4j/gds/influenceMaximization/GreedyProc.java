@@ -39,7 +39,7 @@ import static org.neo4j.gds.influenceMaximization.GreedyProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 @GdsCallable(name = "gds.alpha.influenceMaximization.greedy.stream", description = DESCRIPTION, executionMode = STREAM)
-public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizationConfig, InfluenceMaximizationResult> {
+public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizationStreamConfig, InfluenceMaximizationResult> {
     public static final String DESCRIPTION = "The Greedy algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
     @Procedure(name = "gds.alpha.influenceMaximization.greedy.stream", mode = READ)
@@ -54,12 +54,12 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     }
 
     @Override
-    protected InfluenceMaximizationConfig newConfig(String username, CypherMapWrapper config) {
-        return new InfluenceMaximizationConfigImpl(config);
+    protected InfluenceMaximizationStreamConfig newConfig(String username, CypherMapWrapper config) {
+        return InfluenceMaximizationStreamConfig.of(config);
     }
 
     @Override
-    public GraphAlgorithmFactory<Greedy, InfluenceMaximizationConfig> algorithmFactory() {
+    public GraphAlgorithmFactory<Greedy, InfluenceMaximizationStreamConfig> algorithmFactory() {
         return new GraphAlgorithmFactory<>() {
             @Override
             public String taskName() {
@@ -69,7 +69,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
             @Override
             public Greedy build(
                 Graph graph,
-                InfluenceMaximizationConfig configuration,
+                InfluenceMaximizationStreamConfig configuration,
                 ProgressTracker progressTracker
             ) {
                 return new Greedy(
@@ -85,7 +85,7 @@ public class GreedyProc extends AlgoBaseProc<Greedy, Greedy, InfluenceMaximizati
     }
 
     @Override
-    public ComputationResultConsumer<Greedy, Greedy, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Greedy, Greedy, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.graph().isEmpty()) {
                 computationResult.graph().release();

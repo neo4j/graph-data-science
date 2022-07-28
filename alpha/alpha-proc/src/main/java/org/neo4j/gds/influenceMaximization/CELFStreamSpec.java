@@ -32,7 +32,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.beta.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
-public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>, CELFAlgorithmFactory> {
+public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
 
     @Override
     public String name() {
@@ -40,17 +40,17 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     }
 
     @Override
-    public CELFAlgorithmFactory algorithmFactory() {
-        return new CELFAlgorithmFactory();
+    public CELFAlgorithmFactory<InfluenceMaximizationStreamConfig> algorithmFactory() {
+        return new CELFAlgorithmFactory<>();
     }
 
     @Override
-    public NewConfigFunction<InfluenceMaximizationConfig> newConfigFunction() {
-        return (__, userInput) -> InfluenceMaximizationConfig.of(userInput);
+    public NewConfigFunction<InfluenceMaximizationStreamConfig> newConfigFunction() {
+        return (__, userInput) -> InfluenceMaximizationStreamConfig.of(userInput);
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<InfluenceMaximizationResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var celfSeedSetMap = computationResult.result();
             if (celfSeedSetMap == null) {
