@@ -111,8 +111,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
             " modelName: 'model'," +
-            " sourceNodeLabel: $sourceNodeLabel," +
-            " targetNodeLabel: $targetNodeLabel," +
             " sampleRate: 0.5," +
             " randomSeed: 42," +
             " topK: $topK," +
@@ -122,7 +120,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N","topK", 1, "concurrency", 1, "nodeLabel", "N"),
+            Map.of("topK", 1, "concurrency", 1),
             List.of(
                 Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
                 Map.of("node1", 4L, "node2", 0L, "probability", .49750002083312506),

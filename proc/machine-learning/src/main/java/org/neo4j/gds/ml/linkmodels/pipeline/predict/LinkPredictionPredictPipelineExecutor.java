@@ -47,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -94,7 +95,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     @Override
     protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
-            config.nodeLabelIdentifiers(graphStore),
+            Stream.of(sourceNodeLabels, targetNodeLabels).flatMap(Collection::stream).collect(Collectors.toSet()),
             config.internalRelationshipTypes(graphStore),
             Optional.empty()
         );
