@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ValueClass
-public interface NodeFileHeader extends FileHeader<NodeSchema, NodeLabel, PropertySchema> {
+public interface NodeFileHeader extends FileHeader<NodeSchema, PropertySchema> {
     String[] nodeLabels();
 
     @Override

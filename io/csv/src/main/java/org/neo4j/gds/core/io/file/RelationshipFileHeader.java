@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 @ValueClass
-public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipType, RelationshipPropertySchema> {
+public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipPropertySchema> {
     String relationshipType();
 
     @Override

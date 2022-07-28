@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.api.schema.ElementSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 
 import java.util.Map;
 import java.util.Set;
 
-public interface FileHeader<SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>, IDENTIFIER extends ElementIdentifier, PROPERTY_SCHEMA extends PropertySchema> {
+public interface FileHeader<SCHEMA extends ElementSchema<SCHEMA, ?, PROPERTY_SCHEMA>, PROPERTY_SCHEMA extends PropertySchema> {
 
     Set<HeaderProperty> propertyMappings();
 

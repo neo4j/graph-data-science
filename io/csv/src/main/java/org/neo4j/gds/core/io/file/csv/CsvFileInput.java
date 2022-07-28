@@ -143,7 +143,7 @@ public final class CsvFileInput implements FileInput {
     }
 
     @NotNull
-    private <P extends PropertySchema, HEADER extends FileHeader<?, ?, P>> HashMap<HEADER, ObjectReader> computeHeaderToObjectReaderMapping(
+    private <P extends PropertySchema, HEADER extends FileHeader<?, P>> HashMap<HEADER, ObjectReader> computeHeaderToObjectReaderMapping(
         Map<HEADER, List<Path>> headerToDataFilesMapping,
         Map<String, P> propertySchemas,
         Class<?> deserializationClass,
@@ -202,7 +202,7 @@ public final class CsvFileInput implements FileInput {
     }
 
     abstract static class FileImporter<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
         SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
         IDENTIFIER extends ElementIdentifier,
         PROPERTY_SCHEMA extends PropertySchema> implements InputIterator {
@@ -289,7 +289,7 @@ public final class CsvFileInput implements FileInput {
     }
 
     abstract static class LineChunk<
-        HEADER extends FileHeader<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
+        HEADER extends FileHeader<SCHEMA, PROPERTY_SCHEMA>,
         SCHEMA extends ElementSchema<SCHEMA, IDENTIFIER, PROPERTY_SCHEMA>,
         IDENTIFIER extends ElementIdentifier,
         PROPERTY_SCHEMA extends PropertySchema> implements InputChunk {
