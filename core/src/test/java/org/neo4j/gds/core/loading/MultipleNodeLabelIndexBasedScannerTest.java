@@ -22,7 +22,8 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -34,8 +35,9 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
 
 class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
 
-    @Test
-    void testScanner() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void testScanner(boolean allowPartitionedScan) {
         var nodeCount = 150_000;
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
 
@@ -68,7 +70,12 @@ class MultipleNodeLabelIndexBasedScannerTest extends BaseTest {
 
             var labelIds = new int[]{labelAToken, labelBToken};
 
-            try (var scanner = new MultipleNodeLabelIndexBasedScanner(labelIds, prefetchSize, txContext);
+            try (var scanner = new MultipleNodeLabelIndexBasedScanner(
+                labelIds,
+                prefetchSize,
+                txContext,
+                allowPartitionedScan
+            );
                  var storeScanner = scanner.createCursor(ktx)) {
 
                 var actualNodeCount = new MutableInt();

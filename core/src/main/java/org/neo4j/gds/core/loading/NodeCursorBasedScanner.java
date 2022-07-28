@@ -25,10 +25,10 @@ import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCursor, Void> {
+final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCursor> {
 
     NodeCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
-        super(prefetchSize, transaction, null);
+        super(prefetchSize, transaction);
     }
 
     @Override
@@ -37,7 +37,7 @@ final class NodeCursorBasedScanner extends AbstractNodeCursorBasedScanner<NodeCu
     }
 
     @Override
-    StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction, Void ignore) {
+    StoreScan<NodeCursor> entityCursorScan(KernelTransaction transaction) {
         return Neo4jProxy.scanToStoreScan(transaction.dataRead().allNodesScan(), batchSize());
     }
 

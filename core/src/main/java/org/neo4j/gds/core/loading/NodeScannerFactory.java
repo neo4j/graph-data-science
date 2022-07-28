@@ -21,6 +21,7 @@ package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.logging.Log;
 
 import java.util.Arrays;
@@ -45,9 +46,19 @@ public final class NodeScannerFactory {
         if (Arrays.stream(labelIds).anyMatch(labelId -> labelId == ANY_LABEL) || !hasNodeLabelIndex) {
             return NodeCursorBasedScanner::new;
         } else if (labelIds.length == 1) {
-            return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(labelIds[0], prefetchSize, transaction);
+            return (prefetchSize, transaction) -> new NodeLabelIndexBasedScanner(
+                labelIds[0],
+                prefetchSize,
+                transaction,
+                GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()
+            );
         } else {
-            return (prefetchSize, transaction) -> new MultipleNodeLabelIndexBasedScanner(labelIds, prefetchSize, transaction);
+            return (prefetchSize, transaction) -> new MultipleNodeLabelIndexBasedScanner(
+                labelIds,
+                prefetchSize,
+                transaction,
+                GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()
+            );
         }
     }
 

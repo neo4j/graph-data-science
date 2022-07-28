@@ -22,17 +22,23 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor, Integer> {
+final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor> {
 
     private final int labelId;
+    private final boolean allowPartitionedScan;
 
-    NodeLabelIndexBasedScanner(int labelId, int prefetchSize, TransactionContext transaction) {
-        super(prefetchSize, transaction, labelId);
+    NodeLabelIndexBasedScanner(
+        int labelId,
+        int prefetchSize,
+        TransactionContext transaction,
+        boolean allowPartitionedScan
+    ) {
+        super(prefetchSize, transaction);
         this.labelId = labelId;
+        this.allowPartitionedScan = allowPartitionedScan;
     }
 
     @Override
@@ -41,12 +47,12 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
     }
 
     @Override
-    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction, Integer labelId) {
+    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction) {
         return Neo4jProxy.nodeLabelIndexScan(
             transaction,
             labelId,
             batchSize(),
-            GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()
+            allowPartitionedScan
         );
     }
 
