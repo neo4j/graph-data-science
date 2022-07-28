@@ -59,7 +59,9 @@ public class NodeDeserializer extends StdDeserializer<NodeDTO> {
             }
             var node = tree.get(propertyKey);
             var propertySchema = propertySchemas.get(propertyKey);
-            var parseValue = propertySchema.valueType().fromCsvValue(propertySchema.defaultValue(), (JsonNode) node);
+            var parseValue = CsvImportParsingUtil
+                .getParsingFunction(propertySchema.valueType())
+                .fromCsvValue(propertySchema.defaultValue(), (JsonNode) node);
             nodeDTO.setProperty(propertyKey, parseValue);
         });
 
