@@ -114,7 +114,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         if (config.graphName().equals(ANONYMOUS_GRAPH)) return graphDimensions;
 
         var graphStore = GraphStoreCatalog
-            .get(CatalogRequest.of(config.username(), executionContext.databaseId().name()), config.graphName())
+            .get(CatalogRequest.of(config.username(), executionContext.databaseId()), config.graphName())
             .graphStore();
 
         var lpNodeLabelFilter = LPGraphFilterFactory.generate(model.trainConfig(), config, graphStore, ProgressTracker.NULL_TRACKER);

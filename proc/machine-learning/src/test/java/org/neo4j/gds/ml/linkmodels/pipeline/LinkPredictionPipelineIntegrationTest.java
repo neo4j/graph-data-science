@@ -172,7 +172,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
             .yields());
 
         multiGraphStore = GraphStoreCatalog
-            .get(getUsername(), db.databaseId(), MULTI_GRAPH_NAME)
+            .get(getUsername(), DatabaseId.of(db), MULTI_GRAPH_NAME)
             .graphStore();
     }
 
