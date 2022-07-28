@@ -33,7 +33,6 @@ import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
 import org.neo4j.gds.core.io.file.GraphInfo;
-import org.neo4j.gds.core.io.file.GraphPropertyFileHeader;
 import org.neo4j.gds.core.io.file.MappedListIterator;
 import org.neo4j.gds.core.io.file.NodeFileHeader;
 import org.neo4j.gds.core.io.file.RelationshipFileHeader;

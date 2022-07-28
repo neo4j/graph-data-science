@@ -27,7 +27,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.List;
 
-import static org.neo4j.gds.core.io.file.NodeSchemaConstants.NODE_SCHEMA_COLUMNS;
+import static org.neo4j.gds.core.io.file.CsvSchemaConstants.NODE_SCHEMA_COLUMNS;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.NODE_SCHEMA_FILE_NAME;
 
 class CsvNodeSchemaVisitorTest extends CsvVisitorTest {

@@ -73,7 +73,6 @@ public final class GraphStoreToCsvExporter {
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvRelationshipSchemaVisitor(exportPath),
-            () -> new CsvGraphPropertySchemaVisitor(exportPath),
             () -> new CsvGraphCapabilitiesWriter(exportPath),
             (index) -> new CsvNodeVisitor(
                 exportPath,
@@ -81,13 +80,7 @@ public final class GraphStoreToCsvExporter {
                 headerFiles,
                 index
             ),
-            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index),
-            (index) -> new CsvGraphPropertyVisitor(
-                exportPath,
-                graphStore.schema().graphProperties(),
-                headerFiles,
-                index
-            )
+            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index)
         );
     }
 

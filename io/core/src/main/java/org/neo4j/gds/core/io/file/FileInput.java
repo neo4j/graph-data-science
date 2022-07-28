@@ -20,20 +20,14 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.api.schema.NodeSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.loading.Capabilities;
-import org.neo4j.internal.batchimport.InputIterable;
-
-import java.util.Map;
 
 public interface FileInput extends CompatInput {
-    InputIterable graphProperties();
     String userName();
     GraphInfo graphInfo();
     NodeSchema nodeSchema();
     RelationshipSchema relationshipSchema();
-    Map<String, PropertySchema> graphPropertySchema();
     Capabilities capabilities();
 }
