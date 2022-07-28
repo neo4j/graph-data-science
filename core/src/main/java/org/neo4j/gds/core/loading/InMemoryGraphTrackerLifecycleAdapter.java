@@ -24,7 +24,6 @@ import org.neo4j.dbms.api.DatabaseNotFoundException;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.graphdb.event.DatabaseEventContext;
 import org.neo4j.graphdb.event.DatabaseEventListener;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 
 import java.util.HashMap;
@@ -62,7 +61,7 @@ class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements D
     // The @override is missing for compatibility reasons
     public void databaseCreate(DatabaseEventContext eventContext) {
         var databaseName = eventContext.getDatabaseName();
-        var db = (GraphDatabaseAPI) dbms.database(databaseName);
+        var db = dbms.database(databaseName);
         databaseIdMapping.put(databaseName, DatabaseId.of(db));
     }
 

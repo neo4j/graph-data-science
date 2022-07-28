@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -43,7 +43,7 @@ import static org.neo4j.gds.utils.StringJoining.join;
 
 public class NodePropertyFunc {
     @Context
-    public GraphDatabaseAPI api;
+    public GraphDatabaseService databaseService;
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
@@ -61,7 +61,9 @@ public class NodePropertyFunc {
         Objects.requireNonNull(propertyKey);
         Objects.requireNonNull(nodeLabel);
 
-        GraphStore graphStore = GraphStoreCatalog.get(CatalogRequest.of(username.username(), DatabaseId.of(api)), graphName).graphStore();
+        GraphStore graphStore = GraphStoreCatalog
+            .get(CatalogRequest.of(username.username(), DatabaseId.of(databaseService)), graphName)
+            .graphStore();
         boolean projectAll = nodeLabel.equals(PROJECT_ALL);
         var nodeLabelType = projectAll ? NodeLabel.ALL_NODES : NodeLabel.of(nodeLabel);
 
