@@ -23,13 +23,15 @@ import java.util.List;
 
 import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
 import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
+import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
 
 class CELFSyntaxTest extends SyntaxTestBase {
 
     protected Iterable<SyntaxModeMeta> syntaxModes() {
         return List.of(
             SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE)
+            SyntaxModeMeta.of(MUTATE),
+            SyntaxModeMeta.of(WRITE)
         );
     }
 
