@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
@@ -59,11 +58,11 @@ import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
 
 @GdlExtension
-class ModularityOptimizationTest {
+class ModularityOptimizationWithoutOrientationTest {
 
     private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +
@@ -79,7 +78,15 @@ class ModularityOptimizationTest {
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(c)" +
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
         ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
-        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)";
+        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)" +
+        
+        ", (a)<-[:TYPE_OUT {weight: 0.01}]-(b)" +
+        ", (a)<-[:TYPE_OUT {weight: 5.0}]-(e)" +
+        ", (a)<-[:TYPE_OUT {weight: 5.0}]-(f)" +
+        ", (b)<-[:TYPE_OUT {weight: 5.0}]-(c)" +
+        ", (b)<-[:TYPE_OUT {weight: 5.0}]-(d)" +
+        ", (c)<-[:TYPE_OUT {weight: 0.01}]-(e)" +
+        ", (f)<-[:TYPE_OUT {weight: 0.01}]-(d)";
 
     @Inject
     private TestGraph graph;
@@ -228,8 +235,10 @@ class ModularityOptimizationTest {
             .concurrency(concurrency)
             .batchSize(minBatchSize)
             .build();
+
         var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
         var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+
         return new ModularityOptimization(
             graph,
             maxIterations,

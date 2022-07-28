@@ -62,19 +62,19 @@ class LouvainStatsProcTest extends LouvainProcTest<LouvainStatsConfig> {
 
         assertCypherResult(query, List.of(Map.of(
             "ranLevels", 1L,
-            "modularity", closeTo(0.3744, 1e-5),
-            "modularities", contains((closeTo(0.3744, 1e-5))),
-            "communityCount", 4L,
+            "modularity", closeTo(0.1984, 1e-5),
+            "modularities", contains((closeTo(0.1984, 1e-5))),
+            "communityCount", 3L,
             "communityDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
-                "min", 2L,
-                "max", 8L,
-                "mean", 3.75,
-                "p50", 2L,
+                "min", 1L,
+                "max", 11L,
+                "mean", 5.0,
+                "p50", 3L,
                 "p75", 3L,
-                "p90", 8L,
-                "p95", 8L,
-                "p99", 8L,
-                "p999", 8L
+                "p90", 11L,
+                "p95", 11L,
+                "p99", 11L,
+                "p999", 11L
             )),
             "preProcessingMillis", greaterThanOrEqualTo(0L),
             "computeMillis", greaterThanOrEqualTo(0L),
