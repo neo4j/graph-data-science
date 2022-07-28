@@ -91,7 +91,33 @@ public final class ProxyUtil {
 
     private static String getGdsVersion(Log log) {
         try {
-            return findGdsVersion();
+            // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
+            // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
+            // on every build and having it at the top of the dependency graph would cause a lot of recompilation.
+            // Let's do a bit of class loading and reflection to get the version.
+            var lookup = MethodHandles.lookup();
+
+            var buildInfoPropertiesClass = Class.forName("org.neo4j.gds.BuildInfoProperties");
+
+            // equivalent to: BuildInfoProperties.get()
+            var buildInfoPropertiesHandle = lookup.findStatic(
+                buildInfoPropertiesClass,
+                "get",
+                MethodType.methodType(buildInfoPropertiesClass)
+            );
+
+            // equivalent to: buildInfoProperties.gdsVersion()
+            var gdsVersionHandle = lookup.findVirtual(
+                buildInfoPropertiesClass,
+                "gdsVersion",
+                MethodType.methodType(String.class)
+            );
+
+            // var buildInfoProperties = BuildInfoProperties.get()
+            var buildInfoProperties = buildInfoPropertiesHandle.invoke();
+            // var gdsVersion = buildInfoProperties.gdsVersion()
+            var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
+            return String.valueOf(gdsVersion);
         } catch (ClassNotFoundException e) {
             log.warn("Could not determine GDS version, BuildInfoProperties is missing.", e);
         } catch (NoSuchMethodException | IllegalAccessException e) {
@@ -101,36 +127,6 @@ public final class ProxyUtil {
         }
 
         return "Unknown";
-    }
-
-    private static String findGdsVersion() throws Throwable {
-        // The class that we use to get the GDS version lives in proc-sysinfo, which is part of the released GDS jar,
-        // but we don't want to depend on that here. One reason is that this class gets generated and re-generated
-        // on every build and having it at the top of the dependency graph would cause a lot of recompilation.
-        // Let's do a bit of class loading and reflection to get the version.
-        var lookup = MethodHandles.lookup();
-
-        var buildInfoPropertiesClass = Class.forName("org.neo4j.gds.BuildInfoProperties");
-
-        // equivalent to: BuildInfoProperties.get()
-        var buildInfoPropertiesHandle = lookup.findStatic(
-            buildInfoPropertiesClass,
-            "get",
-            MethodType.methodType(buildInfoPropertiesClass)
-        );
-
-        // equivalent to: buildInfoProperties.gdsVersion()
-        var gdsVersionHandle = lookup.findVirtual(
-            buildInfoPropertiesClass,
-            "gdsVersion",
-            MethodType.methodType(String.class)
-        );
-
-        // var buildInfoProperties = BuildInfoProperties.get()
-        var buildInfoProperties = buildInfoPropertiesHandle.invoke();
-        // var gdsVersion = buildInfoProperties.gdsVersion()
-        var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
-        return String.valueOf(gdsVersion);
     }
 
     private ProxyUtil() {}
