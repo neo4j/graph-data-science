@@ -24,6 +24,7 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.influenceMaximization.CELFMutateProc;
 import org.neo4j.gds.influenceMaximization.CELFStreamProc;
+import org.neo4j.gds.influenceMaximization.CELFWriteProc;
 
 import java.util.List;
 
@@ -40,7 +41,8 @@ class CELFDocTest extends SingleFileDocTestBase {
             GraphProjectProc.class,
             CELFStreamProc.class,
             CELFMutateProc.class,
-            GraphStreamNodePropertiesProc.class
+            GraphStreamNodePropertiesProc.class,
+            CELFWriteProc.class
         );
     }
 

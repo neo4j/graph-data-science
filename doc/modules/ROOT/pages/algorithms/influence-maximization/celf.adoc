@@ -281,3 +281,59 @@ ORDER BY spread DESC, name ASC
 
 Note that in `mutate` all nodes in the in-memory graph get the `spread` property.
 The nodes that are not considered influential by the algorithm receive value of zero.
+
+
+[[alpha-algorithms-celf-examples-write]]
+=== Write
+
+include::partial$/algorithms/shared/examples-write-without-stats-intro.adoc[]
+
+[role=query-example, group=celfWrite]
+--
+.The following will run the algorithm, and stream results:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.write('myGraph', {
+  writeProperty: 'celfSpread',
+  seedSetSize: 3
+})
+YIELD nodePropertiesWritten
+----
+
+.Results
+[opts="header"]
+|===
+| nodePropertiesWritten
+| 10
+|===
+--
+
+[role=query-example, group=celfWrite]
+--
+.Query the written node properties:
+[source, cypher, role=noplay]
+----
+MATCH (n) RETURN n.name AS name, n.celfSpread AS spread
+ORDER BY spread DESC, name ASC
+----
+
+.Results
+[opts="header"]
+|===
+| name        | spread
+| "Alice"     | 1.6
+| "Ceri"      | 1.08
+| "Michael"   | 1.08
+| "Amir"      | 0
+| "Ethan"     | 0
+| "Jack"      | 0
+| "Jimmy"     | 0
+| "Lara"      | 0
+| "Mohammed"  | 0
+| "Willie"    | 0
+|===
+
+--
+
+Note that in `write` all nodes in Neo4j graph projected get the `spread` property.
+The nodes that are not considered influential by the algorithm receive value of zero.
