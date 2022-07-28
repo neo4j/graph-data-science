@@ -115,7 +115,7 @@ class CELFStreamProcTest extends BaseProcTest {
     void testResultStream() {
 
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.alpha.influenceMaximization.celf")
+            .algo("gds.beta.influenceMaximization.celf")
             .streamMode()
             .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)

@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.alpha.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.beta.influenceMaximization.celf.stream", description = DESCRIPTION, executionMode = STREAM)
 public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationConfig, Stream<InfluenceMaximizationResult>, CELFAlgorithmFactory> {
 
     @Override

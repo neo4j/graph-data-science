@@ -34,7 +34,7 @@ public class CELFStreamProc extends BaseProc {
 
     public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
-    @Procedure(name = "gds.alpha.influenceMaximization.celf.stream", mode = READ)
+    @Procedure(name = "gds.beta.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<InfluenceMaximizationResult> stream(
         @Name(value = "graphName") String graphName,

@@ -300,7 +300,7 @@
 .1+<.^| xref::algorithms/influence-maximization/greedy.adoc[Influence Maximization - Greedy]
 | `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
-| `gds.alpha.influenceMaximization.celf.stream`
+| `gds.beta.influenceMaximization.celf.stream`
 .1+<.^| xref::algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
 .4+<.^| xref::algorithms/alpha/kmeans.adoc[Kmeans]

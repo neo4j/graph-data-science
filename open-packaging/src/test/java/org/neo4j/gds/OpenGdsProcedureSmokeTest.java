@@ -168,7 +168,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.alpha.triangles",
         "gds.alpha.ml.splitRelationships.mutate",
         "gds.alpha.influenceMaximization.greedy.stream",
-        "gds.alpha.influenceMaximization.celf.stream",
+        "gds.beta.influenceMaximization.celf.stream",
 
         "gds.alpha.userLog",
 
