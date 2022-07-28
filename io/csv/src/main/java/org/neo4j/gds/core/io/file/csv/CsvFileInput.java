@@ -94,9 +94,9 @@ public final class CsvFileInput implements FileInput {
 
     @Override
     public InputIterable nodes(Collector badCollector) {
-        Map<Path, List<Path>> pathMapping = CsvImportUtil.nodeHeaderToFileMapping(importPath);
+        Map<Path, List<Path>> pathMapping = CsvImportFileUtil.nodeHeaderToFileMapping(importPath);
         Map<NodeFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportUtil.parseNodeHeader(entry.getKey()),
+            entry -> CsvImportFileUtil.parseNodeHeader(entry.getKey()),
             Map.Entry::getValue
         ));
 
@@ -118,9 +118,9 @@ public final class CsvFileInput implements FileInput {
 
     @Override
     public InputIterable relationships(Collector badCollector) {
-        Map<Path, List<Path>> pathMapping = CsvImportUtil.relationshipHeaderToFileMapping(importPath);
+        Map<Path, List<Path>> pathMapping = CsvImportFileUtil.relationshipHeaderToFileMapping(importPath);
         Map<RelationshipFileHeader, List<Path>> headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportUtil.parseRelationshipHeader(entry.getKey()),
+            entry -> CsvImportFileUtil.parseRelationshipHeader(entry.getKey()),
             Map.Entry::getValue
         ));
 
@@ -164,9 +164,9 @@ public final class CsvFileInput implements FileInput {
 
     @Override
     public InputIterable graphProperties() {
-        var pathMapping = CsvImportUtil.graphPropertyHeaderToFileMapping(importPath);
+        var pathMapping = CsvImportFileUtil.graphPropertyHeaderToFileMapping(importPath);
         var headerToDataFilesMapping = pathMapping.entrySet().stream().collect(Collectors.toMap(
-            entry -> CsvImportUtil.parseGraphPropertyHeader(entry.getKey()),
+            entry -> CsvImportFileUtil.parseGraphPropertyHeader(entry.getKey()),
             Map.Entry::getValue
         ));
 
