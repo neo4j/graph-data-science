@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.graphdb.TransactionFailureException;
@@ -58,7 +59,7 @@ class TerminationTest extends BaseProcTest {
     private void terminateTransaction(long txId) {
         kernelTransactions.activeTransactions()
             .stream()
-            .filter(thx -> thx.lastTransactionTimestampWhenStarted() == txId)
+            .filter(thx -> Neo4jProxy.transactionId(thx) == txId)
             .forEach(ktx -> ktx.markForTermination(Status.Transaction.TransactionMarkedAsFailed));
     }
 
@@ -69,7 +70,7 @@ class TerminationTest extends BaseProcTest {
             String query = kth.executingQuery()
                 .map(ExecutingQuery::rawQueryText)
                 .orElse("");
-            map.put(query, kth.lastTransactionTimestampWhenStarted());
+            map.put(query, Neo4jProxy.transactionId(kth));
         });
         return map;
     }
