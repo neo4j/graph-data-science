@@ -39,7 +39,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CsvImportUtilTest {
+class CsvImportFileUtilTest {
 
     @TempDir
     Path tempDir;
@@ -50,7 +50,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        var nodeHeaderFiles = CsvImportUtil.getNodeHeaderFiles(tempDir)
+        var nodeHeaderFiles = CsvImportFileUtil.getNodeHeaderFiles(tempDir)
             .stream()
             .map(Path::getFileName)
             .map(Path::toString)
@@ -72,7 +72,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        Map<Path, List<Path>> headerToFileMapping = CsvImportUtil.nodeHeaderToFileMapping(tempDir);
+        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.nodeHeaderToFileMapping(tempDir);
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
@@ -92,7 +92,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        var relationshipHeaderFiles = CsvImportUtil.getRelationshipHeaderFiles(tempDir)
+        var relationshipHeaderFiles = CsvImportFileUtil.getRelationshipHeaderFiles(tempDir)
             .stream()
             .map(Path::getFileName)
             .map(Path::toString)
@@ -107,7 +107,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        Map<Path, List<Path>> relationshipHeaderToFileMapping = CsvImportUtil.relationshipHeaderToFileMapping(tempDir);
+        Map<Path, List<Path>> relationshipHeaderToFileMapping = CsvImportFileUtil.relationshipHeaderToFileMapping(tempDir);
         relationshipHeaderToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
@@ -124,7 +124,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        var nodeHeaderFiles = CsvImportUtil.getGraphPropertyHeaderFiles(tempDir)
+        var nodeHeaderFiles = CsvImportFileUtil.getGraphPropertyHeaderFiles(tempDir)
             .stream()
             .map(Path::getFileName)
             .map(Path::toString)
@@ -142,7 +142,7 @@ class CsvImportUtilTest {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        Map<Path, List<Path>> headerToFileMapping = CsvImportUtil.graphPropertyHeaderToFileMapping(tempDir);
+        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.graphPropertyHeaderToFileMapping(tempDir);
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
@@ -164,7 +164,7 @@ class CsvImportUtilTest {
         var headerPath = tempDir.resolve("nodes_Person_King_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportUtil.parseNodeHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseNodeHeader(headerPath);
 
         assertThat(parsedHeader.nodeLabels()).containsExactlyInAnyOrder("Person", "King");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
@@ -178,7 +178,7 @@ class CsvImportUtilTest {
         var headerPath = tempDir.resolve("relationships_R_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportUtil.parseRelationshipHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseRelationshipHeader(headerPath);
 
         assertThat(parsedHeader.relationshipType()).isEqualTo("R");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(
@@ -192,7 +192,7 @@ class CsvImportUtilTest {
         var headerPath = tempDir.resolve("graph_property_prop1_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of("prop1:long"));
 
-        var parsedHeader = CsvImportUtil.parseGraphPropertyHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseGraphPropertyHeader(headerPath);
 
         assertThat(parsedHeader.propertyMapping()).isEqualTo(
             HeaderProperty.parse(0, "prop1:long")
@@ -202,8 +202,8 @@ class CsvImportUtilTest {
     @Test
     void shouldReturnEmptyArrayForNoLabels() {
         var noLabelsNodeHeaderFileName = "nodes_header.csv";
-        assertThat(CsvImportUtil.inferNodeLabels(noLabelsNodeHeaderFileName)).isEmpty();
-        assertThat(CsvImportUtil.inferNodeLabels(Paths.get(noLabelsNodeHeaderFileName))).isEqualTo(new String[0]);
+        assertThat(CsvImportFileUtil.inferNodeLabels(noLabelsNodeHeaderFileName)).isEmpty();
+        assertThat(CsvImportFileUtil.inferNodeLabels(Paths.get(noLabelsNodeHeaderFileName))).isEqualTo(new String[0]);
     }
 
     static Stream<Arguments> nodeFileNames() {

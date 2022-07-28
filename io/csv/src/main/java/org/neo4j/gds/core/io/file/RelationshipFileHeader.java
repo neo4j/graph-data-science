@@ -31,7 +31,6 @@ import java.util.Set;
 
 @ValueClass
 public interface RelationshipFileHeader extends FileHeader<RelationshipSchema, RelationshipPropertySchema> {
-    Set<HeaderProperty> propertyMappings();
     String relationshipType();
 
     @Override

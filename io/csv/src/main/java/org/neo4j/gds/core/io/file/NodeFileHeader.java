@@ -34,7 +34,6 @@ import java.util.stream.Stream;
 
 @ValueClass
 public interface NodeFileHeader extends FileHeader<NodeSchema, PropertySchema> {
-    Set<HeaderProperty> propertyMappings();
     String[] nodeLabels();
 
     @Override

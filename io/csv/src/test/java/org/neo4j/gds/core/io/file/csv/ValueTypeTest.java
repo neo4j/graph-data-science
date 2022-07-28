@@ -17,11 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.api.nodeproperties;
+package org.neo4j.gds.core.io.file.csv;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.stream.Stream;
 
@@ -51,25 +55,12 @@ class ValueTypeTest {
         );
     }
 
-    private static Stream<Arguments> formatValuesWithNulls() {
-        return Stream.concat(
-            formatValues(),
-            Stream.of(
-                arguments(ValueType.LONG, null, ""),
-                arguments(ValueType.DOUBLE, null, "")
-            )
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("formatValuesWithNulls")
-    void testFormatting(ValueType valueType, Object value, String expected) {
-        assertThat(valueType.csvValue(value)).isEqualTo(expected);
-    }
-
     @ParameterizedTest
     @MethodSource("formatValues")
-    void testParsingFromCsv(ValueType valueType, Object expected, String value) {
-        assertThat(valueType.fromCsvValue(value)).isEqualTo(expected);
+    void testParsingFromCsv(ValueType valueType, Object expected, String value) throws JsonProcessingException {
+        var schema = CsvSchema.builder().addColumn("a", CsvSchemaUtil.csvTypeFromValueType(valueType)).build();
+        var tree = new CsvMapper().reader().with(schema).readTree(value);
+        var node = tree.get("a");
+        assertThat(CsvImportParsingUtil.getParsingFunction(valueType).fromCsvValue(valueType.fallbackValue(), node)).isEqualTo(expected);
     }
 }

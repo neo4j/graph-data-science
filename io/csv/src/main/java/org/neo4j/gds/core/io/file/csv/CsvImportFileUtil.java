@@ -36,9 +36,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class CsvImportUtil {
+public final class CsvImportFileUtil {
 
-    private CsvImportUtil() {}
+    private CsvImportFileUtil() {}
 
     public static NodeFileHeader parseNodeHeader(Path headerFile) {
         try (var headerReader = Files.newBufferedReader(headerFile, StandardCharsets.UTF_8)) {
@@ -65,15 +65,15 @@ public final class CsvImportUtil {
     }
 
     public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory) {
-        return headerToFileMapping(csvDirectory, CsvImportUtil::getNodeHeaderFiles);
+        return headerToFileMapping(csvDirectory, CsvImportFileUtil::getNodeHeaderFiles);
     }
 
     public static Map<Path, List<Path>> relationshipHeaderToFileMapping(Path csvDirectory) {
-        return headerToFileMapping(csvDirectory, CsvImportUtil::getRelationshipHeaderFiles);
+        return headerToFileMapping(csvDirectory, CsvImportFileUtil::getRelationshipHeaderFiles);
     }
 
     public static Map<Path, List<Path>> graphPropertyHeaderToFileMapping(Path csvDirectory) {
-        return headerToFileMapping(csvDirectory, CsvImportUtil::getGraphPropertyHeaderFiles);
+        return headerToFileMapping(csvDirectory, CsvImportFileUtil::getGraphPropertyHeaderFiles);
     }
 
     public static List<Path> getNodeHeaderFiles(Path csvDirectory) {
