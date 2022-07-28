@@ -6,6 +6,7 @@ group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':config-generator')
+    annotationProcessor project(':procedure-collector')
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
     compileOnly project(':annotations')
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
