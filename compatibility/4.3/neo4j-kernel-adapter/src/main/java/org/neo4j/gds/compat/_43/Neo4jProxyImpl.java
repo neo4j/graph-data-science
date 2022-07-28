@@ -93,6 +93,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.database.TestDatabaseIdRepository;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -636,5 +637,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             isBuiltIn,
             internal
         );
+    }
+
+    @Override
+    public long transactionId(KernelTransactionHandle kernelTransactionHandle) {
+        return kernelTransactionHandle.lastTransactionTimestampWhenStarted();
     }
 }

@@ -63,6 +63,7 @@ import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.database.NamedDatabaseId;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
@@ -408,6 +409,10 @@ public final class Neo4jProxy {
         boolean internal
     ) {
         return IMPL.userFunctionSignature(name, inputSignature, type, description, internal);
+    }
+
+    public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {
+        return IMPL.transactionId(kernelTransactionHandle);
     }
 
     private Neo4jProxy() {
