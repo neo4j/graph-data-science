@@ -145,10 +145,12 @@ public final class GdsCallableFinder {
         }
 
         private static List<Class<?>> loadPossibleClassesFrom(ClassLoader classLoader, String path) {
-            try (var callablesStream = classLoader.getResourceAsStream(path)) {
-                if (callablesStream == null) {
-                    return List.of();
-                }
+            var callablesStream = classLoader.getResourceAsStream(path);
+            if (callablesStream == null) {
+                return List.of();
+            }
+
+            try (callablesStream) {
                 try (var callables = new BufferedReader(new InputStreamReader(
                     new BufferedInputStream(callablesStream),
                     StandardCharsets.UTF_8
