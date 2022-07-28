@@ -68,6 +68,40 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 |===
 ======
 
+[.include-with-mutate]
+======
+
+.Run CELF in mutate mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.mutate(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  mutateMillis: Integer,
+  nodePropertiesWritten: Integer
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name                   | Type      | Description
+| mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
+| nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+|===
+======
+
 ====
 
 
