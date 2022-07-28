@@ -42,6 +42,9 @@ final class CsvSchemaUtil {
             schemaBuilder.addColumn(elementColumn, CsvSchema.ColumnType.NUMBER);
         }
 
+        // We need to construct a csv schema that keeps the correct order
+        // of columns. The file header stores column positions that we can
+        // leverage to achieve this.
         header
             .propertyMappings()
             .stream()
