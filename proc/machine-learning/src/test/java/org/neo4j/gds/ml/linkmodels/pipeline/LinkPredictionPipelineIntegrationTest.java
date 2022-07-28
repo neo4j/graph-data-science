@@ -50,6 +50,7 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
     private static final String GRAPH_NAME = "g";
 
+    private static final String MULTI_GRAPH_NAME = "g_multi";
     private static final String NODES =
         "CREATE " +
         "(ignored:Ignored), " +
@@ -68,7 +69,19 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(m:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(n:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
         "(o:N {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
-        "(p:N {noise: -1, z: -1, array: [1.0]}), ";
+        "(p:N {noise: -1, z: -1, array: [1.0]}), " +
+
+        "(x1:X {noise: 42, z: 200, array: [-1.0,-2.0,3.0,4.0,5.0]}), " +
+        "(x2:X {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(x3:X {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(x4:X {noise: 42, z: 300, array: [-1.0,2.0,3.0,-4.0,5.0]}), " +
+        "(x5:X {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(x6:X {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(x7:X {noise: 42, z: 400, array: [1.0,2.0,-3.0,4.0,-5.0]}), " +
+        "(x8:X {noise: -1, z: -1, array: [1.0]}), " +
+        "(z1:Z), " +
+        "(z2: Z), " +
+        "(z3: Z),";
 
     @Neo4jGraph
     static String GRAPH =
@@ -96,9 +109,33 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         "(a)-[:REL]->(e), " +
         "(m)-[:REL]->(a), " +
         "(m)-[:REL]->(b), " +
-        "(m)-[:REL]->(c) ";
+        "(m)-[:REL]->(c), " +
+
+        "(a)-[:REL_2]->(x1), " +
+        "(a)-[:REL_2]->(x2), " +
+        "(a)-[:REL_2]->(x3), " +
+        "(b)-[:REL_2]->(x4), " +
+        "(b)-[:REL_2]->(x7), " +
+        "(c)-[:REL_2]->(x8), " +
+        "(e)-[:REL_2]->(x5), " +
+        "(e)-[:REL_2]->(x2), " +
+        "(f)-[:REL_2]->(x3), " +
+        "(h)-[:REL_2]->(x4), " +
+        "(j)-[:REL_2]->(x3), " +
+        "(j)-[:REL_2]->(x1), " +
+        "(k)-[:REL_2]->(x2), " +
+        "(m)-[:REL_2]->(x2), " +
+        "(m)-[:REL_2]->(x7), " +
+        "(n)-[:REL_2]->(x8), " +
+        "(a)-[:REL_2]->(x7), " +
+
+        "(a)-[:CONTEXT]->(z1), " +
+        "(z1)-[:CONTEXT]->(z2), " +
+        "(m)-[:CONTEXT]->(z3) ";
 
     private GraphStore graphStore;
+
+    private GraphStore multiGraphStore;
 
     @BeforeEach
     void setup() throws Exception {
@@ -123,7 +160,19 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
         runQuery(createQuery);
 
         graphStore = GraphStoreCatalog
-            .get(getUsername(), DatabaseId.of(db), "g")
+            .get(getUsername(), DatabaseId.of(db), GRAPH_NAME)
+            .graphStore();
+
+        runQuery(GdsCypher.call(MULTI_GRAPH_NAME)
+            .graphProject()
+            .withNodeLabels("N", "X", "Z")
+            .withRelationshipType("REL_2", Orientation.UNDIRECTED)
+            .withRelationshipType("CONTEXT", Orientation.NATURAL)
+            .withNodeProperties(List.of("noise", "z", "array"), DefaultValue.DEFAULT)
+            .yields());
+
+        multiGraphStore = GraphStoreCatalog
+            .get(getUsername(), db.databaseId(), MULTI_GRAPH_NAME)
             .graphStore();
     }
 
@@ -240,4 +289,62 @@ public class LinkPredictionPipelineIntegrationTest extends BaseProcTest {
 
         assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
     }
+
+    @Test
+    void trainAndPredictFiltered() {
+        var topN = 4;
+
+        runQuery("CALL gds.beta.pipeline.linkPrediction.create('pipe')");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {validationFolds: 2})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'pageRank', {mutateProperty: 'pr'})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'COSINE', {nodeProperties: ['pr']})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 1})");
+        runQuery("CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {penalty: 2})");
+
+        var modelName = "trainedModel";
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.train($graphName, {" +
+            "   pipeline: 'pipe', " +
+            "   modelName: $modelName, " +
+            "   negativeClassWeight: 1.0, " +
+            "   randomSeed: 1337," +
+            "   targetRelationshipType: 'REL_2'," +
+            "   sourceNodeLabel: 'N'," +
+            "   targetNodeLabel: 'X', " +
+            "   contextNodeLabels: ['Z'], " +
+            "   contextRelationshipTypes: ['CONTEXT'] " +
+            "})" +
+            " YIELD modelInfo" +
+            " RETURN modelInfo.modelType AS modelType",
+            Map.of("graphName", MULTI_GRAPH_NAME, "modelName", modelName),
+            List.of(Map.of("modelType", "LinkPrediction"))
+        );
+
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.predict.mutate($graphName, {" +
+            " relationshipTypes: ['REL_2'], " +
+            " modelName: $modelName," +
+            " mutateRelationshipType: 'PREDICTED'," +
+            " threshold: 0," +
+            " topN: $topN," +
+            " concurrency: $concurrency" +
+            "})",
+            Map.of("graphName", MULTI_GRAPH_NAME, "modelName", modelName, "topN", topN, "concurrency", 4),
+            List.of(Map.of(
+                "preProcessingMillis", greaterThan(-1L),
+                "computeMillis", greaterThan(-1L),
+                "mutateMillis", greaterThan(-1L),
+                "postProcessingMillis", 0L,
+                // we are writing undirected rels so we get 2x topN
+                "relationshipsWritten", 2L * topN,
+                "configuration", isA(Map.class),
+                "samplingStats", isA(Map.class),
+                "probabilityDistribution", isA(Map.class)
+            ))
+        );
+
+        assertTrue(multiGraphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED"), "probability"));
+    }
+
 }
