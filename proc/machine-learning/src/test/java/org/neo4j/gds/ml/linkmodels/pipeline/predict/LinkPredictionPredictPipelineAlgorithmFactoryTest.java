@@ -93,8 +93,8 @@ class LinkPredictionPredictPipelineAlgorithmFactoryTest {
 
         var labelFilter = generateNodeLabels(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
 
-        assertThat(labelFilter.internalSourceNodeLabels()).containsExactly(NodeLabel.of("A"));
-        assertThat(labelFilter.internalTargetNodeLabels()).containsExactly(NodeLabel.of("B"));
+        assertThat(labelFilter.sourceNodeLabels()).containsExactly(NodeLabel.of("A"));
+        assertThat(labelFilter.targetNodeLabels()).containsExactly(NodeLabel.of("B"));
         assertThat(labelFilter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
 
     }
@@ -113,8 +113,8 @@ class LinkPredictionPredictPipelineAlgorithmFactoryTest {
 
         var nodeLabelFilterForPrediction = generateNodeLabels(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER);
 
-        assertThat(nodeLabelFilterForPrediction.internalSourceNodeLabels()).containsExactly(NodeLabel.of("B"));
-        assertThat(nodeLabelFilterForPrediction.internalTargetNodeLabels()).containsExactly(NodeLabel.of("A"));
+        assertThat(nodeLabelFilterForPrediction.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
+        assertThat(nodeLabelFilterForPrediction.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(nodeLabelFilterForPrediction.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
     }
 

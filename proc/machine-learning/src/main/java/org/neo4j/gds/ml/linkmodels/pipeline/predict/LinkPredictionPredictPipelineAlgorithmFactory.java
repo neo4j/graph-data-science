@@ -154,8 +154,8 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
 
         progressTracker.logInfo(formatWithLocale(
             "The node labels used for filtering in prediction is: {sourceNodeLabel: %s, targetNodeLabel: %s, nodePropertyStepsLabels: %s}",
-            filter.internalSourceNodeLabels(),
-            filter.internalTargetNodeLabels(),
+            filter.sourceNodeLabels(),
+            filter.targetNodeLabels(),
             filter.nodePropertyStepsLabels()
         ));
 

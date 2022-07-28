@@ -19,17 +19,29 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ValueClass
 public interface LPNodeLabelFilter {
-    Collection<NodeLabel> internalSourceNodeLabels();
+    Collection<NodeLabel> sourceNodeLabels();
 
-    Collection<NodeLabel> internalTargetNodeLabels();
+    Collection<NodeLabel> targetNodeLabels();
 
     Collection<NodeLabel> nodePropertyStepsLabels();
+
+
+    @Value.Derived
+    default Collection<NodeLabel> predictNodeLabels() {
+        return Stream
+            .of(sourceNodeLabels(), targetNodeLabels())
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+    }
 
 }

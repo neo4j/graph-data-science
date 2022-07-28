@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -42,12 +42,10 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -58,11 +56,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     > {
     private final Classifier classifier;
 
-    private final Collection<NodeLabel> sourceNodeLabels;
-
-    private final Collection<NodeLabel> targetNodeLabels;
-
-    private final Collection<NodeLabel> featureInputLabels;
+    private final LPNodeLabelFilter labelFilter;
 
     public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPredictPipeline pipeline,
@@ -76,9 +70,11 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.classifier = classifier;
-        this.sourceNodeLabels = lpNodeLabelFilter.internalSourceNodeLabels();
-        this.targetNodeLabels = lpNodeLabelFilter.internalTargetNodeLabels();
-        this.featureInputLabels = lpNodeLabelFilter.nodePropertyStepsLabels();
+        this.labelFilter = lpNodeLabelFilter;
+    }
+
+    LPNodeLabelFilter labelFilter() {
+        return labelFilter;
     }
 
     @Override
@@ -87,7 +83,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.builder()
-                .nodeLabels(featureInputLabels)
+                .nodeLabels(labelFilter.nodePropertyStepsLabels())
                 .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
         );
     }
@@ -95,7 +91,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     @Override
     protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
-            Stream.of(sourceNodeLabels, targetNodeLabels).flatMap(Collection::stream).collect(Collectors.toSet()),
+            labelFilter.predictNodeLabels(),
             config.internalRelationshipTypes(graphStore),
             Optional.empty()
         );
@@ -184,14 +180,17 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 ));
         }
 
+        IdMap sourceNodes = graphStore.getGraph(labelFilter.sourceNodeLabels());
+        IdMap targetNodes = graphStore.getGraph(labelFilter.targetNodeLabels());
+
         if (isApproximateStrategy) {
             // TODO: use filtered knn if needed
             return new ApproximateLinkPrediction(
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                graphStore.getGraph(sourceNodeLabels),
-                graphStore.getGraph(targetNodeLabels),
+                sourceNodes,
+                targetNodes,
                 config.approximateConfig(),
                 progressTracker
             );
@@ -200,8 +199,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
-                graphStore.getGraph(sourceNodeLabels),
-                graphStore.getGraph(targetNodeLabels),
+                sourceNodes,
+                targetNodes,
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),
