@@ -25,7 +25,6 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.schema.ElementSchemaVisitor;
 import org.neo4j.gds.core.io.schema.NodeSchemaVisitor;
 import org.neo4j.gds.core.io.schema.RelationshipSchemaVisitor;
 import org.neo4j.gds.core.loading.Capabilities;
