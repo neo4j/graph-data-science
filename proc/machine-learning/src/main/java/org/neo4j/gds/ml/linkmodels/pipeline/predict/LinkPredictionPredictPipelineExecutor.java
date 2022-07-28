@@ -56,12 +56,12 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     > {
     private final Classifier classifier;
 
-    private final LPNodeLabelFilter labelFilter;
+    private final LPGraphStoreFilter graphStoreFilter;
 
     public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
-        LPNodeLabelFilter lpNodeLabelFilter,
+        LPGraphStoreFilter graphStoreFilter,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -70,11 +70,11 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.classifier = classifier;
-        this.labelFilter = lpNodeLabelFilter;
+        this.graphStoreFilter = graphStoreFilter;
     }
 
-    LPNodeLabelFilter labelFilter() {
-        return labelFilter;
+    LPGraphStoreFilter labelFilter() {
+        return graphStoreFilter;
     }
 
     @Override
@@ -83,15 +83,16 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.builder()
-                .nodeLabels(labelFilter.nodePropertyStepsLabels())
-                .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
+                .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
+                .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
+                .build()
         );
     }
 
     @Override
     protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
-            labelFilter.predictNodeLabels(),
+            graphStoreFilter.predictNodeLabels(),
             config.internalRelationshipTypes(graphStore),
             Optional.empty()
         );
@@ -180,8 +181,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 ));
         }
 
-        IdMap sourceNodes = graphStore.getGraph(labelFilter.sourceNodeLabels());
-        IdMap targetNodes = graphStore.getGraph(labelFilter.targetNodeLabels());
+        IdMap sourceNodes = graphStore.getGraph(graphStoreFilter.sourceNodeLabels());
+        IdMap targetNodes = graphStore.getGraph(graphStoreFilter.targetNodeLabels());
 
         if (isApproximateStrategy) {
             // TODO: use filtered knn if needed
