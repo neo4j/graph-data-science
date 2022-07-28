@@ -20,7 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -106,7 +105,6 @@ class TerminationTest extends BaseProcTest {
         ParallelUtil.run(runnables, Pools.DEFAULT);
     }
 
-    @Disabled
     @Test
     void test() {
         assertThrows(
