@@ -237,6 +237,9 @@
 .2+<.^|xref::beta-algorithms/random-walk.adoc[Random Walk]
 | `gds.beta.randomWalk.stream`
 | `gds.beta.randomWalk.stream.estimate`
+.2+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
+| `gds.beta.influenceMaximization.celf.mutate`
+| `gds.beta.influenceMaximization.celf.stream`
 |===
 
 [[alpha-tier]]
@@ -299,8 +302,6 @@
 | `gds.alpha.triangles`
 .1+<.^| xref::algorithms/influence-maximization/greedy.adoc[Influence Maximization - Greedy]
 | `gds.alpha.influenceMaximization.greedy.stream`
-.1+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
-| `gds.beta.influenceMaximization.celf.stream`
 .1+<.^| xref::algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
 .4+<.^| xref::algorithms/alpha/kmeans.adoc[Kmeans]
