@@ -261,7 +261,6 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         @Override
         public void run() {
             var cumulativeWeight = new MutableDouble();
-            var insideWeightContribution = new MutableDouble();
 
             partition.consume(nodeId -> {
                 if (!isSeeded) {
@@ -269,13 +268,8 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 }
 
                 cumulativeWeight.setValue(0.0D);
-                insideWeightContribution.setValue(0.0D);
-                long currentCommunity = currentCommunities.get(nodeId);
                 relationshipIterator.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
                     cumulativeWeight.add(w);
-                    if (currentCommunity == currentCommunities.get(t) && isSeeded) {
-                        insideWeightContribution.add(w);
-                    }
                     return true;
                 });
 
