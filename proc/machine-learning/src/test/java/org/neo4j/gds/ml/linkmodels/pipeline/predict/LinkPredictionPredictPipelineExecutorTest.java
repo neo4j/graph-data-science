@@ -183,11 +183,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
                 ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(List.of(NodeLabel.of("N")))
-                    .targetNodeLabels(List.of(NodeLabel.of("N")))
+                    .sourceNodeLabels(NodeLabel.listOf("N"))
+                    .targetNodeLabels(NodeLabel.listOf("N"))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+                    .predictRelationshipTypes(RelationshipType.listOf("T"))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -236,11 +236,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 new RandomForestClassifier(modelData),
                 ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(List.of(NodeLabel.of("N")))
-                    .targetNodeLabels(List.of(NodeLabel.of("N")))
+                    .sourceNodeLabels(NodeLabel.listOf("N"))
+                    .targetNodeLabels(NodeLabel.listOf("N"))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+                    .predictRelationshipTypes(RelationshipType.listOf("T"))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -294,11 +294,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
                 ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(List.of(NodeLabel.of("N")))
-                    .targetNodeLabels(List.of(NodeLabel.of("N")))
+                    .sourceNodeLabels(NodeLabel.listOf("N"))
+                    .targetNodeLabels(NodeLabel.listOf("N"))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+                    .predictRelationshipTypes(RelationshipType.listOf("T"))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -327,11 +327,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             .build();
 
         LPGraphStoreFilter graphStoreFilter = ImmutableLPGraphStoreFilter.builder()
-            .sourceNodeLabels(List.of(NodeLabel.of("A")))
-            .targetNodeLabels(List.of(NodeLabel.of("B")))
+            .sourceNodeLabels(NodeLabel.listOf("A"))
+            .targetNodeLabels(NodeLabel.listOf("B"))
             .nodePropertyStepsLabels(NodeLabel.listOf("A", "B", "C"))
             .nodePropertyStepRelationshipTypes(RelationshipType.listOf("CONTEXT", "T"))
-            .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+            .predictRelationshipTypes(RelationshipType.listOf("T"))
             .build();
 
         ExecutableNodePropertyStep nodePropertyStep = new TestFilteredNodePropertyStep(graphStoreFilter);
@@ -439,11 +439,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 pipeline,
                 LogisticRegressionClassifier.from(modelData),
                 ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(List.of(NodeLabel.of("N")))
-                    .targetNodeLabels(List.of(NodeLabel.of("N")))
+                    .sourceNodeLabels(NodeLabel.listOf("N"))
+                    .targetNodeLabels(NodeLabel.listOf("N"))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+                    .predictRelationshipTypes(RelationshipType.listOf("T"))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -556,11 +556,11 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 ),
                 LogisticRegressionClassifier.from(modelData),
                 ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(List.of(NodeLabel.of("N")))
-                    .targetNodeLabels(List.of(NodeLabel.of("N")))
-                    .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
+                    .sourceNodeLabels(NodeLabel.listOf("N"))
+                    .targetNodeLabels(NodeLabel.listOf("N"))
+                    .nodePropertyStepsLabels(NodeLabel.listOf("N"))
                     .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
+                    .predictRelationshipTypes(RelationshipType.listOf("T"))
                     .build(),
                 LinkPredictionPredictPipelineBaseConfigImpl.builder()
                     .username("")

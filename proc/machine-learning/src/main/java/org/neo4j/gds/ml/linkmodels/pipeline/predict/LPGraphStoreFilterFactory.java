@@ -41,8 +41,7 @@ public final class LPGraphStoreFilterFactory {
     private LPGraphStoreFilterFactory() {}
 
     private static Collection<NodeLabel> internalNodeLabels(GraphStore graphStore, String nodeLabel) {
-        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(
-            nodeLabel));
+        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : NodeLabel.listOf(nodeLabel);
     }
 
     private static Collection<NodeLabel> nodePropertyStepLabels(

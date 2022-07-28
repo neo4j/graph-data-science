@@ -128,8 +128,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("N")),
-            List.of(RelationshipType.of("T")),
+            NodeLabel.listOf("N"),
+            RelationshipType.listOf("T"),
             Optional.empty()
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
@@ -191,8 +191,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         var graph = graphStore.getGraph(
-            List.of(NodeLabel.of("N")),
-            List.of(RelationshipType.of("T")),
+            NodeLabel.listOf("N"),
+            RelationshipType.listOf("T"),
             Optional.empty()
         );
 
@@ -233,8 +233,8 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
         );
 
         var graph = multiLabelGraphStore.getGraph(
-            List.of(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C")),
-            List.of(RelationshipType.of("T")),
+            NodeLabel.listOf("A", "B", "C"),
+            RelationshipType.listOf("T"),
             Optional.empty()
         );
         var linkFeatureExtractor = LinkFeatureExtractor.of(graph, List.of(featureStep));
