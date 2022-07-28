@@ -97,11 +97,21 @@ public final class GdsCallableFinder {
             );
 
             var classes = new ArrayList<Class<?>>();
-            classes.addAll(loadPossibleClassesFromJar(classLoader));
-            classes.addAll(loadPossibleClassesFromResourcesFolder(classLoader));
 
-            if (classes.isEmpty()) {
+            // This is a bit of a hack, for the actual estimation-cli, wo don't want to scan the classpath.
+            // but for tests, we don't have all the values collected in the services files
+            var collectViaScanning = StackWalker
+                .getInstance()
+                .walk(s -> s.reduce((l, r) -> r)) // get the last stack frame, our main method
+                .map(StackWalker.StackFrame::getClassName)
+                .filter(c -> c.equals("com.neo4j.gds.estimation.cli.EstimationCli"))
+                .isEmpty();
+
+            if (collectViaScanning) {
                 classes.addAll(loadPossibleClassesViaClasspathScanning(classLoader));
+            } else {
+                classes.addAll(loadPossibleClassesFromJar(classLoader));
+                classes.addAll(loadPossibleClassesFromResourcesFolder(classLoader));
             }
 
             assert assertAllAreAlgoSpec(classes);
@@ -121,7 +131,8 @@ public final class GdsCallableFinder {
                 })
                 .collect(Collectors.toMap(
                     def -> def.name().toLowerCase(Locale.ENGLISH),
-                    Function.identity()
+                    Function.identity(),
+                    (l, r) -> l
                 ));
         }
 
