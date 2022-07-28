@@ -47,8 +47,8 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
             " modelName: 'model'," +
-            " sourceNodeLabel: $sourceNodeLabel," +
-            " targetNodeLabel: $targetNodeLabel," +
+            " sourceNodeLabel: $nodeLabel," +
+            " targetNodeLabel: $nodeLabel," +
             " threshold: 0," +
             " topN: $topN," +
             " concurrency: $concurrency" +
@@ -56,7 +56,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("sourceNodeLabel", nodeLabel, "targetNodeLabel", nodeLabel, "topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
+            Map.of("nodeLabel", nodeLabel, "topN", 3, "concurrency", concurrency),
             List.of(
                 Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
                 Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926959),
@@ -74,8 +74,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .streamMode()
             .addParameter("modelName", "model")
-            .addParameter("sourceNodeLabel", "N")
-            .addParameter("targetNodeLabel", "M")
             .addParameter("threshold", 0.5)
             .addParameter("topN", 9)
             .yields();
@@ -90,12 +88,11 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +
             " modelName: 'model'," +
             " sampleRate: 0.5," +
-            " sourceNodeLabel: $sourceNodeLabel," +
             " targetNodeLabel: $targetNodeLabel," +
             " topK: $topK" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("sourceNodeLabel", "N", "targetNodeLabel", targetNodeLabel, "topK", 3),
+            Map.of("targetNodeLabel", targetNodeLabel, "topK", 3),
             List.of(
                 Map.of("requiredMemory", expectedMemoryRange)
             )

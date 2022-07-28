@@ -108,8 +108,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
-                    "sourceNodeLabel", "dummy",
-                    "targetNodeLabel", "dummy",
                     "sampleRate", 1,
                     "topN", 42,
                     "graphName", "g"
@@ -128,8 +126,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
-                    "sourceNodeLabel", "dummy",
-                    "targetNodeLabel", "dummy",
                     "sampleRate", 0.4,
                     "maxIterations", 42,
                     "initialSampler", "randomWalk",
@@ -155,8 +151,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
-                    "sourceNodeLabel", "dummy",
-                    "targetNodeLabel", "dummy",
                     "sampleRate", 1,
                     "graphName", "g"
                 )
@@ -172,8 +166,6 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             "user",
             CypherMapWrapper.create(Map.of(
                     "modelName", "testModel",
-                    "sourceNodeLabel", "N",
-                    "targetNodeLabel", "N",
                     "nodeLabels", 42,
                     "topN", 42,
                     "sampleRate", 1,

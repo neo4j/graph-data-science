@@ -176,8 +176,6 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('myGraph', {
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Target',
   topN: 5,
   threshold: 0.5
 })
@@ -202,8 +200,6 @@ YIELD requiredMemory
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   topN: 5,
   threshold: 0.45
 })
@@ -242,8 +238,6 @@ We will use the model `lp-pipeline-model`, that we trained in the xref::machine-
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_EXHAUSTIVE_PREDICTED',
   topN: 5,
@@ -284,8 +278,6 @@ To avoid possibly having to run for a very long time considering all possible ne
 ----
 CALL gds.beta.pipeline.linkPrediction.predict.mutate('myGraph', {
   modelName: 'lp-pipeline-model',
-  sourceNodeLabel: 'Person',
-  targetNodeLabel: 'Person',
   relationshipTypes: ['KNOWS'],
   mutateRelationshipType: 'KNOWS_APPROX_PREDICTED',
   sampleRate: 0.5,

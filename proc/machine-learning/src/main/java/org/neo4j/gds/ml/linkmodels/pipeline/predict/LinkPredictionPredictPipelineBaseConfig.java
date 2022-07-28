@@ -66,8 +66,8 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     @Override
     @Configuration.Ignore
     default List<String> nodeLabels() {
-        //Only used by GraphStoreFromCatalogLoader.graphDimensions for memory estimation.
-        //This will underestimate when no predict config is passed (and those from train config are used).
+        // The graph is derived manually in the algo factory.
+        // This method is only used by GraphStoreFromCatalogLoader.graphDimensions for memory estimation.
         return List.of(ElementProjection.PROJECT_ALL);
     }
 

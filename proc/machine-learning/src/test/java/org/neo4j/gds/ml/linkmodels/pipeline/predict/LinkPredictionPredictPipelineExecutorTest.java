@@ -106,6 +106,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                                   "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T}->(n0), (n5)-[:T]->(n1)";
 
 
+    // TODO add a test case
     @Inject
     TestGraph multiLabelGraph;
 
@@ -142,8 +143,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("sourceNodeLabel", "N")
-                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -207,8 +206,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("sourceNodeLabel", "N")
-                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -258,8 +255,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 "",
                 CypherMapWrapper.empty()
                     .withEntry("modelName", "model")
-                    .withEntry("sourceNodeLabel", "N")
-                    .withEntry("targetNodeLabel", "N")
                     .withEntry("topN", 3)
                     .withEntry("graphName", GRAPH_NAME)
             );
@@ -314,8 +309,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             "",
             CypherMapWrapper.empty()
                 .withEntry("modelName", "model")
-                .withEntry("sourceNodeLabel", "N")
-                .withEntry("targetNodeLabel", "N")
                 .withEntry("topN", 3)
                 .withEntry("graphName", GRAPH_NAME)
         );
@@ -429,8 +422,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
             .concurrency(1)
             .graphName(GRAPH_NAME)
-            .sourceNodeLabel("N")
-            .targetNodeLabel("N")
             .topN(10)
             .modelName("model")
             .username("user")
@@ -459,8 +450,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
             .concurrency(1)
             .graphName(GRAPH_NAME)
-            .sourceNodeLabel("N")
-            .targetNodeLabel("N")
             .topN(10)
             .modelName("model")
             .username("user")
@@ -499,12 +488,10 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 ImmutableLPNodeLabelFilter.of(
                     List.of(NodeLabel.of("N")),
                     List.of(NodeLabel.of("N")),
-                    List.of()),
+                    List.of(NodeLabel.of("N"))),
                 LinkPredictionPredictPipelineBaseConfigImpl.builder()
                     .username("")
                     .modelName("model")
-                    .sourceNodeLabel("N")
-                    .targetNodeLabel("N")
                     .topN(3)
                     .graphName(GRAPH_NAME)
                     .build(),

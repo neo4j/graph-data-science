@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import java.util.Collection;
 
 @ValueClass
-interface LPNodeLabelFilter {
+public interface LPNodeLabelFilter {
     Collection<NodeLabel> internalSourceNodeLabels();
 
     Collection<NodeLabel> internalTargetNodeLabels();

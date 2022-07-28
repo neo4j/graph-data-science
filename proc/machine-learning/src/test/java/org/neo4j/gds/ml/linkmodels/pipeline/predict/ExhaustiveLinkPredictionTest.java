@@ -287,8 +287,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
-            .sourceNodeLabel("DUMMY")
-            .targetNodeLabel("DUMMY")
             .build();
 
         var actualEstimate = ExhaustiveLinkPrediction
@@ -309,8 +307,6 @@ class ExhaustiveLinkPredictionTest extends BaseProcTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
-            .sourceNodeLabel("DUMMY")
-            .targetNodeLabel("DUMMY")
             .build();
 
         var actualEstimate = ExhaustiveLinkPrediction

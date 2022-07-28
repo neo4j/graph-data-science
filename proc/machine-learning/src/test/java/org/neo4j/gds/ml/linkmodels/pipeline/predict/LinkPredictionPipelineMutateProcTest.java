@@ -68,7 +68,13 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             " concurrency:" +
             " $concurrency" +
             "})",
-            Map.of("sourceNodeLabel", nodeLabel, "targetNodeLabel", nodeLabel, "topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
+            Map.of(
+                "sourceNodeLabel", nodeLabel,
+                "targetNodeLabel", nodeLabel,
+                "topN", topN,
+                "concurrency", concurrency,
+                "nodeLabel", nodeLabel
+            )
         );
 
         Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore().getGraph(
@@ -113,8 +119,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .call("g")
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
-            .addParameter("sourceNodeLabel", "N")
-            .addParameter("targetNodeLabel", "N")
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.0)
@@ -164,8 +168,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .mutateMode()
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
-            .addParameter("sourceNodeLabel", "N")
-            .addParameter("targetNodeLabel", "N")
             .addParameter("threshold", 0.5)
             .addParameter("topN", 9)
             .yields();
@@ -175,9 +177,9 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     
     static Stream<Arguments> topNConcurrencyLabelCombinations() {
         return crossArguments(
-            () -> List.of(3, 50).stream().map(Arguments::of),
-            () -> List.of(1, 4).stream().map(Arguments::of),
-            () -> List.of("N", "M").stream().map(Arguments::of)
+            () -> Stream.of(3, 50).map(Arguments::of),
+            () -> Stream.of(1, 4).map(Arguments::of),
+            () -> Stream.of("N", "M").map(Arguments::of)
         );
     }
 
@@ -186,14 +188,12 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.mutate.estimate('g', {" +
             " modelName: 'model'," +
-            " sourceNodeLabel: $sourceNodeLabel," +
-            " targetNodeLabel: $targetNodeLabel," +
             " threshold: 0," +
             " mutateRelationshipType: 'PREDICTED'," +
             " topN: $topN" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
+            Map.of("topN", 3),
             List.of(
                 Map.of("requiredMemory", "548 Bytes")
             )
