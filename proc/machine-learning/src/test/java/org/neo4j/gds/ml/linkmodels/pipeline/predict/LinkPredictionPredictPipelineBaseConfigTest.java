@@ -182,9 +182,7 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             )
         );
 
-        assertThat(config.nodeLabels()).containsExactly("N");
-
-
+        assertThat(config.configKeys()).doesNotContain("nodeLabels");
     }
 
 }
