@@ -237,9 +237,10 @@
 .2+<.^|xref::beta-algorithms/random-walk.adoc[Random Walk]
 | `gds.beta.randomWalk.stream`
 | `gds.beta.randomWalk.stream.estimate`
-.2+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
+.3+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
 | `gds.beta.influenceMaximization.celf.mutate`
 | `gds.beta.influenceMaximization.celf.stream`
+| `gds.beta.influenceMaximization.celf.write`
 |===
 
 [[alpha-tier]]
