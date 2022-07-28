@@ -35,10 +35,10 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class LPGraphFilterFactory {
+public final class LPGraphStoreFilterFactory {
 
 
-    private LPGraphFilterFactory() {}
+    private LPGraphStoreFilterFactory() {}
 
     private static Collection<NodeLabel> internalNodeLabels(GraphStore graphStore, String nodeLabel) {
         return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(
@@ -59,7 +59,7 @@ public final class LPGraphFilterFactory {
                 .collect(Collectors.toSet());
     }
 
-    static LPGraphStoreFilter generate(
+    public static LPGraphStoreFilter generate(
         LinkPredictionTrainConfig trainConfig,
         LinkPredictionPredictPipelineBaseConfig predictConfig,
         GraphStore graphStore,
@@ -81,7 +81,14 @@ public final class LPGraphFilterFactory {
             contextRelTypes = trainConfig.internalContextRelationshipType(graphStore);
         }
 
-        Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictConfig.internalRelationshipTypes(graphStore))
+        Collection<RelationshipType> predictRelTypes;
+        if (!predictConfig.relationshipTypes().isEmpty()) {
+            predictRelTypes = predictConfig.internalRelationshipTypes(graphStore);
+        } else {
+            predictRelTypes = List.of(trainConfig.internalTargetRelationshipType());
+        }
+
+        Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictRelTypes)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
@@ -89,6 +96,7 @@ public final class LPGraphFilterFactory {
             .sourceNodeLabels(internalNodeLabels(graphStore, sourceNodeLabel))
             .targetNodeLabels(internalNodeLabels(graphStore, targetNodeLabel))
             .nodePropertyStepsLabels(nodePropertyStepLabels(graphStore, sourceNodeLabel, targetNodeLabel, contextNodeLabels))
+            .predictRelationshipTypes(predictRelTypes)
             .nodePropertyStepRelationshipTypes(nodePropertyStepRelTypes)
             .build();
 
@@ -116,7 +124,6 @@ public final class LPGraphFilterFactory {
             ));
         }
 
-        // TODO test this part
         Collection<RelationshipType> relationshipTypes = filter.nodePropertyStepRelationshipTypes();
         var invalidTypes = relationshipTypes
             .stream()

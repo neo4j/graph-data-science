@@ -71,7 +71,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
         );
 
         var trainConfig = model.trainConfig();
-        var lpGraphStoreFilter = LPGraphFilterFactory.generate(trainConfig, configuration, graphStore, progressTracker);
+        var lpGraphStoreFilter = LPGraphStoreFilterFactory.generate(trainConfig, configuration, graphStore, progressTracker);
 
         return new LinkPredictionPredictPipelineExecutor(
             model.customInfo().pipeline(),
@@ -117,7 +117,7 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             .get(CatalogRequest.of(config.username(), executionContext.databaseId()), config.graphName())
             .graphStore();
 
-        var lpNodeLabelFilter = LPGraphFilterFactory.generate(model.trainConfig(), config, graphStore, ProgressTracker.NULL_TRACKER);
+        var lpNodeLabelFilter = LPGraphStoreFilterFactory.generate(model.trainConfig(), config, graphStore, ProgressTracker.NULL_TRACKER);
 
         //Taking nodePropertyStepsLabels since they are superset of source&target nodeLabels, to give the upper bound estimation
         //In the future we can add nodeCount per label info to GraphDimensions to make more exact estimations

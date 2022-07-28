@@ -34,6 +34,8 @@ public interface LPGraphStoreFilter {
 
     Collection<NodeLabel> targetNodeLabels();
 
+    Collection<RelationshipType> predictRelationshipTypes();
+
     Collection<NodeLabel> nodePropertyStepsLabels();
 
     Collection<RelationshipType> nodePropertyStepRelationshipTypes();

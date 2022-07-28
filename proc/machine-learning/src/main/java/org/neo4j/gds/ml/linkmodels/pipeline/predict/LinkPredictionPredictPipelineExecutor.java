@@ -93,7 +93,7 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
             graphStoreFilter.predictNodeLabels(),
-            config.internalRelationshipTypes(graphStore),
+            graphStoreFilter.predictRelationshipTypes(),
             Optional.empty()
         );
 

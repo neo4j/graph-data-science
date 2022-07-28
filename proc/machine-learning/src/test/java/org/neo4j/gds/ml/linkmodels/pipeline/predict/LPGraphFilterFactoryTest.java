@@ -35,7 +35,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LPGraphFilterFactory.generate;
+import static org.neo4j.gds.ml.linkmodels.pipeline.predict.LPGraphStoreFilterFactory.generate;
 
 @GdlExtension
 class LPGraphFilterFactoryTest {
@@ -84,8 +84,15 @@ class LPGraphFilterFactoryTest {
 
         assertThat(labelFilter.sourceNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(labelFilter.targetNodeLabels()).containsExactly(NodeLabel.of("B"));
-        assertThat(labelFilter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"), NodeLabel.of("C"));
-        assertThat(labelFilter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("CONTEXT"));
+        assertThat(labelFilter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(
+            NodeLabel.of("A"),
+            NodeLabel.of("B"),
+            NodeLabel.of("C")
+        );
+        assertThat(labelFilter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(
+            RelationshipType.of("T"),
+            RelationshipType.of("CONTEXT")
+        );
     }
 
     @Test
@@ -98,6 +105,7 @@ class LPGraphFilterFactoryTest {
             .targetNodeLabel("A")
             .contextNodeLabels(List.of("A"))
             .contextRelationshipTypes(List.of("CONTEXT_NEW"))
+            .relationshipTypes(List.of("OTHER"))
             .topN(42)
             .build();
 
@@ -106,7 +114,10 @@ class LPGraphFilterFactoryTest {
         assertThat(filter.sourceNodeLabels()).containsExactly(NodeLabel.of("B"));
         assertThat(filter.targetNodeLabels()).containsExactly(NodeLabel.of("A"));
         assertThat(filter.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
-        assertThat(filter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(RelationshipType.of("CONTEXT_NEW"));
+        assertThat(filter.nodePropertyStepRelationshipTypes()).containsExactlyInAnyOrder(
+            RelationshipType.of("OTHER"),
+            RelationshipType.of("CONTEXT_NEW")
+        );
     }
 
     @Test
@@ -133,10 +144,16 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
-        assertThatThrownBy(() -> generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER))
-            .hasMessage("Based on the predict and the model's training configuration, expected node labels ['A', 'INVALID', 'INVALID_2'], " +
-                        "but could not find ['INVALID', 'INVALID_2']. " +
-                        "Available labels are ['A', 'B', 'C'].");
+        assertThatThrownBy(() -> generate(
+            trainConfig,
+            predictConfig,
+            multiLabelGraphStore,
+            ProgressTracker.NULL_TRACKER
+        ))
+            .hasMessage(
+                "Based on the predict and the model's training configuration, expected node labels ['A', 'INVALID', 'INVALID_2'], " +
+                "but could not find ['INVALID', 'INVALID_2']. " +
+                "Available labels are ['A', 'B', 'C'].");
     }
 
     @Test
@@ -164,9 +181,15 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
-        assertThatThrownBy(() -> generate(trainConfig, predictConfig, multiLabelGraphStore, ProgressTracker.NULL_TRACKER))
-            .hasMessage("Based on the predict and the model's training configuration, expected relationship types ['INVALID', 'T'], " +
-                        "but could not find ['INVALID']. Available types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
+        assertThatThrownBy(() -> generate(
+            trainConfig,
+            predictConfig,
+            multiLabelGraphStore,
+            ProgressTracker.NULL_TRACKER
+        ))
+            .hasMessage(
+                "Based on the predict and the model's training configuration, expected relationship types ['INVALID', 'T'], " +
+                "but could not find ['INVALID']. Available types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
     }
 
 }

@@ -103,7 +103,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                                   "(n3: B {a: 1.0, b: 0.8, c: 1.0}), " +
                                   "(n4: C {a: 1.0, b: 0.8, c: 1.0}), " +
                                   "(n5: A {a: 1.0, b: 0.8, c: 1.0})" +
-                                  "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T}->(n0), (n5)-[:T]->(n1)";
+                                  "(n0)-[:T]->(n1), (n1)-[:T]->(n2), (n2)-[:T]->(n0), (n5)-[:T]->(n1)";
 
 
     // TODO add a test case
@@ -181,6 +181,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .targetNodeLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
+                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -233,6 +234,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .targetNodeLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
+                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -290,6 +292,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .targetNodeLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
+                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -309,8 +312,6 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void progressTracking() {
-
-
         var config = LinkPredictionPredictPipelineStreamConfig.of(
             "",
             CypherMapWrapper.empty()
@@ -382,6 +383,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .targetNodeLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepsLabels(List.of())
                     .nodePropertyStepRelationshipTypes(List.of())
+                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
                     .build(),
                 config,
                 caller.executionContext(),
@@ -498,6 +500,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                     .targetNodeLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepsLabels(List.of(NodeLabel.of("N")))
                     .nodePropertyStepRelationshipTypes(List.of())
+                    .predictRelationshipTypes(List.of(RelationshipType.of("T")))
                     .build(),
                 LinkPredictionPredictPipelineBaseConfigImpl.builder()
                     .username("")
