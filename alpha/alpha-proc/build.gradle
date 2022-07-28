@@ -8,6 +8,7 @@ dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
     annotationProcessor project(':pregel-proc-generator')
+    annotationProcessor project(':procedure-collector')
 
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
