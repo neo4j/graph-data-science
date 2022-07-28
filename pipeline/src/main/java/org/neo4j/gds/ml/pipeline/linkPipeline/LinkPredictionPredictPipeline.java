@@ -23,7 +23,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public final class LinkPredictionPredictPipeline implements Pipeline<LinkFeature
     }
 
     public static LinkPredictionPredictPipeline from(
-        Stream<NodePropertyStep> nodePropertySteps,
+        Stream<ExecutableNodePropertyStep> nodePropertySteps,
         Stream<LinkFeatureStep> linkFeatureSteps
     ) {
         return new LinkPredictionPredictPipeline(
