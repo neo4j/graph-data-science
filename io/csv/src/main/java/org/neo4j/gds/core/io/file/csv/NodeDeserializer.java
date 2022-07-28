@@ -32,7 +32,6 @@ import java.util.Map;
 
 public class NodeDeserializer extends StdDeserializer<NodeDTO> {
 
-
     static final String NODE_SCHEMA_INJECTION_NAME = "nodePropertySchemas";
 
     NodeDeserializer() {
