@@ -45,12 +45,12 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.walking.CollapsePathMutateProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-@GdsCallable(name = "gds.alpha.collapsePath.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.beta.collapsePath.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class CollapsePathMutateProc extends MutateProc<CollapsePath, Relationships, CollapsePathMutateProc.MutateResult, CollapsePathConfig> {
 
     static final String DESCRIPTION = "Collapse Path algorithm is a traversal algorithm capable of creating relationships between the start and end nodes of a traversal";
 
-    @Procedure(name = "gds.alpha.collapsePath.mutate", mode = READ)
+    @Procedure(name = "gds.beta.collapsePath.mutate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MutateResult> mutate(
         @Name(value = "graphName") String graphName,

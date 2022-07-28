@@ -79,7 +79,7 @@ class CollapsePathMutateProcedureTest extends BaseProcTest {
     void shouldMutateGraphWithCollapsedPaths() {
         // turn London Underground map into a more high level thing
         String query = "" +
-                       "CALL gds.alpha.collapsePath.mutate('cp', { " +
+                       "CALL gds.beta.collapsePath.mutate('cp', { " +
                        "  pathTemplates:" +
                        "    [" +
                        "      ['BURGUNDY', 'BURGUNDY', 'BURGUNDY']," +

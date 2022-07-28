@@ -95,7 +95,7 @@
 *** xref:alpha-algorithms/total-neighbors.adoc[]
 ** xref:algorithms/auxiliary.adoc[]
 *** xref:alpha-algorithms/graph-generation.adoc[]
-*** xref:alpha-algorithms/collapse-path.adoc[]
+*** xref:beta-algorithms/collapse-path.adoc[]
 *** xref:alpha-algorithms/scale-properties.adoc[]
 *** xref:alpha-algorithms/one-hot-encoding.adoc[]
 *** xref:alpha-algorithms/split-relationships.adoc[]

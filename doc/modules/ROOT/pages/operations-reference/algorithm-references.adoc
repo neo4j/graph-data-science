@@ -200,6 +200,8 @@
 | `gds.beta.closeness.stats`
 | `gds.beta.closeness.stream`
 | `gds.beta.closeness.write`
+.1+<.^|xref::beta-algorithms/collapse-path.adoc[Collapse Path]
+| `gds.beta.collapsePath.mutate`
 .8+<.^|xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 | `gds.beta.graphSage.stream`
 | `gds.beta.graphSage.stream.estimate`
@@ -255,8 +257,6 @@
 .2+<.^|xref::algorithms/harmonic-centrality.adoc[Harmonic Centrality]
 | `gds.alpha.closeness.harmonic.stream`
 | `gds.alpha.closeness.harmonic.write`
-.1+<.^|xref::alpha-algorithms/collapse-path.adoc[Collapse Path]
-| `gds.alpha.collapsePath.mutate`
 .8+<.^|xref::algorithms/hits.adoc[HITS]
 | `gds.alpha.hits.mutate`
 | `gds.alpha.hits.mutate.estimate`
