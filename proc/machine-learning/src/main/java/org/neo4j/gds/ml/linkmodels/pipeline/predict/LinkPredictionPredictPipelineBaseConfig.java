@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
@@ -37,7 +38,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -68,11 +68,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     default List<String> nodeLabels() {
         //Only used by GraphStoreFromCatalogLoader.graphDimensions for memory estimation.
         //This will underestimate when no predict config is passed (and those from train config are used).
-        return Stream
-            .concat(Stream.concat(sourceNodeLabel().stream(), targetNodeLabel().stream()), contextNodeLabels().stream())
-            .distinct()
-            .collect(
-                Collectors.toList());
+        return List.of(ElementProjection.PROJECT_ALL);
     }
 
 

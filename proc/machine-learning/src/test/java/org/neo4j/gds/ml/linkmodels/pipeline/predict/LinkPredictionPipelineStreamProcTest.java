@@ -83,20 +83,21 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
     }
 
-    @Test
-    void estimate() {
+    @ParameterizedTest
+    @CsvSource(value = {"N, [2320 Bytes ... 3664 Bytes]", "M, [2880 Bytes ... 5344 Bytes]"})
+    void estimate(String targetNodeLabel, String expectedMemoryRange) {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +
             " modelName: 'model'," +
+            " sampleRate: 0.5," +
             " sourceNodeLabel: $sourceNodeLabel," +
             " targetNodeLabel: $targetNodeLabel," +
-            " threshold: 0," +
-            " topN: $topN" +
+            " topK: $topK" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
+            Map.of("sourceNodeLabel", "N", "targetNodeLabel", targetNodeLabel, "topK", 3),
             List.of(
-                Map.of("requiredMemory", "548 Bytes")
+                Map.of("requiredMemory", expectedMemoryRange)
             )
         );
     }
@@ -131,4 +132,28 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             )
         );
     }
+
+    @Test
+    void estimateWithFictitiousGraph() {
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate(" +
+            "{ nodeCount: $nodeCount," +
+            " relationshipCount: $relationshipCount," +
+            " nodeProjection: $sourceNodeLabel," +
+            " relationshipProjection: '*'}," +
+            "{" +
+            " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
+            " threshold: 0," +
+            " topN: $topN" +
+            "})" +
+            "YIELD requiredMemory",
+            Map.of("nodeCount", 42L, "relationshipCount", 28L, "sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
+            List.of(
+                Map.of("requiredMemory", "289 KiB")
+            )
+        );
+    }
+
 }

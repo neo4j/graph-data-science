@@ -33,6 +33,8 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class PipelineCompanion {
 
+    public static final String ANONYMOUS_GRAPH = "__ANONYMOUS_GRAPH__";
+
     private PipelineCompanion() {}
 
     public static void preparePipelineConfig(
@@ -44,7 +46,7 @@ public final class PipelineCompanion {
         if (graphNameOrConfiguration instanceof String) {
             algoConfiguration.put("graphName", graphNameOrConfiguration);
         } else {
-            algoConfiguration.put("graphName", "__ANONYMOUS_GRAPH__");
+            algoConfiguration.put("graphName", ANONYMOUS_GRAPH);
         }
     }
 

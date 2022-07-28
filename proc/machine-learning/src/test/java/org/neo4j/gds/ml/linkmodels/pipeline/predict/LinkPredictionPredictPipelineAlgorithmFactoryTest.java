@@ -101,4 +101,5 @@ class LinkPredictionPredictPipelineAlgorithmFactoryTest {
         assertThat(nodeLabelFilterForPrediction.nodePropertyStepsLabels()).containsExactlyInAnyOrder(NodeLabel.of("A"), NodeLabel.of("B"));
 
     }
+
 }

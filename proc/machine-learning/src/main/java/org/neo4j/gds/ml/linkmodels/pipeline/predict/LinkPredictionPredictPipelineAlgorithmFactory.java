@@ -23,6 +23,9 @@ import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.getTrainedLPPipelineModel;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.ANONYMOUS_GRAPH;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPredictionPredictPipelineBaseConfig> extends GraphStoreAlgorithmFactory<LinkPredictionPredictPipelineExecutor, CONFIG> {
@@ -81,7 +85,10 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
 
         progressTracker.logInfo(formatWithLocale(
             "The node labels used for filtering in prediction is: {sourceNodeLabel: %s, targetNodeLabel: %s, nodePropertyStepsLabels: %s}",
-            lpNodeLabelFilter.internalSourceNodeLabels(), lpNodeLabelFilter.internalTargetNodeLabels(), lpNodeLabelFilter.nodePropertyStepsLabels()));
+            lpNodeLabelFilter.internalSourceNodeLabels(),
+            lpNodeLabelFilter.internalTargetNodeLabels(),
+            lpNodeLabelFilter.nodePropertyStepsLabels()
+        ));
 
         return new LinkPredictionPredictPipelineExecutor(
             model.customInfo().pipeline(),
@@ -113,10 +120,16 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
     }
 
     static Collection<NodeLabel> internalNodeLabels(GraphStore graphStore, String nodeLabel) {
-        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(nodeLabel));
+        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : List.of(NodeLabel.of(
+            nodeLabel));
     }
 
-    static Collection<NodeLabel> featureInputLabels(GraphStore graphStore, String sourceNodeLabel, String targetNodeLabel, List<String> contextNodeLabels) {
+    static Collection<NodeLabel> featureInputLabels(
+        GraphStore graphStore,
+        String sourceNodeLabel,
+        String targetNodeLabel,
+        List<String> contextNodeLabels
+    ) {
 
         return (contextNodeLabels.contains(ElementProjection.PROJECT_ALL)
                 || sourceNodeLabel.equals(ElementProjection.PROJECT_ALL) || targetNodeLabel.equals(ElementProjection.PROJECT_ALL))
@@ -126,7 +139,11 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
                 .collect(Collectors.toSet());
     }
 
-    static LPNodeLabelFilter generateNodeLabels(LinkPredictionTrainConfig trainConfig, LinkPredictionPredictPipelineBaseConfig predictConfig, GraphStore graphStore) {
+    static LPNodeLabelFilter generateNodeLabels(
+        LinkPredictionTrainConfig trainConfig,
+        LinkPredictionPredictPipelineBaseConfig predictConfig,
+        GraphStore graphStore
+    ) {
         String sourceNodeLabel = predictConfig.sourceNodeLabel().orElse(trainConfig.sourceNodeLabel());
         String targetNodeLabel = predictConfig.targetNodeLabel().orElse(trainConfig.targetNodeLabel());
         List<String> contextNodeLabels;
@@ -142,6 +159,32 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             featureInputLabels(graphStore, sourceNodeLabel, targetNodeLabel, contextNodeLabels)
         );
 
+    }
+
+    @Override
+    public GraphDimensions estimatedGraphDimensionTransformer(GraphDimensions graphDimensions, CONFIG config) {
+        var model = getTrainedLPPipelineModel(
+            modelCatalog,
+            config.modelName(),
+            config.username()
+        );
+
+        //Don't have nodeLabel information for filtering to give better estimation
+        if (config.graphName().equals(ANONYMOUS_GRAPH)) return graphDimensions;
+
+        GraphStore graphStore = GraphStoreCatalog
+            .get(CatalogRequest.of(config.username(), executionContext.databaseId().name()), config.graphName())
+            .graphStore();
+
+        LPNodeLabelFilter lpNodeLabelFilter = generateNodeLabels(model.trainConfig(), config, graphStore);
+
+        //Taking nodePropertyStepsLabels since they are superset of source&target nodeLabels, to give the upper bound estimation
+        //In the future we can add nodeCount per label info to GraphDimensions to make more exact estimations
+        return GraphDimensions
+            .builder()
+            .from(graphDimensions)
+            .nodeCount(graphStore.getGraph(lpNodeLabelFilter.nodePropertyStepsLabels()).nodeCount())
+            .build();
     }
 
 }
