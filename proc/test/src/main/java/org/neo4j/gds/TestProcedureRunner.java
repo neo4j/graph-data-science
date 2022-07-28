@@ -23,8 +23,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 
 import java.util.function.Consumer;
@@ -34,7 +34,7 @@ public final class TestProcedureRunner {
     private TestProcedureRunner() {}
 
     public static <P extends BaseProc> void applyOnProcedure(
-        GraphDatabaseAPI graphDb,
+        GraphDatabaseService graphDb,
         Class<P> procClass,
         Consumer<P> func
     ) {
@@ -42,7 +42,7 @@ public final class TestProcedureRunner {
     }
 
     public static <P extends BaseProc> void applyOnProcedure(
-        GraphDatabaseAPI graphDb,
+        GraphDatabaseService graphDb,
         Class<P> procClass,
         Log log,
         Consumer<P> func
