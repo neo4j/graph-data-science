@@ -48,7 +48,6 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.procedure.Procedure;
 
 import java.lang.reflect.InvocationTargetException;
@@ -101,14 +100,14 @@ public interface AlgoBaseProcTest<ALGORITHM extends Algorithm<RESULT>, CONFIG ex
         return null;
     }
 
-    GraphDatabaseAPI graphDb();
+    GraphDatabaseService graphDb();
 
     default DatabaseId databaseId() {
         return DatabaseId.of(graphDb());
     }
 
-    default GraphDatabaseAPI emptyDb() {
-        GraphDatabaseAPI db = graphDb();
+    default GraphDatabaseService emptyDb() {
+        var db = graphDb();
         runQuery(db, "MATCH (n) DETACH DELETE n");
         return db;
     }

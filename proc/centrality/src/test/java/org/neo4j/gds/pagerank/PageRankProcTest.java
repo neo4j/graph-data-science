@@ -45,7 +45,7 @@ import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.ToleranceConfigProcTest;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -127,7 +127,7 @@ abstract class PageRankProcTest<CONFIG extends PageRankConfig> extends BaseProcT
     static List<Map<String, Object>> weightedExpected;
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

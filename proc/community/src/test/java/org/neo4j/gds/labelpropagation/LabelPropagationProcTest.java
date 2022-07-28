@@ -40,7 +40,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.NodeWeightConfigProcTest;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -95,7 +95,7 @@ abstract class LabelPropagationProcTest<CONFIG extends LabelPropagationBaseConfi
                                        ", (b)-[:X]->(:B {id: 11, weight: 8.0, seed: 2})";
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

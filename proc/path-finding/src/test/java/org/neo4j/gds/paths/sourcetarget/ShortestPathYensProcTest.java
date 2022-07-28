@@ -39,7 +39,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
@@ -122,7 +122,7 @@ abstract class ShortestPathYensProcTest<CONFIG extends ShortestPathYensBaseConfi
     }
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

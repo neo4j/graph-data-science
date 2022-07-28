@@ -32,7 +32,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
@@ -89,7 +89,7 @@ abstract class DegreeCentralityProcTest<CONFIG extends DegreeCentralityConfig>
     protected IdFunction idFunction;
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

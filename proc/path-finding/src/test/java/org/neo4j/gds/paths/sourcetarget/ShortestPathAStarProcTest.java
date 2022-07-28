@@ -45,7 +45,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.paths.ShortestPathBaseConfig.SOURCE_NODE_KEY;
@@ -146,7 +146,7 @@ abstract class ShortestPathAStarProcTest<CONFIG extends ShortestPathBaseConfig> 
     }
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

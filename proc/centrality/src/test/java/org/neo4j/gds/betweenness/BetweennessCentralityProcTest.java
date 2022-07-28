@@ -32,7 +32,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
@@ -64,7 +64,7 @@ abstract class BetweennessCentralityProcTest<CONFIG extends BetweennessCentralit
     List<Map<String, Object>> expected;
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

@@ -32,7 +32,7 @@ import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
 
@@ -55,7 +55,7 @@ abstract class WccProcTest<CONFIG extends WccBaseConfig> extends BaseProcTest im
     private static final String GRAPH_NAME = "myGraph";
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

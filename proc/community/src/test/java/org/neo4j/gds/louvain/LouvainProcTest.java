@@ -37,7 +37,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
 import org.neo4j.gds.test.config.ToleranceConfigProcTest;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -121,7 +121,7 @@ abstract class LouvainProcTest<CONFIG extends LouvainBaseConfig> extends BasePro
                                        ", (m)-[:TYPE {weight: 1.0}]->(n)";
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

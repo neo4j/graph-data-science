@@ -44,7 +44,7 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.test.config.IterationsConfigProcTest;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.Collection;
 import java.util.List;
@@ -115,7 +115,7 @@ abstract class KnnProcTest<CONFIG extends KnnBaseConfig> extends BaseProcTest im
     }
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

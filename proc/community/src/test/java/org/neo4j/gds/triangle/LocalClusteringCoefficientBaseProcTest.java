@@ -37,7 +37,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
@@ -112,7 +112,7 @@ abstract class LocalClusteringCoefficientBaseProcTest<CONFIG extends LocalCluste
 
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 

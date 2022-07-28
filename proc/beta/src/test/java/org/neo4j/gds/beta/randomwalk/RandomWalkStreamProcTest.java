@@ -36,8 +36,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Path;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -249,7 +249,7 @@ class RandomWalkStreamProcTest extends BaseProcTest implements
     }
 
     @Override
-    public GraphDatabaseAPI graphDb() {
+    public GraphDatabaseService graphDb() {
         return db;
     }
 
