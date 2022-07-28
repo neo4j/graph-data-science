@@ -25,6 +25,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
+import org.reflections.util.FilterBuilder;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -38,78 +42,98 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@SuppressWarnings("unchecked")
 public final class GdsCallableFinder {
 
-    private static final List<String> DEFAULT_PACKAGE_BLACKLIST = List.of("org.neo4j.gds.pregel");
+    private static final List<String> DEFAULT_PACKAGE_DENY_LIST = List.of("org.neo4j.gds.pregel");
 
     public static Stream<GdsCallableDefinition> findAll() {
-        return findAll(DEFAULT_PACKAGE_BLACKLIST);
+        return findAll(DEFAULT_PACKAGE_DENY_LIST);
     }
 
-    public static Stream<GdsCallableDefinition> findAll(Collection<String> blacklist) {
-        return allGdsCallables(blacklist).sorted(Comparator.comparing(
+    public static Stream<GdsCallableDefinition> findAll(Collection<String> denyList) {
+        return allGdsCallables(denyList).sorted(Comparator.comparing(
             GdsCallableDefinition::name,
             String.CASE_INSENSITIVE_ORDER
         ));
     }
 
     public static Optional<GdsCallableDefinition> findByName(String name) {
-        return findByName(name, DEFAULT_PACKAGE_BLACKLIST);
+        return findByName(name, DEFAULT_PACKAGE_DENY_LIST);
     }
 
-    public static Optional<GdsCallableDefinition> findByName(String name, Collection<String> blacklist) {
-        var lowerCaseName = name.toLowerCase(Locale.ROOT);
-        return allGdsCallables(blacklist)
-            .filter(callable -> callable.name().toLowerCase(Locale.ROOT).equals(lowerCaseName))
-            .findFirst();
+    public static Optional<GdsCallableDefinition> findByName(String name, Collection<String> denyList) {
+        return Optional
+            .ofNullable(ClassesHolder.CALLABLE_CLASSES.get(name.toLowerCase(Locale.ENGLISH)))
+            .filter(block(denyList));
     }
 
     @NotNull
-    private static Stream<GdsCallableDefinition> allGdsCallables(Collection<String> blacklist) {
-        return ClassesHolder.CALLABLE_CLASSES.stream()
-            .filter(clazz -> blacklist
-                .stream()
-                .noneMatch(item -> clazz.getPackageName().startsWith(item)))
-            .map(clazz -> {
-                GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
-                return ImmutableGdsCallableDefinition
-                    .builder()
-                    .name(gdsCallable.name())
-                    .description(gdsCallable.description())
-                    .executionMode(gdsCallable.executionMode())
-                    .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
-                    .build();
-            });
+    private static Stream<GdsCallableDefinition> allGdsCallables(Collection<String> denyList) {
+        return ClassesHolder.CALLABLE_CLASSES.values().stream().filter(block(denyList));
+    }
+
+    private static Predicate<GdsCallableDefinition> block(Collection<String> denyList) {
+        return def -> denyList
+            .stream()
+            .noneMatch(item -> def.algorithmSpecClass().getPackageName().startsWith(item));
     }
 
     private static final class ClassesHolder {
-        private static final List<Class<?>> CALLABLE_CLASSES = loadPossibleClasses();
+        private static final Map<String, GdsCallableDefinition> CALLABLE_CLASSES = loadPossibleClasses();
 
         @NotNull
-        private static List<Class<?>> loadPossibleClasses() {
-            var pathFromJar = "META-INF/services/" + GdsCallable.class.getCanonicalName();
-            var pathFromResourcesFolder = "/" + pathFromJar;
-
-            var classes = new ArrayList<Class<?>>();
-            classes.addAll(loadPossibleClassesFrom(pathFromJar));
-            classes.addAll(loadPossibleClassesFrom(pathFromResourcesFolder));
-
-            return classes;
-        }
-
-        @NotNull
-        private static List<Class<?>> loadPossibleClassesFrom(String path) {
+        private static Map<String, GdsCallableDefinition> loadPossibleClasses() {
             var classLoader = Objects.requireNonNullElse(
                 Thread.currentThread().getContextClassLoader(),
                 ClassesHolder.class.getClassLoader()
             );
 
+            var classes = new ArrayList<Class<?>>();
+            classes.addAll(loadPossibleClassesFromJar(classLoader));
+            classes.addAll(loadPossibleClassesFromResourcesFolder(classLoader));
+
+            if (classes.isEmpty()) {
+                classes.addAll(loadPossibleClassesViaClasspathScanning(classLoader));
+            }
+
+            assert assertAllAreAlgoSpec(classes);
+
+            return classes
+                .stream()
+                .map(clazz -> {
+                    GdsCallable gdsCallable = clazz.getAnnotation(GdsCallable.class);
+                    //noinspection unchecked
+                    return ImmutableGdsCallableDefinition
+                        .builder()
+                        .name(gdsCallable.name())
+                        .description(gdsCallable.description())
+                        .executionMode(gdsCallable.executionMode())
+                        .algorithmSpecClass((Class<AlgorithmSpec<Algorithm<Object>, Object, AlgoBaseConfig, Object, AlgorithmFactory<?, Algorithm<Object>, AlgoBaseConfig>>>) clazz)
+                        .build();
+                })
+                .collect(Collectors.toMap(
+                    def -> def.name().toLowerCase(Locale.ENGLISH),
+                    Function.identity()
+                ));
+        }
+
+        private static List<Class<?>> loadPossibleClassesFromJar(ClassLoader classLoader) {
+            return loadPossibleClassesFrom(classLoader, "META-INF/services/" + GdsCallable.class.getCanonicalName());
+        }
+
+        private static List<Class<?>> loadPossibleClassesFromResourcesFolder(ClassLoader classLoader) {
+            return loadPossibleClassesFrom(classLoader, "/META-INF/services/" + GdsCallable.class.getCanonicalName());
+        }
+
+        private static List<Class<?>> loadPossibleClassesFrom(ClassLoader classLoader, String path) {
             try (var callablesStream = classLoader.getResourceAsStream(path)) {
                 if (callablesStream == null) {
                     return List.of();
@@ -126,12 +150,29 @@ public final class GdsCallableFinder {
                                 throw new RuntimeException(e);
                             }
                         })
-                        .peek(clazz -> {assert AlgorithmSpec.class.isAssignableFrom(clazz);})
                         .collect(Collectors.toList());
                 }
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
+        }
+
+        private static List<Class<?>> loadPossibleClassesViaClasspathScanning(ClassLoader classLoader) {
+            return Stream.of("org.neo4j.gds")
+                .map(pkg -> new Reflections(new ConfigurationBuilder()
+                    .addClassLoaders(classLoader)
+                    .forPackage(pkg, classLoader)
+                    .addScanners(Scanners.TypesAnnotated)
+                    .filterInputsBy(new FilterBuilder().includePackage(pkg))))
+                .flatMap(reflections -> reflections.getTypesAnnotatedWith(GdsCallable.class).stream())
+                .collect(Collectors.toList());
+        }
+
+        private static boolean assertAllAreAlgoSpec(Iterable<Class<?>> classes) {
+            for (var clazz : classes) {
+                assert AlgorithmSpec.class.isAssignableFrom(clazz);
+            }
+            return true;
         }
     }
 
