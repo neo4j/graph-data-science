@@ -62,6 +62,40 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 |===
 ======
 
+[.include-with-stats]
+======
+
+.Run CELF in stats mode on a named graph.
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stats(
+  graphName: String,
+  configuration: Map
+)
+YIELD
+  computeMillis: Integer,
+  totalSpread: Float
+----
+
+include::partial$/algorithms/common-configuration/common-parameters.adoc[]
+
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
+|===
+| Name          | Type   | Default | Optional | Description
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/alpha/influence-maximization/specific-configuration.adoc[]
+|===
+
+.Results
+[opts="header"]
+|===
+| Name              | Type       | Description
+| computeMillis     | Integer    | Milliseconds for running the algorithm.
+| totalSpread       | Float      | The sum of individual seed set node spreads.
+|===
+======
+
 [.include-with-mutate]
 ======
 
@@ -184,6 +218,31 @@ CALL gds.graph.project(
 
 In the following examples we will demonstrate using the CELF algorithm on this graph.
 
+
+[[alpha-algorithms-celf-examples-stats]]
+=== Stats
+
+:stats-syntax: alpha-algorithms-celf-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
+
+[role=query-example]
+--
+.The following will run the algorithm in stats mode:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.stats('myGraph', {seedSetSize: 3, concurrency: 4})
+YIELD totalSpread
+----
+
+.Results
+[opts="header"]
+|===
+| totalSpread
+| 3.76
+|===
+--
+
+Using `stats` mode is useful to inspect how different configuration options affect the `totalSpread` and choose ones that produce optimal spread.
 
 [[alpha-algorithms-celf-examples-stream]]
 === Stream
