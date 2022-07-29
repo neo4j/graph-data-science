@@ -34,7 +34,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-public class CELF extends Algorithm<CELF> {
+public class CELF extends Algorithm<LongDoubleScatterMap> {
 
     private final long seedSetCount;
     private final double propagationProbability;
@@ -46,7 +46,6 @@ public class CELF extends Algorithm<CELF> {
     private final int batchSize;
     private final LongDoubleScatterMap seedSetNodes;
 
-    private final long[] seedSetNodesArray;
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
 
@@ -82,7 +81,6 @@ public class CELF extends Algorithm<CELF> {
 
         this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
 
-        this.seedSetNodesArray = new long[seedSetCount];
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
@@ -94,13 +92,13 @@ public class CELF extends Algorithm<CELF> {
     }
 
     @Override
-    public CELF compute() {
+    public LongDoubleScatterMap compute() {
         //Find the first node with greedy algorithm
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
 
-        return this;
+        return seedSetNodes;
     }
 
     private void greedyPart() {
@@ -134,7 +132,6 @@ public class CELF extends Algorithm<CELF> {
         gain = spreads.cost(highestNode);
         spreads.pop();
         seedSetNodes.put(highestNode, gain);
-        seedSetNodesArray[0] = highestNode;
     }
 
     private void lazyForwardPart() {
@@ -143,7 +140,8 @@ public class CELF extends Algorithm<CELF> {
             graph,
             propagationProbability,
             monteCarloSimulations,
-            seedSetNodesArray.clone(),
+            seedSetNodes.keys[0],
+            (int) seedSetCount,
             concurrency,
             executorService,
             initialRandomSeed,
@@ -176,7 +174,6 @@ public class CELF extends Algorithm<CELF> {
             var highestNode = spreads.pop();
 
             seedSetNodes.put(highestNode, highestScore);
-            seedSetNodesArray[i] = highestNode;
             gain += highestScore;
             independentCascade.incrementSeedNode(highestNode);
 
@@ -187,12 +184,11 @@ public class CELF extends Algorithm<CELF> {
     public void release() {
     }
 
-    public double getNodeSpread(long node) {
-        return seedSetNodes.getOrDefault(node, 0);
-    }
-
     public Stream<InfluenceMaximizationResult> resultStream() {
         return LongStream.of(seedSetNodes.keys().toArray())
-            .mapToObj(node -> new InfluenceMaximizationResult(graph.toOriginalNodeId(node), getNodeSpread(node)));
+            .mapToObj(node -> new InfluenceMaximizationResult(
+                graph.toOriginalNodeId(node),
+                seedSetNodes.getOrDefault(node, 0)
+            ));
     }
 }

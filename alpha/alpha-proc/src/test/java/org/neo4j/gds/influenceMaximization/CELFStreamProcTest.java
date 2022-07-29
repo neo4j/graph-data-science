@@ -31,6 +31,8 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.concurrent.atomic.LongAdder;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 /**
@@ -46,7 +48,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
  *    \(i)/--------| |
  *     (j)-----------|
  */
-class CELFProcTest extends BaseProcTest {
+class CELFStreamProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER =
@@ -87,7 +89,7 @@ class CELFProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(CELFProc.class, GraphProjectProc.class);
+        registerProcedures(CELFStreamProc.class, GraphProjectProc.class);
 
         String graphCreateQuery = GdsCypher.call("celfGraph")
             .graphProject()
@@ -113,20 +115,25 @@ class CELFProcTest extends BaseProcTest {
     void testResultStream() {
 
         var cypher = GdsCypher.call("celfGraph")
-            .algo("gds.alpha.influenceMaximization.celf")
+            .algo("gds.beta.influenceMaximization.celf")
             .streamMode()
             .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
             .yields("nodeId", "spread");
 
+        LongAdder resultRowCounter = new LongAdder();
 
         runQueryWithRowConsumer(cypher, (tx, row) -> {
+            resultRowCounter.increment();
             long nodeId = row.getNumber("nodeId").longValue();
             double spread = row.getNumber("spread").doubleValue();
             assertThat(nodeId).isBetween(0L, 10L);
             assertThat(spread).isGreaterThanOrEqualTo(0d);
         });
 
+        assertThat(resultRowCounter.longValue())
+            .as("There should be five result rows!")
+            .isEqualTo(5L);
     }
 }

@@ -96,27 +96,27 @@ class CELFOnConnectedGraphTest {
 
 
         CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE);
-        celf.compute();
+        var celfResult = celf.compute();
         var softAssertions = new SoftAssertions();
 
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a")))
+            .assertThat(celfResult.get(idFunction.of("a")))
             .as("spread of a")
             .isEqualTo(4 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("b")))
+            .assertThat(celfResult.get(idFunction.of("b")))
             .as("spread of b")
             .isEqualTo(1, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("c")))
+            .assertThat(celfResult.get(idFunction.of("c")))
             .as("spread of c")
             .isEqualTo(1, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("d")))
+            .assertThat(celfResult.get(idFunction.of("d")))
             .as("spread of d")
             .isEqualTo(2 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("e")))
+            .assertThat(celfResult.get(idFunction.of("e")))
             .as("spread of e")
             .isEqualTo(1, Offset.offset(1e-5));
 

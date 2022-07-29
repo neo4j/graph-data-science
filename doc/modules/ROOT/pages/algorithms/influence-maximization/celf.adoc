@@ -41,7 +41,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 .Run CELF in stream mode on a named graph.
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.influenceMaximization.celf.stream(
+CALL gds.beta.influenceMaximization.celf.stream(
   graphName: String,
   configuration: Map
 )
@@ -171,7 +171,7 @@ For more details on the `stream` mode in general, see xref::common-usage/running
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.alpha.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3, concurrency: 4})
+CALL gds.beta.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3, concurrency: 4})
 YIELD nodeId, spread
 RETURN gds.util.asNode(nodeId).name AS Name, spread
 ORDER BY spread ASC

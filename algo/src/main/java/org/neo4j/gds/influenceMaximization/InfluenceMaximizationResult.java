@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 public class InfluenceMaximizationResult {
     public final long nodeId;
     public final double spread;
@@ -28,35 +26,5 @@ public class InfluenceMaximizationResult {
     InfluenceMaximizationResult(long nodeId, double spread) {
         this.nodeId = nodeId;
         this.spread = spread;
-    }
-
-    @Override
-    public String toString() {
-        return "InfluenceMaximizationResult{nodeId=" + nodeId + ", spread=" + spread + "}";
-    }
-
-    @SuppressWarnings("unused")
-    public static final class Stats {
-        public final long nodes;
-        public final long computeMillis;
-
-        public Stats(
-            long nodes,
-            long computeMillis
-        ) {
-            this.nodes = nodes;
-            this.computeMillis = computeMillis;
-        }
-
-        public static final class Builder extends AbstractResultBuilder<InfluenceMaximizationResult.Stats> {
-
-            @Override
-            public InfluenceMaximizationResult.Stats build() {
-                return new InfluenceMaximizationResult.Stats(
-                    nodeCount,
-                    computeMillis
-                );
-            }
-        }
     }
 }

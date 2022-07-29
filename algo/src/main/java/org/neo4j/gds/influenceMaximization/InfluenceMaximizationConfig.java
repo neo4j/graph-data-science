@@ -21,13 +21,11 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@ValueClass
-@SuppressWarnings("immutables:subtype")
 public interface InfluenceMaximizationConfig extends AlgoBaseConfig, RandomSeedConfig { //BaseConfig
     @Configuration.IntegerRange(min = 1)
     int seedSetSize();
@@ -42,5 +40,9 @@ public interface InfluenceMaximizationConfig extends AlgoBaseConfig, RandomSeedC
     @Configuration.IntegerRange(min = 1)
     default int monteCarloSimulations() {
         return 100;
+    }
+
+    static InfluenceMaximizationConfig of(CypherMapWrapper userInput) {
+        return new InfluenceMaximizationConfigImpl(userInput);
     }
 }

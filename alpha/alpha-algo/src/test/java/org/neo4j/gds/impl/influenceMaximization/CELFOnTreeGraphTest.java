@@ -131,27 +131,27 @@ class CELFOnTreeGraphTest {
 
         //finally a5 has a gain of 0
         CELF celf = new CELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10, DEFAULT_BATCH_SIZE);
-        celf.compute();
+        var celfResult = celf.compute();
         var softAssertions = new SoftAssertions();
 
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a1")))
+            .assertThat(celfResult.get(idFunction.of("a1")))
             .as("spread of a1")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a2")))
+            .assertThat(celfResult.get(idFunction.of("a2")))
             .as("spread of a2")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a3")))
+            .assertThat(celfResult.get(idFunction.of("a3")))
             .as("spread of a3")
             .isEqualTo(4.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a4")))
+            .assertThat(celfResult.get(idFunction.of("a4")))
             .as("spread of a4")
             .isEqualTo(1 / 3.0, Offset.offset(1e-5));
         softAssertions
-            .assertThat(celf.getNodeSpread(idFunction.of("a5")))
+            .assertThat(celfResult.get(idFunction.of("a5")))
             .as("spread of a5")
             .isEqualTo(0, Offset.offset(1e-5));
 
