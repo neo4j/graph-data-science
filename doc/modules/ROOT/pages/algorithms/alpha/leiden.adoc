@@ -177,7 +177,7 @@ include::partial$/algorithms/alpha/leiden/specific-configuration.adoc[]
 | ranLevels              | Integer   | The number of levels the algorithm actually ran.
 | modularity            | Float     | The final modularity score.
 | modularities          | List of Float | The modularity scores for each level.
-| nodeCount              | Integer   | Indicates if the algorithm converged.
+| nodeCount              | Integer   | Number of nodes in the graph.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
 | communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
@@ -233,7 +233,7 @@ include::partial$/algorithms/alpha/leiden/specific-configuration.adoc[]
 | ranLevels              | Integer       | The number of levels the algorithm actually ran.
 | modularity             | Float         | The final modularity score.
 | modularities           | List of Float | The modularity scores for each level.
-| nodeCount              | Integer       | Indicates if the algorithm converged.
+| nodeCount              | Integer       | Number of nodes in the graph.
 | didConverge            | Boolean       | Indicates if the algorithm converged.
 | nodePropertiesWritten  | Integer       | Number of properties added to the Neo4j database.
 | communityDistribution  | Map           | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
