@@ -52,11 +52,10 @@ public class NodeRegressionPredictPipelineExecutor extends PipelineExecutor<
         NodeRegressionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        String graphName,
         ProgressTracker progressTracker,
         Regressor regressor
     ) {
-        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, progressTracker);
         this.regressor = regressor;
     }
 

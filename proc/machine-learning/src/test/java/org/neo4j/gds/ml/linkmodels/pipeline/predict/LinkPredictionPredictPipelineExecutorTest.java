@@ -20,22 +20,13 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.TestProcedureRunner;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -44,11 +35,11 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -60,12 +51,11 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
-import org.neo4j.gds.test.TestProc;
+import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -84,10 +74,9 @@ import static org.neo4j.gds.config.MutatePropertyConfig.MUTATE_PROPERTY_KEY;
 import static org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline.MODEL_TYPE;
 
 @GdlExtension
-class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
-    public static final String GRAPH_NAME = "g";
+class LinkPredictionPredictPipelineExecutorTest {
 
-    @Neo4jGraph
+    @GdlGraph
     static String GDL = "CREATE " +
                         "  (n0:N {a: 1.0, b: 0.8, c: 1.0})" +
                         ", (n1:N {a: 2.0, b: 1.0, c: 1.0})" +
@@ -99,6 +88,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                         ", (n1)-[:T]->(n3)" +
                         ", (n2)-[:T]->(n4)";
 
+    @Inject
     private GraphStore graphStore;
 
 
@@ -118,24 +108,7 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Inject
     GraphStore multiLabelGraphStore;
-
-    @BeforeEach
-    void setup() throws Exception {
-        registerProcedures(
-            GraphProjectProc.class,
-            GraphStreamNodePropertiesProc.class
-        );
-        String createQuery = GdsCypher.call(GRAPH_NAME)
-            .graphProject()
-            .withNodeLabel("N")
-            .withRelationshipType("T", Orientation.UNDIRECTED)
-            .withNodeProperties(List.of("a", "b", "c"), DefaultValue.DEFAULT)
-            .yields();
-
-        runQuery(createQuery);
-
-        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
-    }
+    private final String username = "user";
 
     @AfterEach
     void tearDown() {
@@ -144,176 +117,161 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void shouldPredict() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = LinkPredictionPredictPipelineStreamConfig.of(
-                "",
-                CypherMapWrapper.empty()
-                    .withEntry("modelName", "model")
-                    .withEntry("topN", 3)
-                    .withEntry("graphName", GRAPH_NAME)
-            );
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
+            .modelName("model")
+            .topN(3)
+            .graphName("DUMMY")
+            .build();
 
-            var pipeline = LinkPredictionPredictPipeline.from(
-                Stream.of(),
-                Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
-            );
+        var pipeline = LinkPredictionPredictPipeline.from(
+            Stream.of(),
+            Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
+        );
 
-            var modelData = ImmutableLogisticRegressionData.of(
-                2,
-                new Weights<>(
-                    new Matrix(
-                        new double[]{2.0, 1.0, -3.0},
-                        1,
-                        3
-                    )),
-                Weights.ofVector(0.0)
-            );
-            var progressTracker = new InspectableTestProgressTracker(
-                LinkPredictionPredictPipelineExecutor.progressTask(
-                    "Link Prediction Train Pipeline",
-                    pipeline,
-                    graphStore,
-                    config
-                ),
-                getUsername(),
-                config.jobId()
-            );
-
-            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            new Weights<>(
+                new Matrix(
+                    new double[]{2.0, 1.0, -3.0},
+                    1,
+                    3
+                )),
+            Weights.ofVector(0.0)
+        );
+        var progressTracker = new InspectableTestProgressTracker(
+            LinkPredictionPredictPipelineExecutor.progressTask(
+                "Link Prediction Train Pipeline",
                 pipeline,
-                LogisticRegressionClassifier.from(modelData),
-                ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(NodeLabel.listOf("N"))
-                    .targetNodeLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepsLabels(List.of())
-                    .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(RelationshipType.listOf("T"))
-                    .build(),
-                config,
-                caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
-                progressTracker
-            );
+                config
+            ),
+            "",
+            config.jobId()
+        );
 
-            var predictionResult = pipelineExecutor.compute();
+        var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            pipeline,
+            LogisticRegressionClassifier.from(modelData),
+            ImmutableLPGraphStoreFilter.builder()
+                .sourceNodeLabels(NodeLabel.listOf("N"))
+                .targetNodeLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepRelationshipTypes(List.of())
+                .predictRelationshipTypes(RelationshipType.listOf("T"))
+                .build(),
+            config,
+            ExecutionContext.EMPTY,
+            graphStore,
+            progressTracker
+        );
+
+        var predictionResult = pipelineExecutor.compute();
 
 
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(3);
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(3);
 
-            assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
-            assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
-            progressTracker.assertValidProgressEvolution();
-        });
+        assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
+        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
+        progressTracker.assertValidProgressEvolution();
     }
 
     @Test
     void shouldPredictWithRandomForest() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = LinkPredictionPredictPipelineStreamConfig.of(
-                "",
-                CypherMapWrapper.empty()
-                    .withEntry("modelName", "model")
-                    .withEntry("topN", 3)
-                    .withEntry("graphName", GRAPH_NAME)
-            );
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
+            .modelName("model")
+            .topN(3)
+            .graphName("DUMMY")
+            .build();
 
-            var pipeline = LinkPredictionPredictPipeline.from(
-                Stream.of(),
-                Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
-            );
+        var pipeline = LinkPredictionPredictPipeline.from(
+            Stream.of(),
+            Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
+        );
 
-            var root = new TreeNode<>(0);
-            var modelData = ImmutableRandomForestClassifierData
-                .builder()
-                .addDecisionTree(new DecisionTreePredictor<>(root))
-                .featureDimension(3)
-                .numberOfClasses(2)
-                .build();
+        var root = new TreeNode<>(0);
+        var modelData = ImmutableRandomForestClassifierData
+            .builder()
+            .addDecisionTree(new DecisionTreePredictor<>(root))
+            .featureDimension(3)
+            .numberOfClasses(2)
+            .build();
 
-            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
-                pipeline,
-                new RandomForestClassifier(modelData),
-                ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(NodeLabel.listOf("N"))
-                    .targetNodeLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepsLabels(List.of())
-                    .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(RelationshipType.listOf("T"))
-                    .build(),
-                config,
-                caller.executionContext(),
-                graphStore,
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
+        var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            pipeline,
+            new RandomForestClassifier(modelData),
+            ImmutableLPGraphStoreFilter.builder()
+                .sourceNodeLabels(NodeLabel.listOf("N"))
+                .targetNodeLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepRelationshipTypes(List.of())
+                .predictRelationshipTypes(RelationshipType.listOf("T"))
+                .build(),
+            config,
+            ExecutionContext.EMPTY,
+            graphStore,
+            ProgressTracker.NULL_TRACKER
+        );
 
-            var predictionResult = pipelineExecutor.compute();
+        var predictionResult = pipelineExecutor.compute();
 
 
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(3);
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(3);
 
-            assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
-            assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
-        });
+        assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
+        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
     }
 
     @Test
     void shouldPredictWithNodePropertySteps() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var config = LinkPredictionPredictPipelineStreamConfig.of(
-                "",
-                CypherMapWrapper.empty()
-                    .withEntry("modelName", "model")
-                    .withEntry("topN", 3)
-                    .withEntry("graphName", GRAPH_NAME)
-            );
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
+            .modelName("model")
+            .topN(3)
+            .graphName("DUMMY")
+            .build();
 
-            var pipeline = LinkPredictionPredictPipeline.from(
-                Stream.of(NodePropertyStepFactory.createNodePropertyStep(
-                    "degree",
-                    Map.of("mutateProperty", "degree")
+        var pipeline = LinkPredictionPredictPipeline.from(
+            Stream.of(new NodeIdPropertyStep(graphStore, "degree")),
+            Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
+        );
+
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            new Weights<>(
+                new Matrix(
+                    new double[]{2.0, 1.0, -3.0, -1.0},
+                    1,
+                    4
                 )),
-                Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
-            );
+            Weights.ofVector(0.0)
+        );
 
-            var modelData = ImmutableLogisticRegressionData.of(
-                2,
-                new Weights<>(
-                    new Matrix(
-                        new double[]{2.0, 1.0, -3.0, -1.0},
-                        1,
-                        4
-                    )),
-                Weights.ofVector(0.0)
-            );
+        var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            pipeline,
+            LogisticRegressionClassifier.from(modelData),
+            ImmutableLPGraphStoreFilter.builder()
+                .sourceNodeLabels(NodeLabel.listOf("N"))
+                .targetNodeLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepRelationshipTypes(List.of())
+                .predictRelationshipTypes(RelationshipType.listOf("T"))
+                .build(),
+            config,
+            ExecutionContext.EMPTY,
+            graphStore,
+            ProgressTracker.NULL_TRACKER
+        );
 
-            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
-                pipeline,
-                LogisticRegressionClassifier.from(modelData),
-                ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(NodeLabel.listOf("N"))
-                    .targetNodeLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepsLabels(List.of())
-                    .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(RelationshipType.listOf("T"))
-                    .build(),
-                config,
-                caller.executionContext(),
-                graphStore,
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
+        var predictionResult = pipelineExecutor.compute();
+        var predictedLinks = predictionResult.stream().collect(Collectors.toList());
+        assertThat(predictedLinks).hasSize(3);
 
-            var predictionResult = pipelineExecutor.compute();
-            var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-            assertThat(predictedLinks).hasSize(3);
-
-            assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
-            assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
-        });
+        assertThat(graphStore.relationshipTypes()).containsExactlyElementsOf(RelationshipType.listOf("T"));
+        assertThat(graphStore.hasNodeProperty(graphStore.nodeLabels(), "degree")).isFalse();
     }
 
     @Test
@@ -359,32 +317,32 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             config,
             ExecutionContext.EMPTY,
             multiLabelGraphStore,
-            GRAPH_NAME,
             ProgressTracker.NULL_TRACKER
         );
 
         var predictionResult = pipelineExecutor.compute();
         var predictedLinks = predictionResult.stream().collect(Collectors.toList());
-        assertThat(predictedLinks).hasSize((int) multiLabelGraphStore.getGraph(graphStoreFilter.predictNodeLabels()).nodeCount());
+        assertThat(predictedLinks).hasSize((int) multiLabelGraphStore
+            .getGraph(graphStoreFilter.predictNodeLabels())
+            .nodeCount());
 
-        assertThat(multiLabelGraphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(RelationshipType.listOf("CONTEXT", "T"));
+        assertThat(multiLabelGraphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(RelationshipType.listOf(
+            "CONTEXT",
+            "T"
+        ));
     }
 
     @Test
     void progressTracking() {
-        var config = LinkPredictionPredictPipelineStreamConfig.of(
-            "",
-            CypherMapWrapper.empty()
-                .withEntry("modelName", "model")
-                .withEntry("topN", 3)
-                .withEntry("graphName", GRAPH_NAME)
-        );
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
+            .modelName("model")
+            .topN(3)
+            .graphName("DUMMY")
+            .build();
 
         var pipeline = LinkPredictionPredictPipeline.from(
-            Stream.of(NodePropertyStepFactory.createNodePropertyStep(
-                "degree",
-                Map.of("mutateProperty", "degree")
-            )),
+            Stream.of(new NodeIdPropertyStep(graphStore, "DegreeCentrality", "degree")),
             Stream.of(new L2FeatureStep(List.of("a", "b", "c", "degree")))
         );
 
@@ -400,19 +358,19 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         );
 
         Model.of(
-            getUsername(),
+            username,
             "model",
             MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .username(username)
                 .modelName("model")
                 .pipeline("DUMMY")
                 .sourceNodeLabel("N")
                 .targetNodeLabel("N")
                 .targetRelationshipType("T")
-                .graphName(GRAPH_NAME)
+                .graphName("DUMMY")
                 .negativeClassWeight(1.0)
                 .build(),
             LinkPredictionModelInfo.of(
@@ -430,48 +388,45 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
                 graphStore,
                 config
             ),
-            getUsername(),
+            username,
             config.jobId()
         );
 
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
-                pipeline,
-                LogisticRegressionClassifier.from(modelData),
-                ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(NodeLabel.listOf("N"))
-                    .targetNodeLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepsLabels(List.of())
-                    .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(RelationshipType.listOf("T"))
-                    .build(),
-                config,
-                caller.executionContext(),
-                graphStore,
-                GRAPH_NAME,
-                progressTracker
-            );
+        var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            pipeline,
+            LogisticRegressionClassifier.from(modelData),
+            ImmutableLPGraphStoreFilter.builder()
+                .sourceNodeLabels(NodeLabel.listOf("N"))
+                .targetNodeLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepsLabels(List.of())
+                .nodePropertyStepRelationshipTypes(List.of())
+                .predictRelationshipTypes(RelationshipType.listOf("T"))
+                .build(),
+            config,
+            ExecutionContext.EMPTY,
+            graphStore,
+            progressTracker
+        );
 
-            pipelineExecutor.compute();
+        pipelineExecutor.compute();
 
-            var expectedMessages = new ArrayList<>(List.of(
-                "Link Prediction Predict Pipeline :: Start",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: Start",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality 100%",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
-                "Link Prediction Predict Pipeline :: Execute node property steps :: Finished",
-                "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Start",
-                "Link Prediction Predict Pipeline :: Exhaustive link prediction 100%",
-                "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Finished",
-                "Link Prediction Predict Pipeline :: Finished"
-            ));
+        var expectedMessages = new ArrayList<>(List.of(
+            "Link Prediction Predict Pipeline :: Start",
+            "Link Prediction Predict Pipeline :: Execute node property steps :: Start",
+            "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Start",
+            "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality 100%",
+            "Link Prediction Predict Pipeline :: Execute node property steps :: DegreeCentrality :: Finished",
+            "Link Prediction Predict Pipeline :: Execute node property steps :: Finished",
+            "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Start",
+            "Link Prediction Predict Pipeline :: Exhaustive link prediction 100%",
+            "Link Prediction Predict Pipeline :: Exhaustive link prediction :: Finished",
+            "Link Prediction Predict Pipeline :: Finished"
+        ));
 
-            assertThat(progressTracker.log().getMessages(INFO))
-                .extracting(removingThreadId())
-                .extracting(replaceTimings())
-                .containsExactly(expectedMessages.toArray(String[]::new));
-        });
+        assertThat(progressTracker.log().getMessages(INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(expectedMessages.toArray(String[]::new));
         progressTracker.assertValidProgressEvolution();
     }
 
@@ -489,12 +444,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             Weights.ofVector(0.0)
         );
 
-        var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
-            .concurrency(1)
-            .graphName(GRAPH_NAME)
-            .topN(10)
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
             .modelName("model")
-            .username("user")
+            .concurrency(1)
+            .topN(10)
+            .graphName("DUMMY")
             .build();
 
         assertMemoryEstimation(
@@ -517,12 +472,12 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             .numberOfClasses(2)
             .build();
 
-        var config = new LinkPredictionPredictPipelineBaseConfigImpl.Builder()
-            .concurrency(1)
-            .graphName(GRAPH_NAME)
-            .topN(10)
+        var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
+            .username(username)
             .modelName("model")
-            .username("user")
+            .concurrency(1)
+            .topN(10)
+            .graphName("DUMMY")
             .build();
 
         assertMemoryEstimation(
@@ -536,48 +491,46 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
 
     @Test
     void failOnInvalidFeatureDimension() {
-        TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
-            var tooManyFeatureWeights = new Weights<>(new Matrix(
-                new double[]{2.0, 1.0, -3.0, 42, 42},
-                1,
-                5
-            ));
+        var tooManyFeatureWeights = new Weights<>(new Matrix(
+            new double[]{2.0, 1.0, -3.0, 42, 42},
+            1,
+            5
+        ));
 
-            var modelData = ImmutableLogisticRegressionData.of(
-                2,
-                tooManyFeatureWeights,
-                Weights.ofVector(0.0)
-            );
+        var modelData = ImmutableLogisticRegressionData.of(
+            2,
+            tooManyFeatureWeights,
+            Weights.ofVector(0.0)
+        );
 
-            var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
-                LinkPredictionPredictPipeline.from(
-                    Stream.of(),
-                    Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
-                ),
-                LogisticRegressionClassifier.from(modelData),
-                ImmutableLPGraphStoreFilter.builder()
-                    .sourceNodeLabels(NodeLabel.listOf("N"))
-                    .targetNodeLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepsLabels(NodeLabel.listOf("N"))
-                    .nodePropertyStepRelationshipTypes(List.of())
-                    .predictRelationshipTypes(RelationshipType.listOf("T"))
-                    .build(),
-                LinkPredictionPredictPipelineBaseConfigImpl.builder()
-                    .username("")
-                    .modelName("model")
-                    .topN(3)
-                    .graphName(GRAPH_NAME)
-                    .build(),
-                caller.executionContext(),
-                graphStore,
-                GRAPH_NAME,
-                ProgressTracker.NULL_TRACKER
-            );
+        var pipelineExecutor = new LinkPredictionPredictPipelineExecutor(
+            LinkPredictionPredictPipeline.from(
+                Stream.of(),
+                Stream.of(new L2FeatureStep(List.of("a", "b", "c")))
+            ),
+            LogisticRegressionClassifier.from(modelData),
+            ImmutableLPGraphStoreFilter.builder()
+                .sourceNodeLabels(NodeLabel.listOf("N"))
+                .targetNodeLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepsLabels(NodeLabel.listOf("N"))
+                .nodePropertyStepRelationshipTypes(List.of())
+                .predictRelationshipTypes(RelationshipType.listOf("T"))
+                .build(),
+            LinkPredictionPredictPipelineBaseConfigImpl.builder()
+                .username("")
+                .modelName("model")
+                .topN(3)
+                .graphName("DUMMY")
+                .build(),
+            ExecutionContext.EMPTY,
+            graphStore,
+            ProgressTracker.NULL_TRACKER
+        );
 
-            assertThatThrownBy(pipelineExecutor::compute)
-                .hasMessageContaining("Model expected link features to have a total dimension of `5`, but got `3`. ")
-                .hasMessageContaining("This indicates the dimension of the node-properties ['a', 'b', 'c'] differ between the input and the original train graph.");
-        });
+        assertThatThrownBy(pipelineExecutor::compute)
+            .hasMessageContaining("Model expected link features to have a total dimension of `5`, but got `3`. ")
+            .hasMessageContaining(
+                "This indicates the dimension of the node-properties ['a', 'b', 'c'] differ between the input and the original train graph.");
     }
 
     private static class TestFilteredNodePropertyStep implements ExecutableNodePropertyStep {
@@ -594,8 +547,8 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes
         ) {
-           assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsLabels());
-           assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepRelationshipTypes());
+            assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsLabels());
+            assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepRelationshipTypes());
         }
 
         @Override
@@ -620,6 +573,61 @@ class LinkPredictionPredictPipelineExecutorTest extends BaseProcTest {
         @Override
         public String mutateNodeProperty() {
             return "test";
+        }
+
+        @Override
+        public Map<String, Object> toMap() {
+            return Map.of();
+        }
+    }
+
+    private static class NodeIdPropertyStep implements ExecutableNodePropertyStep {
+        private final GraphStore graphStore;
+        private final String propertyName;
+        private final String procName;
+
+        NodeIdPropertyStep(GraphStore graphStore, String propertyName) {
+            this(graphStore, "AddBogusNodePropertyStep", propertyName);
+        }
+
+        NodeIdPropertyStep(GraphStore graphStore, String procName, String propertyName) {
+            this.graphStore = graphStore;
+            this.propertyName = propertyName;
+            this.procName = procName;
+        }
+
+        @Override
+        public String procName() {
+            return procName;
+        }
+
+        @Override
+        public MemoryEstimation estimate(ModelCatalog modelCatalog, List<String> nodeLabels, List<String> relTypes) {
+            throw new MemoryEstimationNotImplementedException();
+        }
+
+        @Override
+        public String mutateNodeProperty() {
+            return propertyName;
+        }
+
+        @Override
+        public void execute(
+            ExecutionContext executionContext,
+            String graphName,
+            Collection<NodeLabel> nodeLabels,
+            Collection<RelationshipType> relTypes
+        ) {
+            graphStore.addNodeProperty(
+                graphStore.nodeLabels(),
+                propertyName,
+                new LongTestPropertyValues(nodeId -> nodeId)
+            );
+        }
+
+        @Override
+        public Map<String, Object> config() {
+            return Map.of(MUTATE_PROPERTY_KEY, propertyName);
         }
 
         @Override

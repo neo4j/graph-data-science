@@ -81,7 +81,6 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
             configuration,
             executionContext,
             graphStore,
-            configuration.graphName(),
             progressTracker,
             model.data(),
             classIdMap

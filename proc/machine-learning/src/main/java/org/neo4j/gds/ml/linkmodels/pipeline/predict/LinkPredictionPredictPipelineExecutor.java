@@ -65,10 +65,9 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        String graphName,
         ProgressTracker progressTracker
     ) {
-        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, progressTracker);
         this.classifier = classifier;
         this.graphStoreFilter = graphStoreFilter;
     }

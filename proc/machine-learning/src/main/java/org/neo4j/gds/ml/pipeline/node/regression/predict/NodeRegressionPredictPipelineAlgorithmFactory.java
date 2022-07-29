@@ -82,7 +82,6 @@ public class NodeRegressionPredictPipelineAlgorithmFactory
             configuration,
             executionContext,
             graphStore,
-            configuration.graphName(),
             progressTracker,
             regressorFrom(model.data())
         );

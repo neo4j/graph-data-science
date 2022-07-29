@@ -221,7 +221,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    GRAPH_NAME,
                     ProgressTracker.NULL_TRACKER
                 ).compute();
 
@@ -292,7 +291,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    GRAPH_NAME,
                     ProgressTracker.NULL_TRACKER
                 ).compute();
 
@@ -338,7 +336,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     trainConfig,
                     caller.executionContext(),
                     graphStore,
-                    GRAPH_NAME,
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -372,7 +369,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     graphStore,
-                    GRAPH_NAME,
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -419,7 +415,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     linkPredictionTrainConfig,
                     caller.executionContext(),
                     invalidGraphStore,
-                    graphName,
                     ProgressTracker.NULL_TRACKER
                 );
 
@@ -478,7 +473,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                     config,
                     caller.executionContext(),
                     graphStore,
-                    GRAPH_NAME,
                     progressTracker
                 ).compute();
 
@@ -700,7 +694,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                G_BI,
                 ProgressTracker.NULL_TRACKER
             ).compute();
 
@@ -744,7 +737,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                G_BI,
                 ProgressTracker.NULL_TRACKER
             ).splitDataset();
 

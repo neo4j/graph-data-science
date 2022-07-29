@@ -58,19 +58,18 @@ public class NodeClassificationPredictPipelineExecutor extends PipelineExecutor<
     > {
     private static final int MIN_BATCH_SIZE = 100;
     private final Classifier.ClassifierData modelData;
-    private LocalIdMap classIdMap;
+    private final LocalIdMap classIdMap;
 
     public NodeClassificationPredictPipelineExecutor(
         NodePropertyPredictPipeline pipeline,
         NodeClassificationPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        String graphName,
         ProgressTracker progressTracker,
         Classifier.ClassifierData modelData,
         LocalIdMap classIdMap
     ) {
-        super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
+        super(pipeline, config, executionContext, graphStore, progressTracker);
         this.modelData = modelData;
         this.classIdMap = classIdMap;
     }

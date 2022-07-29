@@ -203,7 +203,6 @@ class PipelineExecutorTest {
                 config,
                 ExecutionContext.EMPTY,
                 graphStore,
-                "graph",
                 progressTracker
             );
         }

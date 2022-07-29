@@ -56,14 +56,12 @@ public abstract class PipelineExecutor<
     protected final ExecutionContext executionContext;
     protected final GraphStore graphStore;
     protected final GraphSchema schemaBeforeSteps;
-    protected final String graphName;
 
     protected PipelineExecutor(
         PIPELINE pipeline,
         PIPELINE_CONFIG config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        String graphName,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -71,7 +69,6 @@ public abstract class PipelineExecutor<
         this.config = config;
         this.executionContext = executionContext;
         this.graphStore = graphStore;
-        this.graphName = graphName;
         this.schemaBeforeSteps = graphStore
             .schema()
             .filterNodeLabels(Set.copyOf(config.nodeLabelIdentifiers(graphStore)))
@@ -133,11 +130,11 @@ public abstract class PipelineExecutor<
         @Value.Default
         default Collection<RelationshipType> intermediateRelationshipTypes() {
             return List.of();
-        };
+        }
 
         @Value.Default
         default Collection<RelationshipType> contextRelationshipTypes() {
             return List.of();
-        };
+        }
     }
 }

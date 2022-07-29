@@ -80,7 +80,6 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             configuration,
             executionContext,
             graphStore,
-            configuration.graphName(),
             progressTracker
         );
     }

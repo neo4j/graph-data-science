@@ -146,7 +146,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(42, 1337)
@@ -200,7 +199,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(0, 1)
@@ -256,7 +254,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 modelData,
                 LocalIdMap.of(0, 1)
@@ -321,7 +318,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 progressTracker,
                 modelData,
                 LocalIdMap.of(0, 1)
@@ -366,7 +362,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 streamConfig,
                 caller.executionContext(),
                 graphStore,
-                streamConfig.graphName(),
                 ProgressTracker.NULL_TRACKER,
                 model.data(),
                 LocalIdMap.of(0, 1)
@@ -476,7 +471,6 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 NodeClassificationPipelinePredictProcTestUtil.createClassifierData(manyWeights, bias),
                 LocalIdMap.of(0, 1)

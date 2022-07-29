@@ -113,7 +113,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 createModelData(weights, bias)
             ).compute();
@@ -160,7 +159,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 progressTracker,
                 modelData
             );
@@ -211,7 +209,6 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
                 config,
                 caller.executionContext(),
                 graphStore,
-                GRAPH_NAME,
                 ProgressTracker.NULL_TRACKER,
                 createModelData(manyWeights, bias)
             );

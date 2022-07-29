@@ -59,7 +59,6 @@ public class LinkPredictionTrainPipelineAlgorithmFactory extends GraphStoreAlgor
             trainConfig,
             executionContext,
             graphStore,
-            trainConfig.graphName(),
             progressTracker
         );
     }

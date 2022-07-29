@@ -61,7 +61,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         LinkPredictionTrainConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
-        String graphName,
         ProgressTracker progressTracker
     ) {
         super(
@@ -69,7 +68,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             config,
             executionContext,
             graphStore,
-            graphName,
             progressTracker
         );
 
