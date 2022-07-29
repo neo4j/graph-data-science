@@ -93,7 +93,7 @@ class GraphSageModelTrainerTest {
         Random random = new Random(19L);
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
         configBuilder = GraphSageTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .embeddingDimension(EMBEDDING_DIMENSION);
     }

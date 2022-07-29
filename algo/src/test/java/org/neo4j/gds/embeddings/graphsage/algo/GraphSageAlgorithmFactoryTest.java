@@ -277,8 +277,6 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var model = Model.of(
-            "",
-            "modelName",
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -333,8 +331,6 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var model = Model.of(
-            "",
-            "modelName",
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -493,7 +489,7 @@ class GraphSageAlgorithmFactoryTest {
                                         var trainConfig = ImmutableGraphSageTrainConfig
                                             .builder()
                                             .modelName(modelName)
-                                            .username(userName)
+                                            .modelUser(userName)
                                             .concurrency(concurrency)
                                             .sampleSizes(sampleSizes)
                                             .batchSize(batchSize)
@@ -507,8 +503,6 @@ class GraphSageAlgorithmFactoryTest {
                                             .build();
 
                                         var model = Model.of(
-                                            userName,
-                                            modelName,
                                             "graphSage",
                                             GraphSchema.empty(),
                                             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -523,7 +517,7 @@ class GraphSageAlgorithmFactoryTest {
                                                 .builder()
                                                 .concurrency(concurrency)
                                                 .modelName(modelName)
-                                                .username(userName)
+                                                .modelUser(userName)
                                                 .batchSize(batchSize)
                                                 .build();
                                         };
@@ -555,8 +549,6 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var model = Model.of(
-            "",
-            modelName,
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),

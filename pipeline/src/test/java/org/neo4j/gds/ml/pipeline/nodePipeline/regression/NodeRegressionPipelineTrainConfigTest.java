@@ -35,7 +35,7 @@ class NodeRegressionPipelineTrainConfigTest {
             .targetProperty("DUMMY")
             .metrics(List.of())
             .graphName("DUMMY")
-            .username("DUMMY");
+            .modelUser("DUMMY");
 
         assertThatThrownBy(configBuilder::build).hasMessage("Must specify at least one evaluation metric via the `metrics` parameter.");
     }

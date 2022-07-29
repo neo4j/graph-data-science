@@ -398,7 +398,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     void memoryEstimationTreeStructure(boolean isMultiLabel) {
         var builder = ImmutableGraphSageTrainConfig
             .builder()
-            .username("userName")
+            .modelUser("userName")
             .modelName("modelName")
             .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
@@ -461,7 +461,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     @Test
     void testLogging() {
         var config = GraphSageTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .featureProperties(List.of(DUMMY_PROPERTY))
             .embeddingDimension(12)
             .aggregator(Aggregator.AggregatorType.POOL)
@@ -621,7 +621,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                     var config = ImmutableGraphSageTrainConfig
                                                         .builder()
                                                         .modelName(modelName)
-                                                        .username(userName)
+                                                        .modelUser(userName)
                                                         .concurrency(concurrency)
                                                         .sampleSizes(sampleSizes)
                                                         .batchSize(batchSize)

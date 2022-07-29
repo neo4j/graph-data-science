@@ -358,13 +358,11 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         Model.of(
-            username,
-            "model",
             MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
-                .username(username)
+                .modelUser(username)
                 .modelName("model")
                 .pipeline("DUMMY")
                 .sourceNodeLabel("N")
@@ -378,8 +376,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                 Map.of(),
                 ModelCandidateStats.of(LogisticRegressionTrainConfig.DEFAULT, Map.of(), Map.of()),
                 pipeline
-            )
-        );
+            ));
 
         var progressTracker = new InspectableTestProgressTracker(
             LinkPredictionPredictPipelineExecutor.progressTask(
@@ -449,6 +446,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             .modelName("model")
             .concurrency(1)
             .topN(10)
+            .modelName("model")
+            .modelUser("user")
             .graphName("DUMMY")
             .build();
 
@@ -477,6 +476,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             .modelName("model")
             .concurrency(1)
             .topN(10)
+            .modelName("model")
+            .modelUser("user")
             .graphName("DUMMY")
             .build();
 
@@ -517,7 +518,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                 .predictRelationshipTypes(RelationshipType.listOf("T"))
                 .build(),
             LinkPredictionPredictPipelineBaseConfigImpl.builder()
-                .username("")
+                .modelUser("")
                 .modelName("model")
                 .topN(3)
                 .graphName("DUMMY")

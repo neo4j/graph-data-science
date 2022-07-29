@@ -102,13 +102,11 @@ abstract class LinkPredictionPipelineProcTestBase extends BaseProcTest {
         );
 
         modelCatalog.set(Model.of(
-            getUsername(),
-            "model",
             MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("model")
                 .pipeline("DUMMY")
                 .sourceNodeLabel("N")

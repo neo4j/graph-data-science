@@ -204,7 +204,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .targetRelationshipType("REL")
@@ -273,7 +273,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar", "array")));
 
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .targetRelationshipType("REL")
@@ -321,7 +321,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfigImpl
                 .builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .graphName(GRAPH_NAME)
                 .targetRelationshipType("REL")
                 .sourceNodeLabel("N")
@@ -354,7 +354,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
             var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("foo")
                 .graphName(GRAPH_NAME)
                 .pipeline("bar")
@@ -399,7 +399,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("scalar")));
 
             var linkPredictionTrainConfig = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("foo")
                 .graphName(graphName)
                 .pipeline("bar")
@@ -442,7 +442,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new HadamardFeatureStep(List.of("scalar", "array", "generated_id")));
 
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .targetRelationshipType("REL")
@@ -452,6 +452,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .negativeClassWeight(1)
                 .randomSeed(1337L)
                 .build();
+
             var relationshipCount = config
                 .internalRelationshipTypes(graphStore)
                 .stream()
@@ -552,7 +553,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             MemoryRange expectedRange
         ) {
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .targetRelationshipType("REL")
@@ -584,7 +585,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
         @Test
         void failEstimateOnEmptyParameterSpace() {
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("DUMMY")
                 .graphName("DUMMY")
                 .pipeline("DUMMY")
@@ -676,7 +677,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
 
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(username)
+                .modelUser(username)
                 .modelName("model")
                 .graphName(G_BI)
                 .targetRelationshipType("REL2")
@@ -718,7 +719,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             pipeline.addFeatureStep(new L2FeatureStep(List.of("height")));
 
             var config = LinkPredictionTrainConfigImpl.builder()
-                .username(username)
+                .modelUser(username)
                 .modelName("model")
                 .graphName(G_BI)
                 .targetRelationshipType("REL2")

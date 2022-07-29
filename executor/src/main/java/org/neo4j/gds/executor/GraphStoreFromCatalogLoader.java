@@ -95,7 +95,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         var request = ImmutableCatalogRequest.of(
             databaseId.databaseName(),
             username,
-            Optional.ofNullable(config.usernameOverride()),
+            config.usernameOverride(),
             isGdsAdmin
         );
         return GraphStoreCatalog.get(request, graphName);

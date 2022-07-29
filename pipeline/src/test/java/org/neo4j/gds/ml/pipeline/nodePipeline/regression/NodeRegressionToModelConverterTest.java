@@ -67,7 +67,7 @@ class NodeRegressionToModelConverterTest {
         var config = NodeRegressionPipelineTrainConfigImpl.builder()
             .pipeline("MY_PIPE")
             .graphName("GRAPH")
-            .username("MY USER")
+            .modelUser("MY USER")
             .modelName("model")
             .concurrency(1)
             .randomSeed(1L)

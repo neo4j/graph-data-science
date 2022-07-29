@@ -52,7 +52,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         var executorService = Pools.DEFAULT;
         var model = resolveModel(
             modelCatalog,
-            configuration.username(),
+            configuration.modelUser(),
             configuration.modelName()
         );
 

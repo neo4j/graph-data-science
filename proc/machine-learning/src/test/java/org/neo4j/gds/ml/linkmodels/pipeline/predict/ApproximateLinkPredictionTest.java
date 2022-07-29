@@ -239,7 +239,7 @@ class ApproximateLinkPredictionTest {
         var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .topK(10)
             .sampleRate(0.1)
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .sourceNodeLabel("DUMMY")

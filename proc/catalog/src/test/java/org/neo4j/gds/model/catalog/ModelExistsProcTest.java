@@ -48,12 +48,10 @@ class ModelExistsProcTest extends ModelProcBaseTest {
     void checksIfModelExists() {
         String existingModel = "testModel";
         modelCatalog.set(Model.of(
-            getUsername(),
-            existingModel,
             "testAlgo",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of(getUsername(), existingModel),
             Map::of
         ));
 

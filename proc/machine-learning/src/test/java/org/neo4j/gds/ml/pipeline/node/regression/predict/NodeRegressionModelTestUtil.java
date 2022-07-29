@@ -51,21 +51,19 @@ final class NodeRegressionModelTestUtil {
         Regressor.RegressorData data,
         Stream<String> featureProperties
     ) {
-       return Model.of(
-           username,
-           modelName,
-           NodeRegressionTrainingPipeline.MODEL_TYPE,
-           GraphSchema.empty(),
-           data,
-           NodeRegressionPipelineTrainConfigImpl.builder()
-               .username(username)
+        return Model.of(
+            NodeRegressionTrainingPipeline.MODEL_TYPE,
+            GraphSchema.empty(),
+            data,
+            NodeRegressionPipelineTrainConfigImpl.builder()
+               .modelUser(username)
                .pipeline("DUMMY")
                .graphName("DUMMY")
                .modelName(modelName)
                .targetProperty("target")
                .metrics(List.of("MEAN_SQUARED_ERROR"))
                .build(),
-           NodeRegressionPipelineModelInfo.builder()
+            NodeRegressionPipelineModelInfo.builder()
                .pipeline(NodePropertyPredictPipeline.from(
                    Stream.of(),
                    featureProperties.map(NodeFeatureStep::new))
@@ -76,7 +74,7 @@ final class NodeRegressionModelTestUtil {
                    Map.of()
                ))
                .build()
-       );
+        );
     }
 
     static LinearRegressor createModelData(double[] weights, double bias) {

@@ -38,7 +38,7 @@ public interface GraphDropConfig extends BaseConfig {
     Optional<String> databaseName();
 
     default Optional<String> catalogUser() {
-        return Optional.ofNullable(this.usernameOverride());
+        return this.usernameOverride();
     }
 
     static GraphDropConfig of(
