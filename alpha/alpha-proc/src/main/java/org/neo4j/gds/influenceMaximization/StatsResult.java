@@ -21,14 +21,21 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Map;
+
 public final class StatsResult {
 
     public final long computeMillis;
     public final double totalSpread;
+    public final long nodeCount;
+    public final Map<String, Object> configuration;
 
-    private StatsResult(long computeMillis, double totalSpread) {
+
+    private StatsResult(long computeMillis, double totalSpread, long nodeCount, Map<String, Object> configuration) {
         this.computeMillis = computeMillis;
         this.totalSpread = totalSpread;
+        this.nodeCount = nodeCount;
+        this.configuration = configuration;
     }
 
     public static Builder builder() {
@@ -44,7 +51,7 @@ public final class StatsResult {
         }
 
         public StatsResult build() {
-            return new StatsResult(computeMillis, totalSpread);
+            return new StatsResult(computeMillis, totalSpread, nodeCount, config.toMap());
         }
     }
 }

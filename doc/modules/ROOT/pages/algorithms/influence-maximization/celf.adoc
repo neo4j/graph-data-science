@@ -74,7 +74,9 @@ CALL gds.beta.influenceMaximization.celf.stats(
 )
 YIELD
   computeMillis: Integer,
-  totalSpread: Float
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -93,6 +95,8 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 | Name              | Type       | Description
 | computeMillis     | Integer    | Milliseconds for running the algorithm.
 | totalSpread       | Float      | The sum of individual seed set node spreads.
+| nodeCount         | Integer    | Number of nodes in the graph.
+| configuration     | Map        | The configuration used for running the algorithm.
 |===
 ======
 

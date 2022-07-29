@@ -121,7 +121,7 @@ class CELFStatsProcTest extends BaseProcTest {
             .addParameter("seedSetSize", 5)
             .addParameter("propagationProbability", 0.2)
             .addParameter("monteCarloSimulations", 10)
-            .yields("computeMillis", "totalSpread");
+            .yields();
 
         runQueryWithRowConsumer(cypher, (tx, row) -> {
             assertThat(row.getNumber("computeMillis"))

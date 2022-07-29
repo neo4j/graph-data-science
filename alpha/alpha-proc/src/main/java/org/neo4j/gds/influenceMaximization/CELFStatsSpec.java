@@ -60,7 +60,9 @@ public class CELFStatsSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
 
             var statsResult = statsBuilder
                 .withTotalSpread(Arrays.stream(celfSpreadSet.values).sum())
+                .withNodeCount(computationResult.graph().nodeCount())
                 .withComputeMillis(computationResult.computeMillis())
+                .withConfig(computationResult.config())
                 .build();
 
             return Stream.of(statsResult);
