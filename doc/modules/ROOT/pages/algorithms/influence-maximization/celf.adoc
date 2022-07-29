@@ -146,7 +146,11 @@ CALL gds.beta.influenceMaximization.celf.write(
 )
 YIELD
   writeMillis: Integer,
-  nodePropertiesWritten: Integer
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -165,6 +169,10 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 | Name                   | Type      | Description
 | writeMillis            | Integer   | Milliseconds for adding properties to the projected graph.
 | nodePropertiesWritten  | Integer   | Number of properties added to the Neo4j database.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| totalSpread            | Float     | The sum of individual seed set node spreads.
+| nodeCount              | Integer   | Number of nodes in the graph.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
 
@@ -342,7 +350,7 @@ The nodes that are not considered influential by the algorithm receive value of 
 [[alpha-algorithms-celf-examples-write]]
 === Write
 
-include::partial$/algorithms/shared/examples-write-without-stats-intro.adoc[]
+include::partial$/algorithms/shared/examples-write-intro.adoc[]
 
 [role=query-example, group=celfWrite]
 --
