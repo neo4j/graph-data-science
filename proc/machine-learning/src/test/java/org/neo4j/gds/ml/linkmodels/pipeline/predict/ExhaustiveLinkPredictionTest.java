@@ -24,8 +24,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
