@@ -19,30 +19,24 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RandomSeedConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.result.AbstractResultBuilder;
 
-@Configuration
-public interface InfluenceMaximizationConfig extends AlgoBaseConfig, RandomSeedConfig { //BaseConfig
-    @Configuration.IntegerRange(min = 1)
-    int seedSetSize();
+public final class MutateResult {
+    public final long mutateMillis;
+    public final long nodePropertiesWritten;
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.01, max = 1)
-    default double propagationProbability() {
-        return 0.1;
+    private MutateResult(long mutateMillis, long nodePropertiesWritten) {
+        this.mutateMillis = mutateMillis;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    @Value.Default
-    @Configuration.IntegerRange(min = 1)
-    default int monteCarloSimulations() {
-        return 100;
+    public static Builder builder() {
+        return new Builder();
     }
 
-    static InfluenceMaximizationConfig of(CypherMapWrapper userInput) {
-        return new InfluenceMaximizationConfigImpl(userInput);
+    public static class Builder extends AbstractResultBuilder<MutateResult> {
+        public MutateResult build() {
+            return new MutateResult(mutateMillis, nodePropertiesWritten);
+        }
     }
 }

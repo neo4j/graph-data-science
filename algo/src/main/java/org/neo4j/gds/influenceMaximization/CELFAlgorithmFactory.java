@@ -24,7 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class CELFAlgorithmFactory extends GraphAlgorithmFactory<CELF, InfluenceMaximizationConfig> {
+public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig> extends GraphAlgorithmFactory<CELF, CONFIG> {
+
     public static final int DEFAULT_BATCH_SIZE = 10;
 
     @Override
@@ -35,7 +36,7 @@ public class CELFAlgorithmFactory extends GraphAlgorithmFactory<CELF, InfluenceM
     @Override
     public CELF build(
         Graph graph,
-        InfluenceMaximizationConfig configuration,
+        CONFIG configuration,
         ProgressTracker progressTracker
     ) {
         return new CELF(
