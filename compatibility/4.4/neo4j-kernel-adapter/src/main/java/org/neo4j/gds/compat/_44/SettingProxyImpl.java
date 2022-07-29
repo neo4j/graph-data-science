@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.compat._44;
 
+import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.configuration.SettingImpl;
 import org.neo4j.gds.annotation.SuppressForbidden;
+import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.SettingProxyApi;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Setting;
 
 public class SettingProxyImpl implements SettingProxyApi {
@@ -34,5 +38,39 @@ public class SettingProxyImpl implements SettingProxyApi {
         }
         setting.constraints().forEach(builder::addConstraint);
         return builder.build();
+    }
+
+    @Override
+    public DatabaseMode databaseMode(Config config, GraphDatabaseService databaseService) {
+        var mode = config.get(GraphDatabaseSettings.mode);
+        switch (mode) {
+            case SINGLE:
+                return DatabaseMode.SINGLE;
+            case CORE:
+                return DatabaseMode.CORE;
+            case READ_REPLICA:
+                return DatabaseMode.READ_REPLICA;
+            default:
+                throw new IllegalStateException("Unexpected value: " + mode);
+        }
+    }
+
+    @Override
+    public void setDatabaseMode(Config config, DatabaseMode databaseMode, GraphDatabaseService databaseService) {
+        GraphDatabaseSettings.Mode mode;
+        switch (databaseMode) {
+            case SINGLE:
+                mode = GraphDatabaseSettings.Mode.SINGLE;
+                break;
+            case CORE:
+                mode = GraphDatabaseSettings.Mode.CORE;
+                break;
+            case READ_REPLICA:
+                mode = GraphDatabaseSettings.Mode.READ_REPLICA;
+                break;
+            default:
+                throw new IllegalStateException("Unexpected value: " + databaseMode);
+        }
+        config.set(GraphDatabaseSettings.mode, mode);
     }
 }

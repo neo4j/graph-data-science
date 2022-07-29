@@ -24,15 +24,16 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.configuration.Config;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.RelationshipProjection;
+import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jVersion;
+import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
@@ -271,10 +272,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
         );
 
         assertThat(rootCause(exception)).hasMessage(
-            formatWithLocale(
-                "Illegal parameter value for parameter exportName '../export'. It attempts to write into a forbidden directory.",
-                tempDir.resolve(exportName).normalize()
-            )
+            "Illegal parameter value for parameter exportName '../export'. It attempts to write into a forbidden directory."
         );
     }
 
@@ -327,9 +325,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @Test
     void failsCsvExportWhenRunningOnCluster() {
         var exportName = "export";
-        GraphDatabaseApiProxy
-            .resolveDependency(db, Config.class)
-                .set(GraphDatabaseSettings.mode, GraphDatabaseSettings.Mode.READ_REPLICA);
+        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
@@ -354,9 +351,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
     @Test
     void failsDatabaseExportWhenRunningOnCluster() {
         var exportName = "export";
-        GraphDatabaseApiProxy
-            .resolveDependency(db, Config.class)
-                .set(GraphDatabaseSettings.mode, GraphDatabaseSettings.Mode.READ_REPLICA);
+        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
@@ -397,9 +393,8 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
     @Test
     void failCsvEstimationWhenRunningOnCluster() {
-        GraphDatabaseApiProxy
-            .resolveDependency(db, Config.class)
-            .set(GraphDatabaseSettings.mode, GraphDatabaseSettings.Mode.READ_REPLICA);
+        var config = GraphDatabaseApiProxy.resolveDependency(db, Config.class);
+        SettingProxy.setDatabaseMode(config, DatabaseMode.READ_REPLICA, db);
 
         projectGraph();
 
