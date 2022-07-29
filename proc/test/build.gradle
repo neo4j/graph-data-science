@@ -33,7 +33,7 @@ dependencies {
 }
 
 afterEvaluate {
-    if (ver.'neo4j' == neos.'dev' || ver.'neo4j' == neos.'5.0.0-drop04.0') {
+    if (ver.'neo4j'.startsWith('5.')) {
         dependencies {
             implementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
         }

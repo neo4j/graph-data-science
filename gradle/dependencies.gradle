@@ -117,7 +117,7 @@ def neo_deps = [
 def neo_deps_50 = neo_deps - ['neo4j-storage-engine-api', 'neo4j-cypher-runtime-util']
 
 ext.neodeps = {
-    if (ver.'neo4j' == neos.'dev' || ver.'neo4j' == neos.'5.0.0-drop04.0') {
+    if (ver.'neo4j'.startsWith('5.')) {
         neo_deps_50.iterator()
     } else {
         neo_deps.iterator()

@@ -13,7 +13,7 @@ ext.vendor = { ->
 ext.languageVersion = { ->
     if (project.hasProperty("javaLanguageVersion")) {
         return JavaLanguageVersion.of(project.property('javaLanguageVersion'))
-    } else if (ver.'neo4j' == neos.'dev' || ver.'neo4j' == neos.'5.0.0-drop04.0') {
+    } else if (ver.'neo4j'.startsWith('5.')) {
         return JavaLanguageVersion.of(17)
     } else {
         return JavaLanguageVersion.of(11)
