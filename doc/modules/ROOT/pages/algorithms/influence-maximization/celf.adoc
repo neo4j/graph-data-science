@@ -9,12 +9,6 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-This topic includes:
-
-* xref::algorithms/influence-maximization/celf.adoc#alpha-algorithms-celf-intro[Introduction]
-* xref::algorithms/influence-maximization/celf.adoc#alpha-algorithms-celf-syntax[Syntax]
-* xref::algorithms/influence-maximization/celf.adoc#alpha-algorithms-celf-examples[Examples]
-** xref::algorithms/influence-maximization/celf.adoc#alpha-algorithms-celf-examples-stream[Stream]
 
 [[alpha-algorithms-celf-intro]]
 == Introduction
@@ -178,8 +172,6 @@ CREATE
   (h)-[:FRIEND_OF]->(i);
 ----
 
-In the example, we will use the CELF algorithm to find `k` nodes subset.
-
 .The following statement will project the graph and store it in the graph catalog.
 [source, cypher, role=graph-project-query no-play]
 ----
@@ -196,7 +188,7 @@ In the following examples we will demonstrate using the CELF algorithm on this g
 [[alpha-algorithms-celf-examples-stream]]
 === Stream
 
-In the `stream` execution mode, the algorithm returns the {result} for each node.
+In the `stream` execution mode, the algorithm returns the {result} for nodes that are part of the seed set.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
 For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
@@ -223,6 +215,7 @@ ORDER BY spread DESC, name ASC
 --
 
 Note that in `stream` mode the result is only the seed set computed by the algorithm.
+The other nodes are not considered influential and are not included in the result.
 
 
 [[alpha-algorithms-celf-examples-mutate]]
@@ -232,7 +225,7 @@ include::partial$/algorithms/shared/examples-mutate-without-stats-intro.adoc[]
 
 [role=query-example, group=celfMutate]
 --
-.The following will run the algorithm, and stream results:
+.The following will run the algorithm, and updates the graph with the mutateProperty:
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.influenceMaximization.celf.mutate('myGraph', {
