@@ -61,12 +61,7 @@ class ModelDropProcTest extends ModelProcBaseTest {
             singletonList(
                 map(
                     "modelInfo", map("modelName", existingModel, "modelType", testModelType),
-                    "trainConfig", map(
-                        "dummyConfigProperty", trainConfig.dummyConfigProperty(),
-                        "modelName", trainConfig.modelName(),
-                        "sudo", trainConfig.sudo(),
-                        "username", trainConfig.usernameOverride()
-                    ),
+                    "trainConfig", trainConfig.toMap(),
                     "loaded", true,
                     "stored", false,
                     "graphSchema", EXPECTED_SCHEMA,

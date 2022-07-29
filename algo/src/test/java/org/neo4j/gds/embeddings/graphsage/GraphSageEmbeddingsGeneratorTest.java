@@ -28,7 +28,7 @@ import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
@@ -62,11 +62,12 @@ class GraphSageEmbeddingsGeneratorTest {
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddings(Aggregator.AggregatorType aggregatorType) {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
             .aggregator(aggregatorType)
             .embeddingDimension(EMBEDDING_DIMENSION)
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
+            .modelUser("")
             .relationshipWeightProperty("times")
             .build();
 
@@ -97,9 +98,10 @@ class GraphSageEmbeddingsGeneratorTest {
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddingsFromMultiLabelModel(Aggregator.AggregatorType aggregatorType) {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
             .aggregator(aggregatorType)
             .modelName(MODEL_NAME)
+            .modelUser("")
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases"))
             .embeddingDimension(EMBEDDING_DIMENSION)
             .projectedFeatureDimension(5)
@@ -151,10 +153,11 @@ class GraphSageEmbeddingsGeneratorTest {
         CSRGraphStore graphStore = factory.build();
         Graph filteredGraph = graphStore.getGraph("N", RelationshipType.ALL_RELATIONSHIPS.name, Optional.empty());
 
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
             .aggregator(Aggregator.AggregatorType.MEAN)
             .modelName("DUMMY")
-            .addSampleSize(2)
+            .modelUser("")
+            .sampleSizes(List.of(2))
             .featureProperties(List.of("age"))
             .embeddingDimension(3)
             .build();

@@ -270,6 +270,7 @@ class GraphSageAlgorithmFactoryTest {
     void memoryEstimationTreeStructure() {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
@@ -286,8 +287,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var gsConfig = ImmutableGraphSageStreamConfig
+        var gsConfig = GraphSageStreamConfigImpl
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .build();
 
@@ -324,6 +326,7 @@ class GraphSageAlgorithmFactoryTest {
     void memoryEstimationMutateTreeStructure() {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
@@ -340,8 +343,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var gsConfig = ImmutableGraphSageMutateConfig
+        var gsConfig = GraphSageMutateConfigImpl
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .mutateProperty("foo")
             .build();
@@ -545,6 +549,7 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName(modelName)
+            .modelUser("")
             .addFeatureProperties("a")
             .build();
 
@@ -558,8 +563,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var config = ImmutableGraphSageMutateConfig
+        var config = GraphSageMutateConfigImpl
             .builder()
+            .modelUser("")
             .modelName(modelName)
             .mutateProperty("foo")
             .build();

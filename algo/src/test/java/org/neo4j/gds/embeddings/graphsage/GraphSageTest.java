@@ -46,9 +46,9 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageStreamConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.SingleLabelGraphSageTrain;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -92,7 +92,7 @@ class GraphSageTest {
     private Graph graph;
     private GraphStore graphStore;
     private HugeObjectArray<double[]> features;
-    private ImmutableGraphSageTrainConfig.Builder configBuilder;
+    private GraphSageTrainConfigImpl.Builder configBuilder;
 
     @BeforeEach
     void setUp() {
@@ -126,7 +126,7 @@ class GraphSageTest {
         Random random = new Random();
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
 
-        configBuilder = ImmutableGraphSageTrainConfig.builder().embeddingDimension(EMBEDDING_DIMENSION);
+        configBuilder = GraphSageTrainConfigImpl.builder().modelUser("").embeddingDimension(EMBEDDING_DIMENSION);
     }
 
     @ParameterizedTest
@@ -150,8 +150,9 @@ class GraphSageTest {
         var model = trainAlgo.compute();
         modelCatalog.set(model);
 
-        var streamConfig = ImmutableGraphSageStreamConfig
+        var streamConfig = GraphSageStreamConfigImpl
             .builder()
+            .modelUser("")
             .modelName(MODEL_NAME)
             .concurrency(4)
             .build();
@@ -193,8 +194,9 @@ class GraphSageTest {
             .build()
             .generate();
 
-        var streamConfig = ImmutableGraphSageStreamConfig
+        var streamConfig = GraphSageStreamConfigImpl
             .builder()
+            .modelUser("")
             .modelName(MODEL_NAME)
             .concurrency(4)
             .batchSize(2)
@@ -209,7 +211,7 @@ class GraphSageTest {
     void testLogging() {
         var trainConfig = configBuilder
             .modelName(MODEL_NAME)
-            .addFeatureProperties("f1")
+            .featureProperties(List.of("f1"))
             .relationshipWeightProperty("weight")
             .build();
 
@@ -221,8 +223,9 @@ class GraphSageTest {
 
         modelCatalog.set(graphSageTrain.compute());
 
-        var streamConfig = ImmutableGraphSageStreamConfig
+        var streamConfig = GraphSageStreamConfigImpl
             .builder()
+            .modelUser("")
             .modelName(MODEL_NAME)
             .batchSize(1)
             .build();

@@ -225,7 +225,7 @@ class NodeRegressionPipelineTrainProcTest extends BaseProcTest {
                     "configuration", Matchers.allOf(
                         Matchers.hasEntry("pipeline", PIPELINE_NAME),
                         Matchers.hasEntry("modelName", MODEL_NAME),
-                        aMapWithSize(12)
+                        aMapWithSize(11)
                     ),
                     "modelSelectionStats",modelSelectionStatsCheck
                 )

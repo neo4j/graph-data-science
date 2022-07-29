@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.ImmutableGraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -37,7 +37,6 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.core.features.FeatureExtractionBaseTest;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,9 +72,10 @@ class GraphSageHelperTest {
     @Test
     void shouldValidateSingleLabelPerNode() {
         var graph = GdlFactory.of("(:Foo:Bar)").build().getUnion();
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
             .modelName("foo")
-            .featureProperties(Set.of("dummyProp"))
+            .modelUser("")
+            .featureProperties(List.of("dummyProp"))
             .projectedFeatureDimension(42)
             .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
@@ -98,16 +98,18 @@ class GraphSageHelperTest {
         return Stream.of(
             Arguments.of(
                 "single label",
-                ImmutableGraphSageTrainConfig.builder()
+                GraphSageTrainConfigImpl.builder()
                     .modelName("foo")
-                    .featureProperties(Set.of("dummyProp"))
+                    .featureProperties(List.of("dummyProp"))
+                    .modelUser("")
                     .build(),
                     singleLabelProperties
             ), Arguments.of(
                 "multi label",
-                ImmutableGraphSageTrainConfig.builder()
+                GraphSageTrainConfigImpl.builder()
                     .modelName("foo")
-                    .featureProperties(Set.of("numEmployees", "rating", "numIngredients", "numPurchases"))
+                    .modelUser("")
+                    .featureProperties(List.of("numEmployees", "rating", "numIngredients", "numPurchases"))
                     .projectedFeatureDimension(5)
                     .build(),
                 HugeObjectArray.of(
@@ -143,8 +145,9 @@ class GraphSageHelperTest {
 
         @Override
         public void makeExtractions(Graph graph) {
-            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+            GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
                 .modelName("foo")
+                .modelUser("")
                 .featureProperties(List.of("a", "b"))
                 .build();
 
@@ -168,8 +171,9 @@ class GraphSageHelperTest {
 
         @Test
         void shouldConcatenateFeatures() {
-            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+            GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
                 .modelName("foo")
+                .modelUser("")
                 .featureProperties(List.of("prop", "arrayProp"))
                 .build();
 
@@ -200,9 +204,10 @@ class GraphSageHelperTest {
 
         @Test
         void shouldThrowOnMissingProperties() {
-            GraphSageTrainConfig graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+            GraphSageTrainConfig graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
                 .modelName("foo")
-                .featureProperties(Set.of("prop"))
+                .modelUser("foo")
+                .featureProperties(List.of("prop"))
                 .build();
 
             assertThatExceptionOfType(IllegalArgumentException.class)
@@ -228,9 +233,10 @@ class GraphSageHelperTest {
 
         @Test
         void shouldInitializeFeaturesCorrectly() {
-            var config = ImmutableGraphSageTrainConfig.builder()
+            var config = GraphSageTrainConfigImpl.builder()
                 .modelName("foo")
-                .featureProperties(Set.of("dummyProp", "numEmployees", "rating"))
+                .modelUser("")
+                .featureProperties(List.of("dummyProp", "numEmployees", "rating"))
                 .build();
 
             var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config);
