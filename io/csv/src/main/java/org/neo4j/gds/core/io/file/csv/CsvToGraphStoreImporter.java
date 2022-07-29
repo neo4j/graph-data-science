@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file.csv;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.FileInput;
+import org.neo4j.gds.core.io.file.FileToGraphStoreImporter;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.logging.Log;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+import java.nio.file.Path;
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
+public class CsvToGraphStoreImporter extends FileToGraphStoreImporter {
+
+    public CsvToGraphStoreImporter(
+        int concurrency,
+        Path importPath,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
+        super(concurrency, importPath, log, taskRegistryFactory);
     }
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+    @Override
+    protected FileInput fileInput(Path importPath) {
+        return new CsvFileInput(importPath);
     }
 }

@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file.csv;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+public class AutoloadFlagVisitor {
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
+    public static final String AUTOLOAD_FILE_NAME = ".autoload";
+
+    private final Path autoloadFlagPath;
+
+    public AutoloadFlagVisitor(Path fileLocation) {
+        autoloadFlagPath = fileLocation.resolve(AUTOLOAD_FILE_NAME);
     }
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+    public void export() {
+        try {
+            Files.createFile(autoloadFlagPath);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 }

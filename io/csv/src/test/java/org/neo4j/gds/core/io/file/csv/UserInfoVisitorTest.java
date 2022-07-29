@@ -17,26 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.core.io.file.csv;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-@ValueClass
-@Configuration
-@SuppressWarnings("immutables:subtype")
-public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
+import java.nio.file.Path;
 
-    @Value.Default
-    @Configuration.DoubleRange(min = 0.0, max = 1.0)
-    default double samplingFactor() {
-        return 0.001;
-    }
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
-    static GraphStoreToCsvEstimationConfig of(String username, CypherMapWrapper config) {
-        return new GraphStoreToCsvEstimationConfigImpl(username, config);
+class UserInfoVisitorTest {
+
+    @Test
+    void shouldStoreUsernameToFile(@TempDir Path tempDir) {
+
+        try(var userInfoVisitor = new UserInfoVisitor(tempDir)) {
+            userInfoVisitor.export("UserA");
+        }
+
+        assertThat(tempDir)
+            .isDirectoryContaining("glob:**.userinfo");
+
+        assertThat(tempDir.resolve(UserInfoVisitor.USER_INFO_FILE_NAME))
+            .hasContent("UserA");
     }
 }

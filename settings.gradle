@@ -53,7 +53,7 @@ include('core-test-utils')
 project(':core-test-utils').projectDir = file('core-test-utils')
 
 include('csv')
-project(':csv').projectDir = file('csv')
+project(':csv').projectDir = file('io/csv')
 
 include('cypher-aggregation')
 project(':cypher-aggregation').projectDir = file('cypher-aggregation')
@@ -87,6 +87,9 @@ project(':graph-projection-api').projectDir = file('graph-projection-api')
 
 include('graph-schema-api')
 project(':graph-schema-api').projectDir = file('graph-schema-api')
+
+include 'io-core'
+project(':io-core').projectDir = file('io/core')
 
 include('licensing')
 project(':licensing').projectDir = file('licensing')
