@@ -222,6 +222,11 @@ public final class MemoryUsage {
         return keyArraySize + valueArraySize + sizeOfInstance(LongDoubleHashMap.class);
     }
 
+    public static long sizeOfLongDoubleScatterMap(long length) {
+        return sizeOfLongDoubleHashMap(length);
+    }
+
+
     public static long sizeOfLongHashSet(long length) {
         return sizeOfOpenHashContainer(length) + sizeOfInstance(LongHashSet.class);
     }
