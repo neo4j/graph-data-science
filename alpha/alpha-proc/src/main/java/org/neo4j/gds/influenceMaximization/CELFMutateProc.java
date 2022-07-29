@@ -20,7 +20,9 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -43,5 +45,19 @@ public class CELFMutateProc extends BaseProc {
             new CELFMutateSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
+    }
+
+    @Procedure(name = "gds.beta.influenceMaximization.celf.mutate.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        var mutateSpec = new CELFMutateSpec();
+
+        return new MemoryEstimationExecutor<>(
+            mutateSpec,
+            executionContext()
+        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
