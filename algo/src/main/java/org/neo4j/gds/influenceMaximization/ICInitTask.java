@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
 
@@ -42,13 +43,16 @@ final class ICInitTask implements Runnable {
     private final HugeLongArrayStack newActive;
     private final long initialRandomSeed;
 
+    private final ProgressTracker progressTracker;
+
     ICInitTask(
         Partition partition,
         Graph graph,
         double propagationProbability,
         int monteCarloSimulations,
         HugeDoubleArray singleSpreadArray,
-        long initialRandomSeed
+        long initialRandomSeed,
+        ProgressTracker progressTracker
     ) {
 
         this.partition = partition;
@@ -56,7 +60,7 @@ final class ICInitTask implements Runnable {
         this.propagationProbability = propagationProbability;
         this.monteCarloSimulations = monteCarloSimulations;
         this.singleSpreadArray = singleSpreadArray;
-
+        this.progressTracker = progressTracker;
         active = new BitSet(graph.nodeCount());
         newActive = HugeLongArrayStack.newStack(graph.nodeCount());
 
@@ -102,6 +106,8 @@ final class ICInitTask implements Runnable {
                 nodeSpread += active.cardinality();
             }
             singleSpreadArray.set(nodeId, nodeSpread / monteCarloSimulations);
+            progressTracker.logProgress();
+
         }
 
         }

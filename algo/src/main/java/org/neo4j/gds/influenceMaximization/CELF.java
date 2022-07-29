@@ -94,9 +94,11 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
     @Override
     public LongDoubleScatterMap compute() {
         //Find the first node with greedy algorithm
+        progressTracker.beginSubTask();
         greedyPart();
         //Find the next k-1 nodes using the list-sorting procedure
         lazyForwardPart();
+        progressTracker.endSubTask();
 
         return seedSetNodes;
     }
@@ -149,11 +151,10 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             initialRandomSeed,
             batchSize
         );
-
+        progressTracker.beginSubTask(seedSetCount - 1);
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         long[] firstK = new long[batchSize];
         for (int i = 1; i < seedSetCount; i++) {
-            progressTracker.beginSubTask();
             while (lastUpdate.get(spreads.top()) != i) {
                 long batchUpperBound = Math.min(batchSize, spreads.size());
                 int actualBatchSize = 0;
@@ -180,9 +181,8 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             gain += highestScore;
             independentCascade.incrementSeedNode(highestNode);
             progressTracker.logProgress();
-            progressTracker.endSubTask();
-
         }
+        progressTracker.endSubTask();
     }
 
     @Override
