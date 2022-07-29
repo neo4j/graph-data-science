@@ -233,15 +233,20 @@
 | `gds.beta.node2vec.stream`
 | `gds.beta.node2vec.stream.estimate`
 | `gds.beta.node2vec.write`
-| `gds.beta.node2vec.write`.estimate
+| `gds.beta.node2vec.write.estimate`
 .2+<.^|xref::beta-algorithms/random-walk.adoc[Random Walk]
 | `gds.beta.randomWalk.stream`
 | `gds.beta.randomWalk.stream.estimate`
-.4+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
+.8+<.^| xref::algorithms/influence-maximization/celf.adoc[Influence Maximization - CELF]
 | `gds.beta.influenceMaximization.celf.mutate`
+| `gds.beta.influenceMaximization.celf.mutate.estimate`
 | `gds.beta.influenceMaximization.celf.stats`
+| `gds.beta.influenceMaximization.celf.stats.estimate`
 | `gds.beta.influenceMaximization.celf.stream`
+| `gds.beta.influenceMaximization.celf.stream.estimate`
 | `gds.beta.influenceMaximization.celf.write`
+| `gds.beta.influenceMaximization.celf.write.estimate`
+
 |===
 
 [[alpha-tier]]
