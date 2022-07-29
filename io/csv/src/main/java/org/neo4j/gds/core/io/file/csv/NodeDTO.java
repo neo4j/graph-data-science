@@ -17,17 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.core.io.file.csv;
 
-import org.neo4j.gds.api.schema.ElementSchema;
-import org.neo4j.gds.api.schema.PropertySchema;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
-public interface FileHeader<SCHEMA extends ElementSchema<SCHEMA, ?, PROPERTY_SCHEMA>, PROPERTY_SCHEMA extends PropertySchema> {
+@JsonDeserialize(using = NodeDeserializer.class)
+public class NodeDTO {
+    long id;
 
-    Set<HeaderProperty> propertyMappings();
+    Map<String, Object> properties = new HashMap<>();
 
-    Map<String, PROPERTY_SCHEMA> schemaForIdentifier(SCHEMA schema);
+    @JsonAnySetter
+    void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
 }
