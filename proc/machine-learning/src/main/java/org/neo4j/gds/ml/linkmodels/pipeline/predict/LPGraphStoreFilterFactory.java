@@ -138,5 +138,20 @@ public final class LPGraphStoreFilterFactory {
                 StringJoining.join(graphStore.relationshipTypes().stream().map(RelationshipType::name))
             ));
         }
+
+        var directedPredictRels = filter
+            .predictRelationshipTypes()
+            .stream()
+            .filter(type -> !graphStore.isUndirected(type))
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
+
+        if (!directedPredictRels.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Procedure requires all relationships of %s to be UNDIRECTED, but found %s to be directed.",
+                StringJoining.join(filter.predictRelationshipTypes().stream().map(RelationshipType::name)),
+                StringJoining.join(directedPredictRels)
+            ));
+        }
     }
 }

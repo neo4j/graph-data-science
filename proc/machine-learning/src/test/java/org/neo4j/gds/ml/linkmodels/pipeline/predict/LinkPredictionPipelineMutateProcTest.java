@@ -172,7 +172,7 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .addParameter("topN", 9)
             .yields();
 
-        assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
+        assertError(query, "Procedure requires all relationships of ['T'] to be UNDIRECTED, but found ['T'] to be directed.");
     }
     
     static Stream<Arguments> topNConcurrencyLabelCombinations() {
