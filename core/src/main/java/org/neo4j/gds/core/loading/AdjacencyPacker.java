@@ -40,15 +40,29 @@ public final class AdjacencyPacker {
         if ((flags & SORT) == SORT) {
             Arrays.sort(values, offset, offset + length);
         }
+
         if ((flags & DELTA) == DELTA) {
             var ordinal = flags & MASK;
             var aggregation = Aggregation.resolve(Aggregation.values()[ordinal]);
-            length = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+            return deltaCompress(values, offset, length, aggregation);
+        } else {
+            return compress(values, offset, length);
         }
-        return compress(values, offset, length);
+
     }
 
     public static Compressed compress(long[] values, int offset, int length) {
+        return preparePacking(values, offset, length, length);
+    }
+
+    private static Compressed deltaCompress(long[] values, int offset, int length, Aggregation aggregation) {
+        int deltaLength = AdjacencyCompression.deltaEncodeSortedValues(values, offset, length, aggregation);
+        int alignedLength = Math.toIntExact(BitUtil.align(deltaLength, AdjacencyPacking.BLOCK_SIZE));
+        return preparePacking(values, offset, alignedLength, deltaLength);
+    }
+
+    private static Compressed preparePacking(long[] values, int offset, int length, int validLength) {
+        assert validLength <= length;
         int end = offset + length;
 
         int blocks = length / AdjacencyPacking.BLOCK_SIZE;
@@ -63,18 +77,18 @@ public final class AdjacencyPacker {
             allBits[blockIdx++] = (byte) bits;
         }
 
-        return compress(values, offset, length, allBits, bytes);
+        return runPacking(values, offset, validLength, allBits, bytes);
     }
 
-    private static Compressed compress(long[] values, int offset, int length, byte[] blocks, long bytes) {
+    private static Compressed runPacking(long[] values, int offset, int length, byte[] blocks, long bytes) {
         bytes = BitUtil.align(bytes, Long.BYTES);
         long mem = UnsafeUtil.allocateMemory(bytes, EmptyMemoryTracker.INSTANCE);
         long ptr = mem;
 
-        int i = offset;
+        int in = offset;
         for (byte bits : blocks) {
-            ptr = AdjacencyPacking.pack(bits, values, i, ptr);
-            i += AdjacencyPacking.BLOCK_SIZE;
+            ptr = AdjacencyPacking.pack(bits, values, in, ptr);
+            in += AdjacencyPacking.BLOCK_SIZE;
         }
 
         return new Compressed(mem, bytes, blocks, length);
@@ -85,10 +99,14 @@ public final class AdjacencyPacker {
         var blocks = compressed.blocks();
         long[] values = new long[blocks.length * AdjacencyPacking.BLOCK_SIZE];
 
-        long value = values[0];
+        if (values.length == 0) {
+            return values;
+        }
+
         int offset = 0;
+        long value = values[0];
         for (byte bits : blocks) {
-            ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
+            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
             for (int i = 0; i < AdjacencyPacking.BLOCK_SIZE; i++) {
                 value = values[offset + i] += value;
             }
@@ -109,7 +127,7 @@ public final class AdjacencyPacker {
 
         int offset = 0;
         for (byte bits : blocks) {
-            ptr = AdjacencyPacking.unpack(bits, values, offset, ptr);
+            ptr = AdjacencyUnpacking.unpack(bits, values, offset, ptr);
             offset += AdjacencyPacking.BLOCK_SIZE;
         }
 
