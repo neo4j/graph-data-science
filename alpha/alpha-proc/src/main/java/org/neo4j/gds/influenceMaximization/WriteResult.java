@@ -53,6 +53,7 @@ public final class WriteResult {
 
     public static class Builder extends AbstractResultBuilder<WriteResult> {
         private double totalSpread;
+
         Builder withTotalSpread(double totalSpread) {
             this.totalSpread = totalSpread;
             return this;

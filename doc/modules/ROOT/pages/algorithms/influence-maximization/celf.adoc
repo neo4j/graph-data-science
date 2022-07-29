@@ -112,7 +112,11 @@ CALL gds.beta.influenceMaximization.celf.mutate(
 )
 YIELD
   mutateMillis: Integer,
-  nodePropertiesWritten: Integer
+  nodePropertiesWritten: Integer,
+  computeMillis: Integer,
+  totalSpread: Float,
+  nodeCount: Integer,
+  configuration: Map
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -131,6 +135,10 @@ include::partial$/algorithms/alpha/influence-maximization/specific-configuration
 | Name                   | Type      | Description
 | mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
+| computeMillis          | Integer   | Milliseconds for running the algorithm.
+| totalSpread            | Float     | The sum of individual seed set node spreads.
+| nodeCount              | Integer   | Number of nodes in the graph.
+| configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
 
@@ -292,7 +300,7 @@ The other nodes are not considered influential and are not included in the resul
 [[alpha-algorithms-celf-examples-mutate]]
 === Mutate
 
-include::partial$/algorithms/shared/examples-mutate-without-stats-intro.adoc[]
+include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example, group=celfMutate]
 --

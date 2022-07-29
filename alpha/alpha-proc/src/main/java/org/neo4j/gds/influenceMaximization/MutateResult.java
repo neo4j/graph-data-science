@@ -21,13 +21,30 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Map;
+
 public final class MutateResult {
     public final long mutateMillis;
     public final long nodePropertiesWritten;
+    public final long computeMillis;
+    public final double totalSpread;
+    public final long nodeCount;
+    public final Map<String, Object> configuration;
 
-    private MutateResult(long mutateMillis, long nodePropertiesWritten) {
+    private MutateResult(
+        long mutateMillis,
+        long nodePropertiesWritten,
+        long computeMillis,
+        double totalSpread,
+        long nodeCount,
+        Map<String, Object> configuration
+    ) {
         this.mutateMillis = mutateMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+        this.computeMillis = computeMillis;
+        this.totalSpread = totalSpread;
+        this.nodeCount = nodeCount;
+        this.configuration = configuration;
     }
 
     public static Builder builder() {
@@ -35,8 +52,21 @@ public final class MutateResult {
     }
 
     public static class Builder extends AbstractResultBuilder<MutateResult> {
+
+        private double totalSpread;
+
+        Builder withTotalSpread(double totalSpread) {
+            this.totalSpread = totalSpread;
+            return this;
+        }
+
         public MutateResult build() {
-            return new MutateResult(mutateMillis, nodePropertiesWritten);
+            return new MutateResult(mutateMillis, nodePropertiesWritten,
+                computeMillis,
+                totalSpread,
+                nodeCount,
+                config.toMap()
+            );
         }
     }
 }
