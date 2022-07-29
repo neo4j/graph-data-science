@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -130,7 +131,17 @@ class CELFOnTreeGraphTest {
         //then  a4 is picked with 1/3 (independntant)
 
         //finally a5 has a gain of 0
-        CELF celf = new CELF(graph, 5, 0.51, 3, Pools.DEFAULT, 1, 10, DEFAULT_BATCH_SIZE);
+        CELF celf = new CELF(
+            graph,
+            5,
+            0.51,
+            3,
+            Pools.DEFAULT,
+            1,
+            10,
+            DEFAULT_BATCH_SIZE,
+            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+        );
         var celfResult = celf.compute();
         var softAssertions = new SoftAssertions();
 

@@ -64,9 +64,10 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         ExecutorService executorService,
         int concurrency,
         long initialRandomSeed,
-        int batchSize
+        int batchSize,
+        ProgressTracker progressTracker
     ) {
-        super(ProgressTracker.NULL_TRACKER);
+        super(progressTracker);
         this.graph = graph;
         this.initialRandomSeed = initialRandomSeed;
         this.batchSize = batchSize;
@@ -80,7 +81,6 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         this.concurrency = concurrency;
 
         this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
-
         this.spreads = new HugeLongPriorityQueue(nodeCount) {
             @Override
             protected boolean lessThan(long a, long b) {
@@ -103,7 +103,7 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
 
     private void greedyPart() {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
-
+        progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
@@ -113,7 +113,8 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
                 propagationProbability,
                 monteCarloSimulations,
                 singleSpreadArray,
-                initialRandomSeed
+                initialRandomSeed,
+                progressTracker
             ),
             Optional.of(Math.toIntExact(graph.nodeCount()) / concurrency)
         );
@@ -123,6 +124,7 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             .tasks(tasks)
             .executor(executorService)
             .run();
+        progressTracker.endSubTask();
 
         graph.forEachNode(nodeId -> {
             spreads.add(nodeId, singleSpreadArray.get(nodeId));
@@ -151,6 +153,7 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
         long[] firstK = new long[batchSize];
         for (int i = 1; i < seedSetCount; i++) {
+            progressTracker.beginSubTask();
             while (lastUpdate.get(spreads.top()) != i) {
                 long batchUpperBound = Math.min(batchSize, spreads.size());
                 int actualBatchSize = 0;
@@ -176,6 +179,8 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
             seedSetNodes.put(highestNode, highestScore);
             gain += highestScore;
             independentCascade.incrementSeedNode(highestNode);
+            progressTracker.logProgress();
+            progressTracker.endSubTask();
 
         }
     }

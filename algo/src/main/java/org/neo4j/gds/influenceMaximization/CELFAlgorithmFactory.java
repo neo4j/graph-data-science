@@ -23,6 +23,8 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig> extends GraphAlgorithmFactory<CELF, CONFIG> {
 
@@ -47,7 +49,18 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
             Pools.DEFAULT,
             configuration.concurrency(),
             configuration.randomSeed().orElse(0L),
-            DEFAULT_BATCH_SIZE
+            DEFAULT_BATCH_SIZE,
+            progressTracker
         );
     }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.task(
+            "CELF",
+            Tasks.leaf("Greedy", graph.nodeCount()),
+            Tasks.leaf("LazyForwarding", config.seedSetSize() - 1)
+        );
+    }
+
 }
