@@ -28,6 +28,7 @@ import org.neo4j.gds.config.GraphWriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -58,36 +59,7 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        ProcPreconditions.check();
-        validateGraphName(graphName);
-
-        // input
-        var cypherConfig = CypherMapWrapper.create(configuration);
-        var maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
-
-        var config = GraphWriteRelationshipConfig.of(
-            relationshipType,
-            maybeRelationshipProperty,
-            cypherConfig
-        );
-
-        // validation
-        validateConfig(cypherConfig, config);
-        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        // writing
-        var builder = new Result.Builder(graphName, relationshipType, maybeRelationshipProperty);
-        try (var ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            long relationshipsWritten = runWithExceptionLogging(
-                "Writing relationships failed",
-                () -> writeRelationshipType(graphStore, config.relationshipProperty(), RelationshipType.of(config.relationshipType()))
-            );
-            builder.withRelationshipsWritten(relationshipsWritten);
-        }
-
-        // result
-        return Stream.of(builder.build());
+        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration, Optional.empty());
     }
 
     @Procedure(name = "gds.graph.writeRelationship", mode = WRITE, deprecatedBy = "gds.graph.relationships.write")
@@ -98,21 +70,70 @@ public class GraphWriteRelationshipProc extends CatalogProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration);
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationship.write`";
+        return writeRelationships(graphName, relationshipType, relationshipProperty, configuration, Optional.of(deprecationWarning));
+    }
+
+    private Stream<Result> writeRelationships(
+        String graphName,
+        String relationshipTypeString,
+        String relationshipProperty,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
+    ) {
+        ProcPreconditions.check();
+        validateGraphName(graphName);
+
+        // input
+        var cypherConfig = CypherMapWrapper.create(configuration);
+        var maybeRelationshipProperty = ofNullable(trimToNull(relationshipProperty));
+
+        var config = GraphWriteRelationshipConfig.of(
+            relationshipTypeString,
+            maybeRelationshipProperty,
+            cypherConfig
+        );
+
+        // validation
+        validateConfig(cypherConfig, config);
+        var graphStore = graphStoreFromCatalog(graphName, config).graphStore();
+        config.validate(graphStore);
+
+        var relationshipType = RelationshipType.of(relationshipTypeString);
+        var relationshipCount = graphStore.relationshipCount(relationshipType);
+
+        var progressTracker = new TaskProgressTracker(
+            RelationshipExporter.baseTask("Graph", relationshipCount),
+            log,
+            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+            config.jobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+
+        deprecationWarning.ifPresent(progressTracker::logWarning);
+
+        // writing
+        var builder = new Result.Builder(graphName, relationshipTypeString, maybeRelationshipProperty);
+        try (var ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            long relationshipsWritten = runWithExceptionLogging(
+                "Writing relationships failed",
+                () -> writeRelationshipType(graphStore, config.relationshipProperty(), relationshipType, progressTracker)
+            );
+            builder.withRelationshipsWritten(relationshipsWritten);
+        }
+
+        // result
+        return Stream.of(builder.build());
     }
 
     private long writeRelationshipType(
         GraphStore graphStore,
         Optional<String> relationshipProperty,
-        RelationshipType relationshipType
+        RelationshipType relationshipType,
+        ProgressTracker progressTracker
     ) {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
-        var progressTracker = new TaskProgressTracker(
-            RelationshipExporter.baseTask("Graph", graph.relationshipCount()),
-            log,
-            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-            taskRegistryFactory
-        );
 
         var builder = relationshipExporterBuilder
             .withIdMappingOperator(graph::toOriginalNodeId)
