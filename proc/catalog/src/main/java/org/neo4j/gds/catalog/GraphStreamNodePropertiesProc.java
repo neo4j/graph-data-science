@@ -25,6 +25,7 @@ import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphStreamNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.procedure.Description;
@@ -148,7 +149,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
             subGraph.nodeCount() * nodePropertyKeysAndValues.size()
         );
 
-        var taskProgressTracker = new TaskProgressTracker(task, log, config.concurrency(), taskRegistryFactory);
+        var taskProgressTracker = new TaskProgressTracker(task, log, config.concurrency(), new JobId(), taskRegistryFactory, userLogRegistryFactory);
         taskProgressTracker.beginSubTask();
 
         deprecationWarning.ifPresent(taskProgressTracker::logWarning);

@@ -41,7 +41,7 @@ public class GlobalUserLogStore implements UserLogStore, ThrowingFunction<Contex
 
     private final Map<String, ConcurrentSkipListMap<Task, List<String>>> registeredMessages;
 
-    GlobalUserLogStore() {
+    public GlobalUserLogStore() {
         this.registeredMessages = new ConcurrentHashMap<>();
     }
 
