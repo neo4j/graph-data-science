@@ -31,10 +31,15 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.core.write.NativeRelationshipExporterBuilder;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -60,6 +65,17 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
         ", (a)-[:REL1 { relProp1: 2.0 }]->(c)" +
         ", (a)-[:REL2 { relProp2: 3.0 }]->(d)" +
         ", (d)-[:REL2 { relProp2: 4.0 }]->(e)";
+
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -192,5 +208,15 @@ class GraphWriteRelationshipProcTest extends BaseProcTest {
                 "Graph :: WriteRelationships 100%",
                 "Graph :: WriteRelationships :: Finished"
             );
+    }
+
+    @Test
+    void shouldLogDeprecationWarning() {
+        runQuery("CALL gds.graph.writeRelationship($graph, 'NEW_REL1')", Map.of("graph", TEST_GRAPH_NAME));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
+        Assertions.assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains("gds.graph.relationship.write");
     }
 }
