@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -37,13 +39,20 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.values.storable.NumberType;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -60,6 +69,17 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         ", (b)-[:REL1 { relProp1: 1.0, relProp2: 43.0}]->(b)" +
         ", (a)-[:REL2 { relProp1: 2.0, relProp2: 44.0}]->(a)" +
         ", (b)-[:REL2 { relProp1: 3.0, relProp2: 45.0}]->(b)";
+
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -310,5 +330,23 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             "Expecting all specified relationship projections to have all given properties defined. " +
             "Could not find property key(s) ['newRelProp2'] for label REL2. Defined keys: ['newRelProp1']"
         );
+    }
+
+    static Stream<Arguments> proceduresAndArguments() {
+        return Stream.of(
+            Arguments.of("gds.graph.streamRelationshipProperty", "gds.graph.relationshipProperty.stream", "'relProp1'"),
+            Arguments.of("gds.graph.streamRelationshipProperties", "gds.graph.relationshipProperties.stream", "['relProp1', 'relProp2']")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("proceduresAndArguments")
+    void shouldLogDeprecationWarning(String deprecatedProcedure, String newProcedure, String properties) {
+        runQuery(formatWithLocale("CALL %s($graph, %s)", deprecatedProcedure, properties), Map.of("graph", TEST_GRAPH_SAME_PROPERTIES));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        assertThat(userLogEntries.size()).isEqualTo(1);
+        assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains(newProcedure);
     }
 }
