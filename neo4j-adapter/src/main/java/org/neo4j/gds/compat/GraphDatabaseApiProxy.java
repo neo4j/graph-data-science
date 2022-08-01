@@ -55,7 +55,7 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static boolean containsDependency(GraphDatabaseService db, Class<?> dependency) {
-        return containsDependency(((GraphDatabaseAPI) db).getDependencyResolver(), dependency);
+        return containsDependency(cast(db).getDependencyResolver(), dependency);
     }
 
     public static boolean containsDependency(DependencyResolver resolver, Class<?> dependency) {
@@ -63,15 +63,14 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static <T> T resolveDependency(GraphDatabaseService db, Class<T> dependency) {
-        return resolveDependency(((GraphDatabaseAPI) db).getDependencyResolver(), dependency);
+        return resolveDependency(cast(db).getDependencyResolver(), dependency);
     }
 
     public static <T> T resolveDependency(DependencyResolver resolver, Class<T> dependency) {
         return resolver.resolveDependency(dependency, DependencyResolver.SelectionStrategy.SINGLE);
     }
 
-    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
-        KernelException {
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
             procedures.registerProcedure(clazz);
@@ -94,15 +93,15 @@ public final class GraphDatabaseApiProxy {
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
-        return ((GraphDatabaseAPI) db).databaseId();
+        return cast(db).databaseId();
     }
 
     public static DatabaseLayout databaseLayout(GraphDatabaseService db) {
-        return ((GraphDatabaseAPI) db).databaseLayout();
+        return cast(db).databaseLayout();
     }
 
     public static DbmsInfo dbmsInfo(GraphDatabaseService db) {
-        return ((GraphDatabaseAPI) db).dbmsInfo();
+        return cast(db).dbmsInfo();
     }
 
     public static Node getNodeById(Transaction tx, long id) {
@@ -190,6 +189,10 @@ public final class GraphDatabaseApiProxy {
             tx().commit();
             tx().close();
         }
+    }
+
+    private static GraphDatabaseAPI cast(GraphDatabaseService databaseService) {
+        return (GraphDatabaseAPI) databaseService;
     }
 
     private GraphDatabaseApiProxy() {
