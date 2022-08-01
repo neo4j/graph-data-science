@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -32,9 +33,10 @@ import java.util.concurrent.ExecutorService;
 public class KmeansPlusPlusSampler extends KmeansSampler {
 
     private List<KmeansTask> tasks;
-    private int concurrency;
-    private HugeDoubleArray distanceFromClosestCentroid;
-    private ExecutorService executorService;
+    private final int concurrency;
+    private final ProgressTracker progressTracker;
+    private final HugeDoubleArray distanceFromClosestCentroid;
+    private final ExecutorService executorService;
 
     private NodePropertyValues nodePropertyValues;
 
@@ -48,7 +50,8 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         HugeDoubleArray distanceFromClosestCentroid,
         int concurrency,
         ExecutorService executorService,
-        List<KmeansTask> tasks
+        List<KmeansTask> tasks,
+        ProgressTracker progressTracker
     ) {
         super(random, clusterManager, nodeCount, k);
         this.nodePropertyValues = nodePropertyValues;
@@ -56,6 +59,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         this.executorService = executorService;
         this.tasks = tasks;
         this.concurrency = concurrency;
+        this.progressTracker = progressTracker;
     }
 
 
@@ -67,6 +71,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         clusterManager.initialAssignCluster(firstId);
         distanceFromClosestCentroid.set(firstId, -1);
 
+        progressTracker.logProgress(1);
         for (int i = 1; i < k; ++i) {
 
             RunWithConcurrency.builder()
@@ -110,6 +115,8 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
             bitSet.set(nextNode);
             clusterManager.initialAssignCluster(nextNode);
             distanceFromClosestCentroid.set(nextNode, -(i + 1));
+
+            progressTracker.logProgress(1);
         }
         //nowe we have k clusters and distanceFromClusterAlso for each node closest communit in 0...k-2
 
@@ -125,4 +132,3 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
 
     }
 }
-

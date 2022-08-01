@@ -21,7 +21,11 @@ package org.neo4j.gds.kmeans;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -33,6 +37,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 @GdlExtension
 class KmeansTest {
@@ -344,4 +350,51 @@ class KmeansTest {
         var secondCentroid = result.centers()[1];
         assertThat(secondCentroid).isEqualTo(new double[]{100.0d, 0.0d});
     }
+
+    @Test
+    void progressTracking() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .maxIterations(5)
+            .numberOfRestarts(1)
+            .k(2)
+            .build();
+
+        var factory = new KmeansAlgorithmFactory<KmeansBaseConfig>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, kmeansConfig),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        var kmeans = factory.build(graph, kmeansConfig, progressTracker);
+        var result = kmeans.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Kmeans :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization 50%",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization 100%",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 100%",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 100%",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 1 :: Finished",
+                "Kmeans :: Finished"
+            );
+    }
+
 }

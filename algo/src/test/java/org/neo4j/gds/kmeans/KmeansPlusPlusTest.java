@@ -20,11 +20,11 @@
 package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -88,8 +88,7 @@ public class KmeansPlusPlusTest {
                 distanceFromCentroid,
                 3,
                 1,
-                new Partition(0, 5),
-                ProgressTracker.NULL_TRACKER
+                new Partition(0, 5)
             ),
             KmeansTask.createTask(
                 KmeansSampler.SamplerType.KMEANSPP,
@@ -99,8 +98,7 @@ public class KmeansPlusPlusTest {
                 distanceFromCentroid,
                 3,
                 1,
-                new Partition(5, 5),
-                ProgressTracker.NULL_TRACKER
+                new Partition(5, 5)
             )
         );
         KmeansSampler kmeansSampler = KmeansSampler.createSampler(
@@ -113,7 +111,8 @@ public class KmeansPlusPlusTest {
             2,
             distanceFromCentroid,
             kmeansContext.executor(),
-            tasks
+            tasks,
+            TestProgressTracker.NULL_TRACKER
         );
         kmeansSampler.performInitialSampling();
         double[] distanceArray = new double[]{0, 1, 2, 1, 0, 1, 2, 1, 0, 1};

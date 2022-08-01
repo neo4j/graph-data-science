@@ -23,14 +23,12 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Arrays;
 
 
 public abstract class KmeansTask implements Runnable {
     ClusterManager clusterManager;
-    final ProgressTracker progressTracker;
     final Partition partition;
     final NodePropertyValues nodePropertyValues;
 
@@ -68,8 +66,7 @@ public abstract class KmeansTask implements Runnable {
         HugeDoubleArray distanceFromCentroid,
         int k,
         int dimensions,
-        Partition partition,
-        ProgressTracker progressTracker
+        Partition partition
     ) {
         this.clusterManager = clusterManager;
         this.nodePropertyValues = nodePropertyValues;
@@ -78,7 +75,6 @@ public abstract class KmeansTask implements Runnable {
         this.k = k;
         this.dimensions = dimensions;
         this.partition = partition;
-        this.progressTracker = progressTracker;
         this.communitySizes = new long[k];
         if (samplerType == KmeansSampler.SamplerType.UNIFORM) {
             this.phase = TaskPhase.ITERATION;
@@ -96,8 +92,7 @@ public abstract class KmeansTask implements Runnable {
         HugeDoubleArray distanceFromCentroid,
         int k,
         int dimensions,
-        Partition partition,
-        ProgressTracker progressTracker
+        Partition partition
     ) {
         if (clusterManager instanceof DoubleClusterManager) {
             return new DoubleKmeansTask(
@@ -108,8 +103,7 @@ public abstract class KmeansTask implements Runnable {
                 distanceFromCentroid,
                 k,
                 dimensions,
-                partition,
-                progressTracker
+                partition
             );
         }
         return new FloatKmeansTask(
@@ -120,8 +114,7 @@ public abstract class KmeansTask implements Runnable {
             distanceFromCentroid,
             k,
             dimensions,
-            partition,
-            progressTracker
+            partition
         );
     }
 
@@ -148,7 +141,6 @@ public abstract class KmeansTask implements Runnable {
             //On that note,  maybe we can skip stable communities (i.e., communities that did not change between one iteration to another)
             // or avoid calculating their distance from other nodes etc...
             updateAfterAssignmentToCentroid(nodeId, closestCommunity);
-
         }
     }
 
@@ -228,8 +220,7 @@ final class DoubleKmeansTask extends KmeansTask {
         HugeDoubleArray distanceFromCluster,
         int k,
         int dimensions,
-        Partition partition,
-        ProgressTracker progressTracker
+        Partition partition
     ) {
         super(
             samplerType,
@@ -239,8 +230,7 @@ final class DoubleKmeansTask extends KmeansTask {
             distanceFromCluster,
             k,
             dimensions,
-            partition,
-            progressTracker
+            partition
         );
         this.communityCoordinateSums = new double[k][dimensions];
 
@@ -281,8 +271,7 @@ final class FloatKmeansTask extends KmeansTask {
         HugeDoubleArray distanceFromCluster,
         int k,
         int dimensions,
-        Partition partition,
-        ProgressTracker progressTracker
+        Partition partition
     ) {
         super(
             samplerType,
@@ -292,8 +281,7 @@ final class FloatKmeansTask extends KmeansTask {
             distanceFromCluster,
             k,
             dimensions,
-            partition,
-            progressTracker
+            partition
         );
         this.communityCoordinateSums = new float[k][dimensions];
     }
@@ -325,5 +313,3 @@ final class FloatKmeansTask extends KmeansTask {
 enum TaskPhase {
     INITIAL, ITERATION, DISTANCE
 }
-
-

@@ -130,17 +130,16 @@ public class Kmeans extends Algorithm<KmeansResult> {
 
     @Override
     public KmeansResult compute() {
-        progressTracker.beginSubTask();
+        progressTracker.beginSubTask(); // KMeans start
 
         checkInputValidity();
-
 
         if (k > graph.nodeCount()) {
             // Every node in its own community. Warn and return early.
             progressTracker.logWarning("Number of requested clusters is larger than the number of nodes.");
             bestCommunities.setAll(v -> (int) v);
             distanceFromCentroid.setAll(v -> 0d);
-            progressTracker.endSubTask();
+            progressTracker.endSubTask(); // KMeans end --> conditional!!!
             bestCentroids = new double[(int) graph.nodeCount()][dimensions];
             for (int i = 0; i < (int) graph.nodeCount(); ++i) {
                 bestCentroids[i] = nodePropertyValues.doubleArrayValue(i);
@@ -155,12 +154,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
         bestDistance = Double.POSITIVE_INFINITY;
         bestCommunities.setAll(v -> UNASSIGNED);
 
-
-
         for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
-
+            progressTracker.beginSubTask(); // KMeans Iteration - start
             ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
-
 
             currentCommunities.setAll(v -> UNASSIGNED);
 
@@ -175,8 +171,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
                     currentDistanceFromCentroid,
                     k,
                     dimensions,
-                    partition,
-                    progressTracker
+                    partition
                 ),
                 Optional.of((int) nodeCount / concurrency)
             );
@@ -192,20 +187,27 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 concurrency,
                 distanceFromCentroid,
                 executorService,
-                tasks
+                tasks,
+                progressTracker
             );
 
             assert numberOfTasks <= concurrency;
 
             //Initialization do initial centroid computation and assignment
-            if (seededCentroids.size() > 0) {
+            progressTracker.beginSubTask(); // Initialization - start
+            if (!seededCentroids.isEmpty()) {
                 clusterManager.assignSeededCentroids(seededCentroids);
             } else {
                 sampler.performInitialSampling();
             }
+            progressTracker.endSubTask(); // Initialization - end
             //
             int iteration = 0;
+
+            progressTracker.beginSubTask(); // Main - start
             while (true) {
+                progressTracker.beginSubTask(); // Iteration - start
+
                 long numberOfSwaps = 0;
                 //assign each node to a centroid
                 boolean shouldComputeDistance = (iteration > 0)
@@ -223,10 +225,13 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 }
                 recomputeCentroids(clusterManager, tasks);
 
+                progressTracker.endSubTask(); // Iteration - end
                 if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
                     break;
                 }
+
             }
+            progressTracker.endSubTask(); // Main - end
 
             double averageDistanceFromCentroid = calculatedistancePhase(tasks);
             updateBestSolution(
@@ -237,12 +242,13 @@ public class Kmeans extends Algorithm<KmeansResult> {
                 currentDistanceFromCentroid
             );
 
+            progressTracker.endSubTask(); // KMeans Iteration - end
         }
 
         if (computeSilhouette) {
             calculateSilhouette();
         }
-        progressTracker.endSubTask();
+        progressTracker.endSubTask(); // KMeans end
         return ImmutableKmeansResult.of(
             bestCommunities,
             distanceFromCentroid,

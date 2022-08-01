@@ -21,6 +21,7 @@ package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Arrays;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 
 public abstract class KmeansSampler {
 
+    private static ProgressTracker progressTracker;
     final SplittableRandom random;
     final int k;
     final long nodeCount;
@@ -64,10 +66,11 @@ public abstract class KmeansSampler {
         int concurrency,
         HugeDoubleArray distanceFromCenter,
         ExecutorService executorService,
-        List<KmeansTask> tasks
+        List<KmeansTask> tasks,
+        ProgressTracker progressTracker
     ) {
         if (samplerType == SamplerType.UNIFORM) {
-            return new KmeansUniformSampler(random, clusterManager, nodeCount, k);
+            return new KmeansUniformSampler(random, clusterManager, nodeCount, k, progressTracker);
         } else {
             return new KmeansPlusPlusSampler(
                 random,
@@ -78,7 +81,8 @@ public abstract class KmeansSampler {
                 distanceFromCenter,
                 concurrency,
                 executorService,
-                tasks
+                tasks,
+                progressTracker
             );
         }
     }

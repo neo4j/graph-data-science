@@ -61,6 +61,15 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), config.maxIterations());
+
+        return Tasks.iterativeFixed(taskName(), () -> List.of(
+            Tasks.task("KMeans Iteration", List.of(
+                Tasks.leaf("Initialization", config.k()),
+                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations())
+            ))
+        ),
+            config.numberOfRestarts()
+        );
     }
+
 }

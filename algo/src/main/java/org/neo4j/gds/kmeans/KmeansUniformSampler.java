@@ -19,12 +19,16 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.SplittableRandom;
 
 public class KmeansUniformSampler extends KmeansSampler {
+
+    private final ProgressTracker progressTracker;
 
     @Override
     public void performInitialSampling() {
@@ -36,9 +40,11 @@ public class KmeansUniformSampler extends KmeansSampler {
         SplittableRandom random,
         ClusterManager clusterManager,
         long nodeCount,
-        int k
+        int k,
+        ProgressTracker progressTracker
     ) {
         super(random, clusterManager, nodeCount, k);
+        this.progressTracker = progressTracker;
     }
 
     private List<Long> sampleClusters(
@@ -48,6 +54,7 @@ public class KmeansUniformSampler extends KmeansSampler {
             long nodeId = random.nextLong(nodeCount);
             if (!sampled.contains(nodeId)) {
                 sampled.add(nodeId);
+                progressTracker.logProgress(1);
             }
         }
         return new ArrayList<>(sampled);
