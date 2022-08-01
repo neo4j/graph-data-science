@@ -85,8 +85,11 @@ public final class ElementIdentityResolver {
         }
     }
 
-    public static void resolveAndValidate(GraphStore graphStore, Collection<String> labelFilterNames, String filterName) {
-        validate(graphStore, resolve(graphStore, labelFilterNames), filterName);
+    public static Collection<NodeLabel> resolveAndValidate(GraphStore graphStore, Collection<String> labelFilterNames, String filterName) {
+        Collection<NodeLabel> nodeLabels = resolve(graphStore, labelFilterNames);
+        validate(graphStore, nodeLabels, filterName);
+
+        return nodeLabels;
     }
 
     public static Collection<RelationshipType> resolveAndValidateTypes(GraphStore graphStore, Collection<String> relFilterNames, String filterName) {

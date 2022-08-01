@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.ElementIdentityResolver;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,37 +41,27 @@ public final class LPGraphStoreFilterFactory {
 
     private LPGraphStoreFilterFactory() {}
 
-    private static Collection<NodeLabel> internalNodeLabels(GraphStore graphStore, String nodeLabel) {
-        return (nodeLabel.equals(ElementProjection.PROJECT_ALL)) ? graphStore.nodeLabels() : NodeLabel.listOf(nodeLabel);
-    }
-
-    private static Collection<NodeLabel> nodePropertyStepLabels(
-        GraphStore graphStore,
-        String sourceNodeLabel,
-        String targetNodeLabel,
-        List<String> contextNodeLabels
-    ) {
-        return (contextNodeLabels.contains(ElementProjection.PROJECT_ALL)
-                || sourceNodeLabel.equals(ElementProjection.PROJECT_ALL) || targetNodeLabel.equals(ElementProjection.PROJECT_ALL))
-            ? graphStore.nodeLabels()
-            : Stream.concat(contextNodeLabels.stream(), Stream.of(sourceNodeLabel, targetNodeLabel))
-                .map(NodeLabel::of)
-                .collect(Collectors.toSet());
-    }
-
     public static LPGraphStoreFilter generate(
         LinkPredictionTrainConfig trainConfig,
         LinkPredictionPredictPipelineBaseConfig predictConfig,
         GraphStore graphStore,
         ProgressTracker progressTracker
     ) {
-        String sourceNodeLabel = predictConfig.sourceNodeLabel().orElse(trainConfig.sourceNodeLabel());
-        String targetNodeLabel = predictConfig.targetNodeLabel().orElse(trainConfig.targetNodeLabel());
-        List<String> contextNodeLabels;
+        var sourceNodeLabels = predictConfig
+            .sourceNodeLabel()
+            .map(label -> ElementIdentityResolver.resolve(graphStore, List.of(label)))
+            .orElse(ElementIdentityResolver.resolveAndValidate(graphStore, List.of(trainConfig.sourceNodeLabel()), "`sourceNodeLabel` from the model's train config"));
+
+        var targetNodeLabels = predictConfig
+            .targetNodeLabel()
+            .map(label -> ElementIdentityResolver.resolve(graphStore, List.of(label)))
+            .orElse(ElementIdentityResolver.resolveAndValidate(graphStore, List.of(trainConfig.targetNodeLabel()), "`targetNodeLabel` from the model's train config"));
+
+        Collection<NodeLabel> contextNodeLabels;
         if (!predictConfig.contextNodeLabels().isEmpty()) {
-            contextNodeLabels = predictConfig.contextNodeLabels();
+            contextNodeLabels = ElementIdentityResolver.resolve(graphStore, predictConfig.contextNodeLabels());
         } else {
-            contextNodeLabels = trainConfig.contextNodeLabels();
+            contextNodeLabels = ElementIdentityResolver.resolveAndValidate(graphStore, trainConfig.contextNodeLabels(), "`contextNodeLabels` from the model's train config");
         }
 
         Collection<RelationshipType> contextRelTypes;
@@ -97,14 +86,19 @@ public final class LPGraphStoreFilterFactory {
             );
         }
 
-        Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictRelTypes)
+        var nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictRelTypes)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
+
+        var nodePropertyStepsLabels = Stream
+            .of(contextNodeLabels, targetNodeLabels, sourceNodeLabels)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
         LPGraphStoreFilter filter = ImmutableLPGraphStoreFilter.builder()
-            .sourceNodeLabels(internalNodeLabels(graphStore, sourceNodeLabel))
-            .targetNodeLabels(internalNodeLabels(graphStore, targetNodeLabel))
-            .nodePropertyStepsLabels(nodePropertyStepLabels(graphStore, sourceNodeLabel, targetNodeLabel, contextNodeLabels))
+            .sourceNodeLabels(sourceNodeLabels)
+            .targetNodeLabels(targetNodeLabels)
+            .nodePropertyStepsLabels(nodePropertyStepsLabels)
             .predictRelationshipTypes(predictRelTypes)
             .nodePropertyStepRelationshipTypes(nodePropertyStepRelTypes)
             .build();
@@ -117,22 +111,6 @@ public final class LPGraphStoreFilterFactory {
     }
 
     private static void validateGraphFilter(GraphStore graphStore, LPGraphStoreFilter filter) {
-        var nodePropertyStepsLabels = filter.nodePropertyStepsLabels();
-        var invalidLabels = nodePropertyStepsLabels
-            .stream()
-            .filter((label -> !graphStore.nodeLabels().contains(label)))
-            .map(NodeLabel::name)
-            .collect(Collectors.toList());
-
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Based on the predict and the model's training configuration, expected node labels %s, but could not find %s. Available labels are %s.",
-                StringJoining.join(nodePropertyStepsLabels.stream().map(NodeLabel::name)),
-                StringJoining.join(invalidLabels),
-                StringJoining.join(graphStore.nodeLabels().stream().map(NodeLabel::name))
-            ));
-        }
-
         var directedPredictRels = filter
             .predictRelationshipTypes()
             .stream()

@@ -144,16 +144,15 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
+        // only validates train here as predict config is already validated in before
         assertThatThrownBy(() -> generate(
             trainConfig,
             predictConfig,
             multiLabelGraphStore,
             ProgressTracker.NULL_TRACKER
         ))
-            .hasMessage(
-                "Based on the predict and the model's training configuration, expected node labels ['A', 'INVALID', 'INVALID_2'], " +
-                "but could not find ['INVALID', 'INVALID_2']. " +
-                "Available labels are ['A', 'B', 'C'].");
+            .hasMessage("Could not find `targetNodeLabel` from the model's train config of ['INVALID_2']. " +
+                        "Available labels are ['A', 'B', 'C'].");
     }
 
     @Test
@@ -181,15 +180,15 @@ class LPGraphFilterFactoryTest {
             .topN(42)
             .build();
 
+        // only validates train here as predict config is already validated in before
         assertThatThrownBy(() -> generate(
             trainConfig,
             predictConfig,
             multiLabelGraphStore,
             ProgressTracker.NULL_TRACKER
         ))
-            .hasMessage(
-                "Based on the predict and the model's training configuration, expected relationship types ['INVALID', 'T'], " +
-                "but could not find ['INVALID']. Available types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
+            .hasMessage("Could not find `contextRelationshipTypes` from the model's train config of ['INVALID']. " +
+                        "Available relationship types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
     }
 
 }
