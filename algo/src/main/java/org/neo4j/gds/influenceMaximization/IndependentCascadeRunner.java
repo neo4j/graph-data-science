@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.bouncycastle.util.Arrays;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.ArrayUtil;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,7 +63,7 @@ class IndependentCascadeRunner implements Runnable {
         var candidateNode = 0L;
 
         while ((candidateNode = globalNodeProgress.getAndIncrement()) < graph.nodeCount()) {
-            if (Arrays.contains(seedSetNodes, candidateNode)) {
+            if (ArrayUtil.contains(seedSetNodes, candidateNode)) {
                 continue;
             }
 
