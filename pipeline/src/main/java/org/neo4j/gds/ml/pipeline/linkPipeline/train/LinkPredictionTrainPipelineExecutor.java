@@ -195,8 +195,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
             terminationFlag
         ).compute();
 
-        config.username();
-        config.modelName();
         var model = Model.of(
             MODEL_TYPE,
             schemaBeforeSteps,

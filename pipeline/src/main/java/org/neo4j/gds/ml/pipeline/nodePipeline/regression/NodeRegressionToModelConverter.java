@@ -42,8 +42,6 @@ public class NodeRegressionToModelConverter implements ResultToModelConverter<No
         NodeRegressionTrainResult trainResult,
         GraphSchema originalSchema
     ) {
-        config.username();
-        config.modelName();
         var catalogModel = Model.of(
             NodeRegressionTrainingPipeline.MODEL_TYPE,
             originalSchema,
