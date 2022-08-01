@@ -184,9 +184,8 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
                     remainingRelsConsumer.accept(source, target, weight);
                 }
             }
-            else {
-                remainingRelsConsumer.accept(source, target, weight);
-            }
+            // invalid relationships will be added to neither holdout or remaining
+
             return true;
         });
     }

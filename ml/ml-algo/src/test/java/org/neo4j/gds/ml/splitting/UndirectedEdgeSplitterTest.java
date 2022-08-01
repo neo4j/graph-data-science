@@ -321,8 +321,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var result = splitter.split(graph, .4);
 
         var remainingRels = result.remainingRels();
-        // 1 positive selected reduces remaining
-        assertEquals(8L, remainingRels.topology().elementCount());
+        // 1 positive selected reduces remaining & 4 invalid relationships
+        assertEquals(4L, remainingRels.topology().elementCount());
         assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
@@ -356,8 +356,8 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var result = splitter.split(multiLabelGraph, .7);
 
         var remainingRels = result.remainingRels();
-        // 2 positive selected reduces remaining
-        assertEquals(6L, remainingRels.topology().elementCount());
+        // 2 positive selected reduces remaining & 4 invalid relationships
+        assertEquals(2L, remainingRels.topology().elementCount());
         assertEquals(Orientation.UNDIRECTED, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();

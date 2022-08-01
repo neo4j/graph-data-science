@@ -54,9 +54,9 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
-| sourceNodeLabels           | List of String    | ['*']                  | yes      | Filter the selected relationships where the sourceNode has at least one of the sourceNodeLabels.
+| sourceNodeLabels           | List of String    | ['*']                  | yes      | Filter the relationships where the sourceNode has at least one of the sourceNodeLabels.
 
-| targetNodeLabels           | List of String    | ['*']                  | yes      | Filter the selected relationships where the targetNode has at least one of the targetNodeLabels.
+| targetNodeLabels           | List of String    | ['*']                  | yes      | Filter the relationships where the targetNode has at least one of the targetNodeLabels.
 
 | xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
 | xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
