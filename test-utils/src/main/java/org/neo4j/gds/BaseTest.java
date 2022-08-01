@@ -31,7 +31,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.test.extension.ImpermanentDbmsExtension;
@@ -55,7 +54,7 @@ public abstract class BaseTest {
     protected static final String DEFAULT_GRAPH_NAME = "graph";
 
     @Inject
-    public GraphDatabaseAPI db;
+    public GraphDatabaseService db;
 
     @Inject
     public NodeFunction nodeFunction;
