@@ -25,6 +25,7 @@ import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.MutateProc;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
@@ -40,9 +41,7 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -53,14 +52,15 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.values.storable.NumberType;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.mutate", description = PREDICT_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPipelineMutateProc.MutateResult, LinkPredictionPredictPipelineMutateConfig> {
@@ -86,11 +86,6 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictPipelineMutateConfig> validationConfig() {
-        return LinkPredictionPipelineCompanion.getValidationConfig();
-    }
-
-    @Override
     protected AbstractResultBuilder<MutateResult> resultBuilder(
         ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computeResult,
         ExecutionContext executionContext
@@ -113,7 +108,10 @@ public class LinkPredictionPipelineMutateProc extends MutateProc<LinkPredictionP
                 ComputationResult<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineMutateConfig> computationResult,
                 ExecutionContext executionContext
             ) {
-                var graph = computationResult.graph();
+                var graphStore = computationResult.graphStore();
+                Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
+                var graph = graphStore.getGraph(labelFilter);
+
                 var concurrency = computationResult.config().concurrency();
                 var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
                     .aggregation(Aggregation.SINGLE)

@@ -30,8 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LinkPredictionPredictPipelineBaseConfigTest {
 
@@ -159,4 +159,22 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("No value specified for the mandatory configuration parameter `topN`");
     }
+
+    @Test
+    void configIgnoresUserSpecifiedNodeLabels() {
+        var config = new LinkPredictionPredictPipelineBaseConfigImpl(
+            "user",
+            CypherMapWrapper.create(Map.of(
+                    "modelName", "testModel",
+                    "nodeLabels", 42,
+                    "topN", 42,
+                    "sampleRate", 1,
+                    "graphName", "g"
+                )
+            )
+        );
+
+        assertThat(config.configKeys()).doesNotContain("nodeLabels");
+    }
+
 }

@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -55,9 +56,12 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     > {
     private final Classifier classifier;
 
+    private final LPGraphStoreFilter graphStoreFilter;
+
     public LinkPredictionPredictPipelineExecutor(
         LinkPredictionPredictPipeline pipeline,
         Classifier classifier,
+        LPGraphStoreFilter graphStoreFilter,
         LinkPredictionPredictPipelineBaseConfig config,
         ExecutionContext executionContext,
         GraphStore graphStore,
@@ -66,6 +70,11 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
     ) {
         super(pipeline, config, executionContext, graphStore, graphName, progressTracker);
         this.classifier = classifier;
+        this.graphStoreFilter = graphStoreFilter;
+    }
+
+    LPGraphStoreFilter labelFilter() {
+        return graphStoreFilter;
     }
 
     @Override
@@ -74,16 +83,17 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
         return Map.of(
             DatasetSplits.FEATURE_INPUT,
             ImmutableGraphFilter.builder()
-                .nodeLabels(config.nodeLabelIdentifiers(graphStore))
-                .contextRelationshipTypes(config.internalRelationshipTypes(graphStore)).build()
+                .nodeLabels(graphStoreFilter.nodePropertyStepsLabels())
+                .contextRelationshipTypes(graphStoreFilter.nodePropertyStepRelationshipTypes())
+                .build()
         );
     }
 
     @Override
     protected LinkPredictionResult execute(Map<DatasetSplits, GraphFilter> dataSplits) {
         var graph = graphStore.getGraph(
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore),
+            graphStoreFilter.predictNodeLabels(),
+            graphStoreFilter.predictRelationshipTypes(),
             Optional.empty()
         );
 
@@ -171,11 +181,17 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 ));
         }
 
+        IdMap sourceNodes = graphStore.getGraph(graphStoreFilter.sourceNodeLabels());
+        IdMap targetNodes = graphStore.getGraph(graphStoreFilter.targetNodeLabels());
+
         if (isApproximateStrategy) {
+            // TODO: use filtered knn if needed
             return new ApproximateLinkPrediction(
                 classifier,
                 linkFeatureExtractor,
                 graph,
+                sourceNodes,
+                targetNodes,
                 config.approximateConfig(),
                 progressTracker
             );
@@ -184,6 +200,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 classifier,
                 linkFeatureExtractor,
                 graph,
+                sourceNodes,
+                targetNodes,
                 config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),

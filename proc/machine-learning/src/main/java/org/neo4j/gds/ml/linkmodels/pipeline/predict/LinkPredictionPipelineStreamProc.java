@@ -22,28 +22,27 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
-import org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Mode;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.ESTIMATE_PREDICT_DESCRIPTION;
 import static org.neo4j.gds.ml.linkmodels.pipeline.LinkPredictionPipelineCompanion.PREDICT_DESCRIPTION;
+import static org.neo4j.gds.ml.pipeline.PipelineCompanion.preparePipelineConfig;
 
 @GdsCallable(name = "gds.beta.pipeline.linkPrediction.predict.stream", description = PREDICT_DESCRIPTION, executionMode = STREAM)
 public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, LinkPredictionPipelineStreamProc.Result> {
@@ -70,11 +69,6 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     }
 
     @Override
-    public ValidationConfiguration<LinkPredictionPredictPipelineStreamConfig> validationConfig() {
-        return LinkPredictionPipelineCompanion.getValidationConfig();
-    }
-
-    @Override
     protected LinkPredictionPredictPipelineStreamConfig newConfig(String username, CypherMapWrapper config) {
         return LinkPredictionPredictPipelineStreamConfig.of(username, config);
     }
@@ -87,12 +81,14 @@ public class LinkPredictionPipelineStreamProc extends AlgoBaseProc<LinkPredictio
     @Override
     public ComputationResultConsumer<LinkPredictionPredictPipelineExecutor, LinkPredictionResult, LinkPredictionPredictPipelineStreamConfig, Stream<Result>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-
             if (computationResult.isGraphEmpty()) {
-                graph.release();
+                computationResult.graph().release();
                 return Stream.empty();
             }
+
+            var graphStore = computationResult.graphStore();
+            Collection<NodeLabel> labelFilter = computationResult.algorithm().labelFilter().predictNodeLabels();
+            var graph = graphStore.getGraph(labelFilter);
 
             return computationResult.result().stream()
                 .map(predictedLink -> new Result(

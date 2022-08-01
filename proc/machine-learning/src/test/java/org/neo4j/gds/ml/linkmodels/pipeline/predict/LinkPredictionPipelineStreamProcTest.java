@@ -46,8 +46,9 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         var labelOffset = nodeLabel.equals("N") ? 0 : nodeCount;
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
+            " sourceNodeLabel: $nodeLabel," +
+            " targetNodeLabel: $nodeLabel," +
             " threshold: 0," +
             " topN: $topN," +
             " concurrency: $concurrency" +
@@ -55,7 +56,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("topN", 3, "concurrency", concurrency, "nodeLabel", nodeLabel),
+            Map.of("nodeLabel", nodeLabel, "topN", 3, "concurrency", concurrency),
             List.of(
                 Map.of("node1", 0L + labelOffset, "node2", 4L + labelOffset, "probability", .49750002083312506),
                 Map.of("node1", 1L + labelOffset, "node2", 4L + labelOffset, "probability", .11815697780926959),
@@ -77,21 +78,23 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             .addParameter("topN", 9)
             .yields();
 
-        assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
+        assertError(query, "Procedure requires all relationships of ['T'] to be UNDIRECTED, but found ['T'] to be directed.");
     }
 
-    @Test
-    void estimate() {
+    @ParameterizedTest
+    @CsvSource(value = {"N, [2320 Bytes ... 3664 Bytes]", "M, [2880 Bytes ... 5344 Bytes]"})
+    void estimate(String targetNodeLabel, String expectedMemoryRange) {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +
             " modelName: 'model'," +
-            " threshold: 0," +
-            " topN: $topN" +
+            " sampleRate: 0.5," +
+            " targetNodeLabel: $targetNodeLabel," +
+            " topK: $topK" +
             "})" +
             "YIELD requiredMemory",
-            Map.of("topN", 3),
+            Map.of("targetNodeLabel", targetNodeLabel, "topK", 3),
             List.of(
-                Map.of("requiredMemory", "548 Bytes")
+                Map.of("requiredMemory", expectedMemoryRange)
             )
         );
     }
@@ -104,7 +107,6 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
         );
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
             " sampleRate: 0.5," +
             " randomSeed: 42," +
@@ -115,7 +117,7 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             "YIELD node1, node2, probability" +
             " RETURN node1, node2, probability" +
             " ORDER BY probability DESC, node1",
-            Map.of("topK", 1, "concurrency", 1, "nodeLabel", "N"),
+            Map.of("topK", 1, "concurrency", 1),
             List.of(
                 Map.of("node1", 0L, "node2", 4L, "probability", .49750002083312506),
                 Map.of("node1", 4L, "node2", 0L, "probability", .49750002083312506),
@@ -125,4 +127,28 @@ class LinkPredictionPipelineStreamProcTest extends LinkPredictionPipelineProcTes
             )
         );
     }
+
+    @Test
+    void estimateWithFictitiousGraph() {
+        assertCypherResult(
+            "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate(" +
+            "{ nodeCount: $nodeCount," +
+            " relationshipCount: $relationshipCount," +
+            " nodeProjection: $sourceNodeLabel," +
+            " relationshipProjection: '*'}," +
+            "{" +
+            " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
+            " threshold: 0," +
+            " topN: $topN" +
+            "})" +
+            "YIELD requiredMemory",
+            Map.of("nodeCount", 42L, "relationshipCount", 28L, "sourceNodeLabel", "N", "targetNodeLabel", "N", "topN", 3),
+            List.of(
+                Map.of("requiredMemory", "289 KiB")
+            )
+        );
+    }
+
 }

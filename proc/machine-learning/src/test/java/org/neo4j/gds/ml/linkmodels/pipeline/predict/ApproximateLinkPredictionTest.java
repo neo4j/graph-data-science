@@ -25,10 +25,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
@@ -72,6 +74,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
     private Graph graph;
 
+    private GraphStore graphStore;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(
@@ -87,7 +91,7 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
 
         runQuery(createQuery);
 
-        var graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
+        graphStore = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore();
         graph = graphStore.getUnion();
     }
 
@@ -109,6 +113,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
+            graphStore.getGraph(NodeLabel.of("N")),
+            graphStore.getGraph(NodeLabel.of("N")),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -182,6 +188,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
                 LogisticRegressionClassifier.from(modelData),
                 LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
                 graph,
+                graphStore.getGraph(NodeLabel.of("N")),
+                graphStore.getGraph(NodeLabel.of("N")),
                 ImmutableKnnBaseConfig.builder()
                     .randomSeed(42L)
                     .concurrency(1)
@@ -226,6 +234,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
+            graphStore.getGraph(NodeLabel.of("N")),
+            graphStore.getGraph(NodeLabel.of("N")),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -255,6 +265,8 @@ class ApproximateLinkPredictionTest extends BaseProcTest {
             .username("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
+            .sourceNodeLabel("DUMMY")
+            .targetNodeLabel("DUMMY")
             .build();
 
         var actualEstimate = ApproximateLinkPrediction

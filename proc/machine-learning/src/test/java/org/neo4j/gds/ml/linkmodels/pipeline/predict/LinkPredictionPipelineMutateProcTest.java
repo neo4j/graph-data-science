@@ -59,15 +59,22 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
     void shouldPredictWithTopN(int topN, int concurrency, String nodeLabel) {
         runQuery(
             "CALL gds.beta.pipeline.linkPrediction.predict.mutate('g', {" +
-            " nodeLabels: [$nodeLabel]," +
             " modelName: 'model'," +
+            " sourceNodeLabel: $sourceNodeLabel," +
+            " targetNodeLabel: $targetNodeLabel," +
             " mutateRelationshipType: 'PREDICTED'," +
             " threshold: 0," +
             " topN: $topN," +
             " concurrency:" +
             " $concurrency" +
             "})",
-            Map.of("topN", topN, "concurrency", concurrency, "nodeLabel", nodeLabel)
+            Map.of(
+                "sourceNodeLabel", nodeLabel,
+                "targetNodeLabel", nodeLabel,
+                "topN", topN,
+                "concurrency", concurrency,
+                "nodeLabel", nodeLabel
+            )
         );
 
         Graph actualGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db), "g").graphStore().getGraph(
@@ -112,7 +119,6 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .call("g")
             .algo("gds.beta.pipeline.linkPrediction.predict")
             .mutateMode()
-            .addParameter("nodeLabels", List.of("N"))
             .addParameter("mutateRelationshipType", "PREDICTED")
             .addParameter("modelName", "model")
             .addParameter("threshold", 0.0)
@@ -166,14 +172,14 @@ class LinkPredictionPipelineMutateProcTest extends LinkPredictionPipelineProcTes
             .addParameter("topN", 9)
             .yields();
 
-        assertError(query, "Procedure requires relationship projections to be UNDIRECTED.");
+        assertError(query, "Procedure requires all relationships of ['T'] to be UNDIRECTED, but found ['T'] to be directed.");
     }
     
     static Stream<Arguments> topNConcurrencyLabelCombinations() {
         return crossArguments(
-            () -> List.of(3, 50).stream().map(Arguments::of),
-            () -> List.of(1, 4).stream().map(Arguments::of),
-            () -> List.of("N", "M").stream().map(Arguments::of)
+            () -> Stream.of(3, 50).map(Arguments::of),
+            () -> Stream.of(1, 4).map(Arguments::of),
+            () -> Stream.of("N", "M").map(Arguments::of)
         );
     }
 
