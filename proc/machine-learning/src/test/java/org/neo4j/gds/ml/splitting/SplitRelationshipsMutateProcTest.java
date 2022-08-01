@@ -86,7 +86,6 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
 
     @Test
     void shouldFailIfContainingIsMissing() {
-
         var query = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
@@ -103,15 +102,11 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
         assertThat(ex)
             .getRootCause()
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessage(formatWithLocale(
-                "Relationship type `%s` does not exist in the in-memory graph.",
-                "MISSING"
-            ));
+            .hasMessage("Could not find nonNegativeRelationshipTypes of ['MISSING']. Available relationship types are ['T'].");
     }
 
     @Test
     void shouldFailIfRemainingExists() {
-
         var query = GdsCypher.call("graph")
             .algo("gds.alpha.ml.splitRelationships")
             .mutateMode()
@@ -128,7 +123,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .getRootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(formatWithLocale(
-                "Relationship type `%s` already exists in the in-memory graph.",
+                "Remaining relationship type `%s` already exists in the in-memory graph.",
                 "T"
             ));
     }
@@ -152,7 +147,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             .getRootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(formatWithLocale(
-                "Relationship type `%s` already exists in the in-memory graph.",
+                "Holdout relationship type `%s` already exists in the in-memory graph.",
                 "T"
             ));
     }

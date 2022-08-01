@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.config.ElementIdentityResolver;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -51,10 +52,10 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
 
     public static SplitRelationships of(GraphStore graphStore, SplitRelationshipsBaseConfig config) {
         var nodeLabels = config.nodeLabelIdentifiers(graphStore);
-        var sourceLabels = config.internalSourceLabels(graphStore);
-        var targetLabels = config.internalTargetLabels(graphStore);
+        var sourceLabels = ElementIdentityResolver.resolve(graphStore, config.sourceNodeLabels());
+        var targetLabels = ElementIdentityResolver.resolve(graphStore, config.targetNodeLabels());
         var relationshipTypes = config.internalRelationshipTypes(graphStore);
-        var superRelationshipTypes = config.superRelationshipTypes(graphStore);
+        var superRelationshipTypes = ElementIdentityResolver.resolveTypes(graphStore, config.superRelationshipTypes());
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, config.relationshipWeightProperty());
         var masterGraph = graphStore.getGraph(nodeLabels, superRelationshipTypes, Optional.empty());
