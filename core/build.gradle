@@ -40,7 +40,6 @@ dependencies {
             project(':graph-projection-api'),
             project(':graph-dimensions'),
             project(':collections'),
-            [group: 'org.bouncycastle',        name: 'bcpkix-jdk15on',           version: ver.'bouncycastle'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
