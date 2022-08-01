@@ -18,13 +18,13 @@ This chapter explains the available model catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                                | Description
-| xref::model-catalog/list.adoc[gds.beta.model.list]         | Prints information about models that are currently available in the catalog.
-| xref::model-catalog/exists.adoc[gds.beta.model.exists]     | Checks if a named model is available in the catalog.
-| xref::model-catalog/drop.adoc[gds.beta.model.drop]         | Drops a named model from the catalog.
-| xref::model-catalog/store.adoc[gds.alpha.model.store]      | Stores a names model from the catalog on disk.
-| xref::model-catalog/store.adoc#catalog-model-load[gds.alpha.model.load]        | Loads a named and stored model from disk.
-| xref::model-catalog/store.adoc#catalog-model-delete[gds.alpha.model.delete]    | Removes a named and stored model from disk.
-| xref::model-catalog/publish.adoc[gds.alpha.model.publish]  | Makes a model accessible to all users.
+| xref:model-catalog/list.adoc[gds.beta.model.list]         | Prints information about models that are currently available in the catalog.
+| xref:model-catalog/exists.adoc[gds.beta.model.exists]     | Checks if a named model is available in the catalog.
+| xref:model-catalog/drop.adoc[gds.beta.model.drop]         | Drops a named model from the catalog.
+| xref:model-catalog/store.adoc[gds.alpha.model.store]      | Stores a names model from the catalog on disk.
+| xref:model-catalog/store.adoc#catalog-model-load[gds.alpha.model.load]        | Loads a named and stored model from disk.
+| xref:model-catalog/store.adoc#catalog-model-delete[gds.alpha.model.delete]    | Removes a named and stored model from disk.
+| xref:model-catalog/publish.adoc[gds.alpha.model.publish]  | Makes a model accessible to all users.
 |===
 
 [NOTE]

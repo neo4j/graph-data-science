@@ -28,7 +28,7 @@ To obtain a random walk where the transition probability is independent of the p
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 [[algorithms-random-walk-syntax]]

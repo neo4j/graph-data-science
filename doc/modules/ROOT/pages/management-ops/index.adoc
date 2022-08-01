@@ -7,9 +7,9 @@ A central concept in the GDS library is the management of projected graphs.
 
 This chapter is divided into the following sections:
 
-* xref::management-ops/graph-catalog-ops.adoc[Graph Catalog]
-* xref::management-ops/node-properties.adoc[Node Properties]
-* xref::management-ops/utility-functions.adoc[Utility functions]
-* xref::management-ops/create-cypher-db.adoc[Cypher on GDS graph]
-* xref::management-ops/administration.adoc[Administration]
-* xref::management-ops/backup-restore.adoc[Backup and Restore]
+* xref:management-ops/graph-catalog-ops.adoc[Graph Catalog]
+* xref:management-ops/node-properties.adoc[Node Properties]
+* xref:management-ops/utility-functions.adoc[Utility functions]
+* xref:management-ops/create-cypher-db.adoc[Cypher on GDS graph]
+* xref:management-ops/administration.adoc[Administration]
+* xref:management-ops/backup-restore.adoc[Backup and Restore]

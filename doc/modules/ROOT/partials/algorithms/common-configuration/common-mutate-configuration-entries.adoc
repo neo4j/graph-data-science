@@ -15,12 +15,12 @@ ifeval::["{entity}" == "source-target-pair"]
 | mutateRelationshipType                                        | String      | n/a                    | no       | The relationship type used for the new relationships written to the projected graph.
 endif::[]
 
-| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
+| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                  | yes      | Filter the named graph using the given node labels.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                  | yes      | Filter the named graph using the given relationship types.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer     | 4                      | yes      | The number of concurrent threads used for running the algorithm.
 
 ifeval::["{entity}" == "pregel"]
 | mutateProperty                                                | String      | ""                     | yes      | The prefix used for all public properties in the PregelSchema.
 endif::[]
 
-| xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String      | Generated internally   | yes      | An ID that can be provided to more easily track the algorithm's progress.

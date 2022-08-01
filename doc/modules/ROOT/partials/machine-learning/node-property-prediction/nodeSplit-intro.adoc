@@ -4,8 +4,8 @@ The splitting configuration of a pipeline can be inspected by using `gds.beta.mo
 
 The node splits are used in the training process as follows:
 
-. The input graph is split into two parts: the train graph and the test graph. See the xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#node-pipelines-configure-splits-train-test-image[example below].
-. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part. See the xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#node-pipelines-configure-splits-validation-image[animation below].
+. The input graph is split into two parts: the train graph and the test graph. See the xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#node-pipelines-configure-splits-train-test-image[example below].
+. The train graph is further divided into a number of validation folds, each consisting of a train part and a validation part. See the xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#node-pipelines-configure-splits-validation-image[animation below].
 . Each model candidate is trained on each train part and evaluated on the respective validation part.
 . The model with the highest average score according to the primary metric will win the training.
 . The winning model will then be retrained on the entire train graph.

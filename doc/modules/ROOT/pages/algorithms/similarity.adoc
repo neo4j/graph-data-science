@@ -7,9 +7,9 @@ Similarity algorithms compute the similarity of pairs of nodes based on their ne
 Several similarity metrics can be used to compute a similarity score.
 The Neo4j GDS library includes the following similarity algorithms:
 
-* xref::algorithms/node-similarity.adoc[Node Similarity]
-** xref::algorithms/alpha/filtered-node-similarity.adoc[Filtered Node Similarity]
-* xref::algorithms/knn.adoc[K-Nearest Neighbors]
-** xref::algorithms/alpha/filtered-knn.adoc[Filtered K-Nearest Neighbors]
+* xref:algorithms/node-similarity.adoc[Node Similarity]
+** xref:algorithms/alpha/filtered-node-similarity.adoc[Filtered Node Similarity]
+* xref:algorithms/knn.adoc[K-Nearest Neighbors]
+** xref:algorithms/alpha/filtered-knn.adoc[Filtered K-Nearest Neighbors]
 
-As well as a collection of different xref::algorithms/similarity-functions.adoc[similarity functions] for calculating similarity between arrays of numbers
+As well as a collection of different xref:algorithms/similarity-functions.adoc[similarity functions] for calculating similarity between arrays of numbers

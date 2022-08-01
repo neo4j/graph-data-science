@@ -1,4 +1,4 @@
 [.beta-symbol]
 [.tier-note]
 This feature is in the beta tier.
-For more information on feature tiers, see xref::operations-reference/appendix-a.adoc[Operations reference].
+For more information on feature tiers, see xref:operations-reference/appendix-a.adoc[Operations reference].

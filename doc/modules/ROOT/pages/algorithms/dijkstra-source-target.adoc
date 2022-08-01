@@ -21,10 +21,10 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
 The algorithm supports weighted graphs with positive relationship weights.
 The Dijkstra Source-Target algorithm computes the shortest path between a source and a target node.
-To compute all paths from a source node to all reachable nodes, xref::algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source] can be used.
+To compute all paths from a source node to all reachable nodes, xref:algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source] can be used.
 
 The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
-The implementation is also used for the xref::algorithms/astar.adoc[A*] and xref::algorithms/yens.adoc[Yen's] algorithms.
+The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms.
 The algorithm implementation is executed using a single thread.
 Altering the concurrency configuration has no effect.
 
@@ -155,7 +155,7 @@ ORDER BY index
 
 The result shows the total cost of the shortest path between node `A` and node `F`.
 It also shows an ordered list of node ids that were traversed to find the shortest path as well as the accumulated costs of the visited nodes.
-This can be verified in the xref::algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-examples[example graph].
+This can be verified in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-examples[example graph].
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 

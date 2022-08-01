@@ -4,4 +4,4 @@ ifdef::stream-details[]
 {stream-details}
 endif::[]
 
-For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+For more details on the `stream` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].

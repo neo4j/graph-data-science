@@ -7,6 +7,6 @@ The objective of influence maximization is to find a small subset of k nodes fro
 The Neo4j GDS library includes the following alpha influence maximization algorithms:
 
 * Beta
-** xref::algorithms/influence-maximization/celf.adoc[CELF]
+** xref:algorithms/influence-maximization/celf.adoc[CELF]
 * Alpha
-** xref::algorithms/influence-maximization/greedy.adoc[Greedy]
+** xref:algorithms/influence-maximization/greedy.adoc[Greedy]

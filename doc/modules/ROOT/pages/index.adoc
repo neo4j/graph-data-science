@@ -23,16 +23,16 @@ endif::[]
 
 The manual covers the following areas:
 
-* xref::introduction.adoc[Introduction] -- An introduction to the Neo4j Graph Data Science library.
-* xref::installation/index.adoc[Installation] -- Instructions for how to install and use the Neo4j Graph Data Science library.
-* xref::common-usage/index.adoc[Common usage] -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
-* xref::management-ops/index.adoc[Graph management] -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
-* xref::algorithms/index.adoc[Graph algorithms] -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
-* xref::machine-learning/machine-learning.adoc[Machine learning] -- A detailed guide to the machine learning procedures included in the Neo4j Graph Data Science library.
-* xref::production-deployment/index.adoc[Production deployment] -- This chapter explains advanced details with regards to common Neo4j components.
-* xref::python-client/index.adoc[Python client] -- Documentation of the Graph Data Science client for Python users.
-* xref::operations-reference/appendix-a.adoc[Operations reference] -- Reference of all procedures contained in the Neo4j Graph Data Science library.
-* xref::appendix-b/index.adoc[Migration from Graph Data Science library Version 1.x] -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
+* xref:introduction.adoc[Introduction] -- An introduction to the Neo4j Graph Data Science library.
+* xref:installation/index.adoc[Installation] -- Instructions for how to install and use the Neo4j Graph Data Science library.
+* xref:common-usage/index.adoc[Common usage] -- General usage patterns and recommendations for getting the most out of the Neo4j Graph Data Science library.
+* xref:management-ops/index.adoc[Graph management] -- A detailed guide to the graph catalog and utility procedures included in the Neo4j Graph Data Science library.
+* xref:algorithms/index.adoc[Graph algorithms] -- A detailed guide to each of the algorithms in their respective categories, including use-cases and examples.
+* xref:machine-learning/machine-learning.adoc[Machine learning] -- A detailed guide to the machine learning procedures included in the Neo4j Graph Data Science library.
+* xref:production-deployment/index.adoc[Production deployment] -- This chapter explains advanced details with regards to common Neo4j components.
+* xref:python-client/index.adoc[Python client] -- Documentation of the Graph Data Science client for Python users.
+* xref:operations-reference/appendix-a.adoc[Operations reference] -- Reference of all procedures contained in the Neo4j Graph Data Science library.
+* xref:appendix-b/index.adoc[Migration from Graph Data Science library Version 1.x] -- Additional resources - migration guide, books, etc - to help using the Neo4j Graph Data Science library.
 
 The source code of the library is available at https://github.com/neo4j/graph-data-science[GitHub].
 If you have a suggestion on how we can improve the library or want to report a problem, you can create a https://github.com/neo4j/graph-data-science/issues/new[new issue].

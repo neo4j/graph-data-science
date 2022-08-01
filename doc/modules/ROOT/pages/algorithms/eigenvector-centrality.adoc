@@ -26,7 +26,7 @@ To compute that eigenvalue, the algorithm applies the https://en.wikipedia.org/w
 Within each iteration, the centrality score for each node is derived from the scores of its incoming neighbors.
 In the power iteration method, the eigenvector is L2-normalized after each iteration, leading to normalized results by default.
 
-The xref::algorithms/page-rank.adoc[PageRank] algorithm is a variant of Eigenvector Centrality with an additional jump probability.
+The xref:algorithms/page-rank.adoc[PageRank] algorithm is a variant of Eigenvector Centrality with an additional jump probability.
 
 
 [[algorithms-eigenvector-centrality-considerations]]
@@ -343,7 +343,7 @@ ORDER BY score DESC, name ASC
 --
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
-Below, one can find an example for xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-weighted[weighted graphs].
+Below, one can find an example for xref:algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-weighted[weighted graphs].
 
 
 [[algorithms-eigenvector-centrality-examples-stats]]
@@ -508,7 +508,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example].
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref:algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example].
 However, the computation converges after three iterations, and we can already observe a trend in the resulting scores.
 
 
@@ -561,7 +561,7 @@ This behavior cannot be changed as it is part of the power iteration method.
 
 However, to normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
-A description of all available scalers can be found in the documentation for the xref::alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
+A description of all available scalers can be found in the documentation for the xref:alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
 --
@@ -591,4 +591,4 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing the results with the xref::algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example], we can see that the relative order of scores is the same.
+Comparing the results with the xref:algorithms/eigenvector-centrality.adoc#algorithms-eigenvector-centrality-examples-stream[stream example], we can see that the relative order of scores is the same.

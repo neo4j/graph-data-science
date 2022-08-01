@@ -1,12 +1,12 @@
 [[python-client-pipelines]]
 = Machine learning pipelines
 
-The Python client has special support for xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link prediction pipelines] and xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines].
+The Python client has special support for xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link prediction pipelines] and xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines].
 The GDS pipelines are represented as pipeline objects.
 
 The Python method calls to _create_ the pipelines match their Cypher counterparts exactly.
 However, the rest of the pipeline functionality is deferred to methods on the pipeline objects themselves.
-Once created, the `TrainingPipeline` can be passed as arguments to methods in the Python client, such as the xref::pipeline-catalog/index.adoc[pipeline catalog operations].
+Once created, the `TrainingPipeline` can be passed as arguments to methods in the Python client, such as the xref:pipeline-catalog/index.adoc[pipeline catalog operations].
 Additionally, the `TrainingPipeline` has convenience methods allowing for inspection of the pipeline represented without explicitly involving the pipeline catalog.
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
@@ -14,12 +14,12 @@ include::partial$/pythonclient/python-client-gds-object.adoc[]
 
 == Node classification
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
 
-The creation of the node classification pipeline is very similar to xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[how it's done in Cypher].
+The creation of the node classification pipeline is very similar to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[how it's done in Cypher].
 To create a new node classification pipeline one would make the following call:
 
 [source,python]
@@ -37,21 +37,21 @@ Below is a description of the methods on such objects:
 |===
 | Name                  | Arguments                     | Return type             | Description
 | addNodeProperty       | procedure_name: str, +
-                            config: **kwargs            | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
+                            config: **kwargs            | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
 | selectFeatures        | node_properties: +
-                            Union[str, list[str]]       | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Select node properties to be used as features].
-| configureSplit        | config: **kwargs              | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configure the train-test dataset split].
+                            Union[str, list[str]]       | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Select node properties to be used as features].
+| configureSplit        | config: **kwargs              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configure the train-test dataset split].
 | addLogisticRegression | parameter_space: +
-                            dict[str, any]              | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+                            dict[str, any]              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-                            dict[str, any]              | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
+                            dict[str, any]              | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
 | configureAutoTuning   | config: **kwargs
-                                                        | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-auto-tuning[Configure the auto-tuning].
+                                                        | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-auto-tuning[Configure the auto-tuning].
 | train                 | G: Graph, +
                             config: **kwargs            | NCPredictionPipeline, +
-                                                             Series          | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Train the pipeline on the given input graph using given keyword arguments].
+                                                             Series          | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Train the pipeline on the given input graph using given keyword arguments].
 | train_estimate        | G: Graph, +
-                            config: **kwargs            | Series                  | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipelines-examples-train-memory-estimation[Estimate training the pipeline on the given input graph using given keyword arguments].
+                            config: **kwargs            | Series                  | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipelines-examples-train-memory-estimation[Estimate training the pipeline on the given input graph using given keyword arguments].
 | node_property_steps   | -                             | DataFrame               | Returns the node property steps of the pipeline.
 | feature_properties    | -                             | Series                  | Returns a list of the selected feature properties for the pipeline.
 | split_config          | -                             | Series                  | Returns the configuration set up for train-test splitting of the dataset.
@@ -60,7 +60,7 @@ Below is a description of the methods on such objects:
 | name                  | -                             | str                     | The name of the pipeline as it appears in the pipeline catalog.
 | type                  | -                             | str                     | The type of pipeline.
 | creation_time         | -                             | neo4j.time.Datetime     | Time when the pipeline was created.
-| drop                  | failIfMissing: Optional[bool] | Series                  | xref::pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
+| drop                  | failIfMissing: Optional[bool] | Series                  | xref:pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
 | exists                | -                             | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
@@ -69,9 +69,9 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NCModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
+Another difference is that the `train` Python call takes a xref:python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NCModel` xref:python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-nodeclassification-pipe-example]]
@@ -105,46 +105,46 @@ trained_pipe_model, res = pipe.train(G, modelName="my-model", targetProperty="my
 assert res["trainMillis"] >= 0
 ----
 
-A model referred to as "my-model" in the xref::model-catalog/index.adoc[GDS Model Catalog] is produced.
+A model referred to as "my-model" in the xref:model-catalog/index.adoc[GDS Model Catalog] is produced.
 In the next section we will go over how to use that model to make predictions.
 
 
 === Model
 
 As we saw in the previous section, node classification models are created when training a node classification pipeline.
-In addition to inheriting the methods common to all xref::python-client/model-object.adoc[model objects], node classification models have the following methods:
+In addition to inheriting the methods common to all xref:python-client/model-object.adoc[model objects], node classification models have the following methods:
 
 .Node classification model methods
 [opts="header",cols="8m,6m,4m,13"]
 |===
 | Name                    | Arguments        | Return type | Description
 | predict_mutate          | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-mutate[Predict classes for nodes of the input graph and mutate graph with predictions].
+                            config: **kwargs | Series      | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-mutate[Predict classes for nodes of the input graph and mutate graph with predictions].
 | predict_mutate_estimate | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and mutating graph with predictions].
+                            config: **kwargs | Series      | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and mutating graph with predictions].
 | predict_stream          | G: Graph, +
-                            config: **kwargs | DataFrame   | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#node-classification-pipelines-predict-examples-stream[Predict classes for nodes of the input graph and stream the results].
+                            config: **kwargs | DataFrame   | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#node-classification-pipelines-predict-examples-stream[Predict classes for nodes of the input graph and stream the results].
 | predict_stream_estimate | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and streaming the results].
+                            config: **kwargs | Series      | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and streaming the results].
 | predict_write           | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-write[Predict classes for nodes of the input graph and write results back to the database].
+                            config: **kwargs | Series      | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-write[Predict classes for nodes of the input graph and write results back to the database].
 
 | predict_write_estimate  | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and writing the results back to the database].
+                            config: **kwargs | Series      | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc#nodeclassification-pipelines-examples-predict-memory-estimation[Estimate predicting classes for nodes of the input graph and writing the results back to the database].
 | metrics                 | -                | Series      | Returns values for the metrics specified when training, for this particular model.
 |===
 
-One can note that the predict methods are indeed very similar to xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[their Cypher counterparts].
+One can note that the predict methods are indeed very similar to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[their Cypher counterparts].
 The three main differences are that:
 
-* They take a xref::python-client/graph-object.adoc[graph object] instead of a graph name.
+* They take a xref:python-client/graph-object.adoc[graph object] instead of a graph name.
 * They have Python keyword arguments representing the keys of the configuration map.
-* One does not have to provide a "modelName" since the xref::python-client/model-object.adoc[model object] used itself have this information.
+* One does not have to provide a "modelName" since the xref:python-client/model-object.adoc[model object] used itself have this information.
 
 
 ==== Example (continued)
 
-We now continue the xref::python-client/pipelines.adoc#python-client-pipelines-nodeclassification-pipe-example[example above] using the node classification model `trained_pipe_model` we trained there.
+We now continue the xref:python-client/pipelines.adoc#python-client-pipelines-nodeclassification-pipe-example[example above] using the node classification model `trained_pipe_model` we trained there.
 Suppose that we have a new graph `H` that we want to run predictions on.
 
 [source,python]
@@ -161,12 +161,12 @@ assert len(results) == H.node_count()
 
 == Link prediction
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
 
-The creation of the link prediction pipeline is very similar to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-creating-a-pipeline[how it's done in Cypher].
+The creation of the link prediction pipeline is very similar to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-creating-a-pipeline[how it's done in Cypher].
 To create a new link prediction pipeline one would make the following call:
 
 
@@ -185,21 +185,21 @@ Below is a description of the methods on such objects:
 |===
 | Name                  | Arguments                     | Return type         | Description
 | addNodeProperty       | procedure_name: str, +
-                        config: **kwargs                | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
+                        config: **kwargs                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
 | addFeature            | feature_type: str, +
-                        config: **kwargs                | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Add a link feature for model training based on node properties and a feature combiner].
-| configureSplit        | config: **kwargs              | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configure the feature-train-test dataset split].
+                        config: **kwargs                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Add a link feature for model training based on node properties and a feature combiner].
+| configureSplit        | config: **kwargs              | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configure the feature-train-test dataset split].
 | addLogisticRegression | parameter_space: +
-                          dict[str, any]                | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+                          dict[str, any]                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a logistic regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-                          dict[str, any]                | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
+                          dict[str, any]                | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
 | configureAutoTuning   | config: **kwargs
-                                                        | Series              | xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-auto-tuning[Configure the auto-tuning].
+                                                        | Series              | xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-auto-tuning[Configure the auto-tuning].
 | train                 | G: Graph, +
 config: **kwargs        | LPPredictionPipeline, +
-                                                  Series               | xref::machine-learning/linkprediction-pipelines/training.adoc[Train the model on the given input graph using given keyword arguments].
+                                                  Series               | xref:machine-learning/linkprediction-pipelines/training.adoc[Train the model on the given input graph using given keyword arguments].
 | train_estimate        | G: Graph, +
-                        config: **kwargs                | Series              | xref::machine-learning/linkprediction-pipelines/training.adoc#linkprediction-pipeline-examples-train-estimate[Estimate training the pipeline on the given input graph using given keyword arguments].
+                        config: **kwargs                | Series              | xref:machine-learning/linkprediction-pipelines/training.adoc#linkprediction-pipeline-examples-train-estimate[Estimate training the pipeline on the given input graph using given keyword arguments].
 | node_property_steps   | -                             | DataFrame           | Returns the node property steps of the pipeline.
 | feature_steps         | -                             | DataFrame           | Returns a list of the selected feature steps for the pipeline.
 | split_config          | -                             | Series              | Returns the configuration set up for feature-train-test splitting of the dataset.
@@ -208,7 +208,7 @@ config: **kwargs        | LPPredictionPipeline, +
 | name                  | -                             | str                 | The name of the pipeline as it appears in the pipeline catalog.
 | type                  | -                             | str                 | The type of pipeline.
 | creation_time         | -                             | neo4j.time.Datetime | Time when the pipeline was created.
-| drop                  | failIfMissing: Optional[bool] | Series                  | xref::pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
+| drop                  | failIfMissing: Optional[bool] | Series                  | xref:pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
 | exists                | -                             | bool                | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
@@ -217,9 +217,9 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `LPModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
+Another difference is that the `train` Python call takes a xref:python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `LPModel` xref:python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-linkprediction-pipe-example]]
@@ -255,41 +255,41 @@ trained_pipe_model, res = pipe.train(G, modelName="my-model")
 assert res["trainMillis"] >= 0
 ----
 
-A model referred to as "my-model" in the xref::model-catalog/index.adoc[GDS Model Catalog] is produced.
+A model referred to as "my-model" in the xref:model-catalog/index.adoc[GDS Model Catalog] is produced.
 In the next section we will go over how to use that model to make predictions.
 
 
 === Model
 
 As we saw in the previous section, link prediction models are created when training a link prediction pipeline.
-In addition to inheriting the methods common to all xref::python-client/model-object.adoc[model objects], link prediction models have the following methods:
+In addition to inheriting the methods common to all xref:python-client/model-object.adoc[model objects], link prediction models have the following methods:
 
 .Link prediction model methods
 [opts="header",cols="8m,6m,4m,13"]
 |===
 | Name                    | Arguments        | Return type | Description
 | predict_mutate          | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-mutate[Predict links between non-neighboring nodes of the input graph and mutate graph with predictions].
+                            config: **kwargs | Series      | xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-mutate[Predict links between non-neighboring nodes of the input graph and mutate graph with predictions].
 | predict_mutate_estimate | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-estimate[Estimate predicting links between non-neighboring nodes of the input graph and mutating graph with predictions].
+                            config: **kwargs | Series      | xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-estimate[Estimate predicting links between non-neighboring nodes of the input graph and mutating graph with predictions].
 | predict_stream          | G: Graph, +
-                            config: **kwargs | DataFrame   | xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-stream[Predict links between non-neighboring nodes of the input graph and stream the results].
+                            config: **kwargs | DataFrame   | xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-stream[Predict links between non-neighboring nodes of the input graph and stream the results].
 | predict_stream_estimate | G: Graph, +
-                            config: **kwargs | Series      | xref::machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-estimate[Estimate predicting links between non-neighboring nodes of the input graph and streaming the results].
+                            config: **kwargs | Series      | xref:machine-learning/linkprediction-pipelines/predict.adoc#algorithms-link-prediction-pipelines-predict-examples-estimate[Estimate predicting links between non-neighboring nodes of the input graph and streaming the results].
 | metrics                 | -                | Series      | Returns values for the metrics used when training, for this particular model.
 |===
 
-One can note that the predict methods are indeed very similar to xref::machine-learning/linkprediction-pipelines/predict.adoc[their Cypher counterparts].
+One can note that the predict methods are indeed very similar to xref:machine-learning/linkprediction-pipelines/predict.adoc[their Cypher counterparts].
 The three main differences are that:
 
-* They take a xref::python-client/graph-object.adoc[graph object] instead of a graph name.
+* They take a xref:python-client/graph-object.adoc[graph object] instead of a graph name.
 * They have Python keyword arguments representing the keys of the configuration map.
-* One does not have to provide a "modelName" since the xref::python-client/model-object.adoc[model object] used itself have this information.
+* One does not have to provide a "modelName" since the xref:python-client/model-object.adoc[model object] used itself have this information.
 
 
 ==== Example (continued)
 
-We now continue the xref::python-client/pipelines.adoc#python-client-pipelines-linkprediction-pipe-example[example above] using the link prediction model `trained_pipe_model` we trained there.
+We now continue the xref:python-client/pipelines.adoc#python-client-pipelines-linkprediction-pipe-example[example above] using the link prediction model `trained_pipe_model` we trained there.
 Suppose that we have a new graph `H` that we want to run predictions on.
 
 [source,python]
@@ -306,12 +306,12 @@ assert result["relationshipsWritten"] == 5 * 2  # Undirected relationships
 
 == Node regression
 
-This section outlines how to use the Python client to build, configure and train a xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression pipeline], as well as how to use the model that training produces for predictions.
+This section outlines how to use the Python client to build, configure and train a xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression pipeline], as well as how to use the model that training produces for predictions.
 
 
 === Pipeline
 
-The creation of the node regression pipeline is very similar to xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-creating-a-pipeline[how it's done in Cypher].
+The creation of the node regression pipeline is very similar to xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-creating-a-pipeline[how it's done in Cypher].
 To create a new node regression pipeline one would make the following call:
 
 [source,python]
@@ -329,18 +329,18 @@ Below is a description of the methods on such objects:
 |===
 | Name                  | Arguments                     | Return type             | Description
 | addNodeProperty       | procedure_name: str, +
-config: **kwargs        | Series                        | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
+config: **kwargs        | Series                        | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-node-properties[Add an algorithm that produces a node property to the pipeline, with optional algorithm-specific configuration].
 | selectFeatures        | node_properties: +
-Union[str, list[str]]   | Series                        | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[Select node properties to be used as features].
-| configureSplit        | config: **kwargs              | Series                  | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configure the train-test dataset split].
+Union[str, list[str]]   | Series                        | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[Select node properties to be used as features].
+| configureSplit        | config: **kwargs              | Series                  | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-splits[Configure the train-test dataset split].
 | addLinearRegression   | parameter_space: +
-dict[str, any]          | Series                        | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Add a linear regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
+dict[str, any]          | Series                        | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Add a linear regression model configuration to train as a candidate in the model selection phase]. footnote:range[Ranges can also be given as length two `Tuple`s. I.e. `(x, y)` is the same as `{range: [x, y]}`.]
 | addRandomForest       | parameter_space: +
-dict[str, any]          | Series                        | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
-| configureAutoTuning   | config: **kwargs              | Series                  | xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-auto-tuning[Configure the auto-tuning].
+dict[str, any]          | Series                        | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Add a random forest model configuration to train as a candidate in the model selection phase]. footnote:range[]
+| configureAutoTuning   | config: **kwargs              | Series                  | xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-configure-auto-tuning[Configure the auto-tuning].
 | train                 | G: Graph, +
 config: **kwargs        | NCPredictionPipeline, +
-Series          | xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Train the pipeline on the given input graph using given keyword arguments].
+Series          | xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Train the pipeline on the given input graph using given keyword arguments].
 | node_property_steps   | -                             | DataFrame               | Returns the node property steps of the pipeline.
 | feature_properties    | -                             | Series                  | Returns a list of the selected feature properties for the pipeline.
 | split_config          | -                             | Series                  | Returns the configuration set up for train-test splitting of the dataset.
@@ -349,7 +349,7 @@ Series          | xref::machine-learning/node-property-prediction/noderegression
 | name                  | -                             | str                     | The name of the pipeline as it appears in the pipeline catalog.
 | type                  | -                             | str                     | The type of pipeline.
 | creation_time         | -                             | neo4j.time.Datetime     | Time when the pipeline was created.
-| drop                  | failIfMissing: Optional[bool] | Series                  | xref::pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
+| drop                  | failIfMissing: Optional[bool] | Series                  | xref:pipeline-catalog/drop.adoc[Removes the pipeline] from the GDS Pipeline Catalog.
 | exists                | -                             | bool                    | `True` if the model exists in the GDS Pipeline Catalog, `False` otherwise.
 |===
 
@@ -358,9 +358,9 @@ There are two main differences when comparing the methods above that map to proc
 * As the Python methods are called on the pipeline object, one does not need to provide a name when calling them.
 * Configuration parameters in the Cypher calls are represented by named keyword arguments in the Python method calls.
 
-Another difference is that the `train` Python call takes a xref::python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NRModel` xref::python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
+Another difference is that the `train` Python call takes a xref:python-client/graph-object.adoc[graph object] instead of a graph name, and returns a `NRModel` xref:python-client/model-object.adoc[model object] that we can run predictions with as well as a pandas `Series` with the metadata from the training.
 
-Please consult the xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression Cypher documentation] for information about what kind of input the methods expect.
+Please consult the xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression Cypher documentation] for information about what kind of input the methods expect.
 
 
 [[python-client-pipelines-noderegression-pipe-example]]
@@ -394,37 +394,37 @@ trained_pipe_model, res = pipe.train(G, modelName="my-model", targetProperty="my
 assert res["trainMillis"] >= 0
 ----
 
-A model referred to as "my-model" in the xref::model-catalog/index.adoc[GDS Model Catalog] is produced.
+A model referred to as "my-model" in the xref:model-catalog/index.adoc[GDS Model Catalog] is produced.
 In the next section we will go over how to use that model to make predictions.
 
 
 === Model
 
 As we saw in the previous section, node regression models are created when training a node regression pipeline.
-In addition to inheriting the methods common to all xref::python-client/model-object.adoc[model objects], node regression models have the following methods:
+In addition to inheriting the methods common to all xref:python-client/model-object.adoc[model objects], node regression models have the following methods:
 
 .Node regression model methods
 [opts="header",cols="8m,6m,4m,13"]
 |===
 | Name                    | Arguments        | Return type | Description
 | predict_mutate          | G: Graph, +
-config: **kwargs | Series      | xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc#noderegression-pipelines-predict-examples-mutate[Predict property values for nodes of the input graph and mutate graph with predictions].
+config: **kwargs | Series      | xref:machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc#noderegression-pipelines-predict-examples-mutate[Predict property values for nodes of the input graph and mutate graph with predictions].
 | predict_stream          | G: Graph, +
-config: **kwargs | DataFrame   | xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc#noderegression-pipelines-predict-examples-stream[Predict property values for nodes of the input graph and stream the results].
+config: **kwargs | DataFrame   | xref:machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc#noderegression-pipelines-predict-examples-stream[Predict property values for nodes of the input graph and stream the results].
 | metrics                 | -                | Series      | Returns values for the metrics specified when training, for this particular model.
 |===
 
-One can note that the predict methods are indeed very similar to xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[their Cypher counterparts].
+One can note that the predict methods are indeed very similar to xref:machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[their Cypher counterparts].
 The three main differences are that:
 
-* They take a xref::python-client/graph-object.adoc[graph object] instead of a graph name.
+* They take a xref:python-client/graph-object.adoc[graph object] instead of a graph name.
 * They have Python keyword arguments representing the keys of the configuration map.
-* One does not have to provide a "modelName" since the xref::python-client/model-object.adoc[model object] used itself have this information.
+* One does not have to provide a "modelName" since the xref:python-client/model-object.adoc[model object] used itself have this information.
 
 
 ==== Example (continued)
 
-We now continue the xref::python-client/pipelines.adoc#python-client-pipelines-noderegression-pipe-example[example above] using the node regression model `trained_pipe_model` we trained there.
+We now continue the xref:python-client/pipelines.adoc#python-client-pipelines-noderegression-pipe-example[example above] using the node regression model `trained_pipe_model` we trained there.
 Suppose that we have a new graph `H` that we want to run predictions on.
 
 [source,python]
@@ -442,7 +442,7 @@ assert len(results) == H.node_count()
 == The pipeline catalog
 
 The primary way to use pipeline objects is for training models.
-Additionally, pipeline objects can be used as input to xref::pipeline-catalog/index.adoc[GDS Pipeline Catalog operations].
+Additionally, pipeline objects can be used as input to xref:pipeline-catalog/index.adoc[GDS Pipeline Catalog operations].
 For instance, supposing we have a pipeline object `pipe`, we could:
 
 [source,python]

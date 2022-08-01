@@ -7,10 +7,10 @@ Auxiliary procedures are extra tools that can be useful in your workflow. +
 The Neo4j GDS library includes the following auxiliary procedures, grouped by quality tier:
 
 * Beta
-** xref::alpha-algorithms/graph-generation.adoc[Graph Generation]
+** xref:alpha-algorithms/graph-generation.adoc[Graph Generation]
 * Alpha
-** xref::beta-algorithms/collapse-path.adoc[Collapse Path]
-** xref::alpha-algorithms/scale-properties.adoc[Scale Properties]
-** xref::alpha-algorithms/one-hot-encoding.adoc#algorithms-one-hot-encoding-sample[One Hot Encoding]
-** xref::alpha-algorithms/split-relationships.adoc[Split Relationships]
-** xref::algorithms/alpha/rwr.adoc[Random Walk With Restarts Sampling]
+** xref:beta-algorithms/collapse-path.adoc[Collapse Path]
+** xref:alpha-algorithms/scale-properties.adoc[Scale Properties]
+** xref:alpha-algorithms/one-hot-encoding.adoc#algorithms-one-hot-encoding-sample[One Hot Encoding]
+** xref:alpha-algorithms/split-relationships.adoc[Split Relationships]
+** xref:algorithms/alpha/rwr.adoc[Random Walk With Restarts Sampling]

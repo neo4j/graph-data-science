@@ -1,7 +1,7 @@
 [[python-client-graph-object]]
 = The graph object
 
-In order to utilize most the functionality in GDS, you must first project a graph into the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
+In order to utilize most the functionality in GDS, you must first project a graph into the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
 When projecting a graph with the Python client, a client-side reference to the projected graph is returned.
 We call these references `Graph` objects.
 
@@ -14,7 +14,7 @@ include::partial$/pythonclient/python-client-gds-object.adoc[]
 == Projecting a graph object
 
 There are several ways of projecting a graph object.
-The simplest way is to do a xref::graph-project.adoc#graph-project-native-syntax[native projection]:
+The simplest way is to do a xref:graph-project.adoc#graph-project-native-syntax[native projection]:
 
 [source,python]
 ----
@@ -30,7 +30,7 @@ where `G` is a `Graph` object, and `res` is a pandas `Series` containing metadat
 
 Note that all projection syntax variants are supported by way of specifying a Python `dict` or `list` for the node and relationship projection arguments.
 To specify configuration parameters corresponding to the keys of the procedure's `configuration` map, we give named keyword arguments, like for `concurrency=4` above.
-Read more about this in xref::graph-project.adoc#graph-project-native-syntax[Syntax].
+Read more about this in xref:graph-project.adoc#graph-project-native-syntax[Syntax].
 
 Similarly to Cypher there's also a corresponding `gds.graph.project.estimate` method that can be called in an analogous way.
 
@@ -101,13 +101,13 @@ CREATE
     (d)-[:REL {weight: 42.0}]->(a),
 ----
 
-The supported format for the node data frames is described in xref::graph-project-apache-arrow.adoc#arrow-node-columns[Arrow node schema] and the format for the relationship data frames is described in xref::graph-project-apache-arrow.adoc#arrow-relationship-columns[Arrow relationship schema].
+The supported format for the node data frames is described in xref:graph-project-apache-arrow.adoc#arrow-node-columns[Arrow node schema] and the format for the relationship data frames is described in xref:graph-project-apache-arrow.adoc#arrow-relationship-columns[Arrow relationship schema].
 
 
 [.enterprise-edition]
 === Arrow flight server support
 
-The `construct` method can utilize the xref::installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS if it's enabled.
+The `construct` method can utilize the xref:installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS if it's enabled.
 This in particular means that:
 
 * The construction of the graph is greatly sped up,
@@ -137,7 +137,7 @@ There are convenience methods on the graph object that let us extract informatio
 | size_in_bytes           | -                             | int                      | Number of bytes used in the Java heap to store the graph.
 | memory_usage            | -                             | str                      | Human-readable description of `size_in_bytes`.
 | exists                  | -                             | bool                     | Returns `True` if the graph exists in the GDS Graph Catalog, otherwise `False`.
-| drop                    | failIfMissing: Optional[bool] | Series                   | xref::graph-drop.adoc[Removes the graph] from the GDS Graph Catalog.
+| drop                    | failIfMissing: Optional[bool] | Series                   | xref:graph-drop.adoc[Removes the graph] from the GDS Graph Catalog.
 | configuration           | -                             | Series                   | The configuration used to project the graph in memory.
 | creation_time           | -                             | neo4j.time.Datetime      | Time when the graph was projected.
 | modification_time       | -                             | neo4j.time.Datetime      | Time when the graph was last modified.
@@ -154,7 +154,7 @@ props = G.node_properties("MyLabel")
 
 == Using a graph object
 
-The primary use case for a graph object is to pass it to algorithms, but it's also the input to most methods of the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
+The primary use case for a graph object is to pass it to algorithms, but it's also the input to most methods of the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
 
 
 === Input to algorithms
@@ -166,7 +166,7 @@ include::partial$/pythonclient/python-client-syntax.adoc[]
 
 === The graph catalog
 
-All procedures of the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog] have corresponding Python methods in the client.
+All procedures of the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog] have corresponding Python methods in the client.
 Of those catalog procedures that take a graph name string as input, their Python client equivalents instead take a `Graph` object, with the exception of `gds.graph.exists` which still takes a graph name string.
 
 Below are some examples of how the GDS Graph Catalog can be used via the client:
@@ -190,7 +190,7 @@ The client methods
 * xref:graph-catalog-relationship-ops.adoc[`gds.graph.streamRelationshipProperty`]
 * xref:graph-catalog-relationship-ops.adoc[`gds.graph.streamRelationshipProperties`]
 
-are greatly sped up if xref::installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS is enabled.
+are greatly sped up if xref:installation/installation-apache-arrow.adoc[Arrow Flight Server] of GDS is enabled.
 
 Additionally, setting the client only optional keyword parameter `separate_property_columns=True` (it defaults to `False`) for `gds.graph.streamNodeProperties` and `gds.graph.streamRelationshipProperties` returns a pandas `DataFrame` in which each property requested has its own column.
 Note that this is different from the default behavior for which there would only be one column called `propertyValue` that contains all properties requested interleaved for each node or relationship.

@@ -1,7 +1,7 @@
 [[end-to-end-examples]]
 = End-to-end examples
 
-For each algorithm in the xref::algorithms/index.adoc[Algorithms pages] we have small examples of limited scope that demonstrate the usage of that particular algorithm, typically only using that one algorithm.
+For each algorithm in the xref:algorithms/index.adoc[Algorithms pages] we have small examples of limited scope that demonstrate the usage of that particular algorithm, typically only using that one algorithm.
 The purpose of this section is show how the algorithms in GDS can be used to solve fairly realistic use cases end-to-end, typically using several algorithms in each example.
 
-* xref::end-to-end-examples/fastrp-knn-example.adoc[Product recommendation engine using FastRP and kNN]
+* xref:end-to-end-examples/fastrp-knn-example.adoc[Product recommendation engine using FastRP and kNN]

@@ -268,7 +268,7 @@ In the following examples we will demonstrate using the SLLPA algorithm on this 
 In the `stream` execution mode, the algorithm returns the {result} for each node.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
-For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+For more details on the `stream` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example, no-result=true]
 --

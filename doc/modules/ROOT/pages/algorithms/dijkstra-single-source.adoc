@@ -21,12 +21,12 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
 The algorithm supports weighted graphs with positive relationship weights.
 The Dijkstra Single-Source algorithm computes the shortest paths between a source node and all nodes reachable from that node.
-To compute the shortest path between a source and a target node, xref::algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
+To compute the shortest path between a source and a target node, xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
 
 The GDS implementation is based on the http://www-m3.ma.tum.de/twiki/pub/MN0506/WebHome/dijkstra.pdf[original description] and uses a binary heap as priority queue.
-The implementation is also used for the xref::algorithms/astar.adoc[A*] and xref::algorithms/yens.adoc[Yen's] algorithms.
+The implementation is also used for the xref:algorithms/astar.adoc[A*] and xref:algorithms/yens.adoc[Yen's] algorithms.
 The algorithm implementation is executed using a single thread and altering the concurrency configuration has no effect.
-You can consider xref::algorithms/delta-single-source.adoc[Delta-Stepping] for an efficient parallel shortest path algorithm instead.
+You can consider xref:algorithms/delta-single-source.adoc[Delta-Stepping] for an efficient parallel shortest path algorithm instead.
 
 [[algorithms-dijkstra-single-source-syntax]]
 == Syntax
@@ -157,7 +157,7 @@ ORDER BY index
 
 The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
-This can be verified in the xref::algorithms/dijkstra-single-source.adoc#algorithms-dijkstra-single-source-examples[example graph].
+This can be verified in the xref:algorithms/dijkstra-single-source.adoc#algorithms-dijkstra-single-source-examples[example graph].
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 

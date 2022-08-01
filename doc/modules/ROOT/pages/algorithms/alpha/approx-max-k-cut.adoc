@@ -276,7 +276,7 @@ The total cost is represented by the `cutCost` column here.
 This is the value we want to be as high as possible.
 Additionally, the graph 'myGraph' now has a node property `community` which stores the community to which each node belongs.
 
-To inspect which community each node belongs to we can xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties].
+To inspect which community each node belongs to we can xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties].
 
 [role=query-example]
 --
@@ -345,7 +345,7 @@ YIELD cutCost, nodePropertiesWritten
 
 Since the `value` properties on our `TRANSACTION` relationships were all at least `1.0` and several of a larger value it's not surprising that we obtain a cut with a larger cost in the weighted case.
 
-Let us now xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] to once again inspect the node community distribution.
+Let us now xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] to once again inspect the node community distribution.
 
 [role=query-example]
 --
@@ -371,7 +371,7 @@ RETURN gds.util.asNode(nodeId).name as name, propertyValue AS weightedCommunity
 |===
 --
 
-Comparing this result with that of xref::algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[unweighted case] we can see that `Bridget` has moved to another community but the output is otherwise the same.
+Comparing this result with that of xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[unweighted case] we can see that `Bridget` has moved to another community but the output is otherwise the same.
 Indeed, this makes sense by looking at our graph.
 `Bridget` is connected to nodes of community `1` by eight relationships, but these relationships all have weight `1.0`.
 And although `Bridget` is only connected to two community `0` nodes, these relationships are of weight `81.0` and `45.0`.
@@ -416,7 +416,7 @@ RETURN gds.util.asNode(nodeId).name AS name, communityId
 |===
 --
 
-We can see that the result is what we expect, namely the same as in the xref::algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[mutate unweighted] example.
+We can see that the result is what we expect, namely the same as in the xref:algorithms/alpha/approx-max-k-cut.adoc#algorithms-approx-max-k-cut-mutate-unweighted-example[mutate unweighted] example.
 
 [NOTE]
 ====

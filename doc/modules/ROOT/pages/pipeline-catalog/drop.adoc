@@ -37,7 +37,7 @@ include::partial$/machine-learning/pipeline-catalog/shared/pipeline-info-result.
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.pipeline.drop`.
-To exemplify this, we first create a xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline].
+To exemplify this, we first create a xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline].
 
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]

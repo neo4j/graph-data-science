@@ -9,15 +9,15 @@ The computed scores can then be used to predict new relationships between them.
 [NOTE]
 ====
 The following algorithms use only the topology of the graph to make predictions about relationships between nodes.
-To make predictions also utilizing node properties one can use the machine learning based method xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link prediction pipelines].
+To make predictions also utilizing node properties one can use the machine learning based method xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link prediction pipelines].
 ====
 
 The Neo4j GDS library includes the following link prediction algorithms, grouped by quality tier:
 
 * Alpha
-** xref::alpha-algorithms/adamic-adar.adoc[Adamic Adar]
-** xref::alpha-algorithms/common-neighbors.adoc[Common Neighbors]
-** xref::alpha-algorithms/preferential-attachment.adoc[Preferential Attachment]
-** xref::alpha-algorithms/resource-allocation.adoc[Resource Allocation]
-** xref::alpha-algorithms/same-community.adoc[Same Community]
-** xref::alpha-algorithms/total-neighbors.adoc[Total Neighbors]
+** xref:alpha-algorithms/adamic-adar.adoc[Adamic Adar]
+** xref:alpha-algorithms/common-neighbors.adoc[Common Neighbors]
+** xref:alpha-algorithms/preferential-attachment.adoc[Preferential Attachment]
+** xref:alpha-algorithms/resource-allocation.adoc[Resource Allocation]
+** xref:alpha-algorithms/same-community.adoc[Same Community]
+** xref:alpha-algorithms/total-neighbors.adoc[Total Neighbors]

@@ -5,4 +5,4 @@ The total path cost is stored using the `totalCost` property.
 
 The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
 
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].

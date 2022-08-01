@@ -49,7 +49,7 @@ There are multiple strategies to account for imbalanced data.
 In pipeline training procedure, the AUCPR metric is used.
 It is considered more suitable than the commonly used AUROC (Area Under the Receiver Operating Characteristic) metric for imbalanced data.
 For the metric to appropriately reflect both positive (adjacent node pairs) and negative (non-adjacent node pairs) examples, we provide the ability to both control the ratio of sampling between the classes, and to control the relative weight of classes via `negativeClassWeight`.
-The former is configured by the configuration parameter `negativeSamplingRatio` in xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[configureSplits] when using that procedure to generate the train and test sets.
+The former is configured by the configuration parameter `negativeSamplingRatio` in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[configureSplits] when using that procedure to generate the train and test sets.
 Tuning the `negativeClassWeight`, which is explained below, means weighting up or down the false positives when computing precision.
 
 The recommended value for `negativeSamplingRatio` is the _true class ratio_ of the graph, in other words, not applying _undersampling_.
@@ -58,7 +58,7 @@ The ratio of total probability mass of negative versus positive examples in the 
 Thus, both of these parameters can be adjusted in tandem to trade off evaluation accuracy with speed.
 
 The true class ratio is computed as `(q - r) / r`, where `q = n(n-1)/2` is the number of possible undirected relationships, and `r` is the number of actual undirected relationships.
-Please note that the `relationshipCount` reported by the xref::graph-list.adoc[graph list] procedure is the _directed_ count of relationships summed over all existing relationship types.
+Please note that the `relationshipCount` reported by the xref:graph-list.adoc[graph list] procedure is the _directed_ count of relationships summed over all existing relationship types.
 Thus, we recommend using Cypher to obtain `r` on the source Neo4j graph.
 For example, this query will count the number of relationships of type `T` or `R`:
 

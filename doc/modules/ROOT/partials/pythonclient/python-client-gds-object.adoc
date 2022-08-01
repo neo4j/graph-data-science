@@ -1,2 +1,2 @@
 In the examples below we assume that we have an instantiated `GraphDataScience` object called `gds`.
-Read more about this in xref::python-client/getting-started.adoc[Getting started].
+Read more about this in xref:python-client/getting-started.adoc[Getting started].

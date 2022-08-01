@@ -6,23 +6,23 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                                     | Operation
-| xref::installation/neo4j-server.adoc#neo4j-server-verify[List all operations in GDS]        | `_gds.list_`
-| xref::common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.beta.listProgress`
-| xref::common-usage/logging.adoc#logging-user-warnings[List warnings]              |       `gds.alpha.userLog`
-| xref::management-ops/utility-functions.adoc[The version of the installed GDS]         | `_gds.version_`
-.2+<.^| xref::management-ops/utility-functions.adoc#utility-functions-node-path[Node id functions]
+| xref:installation/neo4j-server.adoc#neo4j-server-verify[List all operations in GDS]        | `_gds.list_`
+| xref:common-usage/logging.adoc#logging-progress-logging[List logged progress]              | `gds.beta.listProgress`
+| xref:common-usage/logging.adoc#logging-user-warnings[List warnings]              |       `gds.alpha.userLog`
+| xref:management-ops/utility-functions.adoc[The version of the installed GDS]         | `_gds.version_`
+.2+<.^| xref:management-ops/utility-functions.adoc#utility-functions-node-path[Node id functions]
 | `_gds.util.asNode_`
 | `_gds.util.asNodes_`
-.4+<.^| xref::management-ops/utility-functions.adoc#utility-functions-numeric[Numeric Functions]
+.4+<.^| xref:management-ops/utility-functions.adoc#utility-functions-numeric[Numeric Functions]
 | `_gds.util.NaN_`
 | `_gds.util.infinity_`
 | `_gds.util.isFinite_`
 | `_gds.util.isInfinite_`
-| xref::graph-catalog-node-ops.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `_gds.util.nodeProperty_`
-| xref::alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `_gds.alpha.ml.oneHotEncoding_`
-| xref::common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo`
-| xref::management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb`
-| xref::common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
+| xref:graph-catalog-node-ops.adoc#utility-functions-catalog[Accessing a node property in a named graph] | `_gds.util.nodeProperty_`
+| xref:alpha-algorithms/one-hot-encoding.adoc[One Hot Encoding] | `_gds.alpha.ml.oneHotEncoding_`
+| xref:common-usage/debug-sysinfo.adoc[Status of the system]                                   | `gds.debug.sysInfo`
+| xref:management-ops/create-cypher-db.adoc[Create an impermanent database backed by a projected graph] | `gds.alpha.create.cypherdb`
+| xref:common-usage/monitoring-system.adoc[Get an overview of the system's workload and available resources] | `gds.alpha.systemMonitor`
 | Back-up graphs and models to disk | `gds.alpha.backup`
 | Restore persisted graphs and models to memory | `gds.alpha.restore`
 |===

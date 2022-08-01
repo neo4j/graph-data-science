@@ -1,7 +1,7 @@
 [[appendix-a-machine-learning]]
 = Machine Learning
 
-Please see xref::algorithms/index.adoc[Graph algorithms] for an introduction to the maturity tiers: production-quality, beta and alpha.
+Please see xref:algorithms/index.adoc[Graph algorithms] for an introduction to the maturity tiers: production-quality, beta and alpha.
 
 include::partial$/operations-reference/pipeline-operation-references.adoc[]
 
@@ -19,7 +19,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.11+<.^| xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.11+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.beta.pipeline.linkPrediction.create`
 | `gds.beta.pipeline.linkPrediction.addNodeProperty`
 | `gds.beta.pipeline.linkPrediction.addFeature`
@@ -31,7 +31,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.pipeline.linkPrediction.predict.mutate.estimate`
 | `gds.beta.pipeline.linkPrediction.predict.stream`
 | `gds.beta.pipeline.linkPrediction.predict.stream.estimate`
-.13+<.^| xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.13+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.beta.pipeline.nodeClassification.create`
 | `gds.beta.pipeline.nodeClassification.addNodeProperty`
 | `gds.beta.pipeline.nodeClassification.selectFeatures`
@@ -56,15 +56,15 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.3+<.^| xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
+.3+<.^| xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipeline]
 | `gds.alpha.pipeline.linkPrediction.addMLP`
 | `gds.alpha.pipeline.linkPrediction.addRandomForest`
 | `gds.alpha.pipeline.linkPrediction.configureAutoTuning`
-.3+<.^| xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
+.3+<.^| xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipeline]
 | `gds.alpha.pipeline.nodeClassification.addMLP`
 | `gds.alpha.pipeline.nodeClassification.addRandomForest`
 | `gds.alpha.pipeline.nodeClassification.configureAutoTuning`
-.10+<.^| xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
+.10+<.^| xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipeline]
 | `gds.alpha.pipeline.nodeRegression.create`
 | `gds.alpha.pipeline.nodeRegression.addNodeProperty`
 | `gds.alpha.pipeline.nodeRegression.selectFeatures`
@@ -89,7 +89,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 | Algorithm name | Operation
-.8+<.^| xref::machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
+.8+<.^| xref:machine-learning/node-embeddings/fastrp.adoc[Fast Random Projection]
 | `gds.fastRP.mutate`
 | `gds.fastRP.mutate.estimate`
 | `gds.fastRP.stats`
@@ -109,7 +109,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 [opts=header,cols="1, 2"]
 |===
 |Algorithm name | Operation
-.8+<.^|xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
+.8+<.^|xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
 | `gds.beta.graphSage.stream`
 | `gds.beta.graphSage.stream.estimate`
 | `gds.beta.graphSage.mutate`
@@ -118,7 +118,7 @@ include::partial$/operations-reference/model-operation-references.adoc[]
 | `gds.beta.graphSage.write.estimate`
 | `gds.beta.graphSage.train`
 | `gds.beta.graphSage.train.estimate`
-.6+<.^|xref::machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
+.6+<.^|xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
 | `gds.beta.node2vec.mutate`
 | `gds.beta.node2vec.mutate.estimate`
 | `gds.beta.node2vec.stream`

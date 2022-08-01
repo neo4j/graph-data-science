@@ -6,7 +6,7 @@
 
 include::partial$/operations-reference/beta-note.adoc[]
 
-In GDS, algorithms can be executed on a named graph that has been filtered based on its xref::common-usage/running-algos.adoc#common-configuration-node-labels[node labels] and xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
+In GDS, algorithms can be executed on a named graph that has been filtered based on its xref:common-usage/running-algos.adoc#common-configuration-node-labels[node labels] and xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
 However, that filtered graph only exists during the execution of the algorithm, and it is not possible to filter on property values.
 If a filtered graph needs to be used multiple times, one can use the subgraph catalog procedure to project a new graph in the graph catalog.
 
@@ -258,7 +258,7 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 === Using query parameters
 
 Similar to https://neo4j.com/docs/cypher-manual/current/syntax/parameters/[Cypher], it is also possible to set query parameters.
-As an example we can rewrite the xref::graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
+As an example we can rewrite the xref:graph-project-subgraph.adoc#catalog-graph-project-subgraph-node-filter-example[node filter example] from above using parameters instead of integer literals:
 
 [role=query-example]
 --

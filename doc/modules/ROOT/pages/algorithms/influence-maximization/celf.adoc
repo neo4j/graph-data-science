@@ -18,7 +18,7 @@ In the propagation process, a node is influenced in case that a uniform random d
 
 Leskovec et al. 2007 introduced the CELF algorithm in their study https://www.cs.cmu.edu/~jure/pubs/detect-kdd07.pdf[Cost-effective Outbreak Detection in Networks] to deal with the NP-hard problem of influence maximization.
 The CELF algorithm is based on a "lazy-forward" optimization.
-Τhe CELF algorithm dramatically improves the efficiency of the xref::algorithms/influence-maximization/greedy.adoc[Greedy] algorithm and should be preferred for large networks.
+Τhe CELF algorithm dramatically improves the efficiency of the xref:algorithms/influence-maximization/greedy.adoc[Greedy] algorithm and should be preferred for large networks.
 
 [[alpha-algorithms-celf-syntax]]
 == Syntax
@@ -297,7 +297,7 @@ Using `stats` mode is useful to inspect how different configuration options affe
 In the `stream` execution mode, the algorithm returns the {result} for nodes that are part of the seed set.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
-For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+For more details on the `stream` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example]
 --

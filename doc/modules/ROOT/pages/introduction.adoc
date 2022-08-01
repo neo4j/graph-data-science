@@ -20,7 +20,7 @@ Due to the exponential growth of possible paths with increasing distance, many o
 Fortunately, optimized algorithms exist that utilize certain structures of the graph, memoize already explored parts, and parallelize operations.
 Whenever possible, we've applied these optimizations.
 
-The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the xref::algorithms/index.adoc[Algorithms] chapter.
+The Neo4j Graph Data Science library contains a large number of algorithms, which are detailed in the xref:algorithms/index.adoc[Algorithms] chapter.
 
 
 [[introduction-algorithms-traits]]
@@ -51,7 +51,7 @@ The algorithm has the ability to distinguish between nodes and/or relationships 
 [[introduction-algorithms-weighted]]
 Weighted::
 The algorithm supports configuration to set node and/or relationship properties to use as weights.
-These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref::common-usage/running-algos.adoc#common-configuration-node-weight-property[nodeWeightProperty], nodeProperties and xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameters.
+These values can represent _cost_, _time_, _capacity_ or some other domain-specific properties, specified via the xref:common-usage/running-algos.adoc#common-configuration-node-weight-property[nodeWeightProperty], nodeProperties and xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] configuration parameters.
 The algorithm will by default consider each node and/or relationship as equally important.
 
 
@@ -62,7 +62,7 @@ In order to run the algorithms as efficiently as possible, the Neo4j Graph Data 
 It is therefore necessary to load the graph data from the Neo4j database into an in memory graph catalog.
 The amount of data loaded can be controlled by so called graph projections, which also allow, for example, filtering on node labels and relationship types, among other options.
 
-For more information see xref::management-ops/index.adoc[Graph Management].
+For more information see xref:management-ops/index.adoc[Graph Management].
 
 
 [[introduction-editions]]
@@ -76,8 +76,8 @@ The Neo4j Graph Data Science library is available in two editions.
 ** Supports the role-based access control system (RBAC) from Neo4j Enterprise Edition.
 ** Supports various additional model catalog features
 *** Storing unlimited amounts of models in the model catalog
-*** xref::model-catalog/publish.adoc[Publishing a stored model]
-*** xref::model-catalog/store.adoc#model-catalog-store-ops[Persisting a stored model to disk]
-** Supports an xref::production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation]
+*** xref:model-catalog/publish.adoc[Publishing a stored model]
+*** xref:model-catalog/store.adoc#model-catalog-store-ops[Persisting a stored model to disk]
+** Supports an xref:production-deployment/feature-toggles.adoc#bit-id-map-feature-toggle[optimized graph implementation]
 
-For more information see xref::installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].
+For more information see xref:installation/System-requirements.adoc#system-requirements-cpu[System Requirements - CPU].

@@ -9,7 +9,7 @@ Graph projections are stored entirely in-memory using compressed data structures
 
 The graph catalog is a concept within the GDS library that allows managing multiple graph projections by name.
 Using its name, a graph projection can be used many times in the analytical workflow.
-Named graphs can be projected using either a xref::graph-project.adoc[Native projection] or a xref::graph-project-cypher.adoc[Cypher projection].
+Named graphs can be projected using either a xref:graph-project.adoc[Native projection] or a xref:graph-project-cypher.adoc[Cypher projection].
 After usage, named graphs can be removed from the catalog to free up main memory.
 
 [NOTE]
@@ -24,25 +24,25 @@ This chapter explains the available graph catalog operations.
 [opts=header,cols="1m,1"]
 |===
 | Name                                                                          | Description
-| xref::graph-project.adoc[gds.graph.project]                                  | Adds a graph to the catalog using Native projection.
-| xref::graph-project-cypher.adoc[gds.graph.project.cypher]                    | Adds a graph to the catalog using Cypher projection.
-| xref::graph-project-cypher-aggregation.adoc[gds.alpha.graph.project]         | Adds a graph to the catalog using Cypher Aggregation.
-| xref::graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
-| xref::graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
-| xref::graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
-| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
-| xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
-| xref::graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
-| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                      | Streams a single node property stored in a named graph.
-| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]       | Streams relationship topologies stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperty.stream]      | Streams a single relationship property stored in a named graph.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperties.stream]    | Streams relationship properties stored in a named graph.
-| xref::graph-catalog-node-ops.adoc[gds.graph.nodeProperties.write]                     | Writes node properties stored in a named graph to Neo4j.
-| xref::graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]               | Writes relationships stored in a named graph to Neo4j.
-| xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
-| xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
-| xref::algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                       | Creates a new graph projection by sampling using random walk with restarts.
+| xref:graph-project.adoc[gds.graph.project]                                  | Adds a graph to the catalog using Native projection.
+| xref:graph-project-cypher.adoc[gds.graph.project.cypher]                    | Adds a graph to the catalog using Cypher projection.
+| xref:graph-project-cypher-aggregation.adoc[gds.alpha.graph.project]         | Adds a graph to the catalog using Cypher Aggregation.
+| xref:graph-project-subgraph.adoc[gds.beta.graph.project.subgraph]           | Adds a graph to the catalog by filtering an existing graph using node and relationship predicates.
+| xref:graph-list.adoc[gds.graph.list]                                        | Prints information about graphs that are currently stored in the catalog.
+| xref:graph-exists.adoc[gds.graph.exists]                                    | Checks if a named graph is stored in the catalog.
+| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.drop]                    | Removes node properties from a named graph.
+| xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[gds.graph.relationships.drop]              | Deletes relationships of a given relationship type from a named graph.
+| xref:graph-drop.adoc[gds.graph.drop]                                        | Drops a named graph from the catalog.
+| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperty.stream]                      | Streams a single node property stored in a named graph.
+| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.stream]                    | Streams node properties stored in a named graph.
+| xref:graph-catalog-relationship-ops.adoc[gds.beta.graph.relationships.stream]       | Streams relationship topologies stored in a named graph.
+| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperty.stream]      | Streams a single relationship property stored in a named graph.
+| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationshipProperties.stream]    | Streams relationship properties stored in a named graph.
+| xref:graph-catalog-node-ops.adoc[gds.graph.nodeProperties.write]                     | Writes node properties stored in a named graph to Neo4j.
+| xref:graph-catalog-relationship-ops.adoc[gds.graph.relationship.write]               | Writes relationships stored in a named graph to Neo4j.
+| xref:graph-catalog-export-ops.adoc#catalog-graph-export-database[gds.graph.export]                           | Exports a named graph into a new offline Neo4j database.
+| xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[gds.beta.graph.export.csv]                       | Exports a named graph into CSV files.
+| xref:algorithms/alpha/rwr.adoc[gds.alpha.graph.sample.rwr]                       | Creates a new graph projection by sampling using random walk with restarts.
 |===
 
 [NOTE]

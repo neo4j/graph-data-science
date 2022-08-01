@@ -78,13 +78,13 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 == Adding node properties
 
 A link prediction pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the projected graph.
-Such steps producing node properties can be chained one after another and created properties can also be used to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[add features].
-Moreover, the node property steps that are added to the pipeline will be executed both when xref::machine-learning/linkprediction-pipelines/training.adoc[training] a pipeline and when the trained model is xref::machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
+Such steps producing node properties can be chained one after another and created properties can also be used to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[add features].
+Moreover, the node property steps that are added to the pipeline will be executed both when xref:machine-learning/linkprediction-pipelines/training.adoc[training] a pipeline and when the trained model is xref:machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
-For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
+For example, xref:machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
 
 
 === Syntax
@@ -145,7 +145,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 | {MultilayerPerceptron=[], RandomForest=[], LogisticRegression=[]}
 |===
 
-The pipeline will now execute the xref::machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref::machine-learning/linkprediction-pipelines/training.adoc[training] a model, and when the trained model is xref::machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
+The pipeline will now execute the xref:machine-learning/node-embeddings/fastrp.adoc[fastRP algorithm] in mutate mode both before xref:machine-learning/linkprediction-pipelines/training.adoc[training] a model, and when the trained model is xref:machine-learning/linkprediction-pipelines/predict.adoc[applied for prediction].
 This ensures the `embedding` property can be used as an input for link features.
 --
 
@@ -157,8 +157,8 @@ A Link Prediction pipeline executes a sequence of steps to compute the features 
 A feature step computes a vector of features for given node pairs.
 For each node pair, the results are concatenated into a single _link feature vector_.
 The order of the features in the link feature vector follows the order of the feature steps.
-Like with node property steps, the feature steps are also executed both at xref::machine-learning/linkprediction-pipelines/training.adoc[training] and xref::machine-learning/linkprediction-pipelines/predict.adoc[prediction] time.
-The supported methods for obtaining features are described xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-supported-features[below].
+Like with node property steps, the feature steps are also executed both at xref:machine-learning/linkprediction-pipelines/training.adoc[training] and xref:machine-learning/linkprediction-pipelines/predict.adoc[prediction] time.
+The supported methods for obtaining features are described xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-supported-features[below].
 
 
 === Syntax
@@ -187,7 +187,7 @@ YIELD
 |===
 | Name                   | Type    | Description
 | pipelineName           | String  | The name of the pipeline.
-| featureType            | String  | The featureType determines the method used for computing the link feature. See xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-supported-features[supported types].
+| featureType            | String  | The featureType determines the method used for computing the link feature. See xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-supported-features[supported types].
 | configuration          | Map     | Configuration for splitting the relationships.
 |===
 
@@ -218,7 +218,7 @@ The supported types of features can then be described as follows:
 | L2                     | image:equations/linkprediction/linkprediction3.svg[f equals vector of s1 minus t1 squared comma s2 minus t2 squared comma dot dot dot comma s d minus t d squared]
 | HADAMARD               | image:equations/linkprediction/linkprediction4.svg[f equals vector of s1 dot t1 comma s2 dot t2 comma dot dot dot comma s d dot t d]
 | COSINE                 | image:equations/linkprediction/linkprediction5.svg[f equals sum of i from 1 to d of s i t i divided by square root of sum of i from 1 to d of s i squared times square root of sum of i from 1 to d of t i squared]
-| SAME_CATEGORY          | The feature is `1` if the category value of source and target are the same, otherwise its `0`. Similar to xref::alpha-algorithms/same-community.adoc#algorithms-linkprediction-same-community-sample[Same Community].
+| SAME_CATEGORY          | The feature is `1` if the category value of source and target are the same, otherwise its `0`. Similar to xref:alpha-algorithms/same-community.adoc#algorithms-linkprediction-same-community-sample[Same Community].
 |===
 
 
@@ -314,10 +314,10 @@ YIELD
 [opts="header",cols="1,1,1,4"]
 |===
 | Name                  | Type    | Default | Description
-| validationFolds       | Integer | 3       | Number of divisions of the training graph used during xref::machine-learning/linkprediction-pipelines/training.adoc[model selection].
+| validationFolds       | Integer | 3       | Number of divisions of the training graph used during xref:machine-learning/linkprediction-pipelines/training.adoc[model selection].
 | testFraction          | Double  | 0.1     | Fraction of the graph reserved for testing. Must be in the range (0, 1).
 | trainFraction         | Double  | 0.1     | Fraction of the <<def-test-complement,test-complement set>> reserved for training. Must be in the range (0, 1).
-| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
+| negativeSamplingRatio | Double  | 1.0     | The desired ratio of negative to positive samples in the test and train set. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
 |===
 
 include::partial$/machine-learning/linkprediction-pipeline/pipelineInfoResult.adoc[]
@@ -346,7 +346,7 @@ YIELD splitConfig
 | {negativeSamplingRatio=1.0, testFraction=0.25, validationFolds=3, trainFraction=0.6}
 |===
 
-We now reconfigured the splitting of the pipeline, which will be applied during xref::machine-learning/linkprediction-pipelines/training.adoc[training].
+We now reconfigured the splitting of the pipeline, which will be applied during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 --
 
 [[linkprediction-adding-model-candidates]]
@@ -355,16 +355,16 @@ We now reconfigured the splitting of the pipeline, which will be applied during 
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
 Each model candidate configuration contains either fixed values or ranges for training parameters.
-When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see xref::machine-learning/auto-tuning.adoc[Auto-tuning].
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see xref:machine-learning/auto-tuning.adoc[Auto-tuning].
 One or more model configurations must be added to the _parameter space_ of the training pipeline, using one of the following procedures:
 
 * `gds.beta.pipeline.linkPrediction.addLogisticRegression`
 * `gds.alpha.pipeline.linkPrediction.addRandomForest`
 * `gds.alpha.pipeline.linkPrediction.addMLP`
 
-For information about the available training methods in GDS, logistic regression, random forest and multilayer perceptron, see xref::machine-learning/training-methods/index.adoc[Training methods].
+For information about the available training methods in GDS, logistic regression, random forest and multilayer perceptron, see xref:machine-learning/training-methods/index.adoc[Training methods].
 
-In xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
+In xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and optionally yielding only `parameterSpace`.
 
@@ -528,12 +528,12 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 --
 
 The `parameterSpace` in the pipeline now contains the four different model candidates, expanded with the default values.
-Each specified model candidate will be tried out during the model selection in xref::machine-learning/linkprediction-pipelines/training.adoc[training].
+Each specified model candidate will be tried out during the model selection in xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 
 [NOTE]
 ====
 These are somewhat naive examples of how to add and configure model candidates.
-Please see xref::machine-learning/training-methods/index.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
+Please see xref:machine-learning/training-methods/index.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
 ====
 
 
@@ -605,5 +605,5 @@ YIELD autoTuningConfig
 | {maxTrials=5}
 |===
 
-We now reconfigured the auto-tuning to try out at most 100 model candidates during xref::machine-learning/linkprediction-pipelines/training.adoc[training].
+We now reconfigured the auto-tuning to try out at most 100 model candidates during xref:machine-learning/linkprediction-pipelines/training.adoc[training].
 --

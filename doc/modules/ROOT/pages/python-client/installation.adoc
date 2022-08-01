@@ -11,7 +11,7 @@ pip install graphdatascience
 [[python-client-system-requirements]]
 == System requirements
 
-The GDS Python client depends on Python, the Neo4j Python Driver, and a server-side installation of the GDS library (see xref::installation/index.adoc[Installation]).
+The GDS Python client depends on Python, the Neo4j Python Driver, and a server-side installation of the GDS library (see xref:installation/index.adoc[Installation]).
 The Python client supports the following versions of the other three components:
 
 [opts=header, cols="m,m,m,m"]
@@ -32,10 +32,10 @@ The Python client supports the following versions of the other three components:
 
 == Versioning
 
-To make things easy for users of the Python client, our aim is that running `pip install --upgrade graphdatascience` should give you a version of the client that supports all xref::installation/supported-neo4j-versions.adoc[currently supported GDS library versions], starting with 2.0.
+To make things easy for users of the Python client, our aim is that running `pip install --upgrade graphdatascience` should give you a version of the client that supports all xref:installation/supported-neo4j-versions.adoc[currently supported GDS library versions], starting with 2.0.
 
 The Python client follows https://semver.org/[semantic versioning].
 
 Python client versions do not map identically to versions of the GDS library.
 Eg. Python client version X.0 must not necessarily be compatible with GDS library version X.0.
-Instead, the Python client may be released independently and one has to consult xref::python-client/installation.adoc#python-client-system-requirements[System requirements] above to figure out whether one's client version is compatible with the GDS library on the server.
+Instead, the Python client may be released independently and one has to consult xref:python-client/installation.adoc#python-client-system-requirements[System requirements] above to figure out whether one's client version is compatible with the GDS library on the server.

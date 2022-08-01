@@ -3,11 +3,11 @@
 
 In most machine learning scenarios, several pre-processing steps are applied to produce data that is amenable to machine learning algorithms.
 This is also true for graph data.
-The goal of pre-processing is to provide good features for the learning algorithm. As part of our pipelines we offer adding such pre-procesing steps as node property steps (see xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Node Classification] or xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Link Prediction]).
+The goal of pre-processing is to provide good features for the learning algorithm. As part of our pipelines we offer adding such pre-procesing steps as node property steps (see xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Node Classification] or xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Link Prediction]).
 
 In GDS some options include:
 
-* xref::machine-learning/node-embeddings/index.adoc[Node embeddings]
-* xref::algorithms/centrality.adoc[Centrality algorithms]
-* xref::algorithms/auxiliary.adoc[Auxiliary algorithms]
-** Of special interest is xref::alpha-algorithms/scale-properties.adoc[Scale Properties]
+* xref:machine-learning/node-embeddings/index.adoc[Node embeddings]
+* xref:algorithms/centrality.adoc[Centrality algorithms]
+* xref:algorithms/auxiliary.adoc[Auxiliary algorithms]
+** Of special interest is xref:alpha-algorithms/scale-properties.adoc[Scale Properties]

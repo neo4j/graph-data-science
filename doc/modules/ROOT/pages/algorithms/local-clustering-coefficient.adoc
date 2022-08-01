@@ -22,7 +22,7 @@ The formula to compute the local clustering coefficient is as follows:
 image::equations/lcc_formula.svg[align="center"]
 
 As we can see the triangle count is required to compute the local clustering coefficient.
-To do this the xref::algorithms/triangle-count.adoc[Triangle Count] algorithm is utilised.
+To do this the xref:algorithms/triangle-count.adoc[Triangle Count] algorithm is utilised.
 
 Additionally, the algorithm can compute the _average clustering coefficient_ for the whole graph.
 This is the normalised sum over all the local clustering coefficients.
@@ -323,7 +323,7 @@ ORDER BY localClusteringCoefficient DESC
 
 From the results we can see that the nodes 'Karin' and 'Mark' have the highest local clustering coefficients.
 This shows that they are the best at introducing their friends - all the people who know them, know each other!
-This can be verified in the xref::algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples[example graph].
+This can be verified in the xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples[example graph].
 
 
 [[algorithms-local-clustering-coefficient-examples-stats]]
@@ -379,7 +379,7 @@ YIELD averageClusteringCoefficient, nodeCount
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `localClusteringCoefficient` which stores the local clustering coefficient for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
 
 [[algorithms-local-clustering-coefficient-examples-write]]
@@ -413,12 +413,12 @@ Additionally, each of the six nodes now has a new property `localClusteringCoeff
 [[algorithms-local-clustering-coefficient-examples-pre-computed]]
 === Pre-computed Counts
 
-By default, the Local Clustering Coefficient algorithm executes xref::algorithms/triangle-count.adoc[Triangle Count] as part of its computation.
+By default, the Local Clustering Coefficient algorithm executes xref:algorithms/triangle-count.adoc[Triangle Count] as part of its computation.
 It is also possible to avoid the triangle count computation by configuring the Local Clustering Coefficient algorithm to read the triangle count from a node property.
 In order to do that we specify the `triangleCountProperty` configuration parameter.
 Please note that the Local Clustering Coefficient algorithm depends on the property holding actual triangle counts and not another number for the results to be actual local clustering coefficients.
 
-To illustrate this we make use of the xref::algorithms/triangle-count.adoc[Triangle Count algorithm]
+To illustrate this we make use of the xref:algorithms/triangle-count.adoc[Triangle Count algorithm]
 in `mutate` mode.
 The Triangle Count algorithm is going to store its result back into 'myGraph'.
 It is also possible to obtain the property value from the Neo4j database using a graph projection with a node property when creating the in-memory graph.
@@ -460,4 +460,4 @@ ORDER BY localClusteringCoefficient DESC
 |===
 --
 
-As we can see the results are the same as in xref::algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-stream[the `stream` example] where we did not specify a `triangleCountProperty`.
+As we can see the results are the same as in xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-stream[the `stream` example] where we did not specify a `triangleCountProperty`.

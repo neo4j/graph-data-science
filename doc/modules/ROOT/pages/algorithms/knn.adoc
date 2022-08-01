@@ -59,7 +59,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -414,7 +414,7 @@ include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 The KNN algorithm does not read any relationships, but the values for `relationshipProjection` or `relationshipQuery` are still being used and respected for the graph loading.
 ====
 
-The results are the same as running write mode on a named graph, see xref::algorithms/knn.adoc#algorithms-knn-syntax[write mode syntax above].
+The results are the same as running write mode on a named graph, see xref:algorithms/knn.adoc#algorithms-knn-syntax[write mode syntax above].
 
 [NOTE]
 ====
@@ -607,7 +607,7 @@ Each new relationship stores the similarity score between the two nodes it repre
 The relationship property key is set using the mandatory configuration parameter `writeProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
 
-For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
 
 
 [role=query-example]

@@ -26,7 +26,7 @@ This means that two nodes that have similar neighborhoods should be assigned sim
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
-Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described xref::machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-examples-properties[below].
+Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-examples-properties[below].
 We will also use _projection of a node_ synonymously with the initial random vector of a node.
 
 Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
@@ -41,7 +41,7 @@ The embedding image:equations/fastrp/fastrp4.svg[e n] of node _n_, which is the 
 image::equations/fastrp/fastrp5.svg[e n equals w zero times normalise r n plus sum from i equals 1 to k of w i times normalise e n to the ith,align="center"]
 
 where `normalize` is the function which divides a vector with its https://en.wikipedia.org/wiki/Norm_(mathematics)#Euclidean_norm[L2 norm], the value of `nodeSelfInfluence` is image:equations/fastrp/fastrp6.svg[w zero], and the values of `iterationWeights` are image:equations/fastrp/fastrp7.svg[w 1 comma w 2 comma dot dot dot w k].
-We will return to xref::machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-node-self-influence[Node Self Influence] later on.
+We will return to xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-node-self-influence[Node Self Influence] later on.
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
@@ -517,7 +517,7 @@ YIELD nodePropertiesWritten
 
 The returned result is similar to the `stats` example.
 Additionally, the graph 'persons' now has a node property `fastrp-embedding` which stores the node embedding for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
 
 [[algorithms-embeddings-fastrp-examples-write]]

@@ -6,7 +6,7 @@ The GDS library is intended to be used on a standalone Neo4j server.
 [NOTE]
 ====
 Running the GDS library on a core member of a Neo4j Causal Cluster is not supported.
-Read more about how to use GDS in conjunction with Neo4j Causal Cluster deployment xref::installation/installation-causal-cluster.adoc[below].
+Read more about how to use GDS in conjunction with Neo4j Causal Cluster deployment xref:installation/installation-causal-cluster.adoc[below].
 ====
 
 On a standalone Neo4j Server, the library will need to be installed and configured manually.

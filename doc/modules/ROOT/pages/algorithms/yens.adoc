@@ -23,12 +23,12 @@ The algorithm is often referred to as Yen's k-Shortest Path algorithm, where k i
 The algorithm supports weighted graphs with positive relationship weights.
 It also respects parallel relationships between the same two nodes when computing multiple shortest paths.
 
-For `k = 1`, the algorithm behaves exactly like xref::algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm] and returns the shortest path.
+For `k = 1`, the algorithm behaves exactly like xref:algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm] and returns the shortest path.
 For `k = 2`, the algorithm returns the shortest path and the second shortest path between the same source and target node.
 Generally, for `k = n`, the algorithm computes at most `n` paths which are discovered in the order of their total cost.
 
 The GDS implementation is based on the https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/[original description].
-For the actual path computation, Yen's algorithm uses xref::algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm].
+For the actual path computation, Yen's algorithm uses xref:algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm].
 The algorithm makes sure that an already discovered shortest path will not be traversed again.
 
 The algorithm implementation is executed using a single thread.
@@ -165,7 +165,7 @@ ORDER BY index
 The result shows the three shortest paths between node `A` and node `F`.
 The first two paths have the same total cost, however the first one traversed from `A` to `D` via the `B` node, while the second traversed via the `C` node.
 The third path has a higher total cost as it goes directly from `D` to `F` using the relationship with a cost of `80`, whereas the detour via `E` for the first two paths costs `70`.
-This can be verified in the xref::algorithms/yens.adoc#algorithms-yens-examples[example graph].
+This can be verified in the xref:algorithms/yens.adoc#algorithms-yens-examples[example graph].
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 

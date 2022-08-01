@@ -447,7 +447,7 @@ If the property value is missing for the given node, `null` is returned.
 
 === Examples
 
-We use the `socialGraph` with the property `score` introduced xref::graph-catalog-node-ops.adoc#node-ops-examples[above].
+We use the `socialGraph` with the property `score` introduced xref:graph-catalog-node-ops.adoc#node-ops-examples[above].
 
 [role=query-example]
 --

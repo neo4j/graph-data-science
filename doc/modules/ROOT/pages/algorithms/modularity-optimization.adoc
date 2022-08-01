@@ -23,7 +23,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 [[algorithms-modularity-optimization-syntax]]
@@ -52,11 +52,11 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                                             | Type    | Default                | Optional | Description
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10                     | yes      | The maximum number of iterations to run.
-| xref::common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10                     | yes      | The maximum number of iterations to run.
+| xref:common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | seedProperty                                                                     | String  | n/a                    | yes      | Used to define initial set of labels (must be a number).
 | consecutiveIds                                                                   | Boolean | false                  | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results
@@ -142,12 +142,12 @@ include::partial$/algorithms/common-configuration/common-configuration.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                             | Type    | Default     | Optional | Description
-| xref::common-usage/running-algos.adoc#common-configuration-seed-property[seedProperty]                              | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
-| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]                            | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
-| xref::common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
+| xref:common-usage/running-algos.adoc#common-configuration-seed-property[seedProperty]                              | String  | n/a         | yes      | Used to set the initial community for a node. The property value needs to be a number.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]                            | String  | n/a         | yes      | The property name written back the ID of the partition particular node belongs to.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10          | yes      | The maximum number of iterations that the modularity optimization will run for each level.
+| xref:common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001      | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | consecutiveIds                                                                   | Boolean | false       | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null        | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null        | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 |===
 
 .Results

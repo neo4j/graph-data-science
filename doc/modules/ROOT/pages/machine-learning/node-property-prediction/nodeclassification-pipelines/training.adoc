@@ -7,24 +7,24 @@ include::partial$/operations-reference/beta-note.adoc[]
 
 
 The train mode, `gds.beta.pipeline.nodeClassification.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
-Running this mode results in a classification model of type `NodeClassification`, which is then stored in the xref::model-catalog/index.adoc[model catalog].
-The classification model can be xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[applied] to a possibly different graph which classifies nodes.
+Running this mode results in a classification model of type `NodeClassification`, which is then stored in the xref:model-catalog/index.adoc[model catalog].
+The classification model can be xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[applied] to a possibly different graph which classifies nodes.
 
 More precisely, the training proceeds as follows:
 
 . Apply `nodeLabels` and `relationshipType` filters to the graph.
-. Apply the node property steps, added according to xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties], on the whole graph.
-. Select node properties to be used as features, as specified in xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features].
-. Split the input graph into two parts: the train graph and the test graph. This is described in xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
+. Apply the node property steps, added according to xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[Adding node properties], on the whole graph.
+. Select node properties to be used as features, as specified in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[Adding features].
+. Split the input graph into two parts: the train graph and the test graph. This is described in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
 These graphs are internally managed and exist only for the duration of the training.
 . Split the nodes in the train graph using stratified k-fold cross-validation.
-The number of folds `k` can be configured as described in xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
-. Each model candidate defined in the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[parameter space] is trained on each train set and evaluated on the respective validation set for every fold. The evaluation uses the specified primary xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipeline-metrics[metric].
+The number of folds `k` can be configured as described in xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-configure-splits[Configuring the node splits].
+. Each model candidate defined in the xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[parameter space] is trained on each train set and evaluated on the respective validation set for every fold. The evaluation uses the specified primary xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipeline-metrics[metric].
 . Choose the best performing model according to the highest average score for the primary metric.
 . Retrain the winning model on the entire train graph.
 . Evaluate the performance of the winning model on the whole train graph as well as the test graph.
 . Retrain the winning model on the entire original graph.
-. Register the winning model in the xref::model-catalog/index.adoc[Model Catalog].
+. Register the winning model in the xref:model-catalog/index.adoc[Model Catalog].
 
 NOTE: The above steps describe what the procedure does logically.
 The actual steps as well as their ordering in the implementation may differ.
@@ -80,14 +80,14 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name                                                          | Type              | Default              | Optional | Description
 | pipeline                                                      | String            | n/a                  | no       | The name of the pipeline to execute.
-| xref::common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
+| xref:common-usage/running-algos.adoc#common-configuration-node-labels[nodeLabels]               | List of String    | ['*']                | yes      | Filter the named graph using the given node labels.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationshipTypes] | List of String    | ['*']                | yes      | Filter the named graph using the given relationship types.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
 | targetProperty                                                | String            | n/a                  | no       | The class of the node. Must be of type Integer.
-| metrics                                                       | List of String    | n/a                  | no       | xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipeline-metrics[Metrics] used to evaluate the models.
+| metrics                                                       | List of String    | n/a                  | no       | xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc#nodeclassification-pipeline-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
 | modelName                                                     | String            | n/a                  | no       | The name of the model to train, must not exist in the Model Catalog.
-| xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
 .Results
@@ -100,7 +100,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | configuration | Map     | Configuration used for the train procedure.
 |===
 
-The `modelInfo` can also be retrieved at a later time by using the xref::model-catalog/list.adoc[Model List Procedure].
+The `modelInfo` can also be retrieved at a later time by using the xref:model-catalog/list.adoc[Model List Procedure].
 The `modelInfo` return field has the following algorithm-specific subfields:
 
 .Fields of modelSelectionStats

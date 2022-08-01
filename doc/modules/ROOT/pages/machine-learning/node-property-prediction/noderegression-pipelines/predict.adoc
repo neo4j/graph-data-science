@@ -10,7 +10,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 
 In the previous sections we have seen how to build up a Node Regression training pipeline and train it to produce a regression model.
-After xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training], the produced, runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].
+After xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training], the produced, runnable model is of type `{modelType}` and resides in the xref:model-catalog/index.adoc[model catalog].
 The regression model can be applied on a graph in the graph catalog to predict a property value for previously unseen nodes.
 
 Since the model has been trained on features which are created using the feature pipeline, the same feature pipeline is stored within the model and executed at prediction time.
@@ -102,7 +102,7 @@ include::partial$/algorithms/common-configuration/common-mutate-configuration-en
 
 In the following examples we will show how to use a regression model to predict a property value of a node in your in-memory graph.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
-We will use the model which we trained in the xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc#noderegression-pipelines-examples-train[train example] which we gave the name `'nr-pipeline-model'`.
+We will use the model which we trained in the xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc#noderegression-pipelines-examples-train[train example] which we gave the name `'nr-pipeline-model'`.
 
 
 [[noderegression-pipelines-predict-examples-stream]]
@@ -145,7 +145,7 @@ The name of the new property is specified using the mandatory configuration para
 The result is a single summary row including information about timings and how many properties were written.
 The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
 
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
 [role=query-example, group=nr]
 --
@@ -167,4 +167,4 @@ CALL gds.alpha.pipeline.nodeRegression.predict.mutate('myGraph', {
 --
 
 The output tells us that we added a property for each of the `UnknownHouse` nodes.
-To use this property, we can run another algorithm using the `predictedPrice` property, or inspect it using xref::graph-catalog-node-ops.adoc#catalog-graph-examples-stream[`gds.graph.nodeProperty.stream`].
+To use this property, we can run another algorithm using the `predictedPrice` property, or inspect it using xref:graph-catalog-node-ops.adoc#catalog-graph-examples-stream[`gds.graph.nodeProperty.stream`].

@@ -133,7 +133,7 @@ CALL gds.graph.project(
 )
 ----
 
-We now run the xref::algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.
+We now run the xref:algorithms/louvain.adoc[Louvain algorithm] to create a division of the nodes into communities that we can then evalutate.
 
 [role=query-example, group=louvain-conductance]
 --
@@ -167,9 +167,9 @@ The nodes are now assigned to communities in the following way:
 | "Michael" | 5
 |===
 
-Please see the xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] procedure for how to obtain such an assignment table.
+Please see the xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[stream node properties] procedure for how to obtain such an assignment table.
 
-For more information about Louvain, see its xref::algorithms/louvain.adoc[algorithm page].
+For more information about Louvain, see its xref:algorithms/louvain.adoc[algorithm page].
 
 
 === Stream
@@ -180,7 +180,7 @@ Note that we in this case we use the feature of relationships being weighted by 
 The Conductance stream procedure returns the conductance for each community.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
-For more details on the stream mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+For more details on the stream mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example, group=louvain-conductance]
 --

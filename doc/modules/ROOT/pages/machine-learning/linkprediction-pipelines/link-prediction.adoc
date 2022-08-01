@@ -14,8 +14,8 @@ More precisely, the input to the machine learning model are _examples_ of node p
 During training, the node pairs are labeled as adjacent or not adjacent.
 
 In GDS, we have Link prediction pipelines which offer an end-to-end workflow, from feature extraction to link prediction.
-The training pipelines reside in the xref::pipeline-catalog/index.adoc[pipeline catalog].
-When a training pipeline is xref::machine-learning/linkprediction-pipelines/training.adoc[executed], a prediction model is created and stored in the xref::model-catalog/index.adoc[model catalog].
+The training pipelines reside in the xref:pipeline-catalog/index.adoc[pipeline catalog].
+When a training pipeline is xref:machine-learning/linkprediction-pipelines/training.adoc[executed], a prediction model is created and stored in the xref:model-catalog/index.adoc[model catalog].
 
 A training pipeline is a sequence of three phases:
 [upperroman]
@@ -23,23 +23,23 @@ A training pipeline is a sequence of three phases:
 . The nodes in the graph are augmented with new properties by running a series of steps on the graph with only relationships from the feature set.
 . The train and test sets are used for training a link prediction pipeline. Link features are derived by combining node properties of node pairs.
 
-For the training and test sets, positive examples are xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[selected] from the relationships in the graph.
+For the training and test sets, positive examples are xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[selected] from the relationships in the graph.
 The negative examples are sampled from non-adjacent nodes.
 
-One can xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[configure] which steps should be included above.
+One can xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[configure] which steps should be included above.
 The steps execute GDS algorithms that create new node properties.
-After configuring the node property steps, one can xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[define] how to combine node properties of node pairs into link features.
+After configuring the node property steps, one can xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[define] how to combine node properties of node pairs into link features.
 The training phase (III) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
 
-After xref::machine-learning/linkprediction-pipelines/training.adoc[training the pipeline], a prediction model is created.
+After xref:machine-learning/linkprediction-pipelines/training.adoc[training the pipeline], a prediction model is created.
 This model includes the node property steps and link feature steps from the training pipeline and uses them to generate the relevant features for predicting new relationships.
 The prediction model can be applied to infer the probability of the existence of a relationship between two non-adjacent nodes.
 
-NOTE: xref::machine-learning/linkprediction-pipelines/predict.adoc[Prediction] can only be done with a prediction model (not with a training pipeline).
+NOTE: xref:machine-learning/linkprediction-pipelines/predict.adoc[Prediction] can only be done with a prediction model (not with a training pipeline).
 
 This segment is divided into the following pages:
 
-* xref::machine-learning/linkprediction-pipelines/config.adoc[Configuring the pipeline]
-* xref::machine-learning/linkprediction-pipelines/training.adoc[Training the pipeline]
-* xref::machine-learning/linkprediction-pipelines/predict.adoc[Applying a trained model for prediction]
-* xref::machine-learning/linkprediction-pipelines/theory.adoc[Theoretical considerations]
+* xref:machine-learning/linkprediction-pipelines/config.adoc[Configuring the pipeline]
+* xref:machine-learning/linkprediction-pipelines/training.adoc[Training the pipeline]
+* xref:machine-learning/linkprediction-pipelines/predict.adoc[Applying a trained model for prediction]
+* xref:machine-learning/linkprediction-pipelines/theory.adoc[Theoretical considerations]

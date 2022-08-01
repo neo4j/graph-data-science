@@ -42,7 +42,7 @@ YIELD
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.model.exists`.
-Assume we trained a model by running `train` on one of our xref::machine-learning/machine-learning.adoc[Machine learning algorithms].
+Assume we trained a model by running `train` on one of our xref:machine-learning/machine-learning.adoc[Machine learning algorithms].
 
 [role=query-example]
 --

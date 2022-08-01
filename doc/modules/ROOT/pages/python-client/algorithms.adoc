@@ -12,10 +12,10 @@ include::partial$/pythonclient/python-client-syntax.adoc[]
 
 Here we can note a few key differences:
 
-* Instead of a graph name string as first argument, we have a xref::python-client/graph-object.adoc[graph object] as first positional argument.
+* Instead of a graph name string as first argument, we have a xref:python-client/graph-object.adoc[graph object] as first positional argument.
 * Instead of a configuration map, we have named keyword arguments.
 
-The result of running a procedure is returned as either a pandas `DataFrame` or a pandas `Series` depending on the xref::python-client/algorithms.adoc#python-client-algorithms-execution-mode[execution mode].
+The result of running a procedure is returned as either a pandas `DataFrame` or a pandas `Series` depending on the xref:python-client/algorithms.adoc#python-client-algorithms-execution-mode[execution mode].
 
 For example, to run the WCC and FastRP algorithms on a graph `G`, we could do the following:
 
@@ -48,7 +48,7 @@ We describe how to use them in the Python client in the sections below.
 == Execution modes
 
 Algorithms return results in a format that is controlled by its execution mode.
-These modes are explained in some detail in xref::common-usage/running-algos.adoc[Running algorithms].
+These modes are explained in some detail in xref:common-usage/running-algos.adoc[Running algorithms].
 In the Python client, the `stats`, `mutate` and `write` modes return a pandas `Series` containing the summary result of running the algorithm.
 The same applies to `estimate` procedures.
 
@@ -65,8 +65,8 @@ Some algorithms produce particularly sizeable results, for example node embeddin
 
 === Train
 
-The `train` mode is used for algorithms that produce a machine learning model into the xref::model-catalog/index.adoc[GDS Model Catalog].
-The Python client has special support for working with such models, which we describe in xref::python-client/model-object.adoc[The model object].
+The `train` mode is used for algorithms that produce a machine learning model into the xref:model-catalog/index.adoc[GDS Model Catalog].
+The Python client has special support for working with such models, which we describe in xref:python-client/model-object.adoc[The model object].
 
 
 == Algorithms that require node matching
@@ -76,7 +76,7 @@ These node ids must be matched directly from the Neo4j database.
 This is straight-forward when working in Cypher.
 In the Python client there is a convenience method `gds.find_node_id` to retrieve a node id based on node labels and property key-value pairs.
 
-For example, to find a source and target node of a graph `G` with cities to run xref::algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target Shortest Path] on, we could do the following:
+For example, to find a source and target node of a graph `G` with cities to run xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target Shortest Path] on, we could do the following:
 
 [source,python]
 ----
@@ -113,7 +113,7 @@ To do more advanced matching beyond the capabilities of `find_node_id()` we reco
 
 == Topological link prediction
 
-The methods for doing xref::algorithms/linkprediction.adoc[Topological link prediction] are a bit different.
+The methods for doing xref:algorithms/linkprediction.adoc[Topological link prediction] are a bit different.
 Just like in the GDS procedure API they do not take a graph as an argument, but rather two node references as positional arguments.
 And they simply return the similarity score of the prediction just made as a float - not any kind of pandas data structure.
 

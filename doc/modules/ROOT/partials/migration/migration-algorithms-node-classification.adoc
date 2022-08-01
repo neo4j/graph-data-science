@@ -1,15 +1,15 @@
 [[migration-algorithms-node-classification]]
 = Node Classification
 
-The original alpha version of node classification has been completely removed and incorporated into xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipelines].
-Before training a node classification model, you must xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[create] and configure a training pipeline.
+The original alpha version of node classification has been completely removed and incorporated into xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipelines].
+Before training a node classification model, you must xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-creating-a-pipeline[create] and configure a training pipeline.
 
 
 == Train
 
 Some parts of the training are now configured in specific configuration procedures for the training pipeline.
 These must precede calling the `train` procedure in order to be effective.
-The remaining parts are moved to the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[pipeline train procedure].
+The remaining parts are moved to the xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[pipeline train procedure].
 Please see the table below.
 
 .Changes in configuration for train

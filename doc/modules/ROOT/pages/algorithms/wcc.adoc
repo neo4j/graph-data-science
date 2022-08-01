@@ -29,7 +29,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -312,10 +312,10 @@ ORDER BY componentId, name
 --
 
 The result shows that the algorithm identifies two components.
-This can be verified in the xref::algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
+This can be verified in the xref:algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
 
 The default behaviour of the algorithm is to run `unweighted`, e.g. without using `relationship` weights.
-The `weighted` option will be demonstrated in xref::algorithms/wcc.adoc#algorithms-wcc-examples-weighted[Weighted]
+The `weighted` option will be demonstrated in xref:algorithms/wcc.adoc#algorithms-wcc-examples-weighted[Weighted]
 
 [[algorithms-wcc-examples-stats]]
 === Stats
@@ -340,7 +340,7 @@ YIELD componentCount
 |===
 --
 
-The result shows that `myGraph` has two components and this can be verified by looking at the xref::algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
+The result shows that `myGraph` has two components and this can be verified by looking at the xref:algorithms/wcc.adoc#algorithms-wcc-examples[example graph].
 
 
 [[algorithms-wcc-examples-mutate]]
@@ -558,10 +558,10 @@ This is correct because these two nodes are connected.
 [[algorithms-wcc-examples-seed-write]]
 === Writing Seeded components
 
-In the xref::algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section] we demonstrated the `seedProperty` usage in `stream` mode.
+In the xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding[previous section] we demonstrated the `seedProperty` usage in `stream` mode.
 It is also available in the other modes of the algorithm.
 Below is an example on how to use `seedProperty` in `write` mode.
-Note that the example below relies on xref::algorithms/wcc.adoc#algorithms-wcc-examples-seeding-steps[Steps 1 - 3] from the previous section.
+Note that the example below relies on xref:algorithms/wcc.adoc#algorithms-wcc-examples-seeding-steps[Steps 1 - 3] from the previous section.
 
 [role=query-example, group=seeding]
 --

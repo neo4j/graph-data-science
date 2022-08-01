@@ -6,4 +6,4 @@ ifdef::mutate-details[]
 {mutate-details}
 endif::[]
 
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].

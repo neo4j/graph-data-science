@@ -7,14 +7,14 @@ Centrality algorithms are used to determine the importance of distinct nodes in 
 The Neo4j GDS library includes the following centrality algorithms, grouped by quality tier:
 
 * Production-quality
-** xref::algorithms/page-rank.adoc[Page Rank]
-** xref::algorithms/article-rank.adoc[Article Rank]
-** xref::algorithms/eigenvector-centrality.adoc[Eigenvector Centrality]
-** xref::algorithms/betweenness-centrality.adoc[Betweenness Centrality]
-** xref::algorithms/degree-centrality.adoc[Degree Centrality]
+** xref:algorithms/page-rank.adoc[Page Rank]
+** xref:algorithms/article-rank.adoc[Article Rank]
+** xref:algorithms/eigenvector-centrality.adoc[Eigenvector Centrality]
+** xref:algorithms/betweenness-centrality.adoc[Betweenness Centrality]
+** xref:algorithms/degree-centrality.adoc[Degree Centrality]
 * Beta
-** xref::algorithms/closeness-centrality.adoc[Closeness Centrality]
+** xref:algorithms/closeness-centrality.adoc[Closeness Centrality]
 * Alpha
-** xref::algorithms/harmonic-centrality.adoc[Harmonic Centrality]
-** xref::algorithms/hits.adoc[HITS]
-** xref::algorithms/influence-maximization.adoc[Influence Maximization]
+** xref:algorithms/harmonic-centrality.adoc[Harmonic Centrality]
+** xref:algorithms/hits.adoc[HITS]
+** xref:algorithms/influence-maximization.adoc[Influence Maximization]

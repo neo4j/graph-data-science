@@ -13,7 +13,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 [[algorithms-filtered-knn-intro]]
 == Introduction
 
-The Filtered K-Nearest Neighbors algorithm extends our popular xref::algorithms/knn.adoc[K-Nearest Neighbors] algorithm with filtering on source nodes, target nodes or both.
+The Filtered K-Nearest Neighbors algorithm extends our popular xref:algorithms/knn.adoc[K-Nearest Neighbors] algorithm with filtering on source nodes, target nodes or both.
 
 === Types of Filtering
 
@@ -61,7 +61,7 @@ You can mix and match source node filtering, target node filtering and seeding t
 [[algorithms-filtered-knn-filter-seeding-configuration]]
 ==== Configuring filters and seeding
 
-You should consult xref::algorithms/knn.adoc#algorithms-knn-node-properties-configuration[K-Nearest Neighbors configuration] for the standard configuration options.
+You should consult xref:algorithms/knn.adoc#algorithms-knn-node-properties-configuration[K-Nearest Neighbors configuration] for the standard configuration options.
 
 The source node filter to use is specified with the `sourceNodeFilter` configuration parameter. It is not mandatory.
 

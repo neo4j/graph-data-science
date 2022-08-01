@@ -3,5 +3,5 @@
 
 Operations known to not work with the Python client are:
 
-* xref::management-ops/utility-functions.adoc#utility-functions-numeric[Numeric utility functions] (will never be supported)
-* xref::management-ops/create-cypher-db.adoc[Cypher on GDS] (might be supported in the future)
+* xref:management-ops/utility-functions.adoc#utility-functions-numeric[Numeric utility functions] (will never be supported)
+* xref:management-ops/create-cypher-db.adoc[Cypher on GDS] (might be supported in the future)

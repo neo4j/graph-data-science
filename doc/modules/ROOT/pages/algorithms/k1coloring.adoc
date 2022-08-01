@@ -28,7 +28,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -61,8 +61,8 @@ YIELD nodeId, color
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                  | Type    | Default                | Optional | Description
-| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
 .Results
@@ -99,8 +99,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                  | Type    | Default                | Optional | Description
-| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| concurrency                                           | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 |===
 
 .Results
@@ -164,10 +164,10 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                        | Type    | Default                | Optional | Description
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
-| xref::common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency] | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]       | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
-| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]       | String  | n/a                    | no       | The node property this procedure writes the color to.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency] | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]       | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]       | String  | n/a                    | no       | The node property this procedure writes the color to.
 |===
 
 .Results

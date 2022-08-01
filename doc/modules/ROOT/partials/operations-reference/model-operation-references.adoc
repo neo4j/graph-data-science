@@ -8,9 +8,9 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                        | Operation
-| xref::model-catalog/exists.adoc[Check if a model exists]  | `gds.beta.model.exists`
-| xref::model-catalog/drop.adoc[Remove a model from memory] | `gds.beta.model.drop`
-| xref::model-catalog/list.adoc[List models]                | `gds.beta.model.list`
+| xref:model-catalog/exists.adoc[Check if a model exists]  | `gds.beta.model.exists`
+| xref:model-catalog/drop.adoc[Remove a model from memory] | `gds.beta.model.drop`
+| xref:model-catalog/list.adoc[List models]                | `gds.beta.model.list`
 |===
 
 === Alpha Tier
@@ -20,8 +20,8 @@
 [opts=header,cols="1, 1"]
 |===
 | Description                                        | Operation
-| xref::model-catalog/store.adoc[Store a model]             | `gds.alpha.model.store`
-| xref::model-catalog/store.adoc#catalog-model-load[Load a stored model]        | `gds.alpha.model.load`
-| xref::model-catalog/store.adoc#catalog-model-delete[Delete a stored model]    | `gds.alpha.model.delete`
-| xref::model-catalog/publish.adoc[Publish a model]         | `gds.alpha.model.publish`
+| xref:model-catalog/store.adoc[Store a model]             | `gds.alpha.model.store`
+| xref:model-catalog/store.adoc#catalog-model-load[Load a stored model]        | `gds.alpha.model.load`
+| xref:model-catalog/store.adoc#catalog-model-delete[Delete a stored model]    | `gds.alpha.model.delete`
+| xref:model-catalog/publish.adoc[Publish a model]         | `gds.alpha.model.publish`
 |===

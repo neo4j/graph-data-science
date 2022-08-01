@@ -6,4 +6,4 @@ The intermediate node ids are stored using the `nodeIds` property.
 The accumulated costs to reach an intermediate node are stored using the `costs` property.
 
 
-For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].

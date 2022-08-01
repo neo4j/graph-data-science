@@ -7,18 +7,18 @@ Community detection algorithms are used to evaluate how groups of nodes are clus
 The Neo4j GDS library includes the following community detection algorithms, grouped by quality tier:
 
 * Production-quality
-** xref::algorithms/louvain.adoc[Louvain]
-** xref::algorithms/label-propagation.adoc[Label Propagation]
-** xref::algorithms/wcc.adoc[Weakly Connected Components]
-** xref::algorithms/triangle-count.adoc[Triangle Count]
-** xref::algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
+** xref:algorithms/louvain.adoc[Louvain]
+** xref:algorithms/label-propagation.adoc[Label Propagation]
+** xref:algorithms/wcc.adoc[Weakly Connected Components]
+** xref:algorithms/triangle-count.adoc[Triangle Count]
+** xref:algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient]
 * Beta
-** xref::algorithms/k1coloring.adoc[K-1 Coloring]
-** xref::algorithms/modularity-optimization.adoc[Modularity Optimization]
+** xref:algorithms/k1coloring.adoc[K-1 Coloring]
+** xref:algorithms/modularity-optimization.adoc[Modularity Optimization]
 * Alpha
-** xref::algorithms/strongly-connected-components.adoc[Strongly Connected Components]
-** xref::algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
-** xref::algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
-** xref::algorithms/alpha/conductance.adoc[Conductance metric]
-** xref::algorithms/alpha/kmeans.adoc[K-Means Clustering]
-** xref::algorithms/alpha/leiden.adoc[Leiden]
+** xref:algorithms/strongly-connected-components.adoc[Strongly Connected Components]
+** xref:algorithms/sllpa.adoc[Speaker-Listener Label Propagation]
+** xref:algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
+** xref:algorithms/alpha/conductance.adoc[Conductance metric]
+** xref:algorithms/alpha/kmeans.adoc[K-Means Clustering]
+** xref:algorithms/alpha/leiden.adoc[Leiden]

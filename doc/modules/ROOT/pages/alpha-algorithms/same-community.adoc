@@ -5,7 +5,7 @@
 
 
 Same Community is a way of determining whether two nodes belong to the same community.
-These communities could be computed by using one of the xref::algorithms/community.adoc[Community detection].
+These communities could be computed by using one of the xref:algorithms/community.adoc[Community detection].
 
 include::partial$/operations-reference/alpha-note.adoc[]
 

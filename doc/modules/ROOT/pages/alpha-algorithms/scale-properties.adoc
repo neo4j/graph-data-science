@@ -27,7 +27,7 @@ There are a number of supported scalers for the Scale Properties algorithm.
 These can be configured using the `scaler` configuration parameter.
 
 List properties are scaled index-by-index.
-See xref::alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
+See xref:alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-examples-list[the list example] for more details.
 
 In the following equations, `p` denotes the vector containing all property values for a single property across all nodes in the graph.
 
@@ -265,9 +265,9 @@ The name of the new property is specified using the mandatory configuration para
 The result is a single summary row containing metrics from the computation.
 The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
 
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
-In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref::alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
+In this example we will scale the two hotel properties of `buildYear` and `avgReview` using the xref:alpha-algorithms/scale-properties.adoc#algorithms-scale-properties-mean[Mean scaler].
 The output is a list property which we will call `hotelFeatures`, imagining that we will use this as input for a machine learning model later on.
 
 [role=query-example]
@@ -292,7 +292,7 @@ CALL gds.alpha.scaleProperties.mutate('myGraph', {
 
 The result shows that there are now eight new node properties in the in-memory graph.
 These contain the scaled values from the input properties, where the scaled `buildYear` values are in the first list position and scaled `avgReview` values are in the second position.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs in the catalog].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs in the catalog].
 
 
 [[algorithms-scale-properties-examples-list]]
