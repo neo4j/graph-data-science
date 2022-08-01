@@ -25,12 +25,16 @@ import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphRemoveNodePropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -44,6 +48,26 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "nodeProperties") List<String> nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return dropNodeProperties(graphName, nodeProperties, configuration, Optional.empty());
+    }
+
+    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
+    @Description("Removes node properties from a projected graph.")
+    public Stream<Result> run(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.drop`";
+        return dropNodeProperties(graphName, nodeProperties, configuration, Optional.of(deprecationWarning));
+    }
+
+    private Stream<Result> dropNodeProperties(
+        String graphName,
+        List<String> nodeProperties,
+        Map<String, Object> configuration,
+        Optional<String> deprecationWarning
     ) {
         ProcPreconditions.check();
         validateGraphName(graphName);
@@ -59,34 +83,45 @@ public class GraphRemoveNodePropertiesProc extends CatalogProc {
         validateConfig(cypherConfig, config);
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
+
+        // progress tracking
+        var task = Tasks.leaf("Graph :: Node properties :: Drop", config.nodeProperties().size());
+        var progressTracker = new TaskProgressTracker(
+            task,
+            log,
+            1,
+            new JobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+
+        deprecationWarning.ifPresent(progressTracker::logWarning);
+
         // removing
         long propertiesRemoved = runWithExceptionLogging(
             "Node property removal failed",
-            () -> dropNodeProperties(graphStore, config)
+            () -> dropNodeProperties(graphStore, config, progressTracker)
         );
         // result
         return Stream.of(new Result(graphName, nodeProperties, propertiesRemoved));
     }
 
-    @Procedure(name = "gds.graph.removeNodeProperties", mode = READ, deprecatedBy = "gds.graph.nodeProperties.drop")
-    @Description("Removes node properties from a projected graph.")
-    public Stream<Result> run(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return dropNodeProperties(graphName, nodeProperties, configuration);
-    }
-
     @NotNull
-    private Long dropNodeProperties(GraphStore graphStore, GraphRemoveNodePropertiesConfig config) {
+    private Long dropNodeProperties(
+        GraphStore graphStore,
+        GraphRemoveNodePropertiesConfig config,
+        TaskProgressTracker progressTracker
+    ) {
         var removedPropertiesCount = new MutableLong(0);
 
+        progressTracker.beginSubTask();
         config.nodeProperties().forEach(propertyKey -> {
             removedPropertiesCount.add(graphStore.nodeProperty(propertyKey).values().size());
             graphStore.removeNodeProperty(propertyKey);
+            progressTracker.logProgress();
         });
 
+        progressTracker.endSubTask();
         return removedPropertiesCount.longValue();
     }
 

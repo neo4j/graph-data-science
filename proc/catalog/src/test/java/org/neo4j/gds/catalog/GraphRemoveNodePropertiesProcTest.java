@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,11 +30,16 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.embeddings.fastrp.FastRPMutateProc;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -50,6 +56,17 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
         ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
         ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
         ", (f:B {nodeProp1: 5, nodeProp2: 47})";
+
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -147,5 +164,15 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
             .graphStore();
 
         assertThat(propertiesToRemove).allMatch(property -> graphStore.nodeLabels().stream().noneMatch(label -> graphStore.hasNodeProperty(label, property)));
+    }
+
+    @Test
+    void shouldLogDeprecationWarning() {
+        runQuery("CALL gds.graph.removeNodeProperties($graph, ['nodeProp1'])", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
+        Assertions.assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains("gds.graph.nodeProperties.drop");
     }
 }
