@@ -26,17 +26,16 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementIdentityResolver;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.LinkMetric;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -135,25 +134,30 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
     }
 
     @Configuration.GraphStoreValidationCheck
+    default void validateSourceNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementIdentityResolver.resolveAndValidate(graphStore, List.of(sourceNodeLabel()), "sourceNodeLabel");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementIdentityResolver.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "sourceNodeLabel");
+    }
+
+    @Configuration.GraphStoreValidationCheck
     default void validateContextNodeLabels(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        Set<NodeLabel> availableLabels = graphStore.nodeLabels();
-        var invalidLabels = featureInputLabels(graphStore)
-            .stream()
-            .filter(label -> !availableLabels.contains(label))
-            .map(NodeLabel::name)
-            .collect(Collectors.toList());
-
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find context node labels of %s. Available labels are %s.",
-                StringJoining.join(invalidLabels.stream()),
-                StringJoining.join(availableLabels.stream().map(NodeLabel::name))
-            ));
-        }
+        ElementIdentityResolver.resolveAndValidate(graphStore, contextNodeLabels(), "sourceNodeLabel");
     }
 
 

@@ -21,10 +21,12 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementIdentityResolver;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.MissingParameterExceptions;
@@ -89,6 +91,32 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
             : contextRelationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
     }
 
+    @Configuration.GraphStoreValidationCheck
+    default void validateSourceNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        sourceNodeLabel().ifPresent(label -> ElementIdentityResolver.resolveAndValidate(graphStore, List.of(label), "sourceNodeLabel"));
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateTargetNodeLabel(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        targetNodeLabel().ifPresent(label -> ElementIdentityResolver.resolveAndValidate(graphStore, List.of(label), "targetNodeLabel"));
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateContextNodeLabels(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementIdentityResolver.resolveAndValidate(graphStore, contextNodeLabels(), "contextNodeLabels");
+    }
 
     //Exhaustive strategy fields
     @Configuration.IntegerRange(min = 1)

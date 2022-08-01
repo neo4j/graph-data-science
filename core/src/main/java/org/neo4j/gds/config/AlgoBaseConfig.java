@@ -30,7 +30,6 @@ import org.neo4j.gds.utils.StringJoining;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -61,9 +60,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-        return nodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+        return ElementIdentityResolver.resolve(graphStore, nodeLabels());
     }
 
     @Configuration.GraphStoreValidation
@@ -81,20 +78,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        Set<NodeLabel> availableLabels = graphStore.nodeLabels();
-        var invalidLabels = selectedLabels
-            .stream()
-            .filter(label -> !availableLabels.contains(label))
-            .map(NodeLabel::name)
-            .collect(Collectors.toList());
-
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find node labels of %s. Available labels are %s.",
-                StringJoining.join(invalidLabels.stream()),
-                StringJoining.join(availableLabels.stream().map(NodeLabel::name))
-            ));
-        }
+        ElementIdentityResolver.validate(graphStore, selectedLabels, "node labels");
     }
 
     @Configuration.GraphStoreValidationCheck
