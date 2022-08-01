@@ -33,8 +33,8 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
     private static final Collection<Neo4jVersion> incompatibleVersions = EnumSet.of(
         Neo4jVersion.V_4_4_8_drop10,
         Neo4jVersion.V_4_4_9_drop10,
-        Neo4jVersion.V_5_0_drop40,
-        Neo4jVersion.V_5_0_drop50
+        Neo4jVersion.V_5_0_drop50,
+        Neo4jVersion.V_5_0_drop60
     );
 
     @Override
