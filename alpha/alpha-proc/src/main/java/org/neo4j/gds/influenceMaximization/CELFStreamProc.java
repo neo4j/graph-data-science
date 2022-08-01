@@ -48,7 +48,7 @@ public class CELFStreamProc extends BaseProc {
         ).compute(graphName, configuration, true, true);
     }
 
-    @Procedure(name = "gds.beta.influenceMaximization.celf.estimate", mode = READ)
+    @Procedure(name = "gds.beta.influenceMaximization.celf.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphName,
