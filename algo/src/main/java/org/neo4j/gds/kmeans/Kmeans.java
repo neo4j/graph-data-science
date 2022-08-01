@@ -154,96 +154,17 @@ public class Kmeans extends Algorithm<KmeansResult> {
         bestDistance = Double.POSITIVE_INFINITY;
         bestCommunities.setAll(v -> UNASSIGNED);
 
-        for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
-            progressTracker.beginSubTask(); // KMeans Iteration - start
-            ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
-
-            currentCommunities.setAll(v -> UNASSIGNED);
-
-            var tasks = PartitionUtils.rangePartition(
-                concurrency,
-                nodeCount,
-                partition -> KmeansTask.createTask(
-                    samplerType,
-                    clusterManager,
-                    nodePropertyValues,
-                    currentCommunities,
-                    currentDistanceFromCentroid,
-                    k,
-                    dimensions,
-                    partition
-                ),
-                Optional.of((int) nodeCount / concurrency)
-            );
-            int numberOfTasks = tasks.size();
-
-            KmeansSampler sampler = KmeansSampler.createSampler(
-                samplerType,
-                random,
-                nodePropertyValues,
-                clusterManager,
-                nodeCount,
-                k,
-                concurrency,
-                distanceFromCentroid,
-                executorService,
-                tasks,
-                progressTracker
-            );
-
-            assert numberOfTasks <= concurrency;
-
-            //Initialization do initial centroid computation and assignment
-            progressTracker.beginSubTask(); // Initialization - start
-            if (!seededCentroids.isEmpty()) {
-                clusterManager.assignSeededCentroids(seededCentroids);
-            } else {
-                sampler.performInitialSampling();
+        // We need this `if` because the task tree is different if the number of restart is > 1.
+        if(maximumNumberOfRestarts == 1) {
+            kMeans(nodeCount, currentCommunities, currentDistanceFromCentroid, 0);
+        } else {
+            for (int restartIteration = 0; restartIteration < maximumNumberOfRestarts; ++restartIteration) {
+                progressTracker.beginSubTask(); // KMeans Iteration - start
+                kMeans(nodeCount, currentCommunities, currentDistanceFromCentroid, restartIteration);
+                progressTracker.endSubTask(); // KMeans Iteration - end
             }
-            progressTracker.endSubTask(); // Initialization - end
-            //
-            int iteration = 0;
-
-            progressTracker.beginSubTask(); // Main - start
-            while (true) {
-                progressTracker.beginSubTask(); // Iteration - start
-
-                long numberOfSwaps = 0;
-                //assign each node to a centroid
-                boolean shouldComputeDistance = (iteration > 0)
-                                                || (samplerType == KmeansSampler.SamplerType.UNIFORM);
-                if (shouldComputeDistance) {
-                    RunWithConcurrency.builder()
-                        .concurrency(concurrency)
-                        .tasks(tasks)
-                        .executor(executorService)
-                        .run();
-
-                    for (KmeansTask task : tasks) {
-                        numberOfSwaps += task.getSwaps();
-                    }
-                }
-                recomputeCentroids(clusterManager, tasks);
-
-                progressTracker.endSubTask(); // Iteration - end
-                if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
-                    break;
-                }
-
-            }
-            progressTracker.endSubTask(); // Main - end
-
-            double averageDistanceFromCentroid = calculatedistancePhase(tasks);
-            updateBestSolution(
-                restartIteration,
-                clusterManager,
-                averageDistanceFromCentroid,
-                currentCommunities,
-                currentDistanceFromCentroid
-            );
-
-            progressTracker.endSubTask(); // KMeans Iteration - end
         }
+
 
         if (computeSilhouette) {
             calculateSilhouette();
@@ -256,6 +177,99 @@ public class Kmeans extends Algorithm<KmeansResult> {
             bestDistance,
             silhouette,
             averageSilhouette
+        );
+    }
+
+    private void kMeans(
+        long nodeCount,
+        HugeIntArray currentCommunities,
+        HugeDoubleArray currentDistanceFromCentroid,
+        int restartIteration
+    ) {
+        ClusterManager clusterManager = ClusterManager.createClusterManager(nodePropertyValues, dimensions, k);
+
+        currentCommunities.setAll(v -> UNASSIGNED);
+
+        var tasks = PartitionUtils.rangePartition(
+            concurrency,
+            nodeCount,
+            partition -> KmeansTask.createTask(
+                samplerType,
+                clusterManager,
+                nodePropertyValues,
+                currentCommunities,
+                currentDistanceFromCentroid,
+                k,
+                dimensions,
+                partition
+            ),
+            Optional.of((int) nodeCount / concurrency)
+        );
+        int numberOfTasks = tasks.size();
+
+        KmeansSampler sampler = KmeansSampler.createSampler(
+            samplerType,
+            random,
+            nodePropertyValues,
+            clusterManager,
+            nodeCount,
+            k,
+            concurrency,
+            distanceFromCentroid,
+            executorService,
+            tasks,
+            progressTracker
+        );
+
+        assert numberOfTasks <= concurrency;
+
+        //Initialization do initial centroid computation and assignment
+        progressTracker.beginSubTask(); // Initialization - start
+        if (!seededCentroids.isEmpty()) {
+            clusterManager.assignSeededCentroids(seededCentroids);
+        } else {
+            sampler.performInitialSampling();
+        }
+        progressTracker.endSubTask(); // Initialization - end
+        //
+        int iteration = 0;
+
+        progressTracker.beginSubTask(); // Main - start
+        while (true) {
+            progressTracker.beginSubTask(); // Iteration - start
+
+            long numberOfSwaps = 0;
+            //assign each node to a centroid
+            boolean shouldComputeDistance = (iteration > 0)
+                                            || (samplerType == KmeansSampler.SamplerType.UNIFORM);
+            if (shouldComputeDistance) {
+                RunWithConcurrency.builder()
+                    .concurrency(concurrency)
+                    .tasks(tasks)
+                    .executor(executorService)
+                    .run();
+
+                for (KmeansTask task : tasks) {
+                    numberOfSwaps += task.getSwaps();
+                }
+            }
+            recomputeCentroids(clusterManager, tasks);
+
+            progressTracker.endSubTask(); // Iteration - end
+            if (kmeansIterationStopper.shouldQuit(numberOfSwaps, ++iteration)) {
+                break;
+            }
+
+        }
+        progressTracker.endSubTask(); // Main - end
+
+        double averageDistanceFromCentroid = calculatedistancePhase(tasks);
+        updateBestSolution(
+            restartIteration,
+            clusterManager,
+            averageDistanceFromCentroid,
+            currentCommunities,
+            currentDistanceFromCentroid
         );
     }
 
@@ -279,7 +293,7 @@ public class Kmeans extends Algorithm<KmeansResult> {
     }
 
     private void checkInputValidity() {
-        if (seededCentroids.size() > 0) {
+        if (!seededCentroids.isEmpty()) {
             for (List<Double> centroid : seededCentroids) {
                 if (centroid.size() != dimensions) {
                     throw new IllegalStateException(

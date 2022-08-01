@@ -379,20 +379,78 @@ class KmeansTest {
             .extracting(replaceTimings())
             .containsExactly(
                 "Kmeans :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization 50%",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization 100%",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Initialization :: Finished",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 100%",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 1 of 5 :: Finished",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 :: Start",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 100%",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Iteration 2 of 5 :: Finished",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Main :: Finished",
-                "Kmeans :: KMeans Iteration 1 of 1 :: Finished",
+                "Kmeans :: Initialization :: Start",
+                "Kmeans :: Initialization 50%",
+                "Kmeans :: Initialization 100%",
+                "Kmeans :: Initialization :: Finished",
+                "Kmeans :: Main :: Start",
+                "Kmeans :: Main :: Iteration 1 of 5 :: Start",
+                "Kmeans :: Main :: Iteration 1 of 5 100%",
+                "Kmeans :: Main :: Iteration 1 of 5 :: Finished",
+                "Kmeans :: Main :: Iteration 2 of 5 :: Start",
+                "Kmeans :: Main :: Iteration 2 of 5 100%",
+                "Kmeans :: Main :: Iteration 2 of 5 :: Finished",
+                "Kmeans :: Main :: Finished",
+                "Kmeans :: Finished"
+            );
+    }
+
+    @Test
+    void progressTrackingWithRestarts() {
+        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+            .nodeProperty("kmeans")
+            .concurrency(1)
+            .randomSeed(19L)
+            .maxIterations(5)
+            .numberOfRestarts(2)
+            .k(2)
+            .build();
+
+        var factory = new KmeansAlgorithmFactory<KmeansBaseConfig>();
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, kmeansConfig),
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        var kmeans = factory.build(graph, kmeansConfig, progressTracker);
+        var result = kmeans.compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "Kmeans :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Initialization :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Initialization 50%",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Initialization 100%",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Initialization :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 100%",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 100%",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Main :: Finished",
+                "Kmeans :: KMeans Iteration 1 of 2 :: Finished",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Start",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Initialization :: Start",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Initialization 50%",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Initialization 100%",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Initialization :: Finished",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Start",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 100%",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 1 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Start",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 100%",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Iteration 2 of 5 :: Finished",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Main :: Finished",
+                "Kmeans :: KMeans Iteration 2 of 2 :: Finished",
                 "Kmeans :: Finished"
             );
     }

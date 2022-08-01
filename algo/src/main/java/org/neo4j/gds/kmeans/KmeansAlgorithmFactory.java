@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
@@ -62,14 +63,24 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
 
-        return Tasks.iterativeFixed(taskName(), () -> List.of(
-            Tasks.task("KMeans Iteration", List.of(
-                Tasks.leaf("Initialization", config.k()),
-                Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations())
-            ))
-        ),
-            config.numberOfRestarts()
+        var iterations = config.numberOfRestarts();
+        if (iterations == 1) {
+            return kMeansTask(taskName(), config);
+        }
+
+        return Tasks.iterativeFixed(
+            taskName(),
+            () -> List.of(kMeansTask("KMeans Iteration", config)),
+            iterations
         );
+    }
+
+    @NotNull
+    private Task kMeansTask(String description, CONFIG config) {
+        return Tasks.task(description, List.of(
+            Tasks.leaf("Initialization", config.k()),
+            Tasks.iterativeDynamic("Main", () -> List.of(Tasks.leaf("Iteration")), config.maxIterations())
+        ));
     }
 
 }
