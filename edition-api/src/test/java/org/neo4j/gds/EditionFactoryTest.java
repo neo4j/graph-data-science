@@ -22,7 +22,7 @@ package org.neo4j.gds;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EditionFactoryTest {
 
     @Inject
-    GraphDatabaseAPI db;
+    GraphDatabaseService db;
 
     @ExtensionCallback
     void configuration(TestDatabaseManagementServiceBuilder builder) {

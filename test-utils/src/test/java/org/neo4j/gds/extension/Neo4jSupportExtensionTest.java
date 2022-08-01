@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.QueryRunner;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Map;
 
@@ -38,7 +37,7 @@ class Neo4jSupportExtensionTest extends BaseTest {
     // import is explicitly from Neo4j as opposed to our
     // own Inject interface, in order to compare both results.
     @org.neo4j.test.extension.Inject
-    GraphDatabaseAPI neoInjectedDb;
+    GraphDatabaseService neoInjectedDb;
 
     @Neo4jGraph
     static final String DB_CYPHER = "CREATE" +
