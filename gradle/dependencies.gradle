@@ -33,7 +33,7 @@ ext {
         'assertj'              : '3.20.2',
         'auto-common'          : '1.1.2',
         'auto-service'         : '1.0',
-        'bouncycastle'         : '1.68',
+        'bouncycastle'         : '1.70',
         'commons-compress'     : '1.19',
         'commons-io'           : '2.11.0',
         'commons-lang3'        : '3.12.0',
