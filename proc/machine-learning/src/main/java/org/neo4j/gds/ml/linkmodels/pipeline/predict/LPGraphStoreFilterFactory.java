@@ -33,6 +33,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.config.ElementIdentityResolver.resolveAndValidateTypes;
+import static org.neo4j.gds.config.ElementIdentityResolver.resolveTypes;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LPGraphStoreFilterFactory {
@@ -75,16 +77,24 @@ public final class LPGraphStoreFilterFactory {
 
         Collection<RelationshipType> contextRelTypes;
         if (!predictConfig.contextRelationshipTypes().isEmpty()) {
-            contextRelTypes = predictConfig.internalContextRelationshipTypes(graphStore);
+            contextRelTypes = resolveTypes(graphStore, predictConfig.contextRelationshipTypes());
         } else {
-            contextRelTypes = trainConfig.internalContextRelationshipType(graphStore);
+            contextRelTypes = resolveAndValidateTypes(
+                graphStore,
+                trainConfig.contextRelationshipTypes(),
+                "`contextRelationshipTypes` from the model's train config"
+            );
         }
 
         Collection<RelationshipType> predictRelTypes;
         if (!predictConfig.relationshipTypes().isEmpty()) {
-            predictRelTypes = predictConfig.internalRelationshipTypes(graphStore);
+            predictRelTypes = resolveTypes(graphStore, predictConfig.relationshipTypes());
         } else {
-            predictRelTypes = List.of(trainConfig.internalTargetRelationshipType());
+            predictRelTypes = resolveAndValidateTypes(
+                graphStore,
+                List.of(trainConfig.targetRelationshipType()),
+                "`targetRelationshipType` from the model's train config"
+            );
         }
 
         Set<RelationshipType> nodePropertyStepRelTypes = Stream.of(contextRelTypes, predictRelTypes)
@@ -120,22 +130,6 @@ public final class LPGraphStoreFilterFactory {
                 StringJoining.join(nodePropertyStepsLabels.stream().map(NodeLabel::name)),
                 StringJoining.join(invalidLabels),
                 StringJoining.join(graphStore.nodeLabels().stream().map(NodeLabel::name))
-            ));
-        }
-
-        Collection<RelationshipType> relationshipTypes = filter.nodePropertyStepRelationshipTypes();
-        var invalidTypes = relationshipTypes
-            .stream()
-            .filter((type -> !graphStore.relationshipTypes().contains(type)))
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
-        if (!invalidTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Based on the predict and the model's training configuration, expected relationship types %s, but could not find %s. Available types are %s.",
-                StringJoining.join(relationshipTypes.stream().map(RelationshipType::name)),
-                StringJoining.join(invalidTypes),
-                StringJoining.join(graphStore.relationshipTypes().stream().map(RelationshipType::name))
             ));
         }
 

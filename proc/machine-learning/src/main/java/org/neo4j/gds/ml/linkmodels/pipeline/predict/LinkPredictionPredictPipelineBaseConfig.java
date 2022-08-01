@@ -84,13 +84,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         return List.of(ElementProjection.PROJECT_ALL);
     }
 
-    @Configuration.Ignore
-    default Collection<RelationshipType> internalContextRelationshipTypes(GraphStore graphStore) {
-        return contextRelationshipTypes().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : contextRelationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
-    }
-
     @Configuration.GraphStoreValidationCheck
     default void validateSourceNodeLabel(
         GraphStore graphStore,
@@ -116,6 +109,15 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         ElementIdentityResolver.resolveAndValidate(graphStore, contextNodeLabels(), "contextNodeLabels");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateContextRelationshipTypes(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementIdentityResolver.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "contextRelationshipTypes");
     }
 
     //Exhaustive strategy fields

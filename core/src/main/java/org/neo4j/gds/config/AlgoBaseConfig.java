@@ -47,9 +47,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return relationshipTypes().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : relationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
+        return ElementIdentityResolver.resolveTypes(graphStore, relationshipTypes());
     }
 
     @Value.Default

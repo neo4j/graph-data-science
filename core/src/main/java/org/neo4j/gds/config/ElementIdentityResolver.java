@@ -21,6 +21,7 @@ package org.neo4j.gds.config;
 
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -38,6 +39,12 @@ public final class ElementIdentityResolver {
         return labelFilterNames.contains(ElementProjection.PROJECT_ALL)
             ? graphStore.nodeLabels()
             : labelFilterNames.stream().map(NodeLabel::of).collect(Collectors.toSet());
+    }
+
+    public static Collection<RelationshipType> resolveTypes(GraphStore graphStore, Collection<String> relFilterNames) {
+        return relFilterNames.contains(ElementProjection.PROJECT_ALL)
+            ? graphStore.relationshipTypes()
+            : relFilterNames.stream().map(RelationshipType::of).collect(Collectors.toSet());
     }
 
     public static void validate(GraphStore graphStore, Collection<NodeLabel> labelFilter, String filterName) {
@@ -59,9 +66,35 @@ public final class ElementIdentityResolver {
         }
     }
 
+    public static void validateTypes(GraphStore graphStore, Collection<RelationshipType> relFilter, String filterName) {
+        var availableTypes = graphStore.relationshipTypes();
+
+        var invalidLabels = relFilter
+            .stream()
+            .filter(label -> !availableTypes.contains(label))
+            .map(RelationshipType::name)
+            .collect(Collectors.toList());
+
+        if (!invalidLabels.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "Could not find %s of %s. Available relationship types are %s.",
+                filterName,
+                StringJoining.join(invalidLabels.stream()),
+                StringJoining.join(availableTypes.stream().map(RelationshipType::name))
+            ));
+        }
+    }
+
     public static void resolveAndValidate(GraphStore graphStore, Collection<String> labelFilterNames, String filterName) {
         validate(graphStore, resolve(graphStore, labelFilterNames), filterName);
     }
 
+    public static Collection<RelationshipType> resolveAndValidateTypes(GraphStore graphStore, Collection<String> relFilterNames, String filterName) {
+        Collection<RelationshipType> relFilter = resolveTypes(graphStore, relFilterNames);
+
+        validateTypes(graphStore, relFilter, filterName);
+
+        return relFilter;
+    }
 
 }
