@@ -24,11 +24,15 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.config.DeleteRelationshipsConfig;
 import org.neo4j.gds.core.loading.DeletionResult;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
@@ -43,21 +47,7 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        ProcPreconditions.check();
-
-        GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
-
-        DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
-
-        DeletionResult deletionResult = graphStoreWithConfig
-            .graphStore()
-            .deleteRelationships(RelationshipType.of(relationshipType));
-
-        return Stream.of(new Result(
-            graphName,
-            relationshipType,
-            deletionResult
-        ));
+        return dropRelationships(graphName, relationshipType, Optional.empty());
     }
 
     @Procedure(name = "gds.graph.deleteRelationships", mode = READ, deprecatedBy = "gds.graph.relationships.drop")
@@ -66,7 +56,44 @@ public class GraphDeleteRelationshipProc extends CatalogProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
-        return dropRelationships(graphName, relationshipType);
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationships.drop`";
+        return dropRelationships(graphName, relationshipType, Optional.of(deprecationWarning));
+    }
+
+    private Stream<Result> dropRelationships(
+        String graphName,
+        String relationshipType,
+        Optional<String> deprecationWarning
+    ) {
+        ProcPreconditions.check();
+
+        GraphStoreWithConfig graphStoreWithConfig = graphStoreFromCatalog(graphName);
+
+        DeleteRelationshipsConfig.of(graphName, relationshipType).validate(graphStoreWithConfig.graphStore());
+
+        var task = Tasks.leaf("Graph :: Relationships :: Drop", 1);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            log,
+            1,
+            new JobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+
+        deprecationWarning.ifPresent(progressTracker::logWarning);
+
+        progressTracker.beginSubTask();
+        DeletionResult deletionResult = graphStoreWithConfig
+            .graphStore()
+            .deleteRelationships(RelationshipType.of(relationshipType));
+        progressTracker.endSubTask();
+
+        return Stream.of(new Result(
+            graphName,
+            relationshipType,
+            deletionResult
+        ));
     }
 
     @SuppressWarnings("unused")
