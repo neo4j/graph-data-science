@@ -24,13 +24,23 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.influenceMaximization.CELF;
+import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfigImpl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.assertj.Extractors.removingThreadId;
+import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
 
 
@@ -95,7 +105,9 @@ class CELFOnConnectedGraphTest {
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
 
 
-        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE);
+        CELF celf = new CELF(graph, 5, 0.2, 3, Pools.DEFAULT, 2, 0, DEFAULT_BATCH_SIZE,
+            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+        );
         var celfResult = celf.compute();
         var softAssertions = new SoftAssertions();
 
@@ -121,5 +133,41 @@ class CELFOnConnectedGraphTest {
             .isEqualTo(1, Offset.offset(1e-5));
 
         softAssertions.assertAll();
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var config = InfluenceMaximizationStreamConfigImpl.builder().seedSetSize((int) graph.nodeCount()).build();
+
+        var factory = new CELFAlgorithmFactory<>();
+
+        var progressTask = factory.progressTask(graph, config);
+        var log = Neo4jProxy.testLog();
+        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+
+        factory
+            .build(graph, config, progressTracker)
+            .compute();
+
+        assertThat(log.getMessages(TestLog.INFO))
+            .extracting(removingThreadId())
+            .extracting(replaceTimings())
+            .containsExactly(
+                "CELF :: Start",
+                "CELF :: Greedy :: Start",
+                "CELF :: Greedy 20%",      // 5 nodes  so 20% for each
+                "CELF :: Greedy 40%",
+                "CELF :: Greedy 60%",
+                "CELF :: Greedy 80%",
+                "CELF :: Greedy 100%",
+                "CELF :: Greedy :: Finished",
+                "CELF :: LazyForwarding :: Start",
+                "CELF :: LazyForwarding 25%",    //4 iterations so 20% for each
+                "CELF :: LazyForwarding 50%",
+                "CELF :: LazyForwarding 75%",
+                "CELF :: LazyForwarding 100%",
+                "CELF :: LazyForwarding :: Finished",
+                "CELF :: Finished"
+            );
     }
 }
