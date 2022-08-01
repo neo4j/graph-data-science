@@ -21,7 +21,6 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Name;
@@ -30,9 +29,6 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 
 public class TerminateProcedure {
-
-    @Context
-    public GraphDatabaseAPI api;
 
     @Context
     public Log log;
