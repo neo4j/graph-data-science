@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.MapUtil.map;
 
-class GraphDeleteRelationshipProcTest extends BaseProcTest {
+class GraphDropRelationshipProcTest extends BaseProcTest {
 
     private final String DB_CYPHER =
         "CREATE (:A)-[:T1]->(:A), " +
@@ -58,7 +58,7 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphDeleteRelationshipProc.class, GraphProjectProc.class);
+        registerProcedures(GraphDropRelationshipProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
         runQuery("CALL gds.graph.project($graphName, 'A', ['T1', { T2: { properties: 'p'}}])", params);
     }

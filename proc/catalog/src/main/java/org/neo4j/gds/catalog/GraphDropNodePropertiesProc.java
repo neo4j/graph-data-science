@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class GraphRemoveNodePropertiesProc extends CatalogProc {
+public class GraphDropNodePropertiesProc extends CatalogProc {
 
     @Procedure(name = "gds.graph.nodeProperties.drop", mode = READ)
     @Description("Removes node properties from a projected graph.")

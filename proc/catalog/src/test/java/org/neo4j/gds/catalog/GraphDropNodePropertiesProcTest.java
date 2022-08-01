@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
+class GraphDropNodePropertiesProcTest extends BaseProcTest {
 
     private static final String TEST_GRAPH_SAME_PROPERTIES = "testGraph";
     private static final String TEST_GRAPH_DIFFERENT_PROPERTIES = "testGraph2";
@@ -72,7 +72,7 @@ class GraphRemoveNodePropertiesProcTest extends BaseProcTest {
     void setup() throws Exception {
         registerProcedures(
             GraphProjectProc.class,
-            GraphRemoveNodePropertiesProc.class,
+            GraphDropNodePropertiesProc.class,
             FastRPMutateProc.class,
             DegreeCentralityMutateProc.class
         );
