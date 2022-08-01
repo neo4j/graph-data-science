@@ -24,8 +24,8 @@ import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.Optional;
 
@@ -45,15 +45,15 @@ public class Neo4jModelCatalogResolver implements BeforeEachCallback, AfterEachC
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-        GraphDatabaseAPI db = (GraphDatabaseAPI) getDbms(context)
+        injectFields(context, getModelCatalog(context));
+    }
+
+    private ModelCatalog getModelCatalog(ExtensionContext context) {
+        var db = getDbms(context)
             .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
             .orElseThrow(() -> new IllegalStateException("No database was found."));
 
-        injectFields(context, getModelCatalog(db));
-    }
-
-    private ModelCatalog getModelCatalog(GraphDatabaseAPI db) {
-        return db.getDependencyResolver().resolveDependency(ModelCatalog.class);
+        return GraphDatabaseApiProxy.resolveDependency(db, ModelCatalog.class);
     }
 
     private Optional<DatabaseManagementService> getDbms(ExtensionContext context) {
@@ -72,10 +72,6 @@ public class Neo4jModelCatalogResolver implements BeforeEachCallback, AfterEachC
 
     @Override
     public void afterEach(ExtensionContext context) throws Exception {
-        GraphDatabaseAPI db = (GraphDatabaseAPI) getDbms(context)
-            .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
-            .orElseThrow(() -> new IllegalStateException("No database was found."));
-
-        getModelCatalog(db).removeAllLoadedModels();
+        getModelCatalog(context).removeAllLoadedModels();
     }
 }

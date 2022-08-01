@@ -28,7 +28,6 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.impl.core.NodeEntity;
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
 
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +55,7 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
 
     @Override
     public void beforeEach(ExtensionContext context) throws Exception {
-        GraphDatabaseAPI db = (GraphDatabaseAPI) getDbms(context)
+        GraphDatabaseService db = getDbms(context)
             .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
             .orElseThrow(() -> new IllegalStateException("No database was found."));
 
@@ -103,13 +102,13 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         return idMap;
     }
 
-    private void injectFields(ExtensionContext context, GraphDatabaseAPI db, Map<String, Node> idMap) {
+    private void injectFields(ExtensionContext context, GraphDatabaseService db, Map<String, Node> idMap) {
         NodeFunction nodeFunction = idMap::get;
         IdFunction idFunction = variable -> nodeFunction.of(variable).getId();
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
             injectInstance(testInstance, nodeFunction, NodeFunction.class);
             injectInstance(testInstance, idFunction, IdFunction.class);
-            injectInstance(testInstance, db, GraphDatabaseAPI.class);
+            injectInstance(testInstance, db, GraphDatabaseService.class);
         });
     }
 }
