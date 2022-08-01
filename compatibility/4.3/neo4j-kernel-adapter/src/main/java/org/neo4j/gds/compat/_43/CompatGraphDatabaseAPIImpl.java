@@ -21,16 +21,10 @@ package org.neo4j.gds.compat._43;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
-import org.neo4j.kernel.impl.factory.DbmsInfo;
 
 final class CompatGraphDatabaseAPIImpl extends GdsGraphDatabaseAPI {
 
     CompatGraphDatabaseAPIImpl(DatabaseManagementService dbms) {
         super(dbms);
-    }
-
-    @Override
-    public DbmsInfo dbmsInfo() {
-        return api.dbmsInfo();
     }
 }
