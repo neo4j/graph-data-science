@@ -230,6 +230,19 @@ public final class ArrayUtil {
         return data;
     }
 
+    /**
+     * Finds whether an array contains a given value.
+     * Linear scans the array and returns true on finding any value equal to the argument.
+     */
+    public static boolean contains(long[] array, long value) {
+        for (long l : array) {
+            if (l == value) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private ArrayUtil() {
         throw new UnsupportedOperationException("No instances");
     }

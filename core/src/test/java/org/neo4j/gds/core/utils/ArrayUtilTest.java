@@ -131,4 +131,18 @@ class ArrayUtilTest {
         assertThat(ArrayUtil.binarySearchLast(a, 0, a.length, 8)).isEqualTo(-14);
     }
 
+
+    @Test
+    void contains() {
+        assertTrue(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, 1L));
+        assertTrue(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, -1L));
+        assertTrue(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, 420L));
+        assertTrue(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, 0L));
+
+        assertFalse(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, 2L));
+        assertFalse(ArrayUtil.contains(new long[]{1L, -1L, 420L, 0L}, -420L));
+
+        assertFalse(ArrayUtil.contains(new long[]{}, -420L));
+        assertFalse(ArrayUtil.contains(new long[]{}, 0L));
+    }
 }
