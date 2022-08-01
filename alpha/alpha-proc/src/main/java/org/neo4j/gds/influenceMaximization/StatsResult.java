@@ -23,24 +23,15 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult {
-    public final long mutateMillis;
-    public final long nodePropertiesWritten;
+public final class StatsResult {
+
     public final long computeMillis;
     public final double totalSpread;
     public final long nodeCount;
     public final Map<String, Object> configuration;
 
-    private MutateResult(
-        long mutateMillis,
-        long nodePropertiesWritten,
-        long computeMillis,
-        double totalSpread,
-        long nodeCount,
-        Map<String, Object> configuration
-    ) {
-        this.mutateMillis = mutateMillis;
-        this.nodePropertiesWritten = nodePropertiesWritten;
+
+    private StatsResult(long computeMillis, double totalSpread, long nodeCount, Map<String, Object> configuration) {
         this.computeMillis = computeMillis;
         this.totalSpread = totalSpread;
         this.nodeCount = nodeCount;
@@ -51,8 +42,7 @@ public final class MutateResult {
         return new Builder();
     }
 
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
-
+    public static class Builder extends AbstractResultBuilder<StatsResult> {
         private double totalSpread;
 
         Builder withTotalSpread(double totalSpread) {
@@ -60,13 +50,8 @@ public final class MutateResult {
             return this;
         }
 
-        public MutateResult build() {
-            return new MutateResult(mutateMillis, nodePropertiesWritten,
-                computeMillis,
-                totalSpread,
-                nodeCount,
-                config.toMap()
-            );
+        public StatsResult build() {
+            return new StatsResult(computeMillis, totalSpread, nodeCount, config.toMap());
         }
     }
 }

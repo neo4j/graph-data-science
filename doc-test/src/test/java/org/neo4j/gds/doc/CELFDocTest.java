@@ -23,6 +23,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.influenceMaximization.CELFMutateProc;
+import org.neo4j.gds.influenceMaximization.CELFStatsProc;
 import org.neo4j.gds.influenceMaximization.CELFStreamProc;
 import org.neo4j.gds.influenceMaximization.CELFWriteProc;
 
@@ -39,6 +40,7 @@ class CELFDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             GraphProjectProc.class,
+            CELFStatsProc.class,
             CELFStreamProc.class,
             CELFMutateProc.class,
             GraphStreamNodePropertiesProc.class,

@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -55,12 +56,16 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
         return (computationResult, executionContext) -> {
             var celfSeedSet = computationResult.result();
             var graph = computationResult.graph();
-            var builder = WriteResult.builder();
+            var config = computationResult.config();
+            var builder = WriteResult.builder()
+                .withTotalSpread(Arrays.stream(celfSeedSet.values).sum())
+                .withNodeCount(graph.nodeCount())
+                .withComputeMillis(computationResult.computeMillis())
+                .withConfig(config);
 
             try (ProgressTimer ignore = ProgressTimer.start(builder::withWriteMillis)) {
                 var writeConcurrency = computationResult.config().writeConcurrency();
                 var algorithm = computationResult.algorithm();
-                var config = computationResult.config();
 
                 NodePropertyExporter exporter =  executionContext.nodePropertyExporterBuilder()
                     .withIdMap(graph)
@@ -74,8 +79,10 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
                     config.writeProperty(),
                     properties
                 );
+
                 builder.withNodePropertiesWritten(exporter.propertiesWritten());
             }
+
             return Stream.of(builder.build());
         };
 

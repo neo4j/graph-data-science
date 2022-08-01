@@ -17,28 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.influenceMaximization;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+@Configuration
+public interface InfluenceMaximizationStatsConfig extends InfluenceMaximizationBaseConfig {
 
-class CELFSyntaxTest extends SyntaxTestBase {
-
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(STATS),
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/influence-maximization/celf.adoc";
+    static InfluenceMaximizationStatsConfig of(CypherMapWrapper userInput) {
+        return new InfluenceMaximizationStatsConfigImpl(userInput);
     }
 }

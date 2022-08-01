@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -78,7 +79,11 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
         ComputationResult<CELF, LongDoubleScatterMap, InfluenceMaximizationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return MutateResult.builder();
+        return MutateResult.builder()
+            .withTotalSpread(Arrays.stream(computationResult.result().values).sum())
+            .withNodeCount(computationResult.graph().nodeCount())
+            .withComputeMillis(computationResult.computeMillis())
+            .withConfig(computationResult.config());
     }
 
 }

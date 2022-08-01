@@ -21,13 +21,30 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
+import java.util.Map;
+
 public final class WriteResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
+    public final long computeMillis;
+    public final double totalSpread;
+    public final long nodeCount;
+    public final Map<String, Object> configuration;
 
-    private WriteResult(long writeMillis, long nodePropertiesWritten) {
+    private WriteResult(
+        long writeMillis,
+        long nodePropertiesWritten,
+        long computeMillis,
+        double totalSpread,
+        long nodeCount,
+        Map<String, Object> configuration
+    ) {
         this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
+        this.computeMillis = computeMillis;
+        this.totalSpread = totalSpread;
+        this.nodeCount = nodeCount;
+        this.configuration = configuration;
     }
 
     public static Builder builder() {
@@ -35,8 +52,22 @@ public final class WriteResult {
     }
 
     public static class Builder extends AbstractResultBuilder<WriteResult> {
+        private double totalSpread;
+
+        Builder withTotalSpread(double totalSpread) {
+            this.totalSpread = totalSpread;
+            return this;
+        }
+
         public WriteResult build() {
-            return new WriteResult(writeMillis, nodePropertiesWritten);
+            return new WriteResult(
+                writeMillis,
+                nodePropertiesWritten,
+                computeMillis,
+                totalSpread,
+                nodeCount,
+                config.toMap()
+            );
         }
     }
 }

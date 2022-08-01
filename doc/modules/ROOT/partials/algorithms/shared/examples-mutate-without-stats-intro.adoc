@@ -1,9 +1,0 @@
-The `mutate` execution mode updates the named graph with a new {entity} property containing the {result} for that {entity}.
-The name of the new property is specified using the mandatory configuration parameter `mutateProperty`.
-The result is a single summary row, similar to `stats`, but with some additional metrics.
-The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
-ifdef::mutate-details[]
-{mutate-details}
-endif::[]
-
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
