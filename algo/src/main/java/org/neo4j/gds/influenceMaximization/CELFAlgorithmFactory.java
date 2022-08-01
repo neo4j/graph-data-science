@@ -22,9 +22,16 @@ package org.neo4j.gds.influenceMaximization;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 
 public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig> extends GraphAlgorithmFactory<CELF, CONFIG> {
 
@@ -61,6 +68,54 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
             Tasks.leaf("Greedy", graph.nodeCount()),
             Tasks.leaf("LazyForwarding", config.seedSetSize() - 1)
         );
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        MemoryEstimations.Builder builder = MemoryEstimations.builder(CELF.class);
+
+        //CELF class
+        builder.fixed(
+                "seedSet",
+                MemoryUsage.sizeOfLongDoubleScatterMap(configuration.seedSetSize())
+            )
+            .fixed("firstK", MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
+            .perNode("LazyForwarding: spread priority queue", HugeLongPriorityQueue.memoryEstimation())
+            .perNode("greedy part: single spread array: ", HugeDoubleArray::memoryEstimation);
+
+        //ICInitTask class
+
+        builder
+            .perGraphDimension(
+                "active",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+            );
+        builder.perNode("newActive", HugeLongArrayStack.memoryEstimation().times(configuration.concurrency()));
+
+
+        //ICLazyMC
+        builder.fixed("spread", MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE));
+        //ICLazyMCTask class
+
+        builder
+            .perGraphDimension(
+                "seedActive",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+            ).perGraphDimension(
+                "candidateActive",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+            ).perGraphDimension(
+                "seedSetNodes",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfLongArray(configuration.seedSetSize()))
+            ).perGraphDimension(
+                "candidateNodeIds",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
+            ).perGraphDimension(
+                "localSpread",
+                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE))
+            );
+        builder.perNode("newActive", HugeLongArrayStack.memoryEstimation().times(configuration.concurrency()));
+        return builder.build();
     }
 
 }

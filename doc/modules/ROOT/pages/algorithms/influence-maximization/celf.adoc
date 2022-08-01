@@ -239,6 +239,33 @@ CALL gds.graph.project(
 In the following examples we will demonstrate using the CELF algorithm on this graph.
 
 
+[[algorithms-celf-examples-memory-estimation]]
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.beta.influenceMaximization.celf.write.estimate('myGraph', {
+  writeProperty: 'spread',
+  seedSetSize: 3
+})
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header",cols="1,1,1,1,1"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 10        | 14                | 16360    | 16360    | "16360 Bytes"
+|===
+--
+
+
 [[alpha-algorithms-celf-examples-stats]]
 === Stats
 
@@ -250,7 +277,7 @@ include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 .The following will run the algorithm in stats mode:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.influenceMaximization.celf.stats('myGraph', {seedSetSize: 3, concurrency: 4})
+CALL gds.beta.influenceMaximization.celf.stats('myGraph', {seedSetSize: 3})
 YIELD totalSpread
 ----
 
@@ -277,7 +304,7 @@ For more details on the `stream` mode in general, see xref::common-usage/running
 .The following will run the algorithm, and stream results:
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3, concurrency: 4})
+CALL gds.beta.influenceMaximization.celf.stream('myGraph', {seedSetSize: 3})
 YIELD nodeId, spread
 RETURN gds.util.asNode(nodeId).name AS name, spread
 ORDER BY spread DESC, name ASC

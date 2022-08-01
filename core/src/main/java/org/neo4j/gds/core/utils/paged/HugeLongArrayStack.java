@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+
 public final class HugeLongArrayStack {
 
     private final HugeLongArray array;
@@ -27,6 +30,11 @@ public final class HugeLongArrayStack {
 
     public static HugeLongArrayStack newStack(long capacity) {
         return new HugeLongArrayStack(HugeLongArray.newArray(capacity));
+    }
+
+    public static MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(HugeLongArrayStack.class)
+            .perNode("array", HugeLongArray::memoryEstimation).build();
     }
 
     private HugeLongArrayStack(HugeLongArray array) {
