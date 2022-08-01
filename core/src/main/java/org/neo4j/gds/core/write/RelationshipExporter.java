@@ -36,6 +36,6 @@ public interface RelationshipExporter {
     );
 
     static Task baseTask(String operationName, long taskVolume) {
-        return Tasks.leaf(operationName + " :: WriteRelationships", taskVolume);
+        return Tasks.leaf(operationName + " :: Relationships :: Write", taskVolume);
     }
 }
