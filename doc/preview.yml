@@ -20,6 +20,9 @@ ui:
     snapshot: true
   output_dir: /assets
 
+runtime:
+  fetch: true
+
 urls:
   html_extension_style: indexify
 
