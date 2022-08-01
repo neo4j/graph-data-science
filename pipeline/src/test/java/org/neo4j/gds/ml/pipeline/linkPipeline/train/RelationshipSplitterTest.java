@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
 
 @GdlExtension
@@ -81,6 +82,34 @@ class RelationshipSplitterTest {
 
     @Inject
     GraphStore graphStore;
+
+    @GdlGraph(graphNamePrefix = "multi")
+    private static final String MULTI_GRAPH =
+        "CREATE " +
+        "(n1:N), " +
+        "(n2:N), " +
+        "(n3:N), " +
+        "(m1:M), " +
+        "(m2:M), " +
+        "(m3:M), " +
+        "" +
+        "(n1)-[:T]->(n2), " +
+        "(n2)-[:T]->(n3), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+        "(n3)-[:T]->(n2), " +
+
+        "(n1)-[:T]->(m1)";
+
+    @Inject
+    GraphStore multiGraphStore;
 
     @Test
     void splitWeightedGraph() {
@@ -203,5 +232,26 @@ class RelationshipSplitterTest {
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertThat(unweightedEstimation.memoryUsage()).isNotEqualTo(weightedEstimation.memoryUsage());
+    }
+
+    @Test
+    void failOnSmallFilteredGraph() {
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .trainFraction(0.3)
+            .testFraction(0.3)
+            .validationFolds(2)
+            .negativeSamplingRatio(1.0)
+            .build();
+
+        RelationshipSplitter relationshipSplitter = new RelationshipSplitter(
+            multiGraphStore,
+            splitConfig,
+            ProgressTracker.NULL_TRACKER,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        // due to the label filter most of the relationships are not valid
+        assertThatThrownBy(() -> relationshipSplitter.splitRelationships(RelationshipType.of("T"), "N", "M", Optional.of(42L), Optional.empty()))
+            .hasMessageContaining("The specified `testFraction` is too low for the current graph. The test set would have 0 relationship(s) but it must have at least 1.");
     }
 }

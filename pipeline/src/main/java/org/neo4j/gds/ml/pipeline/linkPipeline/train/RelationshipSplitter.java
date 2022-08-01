@@ -33,11 +33,12 @@ import org.neo4j.gds.ml.splitting.SplitRelationshipsBaseConfig;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TEST_COMPLEMENT_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
+import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateRelSetSize;
 
 public class RelationshipSplitter {
-
-    private static final String SPLIT_ERROR_TEMPLATE = "%s graph contains no relationships. Consider increasing the `%s` or provide a larger graph";
 
     private final LinkPredictionSplitConfig splitConfig;
     private final ProgressTracker progressTracker;
@@ -65,7 +66,7 @@ public class RelationshipSplitter {
     ) {
         progressTracker.beginSubTask("Split relationships");
 
-        splitConfig.validateAgainstGraphStore(graphStore);
+        splitConfig.validateAgainstGraphStore(graphStore, targetRelationshipType);
 
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 
@@ -80,6 +81,7 @@ public class RelationshipSplitter {
         // 2. Split test-complement into (labeled) train and feature-input.
         //      Train relationships also include newly generated negative links, that were not in the base graph (and positive links).
         relationshipSplit(splitConfig.trainSplit(targetRelationshipType, sourceNodeLabel, targetNodeLabel, randomSeed, relationshipWeightProperty));
+        validateTrainSplit(graphStore);
 
         graphStore.deleteRelationships(testComplementRelationshipType);
 
@@ -87,13 +89,20 @@ public class RelationshipSplitter {
     }
 
     private void validateTestSplit(GraphStore graphStore) {
-        if (graphStore.getGraph(splitConfig.testRelationshipType()).relationshipCount() <= 0) {
-            throw new IllegalStateException(formatWithLocale(
-                SPLIT_ERROR_TEMPLATE,
-                "Test",
-                LinkPredictionSplitConfig.TEST_FRACTION_KEY
-            ));
-        }
+        validateRelSetSize(graphStore.relationshipCount(splitConfig.testRelationshipType()), MIN_SET_SIZE, "test", "`testFraction` is too low");
+        validateRelSetSize(graphStore.relationshipCount(splitConfig.testComplementRelationshipType()), MIN_TEST_COMPLEMENT_SET_SIZE, "test-complement", "`testFraction` is too high");
+    }
+
+    private void validateTrainSplit(GraphStore graphStore) {
+         // needs to validate these here as the filter can reduce the actual set size from the expected set size
+        validateRelSetSize(graphStore.relationshipCount(splitConfig.trainRelationshipType()), MIN_TRAIN_SET_SIZE, "train", "`trainFraction` is too low");
+        validateRelSetSize(graphStore.relationshipCount(splitConfig.featureInputRelationshipType()), MIN_SET_SIZE, "feature-input", "`trainFraction` is too high");
+        validateRelSetSize(
+            graphStore.relationshipCount(splitConfig.trainRelationshipType()) / splitConfig.validationFolds(),
+            MIN_SET_SIZE,
+            "validation",
+            "`validationFolds` is too high or the `trainFraction` too low"
+        );
     }
 
     private void relationshipSplit(SplitRelationshipsBaseConfig splitConfig) {
