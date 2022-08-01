@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.ProcPreconditions;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphWriteNodePropertiesConfig;
@@ -26,6 +27,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -59,6 +62,22 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration, Optional.empty());
+    }
+
+    @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
+    @Description("Writes the given node properties to an online Neo4j database.")
+    public Stream<Result> run(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "nodeProperties") List<String> nodeProperties,
+        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.nodeProperties.write`";
+        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration, Optional.of(deprecationWarning));
+    }
+
+    private Stream<Result> writeNodeProperties(String graphName, List<String> nodeProperties, List<String> nodeLabels, Map<String, Object> configuration, Optional<String> deprecationWarning) {
         ProcPreconditions.check();
         validateGraphName(graphName);
 
@@ -75,33 +94,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-        // writing
-        Result.Builder builder = new Result.Builder(graphName, nodeProperties);
-        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-            long propertiesWritten = runWithExceptionLogging(
-                "Node property writing failed",
-                () -> writeNodeProperties(graphStore, config)
-            );
-            builder.withPropertiesWritten(propertiesWritten);
-        }
-        // result
-        return Stream.of(builder.build());
-    }
-
-    @Procedure(name = "gds.graph.writeNodeProperties", mode = WRITE, deprecatedBy = "gds.graph.nodeProperties.write")
-    @Description("Writes the given node properties to an online Neo4j database.")
-    public Stream<Result> run(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "nodeProperties") List<String> nodeProperties,
-        @Name(value = "nodeLabels", defaultValue = "['*']") List<String> nodeLabels,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);
-    }
-
-    private long writeNodeProperties(GraphStore graphStore, GraphWriteNodePropertiesConfig config) {
         var validNodeLabels = config.validNodeLabels(graphStore);
-        var propertiesWritten = 0L;
         var task = Tasks.iterativeFixed(
             "WriteNodeProperties",
             () -> List.of(
@@ -109,7 +102,37 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
             ),
             validNodeLabels.size()
         );
-        var progressTracker = new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
+        var progressTracker = new TaskProgressTracker(
+            task,
+            log,
+            config.writeConcurrency(),
+            new JobId(),
+            taskRegistryFactory,
+            userLogRegistryFactory
+        );
+
+        deprecationWarning.ifPresent(progressTracker::logWarning);
+
+        // writing
+        Result.Builder builder = new Result.Builder(graphName, nodeProperties);
+        try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
+            long propertiesWritten = runWithExceptionLogging(
+                "Node property writing failed",
+                () -> writeNodeProperties(graphStore, config, validNodeLabels, progressTracker)
+            );
+            builder.withPropertiesWritten(propertiesWritten);
+        }
+        // result
+        return Stream.of(builder.build());
+    }
+
+    private long writeNodeProperties(
+        GraphStore graphStore,
+        GraphWriteNodePropertiesConfig config,
+        Iterable<NodeLabel> validNodeLabels,
+        ProgressTracker progressTracker
+    ) {
+        var propertiesWritten = 0L;
 
         progressTracker.beginSubTask();
         try {
