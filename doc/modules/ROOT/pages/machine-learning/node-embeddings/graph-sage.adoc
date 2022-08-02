@@ -43,7 +43,7 @@ When doing memory estimation of the training, the feature dimension is computed 
 
 Since training GraphSAGE may take a lot of time and memory to train on large graphs, it can be helpful to sample a smaller subgraph prior to training, and then training on that subgraph.
 The trained model can still be applied to predict embeddings on the full graph (or other graphs) since GraphSAGE is inductive.
-To sample a structurally representative subgraph, see xref::algorithms/alpha/rwr.adoc[Random walk with restarts sampling].
+To sample a structurally representative subgraph, see xref:algorithms/alpha/rwr.adoc[Random walk with restarts sampling].
 
 
 == Tuning parameters
@@ -440,7 +440,7 @@ Looking at the results we can draw the following conclusions, the training conve
 Tuning the algorithm parameters, such as trying out different `sampleSizes`, `searchDepth`, `embeddingDimension` or `batchSize` can improve the losses.
 For different datasets, GraphSAGE may require different train parameters for producing good models.
 
-The trained model is automatically registered in the xref::model-catalog/index.adoc[model catalog].
+The trained model is automatically registered in the xref:model-catalog/index.adoc[model catalog].
 
 
 === Train with multiple node labels
@@ -571,7 +571,7 @@ CALL gds.beta.graphSage.train(
 === Train when there are no node properties present in the graph
 
 In the case when you have a graph that does not have node properties we recommend to use existing algorithm in `mutate` mode to create node properties.
-Good candidates are xref::algorithms/centrality.adoc[Centrality algorithms] or xref::algorithms/community.adoc[Community algorithms].
+Good candidates are xref:algorithms/centrality.adoc[Centrality algorithms] or xref:algorithms/community.adoc[Community algorithms].
 
 The following example illustrates calling Degree Centrality in `mutate` mode and then using the mutated property as feature of GraphSAGE training.
 For the purpose of this example we are going to use the `Persons` graph, but we will not load any properties to the in-memory graph.
@@ -671,7 +671,7 @@ NOTE: Due to the random initialisation of the weight variables the results may v
 [[graph-sage-trained-model-example-mutate]]
 === Mutate
 
-The xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
+The xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to the in-memory graph using the `mutate` mode of the procedure.
 Below is an example of how to achieve this.
 
 --
@@ -699,7 +699,7 @@ CALL gds.beta.graphSage.mutate(
 [[graph-sage-trained-model-example-write]]
 === Write
 
-The xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to Neo4j.
+The xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[model trained as part of the stream example] can be reused to write the results to Neo4j.
 Below is an example of how to achieve this.
 
 --

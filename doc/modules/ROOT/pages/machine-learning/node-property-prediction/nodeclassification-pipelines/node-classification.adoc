@@ -14,29 +14,29 @@ During training, the property representing the class of the node is referred to 
 GDS supports both binary and multi-class node classification.
 
 In GDS, we have Node Classification pipelines which offer an end-to-end workflow, from feature extraction to node classification.
-The training pipelines reside in the xref::pipeline-catalog/index.adoc[pipeline catalog].
-When a training pipeline is xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[executed], a classification model is created and stored in the xref::model-catalog/index.adoc[model catalog].
+The training pipelines reside in the xref:pipeline-catalog/index.adoc[pipeline catalog].
+When a training pipeline is xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[executed], a classification model is created and stored in the xref:model-catalog/index.adoc[model catalog].
 
 A training pipeline is a sequence of two phases:
 [upperroman]
 . The graph is augmented with new node properties in a series of steps.
 . The augmented graph is used for training a node classification model.
 
-One can xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[configure] which steps should be included above.
+One can xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-node-properties[configure] which steps should be included above.
 The steps execute GDS algorithms that create new node properties.
-After configuring the node property steps, one can xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[select] a subset of node properties to be used as features.
+After configuring the node property steps, one can xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-features[select] a subset of node properties to be used as features.
 The training phase (II) trains multiple model candidates using cross-validation, selects the best one, and reports relevant performance metrics.
 
-After xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training the pipeline], a classification model is created.
+After xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training the pipeline], a classification model is created.
 This model includes the node property steps and feature configuration from the training pipeline and uses them to generate the relevant features for classifying unlabeled nodes.
 The classification model can be applied to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
 The order of the probabilities matches the order of the classes registered in the model.
 
-NOTE: xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Classification] can only be done with a classification model (not with a training pipeline).
+NOTE: xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Classification] can only be done with a classification model (not with a training pipeline).
 
 This segment is divided into the following pages:
 
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc[Configuring the pipeline]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Applying a classification model to make predictions]
+* xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc[Configuring the pipeline]
+* xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[Training the pipeline]
+* xref:machine-learning/node-property-prediction/nodeclassification-pipelines/predict.adoc[Applying a classification model to make predictions]

@@ -41,7 +41,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -365,8 +365,8 @@ ORDER BY score DESC, name ASC
 --
 
 The above query is running the algorithm in `stream` mode as `unweighted` and the returned scores are not normalized.
-Below, one can find an example for xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-weighted[weighted graphs].
-Another xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-scaler[example] shows the application of a scaler to normalize the final scores.
+Below, one can find an example for xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-weighted[weighted graphs].
+Another xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-scaler[example] shows the application of a scaler to normalize the final scores.
 
 NOTE: While we are using the `stream` mode to illustrate running the algorithm as `weighted` or `unweighted`, all the algorithm modes support this configuration parameter.
 
@@ -531,7 +531,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-In this example we are using `tolerance: 0.1`, so the results are a bit different compared to the ones from xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `tolerance`.
+In this example we are using `tolerance: 0.1`, so the results are a bit different compared to the ones from xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `tolerance`.
 Note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `tolerance` the node 'Product' has higher score than the other two.
 
 
@@ -571,7 +571,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Compared to the results from the xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
+Compared to the results from the xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `dampingFactor` the score values are closer to each other when using `dampingFactor: 0.05`.
 Also, note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `dampingFactor` the node 'Product' has higher score than the other two.
 
 
@@ -614,7 +614,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing these results to the ones from the xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.
+Comparing these results to the ones from the xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows that the 'Site A' node  that we used in the `sourceNodes` list now scores second instead of fourth.
 
 
 [[algorithms-page-rank-examples-scaler]]
@@ -622,7 +622,7 @@ Comparing these results to the ones from the xref::algorithms/page-rank.adoc#alg
 
 To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
-A description of all available scalers can be found in the documentation for the xref::alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
+A description of all available scalers can be found in the documentation for the xref:alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
 --
@@ -652,4 +652,4 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing the results with the xref::algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example], we can see that the relative order of scores is the same.
+Comparing the results with the xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example], we can see that the relative order of scores is the same.

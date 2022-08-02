@@ -17,7 +17,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-article-rank-introduction]]
 == Introduction
 
-ArticleRank is a variant of the xref::algorithms/page-rank.adoc[Page Rank algorithm], which measures the *transitive* influence of nodes.
+ArticleRank is a variant of the xref:algorithms/page-rank.adoc[Page Rank algorithm], which measures the *transitive* influence of nodes.
 
 Page Rank follows the assumption that relationships originating from low-degree nodes have a higher influence than relationships from high-degree nodes.
 Article Rank lowers the influence of low-degree nodes by lowering the scores being sent to their neighbors in each iteration.
@@ -352,7 +352,7 @@ ORDER BY score DESC, name ASC
 --
 
 The above query is running the algorithm in `stream` mode as `unweighted`.
-Below, one can find an example for xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-weighted[weighted graphs].
+Below, one can find an example for xref:algorithms/article-rank.adoc#algorithms-article-rank-examples-weighted[weighted graphs].
 
 
 [[algorithms-article-rank-examples-stats]]
@@ -511,7 +511,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example].
+We are using `tolerance: 0.1`, which leads to slightly different results compared to the xref:algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example].
 However, the computation converges after four iterations, and we can already observe a trend in the resulting scores.
 
 
@@ -554,7 +554,7 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing these results to the ones from the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
+Comparing these results to the ones from the xref:algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example] (which is not using `sourceNodes` configuration parameter) shows the 'Site A' and `Site B` nodes we used in the `sourceNodes` list now score second and third instead of fourth and fifth.
 
 
 [[algorithms-article-rank-examples-scaler]]
@@ -562,7 +562,7 @@ Comparing these results to the ones from the xref::algorithms/article-rank.adoc#
 
 To normalize the final scores as part of the algorithm execution, one can use the `scaler` configuration parameter.
 A common scaler is the `L1Norm`, which normalizes each score to a value between 0 and 1.
-A description of all available scalers can be found in the documentation for the xref::alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
+A description of all available scalers can be found in the documentation for the xref:alpha-algorithms/scale-properties.adoc[`scaleProperties`] procedure.
 
 [role=query-example]
 --
@@ -593,4 +593,4 @@ ORDER BY score DESC, name ASC
 |===
 --
 
-Comparing the results with the xref::algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example], we can see that the relative order of scores is the same.
+Comparing the results with the xref:algorithms/article-rank.adoc#algorithms-article-rank-examples-stream[stream example], we can see that the relative order of scores is the same.

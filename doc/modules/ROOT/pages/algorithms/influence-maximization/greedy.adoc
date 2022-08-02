@@ -11,10 +11,10 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 This topic includes:
 
-* xref::algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-intro[Introduction]
-* xref::algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-syntax[Syntax]
-* xref::algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-examples[Examples]
-** xref::algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-examples-stream[Stream]
+* xref:algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-intro[Introduction]
+* xref:algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-syntax[Syntax]
+* xref:algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-examples[Examples]
+** xref:algorithms/influence-maximization/greedy.adoc#alpha-algorithms-greedy-examples-stream[Stream]
 
 [[alpha-algorithms-greedy-intro]]
 == Introduction
@@ -24,7 +24,7 @@ In the propagation process, a node is influenced in case that a uniform random d
 
 Kempe et al. 2003 introduced the Greedy algorithm in their study https://www.cs.cornell.edu/home/kleinber/kdd03-inf.pdf[Maximizing the Spread of Influence through a Social Network] to deal with the *NP*-hard problem of influence maximization.
 The Greedy algorithm successively selecting the node within the maximum marginal gain approximation in polynomial time.
-For large networks xref::algorithms/influence-maximization/celf.adoc[CELF] algorithm should be used.
+For large networks xref:algorithms/influence-maximization/celf.adoc[CELF] algorithm should be used.
 
 [[alpha-algorithms-greedy-syntax]]
 == Syntax
@@ -163,7 +163,7 @@ In the following examples we will demonstrate using the Greedy algorithm on this
 In the `stream` execution mode, the algorithm returns the {result} for each node.
 This allows us to inspect the results directly or post-process them in Cypher without any side effects.
 
-For more details on the `stream` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stream[Stream].
+For more details on the `stream` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stream[Stream].
 
 [role=query-example]
 --

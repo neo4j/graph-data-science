@@ -20,9 +20,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 The Delta-Stepping Shortest Path algorithm computes all shortest paths between a source node and all reachable nodes in the graph.
 The algorithm supports weighted graphs with positive relationship weights.
-To compute the shortest path between a source and a single target node, xref::algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
+To compute the shortest path between a source and a single target node, xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target] can be used.
 
-In contrast to xref::algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source], the Delta-Stepping algorithm is a distance correcting algorithm.
+In contrast to xref:algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source], the Delta-Stepping algorithm is a distance correcting algorithm.
 This property allows it to traverse the graph in parallel.
 The algorithm is guaranteed to always find the shortest path between a source node and a target node.
 However, if multiple shortest paths exist between two nodes, the algorithm is not guaranteed to return the same path in each computation.
@@ -177,7 +177,7 @@ ORDER BY index
 
 The result shows the total cost of the shortest path between node `A` and all other reachable nodes in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
-This can be verified in the xref::algorithms/delta-single-source.adoc#algorithms-delta-single-source-examples[example graph].
+This can be verified in the xref:algorithms/delta-single-source.adoc#algorithms-delta-single-source-examples[example graph].
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 

@@ -17,10 +17,10 @@ In this section we will focus on side-by-side examples of operations using the s
 
 This section is divided into the following sub-sections:
 
-* xref::appendix-b/migration-algos-common.adoc[Common Changes]
-* xref::appendix-b/migration-graph-projection.adoc[Graph Projection]
-* xref::appendix-b/migration-graph-listing.adoc[Graph Listing]
-* xref::appendix-b/migration-graph-drop.adoc[Graph Drop]
-* xref::appendix-b/migration-memory-estimation.adoc[Memory Estimation]
-* xref::appendix-b/migration-algorithms.adoc[Algorithms]
-* xref::appendix-b/migration-ml.adoc[Machine Learning]
+* xref:appendix-b/migration-algos-common.adoc[Common Changes]
+* xref:appendix-b/migration-graph-projection.adoc[Graph Projection]
+* xref:appendix-b/migration-graph-listing.adoc[Graph Listing]
+* xref:appendix-b/migration-graph-drop.adoc[Graph Drop]
+* xref:appendix-b/migration-memory-estimation.adoc[Memory Estimation]
+* xref:appendix-b/migration-algorithms.adoc[Algorithms]
+* xref:appendix-b/migration-ml.adoc[Machine Learning]

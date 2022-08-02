@@ -107,4 +107,4 @@ This is useful if there are multiple users with graphs of the same name.
 CALL gds.graph.drop('my-fictive-graph', true, '', 'another-user') YIELD graphName;
 ----
 
-See xref::management-ops/administration.adoc[Administration] for more details on this.
+See xref:management-ops/administration.adoc[Administration] for more details on this.

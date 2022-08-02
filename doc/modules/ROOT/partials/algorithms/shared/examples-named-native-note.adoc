@@ -1,5 +1,5 @@
 [NOTE]
 ====
 In the examples below we will use named graphs and native projections as the norm.
-However, xref::graph-project-cypher.adoc[Cypher projections] can also be used.
+However, xref:graph-project-cypher.adoc[Cypher projections] can also be used.
 ====

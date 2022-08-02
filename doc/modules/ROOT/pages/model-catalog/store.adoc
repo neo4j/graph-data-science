@@ -22,14 +22,14 @@ The `gds.model.store_location` parameter must be configured for this feature.
 
 *Models that can be stored*
 
-* xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE model]
-* xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification model]
-* xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction model]
+* xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE model]
+* xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification model]
+* xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction model]
 
-For xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification] and xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction], storing a model is only supported for a subset of xref::machine-learning/training-methods/index.adoc[trainer-methods].
+For xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification] and xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction], storing a model is only supported for a subset of xref:machine-learning/training-methods/index.adoc[trainer-methods].
 The trainer method of a model can be inspected in the `modelInfo` under `bestParameters`.
 
-Currently, we only support xref::machine-learning/training-methods/logistic-regression.adoc[Logistic Regression].
+Currently, we only support xref:machine-learning/training-methods/logistic-regression.adoc[Logistic Regression].
 
 
 === Syntax
@@ -131,7 +131,7 @@ YIELD
 ----
 --
 
-To verify if a model is loaded, we can use the xref::model-catalog/list.adoc[`gds.beta.model.list`] procedure.
+To verify if a model is loaded, we can use the xref:model-catalog/list.adoc[`gds.beta.model.list`] procedure.
 The procedure returns flags to indicate if the model is stored and if the model is loaded into memory.
 The operation is idempotent, and skips loading if the model is already loaded.
 

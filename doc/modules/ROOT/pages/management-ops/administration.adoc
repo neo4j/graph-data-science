@@ -90,7 +90,7 @@ YIELD componentCount
 Unlike for listing, the full procedure signature must be used when using the `username` override to disambiguate.
 In the query below we have used the default values for the second and third parameter for the drop procedure.
 `username` is the fourth parameter.
-For more details see xref::graph-drop.adoc[Dropping graphs].
+For more details see xref:graph-drop.adoc[Dropping graphs].
 
 .To drop `graphA` owned by `bob`, `carol` can run the following:
 [source, cypher, role=noplay]

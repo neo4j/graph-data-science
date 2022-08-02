@@ -20,7 +20,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-filtered-node-similarity-intro]]
 == Introduction
 
-The Filtered Node Similarity algorithm is an extension to the xref::algorithms/node-similarity.adoc[Node Similarity] algorithm.
+The Filtered Node Similarity algorithm is an extension to the xref:algorithms/node-similarity.adoc[Node Similarity] algorithm.
 It adds support for filtering on source nodes, target nodes, or both.
 
 
@@ -36,7 +36,7 @@ If the `(alice)` node does not match the target node filter, or the `(bob)` node
 [[algorithms-filtered-node-similarity-filter-configuration]]
 == Configuring node filters
 
-For the standard configuration of node similarity, see xref::algorithms/node-similarity.adoc#algorithms-node-similarity-syntax[Node Similarity syntax].
+For the standard configuration of node similarity, see xref:algorithms/node-similarity.adoc#algorithms-node-similarity-syntax[Node Similarity syntax].
 
 The source node filter is specified with the `sourceNodeFilter` configuration parameter.
 The target node filter is specified with the `targetNodeFilter` configuration parameter.

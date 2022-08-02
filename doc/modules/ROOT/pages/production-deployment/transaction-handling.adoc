@@ -41,7 +41,7 @@ RETURN nodeCount
 == During results writing
 
 Results from algorithms (node properties, for example) are written to the graph in new transactions.
-The number of transactions used depends on the size of the results and the `writeConcurrency` configuration parameter (for more details, please refer to sections xref::common-usage/running-algos.adoc#running-algos-write[Write] and xref::common-usage/running-algos.adoc#algorithms-syntax-configuration-parameters[Common Configuration parameters]).
+The number of transactions used depends on the size of the results and the `writeConcurrency` configuration parameter (for more details, please refer to sections xref:common-usage/running-algos.adoc#running-algos-write[Write] and xref:common-usage/running-algos.adoc#algorithms-syntax-configuration-parameters[Common Configuration parameters]).
 These transactions are committed independently from the Cypher transaction.
 This means, if the Cypher transaction is terminated (either by the user or by the database system), already committed write transactions will _not_ be rolled back.
 

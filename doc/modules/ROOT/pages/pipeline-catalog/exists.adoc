@@ -42,7 +42,7 @@ YIELD
 == Example
 
 In this section we are going to demonstrate the usage of `gds.beta.pipeline.exists`.
-To exemplify this, we create a xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and check for its existence.
+To exemplify this, we create a xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and check for its existence.
 
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]

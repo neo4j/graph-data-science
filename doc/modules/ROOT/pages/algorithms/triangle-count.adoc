@@ -21,7 +21,7 @@ The Triangle Count algorithm in the GDS library only finds triangles in undirect
 
 Triangle counting has gained popularity in social network analysis, where it is used to detect communities and measure the cohesiveness of those communities.
 It can also be used to determine the stability of a graph, and is often used as part of the computation of network indices, such as clustering coefficients.
-The Triangle Count algorithm is also used to compute the xref::algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient].
+The Triangle Count algorithm is also used to compute the xref:algorithms/local-clustering-coefficient.adoc[Local Clustering Coefficient].
 
 For more information on this algorithm, see:
 
@@ -356,7 +356,7 @@ ORDER BY triangleCount DESC
 --
 
 Here we find that the 'Michael' node has the most triangles.
-This can be verified in the xref::algorithms/triangle-count.adoc#algorithms-triangle-count-examples[example graph].
+This can be verified in the xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples[example graph].
 Since the 'Alice' node only `KNOWS` one other node, it can not be part of any triangle, and indeed the algorithm reports a count of zero.
 
 
@@ -385,14 +385,14 @@ YIELD globalTriangleCount, nodeCount
 --
 
 Here we can see that the graph has six nodes with a total number of three triangles.
-Comparing this to the xref::algorithms/triangle-count.adoc#algorithms-triangle-count-examples-stream[stream example] we can see that the 'Michael' node has a triangle count equal to the global triangle count.
+Comparing this to the xref:algorithms/triangle-count.adoc#algorithms-triangle-count-examples-stream[stream example] we can see that the 'Michael' node has a triangle count equal to the global triangle count.
 In other words, that node is part of all of the triangles in the graph and thus has a very central position in the graph.
 
 
 [[algorithms-triangle-count-examples-mutate]]
 === Mutate
 
-:mutate-details: For example, using the triangle count to compute the xref::algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-pre-computed[local clustering coefficient].
+:mutate-details: For example, using the triangle count to compute the xref:algorithms/local-clustering-coefficient.adoc#algorithms-local-clustering-coefficient-examples-pre-computed[local clustering coefficient].
 include::partial$/algorithms/shared/examples-mutate-intro.adoc[]
 
 [role=query-example]
@@ -416,7 +416,7 @@ YIELD globalTriangleCount, nodeCount
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `triangles` which stores the triangle count for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
 
 [[algorithms-triangle-count-examples-write]]
@@ -453,7 +453,7 @@ Additionally, each of the six nodes now has a new property `triangles` in the Ne
 The Triangle Count algorithm supports a `maxDegree` configuration parameter that can be used to exclude nodes from processing if their degree is greater than the configured value.
 This can be useful to speed up the computation when there are nodes with a very high degree (so-called super nodes) in the graph.
 Super nodes have a great impact on the performance of the Triangle Count algorithm.
-To learn about the degree distribution of your graph, see xref::graph-list.adoc[Listing graphs].
+To learn about the degree distribution of your graph, see xref:graph-list.adoc[Listing graphs].
 
 The nodes excluded from the computation get assigned a triangle count of `-1`.
 

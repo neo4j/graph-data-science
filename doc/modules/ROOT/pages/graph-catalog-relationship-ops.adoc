@@ -616,7 +616,7 @@ NOTE: The properties we want to stream must exist for each specified relationshi
 === Write
 
 We can write relationships stored in a named in-memory graph back to Neo4j.
-This can be used to write algorithm results (for example from xref::algorithms/node-similarity.adoc[Node Similarity]) or relationships that have been aggregated during graph creation.
+This can be used to write algorithm results (for example from xref:algorithms/node-similarity.adoc[Node Similarity]) or relationships that have been aggregated during graph creation.
 
 The relationships to write are specified by a relationship type.
 
@@ -654,7 +654,7 @@ Here is an illustration of how the example graph looks in Neo4j after executing 
 image::example-graphs/write_relationships_graph.svg[Visualization of the example graph after writing relationships back,align="center"]
 
 The `SIMILAR` relationships have been added to the underlying database and can be used in Cypher queries or for projecting to in-memory graph for running algorithms.
-The relationships in this example are undirected because we used xref::algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
+The relationships in this example are undirected because we used xref:algorithms/node-similarity.adoc[Node Similarity] to mutate the in-memory graph and this algorithm creates undirected relationships, this may not be the case if we use different algorithms.
 
 
 ==== Relationship type with property
@@ -696,7 +696,7 @@ This is useful to free up main memory or to remove accidentally added relationsh
 [NOTE]
 ====
 Deleting relationships of a given type is only possible if it is not the last relationship type present in the graph.
-If we still want to delete these relationships we need to xref::graph-drop.adoc[drop the graph] instead.
+If we still want to delete these relationships we need to xref:graph-drop.adoc[drop the graph] instead.
 ====
 
 [role=query-example]

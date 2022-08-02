@@ -7,7 +7,7 @@ The Python client will translate the Python code written by the user to a corres
 The Python client attempts to be as pythonic as possible to maximize convenience for users accustomed to and experienced with Python environments.
 As such standard Python and pandas types are used as much as possible.
 However, to be consistent with the Cypher surface the general return value of calling a method corresponding to a Cypher procedure will be in the form of a table (a pandas `DataFrame` in Python).
-Read more about this in xref::python-client/getting-started.adoc#python-client-getting-started-mapping[Mapping between Cypher and Python].
+Read more about this in xref:python-client/getting-started.adoc#python-client-getting-started-mapping[Mapping between Cypher and Python].
 
 The root component of the Python client is the `GraphDataScience` object.
 Once instantiated it forms the entrypoint to interacting with the GDS library.
@@ -141,11 +141,11 @@ There are some general principles for how the Cypher API maps to the Python clie
 +
 Some notable exceptions to this are:
 
-** Procedures instantiating xref::python-client/graph-object.adoc[graph objects] and xref::python-client/model-object.adoc[model objects] have two return values: a graph or model object, and a row of metadata (typically a pandas `Series`) from the underlying procedure call.
-** Any methods on xref::python-client/pipelines.adoc[pipeline], xref::python-client/graph-object.adoc[graph] or xref::python-client/model-object.adoc[model] objects (native to the Python client) mapping to Cypher procedures.
+** Procedures instantiating xref:python-client/graph-object.adoc[graph objects] and xref:python-client/model-object.adoc[model objects] have two return values: a graph or model object, and a row of metadata (typically a pandas `Series`) from the underlying procedure call.
+** Any methods on xref:python-client/pipelines.adoc[pipeline], xref:python-client/graph-object.adoc[graph] or xref:python-client/model-object.adoc[model] objects (native to the Python client) mapping to Cypher procedures.
 ** `gds.version()` which returns a string.
 * Method calls corresponding to Cypher functions (preceded by `RETURN` in the docs) will simply return the value the function returns.
-* The Python client also contains specific functionality for inspecting graphs from the xref::management-ops/graph-catalog-ops.adoc[GDS Graph Catalog], using a client-side xref::python-client/graph-object.adoc[graph object].
-Similarly, models from the xref::model-catalog/index.adoc[GDS Model Catalog] can be inspected using a client-side xref::python-client/model-object.adoc[model object].
-* Cypher functions and procedures of GDS that take references to graphs and/or models as strings for input typically instead take xref::python-client/graph-object.adoc[graph objects] and/or xref::python-client/model-object.adoc[model objects] as input in the Python client API.
-* To configure and use xref::machine-learning/machine-learning.adoc[machine learning pipelines] in GDS, specific xref::python-client/pipelines.adoc[pipeline objects] are used in the Python client.
+* The Python client also contains specific functionality for inspecting graphs from the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog], using a client-side xref:python-client/graph-object.adoc[graph object].
+Similarly, models from the xref:model-catalog/index.adoc[GDS Model Catalog] can be inspected using a client-side xref:python-client/model-object.adoc[model object].
+* Cypher functions and procedures of GDS that take references to graphs and/or models as strings for input typically instead take xref:python-client/graph-object.adoc[graph objects] and/or xref:python-client/model-object.adoc[model objects] as input in the Python client API.
+* To configure and use xref:machine-learning/machine-learning.adoc[machine learning pipelines] in GDS, specific xref:python-client/pipelines.adoc[pipeline objects] are used in the Python client.

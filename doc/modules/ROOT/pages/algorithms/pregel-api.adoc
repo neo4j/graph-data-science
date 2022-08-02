@@ -66,7 +66,7 @@ Pregel node values are composite values.
 The `schema` describes the layout of that composite value.
 Each element of the schema can represent either a primitive long or double value as well as arrays of those.
 The element is uniquely identified by a key, which is used to access the value during the computation.
-Details on schema declaration can be found in the xref::algorithms/pregel-api.adoc#algorithms-pregel-api-schema[dedicated section].
+Details on schema declaration can be found in the xref:algorithms/pregel-api.adoc#algorithms-pregel-api-schema[dedicated section].
 
 The `init` method is called in the beginning of the first superstep of the Pregel computation and allows initializing node values.
 The interface defines an abstract `compute` method, which is called for each node in every superstep.
@@ -80,14 +80,14 @@ Messages can be sent to neighbor nodes or any node if its identifier is known.
 
 The `masterCompute` method is called exactly once at the end of each superstep.
 It is executed by a single thread and can be used to modify a global state based on the current computation state.
-Details on using a master computation can be found in the xref::algorithms/pregel-api.adoc#algorithms-pregel-api-master-compute[dedicated section].
+Details on using a master computation can be found in the xref:algorithms/pregel-api.adoc#algorithms-pregel-api-master-compute[dedicated section].
 
 An optional `reducer` can be used to define a function that is being applied on messages sent to a single node.
 It takes two arguments, the current value and a message value, and produces a new value.
 The function is called repeatedly, once for each message that is sent to a node.
 Eventually, only one message will be received by the node in the next superstep.
 By defining a reducer, memory consumption and computation runtime can be improved significantly.
-Check the xref::algorithms/pregel-api.adoc#algorithms-pregel-api-reducer[dedicated section] for more details.
+Check the xref:algorithms/pregel-api.adoc#algorithms-pregel-api-reducer[dedicated section] for more details.
 
 The `applyRelationshipWeight` method can be used to modify the message based on a relationship property.
 If the input graph has no relationship properties, i.e. is unweighted, the method is skipped.
@@ -128,7 +128,7 @@ Note, that each property consumes additional memory when executing the algorithm
 
 The `add` method on the builder takes a third argument: `Visibility`.
 There are two possible values: `PUBLIC` (default) and `PRIVATE`.
-The visibility is considered during xref::algorithms/pregel-api.adoc#algorithms-pregel-api-procedure[procedure code generation] to indicate if the value is part of the Pregel result or not.
+The visibility is considered during xref:algorithms/pregel-api.adoc#algorithms-pregel-api-procedure[procedure code generation] to indicate if the value is part of the Pregel result or not.
 Any value that has visibility `PUBLIC` will be part of the computation result and included in the result of the procedure, e.g., streamed to the caller, mutated to the in-memory graph or written to the database.
 
 The following shows a schema where one value is used as result and a second value is only used during computation:
@@ -345,13 +345,13 @@ This is equivalent to all the other algorithms within the GDS library.
 [opts="header",cols="1,1,1,6"]
 |===
 | Name                                                                             | Type      | Default       | Description
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer   | -             | Maximum number of supersteps after which the computation will terminate.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer   | -             | Maximum number of supersteps after which the computation will terminate.
 | isAsynchronous                                                                   | Boolean   | false         | Flag indicating if messages can be sent and received in the same superstep.
 | partitioning                                                                     | String    | "range"       | Selects the partitioning of the input graph, can be either "range", "degree" or "auto".
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String    | null          | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]                                 | Integer   | 4             | Concurrency used when executing the Pregel computation.
-| xref::common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]                      | Integer   | concurrency   | Concurrency used when writing computation results to Neo4j.
-| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]                            | String    | "pregel_"     | Prefix string that is prepended to node schema keys in write mode.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String    | null          | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]                                 | Integer   | 4             | Concurrency used when executing the Pregel computation.
+| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]                      | Integer   | concurrency   | Concurrency used when writing computation results to Neo4j.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]                            | String    | "pregel_"     | Prefix string that is prepended to node schema keys in write mode.
 | mutateProperty                                                                   | String    | "pregel_"     | Prefix string that is prepended to node schema keys in mutate mode.
 |===
 
@@ -497,7 +497,7 @@ For the above Code snippet, we generate four procedures:
 
 Note that by default, all values specified in the `PregelSchema` are included in the procedure results.
 To change that behaviour, we can change the visibility for individual parts of the schema.
-For more details, please refer to the xref::algorithms/pregel-api.adoc#algorithms-pregel-api-schema[dedicated documentation section].
+For more details, please refer to the xref:algorithms/pregel-api.adoc#algorithms-pregel-api-schema[dedicated documentation section].
 
 
 [[algorithms-pregel-api-plugin]]

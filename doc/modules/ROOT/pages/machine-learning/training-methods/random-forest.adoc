@@ -17,7 +17,7 @@ The approach of combining several predictors (in this case decision trees) is al
 For classification, a random forest prediction is made by simply taking a majority vote of its decision trees' predictions.
 The impurity criteria available for computing the potential of a node split in decision tree classifier training in GDS are https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity[Gini impurity] (default) and https://en.wikipedia.org/wiki/Entropy_(information_theory)[Entropy].
 
-Random forest classification is available for the training of xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[node classification] and xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[link prediction] pipelines.
+Random forest classification is available for the training of xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[node classification] and xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[link prediction] pipelines.
 
 
 == Regression

@@ -10,7 +10,7 @@ include::partial$/operations-reference/beta-note.adoc[]
 
 
 In the previous sections we have seen how to build up a Node Classification training pipeline and train it to produce a classification pipeline.
-After xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training], the runnable model is of type `{modelType}` and resides in the xref::model-catalog/index.adoc[model catalog].
+After xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[training], the runnable model is of type `{modelType}` and resides in the xref:model-catalog/index.adoc[model catalog].
 
 The classification model can be executed with a graph in the graph catalog to predict the class of previously unseen nodes.
 In addition to the predicted class for each node, the predicted probability for each class may also be retained on the nodes.
@@ -151,7 +151,7 @@ include::partial$/machine-learning/node-property-prediction/nodeclassification-p
 In the following examples we will show how to use a classification model to predict the class of a node in your in-memory graph.
 In addition to the predicted class, we will also produce the probability for each class in another node property.
 In order to do this, we must first have an already trained model registered in the Model Catalog.
-We will use the model which we trained in the xref::machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[train example] which we gave the name `'nc-pipeline-model'`.
+We will use the model which we trained in the xref:machine-learning/node-property-prediction/nodeclassification-pipelines/training.adoc[train example] which we gave the name `'nc-pipeline-model'`.
 
 [[nodeclassification-pipelines-examples-predict-memory-estimation]]
 === Memory Estimation
@@ -216,7 +216,7 @@ This makes sense, as all houses in class 0 had three stories, class 1 two storie
 Additionally, we see that the model is confident in these predictions, as the confidence is >=79% in all cases.
 --
 
-NOTE: The indices in the `predictedProbabilities` correspond to the order of the classes in the classification model. To inspect the order of the classes, we can look at its `modelInfo` (see xref::model-catalog/list.adoc[listing models]).
+NOTE: The indices in the `predictedProbabilities` correspond to the order of the classes in the classification model. To inspect the order of the classes, we can look at its `modelInfo` (see xref:model-catalog/list.adoc[listing models]).
 
 [[nodeclassification-pipelines-examples-mutate]]
 === Mutate
@@ -226,7 +226,7 @@ The name of the new property is specified using the mandatory configuration para
 The result is a single summary row including information about timings and how many properties were written.
 The `mutate` mode is especially useful when multiple algorithms are used in conjunction.
 
-For more details on the `mutate` mode in general, see xref::common-usage/running-algos.adoc#running-algos-mutate[Mutate].
+For more details on the `mutate` mode in general, see xref:common-usage/running-algos.adoc#running-algos-mutate[Mutate].
 
 [role=query-example, group=nc]
 --
@@ -259,7 +259,7 @@ The name of the new property is specified using the mandatory configuration para
 The result is a single summary row including information about timings and how many properties were written.
 The `write` mode enables directly persisting the results to the database.
 
-For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
 
 [role=query-example, group=nc]
 --

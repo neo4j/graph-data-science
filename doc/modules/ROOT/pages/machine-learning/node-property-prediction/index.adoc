@@ -7,6 +7,6 @@ Node property prediction pipelines provide an end-to-end workflow for predicting
 The Neo4j Graph Data Science library support the following node property prediction pipelines:
 
 * Beta
-** xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines]
+** xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node classification pipelines]
 * Alpha
-** xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node regression pipelines]
+** xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node regression pipelines]

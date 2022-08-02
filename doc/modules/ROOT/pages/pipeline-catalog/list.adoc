@@ -36,7 +36,7 @@ include::partial$/machine-learning/pipeline-catalog/shared/pipeline-info-result.
 
 Once we have created training pipelines in the catalog we can see information about either all of them or a single model using its name.
 
-To exemplify listing pipelines, we create a xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and a xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline] so that we have something to list.
+To exemplify listing pipelines, we create a xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification pipeline] and a xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction pipeline] so that we have something to list.
 
 .Creating a link prediction training pipelines:
 [source, cypher, role=noplay setup-query]

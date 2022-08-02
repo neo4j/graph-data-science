@@ -52,7 +52,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -365,7 +365,7 @@ ORDER BY Community, Name
 
 In the above example we can see that our graph has two communities each containing three nodes.
 The default behaviour of the algorithm is to run `unweighted`, e.g. without using `node` or `relationship` weights.
-The `weighted` option will be demonstrated in xref::algorithms/label-propagation.adoc#algorithms-label-propagation-examples-weighted[Weighted]
+The `weighted` option will be demonstrated in xref:algorithms/label-propagation.adoc#algorithms-label-propagation-examples-weighted[Weighted]
 
 
 [[algorithms-label-propagation-examples-stats]]
@@ -418,7 +418,7 @@ YIELD communityCount, ranIterations, didConverge
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `community` which stores the community ID for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
 
 [[algorithms-label-propagation-examples-write]]
@@ -480,7 +480,7 @@ ORDER BY Community, Name
 |===
 --
 
-Compared to the xref::algorithms/label-propagation.adoc#algorithms-label-propagation-examples-stream[unweighted run] of the algorithm we still have two communities, but they contain two and four nodes respectively.
+Compared to the xref:algorithms/label-propagation.adoc#algorithms-label-propagation-examples-stream[unweighted run] of the algorithm we still have two communities, but they contain two and four nodes respectively.
 Using the weighted relationships, the nodes `Alice` and `Charles` are now in the same community as there is a strong link between them.
 
 NOTE: We have used the `stream` mode to demonstrate running the algorithm using weights, the configuration parameters are available for all the modes of the algorithm.

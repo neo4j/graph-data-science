@@ -2,24 +2,24 @@
 = Training the pipeline
 
 The train mode, `gds.beta.pipeline.linkPrediction.train`, is responsible for splitting data, feature extraction, model selection, training and storing a model for future use.
-Running this mode results in a prediction model of type `LinkPrediction` being stored in the xref::model-catalog/index.adoc[model catalog] along with metrics collected during training.
-The model can be xref::machine-learning/linkprediction-pipelines/predict.adoc[applied] to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
+Running this mode results in a prediction model of type `LinkPrediction` being stored in the xref:model-catalog/index.adoc[model catalog] along with metrics collected during training.
+The model can be xref:machine-learning/linkprediction-pipelines/predict.adoc[applied] to a possibly different graph which produces a relationship type of predicted links, each having a predicted probability stored as a property.
 
 More precisely, the procedure will in order:
 
 . Apply `sourceNodeLabel`, `targetNodeLabel`, and `targetRelationshipType` filters to the graph. All subsequent graphs have the same node set.
-. Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
+. Create a relationship split of the graph into `test`, `train` and `feature-input` sets as described in xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits].
 These graphs are internally managed and exist only for the duration of the training.
-. Apply the node property steps, added according to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties], on the graph of the `featureInput` and `contextRelationshipTypes`.
-. Apply the feature steps, added according to xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
+. Apply the node property steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[Adding node properties], on the graph of the `featureInput` and `contextRelationshipTypes`.
+. Apply the feature steps, added according to xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[Adding link features], to the `train` graph, which yields for each `train` relationship an _instance_, that is, a feature vector and a binary label.
 . Split the training instances using stratified k-fold cross-validation.
 The number of folds `k` can be configured using `validationFolds` in `gds.beta.pipeline.linkPrediction.configureSplit`.
-. Train each model candidate given by the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[parameter space] for each of the folds and evaluate the model on the respective validation set.
-The evaluation uses the specified xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[metric].
+. Train each model candidate given by the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[parameter space] for each of the folds and evaluate the model on the respective validation set.
+The evaluation uses the specified xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[metric].
 . Declare as winner the model with the highest average metric across the folds.
 . Re-train the winning model on the whole training set and evaluate it on both the `train` and `test` sets.
 In order to evaluate on the `test` set, the feature pipeline is first applied again as for the `train` set.
-. Register the winning model in the xref::model-catalog/index.adoc[Model Catalog].
+. Register the winning model in the xref:model-catalog/index.adoc[Model Catalog].
 
 NOTE: The above steps describe what the procedure does logically.
 The actual steps as well as their ordering in the implementation may differ.
@@ -55,13 +55,13 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | targetRelationshipType                                        | String            | n/a                  | no       | The name of the relationship type to train the model on. The relationship type must be undirected.
 | sourceNodeLabel                                               | String            | n/a                  | no       | The name of the node label relationships in the training and test sets should start from footnote:label-filter[This helps to train the model to predict links with a certain label combination.].
 | targetNodeLabel                                              | String            | n/a                  | no       | The name of the node label relationships in the training and test sets should end at footnote:label-filter[].
-| contextNodeLabels                                            | List ofString      | []                   | yes      | The names of context node labels used to execute the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
-| contextRelationshipTypes                                      | List of String    | []                   | yes      | The names of context relationship types to use to the xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] on. This is in addition to the `feature input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
-| negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
-| metrics                                                       | List of String    | [`AUCPR`]            | no       | xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
+| contextNodeLabels                                            | List ofString      | []                   | yes      | The names of context node labels used to execute the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] over. This is in addition to the `sourceNodeLabel` and `targetNodeLabel`.
+| contextRelationshipTypes                                      | List of String    | []                   | yes      | The names of context relationship types to use to the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[nodePropertySteps] on. This is in addition to the `feature input` set produced from the `targetRelationshipType` (see xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[Configuring the relationship splits])
+| negativeClassWeight                                           | Float             | 1.0                  | yes      | Weight of negative examples in model evaluation. Positive examples have weight 1. More details xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-classimbalance[here].
+| metrics                                                       | List of String    | [`AUCPR`]            | no       | xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[Metrics] used to evaluate the models.
 | randomSeed                                                    | Integer           | n/a                  | yes      | Seed for the random number generator used during training.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
-| xref::common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer           | 4                    | yes      | The number of concurrent threads used for running the algorithm.
+| xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String            | Generated internally | yes      | An ID that can be provided to more easily track the training's progress.
 |===
 
 .Results
@@ -74,7 +74,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 | configuration           | Map     | Configuration used for the train procedure.
 |===
 
-The `modelInfo` can also be retrieved at a later time by using the xref::model-catalog/list.adoc[Model List Procedure].
+The `modelInfo` can also be retrieved at a later time by using the xref:model-catalog/list.adoc[Model List Procedure].
 The `modelInfo` return field has the following algorithm-specific subfields:
 
 .Fields of modelSelectionStats
@@ -209,9 +209,9 @@ WARNING: The Link Prediction model requires the graph to be created using the `U
 First off, we will estimate the cost of training the pipeline by using the `estimate` procedure.
 Estimation is useful to understand the memory impact that training the pipeline on your graph will have.
 When actually training the pipeline the system will perform an estimation and prohibit the execution if the estimation shows there is a very high probability of the execution running out of memory.
-To read more about this, see xref::common-usage/memory-estimation.adoc#estimate-heap-control[Automatic estimation and execution blocking].
+To read more about this, see xref:common-usage/memory-estimation.adoc#estimate-heap-control[Automatic estimation and execution blocking].
 
-For more details on `estimate` in general, see xref::common-usage/memory-estimation.adoc[Memory Estimation].
+For more details on `estimate` in general, see xref:common-usage/memory-estimation.adoc[Memory Estimation].
 
 [role=query-example]
 --
@@ -270,6 +270,6 @@ RETURN
 |===
 
 We can see the MLP model configuration won, and has a score of `0.8` on the test set.
-The score computed as the xref::machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
+The score computed as the xref:machine-learning/linkprediction-pipelines/theory.adoc#linkprediction-pipelines-metrics[AUCPR] metric, which is in the range [0, 1].
 A model which gives higher score to all links than non-links will have a score of 1.0, and a model that assigns random scores will on average have a score of 0.5.
 --

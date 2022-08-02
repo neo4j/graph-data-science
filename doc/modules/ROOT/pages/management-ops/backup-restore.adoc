@@ -11,7 +11,7 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 In the Neo4j Graph Data Science library, graphs and machine learning models are stored in-memory.
 This is necessary mainly for performance reasons but has the disadvantage that data will be lost after shutting down the database.
-There are already concepts to circumvent this limitation, such as running algorithms in xref::common-usage/running-algos.adoc#running-algos-write[write mode], xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[exporting graphs to csv] or xref::model-catalog/store.adoc#model-catalog-store-ops[storing models].
+There are already concepts to circumvent this limitation, such as running algorithms in xref:common-usage/running-algos.adoc#running-algos-write[write mode], xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[exporting graphs to csv] or xref:model-catalog/store.adoc#model-catalog-store-ops[storing models].
 The back-up and restore procedures described in this section will provide a simple and uniform way of saving graphs and models in order to load them back into memory after a database restart.
 
 [NOTE]

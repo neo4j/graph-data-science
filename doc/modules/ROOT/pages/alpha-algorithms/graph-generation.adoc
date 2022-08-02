@@ -6,7 +6,7 @@
 
 In certain use cases it is useful to generate random graphs, for example, for testing or benchmarking purposes.
 For that reason the Neo4j Graph Algorithm library comes with a set of built-in graph generators.
-The generator stores the resulting graph in the xref::management-ops/graph-catalog-ops.adoc[graph catalog].
+The generator stores the resulting graph in the xref:management-ops/graph-catalog-ops.adoc[graph catalog].
 That graph can be used as input for any algorithm in the library.
 
 include::partial$/operations-reference/beta-note.adoc[]
@@ -51,10 +51,10 @@ YIELD name, nodes, relationships, generateMillis, relationshipSeed, averageDegre
 [opts="header",cols="3m,1,1m,1,4"]
 |===
 | Name                      | Type      | Default  | Optional | Description
-| relationshipDistribution  | String    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see xref::alpha-algorithms/graph-generation.adoc#graph-generation-distribution[Relationship Distribution].
+| relationshipDistribution  | String    | UNIFORM  | yes      | The probability distribution method used to connect generated nodes. For more information see xref:alpha-algorithms/graph-generation.adoc#graph-generation-distribution[Relationship Distribution].
 | relationshipSeed          | Integer   | null     | yes      | The seed used for generating relationships.
-| relationshipProperty      | Map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see xref::alpha-algorithms/graph-generation.adoc#graph-generation-relationship-property[Relationship Property].
-| aggregation               | String    | NONE     | yes      | The relationship aggregation method cf. xref::graph-project.adoc#relationship-projection-syntax[Relationship Projection].
+| relationshipProperty      | Map       | {}       | yes      | Describes the method used to generate a relationship property. By default no relationship property is generated. For more information see xref:alpha-algorithms/graph-generation.adoc#graph-generation-relationship-property[Relationship Property].
+| aggregation               | String    | NONE     | yes      | The relationship aggregation method cf. xref:graph-project.adoc#relationship-projection-syntax[Relationship Projection].
 | orientation               | String    | NATURAL  | yes      | The method of orienting edges. Allowed values are NATURAL, REVERSE and UNDIRECTED.
 | allowSelfLoops            | Boolean   | false    | yes      | Whether to allow relationships with identical source and target node.
 |===

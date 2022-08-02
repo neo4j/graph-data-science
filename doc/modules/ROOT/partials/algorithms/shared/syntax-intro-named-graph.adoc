@@ -1,3 +1,3 @@
 This section covers the syntax used to execute the {algorithm} algorithm in each of its execution modes.
 We are describing the named graph variant of the syntax.
-To learn more about general syntax variants, see xref::algorithms/syntax.adoc[Syntax overview].
+To learn more about general syntax variants, see xref:algorithms/syntax.adoc[Syntax overview].

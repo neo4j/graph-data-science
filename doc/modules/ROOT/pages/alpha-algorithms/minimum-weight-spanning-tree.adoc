@@ -84,7 +84,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 |===
 | Name                                                                             | Type    | Default   | Optional  | Description
 | startNodeId                                                                      | Integer | null      | no        | The start node ID
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null      | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'mst'     | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a       | no        | The weight property of the `writeProperty` relationship type written back
 |===
@@ -124,7 +124,7 @@ YIELD preProcessingMillis, computeMillis, writeMillis, effectiveNodeCount
 | Name                                                                             | Type    | Default | Optional  | Description
 | k                                                                                | Integer | null    | no        | The result is a tree with `k` nodes and `k − 1` relationships
 | startNodeId                                                                      | Integer | null    | no        | The start node ID
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes       | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
 | writeProperty                                                                    | String  | 'MST'   | yes       | The relationship type written back as result
 | weightWriteProperty                                                              | String  | n/a     | no        | The weight property of the `writeProperty` relationship type written back
 |===

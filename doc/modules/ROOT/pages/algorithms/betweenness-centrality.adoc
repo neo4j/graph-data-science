@@ -34,7 +34,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -307,7 +307,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 |===
 --
 
-As is discussed in xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-considerations[Considerations and sampling] we can configure the memory requirements using the `concurrency` configuration parameter.
+As is discussed in xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-considerations[Considerations and sampling] we can configure the memory requirements using the `concurrency` configuration parameter.
 
 [role=query-example]
 --
@@ -362,7 +362,7 @@ ORDER BY name ASC
 --
 
 We note that the 'Carol' node has the highest score, followed by the 'Frank' node.
-Studying the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples[example graph] we can see that these nodes are in bottleneck positions in the graph.
+Studying the xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples[example graph] we can see that these nodes are in bottleneck positions in the graph.
 The 'Carol' node connects the 'Alice' and 'Bob' nodes to all other nodes, which increases its score.
 In particular, the shortest path from 'Alice' or 'Bob' to any other reachable node passes through 'Carol'.
 Similarly, all shortest paths that lead to the 'Gale' node passes through the 'Frank' node.
@@ -396,7 +396,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 |===
 --
 
-Comparing this to the results we saw in the xref::algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples-stream[stream example], we can find our minimum and maximum values from the table.
+Comparing this to the results we saw in the xref:algorithms/betweenness-centrality.adoc#algorithms-betweenness-centrality-examples-stream[stream example], we can find our minimum and maximum values from the table.
 It is worth noting that unless the graph has a particular shape involving a directed cycle, the minimum score will almost always be zero.
 
 
@@ -425,7 +425,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 
 The returned result is the same as in the `stats` example.
 Additionally, the graph 'myGraph' now has a node property `betweenness` which stores the betweenness centrality score for each node.
-To find out how to inspect the new schema of the in-memory graph, see xref::graph-list.adoc[Listing graphs].
+To find out how to inspect the new schema of the in-memory graph, see xref:graph-list.adoc[Listing graphs].
 
 
 [[algorithms-betweenness-centrality-examples-write]]

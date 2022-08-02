@@ -3,4 +3,4 @@ The name of the new property is specified using the mandatory configuration para
 The result is a single summary row, similar to `stats`, but with some additional metrics.
 The `write` mode enables directly persisting the results to the database.
 
-For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].

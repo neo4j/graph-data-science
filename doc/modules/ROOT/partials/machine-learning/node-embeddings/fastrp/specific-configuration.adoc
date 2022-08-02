@@ -5,6 +5,6 @@
 | nodeSelfInfluence                                                                | Float           | 0.0             | yes       | Controls for each node how much its initial random vector contributes to its final embedding.
 | normalizationStrength                                                            | Float           | 0.0             | yes       | The initial random vector for each node is scaled by its degree to the power of `normalizationStrength`.
 | randomSeed                                                                       | Integer         | n/a             | yes       | A random seed which is used for all randomness in computing the embeddings.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String          | null            | yes       | Name of the relationship property to use for weighted random projection. If unspecified, the algorithm runs unweighted.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String          | null            | yes       | Name of the relationship property to use for weighted random projection. If unspecified, the algorithm runs unweighted.
 5+| The number of iterations is equal to the length of `iterationWeights`.
 5+| It is required that `iterationWeights` is non-empty or `nodeSelfInfluence` is non-zero.

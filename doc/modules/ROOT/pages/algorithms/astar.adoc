@@ -22,12 +22,12 @@ The A* (pronounced "A-Star") Shortest Path algorithm computes the shortest path 
 A* is an informed search algorithm as it uses a heuristic function to guide the graph traversal.
 The algorithm supports weighted graphs with positive relationship weights.
 
-Unlike xref::algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm], the next node to search from is not solely picked on the already computed distance.
+Unlike xref:algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm], the next node to search from is not solely picked on the already computed distance.
 Instead, the algorithm combines the already computed distance with the result of a heuristic function.
 That function takes a node as input and returns a value that corresponds to the cost to reach the target node from that node.
 In each iteration, the graph traversal is continued from the node with the lowest combined cost.
 
-In GDS, the A* algorithm is based on the xref::algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm].
+In GDS, the A* algorithm is based on the xref:algorithms/dijkstra-source-target.adoc[Dijkstra's shortest path algorithm].
 The heuristic function is the haversine distance, which defines the distance between two points on a sphere.
 Here, the sphere is the earth and the points are geo-coordinates stored on the nodes in the graph.
 
@@ -177,7 +177,7 @@ ORDER BY index
 
 The result shows the total cost of the shortest path between node `King's Cross` and `Kentish Town` in the graph.
 It also shows ordered lists of node ids that were traversed to find the shortest paths as well as the accumulated costs of the visited nodes.
-This can be verified in the xref::algorithms/astar.adoc#algorithms-astar-examples[example graph].
+This can be verified in the xref:algorithms/astar.adoc#algorithms-astar-examples[example graph].
 Cypher Path objects can be returned by the `path` return field.
 The Path objects contain the node objects and virtual relationships which have a `cost` property.
 

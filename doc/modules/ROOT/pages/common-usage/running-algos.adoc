@@ -6,11 +6,11 @@
 All algorithms are exposed as Neo4j procedures.
 They can be called directly from Cypher using Neo4j Browser, `cypher-shell`, or from your client code using a Neo4j Driver in the language of your choice.
 
-For a detailed guide on the syntax to run algorithms, please see the xref::algorithms/syntax.adoc[Syntax overview] section.
+For a detailed guide on the syntax to run algorithms, please see the xref:algorithms/syntax.adoc[Syntax overview] section.
 In short, algorithms are run using one of the execution modes `stream`, `stats`, `mutate` or `write`, which we cover in this chapter.
 
 The execution of any algorithm can be canceled by terminating the Cypher transaction that is executing the procedure call.
-For more on how transactions are used, see xref::production-deployment/transaction-handling.adoc[Transaction Handling].
+For more on how transactions are used, see xref:production-deployment/transaction-handling.adoc[Transaction Handling].
 
 
 [[running-algos-stream]]
@@ -44,8 +44,8 @@ This enables running multiple algorithms on the same projected graph without wri
 This execution mode is especially useful in three scenarios:
 
 * Algorithms can depend on the results of previous algorithms without the need to write to Neo4j.
-* Algorithm results can be written altogether (see xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[write node properties] and xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[write relationships]).
-* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `xref::graph-catalog-node-ops.adoc#utility-functions-catalog[gds.util.nodeProperty]`).
+* Algorithm results can be written altogether (see xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[write node properties] and xref:graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[write relationships]).
+* Algorithm results can be queried via Cypher without the need to write to Neo4j at all (see `xref:graph-catalog-node-ops.adoc#utility-functions-catalog[gds.util.nodeProperty]`).
 
 A statistical summary of the computation is returned similar to the `stats` mode.
 Mutated data can be node properties (such as Page Rank scores), new relationships (such as Node Similarity similarities), or relationship properties.
@@ -78,7 +78,7 @@ To learn more about algorithm specific parameters and to find out if an algorith
 concurrency - Integer::
 Controls the parallelism with which the algorithm is executed.
 By default this value is set to 4.
-For more details on the concurrency settings and limitations please see xref::installation/System-requirements.adoc#system-requirements-cpu[the CPU section] of the System Requirements.
+For more details on the concurrency settings and limitations please see xref:installation/System-requirements.adoc#system-requirements-cpu[the CPU section] of the System Requirements.
 
 [[common-configuration-node-labels]]
 nodeLabels - List of String::
@@ -97,7 +97,7 @@ In algorithms that support node weights this parameter defines the node property
 [[common-configuration-relationship-weight-property]]
 relationshipWeightProperty - String::
 In algorithms that support relationship weights this parameter defines the relationship property that contains the weights.
-The specified property is required to exist in the specified graph on all specified xref::common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
+The specified property is required to exist in the specified graph on all specified xref:common-usage/running-algos.adoc#common-configuration-relationship-types[relationship types].
 The values must be numeric, and some algorithms may have additional value restrictions, such as requiring only positive weights.
 
 [[common-configuration-max-iterations]]
@@ -129,4 +129,4 @@ The Default is `concurrency`
 
 [[common-configuration-jobid]]
 jobId - String::
-An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's xref::common-usage/logging.adoc[logging capabilities].
+An id for the job to be started can be provided in order for it to be more easily tracked with eg. GDS's xref:common-usage/logging.adoc[logging capabilities].

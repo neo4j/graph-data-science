@@ -2,15 +2,15 @@ ifeval::["{modelType}" != ""]
 | modelName                                                     | String      | n/a                    | no       | The name of a {modelType} model in the model catalog.
 endif::[]
 include::partial$/algorithms/common-configuration/common-configuration-entries.adoc[]
-| xref::common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]   | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
+| xref:common-usage/running-algos.adoc#common-configuration-write-concurrency[writeConcurrency]   | Integer     | value of 'concurrency' | yes      | The number of concurrent threads used for writing the result to Neo4j.
 
 ifeval::["{entity}" == "node"]
-| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
 endif::[]
 
 ifeval::["{entity}" == "relationship"]
 | writeRelationshipType                                         | String      | n/a                    | no       | The relationship type used to persist the computed relationships in the Neo4j database.
-| xref::common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
+| xref:common-usage/running-algos.adoc#common-configuration-write-property[writeProperty]         | String      | n/a                    | no       | The {entity} property in the Neo4j database to which the {result} is written.
 endif::[]
 
 ifeval::["{entity}" == "source-target-pair"]

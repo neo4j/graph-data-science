@@ -79,7 +79,7 @@ YIELD
 ====
 Some kinds of jobs that typically take while to run, like graph projections and running algorithms, takes an optional `jobId` in their configuration parameter maps.
 This can make tracking them easier as they will then be listed under the provided `jobId` in the `gds.beta.listProgress` results.
-For algorithms, see xref::common-usage/running-algos.adoc#common-configuration-jobid[the `jobId` parameter documentation] for more on this.
+For algorithms, see xref:common-usage/running-algos.adoc#common-configuration-jobid[the `jobId` parameter documentation] for more on this.
 ====
 
 

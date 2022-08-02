@@ -8,42 +8,42 @@
 [opts=header,cols="1, 1"]
 |===
 |Description | Operation
-.5+<.^|xref::graph-project.adoc[Project Graph]
+.5+<.^|xref:graph-project.adoc[Project Graph]
 | `gds.graph.project`
 | `gds.graph.project.estimate`
 | `gds.graph.project.cypher`
 | `gds.graph.project.cypher.estimate`
 | `gds.alpha.graph.project`
-.2+<.^|xref::graph-exists.adoc[Check if a graph exists]
+.2+<.^|xref:graph-exists.adoc[Check if a graph exists]
 | `gds.graph.exists`
 | `_gds.graph.exists_`
-|xref::graph-list.adoc[List graphs] | `gds.graph.list`
-.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
+|xref:graph-list.adoc[List graphs] | `gds.graph.list`
+.2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-remove-node-properties-example[Drop node properties from a named graph]
 | `gds.graph.nodeProperties.drop`
 | `gds.graph.removeNodeProperties` (deprecated)
-.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph]
+.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-delete-rel-type[Delete relationships from a named graph]
 | `gds.graph.relationships.drop`
 | `gds.graph.deleteRelationships` (deprecated)
-|xref::graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
-.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller]
+|xref:graph-drop.adoc[Remove a named graph from memory] | `gds.graph.drop`
+.2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[Stream a single node property to the procedure caller]
 | `gds.graph.nodeProperty.stream`
 | `gds.graph.streamNodeProperty` (deprecated)
-.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller]
+.2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[Stream node properties to the procedure caller]
 | `gds.graph.nodeProperties.stream`
 | `gds.graph.streamNodeProperties` (deprecated)
-.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
+.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[Stream a single relationship property to the procedure caller]
 | `gds.graph.relationshipProperty.stream`
 | `gds.graph.streamRelationshipProperty` (deprecated)
-.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
+.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[Stream relationship properties to the procedure caller]
 | `gds.graph.relationshipProperties.stream`
 | `gds.graph.streamRelationshipProperties` (deprecated)
-.2+<.^|xref::graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
+.2+<.^|xref:graph-catalog-node-ops.adoc#catalog-graph-write-node-properties-example[Write node properties to Neo4j]
 | `gds.graph.nodeProperties.write`
 | `gds.graph.writeNodeProperties`
-.2+<.^|xref::graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j]
+.2+<.^|xref:graph-catalog-relationship-ops.adoc#catalog-graph-write-relationship-example[Write relationships to Neo4j]
 | `gds.graph.relationship.write`
 | `gds.graph.writeRelationship`
-|xref::graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export`
+|xref:graph-catalog-export-ops.adoc#catalog-graph-export-database[Graph Export] | `gds.graph.export`
 |===
 
 == Beta Tier
@@ -53,12 +53,12 @@
 [opts=header,cols="1, 1"]
 |===
 |Description                                | Operation
-|xref::graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
-|xref::alpha-algorithms/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
-.2+<.^|xref::graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
+|xref:graph-project-subgraph.adoc[Project a graph from a graph in the catalog] | `gds.beta.graph.project.subgraph`
+|xref:alpha-algorithms/graph-generation.adoc[Generate Random Graph]| `gds.beta.graph.generate`
+.2+<.^|xref:graph-catalog-export-ops.adoc#catalog-graph-export-csv[CSV Export]
 | `gds.beta.graph.export.csv`
 | `gds.beta.graph.export.csv.estimate`
-|xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream`
+|xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[Stream relationship topologies to the procedure caller] | `gds.beta.graph.relationships.stream`
 |===
 
 

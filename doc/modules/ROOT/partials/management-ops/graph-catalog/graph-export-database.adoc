@@ -114,7 +114,7 @@ The new database can be started using link:https://neo4j.com/docs/cypher-manual/
 The original database (`my-db-graph`) must not have changed since loading the in-memory representation (`my-in-memory-graph`) that we export in order for the export to work correctly.
 ====
 
-The `additionalNodeProperties` parameter uses the same syntax as `nodeProperties` of the xref::graph-project.adoc[graph project procedure].
+The `additionalNodeProperties` parameter uses the same syntax as `nodeProperties` of the xref:graph-project.adoc[graph project procedure].
 So we could for instance define a default value for our `myproperty`.
 
 .Export the `my-in-memory-graph` from GDS with `myproperty` from `my-db-graph` with default value into a Neo4j database called `mydatabase`:

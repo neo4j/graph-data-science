@@ -7,4 +7,4 @@ It can be useful for evaluating algorithm performance by inspecting the `compute
 In the examples below we will omit returning the timings.
 The full signature of the procedure can be found in <<{stats-syntax}, the syntax section>>.
 
-For more details on the `stats` mode in general, see xref::common-usage/running-algos.adoc#running-algos-stats[Stats].
+For more details on the `stats` mode in general, see xref:common-usage/running-algos.adoc#running-algos-stats[Stats].

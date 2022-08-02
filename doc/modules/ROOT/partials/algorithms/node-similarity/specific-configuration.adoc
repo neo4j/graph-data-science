@@ -14,7 +14,7 @@ This value cannot be negative, a value of 0 means no global limit.
 | bottomN                                                                          | Integer | 0       | yes      | Global limit on the number of scores computed.
 The N smallest total results are returned.
 This value cannot be negative, a value of 0 means no global limit.
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights.
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null    | yes      | Name of the relationship property to use as weights.
 If unspecified, the algorithm runs unweighted.
 | similarityMetric
 | String | JACCARD       | yes      |  The metric used to compute similarity.

@@ -23,7 +23,7 @@ Memory configuration depends on the graph projection that we're using.
 In many use cases it will be useful to estimate the required memory of projecting a graph and running an algorithm _before_ running it in order to make sure that the workload can run on the available free memory.
 To do this the `.estimate` mode can be used, which returns an estimate of the amount of memory required to run graph algorithms.
 Note that only algorithms in the production-ready tier are guaranteed to have an `.estimate` mode.
-For more details please refer to xref::algorithms/syntax.adoc[Syntax overview].
+For more details please refer to xref:algorithms/syntax.adoc[Syntax overview].
 
 .Syntax outline:
 [source, cypher, role=noplay]
@@ -47,14 +47,14 @@ CALL gds[.<tier>].<algorithm>.<execution-mode>.estimate(
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name              | Type          | Default   | Optional  | Description
-| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a xref::common-usage/memory-estimation.adoc#estimate-procedure-graph-project-config[configuration to project a graph].
+| graphNameOrConfig | String or Map | -         | no        | The name of the projected graph or a xref:common-usage/memory-estimation.adoc#estimate-procedure-graph-project-config[configuration to project a graph].
 | configuration     | Map           | -         | no        | The configuration of the algorithm.
 |===
 
 The configuration map accepts the same configuration parameters as the estimated algorithm.
 See the specific algorithm documentation for more information.
 
-In contrast to procedures that execute algorithms, for memory estimation it is possible to define a xref::common-usage/memory-estimation.adoc#estimate-procedure-graph-project-config[graph projection config].
+In contrast to procedures that execute algorithms, for memory estimation it is possible to define a xref:common-usage/memory-estimation.adoc#estimate-procedure-graph-project-config[graph projection config].
 With this it is possible to measure the memory consumption of projecting a graph and executing the algorithm at the same time.
 
 .Results
@@ -80,20 +80,20 @@ With this it is possible to measure the memory consumption of projecting a graph
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                        | Type                          | Default                | Optional | Description
-| xref::graph-project.adoc#node-projection-syntax[node projection]                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
-| xref::graph-project.adoc#relationship-projection-syntax[relationship projection] | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
+| xref:graph-project.adoc#node-projection-syntax[node projection]                 | String, List of String or Map | null                   | yes      | The node projection used for anonymous graph creation via a Native projection.
+| xref:graph-project.adoc#relationship-projection-syntax[relationship projection] | String, List of String or Map | null                   | yes      | The relationship projection used for anonymous graph creation a Native projection.
 | nodeQuery                                                   | String                        | null                   | yes      | The Cypher query used to select the nodes for anonymous graph creation via a Cypher projection.
 | relationshipQuery                                           | String                        | null                   | yes      | The Cypher query used to select the relationships for anonymous graph creation via a Cypher projection.
 | nodeProperties                                              | String, List of String or Map | null                   | yes      | The node properties to project during anonymous graph creation.
 | relationshipProperties                                      | String, List of String or Map | null                   | yes      | The relationship properties to project during anonymous graph creation.
-| xref::common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer                       | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]            | Integer                       | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'.
 | readConcurrency                                             | Integer                       | value of 'concurrency' | yes      | The number of concurrent threads used for creating the graph.
 |===
 
 [[estimate-procedure-graph]]
 == Estimating memory requirements for graphs
 
-The xref::graph-project.adoc[`gds.graph.project`] procedures also support `.estimate` to estimate memory usage for just the graph.
+The xref:graph-project.adoc[`gds.graph.project`] procedures also support `.estimate` to estimate memory usage for just the graph.
 Those procedures don't accept the graph name as the first argument, as they don't actually project the graph.
 
 .Syntax
@@ -103,7 +103,7 @@ CALL gds.graph.project.estimate(nodeProjection: String|List|Map, relationshipPro
 YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, heapPercentageMin, heapPercentageMax, nodeCount, relationshipCount
 ----
 
-The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in xref::graph-project.adoc[`gds.graph.project`].
+The `nodeProjection` and `relationshipProjection` parameters follow the same syntax as in xref:graph-project.adoc[`gds.graph.project`].
 
 .Parameters
 [opts="header",cols="1,1,1,1,4"]
@@ -153,7 +153,7 @@ YIELD requiredMemory, treeView, mapView, bytesMin, bytesMax, nodeCount, relation
 | "593 KiB" | 607576   | 607576   | 100       | 1000
 |===
 
-The xref::graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
+The xref:graph-project-cypher.adoc[`gds.graph.project.cypher`] procedure has to execute both, the `nodeQuery` and `relationshipQuery`, in order to count the number of nodes and relationships of the graph.
 
 .Syntax
 [source, cypher, role=noplay]
@@ -186,7 +186,7 @@ It does not guarantee that an execution that passed the heap control will succee
 Thus, it is still useful to first run the estimation mode before running an algorithm or graph creation on a large data set, in order to view all details of the estimation.
 
 The free memory taken into consideration is based on the Java runtime system information.
-The amount of free memory can be increased by either xref::graph-drop.adoc[dropping] unused graphs from the catalog, or by xref::installation/System-requirements.adoc#heap-size[increasing the maximum heap size] prior to starting the Neo4j instance.
+The amount of free memory can be increased by either xref:graph-drop.adoc[dropping] unused graphs from the catalog, or by xref:installation/System-requirements.adoc#heap-size[increasing the maximum heap size] prior to starting the Neo4j instance.
 
 [[bypass-heap-control]]
 === Bypassing heap control

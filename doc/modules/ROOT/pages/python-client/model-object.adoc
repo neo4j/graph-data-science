@@ -1,10 +1,10 @@
 [[python-client-model-object]]
 = The model object
 
-Models of the xref::model-catalog/index.adoc[GDS Model Catalog] are represented as `Model` objects in the Python client, similar to how there are xref::python-client/graph-object.adoc[graph objects].
-`Model` objects are typically constructed from training a xref::python-client/pipelines.adoc[pipeline] or a xref::python-client/model-object.adoc#python-client-model-object-graphsage[GraphSAGE model], in which case a reference to the trained model in the form of a `Model` object is returned.
+Models of the xref:model-catalog/index.adoc[GDS Model Catalog] are represented as `Model` objects in the Python client, similar to how there are xref:python-client/graph-object.adoc[graph objects].
+`Model` objects are typically constructed from training a xref:python-client/pipelines.adoc[pipeline] or a xref:python-client/model-object.adoc#python-client-model-object-graphsage[GraphSAGE model], in which case a reference to the trained model in the form of a `Model` object is returned.
 
-Once created, the `Model` objects can be passed as arguments to methods in the Python client, such as the xref::model-catalog/index.adoc[model catalog operations].
+Once created, the `Model` objects can be passed as arguments to methods in the Python client, such as the xref:model-catalog/index.adoc[model catalog operations].
 Additionally, the `Model` objects have convenience methods allowing for inspection of the models represented without explicitly involving the model catalog.
 
 include::partial$/pythonclient/python-client-gds-object.adoc[]
@@ -14,7 +14,7 @@ include::partial$/pythonclient/python-client-gds-object.adoc[]
 == Constructing a model object
 
 There are several ways of constructing a model object.
-One of the simplest is to train a xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE] model.
+One of the simplest is to train a xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE] model.
 Supposing we have a graph `G` that have an integer node property "price", we could do the following:
 
 [source,python]
@@ -24,7 +24,7 @@ model, res = gds.beta.graphSage.train(G, modelName="my-model", featureProperties
 
 where `model` is the model object, and `res` is a pandas `Series` containing metadata from the underlying procedure call.
 
-Similarly, we can also get model objects from training xref::python-client/pipelines.adoc[machine learning pipelines].
+Similarly, we can also get model objects from training xref:python-client/pipelines.adoc[machine learning pipelines].
 
 To get a model object that represents a model that has already been trained and is present in the model catalog, one can call the client-side only `get` method and passing it a name:
 
@@ -52,12 +52,12 @@ There are convenience methods on all model objects that let us extract informati
 | type          | -                             | str                 | The type of model it is, eg. "graphSage".
 | train_config  | -                             | Series              | The configuration used for training the model.
 | graph_schema  | -                             | Series              | The schema of the graph on which the model was trained.
-| loaded        | -                             | bool                | `True` if the model is xref::model-catalog/store.adoc#catalog-model-load[loaded] in the in-memory model catalog, `False` otherwise.
-| stored        | -                             | bool                | `True` if the model is xref::model-catalog/store.adoc[stored] on disk, `False` otherwise.
+| loaded        | -                             | bool                | `True` if the model is xref:model-catalog/store.adoc#catalog-model-load[loaded] in the in-memory model catalog, `False` otherwise.
+| stored        | -                             | bool                | `True` if the model is xref:model-catalog/store.adoc[stored] on disk, `False` otherwise.
 | creation_time | -                             | neo4j.time.Datetime | Time when the model was created.
-| shared        | -                             | bool                | `True` if the model is xref::model-catalog/publish.adoc[shared] between users, `False` otherwise.
+| shared        | -                             | bool                | `True` if the model is xref:model-catalog/publish.adoc[shared] between users, `False` otherwise.
 | exists        | -                             | bool                | `True` if the model exists in the GDS Model Catalog, `False` otherwise.
-| drop          | failIfMissing: Optional[bool] | Series              | xref::model-catalog/drop.adoc[Removes the model] from the GDS Model Catalog.
+| drop          | failIfMissing: Optional[bool] | Series              | xref:model-catalog/drop.adoc[Removes the model] from the GDS Model Catalog.
 |===
 
 For example, to get the train configuration of a model object `model`, we would do the following:
@@ -71,9 +71,9 @@ train_config = model.train_config()
 == Using a model object
 
 The primary way to use model objects is for prediction.
-How to do so for GraphSAGE is xref::python-client/model-object.adoc#python-client-model-object-graphsage[described below], and on the xref::python-client/pipelines.adoc[Machine learning pipelines] page for pipelines.
+How to do so for GraphSAGE is xref:python-client/model-object.adoc#python-client-model-object-graphsage[described below], and on the xref:python-client/pipelines.adoc[Machine learning pipelines] page for pipelines.
 
-Additionally, model objects can be used as input to xref::model-catalog/index.adoc[GDS Model Catalog operations].
+Additionally, model objects can be used as input to xref:model-catalog/index.adoc[GDS Model Catalog operations].
 For instance, supposing we have a model object `model`, we could:
 
 [source,python]
@@ -88,20 +88,20 @@ gds.beta.model.drop(model)  # same as model.drop()
 [[python-client-model-object-graphsage]]
 === GraphSAGE
 
-As exemplified above in xref::python-client/model-object.adoc#python-client-model-object-constructing[Constructing a model object], training a GraphSAGE model with the Python client is analogous to xref::machine-learning/node-embeddings/graph-sage.adoc[its Cypher counterpart].
+As exemplified above in xref:python-client/model-object.adoc#python-client-model-object-constructing[Constructing a model object], training a GraphSAGE model with the Python client is analogous to xref:machine-learning/node-embeddings/graph-sage.adoc[its Cypher counterpart].
 
-Once trained, in addition to the xref::python-client/model-object.adoc#python-client-model-object-inspecting[methods above], the GraphSAGE model object will have the following methods.
+Once trained, in addition to the xref:python-client/model-object.adoc#python-client-model-object-inspecting[methods above], the GraphSAGE model object will have the following methods.
 
 .GraphSAGE model methods
 [opts="header",cols="5m,5m,6m,11"]
 |===
 | Name           | Arguments        | Return type | Description
 | predict_mutate | G: Graph, +
-                   config: **kwargs | Series      | xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example-mutate[Predict embeddings for nodes of the input graph and mutate graph with predictions].
+                   config: **kwargs | Series      | xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example-mutate[Predict embeddings for nodes of the input graph and mutate graph with predictions].
 | predict_stream | G: Graph, +
-                   config: **kwargs | DataFrame   | xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[Predict embeddings for nodes of the input graph and stream the results].
+                   config: **kwargs | DataFrame   | xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example[Predict embeddings for nodes of the input graph and stream the results].
 | predict_write  | G: Graph, +
-                   config: **kwargs | Series      | xref::machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example-write[Predict embeddings for nodes of the input graph and write the results back to the database].
+                   config: **kwargs | Series      | xref:machine-learning/node-embeddings/graph-sage.adoc#graph-sage-trained-model-example-write[Predict embeddings for nodes of the input graph and write the results back to the database].
 | metrics        | -                | Series      | Returns values for the metrics computed when training.
 |===
 

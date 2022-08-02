@@ -53,8 +53,8 @@ YIELD startNodeId, targetNodeId, distance
 [opts="header",cols="1,1,1,1,4"]
 |===
 | Name                                                                             | Type    | Default                | Optional | Description
-| xref::common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
-| concurrency                                                                      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref::installation/System-requirements.adoc#system-requirements-cpu[CPU].
+| xref:common-usage/running-algos.adoc#common-configuration-relationship-weight-property[relationshipWeightProperty] | String  | null                   | yes      | Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted.
+| concurrency                                                                      | Integer | 4                      | yes      | The number of concurrent threads used for running the algorithm. Also provides the default value for 'readConcurrency' and 'writeConcurrency'. This is dependent on the Neo4j edition; for more information, see xref:installation/System-requirements.adoc#system-requirements-cpu[CPU].
 | readConcurrency                                                                  | Integer | value of 'concurrency' | yes      | The number of concurrent threads used for reading the graph.
 |===
 

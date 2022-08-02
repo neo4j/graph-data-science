@@ -22,7 +22,7 @@ The algorithm separates nodes into disjoint communities so as to maximize a modu
 Modularity quantifies the quality of an assignment of nodes to communities, that is how densely connected nodes in a community are, compared to how connected they would be in a random network.
 
 The Leiden algorithm is a hierarchical clustering algorithm, that recursively merges communities into single nodes by greedily optimizing the modularity and the process repeats in the condensed graph.
-It modifies the xref::algorithms/louvain.adoc[Louvain] algorithm to address some of its shortcomings, namely the case where some of the communities found by Louvain are not well-connected.
+It modifies the xref:algorithms/louvain.adoc[Louvain] algorithm to address some of its shortcomings, namely the case where some of the communities found by Louvain are not well-connected.
 This is achieved by periodically randomly breaking down communities into smaller well-connected ones.
 
 For more information on this algorithm, see:
@@ -32,7 +32,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient memory availability.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 [[algorithms-leiden-syntax]]

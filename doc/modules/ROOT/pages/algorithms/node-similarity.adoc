@@ -62,7 +62,7 @@ For more information on this algorithm, see:
 [NOTE]
 ====
 Running this algorithm requires sufficient available memory.
-Before running this algorithm, we recommend that you read xref::common-usage/memory-estimation.adoc[Memory Estimation].
+Before running this algorithm, we recommend that you read xref:common-usage/memory-estimation.adoc[Memory Estimation].
 ====
 
 
@@ -448,7 +448,7 @@ The type of the new relationship is specified using the mandatory configuration 
 The name of the new property is specified using the mandatory configuration parameter `writeProperty`.
 The result is a single summary row, similar to `stats`, but with some additional metrics.
 
-For more details on the `write` mode in general, see xref::common-usage/running-algos.adoc#running-algos-write[Write].
+For more details on the `write` mode in general, see xref:common-usage/running-algos.adoc#running-algos-write[Write].
 
 [role=query-example]
 --

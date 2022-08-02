@@ -8,7 +8,7 @@
 Accepts a single property key,
 a Map of property keys to metrics,
 or a List of property keys and/or Maps, as above.
-See xref::algorithms/knn.adoc#algorithms-knn-node-properties-configuration[Node properties and metrics configuration] for details.
+See xref:algorithms/knn.adoc#algorithms-knn-node-properties-configuration[Node properties and metrics configuration] for details.
 | topK                                                             | Integer         | 10        | yes      | The number of neighbors to find for each node.
 The K-nearest neighbors are returned.
 This value cannot be lower than 1.
@@ -17,9 +17,9 @@ Value must be between 0 (exclusive) and 1 (inclusive).
 | deltaThreshold                                                   | Float           | 0.001     | yes      | Value as a percentage to determine when to stop early.
 If fewer updates than the configured value happen, the algorithm stops.
 Value must be between 0 (exclusive) and 1 (inclusive).
-| xref::common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]            | Integer         | 100       | yes      | Hard limit to stop the algorithm after that many iterations.
+| xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]            | Integer         | 100       | yes      | Hard limit to stop the algorithm after that many iterations.
 | randomJoins                                                      | Integer         | 10        | yes      | Between every iteration, how many attempts are being made to connect new node neighbors based on random selection.
-| xref::algorithms/knn.adoc#algorithms-knn-introduction-sampling[initialSampler]         | String          | "uniform" | yes      | The method used to sample the first `k` random neighbors for each node. "uniform" and "randomWalk", both case-insensitive, are valid inputs.
+| xref:algorithms/knn.adoc#algorithms-knn-introduction-sampling[initialSampler]         | String          | "uniform" | yes      | The method used to sample the first `k` random neighbors for each node. "uniform" and "randomWalk", both case-insensitive, are valid inputs.
 | randomSeed                                                       | Integer         | n/a       | yes      | The seed value to control the randomness of the algorithm.
 Note that `concurrency` must be set to 1 when setting this parameter.
 | similarityCutoff                                                 | Float           | 0         | yes      | Filter out from the list of K-nearest neighbors nodes with similarity below this threshold.

@@ -3,25 +3,25 @@
 :description: This section describes supervised machine learning methods for training pipelines in the Neo4j Graph Data Science library.
 
 
-xref::machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipelines], xref::machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipelines], and xref::machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
+xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[Node Classification Pipelines], xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[Node Regression Pipelines], and xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[Link Prediction Pipelines] are trained using supervised machine learning methods.
 These methods have several hyperparameters that one can set to influence the training.
 The objective of this page is to give a brief overview of the methods, as well as advice on how to tune their hyperparameters.
 
-For instructions on how to add model candidates, see the sections xref::machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Adding model candidates (Node Classification)], xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Adding model candidates (Node Regression)], and xref::machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Adding model candidates (Link Prediction)].
-During training, xref::machine-learning/auto-tuning.adoc[auto-tuning] is carried out to select a best candidate and the best values for its hyper-parameters.
+For instructions on how to add model candidates, see the sections xref:machine-learning/node-property-prediction/nodeclassification-pipelines/config.adoc#nodeclassification-pipelines-adding-model-candidates[Adding model candidates (Node Classification)], xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-model-candidates[Adding model candidates (Node Regression)], and xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[Adding model candidates (Link Prediction)].
+During training, xref:machine-learning/auto-tuning.adoc[auto-tuning] is carried out to select a best candidate and the best values for its hyper-parameters.
 
 The training methods currently support in the Neo4j Graph Data Science library are:
 
 **Classification**
 
 * Beta
-** xref::machine-learning/training-methods/logistic-regression.adoc[Logistic regression]
+** xref:machine-learning/training-methods/logistic-regression.adoc[Logistic regression]
 * Alpha
-** xref::machine-learning/training-methods/random-forest.adoc[Random forest]
-** xref::machine-learning/training-methods/mlp.adoc[Multilayer Perceptron]
+** xref:machine-learning/training-methods/random-forest.adoc[Random forest]
+** xref:machine-learning/training-methods/mlp.adoc[Multilayer Perceptron]
 
 **Regression**
 
 * Alpha
-** xref::machine-learning/training-methods/random-forest.adoc[Random forest]
-** xref::machine-learning/training-methods/linear-regression.adoc[Linear regression]
+** xref:machine-learning/training-methods/random-forest.adoc[Random forest]
+** xref:machine-learning/training-methods/linear-regression.adoc[Linear regression]

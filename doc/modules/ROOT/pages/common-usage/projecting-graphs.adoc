@@ -6,4 +6,4 @@
 In order for any algorithm in the GDS library to run, we must first project a graph to run on.
 The graph is projected as a _named graph_.
 A named graph is given a name and stored in the graph catalog.
-For a detailed guide on all graph catalog operations, see xref::management-ops/graph-catalog-ops.adoc[Graph Catalog].
+For a detailed guide on all graph catalog operations, see xref:management-ops/graph-catalog-ops.adoc[Graph Catalog].

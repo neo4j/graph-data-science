@@ -10,11 +10,11 @@ include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 The graphs in the Neo4j Graph Data Science Library support properties for nodes and relationships.
 One way to export those properties is using Cypher procedures.
-Those are documented in xref::graph-catalog-node-ops.adoc[Node operations] and xref::graph-catalog-relationship-ops.adoc[Relationship operations].
+Those are documented in xref:graph-catalog-node-ops.adoc[Node operations] and xref:graph-catalog-relationship-ops.adoc[Relationship operations].
 Similar to the procedures, GDS also supports exporting properties via Arrow Flight.
 
 In this chapter, we assume that a Flight server has been set up and configured.
-To learn more about the installation, please refer to the xref::installation/installation-apache-arrow.adoc[installation chapter].
+To learn more about the installation, please refer to the xref:installation/installation-apache-arrow.adoc[installation chapter].
 
 
 == Arrow Ticket format
@@ -54,7 +54,7 @@ To stream a single node property, the client needs to encode that information in
 }
 ----
 
-The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[procedure].
+The `procedure_name` indicates that we mirror the behaviour of the existing xref:graph-catalog-node-ops.adoc#catalog-graph-stream-single-node-property-example[procedure].
 The specific configuration needs to include the following keys:
 
 [[arrow-node-property-export]]
@@ -96,7 +96,7 @@ To stream multiple node properties, the client needs to encode that information 
 }
 ----
 
-The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[procedure].
+The `procedure_name` indicates that we mirror the behaviour of the existing xref:graph-catalog-node-ops.adoc#catalog-graph-stream-node-properties-example[procedure].
 The specific configuration needs to include the following keys:
 
 [[arrow-node-properties-export]]
@@ -136,7 +136,7 @@ To stream a single relationship property, the client needs to encode that inform
 }
 ----
 
-The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[procedure].
+The `procedure_name` indicates that we mirror the behaviour of the existing xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-single-relationship-property-example[procedure].
 The specific configuration needs to include the following keys:
 
 [[arrow-relationship-property-export]]
@@ -180,7 +180,7 @@ To stream multiple relationship properties, the client needs to encode that info
 }
 ----
 
-The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[procedure].
+The `procedure_name` indicates that we mirror the behaviour of the existing xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-properties-example[procedure].
 The specific configuration needs to include the following keys:
 
 [[arrow-relationship-properties-export]]
@@ -224,7 +224,7 @@ To stream the topology of one or more relationship types, the client needs to en
 }
 ----
 
-The `procedure_name` indicates that we mirror the behaviour of the existing xref::graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[procedure].
+The `procedure_name` indicates that we mirror the behaviour of the existing xref:graph-catalog-relationship-ops.adoc#catalog-graph-stream-relationship-topology-example[procedure].
 The specific configuration needs to include the following keys:
 
 [[arrow-relationship-topology-export]]

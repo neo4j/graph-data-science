@@ -19,22 +19,22 @@ When writing algorithm results back to Neo4j, heap space is also used for handli
 For purely analytical workloads, a general recommendation is to set the heap space to about 90% of the available main memory.
 This can be done via https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.initial_size[dbms.memory.heap.initial_size] and https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.heap.max_size[dbms.memory.heap.max_size].
 
-To better estimate the heap space required to project graphs and run algorithms, consider the xref::common-usage/memory-estimation.adoc[Memory Estimation] feature.
+To better estimate the heap space required to project graphs and run algorithms, consider the xref:common-usage/memory-estimation.adoc[Memory Estimation] feature.
 The feature estimates the memory consumption of all involved data structures using information about number of nodes and relationships from the Neo4j count store.
 
 === Page cache
 
 The page cache is used to cache the Neo4j data and will help to avoid costly disk access.
 
-For purely analytical workloads including xref::graph-project.adoc[native projections], it is recommended to decrease https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
+For purely analytical workloads including xref:graph-project.adoc[native projections], it is recommended to decrease https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/reference/configuration-settings/#config_dbms.memory.pagecache.size[dbms.memory.pagecache.size] in favor of an increased heap size.
 However, setting a minimum page cache size is still important when projecting graphs:
 
-* For xref::graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
-* For xref::graph-project-cypher.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
+* For xref:graph-project.adoc[native projections], the minimum page cache size for projecting a graph can be roughly estimated by `8KB * 100 * readConcurrency`.
+* For xref:graph-project-cypher.adoc[Cypher projections], a higher page cache is required depending on the query complexity.
 
 However, if it is required to write algorithm results back to Neo4j, the write performance is highly depended on store fragmentation as well as the number of properties and relationships to write.
 We recommend starting with a page cache size of roughly `250MB * writeConcurrency` and evaluate write performance and adapt accordingly.
-Ideally, if the xref::common-usage/memory-estimation.adoc[memory estimation] feature has been used to find a good heap size, the remaining memory can be used for page cache and OS.
+Ideally, if the xref:common-usage/memory-estimation.adoc[memory estimation] feature has been used to find a good heap size, the remaining memory can be used for page cache and OS.
 
 [NOTE]
 ====
@@ -47,7 +47,7 @@ See https://neo4j.com/docs/operations-manual/{neo4j-docs-link-version}/performan
 
 The library uses multiple CPU cores for graph projections, algorithm computation, and results writing.
 Configuring the workloads to make best use of the available CPU cores in your system is important to achieve maximum performance.
-The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see xref::common-usage/running-algos.adoc#algorithms-syntax-configuration-parameters[Common Configuration parameters]
+The concurrency used for the stages of projection, computation and writing is configured per algorithm execution, see xref:common-usage/running-algos.adoc#algorithms-syntax-configuration-parameters[Common Configuration parameters]
 
 The default concurrency used for most operations in the Graph Data Science library is 4.
 

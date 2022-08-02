@@ -75,13 +75,13 @@ This shows that the newly created pipeline does not contain any steps yet, and h
 == Adding node properties
 
 A node regression pipeline can execute one or several GDS algorithms in mutate mode that create node properties in the in-memory graph.
-Such steps producing node properties can be chained one after another and created properties can later be used as xref::machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[features].
-Moreover, the node property steps that are added to the training pipeline will be executed both when xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training] a model and when the regression pipeline is xref::machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[applied for regression].
+Such steps producing node properties can be chained one after another and created properties can later be used as xref:machine-learning/node-property-prediction/noderegression-pipelines/config.adoc#noderegression-pipelines-adding-features[features].
+Moreover, the node property steps that are added to the training pipeline will be executed both when xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training] a model and when the regression pipeline is xref:machine-learning/node-property-prediction/noderegression-pipelines/predict.adoc[applied for regression].
 
 The name of the procedure that should be added can be a fully qualified GDS procedure name ending with `.mutate`.
 The ending `.mutate` may be omitted and one may also use shorthand forms such as `node2vec` instead of `gds.beta.node2vec.mutate`.
 
-For example, xref::machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
+For example, xref:machine-learning/pre-processing.adoc[pre-processing algorithms] can be used as node property steps.
 
 
 === Syntax
@@ -256,7 +256,7 @@ CALL gds.alpha.pipeline.nodeRegression.configureSplit('pipe', {
 | {testFraction=0.2, validationFolds=5}
 |===
 
-We now reconfigured the splitting of the graph for the pipeline, which will be used during xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
+We now reconfigured the splitting of the graph for the pipeline, which will be used during xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
 --
 
 [[noderegression-pipelines-adding-model-candidates]]
@@ -265,15 +265,15 @@ We now reconfigured the splitting of the graph for the pipeline, which will be u
 A pipeline contains a collection of configurations for model candidates which is initially empty.
 This collection is called the _parameter space_.
 Each model candidate configuration contains either fixed values or ranges for training parameters.
-When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see xref::machine-learning/auto-tuning.adoc[Auto-tuning].
+When a range is present, values from the range are determined automatically by an auto-tuning algorithm, see xref:machine-learning/auto-tuning.adoc[Auto-tuning].
 One or more model configurations must be added to the parameter space of the training pipeline, using one of the following procedures:
 
 * `gds.alpha.pipeline.nodeRegression.addLinearRegression`
 * `gds.alpha.pipeline.nodeRegression.addRandomForest`
 
-For detailed information about the available training methods in GDS, see xref::machine-learning/training-methods/index.adoc[Training methods].
+For detailed information about the available training methods in GDS, see xref:machine-learning/training-methods/index.adoc[Training methods].
 
-In xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
+In xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[Training the pipeline], we explain further how the configured model candidates are trained, evaluated and compared.
 
 The parameter space of a pipeline can be inspected using `gds.beta.model.list` and yielding `parameterSpace`.
 
@@ -394,12 +394,12 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LinearRe
 --
 
 The `parameterSpace` in the pipeline now contains the three different model candidates, expanded with the default values.
-Each specified model candidate will be tried out during the model selection in xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
+Each specified model candidate will be tried out during the model selection in xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
 
 [NOTE]
 ====
 These are somewhat naive examples of how to add and configure model candidates.
-Please see xref::machine-learning/training-methods/index.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
+Please see xref:machine-learning/training-methods/index.adoc[Training methods] for more information on how to tune the configuration parameters of each method.
 ====
 
 
@@ -471,5 +471,5 @@ CALL gds.alpha.pipeline.nodeRegression.configureAutoTuning('pipe', {
 | {maxTrials=100}
 |===
 
-We explicitly configured the auto-tuning to try out at most 100 model candidates during xref::machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
+We explicitly configured the auto-tuning to try out at most 100 model candidates during xref:machine-learning/node-property-prediction/noderegression-pipelines/training.adoc[training].
 --

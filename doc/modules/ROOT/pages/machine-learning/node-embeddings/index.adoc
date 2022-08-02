@@ -8,8 +8,8 @@ These vectors, also called embeddings, can be used for machine learning.
 The Neo4j Graph Data Science library contains the following node embedding algorithms:
 
 * Production-quality
-** xref::machine-learning/node-embeddings/fastrp.adoc[FastRP]
+** xref:machine-learning/node-embeddings/fastrp.adoc[FastRP]
 
 * Beta
-** xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
-** xref::machine-learning/node-embeddings/node2vec.adoc[Node2Vec]
+** xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]
+** xref:machine-learning/node-embeddings/node2vec.adoc[Node2Vec]

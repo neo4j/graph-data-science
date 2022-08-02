@@ -5,7 +5,7 @@
 
 This chapter is divided into the following sections:
 
-* xref::production-deployment/transaction-handling.adoc[Transaction Handling]
-* xref::production-deployment/fabric.adoc[Using GDS and Fabric]
-* xref::production-deployment/causal-cluster.adoc[GDS with Neo4j Causal Cluster]
-* xref::production-deployment/feature-toggles.adoc[GDS Feature Toggles]
+* xref:production-deployment/transaction-handling.adoc[Transaction Handling]
+* xref:production-deployment/fabric.adoc[Using GDS and Fabric]
+* xref:production-deployment/causal-cluster.adoc[GDS with Neo4j Causal Cluster]
+* xref:production-deployment/feature-toggles.adoc[GDS Feature Toggles]

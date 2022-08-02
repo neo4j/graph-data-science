@@ -2,11 +2,11 @@
 [opts="header",cols="1,1,4"]
 |===
 | Name          | Type     | Description
-| modelInfo     | Map      | Detailed information about the trained model. Always includes the `modelName` and `modelType`, e.g., xref::machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]. Dependent on the model type, there are additional fields.
+| modelInfo     | Map      | Detailed information about the trained model. Always includes the `modelName` and `modelType`, e.g., xref:machine-learning/node-embeddings/graph-sage.adoc[GraphSAGE]. Dependent on the model type, there are additional fields.
 | trainConfig   | Map      | The configuration used for training the model.
 | graphSchema   | Map      | The schema of the graph on which the model was trained.
-| loaded        | Boolean  | True, if the model is xref::model-catalog/store.adoc#catalog-model-load[loaded] in the in-memory model catalog.
-| stored        | Boolean  | True, if the model is xref::model-catalog/store.adoc[stored] on disk.
+| loaded        | Boolean  | True, if the model is xref:model-catalog/store.adoc#catalog-model-load[loaded] in the in-memory model catalog.
+| stored        | Boolean  | True, if the model is xref:model-catalog/store.adoc[stored] on disk.
 | creationTime  | Datetime | Time when the model was created.
-| shared        | Boolean  | True, if the model is xref::model-catalog/publish.adoc[shared] between users.
+| shared        | Boolean  | True, if the model is xref:model-catalog/publish.adoc[shared] between users.
 |===

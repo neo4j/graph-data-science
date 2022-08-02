@@ -4,6 +4,6 @@ We will use the `{mode}` mode in this example.
 Estimating the algorithm is useful to understand the memory impact that running the algorithm on your graph will have.
 When you later actually run the algorithm in one of the execution modes the system will perform an estimation.
 If the estimation shows that there is a very high probability of the execution going over its memory limitations, the execution is prohibited.
-To read more about this, see xref::common-usage/memory-estimation.adoc#estimate-heap-control[Automatic estimation and execution blocking].
+To read more about this, see xref:common-usage/memory-estimation.adoc#estimate-heap-control[Automatic estimation and execution blocking].
 
-For more details on `estimate` in general, see xref::common-usage/memory-estimation.adoc[Memory Estimation].
+For more details on `estimate` in general, see xref:common-usage/memory-estimation.adoc[Memory Estimation].

@@ -7,15 +7,15 @@ Path finding algorithms find the path between two or more nodes or evaluate the 
 The Neo4j GDS library includes the following path finding algorithms, grouped by quality tier:
 
 * Production-quality
-** xref::algorithms/delta-single-source.adoc[Delta-Stepping Single-Source Shortest Path]
-** xref::algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target Shortest Path]
-** xref::algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source Shortest Path]
-** xref::algorithms/astar.adoc[A* Shortest Path]
-** xref::algorithms/yens.adoc[Yen's Shortest Path]
-** xref::algorithms/bfs.adoc[Breadth First Search]
-** xref::algorithms/dfs.adoc[Depth First Search]
+** xref:algorithms/delta-single-source.adoc[Delta-Stepping Single-Source Shortest Path]
+** xref:algorithms/dijkstra-source-target.adoc[Dijkstra Source-Target Shortest Path]
+** xref:algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source Shortest Path]
+** xref:algorithms/astar.adoc[A* Shortest Path]
+** xref:algorithms/yens.adoc[Yen's Shortest Path]
+** xref:algorithms/bfs.adoc[Breadth First Search]
+** xref:algorithms/dfs.adoc[Depth First Search]
 * Beta
-** xref::beta-algorithms/random-walk.adoc[Random Walk]
+** xref:beta-algorithms/random-walk.adoc[Random Walk]
 * Alpha
-** xref::alpha-algorithms/minimum-weight-spanning-tree.adoc[Minimum Weight Spanning Tree]
-** xref::alpha-algorithms/all-pairs-shortest-path.adoc[All Pairs Shortest Path]
+** xref:alpha-algorithms/minimum-weight-spanning-tree.adoc[Minimum Weight Spanning Tree]
+** xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Pairs Shortest Path]
