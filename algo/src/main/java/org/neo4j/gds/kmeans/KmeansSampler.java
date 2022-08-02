@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 
 public abstract class KmeansSampler {
 
-    private static ProgressTracker progressTracker;
     final SplittableRandom random;
     final int k;
     final long nodeCount;
