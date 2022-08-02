@@ -93,7 +93,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
     void shouldPredict() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .username("")
+                .modelUser("")
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .build();
@@ -125,7 +125,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
     @Test
     void progressTracking() {
         var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-            .username("")
+            .modelUser("")
             .modelName("model")
             .graphName(GRAPH_NAME)
             .build();
@@ -190,7 +190,7 @@ class NodeRegressionPredictPipelineExecutorTest extends BaseProcTest {
     void failOnInvalidFeatureDimensions() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = NodeRegressionPredictPipelineBaseConfigImpl.builder()
-                .username("")
+                .modelUser("")
                 .modelName("model")
                 .graphName(GRAPH_NAME)
                 .build();

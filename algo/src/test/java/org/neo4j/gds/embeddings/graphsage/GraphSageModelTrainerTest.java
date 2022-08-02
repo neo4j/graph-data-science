@@ -33,7 +33,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -93,7 +92,7 @@ class GraphSageModelTrainerTest {
         Random random = new Random(19L);
         LongStream.range(0, nodeCount).forEach(n -> features.set(n, random.doubles(FEATURES_COUNT).toArray()));
         configBuilder = GraphSageTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .embeddingDimension(EMBEDDING_DIMENSION);
     }
@@ -191,12 +190,13 @@ class GraphSageModelTrainerTest {
         LongStream
             .range(0, arrayGraph.nodeCount())
             .forEach(n -> arrayFeatures.set(n, arrayGraph.nodeProperties("features").doubleArrayValue(n)));
-        var config = GraphSageTrainConfig.testBuilder()
+        var config = GraphSageTrainConfigImpl.builder()
             .embeddingDimension(12)
             .aggregator(AggregatorType.MEAN)
             .activationFunction(ActivationFunction.SIGMOID)
-            .addFeatureProperty("features")
+            .featureProperties(List.of("features"))
             .modelName("model")
+            .modelUser("")
             .build();
 
         var trainer = new GraphSageModelTrainer(config, Pools.DEFAULT, ProgressTracker.NULL_TRACKER);

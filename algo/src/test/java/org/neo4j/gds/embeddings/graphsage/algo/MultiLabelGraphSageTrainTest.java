@@ -106,7 +106,8 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void shouldStoreMultiLabelFeatureFunctionInModel() {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
+            .modelUser("")
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .modelName("foo")
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
@@ -129,7 +130,8 @@ class MultiLabelGraphSageTrainTest {
     void runsTrainingOnMultiLabelGraph() {
         String modelName = "gsModel";
 
-        var graphSageTrainConfig = ImmutableGraphSageTrainConfig.builder()
+        var graphSageTrainConfig = GraphSageTrainConfigImpl.builder()
+            .modelUser("")
             .concurrency(1)
             .projectedFeatureDimension(5)
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
@@ -173,7 +175,8 @@ class MultiLabelGraphSageTrainTest {
 
     @Test
     void shouldFailUnequalLengthArrays() {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
+            .modelUser("")
             .featureProperties(List.of("p1", "p2"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
@@ -196,7 +199,8 @@ class MultiLabelGraphSageTrainTest {
     }
 
     void shouldFailMissingArrayProperty(Graph graph, String property, long missingNode) {
-        var config = ImmutableGraphSageTrainConfig.builder()
+        var config = GraphSageTrainConfigImpl.builder()
+            .modelUser("")
             .featureProperties(List.of("p1", "p2"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)
@@ -219,7 +223,8 @@ class MultiLabelGraphSageTrainTest {
     }
 
     private static Stream<Arguments> featureSizes() {
-        var builder = ImmutableGraphSageTrainConfig.builder()
+        var builder = GraphSageTrainConfigImpl.builder()
+            .modelUser("")
             .featureProperties(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"))
             .embeddingDimension(64)
             .projectedFeatureDimension(PROJECTED_FEATURE_SIZE)

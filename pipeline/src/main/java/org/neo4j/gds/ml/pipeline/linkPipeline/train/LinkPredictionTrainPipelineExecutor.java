@@ -196,8 +196,6 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         ).compute();
 
         var model = Model.of(
-            config.username(),
-            config.modelName(),
             MODEL_TYPE,
             schemaBeforeSteps,
             trainResult.classifier().data(),

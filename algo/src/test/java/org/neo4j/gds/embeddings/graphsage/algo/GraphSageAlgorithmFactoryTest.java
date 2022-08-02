@@ -270,6 +270,7 @@ class GraphSageAlgorithmFactoryTest {
     void memoryEstimationTreeStructure() {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
@@ -277,8 +278,6 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var model = Model.of(
-            "",
-            "modelName",
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -288,8 +287,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var gsConfig = ImmutableGraphSageStreamConfig
+        var gsConfig = GraphSageStreamConfigImpl
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .build();
 
@@ -326,6 +326,7 @@ class GraphSageAlgorithmFactoryTest {
     void memoryEstimationMutateTreeStructure() {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .addFeatureProperties("a")
             .sampleSizes(List.of(1, 2))
@@ -333,8 +334,6 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var model = Model.of(
-            "",
-            "modelName",
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -344,8 +343,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var gsConfig = ImmutableGraphSageMutateConfig
+        var gsConfig = GraphSageMutateConfigImpl
             .builder()
+            .modelUser("")
             .modelName("modelName")
             .mutateProperty("foo")
             .build();
@@ -493,7 +493,7 @@ class GraphSageAlgorithmFactoryTest {
                                         var trainConfig = ImmutableGraphSageTrainConfig
                                             .builder()
                                             .modelName(modelName)
-                                            .username(userName)
+                                            .modelUser(userName)
                                             .concurrency(concurrency)
                                             .sampleSizes(sampleSizes)
                                             .batchSize(batchSize)
@@ -507,8 +507,6 @@ class GraphSageAlgorithmFactoryTest {
                                             .build();
 
                                         var model = Model.of(
-                                            userName,
-                                            modelName,
                                             "graphSage",
                                             GraphSchema.empty(),
                                             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -523,7 +521,7 @@ class GraphSageAlgorithmFactoryTest {
                                                 .builder()
                                                 .concurrency(concurrency)
                                                 .modelName(modelName)
-                                                .username(userName)
+                                                .modelUser(userName)
                                                 .batchSize(batchSize)
                                                 .build();
                                         };
@@ -551,12 +549,11 @@ class GraphSageAlgorithmFactoryTest {
         var trainConfig = ImmutableGraphSageTrainConfig
             .builder()
             .modelName(modelName)
+            .modelUser("")
             .addFeatureProperties("a")
             .build();
 
         var model = Model.of(
-            "",
-            modelName,
             "graphSage",
             GraphSchema.empty(),
             ModelData.of(new Layer[]{}, new SingleLabelFeatureFunction()),
@@ -566,8 +563,9 @@ class GraphSageAlgorithmFactoryTest {
 
         modelCatalog.set(model);
 
-        var config = ImmutableGraphSageMutateConfig
+        var config = GraphSageMutateConfigImpl
             .builder()
+            .modelUser("")
             .modelName(modelName)
             .mutateProperty("foo")
             .build();

@@ -21,8 +21,8 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ElementProjection;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
@@ -54,7 +54,7 @@ class LinkPredictionTrainConfigTest {
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .sourceNodeLabel("N")
             .targetNodeLabel("N")
             .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
@@ -70,7 +70,7 @@ class LinkPredictionTrainConfigTest {
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .sourceNodeLabel(ElementProjection.PROJECT_ALL)
             .targetNodeLabel(ElementProjection.PROJECT_ALL)
             .contextRelationshipTypes(List.of(ElementProjection.PROJECT_ALL))
@@ -90,7 +90,7 @@ class LinkPredictionTrainConfigTest {
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .sourceNodeLabel("A")
             .targetNodeLabel("B")
             .contextNodeLabels(List.of("C"))

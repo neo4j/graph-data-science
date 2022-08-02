@@ -89,8 +89,6 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
     }
 
     static <D, C extends ModelConfig & BaseConfig, INFO extends ToMapConvertible> Model<D, C, INFO> of(
-        String creator,
-        String name,
         String algoType,
         GraphSchema graphSchema,
         D modelData,
@@ -98,8 +96,8 @@ public interface Model<DATA, CONFIG extends ModelConfig & BaseConfig, INFO exten
         INFO customInfo
     ) {
         return ImmutableModel.<D, C, INFO>builder()
-            .creator(creator)
-            .name(name)
+            .creator(trainConfig.username())
+            .name(trainConfig.modelName())
             .algoType(algoType)
             .graphSchema(graphSchema)
             .data(modelData)

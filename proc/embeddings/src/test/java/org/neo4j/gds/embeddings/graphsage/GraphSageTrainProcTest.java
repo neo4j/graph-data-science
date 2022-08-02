@@ -231,8 +231,6 @@ class GraphSageTrainProcTest extends GraphSageBaseProcTest {
             CypherMapWrapper.create(trainConfigParams)
         );
         var model = Model.of(
-            getUsername(),
-            GraphSageBaseProcTest.modelName,
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
             42,

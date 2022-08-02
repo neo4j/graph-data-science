@@ -78,7 +78,7 @@ class NodeClassificationTrainAlgorithmTest {
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline("DUMMY_PIPE")
             .graphName("DUMMY_GRAPH")
-            .username("DUMMY_USER")
+            .modelUser("DUMMY_USER")
             .modelName("model")
             .targetProperty("t")
             .metrics(List.of(metricSpecification))

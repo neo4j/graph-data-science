@@ -93,7 +93,7 @@ class NodeRegressionTrainTest {
 
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
@@ -131,7 +131,7 @@ class NodeRegressionTrainTest {
         pipeline.addTrainerConfig(candidate2);
 
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
@@ -171,7 +171,7 @@ class NodeRegressionTrainTest {
             RegressionMetrics.ROOT_MEAN_SQUARED_ERROR
         );
         NodeRegressionPipelineTrainConfig trainConfig = NodeRegressionPipelineTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
@@ -212,7 +212,7 @@ class NodeRegressionTrainTest {
         pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(MAX_TRIALS).build());
 
         NodeRegressionPipelineTrainConfig config = NodeRegressionPipelineTrainConfigImpl.builder()
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .pipeline("DUMMY")
             .graphName("DUMMY")
             .modelName("DUMMY")
@@ -252,7 +252,7 @@ class NodeRegressionTrainTest {
         var config = NodeRegressionPipelineTrainConfigImpl.builder()
             .graphName("IGNORE")
             .pipeline("IGNORE")
-            .username("IGNORE")
+            .modelUser("IGNORE")
             .modelName("model")
             .randomSeed(42L)
             .targetProperty("target")
@@ -280,7 +280,7 @@ class NodeRegressionTrainTest {
 
         var config = NodeRegressionPipelineTrainConfigImpl.builder()
             .pipeline("")
-            .username("myUser")
+            .modelUser("myUser")
             .graphName("dummy")
             .modelName("myModel")
             .targetProperty("target")

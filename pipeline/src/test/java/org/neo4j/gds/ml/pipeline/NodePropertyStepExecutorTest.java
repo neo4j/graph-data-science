@@ -36,6 +36,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.gdl.GdlFactory;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
@@ -128,6 +129,11 @@ class NodePropertyStepExecutorTest {
         @Override
         public String graphName() {
             return "test";
+        }
+
+        @Override
+        public Optional<String> usernameOverride() {
+            return Optional.empty();
         }
     }
 

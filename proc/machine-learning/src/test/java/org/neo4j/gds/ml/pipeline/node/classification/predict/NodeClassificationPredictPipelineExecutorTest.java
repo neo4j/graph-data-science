@@ -351,7 +351,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
         var model = createModel(GRAPH_NAME, getUsername(), 3, List.of("a", "b", "d"));
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var streamConfig = NodeClassificationPredictPipelineBaseConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName(MODEL_NAME)
                 .graphName(GRAPH_NAME)
                 .includePredictedProbabilities(false)
@@ -382,7 +382,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .graphName(GRAPH_NAME)
             .modelName(model.name())
             .includePredictedProbabilities(true)
-            .username("user")
+            .modelUser("user")
             .build();
 
         var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog());
@@ -408,13 +408,11 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .build();
 
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model = Model.of(
-            getUsername(),
-            "model",
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfigImpl.builder()
-                .username(getUsername())
+                .modelUser(getUsername())
                 .modelName("model")
                 .metrics(ClassificationMetricSpecification.Parser.parse(List.of("F1_MACRO")))
                 .graphName(GRAPH_NAME)
@@ -435,7 +433,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .graphName(GRAPH_NAME)
             .modelName(model.name())
             .includePredictedProbabilities(true)
-            .username("user")
+            .modelUser("user")
             .build();
 
         assertMemoryEstimation(
@@ -451,7 +449,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
     void failOnInvalidFeatureDimensions() {
         TestProcedureRunner.applyOnProcedure(db, TestProc.class, caller -> {
             var config = NodeClassificationPredictPipelineBaseConfigImpl.builder()
-                .username("")
+                .modelUser("")
                 .modelName("DUMMY")
                 .includePredictedProbabilities(false)
                 .graphName(GRAPH_NAME)

@@ -43,8 +43,6 @@ public class NodeClassificationToModelConverter implements ResultToModelConverte
         NodeClassificationTrainResult result, GraphSchema originalSchema
     ) {
         var catalogModel = Model.of(
-            config.username(),
-            config.modelName(),
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             originalSchema,
             result.classifier().data(),

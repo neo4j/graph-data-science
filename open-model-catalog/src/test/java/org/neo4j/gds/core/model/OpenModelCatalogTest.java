@@ -48,12 +48,10 @@ class OpenModelCatalogTest {
     private static final GraphSchema GRAPH_SCHEMA = GdlFactory.of("(:Node1)").build().schema();
 
     private static final Model<String, TestTrainConfig, ToMapConvertible> TEST_MODEL = Model.of(
-        USERNAME,
-        "testModel",
         "testAlgo",
         GRAPH_SCHEMA,
         "modelData",
-        TestTrainConfig.of(),
+        TestTrainConfig.of(USERNAME, "testModel"),
         Map::of
     );
 
@@ -68,24 +66,20 @@ class OpenModelCatalogTest {
             int modelIndex = i;
             assertDoesNotThrow(() -> {
                 modelCatalog.set(Model.of(
-                    USERNAME,
-                    "testModel_" + modelIndex,
                     "testAlgo",
                     GRAPH_SCHEMA,
                     1337L,
-                    TestTrainConfig.of(),
+                    TestTrainConfig.of(USERNAME, "testModel_" + modelIndex),
                     Map::of
                 ));
             });
         }
 
         var tippingModel = Model.of(
-            USERNAME,
-            "testModel_" + (allowedModelsCount + 1),
             "testAlgo",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of(),
+            TestTrainConfig.of(USERNAME, "testModel_" + (allowedModelsCount + 1)),
             Map::of
         );
 
@@ -102,29 +96,25 @@ class OpenModelCatalogTest {
     @Test
     void shouldStoreModelsPerType() {
         var model = Model.of(
-            USERNAME,
-            "testModel",
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of(USERNAME, "testModel"),
             Map::of
         );
-        var model2 = Model.of(
-            USERNAME,
-            "testModel2",
-            "testAlgo2",
-            GRAPH_SCHEMA,
-            1337L,
-            TestTrainConfig.of(),
-            Map::of
-        );
+        var model2 = Model.of("testAlgo2", GRAPH_SCHEMA, 1337L, TestTrainConfig.of(USERNAME, "testModel2"), Map::of);
 
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
-        assertEquals(model2, modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(
+            model,
+            modelCatalog.get(USERNAME, "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
+        );
+        assertEquals(
+            model2,
+            modelCatalog.get(USERNAME, "testModel2", Long.class, TestTrainConfig.class, ToMapConvertible.class)
+        );
     }
 
     @Test
@@ -139,29 +129,31 @@ class OpenModelCatalogTest {
     @Test
     void shouldStoreModels() {
         var model = Model.of(
-            "user1",
-            "testModel",
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of("user1", "testModel"),
             Map::of
         );
         var model2 = Model.of(
-            "user2",
-            "testModel2",
             "testAlgo",
             GRAPH_SCHEMA,
             "testTrainData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of("user2", "testModel2"),
             Map::of
         );
 
         modelCatalog.set(model);
         modelCatalog.set(model2);
 
-        assertEquals(model, modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class));
-        assertEquals(model2, modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class));
+        assertEquals(
+            model,
+            modelCatalog.get("user1", "testModel", String.class, TestTrainConfig.class, ToMapConvertible.class)
+        );
+        assertEquals(
+            model2,
+            modelCatalog.get("user2", "testModel2", String.class, TestTrainConfig.class, ToMapConvertible.class)
+        );
     }
 
     @Test
@@ -199,7 +191,13 @@ class OpenModelCatalogTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> modelCatalog.get(USERNAME, "testModel", String.class, ModelCatalogTestTrainConfig.class, ToMapConvertible.class)
+            () -> modelCatalog.get(
+                USERNAME,
+                "testModel",
+                String.class,
+                ModelCatalogTestTrainConfig.class,
+                ToMapConvertible.class
+            )
         );
 
         assertEquals(

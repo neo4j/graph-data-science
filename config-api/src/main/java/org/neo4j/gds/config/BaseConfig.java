@@ -20,26 +20,23 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @SuppressWarnings("immutables:subtype")
 public interface BaseConfig extends ToMapConvertible {
 
     String SUDO_KEY = "sudo";
 
-    @Value.Default
     @Value.Parameter(false)
     @Configuration.Key("username")
-    @Configuration.ConvertWith("org.apache.commons.lang3.StringUtils#trimToNull")
-    default @Nullable String usernameOverride() {
-        return null;
-    }
+    @Configuration.ConvertWith("trim")
+    Optional<String> usernameOverride();
 
     @Value.Default
     @Value.Parameter(false)
@@ -61,5 +58,9 @@ public interface BaseConfig extends ToMapConvertible {
     @Value.Derived
     default Map<String, Object> toMap() {
         return new HashMap<>();
+    }
+
+    static Optional<String> trim(Optional<String> input) {
+        return input.map(String::trim).filter(s -> !s.isEmpty());
     }
 }

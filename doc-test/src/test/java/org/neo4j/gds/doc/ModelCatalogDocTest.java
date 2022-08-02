@@ -42,12 +42,15 @@ abstract class ModelCatalogDocTest extends SingleFileDocTestBase {
     @BeforeEach
     void loadModel() {
         modelCatalog.set(Model.of(
-            getUsername(),
-            "my-model",
             GraphSage.MODEL_TYPE,
             GraphSchema.empty(),
             ModelData.of(new Layer[0], new SingleLabelFeatureFunction()),
-            ImmutableGraphSageTrainConfig.builder().modelName("my-model").addFeatureProperties("a").build(),
+            ImmutableGraphSageTrainConfig
+                .builder()
+                .modelUser(getUsername())
+                .modelName("my-model")
+                .addFeatureProperties("a")
+                .build(),
             GraphSageModelTrainer.GraphSageTrainMetrics.empty()
         ));
     }

@@ -82,8 +82,6 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
         progressTracker.endSubTask("GraphSageTrain");
 
         return Model.of(
-            config.username(),
-            config.modelName(),
             GraphSage.MODEL_TYPE,
             graph.schema(),
             ModelData.of(trainResult.layers(), multiLabelFeatureFunction),

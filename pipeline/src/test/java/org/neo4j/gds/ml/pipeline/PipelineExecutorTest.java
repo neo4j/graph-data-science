@@ -42,6 +42,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -187,6 +188,11 @@ class PipelineExecutorTest {
         @Override
         public Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
             return List.of(NODE_LABEL_N);
+        }
+
+        @Override
+        public Optional<String> usernameOverride() {
+            return Optional.empty();
         }
     }
 

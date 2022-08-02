@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.model;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.BaseConfig;
@@ -41,12 +40,14 @@ public interface ModelConfig extends Serializable, BaseConfig {
     String modelName();
 
     @Configuration.Parameter
-    @Value.Default
-    default String username() {
-        return "";
-    }
+    String modelUser();
 
     static @Nullable String validateName(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), MODEL_NAME_KEY);
+    }
+
+    @Configuration.Ignore
+    default String username() {
+        return usernameOverride().orElse(modelUser());
     }
 }

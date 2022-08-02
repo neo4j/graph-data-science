@@ -102,7 +102,7 @@ class GraphListProcTest extends BaseProcTest {
                 new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(10)
+                        .hasSize(9)
                         .containsEntry(
                             "nodeProjection", map(
                                 "A", map(
@@ -136,10 +136,10 @@ class GraphListProcTest extends BaseProcTest {
                             intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
                         )
                         .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
                         .doesNotContainKeys(
                             GraphProjectConfig.NODE_COUNT_KEY,
-                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY
+                            GraphProjectConfig.RELATIONSHIP_COUNT_KEY,
+                            "username"
                         );
 
                     return true;
@@ -212,7 +212,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(12)
+                        .hasSize(11)
                         .containsEntry("nodeProjections", map(
                             "10_Nodes", map(
                                 "label", "10_Nodes",
@@ -253,9 +253,9 @@ class GraphListProcTest extends BaseProcTest {
                             "relationshipSeed",
                             relationshipSeed -> assertThat(relationshipSeed).isNull()
                         )
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
                         .doesNotContainKeys(
                             "readConcurrency",
+                            "username",
                             "validateRelationships",
                             "relationshipCount",
                             "nodeCount"
@@ -328,7 +328,7 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(9)
+                        .hasSize(8)
                         .hasEntrySatisfying(
                             "relationshipQuery",
                             stringAssertConsumer(relationshipQuery -> relationshipQuery.isEqualTo(
@@ -350,8 +350,8 @@ class GraphListProcTest extends BaseProcTest {
                         )
                         .hasEntrySatisfying("parameters", parameters -> assertThat(parameters).asInstanceOf(
                             stringObjectMapAssertFactory()).isEmpty())
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
                         .doesNotContainKeys(
+                            "username",
                             GraphProjectConfig.NODE_COUNT_KEY,
                             GraphProjectConfig.RELATIONSHIP_COUNT_KEY
                         );
@@ -396,9 +396,8 @@ class GraphListProcTest extends BaseProcTest {
                 "configuration", new Condition<>(config -> {
                     assertThat(config)
                         .asInstanceOf(stringObjectMapAssertFactory())
-                        .hasSize(3)
+                        .hasSize(2)
                         .hasEntrySatisfying("creationTime", creationTimeAssertConsumer())
-                        .hasEntrySatisfying("username", username -> assertThat(username).isNull())
                         .hasEntrySatisfying("jobId", jobId -> assertThat(jobId).isNotNull());
 
                     return true;

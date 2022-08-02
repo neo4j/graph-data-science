@@ -96,7 +96,7 @@ class GraphDropProcTest extends BaseProcTest {
                     new Condition<>(config -> {
                         assertThat(config)
                             .asInstanceOf(stringObjectMapAssertFactory())
-                            .hasSize(10)
+                            .hasSize(9)
                             .containsEntry(
                                 "nodeProjection", map(
                                     "A", map(
@@ -130,8 +130,8 @@ class GraphDropProcTest extends BaseProcTest {
                                 intAssertConsumer(readConcurrency -> readConcurrency.isEqualTo(4))
                             )
                             .hasEntrySatisfying("sudo", booleanAssertConsumer(AbstractBooleanAssert::isFalse))
-                            .hasEntrySatisfying("username", username -> assertThat(username).isNull())
                             .doesNotContainKeys(
+                                "username",
                                 GraphProjectConfig.NODE_COUNT_KEY,
                                 GraphProjectConfig.RELATIONSHIP_COUNT_KEY
                             );

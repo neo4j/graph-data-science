@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -218,8 +217,4 @@ public interface GraphSageTrainConfig extends
         return new GraphSageTrainConfigImpl(username, userInput);
     }
 
-    @TestOnly
-    static ImmutableGraphSageTrainConfig.Builder testBuilder() {
-        return ImmutableGraphSageTrainConfig.builder();
-    }
 }

@@ -99,13 +99,11 @@ final class NodeClassificationPipelinePredictProcTestUtil {
 
         var modelData = createClassifierData(weights.data(), bias.data());
         return Model.of(
-            username,
-            "model",
             NodeClassificationTrainingPipeline.MODEL_TYPE,
             GraphSchema.empty(),
             modelData,
             NodeClassificationPipelineTrainConfigImpl.builder()
-                .username(username)
+                .modelUser(username)
                 .modelName("model")
                 .graphName(graphName)
                 .pipeline("DUMMY")

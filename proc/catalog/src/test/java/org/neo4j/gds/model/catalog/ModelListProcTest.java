@@ -54,32 +54,25 @@ class ModelListProcTest extends ModelProcBaseTest {
     @ValueSource(strings = {"gds.beta.model.list()", "gds.beta.model.list(null)"})
     void listsModel(String query) {
         var model1 = Model.of(
-            getUsername(),
-            "testModel1",
             "testAlgo1",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of(getUsername(), "testModel1"),
             Map::of
         );
-
         var model2 = Model.of(
-            getUsername(),
-            "testModel2",
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of(),
+            TestTrainConfig.of(getUsername(), "testModel2"),
             Map::of
         );
 
         var otherUserModel = Model.of(
-            "anotherUser",
-            "testModel1337",
             "testAlgo1337",
             GRAPH_SCHEMA,
             3435L,
-            TestTrainConfig.of(),
+            TestTrainConfig.of("anotheruser", "testModel"),
             Map::of
         );
 
@@ -98,7 +91,7 @@ class ModelListProcTest extends ModelProcBaseTest {
                 map(
                     "modelInfo", map("modelName", "testModel1", "modelType", "testAlgo1"),
                     "graphSchema", EXPECTED_SCHEMA,
-                    "trainConfig", TestTrainConfig.of().toMap(),
+                    "trainConfig", TestTrainConfig.of(getUsername(), "testModel1").toMap(),
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
@@ -107,7 +100,7 @@ class ModelListProcTest extends ModelProcBaseTest {
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
                     "graphSchema", EXPECTED_SCHEMA,
-                    "trainConfig", TestTrainConfig.of().toMap(),
+                    "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "loaded", true,
                     "stored", false,
                     "creationTime", isA(ZonedDateTime.class),
@@ -132,25 +125,20 @@ class ModelListProcTest extends ModelProcBaseTest {
     @Test
     void returnSpecificModel() {
         var model1 = Model.of(
-            getUsername(),
-            "testModel1",
             "testAlgo1",
             GRAPH_SCHEMA,
             "testData",
-            TestTrainConfig.of(),
+            TestTrainConfig.of(getUsername(), "testModel1"),
             Map::of
         );
 
         var model2 = Model.of(
-            getUsername(),
-            "testModel2",
             "testAlgo2",
             GRAPH_SCHEMA,
             1337L,
-            TestTrainConfig.of(),
+            TestTrainConfig.of(getUsername(), "testModel2"),
             Map::of
         );
-
         modelCatalog.set(model1);
         modelCatalog.set(model2);
 
@@ -159,7 +147,7 @@ class ModelListProcTest extends ModelProcBaseTest {
             singletonList(
                 map(
                     "modelInfo", map("modelName", "testModel2", "modelType", "testAlgo2"),
-                    "trainConfig", TestTrainConfig.of().toMap(),
+                    "trainConfig", TestTrainConfig.of(getUsername(), "testModel2").toMap(),
                     "graphSchema", EXPECTED_SCHEMA,
                     "loaded", true,
                     "stored", false,

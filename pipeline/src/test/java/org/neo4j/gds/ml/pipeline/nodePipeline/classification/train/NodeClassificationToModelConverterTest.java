@@ -84,7 +84,7 @@ class NodeClassificationToModelConverterTest {
         var config = NodeClassificationPipelineTrainConfigImpl.builder()
             .pipeline(PIPELINE_NAME)
             .graphName(GRAPH_NAME)
-            .username(USERNAME)
+            .modelUser(USERNAME)
             .modelName(MODEL_NAME)
             .concurrency(1)
             .randomSeed(42L)

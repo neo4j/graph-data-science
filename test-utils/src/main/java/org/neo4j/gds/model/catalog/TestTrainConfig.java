@@ -23,10 +23,7 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.model.ModelConfig;
-
-import java.util.Map;
 
 @ValueClass
 @Configuration("TestTrainConfigImpl")
@@ -40,11 +37,12 @@ public interface TestTrainConfig extends BaseConfig, ModelConfig {
         return "dummyConfigProperty";
     }
 
-    static TestTrainConfig of() {
-        CypherMapWrapper config = CypherMapWrapper.create(Map.of(
-            "modelName", "modelName",
-            "dummyConfigProperty", "dummyProperty"
-        ));
-        return new TestTrainConfigImpl("username", config);
+    static TestTrainConfig of(String username, String modelName) {
+        return TestTrainConfigImpl
+            .builder()
+            .modelUser(username)
+            .modelName(modelName)
+            .dummyConfigProperty("dummyProperty")
+            .build();
     }
 }

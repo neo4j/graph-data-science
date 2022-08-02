@@ -258,7 +258,7 @@ class ExhaustiveLinkPredictionTest {
     void estimateWithDifferentTopN(int topN, long expectedEstimation) {
         var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .topN(topN)
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .build();
@@ -278,7 +278,7 @@ class ExhaustiveLinkPredictionTest {
     void estimateWithDifferentLinkFeatureDimension(int linkFeatureDimension, long expectedEstimation) {
         var config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
             .topN(10)
-            .username("DUMMY")
+            .modelUser("DUMMY")
             .modelName("DUMMY")
             .graphName("DUMMY")
             .build();
