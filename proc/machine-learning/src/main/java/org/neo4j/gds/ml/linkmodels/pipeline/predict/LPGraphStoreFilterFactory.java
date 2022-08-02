@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.ElementIdentityResolver;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfig;
 import org.neo4j.gds.utils.StringJoining;
@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.config.ElementIdentityResolver.resolveAndValidateTypes;
-import static org.neo4j.gds.config.ElementIdentityResolver.resolveTypes;
+import static org.neo4j.gds.config.ElementTypeValidator.resolveAndValidateTypes;
+import static org.neo4j.gds.config.ElementTypeValidator.resolveTypes;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class LPGraphStoreFilterFactory {
@@ -49,19 +49,19 @@ public final class LPGraphStoreFilterFactory {
     ) {
         var sourceNodeLabels = predictConfig
             .sourceNodeLabel()
-            .map(label -> ElementIdentityResolver.resolve(graphStore, List.of(label)))
-            .orElse(ElementIdentityResolver.resolveAndValidate(graphStore, List.of(trainConfig.sourceNodeLabel()), "`sourceNodeLabel` from the model's train config"));
+            .map(label -> ElementTypeValidator.resolve(graphStore, List.of(label)))
+            .orElse(ElementTypeValidator.resolveAndValidate(graphStore, List.of(trainConfig.sourceNodeLabel()), "`sourceNodeLabel` from the model's train config"));
 
         var targetNodeLabels = predictConfig
             .targetNodeLabel()
-            .map(label -> ElementIdentityResolver.resolve(graphStore, List.of(label)))
-            .orElse(ElementIdentityResolver.resolveAndValidate(graphStore, List.of(trainConfig.targetNodeLabel()), "`targetNodeLabel` from the model's train config"));
+            .map(label -> ElementTypeValidator.resolve(graphStore, List.of(label)))
+            .orElse(ElementTypeValidator.resolveAndValidate(graphStore, List.of(trainConfig.targetNodeLabel()), "`targetNodeLabel` from the model's train config"));
 
         Collection<NodeLabel> contextNodeLabels;
         if (!predictConfig.contextNodeLabels().isEmpty()) {
-            contextNodeLabels = ElementIdentityResolver.resolve(graphStore, predictConfig.contextNodeLabels());
+            contextNodeLabels = ElementTypeValidator.resolve(graphStore, predictConfig.contextNodeLabels());
         } else {
-            contextNodeLabels = ElementIdentityResolver.resolveAndValidate(graphStore, trainConfig.contextNodeLabels(), "`contextNodeLabels` from the model's train config");
+            contextNodeLabels = ElementTypeValidator.resolveAndValidate(graphStore, trainConfig.contextNodeLabels(), "`contextNodeLabels` from the model's train config");
         }
 
         Collection<RelationshipType> contextRelTypes;

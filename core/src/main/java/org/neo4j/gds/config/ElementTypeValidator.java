@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public final class ElementIdentityResolver {
+public final class ElementTypeValidator {
 
-    private ElementIdentityResolver() {}
+    private ElementTypeValidator() {}
 
     public static Collection<NodeLabel> resolve(GraphStore graphStore, Collection<String> labelFilterNames) {
         return labelFilterNames.contains(ElementProjection.PROJECT_ALL)

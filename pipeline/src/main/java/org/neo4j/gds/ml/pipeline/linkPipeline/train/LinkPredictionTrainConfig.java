@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ElementIdentityResolver;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -91,7 +91,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
 
     @Configuration.Ignore
     default Collection<RelationshipType> internalContextRelationshipType(GraphStore graphStore) {
-        var relTypes =  ElementIdentityResolver.resolveTypes(graphStore, contextRelationshipTypes());
+        var relTypes =  ElementTypeValidator.resolveTypes(graphStore, contextRelationshipTypes());
 
         return relTypes.stream().filter(type -> !type.equals(internalTargetRelationshipType())).collect(Collectors.toList());
     }
@@ -137,7 +137,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidate(graphStore, List.of(sourceNodeLabel()), "sourceNodeLabel");
+        ElementTypeValidator.resolveAndValidate(graphStore, List.of(sourceNodeLabel()), "sourceNodeLabel");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -146,7 +146,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "sourceNodeLabel");
+        ElementTypeValidator.resolveAndValidate(graphStore, List.of(targetNodeLabel()), "sourceNodeLabel");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -155,7 +155,7 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidate(graphStore, contextNodeLabels(), "sourceNodeLabel");
+        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "sourceNodeLabel");
     }
 
 

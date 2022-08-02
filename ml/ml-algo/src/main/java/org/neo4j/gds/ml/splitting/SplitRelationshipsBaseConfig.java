@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ElementIdentityResolver;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
@@ -98,7 +98,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidateTypes(graphStore, nonNegativeRelationshipTypes(), "nonNegativeRelationshipTypes");
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, nonNegativeRelationshipTypes(), "nonNegativeRelationshipTypes");
     }
 
     @Configuration.GraphStoreValidationCheck

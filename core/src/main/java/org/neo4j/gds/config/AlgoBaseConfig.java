@@ -47,7 +47,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return ElementIdentityResolver.resolveTypes(graphStore, relationshipTypes());
+        return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes());
     }
 
     @Value.Default
@@ -58,7 +58,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-        return ElementIdentityResolver.resolve(graphStore, nodeLabels());
+        return ElementTypeValidator.resolve(graphStore, nodeLabels());
     }
 
     @Configuration.GraphStoreValidation
@@ -76,7 +76,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.validate(graphStore, selectedLabels, "node labels");
+        ElementTypeValidator.validate(graphStore, selectedLabels, "node labels");
     }
 
     @Configuration.GraphStoreValidationCheck

@@ -26,7 +26,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ElementIdentityResolver;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.MissingParameterExceptions;
@@ -90,7 +90,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        sourceNodeLabel().ifPresent(label -> ElementIdentityResolver.resolveAndValidate(graphStore, List.of(label), "sourceNodeLabel"));
+        sourceNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "sourceNodeLabel"));
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -99,7 +99,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        targetNodeLabel().ifPresent(label -> ElementIdentityResolver.resolveAndValidate(graphStore, List.of(label), "targetNodeLabel"));
+        targetNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "targetNodeLabel"));
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -108,7 +108,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidate(graphStore, contextNodeLabels(), "contextNodeLabels");
+        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "contextNodeLabels");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -117,7 +117,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementIdentityResolver.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "contextRelationshipTypes");
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "contextRelationshipTypes");
     }
 
     //Exhaustive strategy fields
