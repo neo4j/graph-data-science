@@ -48,6 +48,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
     private HugeAtomicDoubleArray centrality;
     private SelectionStrategy selectionStrategy;
+    private final boolean weighted;
 
     private final ExecutorService executorService;
     private final int concurrency;
@@ -55,12 +56,14 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
+        boolean weighted,
         ExecutorService executorService,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
+        this.weighted = weighted;
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
@@ -135,24 +138,11 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
 
                 forwardNodes.add(startNodeId);
 
-                // BC forward traversal
-                while (!forwardNodes.isEmpty()) {
-                    long node = forwardNodes.remove();
-                    backwardNodes.push(node);
-                    int distanceNode = distance.get(node);
-
-                    localRelationshipIterator.forEachRelationship(node, (source, target) -> {
-                        if (distance.get(target) < 0) {
-                            forwardNodes.add(target);
-                            distance.set(target, distanceNode + 1);
-                        }
-
-                        if (distance.get(target) == distanceNode + 1) {
-                            sigma.addTo(target, sigma.get(source));
-                            append(target, source);
-                        }
-                        return true;
-                    });
+                if (weighted) {
+                    forwardWeighted();
+                } else {
+                    // BC forward traversal
+                    forwardUnweighted();
                 }
 
                 while (!backwardNodes.isEmpty()) {
@@ -176,6 +166,31 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
                         } while (!centrality.compareAndSet(node, current, current + dependencyNode / divisor));
                     }
                 }
+            }
+        }
+
+        private void forwardWeighted() {
+
+        }
+
+        private void forwardUnweighted() {
+            while (!forwardNodes.isEmpty()) {
+                long node = forwardNodes.remove();
+                backwardNodes.push(node);
+                int distanceNode = distance.get(node);
+
+                localRelationshipIterator.forEachRelationship(node, (source, target) -> {
+                    if (distance.get(target) < 0) {
+                        forwardNodes.add(target);
+                        distance.set(target, distanceNode + 1);
+                    }
+
+                    if (distance.get(target) == distanceNode + 1) {
+                        sigma.addTo(target, sigma.get(source));
+                        append(target, source);
+                    }
+                    return true;
+                });
             }
         }
 

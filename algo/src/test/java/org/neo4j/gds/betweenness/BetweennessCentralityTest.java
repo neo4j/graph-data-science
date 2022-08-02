@@ -132,6 +132,7 @@ class BetweennessCentralityTest {
         HugeAtomicDoubleArray actualResult = new BetweennessCentrality(
             graph,
             new SelectionStrategy.RandomDegree(samplingSize, Optional.of(42L)),
+            false,
             Pools.DEFAULT,
             concurrency,
             ProgressTracker.NULL_TRACKER
@@ -150,6 +151,7 @@ class BetweennessCentralityTest {
         var actualResult = new BetweennessCentrality(
             graph,
             SelectionStrategy.ALL,
+            false,
             Pools.DEFAULT,
             concurrency,
             ProgressTracker.NULL_TRACKER
