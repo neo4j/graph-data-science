@@ -456,20 +456,20 @@ public class Knn extends Algorithm<Knn.Result> {
                 // old[v] ∪ Sample(old′[v], ρK)
                 var oldNeighbors = allOldNeighbors.get(nodeId);
                 if (oldNeighbors != null) {
-                    joinOldNeighbors(rng, sampledK, allReverseOldNeighbors.get(nodeId), oldNeighbors);
+                    combineNeighbors(rng, sampledK, allReverseOldNeighbors.get(nodeId), oldNeighbors);
                 }
 
 
                 // new[v] ∪ Sample(new′[v], ρK)
                 var newNeighbors = allNewNeighbors.get(nodeId);
                 if (newNeighbors != null) {
+                    combineNeighbors(rng, sampledK, allReverseNewNeighbors.get(nodeId), newNeighbors);
+
                     this.updateCount += joinNewNeighbors(
                         rng,
                         similarityFunction,
-                        sampledK,
                         allNeighbors,
                         nodeId,
-                        allReverseNewNeighbors.get(nodeId),
                         oldNeighbors,
                         newNeighbors
                     );
@@ -481,37 +481,15 @@ public class Knn extends Algorithm<Knn.Result> {
             progressTracker.logProgress(partition.nodeCount());
         }
 
-        private void joinOldNeighbors(
-            SplittableRandom rng,
-            int sampledK,
-            @Nullable LongArrayList reverseOldNeighbors,
-            LongArrayList oldNeighbors
-        ) {
-            if (reverseOldNeighbors != null) {
-                var numberOfReverseOldNeighbors = reverseOldNeighbors.size();
-                for (var elem : reverseOldNeighbors) {
-                    if (rng.nextInt(numberOfReverseOldNeighbors) < sampledK) {
-                        // TODO: this could add nodes twice, maybe? should this be a set?
-                        oldNeighbors.add(elem.value);
-                    }
-                }
-            }
-        }
-
         private long joinNewNeighbors(
             SplittableRandom rng,
             SimilarityFunction similarityFunction,
-            int sampledK,
             HugeObjectArray<NeighborList> allNeighbors,
-            // what are reversed new neighbors?
             long nodeId,
-            LongArrayList reverseNewNeighbors,
             LongArrayList oldNeighbors,
             LongArrayList newNeighbors
         ) {
             long updateCount = 0;
-
-            joinOldNeighbors(rng, sampledK, reverseNewNeighbors, newNeighbors);
 
             var newNeighborElements = newNeighbors.buffer;
             var newNeighborsCount = newNeighbors.elementsCount;
@@ -520,10 +498,10 @@ public class Knn extends Algorithm<Knn.Result> {
                 var elem1 = newNeighborElements[i];
                 assert elem1 != nodeId;
 
-                // join(u1, v), this isn't in the paper
+                // join(u1, nodeId), this isn't in the paper
                 updateCount += join(rng, similarityFunction, allNeighbors, elem1, nodeId);
 
-                // join(new_nbd, new_ndb)
+                //  try out using the new neighbors between themselves / join(new_nbd, new_ndb)
                 for (int j = i + 1; j < newNeighborsCount; j++) {
                     var elem2 = newNeighborElements[i];
                     if (elem1 == elem2) {
@@ -535,7 +513,7 @@ public class Knn extends Algorithm<Knn.Result> {
                     updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
                 }
 
-                // join(new_nbd, old_ndb)
+                // try out joining the old neighbors with the new neighbor / join(new_nbd, old_ndb)
                 if (oldNeighbors != null) {
                     for (var oldElemCursor : oldNeighbors) {
                         var elem2 = oldElemCursor.value;
@@ -544,12 +522,30 @@ public class Knn extends Algorithm<Knn.Result> {
                             continue;
                         }
 
+                        // TODO the similarity is defined symmetric? (we could only try the second join if the first succeeded)
                         updateCount += join(rng, similarityFunction, allNeighbors, elem1, elem2);
                         updateCount += join(rng, similarityFunction, allNeighbors, elem2, elem1);
                     }
                 }
             }
             return updateCount;
+        }
+
+        private void combineNeighbors(
+            SplittableRandom rng,
+            int sampledK,
+            @Nullable LongArrayList reversedNeighbors,
+            LongArrayList neighbors
+        ) {
+            if (reversedNeighbors != null) {
+                var numberOfReverseNeighbors = reversedNeighbors.size();
+                for (var elem : reversedNeighbors) {
+                    if (rng.nextInt(numberOfReverseNeighbors) < sampledK) {
+                        // TODO: this could add nodes twice, maybe? should this be a set?
+                        neighbors.add(elem.value);
+                    }
+                }
+            }
         }
 
         private void randomJoins(
@@ -562,6 +558,7 @@ public class Knn extends Algorithm<Knn.Result> {
         ) {
             for (int i = 0; i < randomJoins; i++) {
                 var randomNodeId = rng.nextLong(nodeCount - 1);
+                // shifting the randomNode as the randomNode was picked from [0, n-1)
                 if (randomNodeId >= nodeId) {
                     ++randomNodeId;
                 }
