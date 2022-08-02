@@ -257,14 +257,14 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             .generate();
 
         var splitResult1 = new UndirectedEdgeSplitter(
-            Optional.empty(),
+            Optional.of(42L),
             1.0,
             graphStore.nodes(),
             graphStore.nodes(),
             4
         ).split(graph, 0.5);
         var splitResult2 = new UndirectedEdgeSplitter(
-            Optional.empty(),
+            Optional.of(117L),
             1.0,
             graphStore.nodes(),
             graphStore.nodes(),
