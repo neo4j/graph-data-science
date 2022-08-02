@@ -44,20 +44,11 @@ dependencies {
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
-            [group: 'io.jsonwebtoken',         name: 'jjwt-api',                 version: ver.'jjwt'],
     )
 
     implementation(
-        [group: 'io.jsonwebtoken', name: 'jjwt-impl', version: ver.'jjwt'],
         [group: 'org.roaringbitmap', name: 'RoaringBitmap', version: ver.'RoaringBitmap'],
     )
-
-    // Set hardcoded version of jackson-databind until there is a new version of jjwt-jackson
-    implementation(group: 'io.jsonwebtoken', name: 'jjwt-jackson', version: ver.'jjwt') {
-        exclude group: 'com.fasterxml.jackson.core', module: 'jackson-databind'
-    }
-    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: ver.'jackson'
-    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-csv', version: ver.'jackson'
 
     // TEST DEPENDENCIES
 
