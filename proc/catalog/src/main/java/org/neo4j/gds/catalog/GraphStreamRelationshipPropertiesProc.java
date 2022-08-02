@@ -163,7 +163,7 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("relationshipProperty"));
 
         var task = Tasks.leaf(
-            "Graph :: Relationship properties :: Stream",
+            "Graph :: RelationshipProperties :: Stream",
             graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
         );
 

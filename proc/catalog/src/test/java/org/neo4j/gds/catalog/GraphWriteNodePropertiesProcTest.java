@@ -286,16 +286,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "WriteNodeProperties :: Label 1 of 2 :: Start",
-                "WriteNodeProperties :: Label 1 of 2 33%",
-                "WriteNodeProperties :: Label 1 of 2 66%",
-                "WriteNodeProperties :: Label 1 of 2 100%",
-                "WriteNodeProperties :: Label 1 of 2 :: Finished",
-                "WriteNodeProperties :: Label 2 of 2 :: Start",
-                "WriteNodeProperties :: Label 2 of 2 33%",
-                "WriteNodeProperties :: Label 2 of 2 66%",
-                "WriteNodeProperties :: Label 2 of 2 100%",
-                "WriteNodeProperties :: Label 2 of 2 :: Finished"
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Start",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 33%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 66%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 100%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Finished",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Start",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 33%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 66%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 100%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Finished"
             );
     }
 

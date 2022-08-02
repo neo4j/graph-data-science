@@ -85,7 +85,7 @@ public class GraphDropNodePropertiesProc extends CatalogProc {
         config.validate(graphStore);
 
         // progress tracking
-        var task = Tasks.leaf("Graph :: Node properties :: Drop", config.nodeProperties().size());
+        var task = Tasks.leaf("Graph :: NodeProperties :: Drop", config.nodeProperties().size());
         var progressTracker = new TaskProgressTracker(
             task,
             log,

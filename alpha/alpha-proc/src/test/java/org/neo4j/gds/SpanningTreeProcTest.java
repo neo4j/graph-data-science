@@ -230,7 +230,7 @@ public class SpanningTreeProcTest extends BaseProcTest {
 
             assertThat(taskStore.taskStream().map(Task::description)).contains(
                 "SpanningTree",
-                "SpanningTree :: WriteRelationships"
+                "SpanningTree :: Relationships :: Write"
             );
         });
     }

@@ -145,7 +145,7 @@ public class GraphStreamNodePropertiesProc extends CatalogProc {
         var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("nodeProperty"));
 
         var task = Tasks.leaf(
-            "Graph :: Node properties :: Stream",
+            "Graph :: NodeProperties :: Stream",
             subGraph.nodeCount() * nodePropertyKeysAndValues.size()
         );
 

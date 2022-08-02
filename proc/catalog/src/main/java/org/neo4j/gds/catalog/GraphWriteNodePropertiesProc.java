@@ -96,7 +96,7 @@ public class GraphWriteNodePropertiesProc extends CatalogProc {
 
         var validNodeLabels = config.validNodeLabels(graphStore);
         var task = Tasks.iterativeFixed(
-            "Graph :: Node properties :: Write",
+            "Graph :: NodeProperties :: Write",
             () -> List.of(
                 NodePropertyExporter.innerTask("Label", Task.UNKNOWN_VOLUME)
             ),
