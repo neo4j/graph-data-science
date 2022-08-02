@@ -19,18 +19,21 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.kernel.internal.GraphDatabaseAPI;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public final class TestGraphLoaderFactory {
 
     private TestGraphLoaderFactory() {}
 
-    public static TestGraphLoader graphLoader(GraphDatabaseAPI db, GraphFactoryTestSupport.FactoryType factoryType) {
+    public static TestGraphLoader graphLoader(
+            GraphDatabaseService databaseService,
+            GraphFactoryTestSupport.FactoryType factoryType
+    ) {
         switch (factoryType) {
             case NATIVE:
-                return new TestNativeGraphLoader(db);
+                return new TestNativeGraphLoader(databaseService);
             case CYPHER:
-                return new TestCypherGraphLoader(db);
+                return new TestCypherGraphLoader(databaseService);
             default:
                 throw new IllegalArgumentException("Unknown FactoryType: " + factoryType);
         }
