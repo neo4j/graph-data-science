@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.catalog.GraphDeleteRelationshipProc;
+import org.neo4j.gds.catalog.GraphDropRelationshipProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipsProc;
@@ -44,7 +44,7 @@ final class RelationshipOperationsDocTest extends SingleFileDocTestBase {
             GraphStreamRelationshipsProc.class,
             GraphStreamRelationshipPropertiesProc.class,
             GraphWriteRelationshipProc.class,
-            GraphDeleteRelationshipProc.class
+            GraphDropRelationshipProc.class
         );
     }
 

@@ -28,6 +28,9 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -54,6 +57,83 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        return streamRelationshipProperties(
+            graphName,
+            configuration,
+            relationshipProperties,
+            relationshipTypes,
+            PropertiesResult::new,
+            Optional.empty()
+        );
+    }
+
+    @Procedure(name = "gds.graph.streamRelationshipProperties", mode = READ, deprecatedBy = "gds.graph.relationshipProperties.stream")
+    @Description("Streams the given relationship properties.")
+    public Stream<PropertiesResult> streamProperties(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipProperties") List<String> relationshipProperties,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationshipProperties.stream`";
+        return streamRelationshipProperties(graphName, configuration, relationshipProperties, relationshipTypes, PropertiesResult::new, Optional.of(deprecationWarning));
+    }
+
+    @Procedure(name = "gds.graph.relationshipProperty.stream", mode = READ)
+    @Description("Streams the given relationship property.")
+    public Stream<PropertyResult> streamRelationshipProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipProperty") String relationshipProperty,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        return streamRelationshipProperties(
+            graphName,
+            configuration,
+            List.of(relationshipProperty),
+            relationshipTypes,
+            (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new PropertyResult(
+                sourceId,
+                targetId,
+                relationshipType,
+                propertyValue
+            ),
+            Optional.empty()
+        );
+    }
+
+    @Procedure(name = "gds.graph.streamRelationshipProperty", mode = READ, deprecatedBy = "gds.graph.relationshipProperty.stream")
+    @Description("Streams the given relationship property.")
+    public Stream<PropertyResult> streamProperty(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "relationshipProperties") String relationshipProperty,
+        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        var deprecationWarning = "This procedures is deprecated for removal. Please use `gds.graph.relationshipProperty.stream`";
+        return streamRelationshipProperties(
+            graphName,
+            configuration,
+            List.of(relationshipProperty),
+            relationshipTypes,
+            (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new PropertyResult(
+                sourceId,
+                targetId,
+                relationshipType,
+                propertyValue
+            ),
+            Optional.of(deprecationWarning)
+        );
+    }
+
+    private <R> Stream<R> streamRelationshipProperties(
+        String graphName,
+        Map<String, Object> configuration,
+        List<String> relationshipProperties,
+        List<String> relationshipTypes,
+        ResultProducer<R> producer,
+        Optional<String> deprecationWarning
+    ) {
         ProcPreconditions.check();
         validateGraphName(graphName);
 
@@ -70,68 +150,6 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
         GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
         config.validate(graphStore);
 
-       return streamRelationshipProperties(graphStore, config, PropertiesResult::new);
-    }
-
-    @Procedure(name = "gds.graph.streamRelationshipProperties", mode = READ, deprecatedBy = "gds.graph.relationshipProperties.stream")
-    @Description("Streams the given relationship properties.")
-    public Stream<PropertiesResult> streamProperties(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipProperties") List<String> relationshipProperties,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return streamRelationshipProperties(graphName, relationshipProperties, relationshipTypes, configuration);
-    }
-
-    @Procedure(name = "gds.graph.relationshipProperty.stream", mode = READ)
-    @Description("Streams the given relationship property.")
-    public Stream<PropertyResult> streamRelationshipProperty(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipProperty") String relationshipProperty,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        ProcPreconditions.check();
-        validateGraphName(graphName);
-
-        // input
-        CypherMapWrapper cypherConfig = CypherMapWrapper.create(configuration);
-        GraphStreamRelationshipPropertiesConfig config = GraphStreamRelationshipPropertiesConfig.of(
-            graphName,
-            List.of(relationshipProperty),
-            relationshipTypes,
-            cypherConfig
-        );
-        // validation
-        validateConfig(cypherConfig, config);
-        GraphStore graphStore = graphStoreFromCatalog(graphName, config).graphStore();
-        config.validate(graphStore);
-
-        return streamRelationshipProperties(
-            graphStore,
-            config,
-            (sourceId, targetId, relationshipType, propertyName, propertyValue) -> new PropertyResult(
-                sourceId,
-                targetId,
-                relationshipType,
-                propertyValue
-            )
-        );
-    }
-
-    @Procedure(name = "gds.graph.streamRelationshipProperty", mode = READ, deprecatedBy = "gds.graph.relationshipProperty.stream")
-    @Description("Streams the given relationship property.")
-    public Stream<PropertyResult> streamProperty(
-        @Name(value = "graphName") String graphName,
-        @Name(value = "relationshipProperties") String relationshipProperty,
-        @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
-        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ) {
-        return streamRelationshipProperty(graphName, relationshipProperty, relationshipTypes, configuration);
-    }
-
-    private <R> Stream<R> streamRelationshipProperties(GraphStore graphStore, GraphStreamRelationshipPropertiesConfig config, ResultProducer<R> producer) {
         Collection<RelationshipType> validRelationshipTypes = config.validRelationshipTypes(graphStore);
 
         var relationshipPropertyKeysAndValues = validRelationshipTypes
@@ -144,7 +162,17 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
             .collect(Collectors.toList());
         var usesPropertyNameColumn = callContext.outputFields().anyMatch(field -> field.equals("relationshipProperty"));
 
-        return LongStream
+        var task = Tasks.leaf(
+            "Graph :: RelationshipProperties :: Stream",
+            graphStore.nodeCount() * relationshipPropertyKeysAndValues.size()
+        );
+
+        var taskProgressTracker = new TaskProgressTracker(task, log, config.concurrency(), new JobId(), taskRegistryFactory, userLogRegistryFactory);
+        taskProgressTracker.beginSubTask();
+
+        deprecationWarning.ifPresent(taskProgressTracker::logWarning);
+
+        var resultStream = LongStream
             .range(0, graphStore.nodeCount())
             .mapToObj(nodeId -> relationshipPropertyKeysAndValues.stream().flatMap(relTypeAndPropertyKeyAndValues -> {
                 ValueType valueType = graphStore.relationshipPropertyType(relTypeAndPropertyKeyAndValues.getMiddle());
@@ -170,7 +198,13 @@ public class GraphStreamRelationshipPropertiesProc extends CatalogProc {
                             propertyValue
                         );
                     });
-            })).flatMap(Function.identity());
+            })).flatMap(Function.identity())
+            .onClose(taskProgressTracker::endSubTask);
+
+        try (var statement = transaction.acquireStatement()) {
+            statement.registerCloseableResource(resultStream);
+            return resultStream;
+        }
     }
 
     @SuppressWarnings("unused")

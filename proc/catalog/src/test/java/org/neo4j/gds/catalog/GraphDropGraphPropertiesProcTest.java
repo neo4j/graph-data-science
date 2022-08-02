@@ -37,7 +37,7 @@ import java.util.stream.LongStream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
+class GraphDropGraphPropertiesProcTest extends BaseProcTest {
 
     @Neo4jGraph
     private static final String GRAPH = "CREATE (a)";
@@ -47,7 +47,7 @@ class GraphRemoveGraphPropertiesProcTest extends BaseProcTest {
 
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphProjectProc.class, GraphRemoveGraphPropertiesProc.class);
+        registerProcedures(GraphProjectProc.class, GraphDropGraphPropertiesProc.class);
 
         runQuery(GdsCypher.call(DEFAULT_GRAPH_NAME).graphProject().withAnyLabel().withAnyRelationshipType().yields());
 

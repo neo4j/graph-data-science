@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,15 +39,20 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.IdentityPropertyValues;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
 import org.neo4j.gds.pagerank.PageRankMutateProc;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
@@ -69,6 +75,17 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         ", (d:B {nodeProp1: 3, nodeProp2: 45})" +
         ", (e:B {nodeProp1: 4, nodeProp2: 46})" +
         ", (f:B {nodeProp1: 5, nodeProp2: 47})";
+
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -269,16 +286,16 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .contains(
-                "WriteNodeProperties :: Label 1 of 2 :: Start",
-                "WriteNodeProperties :: Label 1 of 2 33%",
-                "WriteNodeProperties :: Label 1 of 2 66%",
-                "WriteNodeProperties :: Label 1 of 2 100%",
-                "WriteNodeProperties :: Label 1 of 2 :: Finished",
-                "WriteNodeProperties :: Label 2 of 2 :: Start",
-                "WriteNodeProperties :: Label 2 of 2 33%",
-                "WriteNodeProperties :: Label 2 of 2 66%",
-                "WriteNodeProperties :: Label 2 of 2 100%",
-                "WriteNodeProperties :: Label 2 of 2 :: Finished"
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Start",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 33%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 66%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 100%",
+                "Graph :: NodeProperties :: Write :: Label 1 of 2 :: Finished",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Start",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 33%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 66%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 100%",
+                "Graph :: NodeProperties :: Write :: Label 2 of 2 :: Finished"
             );
     }
 
@@ -304,5 +321,15 @@ class GraphWriteNodePropertiesProcTest extends BaseProcTest {
             "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']."
         );
+    }
+
+    @Test
+    void shouldLogDeprecationWarning() {
+        runQuery("CALL gds.graph.writeNodeProperties($graph, ['newNodeProp1', 'newNodeProp2'])", Map.of("graph", TEST_GRAPH_SAME_PROPERTIES));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
+        Assertions.assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains("gds.graph.nodeProperties.write");
     }
 }

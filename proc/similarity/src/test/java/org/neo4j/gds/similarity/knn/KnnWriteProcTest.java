@@ -193,7 +193,7 @@ class KnnWriteProcTest extends KnnProcTest<KnnWriteConfig> implements WriteRelat
             pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
 
             Assertions.assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "KnnWriteProc :: WriteRelationships",
+                "KnnWriteProc :: Relationships :: Write",
                 "Knn"
             );
         });

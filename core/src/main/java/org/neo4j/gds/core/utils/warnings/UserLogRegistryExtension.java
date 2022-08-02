@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.warnings;
 
+import org.jetbrains.annotations.TestOnly;
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -30,11 +31,22 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
+import java.util.function.Supplier;
+
 @ServiceProvider
 public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryExtension.Dependencies> {
 
+    private final Supplier<GlobalUserLogStore> userLogStoreSupplier;
+
     public UserLogRegistryExtension() {
         super(ExtensionType.DATABASE, "gds.warnings.registry");
+        this.userLogStoreSupplier = GlobalUserLogStore::new;
+    }
+
+    @TestOnly
+    public UserLogRegistryExtension(Supplier<GlobalUserLogStore> userLogStoreSupplier) {
+        super(ExtensionType.DATABASE, "gds.warnings.registry");
+        this.userLogStoreSupplier = userLogStoreSupplier;
     }
 
     @Override
@@ -42,7 +54,7 @@ public class UserLogRegistryExtension extends ExtensionFactory<UserLogRegistryEx
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         if (enabled) {
-            var globalWarningStore = new GlobalUserLogStore();
+            var globalWarningStore = userLogStoreSupplier.get();
             registry.registerComponent(UserLogStore.class, ctx -> globalWarningStore, true);
             registry.registerComponent(UserLogRegistryFactory.class, globalWarningStore, true);
         } else {

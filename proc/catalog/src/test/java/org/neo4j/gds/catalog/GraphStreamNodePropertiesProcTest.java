@@ -23,6 +23,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
@@ -35,12 +37,19 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.utils.IdentityPropertyValues;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.compat.MapUtil.map;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -57,6 +66,17 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         ", (d:B {id: 3, nodeProp1: 3.0, nodeProp2: 45})" +
         ", (e:B {id: 4, nodeProp1: 4.0, nodeProp2: 46})" +
         ", (f:B {id: 5, nodeProp1: 5.0, nodeProp2: 47})";
+
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
 
     @BeforeEach
     void setup() throws Exception {
@@ -304,5 +324,23 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
             "Could not find property key(s) ['newNodeProp3'] for label A. " +
             "Defined keys: ['newNodeProp1', 'newNodeProp2']"
         );
+    }
+
+    static Stream<Arguments> proceduresAndArguments() {
+        return Stream.of(
+            Arguments.of("gds.graph.streamNodeProperty", "gds.graph.nodeProperty.stream", "'newNodeProp1'"),
+            Arguments.of("gds.graph.streamNodeProperties", "gds.graph.nodeProperties.stream", "['newNodeProp1', 'newNodeProp2']")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("proceduresAndArguments")
+    void shouldLogDeprecationWarning(String deprecatedProcedure, String newProcedure, String properties) {
+        runQuery(formatWithLocale("CALL %s($graph, %s)", deprecatedProcedure, properties), Map.of("graph", TEST_GRAPH_SAME_PROPERTIES));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        assertThat(userLogEntries.size()).isEqualTo(1);
+        assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains(newProcedure);
     }
 }

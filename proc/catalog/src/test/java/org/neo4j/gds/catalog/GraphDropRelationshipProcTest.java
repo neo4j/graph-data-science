@@ -19,18 +19,24 @@
  */
 package org.neo4j.gds.catalog;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.warnings.GlobalUserLogStore;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryExtension;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.ExtensionCallback;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.neo4j.gds.compat.MapUtil.map;
 
-class GraphDeleteRelationshipProcTest extends BaseProcTest {
+class GraphDropRelationshipProcTest extends BaseProcTest {
 
     private final String DB_CYPHER =
         "CREATE (:A)-[:T1]->(:A), " +
@@ -39,9 +45,20 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
     private final String graphName = "g";
     private final Map<String, Object> params = map("graphName", this.graphName);
 
+    GlobalUserLogStore userLogStore;
+
+    @Override
+    @ExtensionCallback
+    protected void configuration(TestDatabaseManagementServiceBuilder builder) {
+        super.configuration(builder);
+        this.userLogStore = new GlobalUserLogStore();
+        builder.removeExtensions(extension -> extension instanceof UserLogRegistryExtension);
+        builder.addExtension(new UserLogRegistryExtension(() -> userLogStore));
+    }
+
     @BeforeEach
     void setup() throws Exception {
-        registerProcedures(GraphDeleteRelationshipProc.class, GraphProjectProc.class);
+        registerProcedures(GraphDropRelationshipProc.class, GraphProjectProc.class);
         runQuery(DB_CYPHER);
         runQuery("CALL gds.graph.project($graphName, 'A', ['T1', { T2: { properties: 'p'}}])", params);
     }
@@ -98,6 +115,16 @@ class GraphDeleteRelationshipProcTest extends BaseProcTest {
             "deletedRelationships", 1L,
             "deletedProperties", map("p", 1L))
         ));
+    }
+
+    @Test
+    void shouldLogDeprecationWarning() {
+        runQuery("CALL gds.graph.deleteRelationships($graph, 'T1')", Map.of("graph", graphName));
+        var userLogEntries = userLogStore.query(getUsername()).collect(Collectors.toList());
+        Assertions.assertThat(userLogEntries.size()).isEqualTo(1);
+        Assertions.assertThat(userLogEntries.get(0).getMessage())
+            .contains("deprecated")
+            .contains("gds.graph.relationships.drop");
     }
 
 }

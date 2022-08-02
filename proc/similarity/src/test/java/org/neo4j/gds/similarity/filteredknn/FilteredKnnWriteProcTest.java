@@ -193,7 +193,7 @@ class FilteredKnnWriteProcTest extends FilteredKnnProcTest<FilteredKnnWriteConfi
             pathProc.write("undirectedGraph", createMinimalConfig(CypherMapWrapper.empty()).toMap());
 
             Assertions.assertThat(taskStore.taskStream().map(Task::description)).containsExactlyInAnyOrder(
-                "FilteredKnnWriteProc :: WriteRelationships",
+                "FilteredKnnWriteProc :: Relationships :: Write",
                 "Knn"
             );
         });
