@@ -185,9 +185,8 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
                     }
                     // because of reverse edge
                     candidateEdgesRemaining.addAndGet(-2);
-                } else {
-                    remainingRelsConsumer.accept(source, target, weight);
                 }
+                // invalid relationships will be added to neither holdout or remaining
             }
             return true;
         });

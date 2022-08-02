@@ -221,8 +221,8 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         var result = splitter.split(multiLabelGraph, .6);
 
         var remainingRels = result.remainingRels();
-        // 1 positive selected reduces remaining
-        assertEquals(4L, remainingRels.topology().elementCount());
+        // 1 positive selected reduces remaining & 2 invalid
+        assertEquals(2L, remainingRels.topology().elementCount());
         assertEquals(Orientation.NATURAL, remainingRels.topology().orientation());
         assertFalse(remainingRels.topology().isMultiGraph());
         assertThat(remainingRels.properties()).isNotEmpty();
