@@ -184,7 +184,7 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         var graphStore = GdlFactory.of("(:A)-->(:C2)").build();
 
         LinkPredictionPredictPipelineBaseConfig config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
-            .username("user")
+            .modelUser("user")
             .modelName("testModel")
             .sourceNodeLabel("INV_SOURCE")
             .targetNodeLabel("INV_TARGET")
@@ -195,9 +195,9 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         assertThatThrownBy(() -> config.graphStoreValidation(graphStore, List.of(), List.of())
         )
             .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Could not find sourceNodeLabel of ['INV_SOURCE'].")
-            .hasMessageContaining("Could not find targetNodeLabel of ['INV_TARGET'].")
-            .hasMessageContaining("Could not find contextNodeLabels of ['INV_C1'].");
+            .hasMessageContaining("Could not find the specified `sourceNodeLabel` of ['INV_SOURCE'].")
+            .hasMessageContaining("Could not find the specified `targetNodeLabel` of ['INV_TARGET'].")
+            .hasMessageContaining("Could not find the specified `contextNodeLabels` of ['INV_C1'].");
     }
 
 }

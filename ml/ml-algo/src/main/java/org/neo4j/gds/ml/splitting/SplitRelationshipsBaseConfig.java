@@ -88,17 +88,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateTypeDoesNotExist(graphStore, remainingRelationshipType(), "Remaining");
-    }
-
-    @Configuration.GraphStoreValidationCheck
-    @Value.Default
-    default void validateNonNegativeRelTypesExist(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        ElementTypeValidator.resolveAndValidateTypes(graphStore, nonNegativeRelationshipTypes(), "nonNegativeRelationshipTypes");
+        validateTypeDoesNotExist(graphStore, remainingRelationshipType(), "remainingRelationshipType");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -108,7 +98,17 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateTypeDoesNotExist(graphStore, holdoutRelationshipType(), "Holdout");
+        validateTypeDoesNotExist(graphStore, holdoutRelationshipType(), "holdoutRelationshipType");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateNonNegativeRelTypesExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, nonNegativeRelationshipTypes(), "`nonNegativeRelationshipTypes`");
     }
 
 
@@ -116,7 +116,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     default void validateTypeDoesNotExist(GraphStore graphStore, RelationshipType type, String name) {
         if (graphStore.hasRelationshipType(type)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "%s relationship type `%s` already exists in the in-memory graph.",
+                "The specified `%s` of `%s` already exists in the in-memory graph.",
                 name,
                 type.name()
             ));

@@ -90,7 +90,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        sourceNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "sourceNodeLabel"));
+        sourceNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "`sourceNodeLabel`"));
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -99,7 +99,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        targetNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "targetNodeLabel"));
+        targetNodeLabel().ifPresent(label -> ElementTypeValidator.resolveAndValidate(graphStore, List.of(label), "`targetNodeLabel`"));
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -108,7 +108,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "contextNodeLabels");
+        ElementTypeValidator.resolveAndValidate(graphStore, contextNodeLabels(), "`contextNodeLabels`");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -117,7 +117,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "contextRelationshipTypes");
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, contextRelationshipTypes(), "`contextRelationshipTypes`");
     }
 
     //Exhaustive strategy fields

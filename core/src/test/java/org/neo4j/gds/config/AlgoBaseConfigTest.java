@@ -50,7 +50,7 @@ class AlgoBaseConfigTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         ))
-            .hasMessageContaining("Could not find node labels of ['X', 'Y']. Available labels are ['A', 'B', 'C'].");
+            .hasMessageContaining("Could not find the specified `nodeLabels` of ['X', 'Y']. Available labels are ['A', 'B', 'C'].");
     }
 
     @Test
@@ -65,7 +65,7 @@ class AlgoBaseConfigTest {
             config.internalRelationshipTypes(graphStore)
         ))
             .hasMessageContaining(
-                "Could not find relationship types of ['I_REL', 'I_REL_2']. Available types are ['REL', 'REL2']."
+                "Could not find the specified `relationshipTypes` of ['I_REL', 'I_REL_2']. Available relationship types are ['REL', 'REL2']."
             );
     }
 
@@ -81,8 +81,8 @@ class AlgoBaseConfigTest {
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
         ))
-            .hasMessageContaining("Could not find node labels of ['X', 'Y']")
-            .hasMessageContaining("Could not find relationship types of ['I_REL', 'I_REL_2']");
+            .hasMessageContaining("Could not find the specified `nodeLabels` of ['X', 'Y']")
+            .hasMessageContaining("Could not find the specified `relationshipTypes` of ['I_REL', 'I_REL_2']");
     }
 
 

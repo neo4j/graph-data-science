@@ -58,7 +58,7 @@ public final class ElementTypeValidator {
 
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Could not find %s of %s. Available labels are %s.",
+                "Could not find the specified %s of %s. Available labels are %s.",
                 filterName,
                 StringJoining.join(invalidLabels.stream()),
                 StringJoining.join(availableLabels.stream().map(NodeLabel::name))
@@ -77,7 +77,7 @@ public final class ElementTypeValidator {
 
         if (!invalidLabels.isEmpty()) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Could not find %s of %s. Available relationship types are %s.",
+                "Could not find the specified %s of %s. Available relationship types are %s.",
                 filterName,
                 StringJoining.join(invalidLabels.stream()),
                 StringJoining.join(availableTypes.stream().map(RelationshipType::name))

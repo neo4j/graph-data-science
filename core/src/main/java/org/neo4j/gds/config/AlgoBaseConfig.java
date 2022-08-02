@@ -25,14 +25,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
@@ -76,7 +72,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        ElementTypeValidator.validate(graphStore, selectedLabels, "node labels");
+        ElementTypeValidator.validate(graphStore, selectedLabels, "`nodeLabels`");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -85,19 +81,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        var availableTypes = graphStore.relationshipTypes();
-        var invalidTypes = selectedRelationshipTypes
-            .stream()
-            .filter(type -> !availableTypes.contains(type))
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
-        if (!invalidTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find relationship types of %s. Available types are %s.",
-                StringJoining.join(invalidTypes.stream()),
-                StringJoining.join(availableTypes.stream().map(RelationshipType::name))
-            ));
-        }
+        ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipTypes`");
     }
 }

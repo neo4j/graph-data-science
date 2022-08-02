@@ -151,7 +151,7 @@ class LPGraphFilterFactoryTest {
             multiLabelGraphStore,
             ProgressTracker.NULL_TRACKER
         ))
-            .hasMessage("Could not find `targetNodeLabel` from the model's train config of ['INVALID_2']. " +
+            .hasMessage("Could not find the specified `targetNodeLabel` from the model's train config of ['INVALID_2']. " +
                         "Available labels are ['A', 'B', 'C'].");
     }
 
@@ -187,7 +187,7 @@ class LPGraphFilterFactoryTest {
             multiLabelGraphStore,
             ProgressTracker.NULL_TRACKER
         ))
-            .hasMessage("Could not find `contextRelationshipTypes` from the model's train config of ['INVALID']. " +
+            .hasMessage("Could not find the specified `contextRelationshipTypes` from the model's train config of ['INVALID']. " +
                         "Available relationship types are ['CONTEXT', 'CONTEXT_NEW', 'OTHER', 'T'].");
     }
 
