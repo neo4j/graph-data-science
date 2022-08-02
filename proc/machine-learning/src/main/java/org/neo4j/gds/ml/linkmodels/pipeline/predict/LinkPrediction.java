@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
@@ -33,9 +33,9 @@ public abstract class LinkPrediction {
     private final LinkFeatureExtractor linkFeatureExtractor;
     protected final Graph graph;
 
-    protected final IdMap sourceNodeLabelIdMap;
+    protected final LongPredicate sourceNodeFilter;
 
-    protected final IdMap targetNodeLabelIdMap;
+    protected final LongPredicate targetNodeFilter;
 
     protected final int concurrency;
     final ProgressTracker progressTracker;
@@ -44,16 +44,16 @@ public abstract class LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        IdMap sourceNodeLabelIdMap,
-        IdMap targetNodeLabelIdMap,
+        LongPredicate sourceNodeFilter,
+        LongPredicate targetNodeFilter,
         int concurrency,
         ProgressTracker progressTracker
     ) {
         this.classifier = classifier;
         this.linkFeatureExtractor = linkFeatureExtractor;
         this.graph = graph;
-        this.sourceNodeLabelIdMap = sourceNodeLabelIdMap;
-        this.targetNodeLabelIdMap = targetNodeLabelIdMap;
+        this.sourceNodeFilter = sourceNodeFilter;
+        this.targetNodeFilter = targetNodeFilter;
         this.concurrency = concurrency;
         this.progressTracker = progressTracker;
     }

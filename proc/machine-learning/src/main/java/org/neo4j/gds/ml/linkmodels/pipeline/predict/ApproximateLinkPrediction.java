@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -48,8 +48,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
-        IdMap sourceNodeLabelIdMap,
-        IdMap targetNodeLabelIdMap,
+        LongPredicate sourceNodeFilter,
+        LongPredicate targetNodeFilter,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
@@ -57,8 +57,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             classifier,
             linkFeatureExtractor,
             graph,
-            sourceNodeLabelIdMap,
-            targetNodeLabelIdMap,
+            sourceNodeFilter,
+            targetNodeFilter,
             knnConfig.concurrency(),
             progressTracker
         );
