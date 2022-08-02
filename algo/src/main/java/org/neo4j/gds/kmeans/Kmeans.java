@@ -165,7 +165,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
             }
         }
 
-
         if (computeSilhouette) {
             calculateSilhouette();
         }
@@ -224,16 +223,9 @@ public class Kmeans extends Algorithm<KmeansResult> {
         assert numberOfTasks <= concurrency;
 
         //Initialization do initial centroid computation and assignment
-        progressTracker.beginSubTask(); // Initialization - start
-        if (!seededCentroids.isEmpty()) {
-            clusterManager.assignSeededCentroids(seededCentroids);
-        } else {
-            sampler.performInitialSampling();
-        }
-        progressTracker.endSubTask(); // Initialization - end
-        //
-        int iteration = 0;
+        initializeCentroids(clusterManager, sampler);
 
+        int iteration = 0;
         progressTracker.beginSubTask(); // Main - start
         while (true) {
             progressTracker.beginSubTask(); // Iteration - start
@@ -271,6 +263,16 @@ public class Kmeans extends Algorithm<KmeansResult> {
             currentCommunities,
             currentDistanceFromCentroid
         );
+    }
+
+    private void initializeCentroids(ClusterManager clusterManager, KmeansSampler sampler) {
+        progressTracker.beginSubTask(); // Initialization - start
+        if (!seededCentroids.isEmpty()) {
+            clusterManager.assignSeededCentroids(seededCentroids);
+        } else {
+            sampler.performInitialSampling();
+        }
+        progressTracker.endSubTask(); // Initialization - end
     }
 
     private void recomputeCentroids(ClusterManager clusterManager, List<KmeansTask> tasks) {
