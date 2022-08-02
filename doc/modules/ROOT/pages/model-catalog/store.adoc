@@ -1,6 +1,8 @@
-[.enterprise-edition]
+[.enterprise-edition.alpha]
 [[model-catalog-store-ops]]
 = Storing models on disk
+
+include::partial$/operations-reference/alpha-note.adoc[]
 
 The model catalog exists as long as the Neo4j instance is running.
 When Neo4j is restarted, models are no longer available in the catalog and need to be trained again.
@@ -17,8 +19,6 @@ The `gds.model.store_location` parameter must be configured for this feature.
 [.alpha]
 [[catalog-model-store]]
 == Storing models from the catalog on disk
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 *Models that can be stored*
 
@@ -84,8 +84,6 @@ YIELD
 [[catalog-model-load]]
 == Loading models from disk
 
-include::partial$/operations-reference/alpha-note.adoc[]
-
 GDS will discover available models from the configured store location upon database startup.
 During discovery, only model metadata is loaded, not the actual model data.
 In order to use a stored model, it has to be explicitly loaded.
@@ -140,8 +138,6 @@ The operation is idempotent, and skips loading if the model is already loaded.
 [.alpha]
 [[catalog-model-delete]]
 == Deleting models from disk
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 To remove a stored model from disk, it has to be deleted.
 This is different from dropping a model.

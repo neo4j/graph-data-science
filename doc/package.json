@@ -24,7 +24,7 @@
     "@antora/site-generator-default": "^3.0.0",
     "@neo4j-antora/antora-add-notes": "^0.1.6",
     "@neo4j-antora/antora-modify-sitemaps": "^0.4.3",
-    "@neo4j-antora/antora-page-roles": "^0.3.0",
+    "@neo4j-antora/antora-page-roles": "^0.3.1",
     "@neo4j-antora/antora-table-footnotes": "^0.3.0",
     "@neo4j-documentation/macros": "^1.0.0",
     "@neo4j-documentation/remote-include": "^1.0.0"
