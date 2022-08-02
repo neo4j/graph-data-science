@@ -21,7 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.beta.modularity.TestGraphs;
+import org.neo4j.gds.modularity.TestGraphs;
 import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;

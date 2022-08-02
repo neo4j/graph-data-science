@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.modularity;
+package org.neo4j.gds.modularity;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
@@ -54,16 +53,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.TestSupport.ids;
-import static org.neo4j.gds.beta.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
+import static org.neo4j.gds.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 @GdlExtension
-class ModularityOptimizationTest {
+class ModularityOptimizationWithoutOrientationTest {
 
     private static final String[][] EXPECTED_SEED_COMMUNITIES = {new String[]{"a", "b"}, new String[]{"c", "e"}, new String[]{"d", "f"}};
 
-    @GdlGraph(orientation = Orientation.UNDIRECTED)
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
         "  (a:Node {seed1:  1,  seed2: 21})" +
@@ -79,7 +78,15 @@ class ModularityOptimizationTest {
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(c)" +
         ", (b)-[:TYPE_OUT {weight: 5.0}]->(d)" +
         ", (c)-[:TYPE_OUT {weight: 0.01}]->(e)" +
-        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)";
+        ", (f)-[:TYPE_OUT {weight: 0.01}]->(d)" +
+        
+        ", (a)<-[:TYPE_OUT {weight: 0.01}]-(b)" +
+        ", (a)<-[:TYPE_OUT {weight: 5.0}]-(e)" +
+        ", (a)<-[:TYPE_OUT {weight: 5.0}]-(f)" +
+        ", (b)<-[:TYPE_OUT {weight: 5.0}]-(c)" +
+        ", (b)<-[:TYPE_OUT {weight: 5.0}]-(d)" +
+        ", (c)<-[:TYPE_OUT {weight: 0.01}]-(e)" +
+        ", (f)<-[:TYPE_OUT {weight: 0.01}]-(d)";
 
     @Inject
     private TestGraph graph;
@@ -228,8 +235,10 @@ class ModularityOptimizationTest {
             .concurrency(concurrency)
             .batchSize(minBatchSize)
             .build();
+
         var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
         var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+
         return new ModularityOptimization(
             graph,
             maxIterations,
