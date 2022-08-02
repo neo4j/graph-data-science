@@ -257,7 +257,8 @@
 [role=procedure-listing]
 [opts=header,cols="1, 2"]
 |===
-|Algorithm name | Operation .1+<.^|xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
+|Algorithm name | Operation
+.1+<.^|xref:alpha-algorithms/all-pairs-shortest-path.adoc[All Shortest Paths]
 | `gds.alpha.allShortestPaths.stream`
 .4+<.^|xref:algorithms/alpha/approx-max-k-cut.adoc[Approximate Maximum k-cut]
 | `gds.alpha.maxkcut.mutate`
@@ -311,11 +312,15 @@
 | `gds.alpha.influenceMaximization.greedy.stream`
 .1+<.^| xref:algorithms/alpha/conductance.adoc[Conductance]
 | `gds.alpha.conductance.stream`
-.4+<.^| xref:algorithms/alpha/kmeans.adoc[Kmeans]
+.8+<.^| xref:algorithms/alpha/kmeans.adoc[Kmeans]
 | `gds.alpha.kmeans.mutate`
+| `gds.alpha.kmeans.mutate.estimate`
 | `gds.alpha.kmeans.stats`
+| `gds.alpha.kmeans.stats.estimate`
 | `gds.alpha.kmeans.stream`
+| `gds.alpha.kmeans.stream.estimate`
 | `gds.alpha.kmeans.write`
+| `gds.alpha.kmeans.write.estimate`
 .4+<.^| xref:algorithms/alpha/filtered-knn.adoc[Filtered KNN]
 | `gds.alpha.knn.filtered.mutate`
 | `gds.alpha.knn.filtered.stats`

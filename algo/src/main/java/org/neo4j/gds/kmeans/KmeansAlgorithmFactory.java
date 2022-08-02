@@ -23,9 +23,14 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
+import org.neo4j.gds.core.utils.paged.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
@@ -83,4 +88,32 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
         ));
     }
 
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        var fakeLenght = 128;
+        var builder = MemoryEstimations.builder(Kmeans.class)
+            .perNode("bestCommunities", HugeIntArray::memoryEstimation)
+            .fixed(
+                "bestCentroids",
+                MemoryUsage.sizeOfArray(configuration.k(), MemoryUsage.sizeOfDoubleArray(fakeLenght))
+            )
+            .perNode("nodesInCluster", MemoryUsage::sizeOfLongArray)
+            .perNode("distanceFromCentroid", HugeDoubleArray::memoryEstimation)
+            .add(ClusterManager.memoryEstimation(
+                configuration.k(),
+                fakeLenght
+            ))
+            .perThread("KMeansTask", KmeansTask.memoryEstimation(configuration.k(), fakeLenght));
+
+        if(configuration.computeSilhouette()) {
+            builder.perNode("silhouette", HugeDoubleArray::memoryEstimation);
+        }
+
+        if(configuration.isSeeded()) {
+            var centroids = configuration.seedCentroids();
+            builder.fixed("seededCentroids", MemoryUsage.sizeOf(centroids));
+        }
+
+        return builder.build();
+    }
 }
