@@ -405,8 +405,6 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .pipeline("bar")
                 .targetRelationshipType("_TEST_")
                 .contextRelationshipTypes(List.of("*"))
-                .sourceNodeLabel("*")
-                .targetNodeLabel("*")
                 .build();
 
             TestProcedureRunner.applyOnProcedure(db, TestMutateProc.class, caller -> {

@@ -20,11 +20,15 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.assertj.Extractors;
+import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -39,6 +43,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.progressTask;
+import static org.neo4j.gds.ml.pipeline.linkPipeline.train.RelationshipSplitter.splitEstimation;
 
 @GdlExtension
 class RelationshipSplitterTest {
@@ -129,6 +135,31 @@ class RelationshipSplitterTest {
     }
 
     @Test
+    void warnForUnfilteredSplitting() {
+        var splitConfig = LinkPredictionSplitConfigImpl.builder()
+            .trainFraction(0.3)
+            .testFraction(0.3)
+            .validationFolds(2)
+            .negativeSamplingRatio(1.0)
+            .build();
+
+        var progressTracker = new InspectableTestProgressTracker(progressTask(splitConfig.expectedSetSizes(graphStore.relationshipCount())), "user", new JobId());
+
+        var relationshipSplitter = new RelationshipSplitter(
+            graphStore,
+            splitConfig,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+
+        relationshipSplitter.splitRelationships(RelationshipType.of("REL"), "*", "N", Optional.of(42L), Optional.of("weight"));
+
+        assertThat(progressTracker.log().getMessages(TestLog.WARN))
+            .extracting(Extractors.removingThreadId())
+            .contains("Split relationships :: Using * for the `sourceNodeLabel` or `targetNodeLabel` results in not ideal negative link sampling.");
+    }
+
+    @Test
     void estimateWithDifferentTestFraction() {
         var splitConfigBuilder = LinkPredictionSplitConfigImpl.builder()
             .trainFraction(0.3)
@@ -136,13 +167,13 @@ class RelationshipSplitterTest {
             .negativeSamplingRatio(1.0);
 
         var splitConfig = splitConfigBuilder.testFraction(0.2).build();
-        var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(28_800, 35_840));
 
         splitConfig = splitConfigBuilder.testFraction(0.8).build();
-        actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         // higher testFraction -> lower estimation as test-complement is smaller
@@ -158,13 +189,13 @@ class RelationshipSplitterTest {
             .negativeSamplingRatio(1.0);
 
         var splitConfig = splitConfigBuilder.trainFraction(0.2).build();
-        var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_200, 34_240));
 
         splitConfig = splitConfigBuilder.trainFraction(0.8).build();
-        actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27_184, 40_944));
@@ -178,13 +209,13 @@ class RelationshipSplitterTest {
             .validationFolds(3);
 
         var splitConfig = splitConfigBuilder.negativeSamplingRatio(1).build();
-        var actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        var actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(27184, 35_344));
 
         splitConfig = splitConfigBuilder.negativeSamplingRatio(4).build();
-        actualEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        actualEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertMemoryRange(actualEstimation.memoryUsage(), MemoryRange.of(39424, 59_824));
@@ -196,10 +227,10 @@ class RelationshipSplitterTest {
             .testFraction(0.3)
             .trainFraction(0.3)
             .validationFolds(3).negativeSamplingRatio(1).build();
-        var unweightedEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
+        var unweightedEstimation = splitEstimation(splitConfig, "REL", Optional.empty(), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
-        var weightedEstimation = RelationshipSplitter.splitEstimation(splitConfig, "REL", Optional.of("weight"), "N", "N")
+        var weightedEstimation = splitEstimation(splitConfig, "REL", Optional.of("weight"), "N", "N")
             .estimate(splitConfig.expectedGraphDimensions(GraphDimensions.of(100, 1_000), "REL"), 4);
 
         assertThat(unweightedEstimation.memoryUsage()).isNotEqualTo(weightedEstimation.memoryUsage());

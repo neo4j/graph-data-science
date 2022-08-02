@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.ml.pipeline.linkPipeline.ExpectedSetSizes;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.splitting.EdgeSplitter;
 import org.neo4j.gds.ml.splitting.SplitRelationships;
@@ -56,6 +60,14 @@ public class RelationshipSplitter {
         this.terminationFlag = terminationFlag;
     }
 
+    @NotNull
+    static LeafTask progressTask(ExpectedSetSizes sizes) {
+        return Tasks.leaf(
+            "Split relationships",
+            sizes.trainSize() + sizes.featureInputSize() + sizes.testSize() + sizes.testComplementSize()
+        );
+    }
+
     public void splitRelationships(
         RelationshipType targetRelationshipType,
         String sourceNodeLabel,
@@ -66,6 +78,13 @@ public class RelationshipSplitter {
         progressTracker.beginSubTask("Split relationships");
 
         splitConfig.validateAgainstGraphStore(graphStore);
+
+        if (sourceNodeLabel.equals(ElementProjection.PROJECT_ALL) || targetNodeLabel.equals(ElementProjection.PROJECT_ALL)) {
+            progressTracker.logWarning(formatWithLocale(
+                "Using %s for the `sourceNodeLabel` or `targetNodeLabel` results in not ideal negative link sampling.",
+                ElementProjection.PROJECT_ALL
+            ));
+        }
 
         var testComplementRelationshipType = splitConfig.testComplementRelationshipType();
 

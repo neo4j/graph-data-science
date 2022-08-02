@@ -56,9 +56,13 @@ public interface LinkPredictionTrainConfig extends AlgoBaseConfig, GraphNameConf
 
     String targetRelationshipType();
 
-    String sourceNodeLabel();
+    default String sourceNodeLabel() {
+        return ElementProjection.PROJECT_ALL;
+    }
 
-    String targetNodeLabel();
+    default String targetNodeLabel() {
+        return ElementProjection.PROJECT_ALL;
+    }
 
     default List<String> contextRelationshipTypes() {
         return List.of();
