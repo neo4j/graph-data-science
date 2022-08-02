@@ -118,7 +118,7 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Test
     void shouldPredict() {
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .topN(3)
             .graphName("DUMMY")
@@ -180,7 +180,7 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Test
     void shouldPredictWithRandomForest() {
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .topN(3)
             .graphName("DUMMY")
@@ -228,7 +228,7 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Test
     void shouldPredictWithNodePropertySteps() {
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .topN(3)
             .graphName("DUMMY")
@@ -277,7 +277,7 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Test
     void shouldPredictFilteredWithNodePropertySteps() {
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username("")
+            .modelUser("")
             .graphName("DUMMY")
             .modelName("model")
             .sampleRate(0.5)
@@ -335,7 +335,7 @@ class LinkPredictionPredictPipelineExecutorTest {
     @Test
     void progressTracking() {
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .topN(3)
             .graphName("DUMMY")
@@ -442,7 +442,7 @@ class LinkPredictionPredictPipelineExecutorTest {
         );
 
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .concurrency(1)
             .topN(10)
@@ -472,12 +472,11 @@ class LinkPredictionPredictPipelineExecutorTest {
             .build();
 
         var config = LinkPredictionPredictPipelineStreamConfigImpl.builder()
-            .username(username)
+            .modelUser(username)
             .modelName("model")
             .concurrency(1)
             .topN(10)
             .modelName("model")
-            .modelUser("user")
             .graphName("DUMMY")
             .build();
 
