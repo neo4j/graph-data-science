@@ -29,20 +29,20 @@ There are two different sampling strategies.
 Uniform::
 
 With uniform sampling, each node has the same probability to be picked as one of the `k`  initial centroids.
-This is the default sampler for K-Means.
+This is the default sampler for K-Means denoted with the `uniform` parameter.
 
 K-Means++::
 
 This sampling strategy adapts the well-known
-http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf[K-means++]  initialization algorithm for K-Means.
+K-means\++  http://ilpubs.stanford.edu:8090/778/1/2006-13.pdf[initialization algorithm] for K-Means.
 The sampling begins by choosing the  first centroid uniformly at random.
 Then, the remaining `k-1`  centroids are picked one-by-one based on weighted random sampling.
 That is, the probability a node is chosen as the next centroid is proportional to its minimum distance from the already picked centroids.
 Nodes with larger distance hence have higher chance to be picked as a centroid.
-This sampling strategy tries to spread the initial clusters more evenly so as to obtain a better final clustering. This option can be enabled by choosing `kmeans++` as the  initial sampler in the configuration.
+This sampling strategy tries to spread the initial clusters more evenly so as to obtain a better final clustering. This option can be enabled by choosing `kmeans++` as the initial sampler in the configuration.
 
 
-It is also possible to explicitly give the list of initial centroids to the algorithm. In this case, the value of the `initialSampler` parameter is ignored, even if changed in the configuration.
+It is also possible to explicitly give the list of initial centroids to the algorithm via the `seedCentroids` parameter. In this case, the value of the `initialSampler` parameter is ignored, even if changed in the configuration.
 
 [[algorithm-k-means-considerations]]
 == Considerations
