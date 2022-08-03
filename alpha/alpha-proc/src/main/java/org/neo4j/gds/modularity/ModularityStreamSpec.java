@@ -32,15 +32,15 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.modularity.stream", description = DESCRIPTION, executionMode = STREAM)
-public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<ModularityResult>, ModularityCalculatorFactory> {
+public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>, ModularityCalculatorFactory<ModularityStreamConfig>> {
     @Override
     public String name() {
         return "ModularityStream";
     }
 
     @Override
-    public ModularityCalculatorFactory algorithmFactory() {
-        return new ModularityCalculatorFactory();
+    public ModularityCalculatorFactory<ModularityStreamConfig> algorithmFactory() {
+        return new ModularityCalculatorFactory<>();
     }
 
     @Override
@@ -49,10 +49,10 @@ public class ModularityStreamSpec implements AlgorithmSpec<ModularityCalculator,
     }
 
     @Override
-    public ComputationResultConsumer<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<ModularityResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ModularityCalculator, List<CommunityModularity>, ModularityStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> Optional.ofNullable(computationResult.result())
             .orElseGet(List::of)
             .stream()
-            .map(ModularityResult::from);
+            .map(StreamResult::from);
     }
 }

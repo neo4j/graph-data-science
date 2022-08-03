@@ -28,23 +28,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.modularity.ModularityStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModularityStreamProc extends BaseProc {
+public class ModularityStatsProc extends BaseProc {
 
-    static final String DESCRIPTION = "TODO: Add modularity description";
-
-    @Procedure(value = "gds.alpha.modularity.stream", mode = READ)
+    @Procedure(value = "gds.alpha.modularity.stats", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<StatsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return new ProcedureExecutor<>(
-            new ModularityStreamSpec(),
+            new ModularityStatsSpec(),
             executionContext()
         ).compute(graphName, configuration, true, true);
-
     }
 
 }

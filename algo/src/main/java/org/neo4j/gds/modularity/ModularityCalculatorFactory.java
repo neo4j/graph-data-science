@@ -23,11 +23,11 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
-public class ModularityCalculatorFactory extends GraphAlgorithmFactory<ModularityCalculator, ModularityStreamConfig> {
+public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> extends GraphAlgorithmFactory<ModularityCalculator, CONFIG> {
     @Override
     public ModularityCalculator build(
         Graph graph,
-        ModularityStreamConfig configuration,
+        CONFIG configuration,
         ProgressTracker progressTracker
     ) {
         return new ModularityCalculator(

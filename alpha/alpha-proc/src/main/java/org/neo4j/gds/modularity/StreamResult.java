@@ -19,18 +19,17 @@
  */
 package org.neo4j.gds.modularity;
 
-public class ModularityResult {
+public class StreamResult {
 
     public final long communityId;
     public final double modularity;
 
-
-    private ModularityResult(long communityId, double modularity) {
+    private StreamResult(long communityId, double modularity) {
         this.communityId = communityId;
         this.modularity = modularity;
     }
 
-    static ModularityResult from(CommunityModularity communityModularity) {
-        return new ModularityResult(communityModularity.communityId(), communityModularity.modularity());
+    static StreamResult from(CommunityModularity communityModularity) {
+        return new StreamResult(communityModularity.communityId(), communityModularity.modularity());
     }
 }

@@ -23,8 +23,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface ModularityStreamConfig extends ModularityBaseConfig {
-    static ModularityStreamConfig of(CypherMapWrapper userInput) {
-        return new ModularityStreamConfigImpl(userInput);
+public interface ModularityStatsConfig extends ModularityBaseConfig {
+    static ModularityStatsConfig of(CypherMapWrapper userInput) {
+        return new ModularityStatsConfigImpl(userInput);
     }
 }
