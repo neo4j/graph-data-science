@@ -60,7 +60,7 @@ class ModularityCalculatorTest {
     void compute() {
         var modularityCalculator = new ModularityCalculator(
             graph,
-            graphStore.nodeProperty("communityId").values(),
+            graphStore.nodeProperty("communityId").values()::longValue,
             4
         );
 

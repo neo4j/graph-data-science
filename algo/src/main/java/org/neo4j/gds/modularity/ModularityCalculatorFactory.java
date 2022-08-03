@@ -32,7 +32,7 @@ public class ModularityCalculatorFactory extends GraphAlgorithmFactory<Modularit
     ) {
         return new ModularityCalculator(
             graph,
-            graph.nodeProperties(configuration.communityProperty()),
+            graph.nodeProperties(configuration.communityProperty())::longValue,
             configuration.concurrency()
         );
     }

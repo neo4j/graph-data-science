@@ -21,7 +21,6 @@ package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
@@ -37,18 +36,18 @@ import java.util.function.LongUnaryOperator;
 public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
 
     private final Graph graph;
-    private final NodePropertyValues communityIdProperty;
+    private final LongUnaryOperator communityIdProvider;
     private final int concurrency;
 
 
     protected ModularityCalculator(
         Graph graph,
-        NodePropertyValues communityIdProperty,
+        LongUnaryOperator communityIdProvider,
         int concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
-        this.communityIdProperty = communityIdProperty;
+        this.communityIdProvider = communityIdProvider;
         this.concurrency = concurrency;
     }
 
@@ -59,7 +58,6 @@ public class ModularityCalculator extends Algorithm<List<CommunityModularity>> {
         var insideRelationships = HugeAtomicDoubleArray.newArray(nodeCount);
         var totalCommunityRelationships = HugeAtomicDoubleArray.newArray(nodeCount);
         var communityTracker = HugeAtomicBitSet.create(nodeCount);
-        LongUnaryOperator communityIdProvider = communityIdProperty::longValue;
         var totalRelationshipWeight = new DoubleAdder();
 
         var tasks = PartitionUtils.rangePartition(
