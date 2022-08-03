@@ -456,8 +456,8 @@ class KnnTest {
 
         joinNeighbors.run();
 
-        // 1-0, 2-0, 1-2, 2-1
-        assertThat(joinNeighbors.nodePairsConsidered()).isEqualTo(4);
+        // 1-0, 2-0, 1-2/2-1
+        assertThat(joinNeighbors.nodePairsConsidered()).isEqualTo(3);
 
         assertThat(allNeighbors.get(0).elements()).containsExactly(1L);
         assertThat(allNeighbors.get(1).elements()).containsExactly(2L);
