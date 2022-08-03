@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.modularity;
+package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
@@ -41,7 +41,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
-import static org.neo4j.gds.beta.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
+import static org.neo4j.gds.modularity.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
 public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends GraphAlgorithmFactory<ModularityOptimization, T> {
 

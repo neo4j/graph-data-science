@@ -17,29 +17,45 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.beta.modularity;
+package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 
-class InsideRelationshipCalculator implements Runnable {
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.function.LongUnaryOperator;
+
+class RelationshipCountCollector implements Runnable {
     private final Partition partition;
     private final Graph localGraph;
     private final HugeAtomicDoubleArray insideRelationships;
-    private final HugeLongArray communities;
+    private final HugeAtomicDoubleArray totalCommunityRelationships;
+    private final HugeAtomicBitSet communityTracker;
+    private final LongUnaryOperator communityIdProvider;
 
-    InsideRelationshipCalculator(
+    private final DoubleAdder totalRelationshipWeight;
+
+    RelationshipCountCollector(
         Partition partition,
         Graph graph,
         HugeAtomicDoubleArray insideRelationships,
-        HugeLongArray communities
+        HugeAtomicDoubleArray totalCommunityRelationships,
+        HugeAtomicBitSet communityTracker,
+        LongUnaryOperator communityIdProvider,
+        DoubleAdder totalRelationshipWeight
     ) {
+        this.totalRelationshipWeight = totalRelationshipWeight;
+        assert insideRelationships.size() == totalCommunityRelationships.size()
+               && insideRelationships.size() == communityTracker.size();
+
         this.partition = partition;
         this.localGraph = graph.concurrentCopy();
         this.insideRelationships = insideRelationships;
-        this.communities = communities;
+        this.totalCommunityRelationships = totalCommunityRelationships;
+        this.communityTracker = communityTracker;
+        this.communityIdProvider = communityIdProvider;
     }
 
     @Override
@@ -47,12 +63,15 @@ class InsideRelationshipCalculator implements Runnable {
         long startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
-            long communityId = communities.get(nodeId);
+            long communityId = communityIdProvider.applyAsLong(nodeId);
             localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                long tCommunityId = communities.get(t);
+                long tCommunityId = communityIdProvider.applyAsLong(t);
+                communityTracker.set(communityId);
                 if (tCommunityId == communityId) {
                     insideRelationships.getAndAdd(communityId, w);
                 }
+                totalCommunityRelationships.getAndAdd(communityId, w);
+                totalRelationshipWeight.add(w);
                 return true;
             });
         }
