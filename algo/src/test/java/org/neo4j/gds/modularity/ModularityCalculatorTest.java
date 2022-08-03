@@ -21,21 +21,17 @@ package org.neo4j.gds.modularity;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
-import org.neo4j.gds.core.utils.partition.Partition;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.concurrent.atomic.DoubleAdder;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
-class RelationshipCountCollectorTest {
+class ModularityCalculatorTest {
 
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     static final String GRAPH =
@@ -58,29 +54,20 @@ class RelationshipCountCollectorTest {
 
     @Inject
     private TestGraph graph;
+    @Inject
+    private GraphStore graphStore;
 
     @Test
-    void collect() {
-        var insideRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
-        var totalCommunityRelationships = HugeAtomicDoubleArray.newArray(graph.nodeCount());
-        var communityTracker = HugeAtomicBitSet.create(graph.nodeCount());
-        var communities = HugeLongArray.of(0, 0, 5, 0, 5, 5);
-        var totalRelationshipWeight = new DoubleAdder();
+    void compute() {
+        var modularityCalculator = new ModularityCalculator(graph,
+            (LongNodePropertyValues) graphStore.nodeProperty("communityId").values(), 4);
 
-        new RelationshipCountCollector(
-            new Partition(0L, graph.nodeCount()),
-            graph,
-            insideRelationships,
-            totalCommunityRelationships,
-            communityTracker,
-            communities::get,
-            totalRelationshipWeight
-        ).run();
+        var modularities = modularityCalculator.compute();
 
-        assertThat(totalRelationshipWeight.doubleValue()).isEqualTo(16);
-        assertThat(insideRelationships.get(0)).isEqualTo(6);
-        assertThat(totalCommunityRelationships.get(0)).isEqualTo(9);
-        assertThat(insideRelationships.get(5)).isEqualTo(4);
-        assertThat(totalCommunityRelationships.get(5)).isEqualTo(7);
+        assertThat(modularities)
+            .containsExactlyInAnyOrder(
+                CommunityModularity.of(0L, 6 - 9 * 9 * (1.0 / 16)),
+                CommunityModularity.of(5L, 4 - 7 * 7 * (1.0 / 16))
+            );
     }
 }

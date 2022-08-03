@@ -22,8 +22,10 @@ package org.neo4j.gds.modularity;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.paged.HugeAtomicDoubleArray;
-import org.neo4j.gds.core.utils.paged.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.Partition;
+
+import java.util.concurrent.atomic.DoubleAdder;
+import java.util.function.LongUnaryOperator;
 
 class RelationshipCountCollector implements Runnable {
     private final Partition partition;
@@ -31,7 +33,9 @@ class RelationshipCountCollector implements Runnable {
     private final HugeAtomicDoubleArray insideRelationships;
     private final HugeAtomicDoubleArray totalCommunityRelationships;
     private final HugeAtomicBitSet communityTracker;
-    private final HugeLongArray communities;
+    private final LongUnaryOperator communityIdProvider;
+
+    private final DoubleAdder totalRelationshipWeight;
 
     RelationshipCountCollector(
         Partition partition,
@@ -39,8 +43,10 @@ class RelationshipCountCollector implements Runnable {
         HugeAtomicDoubleArray insideRelationships,
         HugeAtomicDoubleArray totalCommunityRelationships,
         HugeAtomicBitSet communityTracker,
-        HugeLongArray communities
+        LongUnaryOperator communityIdProvider,
+        DoubleAdder totalRelationshipWeight
     ) {
+        this.totalRelationshipWeight = totalRelationshipWeight;
         assert insideRelationships.size() == totalCommunityRelationships.size()
                && insideRelationships.size() == communityTracker.size();
 
@@ -48,8 +54,8 @@ class RelationshipCountCollector implements Runnable {
         this.localGraph = graph.concurrentCopy();
         this.insideRelationships = insideRelationships;
         this.totalCommunityRelationships = totalCommunityRelationships;
-        this.communities = communities;
         this.communityTracker = communityTracker;
+        this.communityIdProvider = communityIdProvider;
     }
 
     @Override
@@ -57,14 +63,15 @@ class RelationshipCountCollector implements Runnable {
         long startNode = partition.startNode();
         long endNode = startNode + partition.nodeCount();
         for (long nodeId = startNode; nodeId < endNode; ++nodeId) {
-            long communityId = communities.get(nodeId);
+            long communityId = communityIdProvider.applyAsLong(nodeId);
             localGraph.forEachRelationship(nodeId, 1.0, (s, t, w) -> {
-                long tCommunityId = communities.get(t);
+                long tCommunityId = communityIdProvider.applyAsLong(t);
                 communityTracker.set(communityId);
                 if (tCommunityId == communityId) {
                     insideRelationships.getAndAdd(communityId, w);
                 }
                 totalCommunityRelationships.getAndAdd(communityId, w);
+                totalRelationshipWeight.add(w);
                 return true;
             });
         }
