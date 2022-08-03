@@ -25,15 +25,10 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.utils.StringJoining;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConfig {
 
@@ -48,9 +43,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<RelationshipType> internalRelationshipTypes(GraphStore graphStore) {
-        return relationshipTypes().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.relationshipTypes()
-            : relationshipTypes().stream().map(RelationshipType::of).collect(Collectors.toList());
+        return ElementTypeValidator.resolveTypes(graphStore, relationshipTypes());
     }
 
     @Value.Default
@@ -61,9 +54,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
 
     @Configuration.Ignore
     default Collection<NodeLabel> nodeLabelIdentifiers(GraphStore graphStore) {
-        return nodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : nodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
+        return ElementTypeValidator.resolve(graphStore, nodeLabels());
     }
 
     @Configuration.GraphStoreValidation
@@ -81,20 +72,7 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        Set<NodeLabel> availableLabels = graphStore.nodeLabels();
-        var invalidLabels = selectedLabels
-            .stream()
-            .filter(label -> !availableLabels.contains(label))
-            .map(NodeLabel::name)
-            .collect(Collectors.toList());
-
-        if (!invalidLabels.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find node labels of %s. Available labels are %s.",
-                StringJoining.join(invalidLabels.stream()),
-                StringJoining.join(availableLabels.stream().map(NodeLabel::name))
-            ));
-        }
+        ElementTypeValidator.validate(graphStore, selectedLabels, "`nodeLabels`");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -103,19 +81,6 @@ public interface AlgoBaseConfig extends BaseConfig, ConcurrencyConfig, JobIdConf
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        var availableTypes = graphStore.relationshipTypes();
-        var invalidTypes = selectedRelationshipTypes
-            .stream()
-            .filter(type -> !availableTypes.contains(type))
-            .map(RelationshipType::name)
-            .collect(Collectors.toList());
-
-        if (!invalidTypes.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Could not find relationship types of %s. Available types are %s.",
-                StringJoining.join(invalidTypes.stream()),
-                StringJoining.join(availableTypes.stream().map(RelationshipType::name))
-            ));
-        }
+        ElementTypeValidator.validateTypes(graphStore, selectedRelationshipTypes, "`relationshipTypes`");
     }
 }

@@ -78,7 +78,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.01)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `testFraction` is too high for the current graph. " +
                                   "The test-complement set would have 0 relationship(s) but it must have at least 3.");
     }
@@ -90,7 +90,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.1)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `trainFraction` is too low for the current graph. " +
                                   "The train set would have 0 relationship(s) but it must have at least 2.");
     }
@@ -102,7 +102,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.99)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `testFraction` is too low for the current graph. " +
                                   "The test set would have 0 relationship(s) but it must have at least 1.");
     }
@@ -114,7 +114,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.99)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining("The specified `trainFraction` is too high for the current graph. " +
                                   "The feature-input set would have 0 relationship(s) but it must have at least 1.");
     }
@@ -127,7 +127,7 @@ class LinkPredictionSplitConfigTest {
             .trainFraction(0.5)
             .build();
 
-        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore))
+        assertThatThrownBy(() -> config.validateAgainstGraphStore(graphStore, RelationshipType.ALL_RELATIONSHIPS))
             .hasMessageContaining(
                 "The specified `validationFolds` is too high or the `trainFraction` too low for the current graph. " +
                 "The validation set would have 0 relationship(s) but it must have at least 1.");

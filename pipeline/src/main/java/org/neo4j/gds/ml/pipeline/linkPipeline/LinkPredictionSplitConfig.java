@@ -159,7 +159,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
     }
 
     @Configuration.Ignore
-    default void validateAgainstGraphStore(GraphStore graphStore) {
+    default void validateAgainstGraphStore(GraphStore graphStore, RelationshipType targetRelationshipType) {
         var reservedTypes = Stream.of(
             testRelationshipType(),
             trainRelationshipType(),
@@ -179,7 +179,7 @@ public interface LinkPredictionSplitConfig extends ToMapConvertible {
             ));
         }
 
-        var expectedSetSizes = expectedSetSizes(graphStore.relationshipCount());
+        var expectedSetSizes = expectedSetSizes(graphStore.relationshipCount(targetRelationshipType));
 
         validateRelSetSize(expectedSetSizes.testSize(), MIN_SET_SIZE, "test", "`testFraction` is too low");
         validateRelSetSize(

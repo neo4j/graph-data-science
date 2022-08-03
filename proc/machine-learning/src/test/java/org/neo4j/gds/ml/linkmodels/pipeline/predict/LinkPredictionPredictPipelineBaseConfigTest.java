@@ -24,8 +24,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -175,6 +177,27 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         );
 
         assertThat(config.configKeys()).doesNotContain("nodeLabels");
+    }
+
+    @Test
+    void failOnInvalidNodeLabels() {
+        var graphStore = GdlFactory.of("(:A)-->(:C2)").build();
+
+        LinkPredictionPredictPipelineBaseConfig config = LinkPredictionPredictPipelineBaseConfigImpl.builder()
+            .modelUser("user")
+            .modelName("testModel")
+            .sourceNodeLabel("INV_SOURCE")
+            .targetNodeLabel("INV_TARGET")
+            .graphName("dummy")
+            .topN(5)
+            .contextNodeLabels(List.of("INV_C1", "C2"))
+            .build();
+        assertThatThrownBy(() -> config.graphStoreValidation(graphStore, List.of(), List.of())
+        )
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Could not find the specified `sourceNodeLabel` of ['INV_SOURCE'].")
+            .hasMessageContaining("Could not find the specified `targetNodeLabel` of ['INV_TARGET'].")
+            .hasMessageContaining("Could not find the specified `contextNodeLabels` of ['INV_C1'].");
     }
 
 }

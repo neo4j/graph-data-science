@@ -26,10 +26,10 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -60,20 +60,6 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         return Stream.of(sourceNodeLabels(), targetNodeLabels()).flatMap(List::stream).distinct().collect(Collectors.toList());
     }
 
-    @Configuration.Ignore
-    default Collection<NodeLabel> internalSourceLabels(GraphStore graphStore) {
-        return sourceNodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : sourceNodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-    }
-
-    @Configuration.Ignore
-    default Collection<NodeLabel> internalTargetLabels(GraphStore graphStore) {
-        return targetNodeLabels().contains(ElementProjection.PROJECT_ALL)
-            ? graphStore.nodeLabels()
-            : targetNodeLabels().stream().map(NodeLabel::of).collect(Collectors.toList());
-    }
-
     @Configuration.ConvertWith("org.neo4j.gds.RelationshipType#of")
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType holdoutRelationshipType();
@@ -89,14 +75,10 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
 
     @Configuration.Ignore
     @Value.Derived
-    default List<RelationshipType> superRelationshipTypes(GraphStore graphStore) {
-        return relationshipTypes().contains(ElementProjection.PROJECT_ALL) || nonNegativeRelationshipTypes().contains(
-            ElementProjection.PROJECT_ALL)
-            ? new ArrayList<>(graphStore.relationshipTypes())
-            : Stream.of(relationshipTypes(), nonNegativeRelationshipTypes())
-                .flatMap(List::stream)
-                .map(RelationshipType::of)
-                .collect(Collectors.toList());
+    default List<String> superRelationshipTypes() {
+        return Stream.of(relationshipTypes(), nonNegativeRelationshipTypes())
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -106,24 +88,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateTypeDoesNotExist(graphStore, remainingRelationshipType());
-    }
-
-    @Configuration.GraphStoreValidationCheck
-    @Value.Default
-    default void validateNonNegativeRelTypesExist(
-        GraphStore graphStore,
-        Collection<NodeLabel> selectedLabels,
-        Collection<RelationshipType> selectedRelationshipTypes
-    ) {
-        nonNegativeRelationshipTypes().forEach(relationshipType -> {
-            if (!graphStore.hasRelationshipType(RelationshipType.of(relationshipType))) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Relationship type `%s` does not exist in the in-memory graph.",
-                    relationshipType
-                ));
-            }
-        });
+        validateTypeDoesNotExist(graphStore, remainingRelationshipType(), "remainingRelationshipType");
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -133,16 +98,27 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateTypeDoesNotExist(graphStore, holdoutRelationshipType());
+        validateTypeDoesNotExist(graphStore, holdoutRelationshipType(), "holdoutRelationshipType");
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void validateNonNegativeRelTypesExist(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        ElementTypeValidator.resolveAndValidateTypes(graphStore, nonNegativeRelationshipTypes(), "`nonNegativeRelationshipTypes`");
     }
 
 
     @Configuration.Ignore
-    default void validateTypeDoesNotExist(GraphStore graphStore, RelationshipType holdoutRelationshipType) {
-        if (graphStore.hasRelationshipType(holdoutRelationshipType)) {
+    default void validateTypeDoesNotExist(GraphStore graphStore, RelationshipType type, String name) {
+        if (graphStore.hasRelationshipType(type)) {
             throw new IllegalArgumentException(formatWithLocale(
-                "Relationship type `%s` already exists in the in-memory graph.",
-                holdoutRelationshipType.name()
+                "The specified `%s` of `%s` already exists in the in-memory graph.",
+                name,
+                type.name()
             ));
         }
     }
