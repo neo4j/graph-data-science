@@ -41,6 +41,7 @@ import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TEST_COMPLEMENT_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.MIN_TRAIN_SET_SIZE;
 import static org.neo4j.gds.ml.pipeline.NonEmptySetValidation.validateRelSetSize;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RelationshipSplitter {
 
