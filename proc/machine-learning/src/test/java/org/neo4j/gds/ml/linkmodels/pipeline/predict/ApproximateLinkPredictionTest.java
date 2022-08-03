@@ -90,8 +90,8 @@ class ApproximateLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
-            graphStore.getGraph(NodeLabel.of("N")),
-            graphStore.getGraph(NodeLabel.of("N")),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
@@ -165,8 +165,8 @@ class ApproximateLinkPredictionTest {
                 LogisticRegressionClassifier.from(modelData),
                 LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
                 graph,
-                graphStore.getGraph(NodeLabel.of("N")),
-                graphStore.getGraph(NodeLabel.of("N")),
+                LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+                LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
                 ImmutableKnnBaseConfig.builder()
                     .randomSeed(42L)
                     .concurrency(1)
@@ -211,8 +211,8 @@ class ApproximateLinkPredictionTest {
             LogisticRegressionClassifier.from(modelData),
             LinkFeatureExtractor.of(graph, List.of(new L2FeatureStep(List.of("a", "b", "c")))),
             graph,
-            graphStore.getGraph(NodeLabel.of("N")),
-            graphStore.getGraph(NodeLabel.of("N")),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
+            LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N"))),
             ImmutableKnnBaseConfig.builder()
                 .randomSeed(42L)
                 .concurrency(1)
