@@ -425,7 +425,17 @@ class KnnTest {
 
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount());
 
-        SimilarityFunction similarityFunction = new SimilarityFunction((firstNodeId, secondNodeId) -> ((double) secondNodeId) / (firstNodeId + secondNodeId));
+        SimilarityFunction similarityFunction = new SimilarityFunction(new SimilarityComputer() {
+            @Override
+            public double similarity(long firstNodeId, long secondNodeId) {
+                return ((double) secondNodeId) / (firstNodeId + secondNodeId);
+            }
+
+            @Override
+            public boolean isSymmetric() {
+                return true;
+            }
+        });
 
         var joinNeighbors = new Knn.JoinNeighbors(
             random,
