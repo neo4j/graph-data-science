@@ -22,7 +22,6 @@ package org.neo4j.gds.modularity;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -59,8 +58,11 @@ class ModularityCalculatorTest {
 
     @Test
     void compute() {
-        var modularityCalculator = new ModularityCalculator(graph,
-            (LongNodePropertyValues) graphStore.nodeProperty("communityId").values(), 4);
+        var modularityCalculator = new ModularityCalculator(
+            graph,
+            graphStore.nodeProperty("communityId").values(),
+            4
+        );
 
         var modularities = modularityCalculator.compute();
 

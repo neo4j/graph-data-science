@@ -335,4 +335,6 @@
 | `gds.alpha.nodeSimilarity.filtered.stream.estimate`
 | `gds.alpha.nodeSimilarity.filtered.write`
 | `gds.alpha.nodeSimilarity.filtered.write.estimate`
+.1+<.^|  xref:algorithms/alpha/modularity.adoc[Modularity Metric]
+| `gds.alpha.modularity.stream`
 |===
