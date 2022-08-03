@@ -388,7 +388,7 @@ public class Knn extends Algorithm<Knn.Result> {
         }
     }
 
-    private static final class JoinNeighbors implements Runnable {
+    static final class JoinNeighbors implements Runnable {
         private final SplittableRandom random;
         private final SimilarityFunction similarityFunction;
         private final NeighborFilter neighborFilter;
@@ -405,7 +405,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private long nodePairsConsidered;
         private final double perturbationRate;
 
-        private JoinNeighbors(
+        JoinNeighbors(
             SplittableRandom random,
             SimilarityFunction similarityFunction,
             NeighborFilter neighborFilter,
