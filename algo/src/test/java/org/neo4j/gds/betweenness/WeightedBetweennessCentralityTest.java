@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Pools;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import java.util.Optional;
 
 @GdlExtension
 class WeightedBetweennessCentralityTest {
@@ -45,37 +45,45 @@ class WeightedBetweennessCentralityTest {
     @GdlGraph
     private static final String gdlGraphString =
         "CREATE " +
-        "  (a1)-[:REL]->(b)" +
-        ", (a2)-[:REL]->(b)" +
-        ", (b) -[:REL]->(c)" +
-        ", (b) -[:REL]->(d)" +
-        ", (c) -[:REL]->(e)" +
-        ", (d) -[:REL]->(e)" +
-        ", (e) -[:REL]->(f)";
+        "  (a1)-[:REL {weight: 1.0}]->(b)" +
+        ", (a2)-[:REL {weight: 1.0}]->(b)" +
+        ", (b) -[:REL {weight: 1.0}]->(c)" +
+        ", (b) -[:REL {weight: 1.0}]->(d)" +
+        ", (c) -[:REL {weight: 1.0}]->(e)" +
+        ", (d) -[:REL {weight: 1.0}]->(e)" +
+        ", (e) -[:REL {weight: 1.0}]->(f)";
 
     @Inject
     private Graph graph;
 
-    @Inject
-    private IdFunction idFunction;
-
     @Test
-    void should() {
-        var algo = new BetweennessCentrality(
+    void shouldEqualWithUnweightedWhenWeightsAreEqual() {
+        var algoWeighted = new BetweennessCentrality(
             graph,
-            new SelectionStrategy.RandomDegree(1),
+            new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
             true,
             Pools.DEFAULT,
             8,
             ProgressTracker.NULL_TRACKER
         );
-        var result = algo.compute();
-        assertThat(result.get(idFunction.of("a1"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("a2"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("b"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("c"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("d"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("e"))).isEqualTo(0.00000);
-        assertThat(result.get(idFunction.of("f"))).isEqualTo(0.00000);
+        var algoUnweighted = new BetweennessCentrality(
+            graph,
+            new SelectionStrategy.RandomDegree(7, Optional.of(42L)),
+            false,
+            Pools.DEFAULT,
+            8,
+            ProgressTracker.NULL_TRACKER
+        );
+        var resultWeighted = algoWeighted.compute();
+        var resultUnweighted = algoUnweighted.compute();
+
+        SoftAssertions softAssertions = new SoftAssertions();
+        graph.forEachNode(nodeId -> {
+                softAssertions.assertThat(resultWeighted.get(nodeId)).isEqualTo(resultUnweighted.get(nodeId));
+                return true;
+            }
+        );
+
+        softAssertions.assertAll();
     }
 }

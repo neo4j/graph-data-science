@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.cursors.LongCursor;
 import org.neo4j.gds.Algorithm;
@@ -34,6 +35,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -53,6 +55,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     private final ExecutorService executorService;
     private final int concurrency;
 
+
     public BetweennessCentrality(
         Graph graph,
         SelectionStrategy selectionStrategy,
@@ -71,6 +74,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.isUndirected() ? 2.0 : 1.0;
+
     }
 
     @Override
@@ -89,13 +93,15 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     }
 
     final class BCTask implements Runnable {
+        private final BitSet visited;
 
         private final RelationshipIterator localRelationshipIterator;
 
         private final HugeObjectArray<LongArrayList> predecessors;
         private final HugeCursor<LongArrayList[]> predecessorsCursor;
 
-        private final HugeLongArrayQueue forwardNodes;
+        private final HugeLongArrayQueue unweightedForwardNodes;
+        private final HugeLongPriorityQueue weightedForwardNodes;
         private final HugeLongArrayStack backwardNodes;
 
         private final HugeDoubleArray delta;
@@ -109,11 +115,15 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             this.predecessorsCursor = predecessors.newCursor();
             this.backwardNodes = HugeLongArrayStack.newStack(nodeCount);
             // TODO: make queue growable
-            this.forwardNodes = HugeLongArrayQueue.newQueue(nodeCount);
+            this.unweightedForwardNodes = HugeLongArrayQueue.newQueue(nodeCount);
 
             this.sigma = HugeLongArray.newArray(nodeCount);
             this.delta = HugeDoubleArray.newArray(nodeCount);
             this.distance = HugeIntArray.newArray(nodeCount);
+
+            this.weightedForwardNodes = HugeLongPriorityQueue.min(nodeCount);
+
+            this.visited = new BitSet(nodeCount);
         }
 
         @Override
@@ -136,13 +146,11 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
                 sigma.addTo(startNodeId, 1);
                 distance.set(startNodeId, 0);
 
-                forwardNodes.add(startNodeId);
-
                 if (weighted) {
-                    forwardWeighted();
+                    forwardWeighted(startNodeId);
                 } else {
                     // BC forward traversal
-                    forwardUnweighted();
+                    forwardUnweighted(startNodeId);
                 }
 
                 while (!backwardNodes.isEmpty()) {
@@ -169,19 +177,17 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             }
         }
 
-        private void forwardWeighted() {
+        private void forwardUnweighted(long startNodeId) {
+            unweightedForwardNodes.add(startNodeId);
 
-        }
-
-        private void forwardUnweighted() {
-            while (!forwardNodes.isEmpty()) {
-                long node = forwardNodes.remove();
+            while (!unweightedForwardNodes.isEmpty()) {
+                long node = unweightedForwardNodes.remove();
                 backwardNodes.push(node);
                 int distanceNode = distance.get(node);
 
                 localRelationshipIterator.forEachRelationship(node, (source, target) -> {
                     if (distance.get(target) < 0) {
-                        forwardNodes.add(target);
+                        unweightedForwardNodes.add(target);
                         distance.set(target, distanceNode + 1);
                     }
 
@@ -191,6 +197,49 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
                     }
                     return true;
                 });
+            }
+        }
+
+        private void forwardWeighted(long startNodeId) {
+            weightedForwardNodes.add(startNodeId, 0.0D);
+            while (!weightedForwardNodes.isEmpty() && terminationFlag.running()) {
+                var node = weightedForwardNodes.top();
+                var thisNodesStoredCost = weightedForwardNodes.cost(node);
+                weightedForwardNodes.pop();
+                backwardNodes.push(node);
+                visited.set(node);
+
+                // For disconnected graphs, this will not reach 100%.
+                progressTracker.logProgress(graph.degree(node));
+
+                localRelationshipIterator.forEachRelationship(
+                    node,
+                    1.0D,
+                    (source, target, weight) -> {
+                        boolean visitedAlready = visited.get(target);
+                        if (!visitedAlready) {
+                            boolean insideQueue = weightedForwardNodes.containsElement(target);
+                            if (!insideQueue) {
+                                weightedForwardNodes.add(target, thisNodesStoredCost + weight);
+                                var targetPredecessors = new LongArrayList();
+                                predecessors.set(target, targetPredecessors);
+                            }
+
+                            if (weightedForwardNodes.cost(target) == thisNodesStoredCost + weight) {
+                                var pred = predecessors.get(target);
+                                sigma.addTo(target, sigma.get(source));
+                                pred.add(source);
+                            } else if (weight + thisNodesStoredCost < weightedForwardNodes.cost(target)) {
+                                weightedForwardNodes.set(target, weight + thisNodesStoredCost);
+                                var pred = predecessors.get(target);
+                                pred.clear();
+                                sigma.set(target, sigma.get(source));
+                                pred.add(source);
+                            }
+                        }
+                        return true;
+                    }
+                );
             }
         }
 
@@ -208,6 +257,7 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
             distance.fill(-1);
             sigma.fill(0);
             delta.fill(0);
+            visited.clear();
 
             predecessors.initCursor(predecessorsCursor);
 
