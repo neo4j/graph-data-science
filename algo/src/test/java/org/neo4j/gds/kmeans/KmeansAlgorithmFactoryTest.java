@@ -22,7 +22,6 @@ package org.neo4j.gds.kmeans;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.paged.HugeDoubleArray;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -45,23 +44,12 @@ class KmeansAlgorithmFactoryTest {
 
         var estimate = memoryTree.memoryUsage();
 
-        var sizeOfKMeansInstance = MemoryUsage.sizeOfInstance(Kmeans.class);
-        var bestCommunitiesSize = 208L;
-        var bestCentroidsSize = 10416L;
-        var nodesInClusterSize = MemoryUsage.sizeOfLongArray(42);
-        var distanceFromCentroid = HugeDoubleArray.memoryEstimation(42);
-        var kMeansSize = sizeOfKMeansInstance + bestCommunitiesSize + bestCentroidsSize + nodesInClusterSize + distanceFromCentroid;
-
-        var clusterManagerEstimate = ClusterManager.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var clusterManagerMin = clusterManagerEstimate.min;
-        var clusterManagerMax = clusterManagerEstimate.max;
-
-        var kMeansTaskEstimate = KmeansTask.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var kMeansTasksSizeMin = 4 * kMeansTaskEstimate.min;
-        var kMeansTasksSizeMax = 4 * kMeansTaskEstimate.max;
-
-        assertThat(estimate.min).isEqualTo(kMeansSize + clusterManagerMin + kMeansTasksSizeMin);
-        assertThat(estimate.max).isEqualTo(kMeansSize + clusterManagerMax + kMeansTasksSizeMax);
+        assertThat(estimate.min)
+            .as("Min should be correct")
+            .isEqualTo(33944L);
+        assertThat(estimate.max)
+            .as("Max should be correct")
+            .isEqualTo(54936L);
     }
 
     @Test
@@ -79,24 +67,12 @@ class KmeansAlgorithmFactoryTest {
 
         var estimate = memoryTree.memoryUsage();
 
-        var sizeOfKMeansInstance = MemoryUsage.sizeOfInstance(Kmeans.class);
-        var bestCommunitiesSize = 208L;
-        var bestCentroidsSize = 10416L;
-        var nodesInClusterSize = MemoryUsage.sizeOfLongArray(42);
-        var distanceFromCentroid = HugeDoubleArray.memoryEstimation(42);
-        var clusterManagerEstimate = ClusterManager.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var clusterManagerMin = clusterManagerEstimate.min;
-        var clusterManagerMax = clusterManagerEstimate.max;
-
-        var kMeansTaskEstimate = KmeansTask.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var kMeansTasksSizeMin = 4 * kMeansTaskEstimate.min;
-        var kMeansTasksSizeMax = 4 * kMeansTaskEstimate.max;
-
-        var seedCentroidsSize = MemoryUsage.sizeOf(centroidsSeeds);
-
-        var kMeansSize = sizeOfKMeansInstance + bestCommunitiesSize + bestCentroidsSize + nodesInClusterSize + distanceFromCentroid + seedCentroidsSize;
-        assertThat(estimate.min).isEqualTo(kMeansSize + clusterManagerMin + kMeansTasksSizeMin);
-        assertThat(estimate.max).isEqualTo(kMeansSize + clusterManagerMax + kMeansTasksSizeMax);
+        assertThat(estimate.min)
+            .as("Min should be correct")
+            .isEqualTo(33944L + MemoryUsage.sizeOf(centroidsSeeds));
+        assertThat(estimate.max)
+            .as("Max should be correct")
+            .isEqualTo(54936L + MemoryUsage.sizeOf(centroidsSeeds));
     }
 
     @Test
@@ -114,24 +90,12 @@ class KmeansAlgorithmFactoryTest {
 
         var estimate = memoryTree.memoryUsage();
 
-        var sizeOfKMeansInstance = MemoryUsage.sizeOfInstance(Kmeans.class);
-        var bestCommunitiesSize = 208L;
-        var bestCentroidsSize = 10416L;
-        var nodesInClusterSize = MemoryUsage.sizeOfLongArray(42);
-        var distanceFromCentroid = HugeDoubleArray.memoryEstimation(42);
-
-        var clusterManagerEstimate = ClusterManager.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var clusterManagerMin = clusterManagerEstimate.min;
-        var clusterManagerMax = clusterManagerEstimate.max;
-
-        var kMeansTaskEstimate = KmeansTask.memoryEstimation(config.k(), 128).estimate(graphDimensions, 4).memoryUsage();
-        var kMeansTasksSizeMin = 4 * kMeansTaskEstimate.min;
-        var kMeansTasksSizeMax = 4 * kMeansTaskEstimate.max;
-
-        var silhouetteSize = HugeDoubleArray.memoryEstimation(42);
-        var kMeansSize = sizeOfKMeansInstance + bestCommunitiesSize + bestCentroidsSize + nodesInClusterSize + distanceFromCentroid + silhouetteSize;
-        assertThat(estimate.min).isEqualTo(kMeansSize + clusterManagerMin + kMeansTasksSizeMin);
-        assertThat(estimate.max).isEqualTo(kMeansSize + clusterManagerMax + kMeansTasksSizeMax);
+        assertThat(estimate.min)
+            .as("Min should be correct")
+            .isEqualTo(34320L);
+        assertThat(estimate.max)
+            .as("Max should be correct")
+            .isEqualTo(55312L);
     }
 
 }

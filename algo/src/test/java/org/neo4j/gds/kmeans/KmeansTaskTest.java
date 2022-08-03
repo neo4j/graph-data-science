@@ -21,7 +21,6 @@ package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -29,20 +28,13 @@ class KmeansTaskTest {
 
     @Test
     void memoryEstimation() {
-        var k = 10;
-        var dimensions = 128;
 
-        var estimation = KmeansTask.memoryEstimation(k, dimensions)
+        var estimation = KmeansTask.memoryEstimation(10, 128)
             .estimate(GraphDimensions.of(42, 1337), 4);
 
         var usage = estimation.memoryUsage();
 
-        var instanceSize = MemoryUsage.sizeOfInstance(KmeansTask.class);
-        var communitySizesSize = MemoryUsage.sizeOfLongArray(k);
-        var communityCoordinateSumsMin = k * MemoryUsage.sizeOfFloatArray(dimensions);
-        var communityCoordinateSumsMax = k * MemoryUsage.sizeOfDoubleArray(dimensions);
-
-        assertThat(usage.min).isEqualTo(instanceSize + communitySizesSize + communityCoordinateSumsMin);
-        assertThat(usage.max).isEqualTo(instanceSize + communitySizesSize + communityCoordinateSumsMax);
+        assertThat(usage.min).isEqualTo(5448L);
+        assertThat(usage.max).isEqualTo(10568L);
     }
 }

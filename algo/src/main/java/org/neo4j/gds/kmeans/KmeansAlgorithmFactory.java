@@ -90,20 +90,20 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        var fakeLenght = 128;
+        var fakeLength = 128;
         var builder = MemoryEstimations.builder(Kmeans.class)
             .perNode("bestCommunities", HugeIntArray::memoryEstimation)
             .fixed(
                 "bestCentroids",
-                MemoryUsage.sizeOfArray(configuration.k(), MemoryUsage.sizeOfDoubleArray(fakeLenght))
+                MemoryUsage.sizeOfArray(configuration.k(), MemoryUsage.sizeOfDoubleArray(fakeLength))
             )
             .perNode("nodesInCluster", MemoryUsage::sizeOfLongArray)
             .perNode("distanceFromCentroid", HugeDoubleArray::memoryEstimation)
             .add(ClusterManager.memoryEstimation(
                 configuration.k(),
-                fakeLenght
+                fakeLength
             ))
-            .perThread("KMeansTask", KmeansTask.memoryEstimation(configuration.k(), fakeLenght));
+            .perThread("KMeansTask", KmeansTask.memoryEstimation(configuration.k(), fakeLength));
 
         if(configuration.computeSilhouette()) {
             builder.perNode("silhouette", HugeDoubleArray::memoryEstimation);

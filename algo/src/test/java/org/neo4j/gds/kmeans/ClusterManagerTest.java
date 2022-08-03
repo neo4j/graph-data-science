@@ -21,7 +21,6 @@ package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,28 +28,17 @@ class ClusterManagerTest {
 
     @Test
     void memoryEstimation() {
-        var k = 3;
-        var dimensions = 5;
-        var estimation = ClusterManager.memoryEstimation(k, dimensions)
+        var estimation = ClusterManager.memoryEstimation(3, 5)
             .estimate(GraphDimensions.of(42, 1337), 4);
 
         var usage = estimation.memoryUsage();
 
-        var instanceSize = MemoryUsage.sizeOfInstance(ClusterManager.class);
-        var nodesInClusterSize = MemoryUsage.sizeOfLongArray(k);
-        var shouldResetSize = MemoryUsage.sizeOfArray(k, 1L);
-
-        var total = instanceSize + nodesInClusterSize + shouldResetSize;
-
-        var floatCentroidsSize = MemoryUsage.sizeOfFloatArray(dimensions);
-        var doubleCentroidsSize = MemoryUsage.sizeOfDoubleArray(dimensions);
-
         assertThat(usage.min)
             .as("Min should be correct")
-            .isEqualTo(total + floatCentroidsSize);
+            .isEqualTo(144L);
         assertThat(usage.max)
             .as("Max should be correct")
-            .isEqualTo(total + doubleCentroidsSize);
+            .isEqualTo(160L);
     }
 
 }
