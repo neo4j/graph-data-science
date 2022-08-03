@@ -91,8 +91,7 @@ class UnweightedForwardTraversor implements ForwardTraversor {
 
         while (!nodeQueue.isEmpty()) {
             long node = nodeQueue.remove();
-            if (predecessors.get(node) != null)
-                backwardNodes.push(node);
+             backwardNodes.push(node);
             int distanceNode = distances.get(node);
 
             graph.forEachRelationship(node, (source, target) -> {
