@@ -119,7 +119,9 @@ public final class ProxyUtil {
             var gdsVersion = gdsVersionHandle.invoke(buildInfoProperties);
             return String.valueOf(gdsVersion);
         } catch (ClassNotFoundException e) {
-            log.warn("Could not determine GDS version, BuildInfoProperties is missing.", e);
+            log.debug("Could not determine GDS version, BuildInfoProperties is missing. " +
+                      "This is likely due to not running GDS as a plugin, " +
+                      "for example when running tests or using GDS as a Java module dependency.");
         } catch (NoSuchMethodException | IllegalAccessException e) {
             log.warn("Could not determine GDS version, the according methods on BuildInfoProperties could not be found.", e);
         } catch (Throwable e) {
