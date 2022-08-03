@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.AlgoBaseProc;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
+import org.neo4j.gds.TestLogProvider;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -35,8 +36,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraResult;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.LogProvider;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 
@@ -84,17 +83,7 @@ class ShortestPathDijkstraWriteProcTest extends ShortestPathDijkstraProcTest<Sho
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         testLog = Neo4jProxy.testLog();
-        builder.setUserLogProvider(new LogProvider() {
-            @Override
-            public Log getLog(Class<?> loggingClass) {
-                return testLog;
-            }
-
-            @Override
-            public Log getLog(String name) {
-                return testLog;
-            }
-        });
+        builder.setUserLogProvider(new TestLogProvider(testLog));
     }
 
     @Test

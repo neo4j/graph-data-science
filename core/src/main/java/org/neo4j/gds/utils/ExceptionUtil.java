@@ -27,6 +27,7 @@ import java.io.UncheckedIOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -182,6 +183,10 @@ public final class ExceptionUtil {
     @SuppressWarnings("TypeMayBeWeakened")
     public static <E extends Exception> void run(CheckedRunnable<E> runnable) {
         runnable.run();
+    }
+
+    public static <T, E extends Exception> Consumer<T> consumer(CheckedConsumer<T, E> consumer) {
+        return consumer;
     }
 
     public static <T, R, E extends Exception> Function<T, R> function(CheckedFunction<T, R, E> function) {

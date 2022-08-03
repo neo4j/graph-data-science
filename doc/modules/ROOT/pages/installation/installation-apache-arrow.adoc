@@ -73,6 +73,17 @@ Such a certificate can be used to secure Neo4j.
 For Arrow Flight, only certificates with a password-less private key are accepted.
 ====
 
+Flight server encryption can also be deactivated, even if it is configured for Neo4j.
+To disable encryption, use the following settings:
+
+----
+gds.arrow.encryption.never=true
+----
+
+The setting can only used to deactivate encryption for the GDS Flight server.
+It cannot be used to deactivate encryption for the Neo4j server.
+It cannot be used to activate encryption for the GDS Flight server if the Neo4j server has no encryption configured.
+
 == Monitoring
 
 To return details about the status of the GDS Flight server, GDS provides the `gds.debug.arrow` procedure.
