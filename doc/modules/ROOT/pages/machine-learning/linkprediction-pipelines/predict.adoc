@@ -292,10 +292,10 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header",cols="3,7"]
 |===
 | relationshipsWritten | samplingStats
-| 16                   | {linksConsidered=44, didConverge=true, strategy=approximate, ranIterations=2}
+| 16                   | {linksConsidered=52, didConverge=true, strategy=approximate, ranIterations=2}
 |===
 --
 
-As we can see in the `samplingStats`, we use the approximate search strategy and check 44 possible links during the prediction.
+As we can see in the `samplingStats`, we use the approximate search strategy and check 52 possible links during the prediction.
 Though in this small example we actually consider more links that in the exhaustive case, this will typically not be the case for larger graphs.
 Since the relationships we write are undirected, reported `relationshipsWritten` is 16 when we search for the best (`topK = 1`) prediction for each node.

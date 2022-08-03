@@ -390,7 +390,7 @@ public class Knn extends Algorithm<Knn.Result> {
         }
     }
 
-    private static final class JoinNeighbors implements Runnable {
+    static final class JoinNeighbors implements Runnable {
         private final SplittableRandom random;
         private final SimilarityFunction similarityFunction;
         private final NeighborFilter neighborFilter;
@@ -409,7 +409,7 @@ public class Knn extends Algorithm<Knn.Result> {
         private long nodePairsConsidered;
         private final double perturbationRate;
 
-        private JoinNeighbors(
+        JoinNeighbors(
             SplittableRandom random,
             SimilarityFunction similarityFunction,
             NeighborFilter neighborFilter,
@@ -539,7 +539,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
                 // join(new_nbd, new_ndb)
                 for (int j = i + 1; j < newNeighborsCount; j++) {
-                    var elem2 = newNeighborElements[i];
+                    var elem2 = newNeighborElements[j];
                     if (elem1 == elem2) {
                         continue;
                     }
