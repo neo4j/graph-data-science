@@ -44,12 +44,18 @@ import java.util.stream.Stream;
 public class ApproximateLinkPrediction extends LinkPrediction {
     private final KnnBaseConfig knnConfig;
 
+    private final long validSourceNodeCount;
+
+    private final long validTargetNodeCount;
+
     public ApproximateLinkPrediction(
         Classifier classifier,
         LinkFeatureExtractor linkFeatureExtractor,
         Graph graph,
         LongPredicate sourceNodeFilter,
         LongPredicate targetNodeFilter,
+        long validSourceNodeCount,
+        long validTargetNodeCount,
         KnnBaseConfig knnConfig,
         ProgressTracker progressTracker
     ) {
@@ -63,6 +69,8 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             progressTracker
         );
         this.knnConfig = knnConfig;
+        this.validSourceNodeCount = validSourceNodeCount;
+        this.validTargetNodeCount = validTargetNodeCount;
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
@@ -80,7 +88,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             knnConfig,
             linkPredictionSimilarityComputer,
-            new LinkPredictionSimilarityComputer.LinkFilterFactory(graph),
+            new LinkPredictionSimilarityComputer.LinkFilterFactory(graph, sourceNodeFilter, targetNodeFilter, validSourceNodeCount, validTargetNodeCount),
             ImmutableKnnContext.of(
                 Pools.DEFAULT,
                 progressTracker

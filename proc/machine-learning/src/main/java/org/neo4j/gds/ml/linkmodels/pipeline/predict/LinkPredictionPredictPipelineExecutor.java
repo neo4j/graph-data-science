@@ -195,6 +195,8 @@ public class LinkPredictionPredictPipelineExecutor extends PipelineExecutor<
                 graph,
                 sourceNodeFilter,
                 targetNodeFilter,
+                sourceNodes.nodeCount(),
+                targetNodes.nodeCount(),
                 config.approximateConfig(),
                 progressTracker
             );

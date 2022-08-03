@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
+import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -45,9 +48,9 @@ class LinkPredictionSimilarityComputerTest {
     @GdlGraph
     private static final String GDL =
         "CREATE" +
-        "  (a { prop1: 4,  prop2: [1L, 0L, 0L, 0L]})" +
-        "  (b { prop1: 100,  prop2: [0L, 10L, 0L, 0L]})" +
-        ", (c { prop1: 1, prop2: [2L, 1L, 0L, 0L]})"+
+        "  (a: N { prop1: 4,  prop2: [1L, 0L, 0L, 0L]})" +
+        "  (b: N { prop1: 100,  prop2: [0L, 10L, 0L, 0L]})" +
+        ", (c: M { prop1: 1, prop2: [2L, 1L, 0L, 0L]})"+
         ", (a)-->(a)" +
         ", (a)-->(b)"+
         ", (c)-->(a)";
@@ -55,6 +58,9 @@ class LinkPredictionSimilarityComputerTest {
 
     @Inject
     public TestGraph graph;
+
+    @Inject
+    public GraphStore graphStore;
 
     @Test
     void validateComputeSimilarity() {
@@ -84,7 +90,7 @@ class LinkPredictionSimilarityComputerTest {
 
     @Test
     void filterExistingRelationships() {
-        NeighborFilter filter = new LinkFilterFactory(graph).create();
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeId->true, nodeId->true, 3, 3).create();
 
         // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
         assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
@@ -99,8 +105,26 @@ class LinkPredictionSimilarityComputerTest {
     }
 
     @Test
+    void filterNodeLabelsAndExistingRelationships() {
+        LongPredicate nodeLabelFilter = LPGraphStoreFilterFactory.generateNodeLabelFilter(graph, graphStore.getGraph(NodeLabel.of("N")));
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeLabelFilter, nodeLabelFilter, 2, 2).create();
+
+        // The node filter does not support self-loops as a node is always similar to itself so a-->a should be false.
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("a"))).isEqualTo(false);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("b"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("a"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("c"))).isEqualTo(true);
+        //C has nodeLabel M which should doesn't satisfy source/target nodeLabel filter, exclude edges on C
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("b"), graph.toMappedNodeId("c"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("a"), graph.toMappedNodeId("c"))).isEqualTo(true);
+        assertThat(filter.excludeNodePair(graph.toMappedNodeId("c"), graph.toMappedNodeId("b"))).isEqualTo(true);
+    }
+
+    @Test
     void neighbourEstimates() {
-        NeighborFilter filter = new LinkFilterFactory(graph).create();
+        NeighborFilter filter = new LinkFilterFactory(graph, nodeId->true, nodeId->true, 3, 3).create();
 
         assertThat(filter.lowerBoundOfPotentialNeighbours(graph.toMappedNodeId("a")))
             .isLessThanOrEqualTo(1)
