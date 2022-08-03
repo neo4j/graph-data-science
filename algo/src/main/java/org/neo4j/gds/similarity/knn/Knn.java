@@ -503,7 +503,7 @@ public class Knn extends Algorithm<Knn.Result> {
 
                 //  try out using the new neighbors between themselves / join(new_nbd, new_ndb)
                 for (int j = i + 1; j < newNeighborsCount; j++) {
-                    var elem2 = newNeighborElements[i];
+                    var elem2 = newNeighborElements[j];
                     if (elem1 == elem2) {
                         continue;
                     }

@@ -73,7 +73,7 @@ class ApproximateLinkPredictionTest {
     private GraphStore graphStore;
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 44, 1", "2, 59, 1"})
+    @CsvSource(value = {"1, 75, 2", "2, 89, 1"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLogisticRegressionData.of(
             2,
@@ -154,7 +154,7 @@ class ApproximateLinkPredictionTest {
 
         var expectedLinks = List.of(
             PredictedLink.of(0, 4, 0.497),
-            PredictedLink.of(1, 0, 0.115),
+            PredictedLink.of(1, 4, 0.118),
             PredictedLink.of(2, 0, 2.0547103309367367E-4),
             PredictedLink.of(3, 0, 0.002472623156634774),
             PredictedLink.of(4, 0, 0.4975)
